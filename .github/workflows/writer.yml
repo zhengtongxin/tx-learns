@@ -122,3 +122,13 @@ jobs:
           else
             node scripts/notify-telegram.mjs "⚠️ The writer agent could not finish a draft from your notes. Logs: $RUN"
           fi
+      - name: Record status for the Ecosystem page
+        if: always() && steps.notes.outputs.dirs != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          URL: ${{ steps.pr.outputs.url }}
+          SLUG: ${{ steps.notes.outputs.slug }}
+        run: |
+          if [ -n "$URL" ]; then STATE=ok; SUMMARY="Drafted a lesson from the $SLUG notes. Waiting for TX to read and merge."
+          else STATE=fail; SUMMARY="Could not finish a draft from the $SLUG notes."; fi
+          STATE=$STATE SUMMARY="$SUMMARY" LINK="$URL" node scripts/record-status.mjs writer

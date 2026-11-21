@@ -1,0 +1,206 @@
+# Reader agent: after Vercel finishes a preview deploy, Claude reads the lessons that changed as a newcomer
+# to AI would, scores how clear each one is and flags the confusing parts. On test it also drafts fixes in a
+# pull request into test; on other branches it comments on the pull request. It never pushes to test or main.
+name: Claude reader
+on:
+  deployment_status:
+  workflow_dispatch:
+    inputs:
+      files:
+        description: Lessons to read, space separated, e.g. agentic-ai/08-agents-tools-handoffs.html
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: reader-${{ github.event.deployment.sha || github.sha }}
+  cancel-in-progress: false
+jobs:
+  read:
+    # Only finished preview deploys. Production is skipped: the same lessons were already read on test.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.deployment_status.state == 'success' &&
+       github.event.deployment.environment != 'Production')
+    runs-on: ubuntu-latest
+    # Read-only job: Claude never shares a job with a write token. The share job below does the writing.
+    outputs:
+      files: ${{ steps.find.outputs.files }}
+      where: ${{ steps.find.outputs.where }}
+      pr: ${{ steps.find.outputs.pr }}
+    env:
+      SHA: ${{ github.event.deployment.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.deployment.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Find the lessons that changed in this deploy
+        id: find
+        env:
+          FILES: ${{ inputs.files }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          where=other; pr=
+          if [ "$(git rev-parse origin/test)" = "$SHA" ]; then where=test; fi
+          if [ "$where" = other ]; then
+            pr=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/pulls" --jq '[.[]|select(.state=="open")][0].number // empty' || true)
+          fi
+          msg=$(git log -1 --format=%s "$SHA")
+          if [ -n "$FILES" ]; then files="$FILES"
+          elif echo "$msg" | grep -qE 'reader/|^Reader:'; then echo "This deploy is the reader's own fix; not reading it again."; files=
+          else files=$(git diff --name-only --diff-filter=AM "$SHA^1" "$SHA" -- 'agentic-ai/[0-9]*.html' | tr '\n' ' '); fi
+          files=$(echo $files)
+          echo "where=$where pr=$pr files=$files"
+          { echo "where=$where"; echo "pr=$pr"; echo "files=$files"; } >> "$GITHUB_OUTPUT"
+      - name: Install Claude Code
+        if: steps.find.outputs.files != ''
+        run: npm install -g @anthropic-ai/claude-code
+      - name: Read the lessons with Claude
+        if: steps.find.outputs.files != ''
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FILES: ${{ steps.find.outputs.files }}
+          WHERE: ${{ steps.find.outputs.where }}
+        run: |
+          set -o pipefail
+          if [ "$WHERE" = test ]; then
+            EDIT="7. Then fix what you flagged, in the lesson files only: small wording changes, a missing step or
+             definition, a clearer analogy. Keep TX's voice, the story and the structure. Change EN and 中文 together.
+             Do not touch anything you scored as fine. Run node scripts/check-copy.mjs until it passes."
+          else
+            EDIT="7. Do not edit any file except /tmp/reader.json and /tmp/reader-comment.md."
+          fi
+          cat > /tmp/reader-prompt.md <<PROMPT
+          You are the reader for TX Learns, a bilingual (EN/中文) interactive learning site about agentic AI.
+          A new version was just deployed. Read these lessons the way a real visitor would: someone smart and curious
+          who is new to AI and has never seen the source material. Lessons: $FILES
+
+          1. Read STYLE.md so you know what a good lesson here looks like.
+          2. Read each lesson top to bottom in English, then skim the 中文. Look at assets/teach.js only if you need
+             to know what a widget does. Imagine clicking every quiz and widget.
+          3. Note every place you would get stuck: a term used before it is explained, a jump in steps, code you
+             could not follow, a quiz whose answer was never taught, an analogy that does not fit, 中文 that reads
+             like a word-for-word translation.
+          4. Score each lesson for clarity from 1 to 10 (8 or more = a newcomer gets it on the first read).
+          5. Write /tmp/reader.json exactly like:
+             {"lessons":[{"file":"...","score":8,"confusing":[{"where":"Step 2","quote":"exact text","why":"...","fix":"..."}]}],
+              "summary":"one plain sentence about what a newcomer would struggle with most"}
+             At most 5 items per lesson, most important first. An empty list is fine.
+          6. Write /tmp/reader-comment.md: start with "📖 Reader check", then for each lesson its score and the
+             confusing parts as a short list (where, quote, why, suggested fix). Under 350 words, friendly and plain.
+             End with "_Read by the TX Learns reader agent (Claude)._"
+          $EDIT
+          Do not run git.
+          PROMPT
+          claude -p "$(cat /tmp/reader-prompt.md)" --max-turns 50 \
+            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*)" \
+            --output-format text | tail -30
+      - name: Package the result for the share job
+        if: always() && steps.find.outputs.files != ''
+        run: |
+          mkdir -p /tmp/out
+          cp /tmp/reader.json /tmp/reader-comment.md /tmp/out/ 2>/dev/null || true
+          git diff -- 'agentic-ai/*.html' > /tmp/out/fix.patch
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.find.outputs.files != ''
+        with:
+          name: reader
+          path: /tmp/out/
+          if-no-files-found: ignore
+
+  # Write job: only trusted scripts from the default branch run here, never files Claude could have touched.
+  share:
+    needs: read
+    if: always() && needs.read.outputs.files != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    env:
+      SHA: ${{ github.event.deployment.sha || github.sha }}
+      WHERE: ${{ needs.read.outputs.where }}
+      PR: ${{ needs.read.outputs.pr }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      T: trusted/scripts
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          path: trusted
+          sparse-checkout: scripts
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.deployment.sha || github.sha }}
+          path: work
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: reader
+          path: /tmp/out
+      - name: Share the result
+        id: share
+        run: |
+          test -s /tmp/out/reader.json || { echo "The reader wrote no result."; exit 1; }
+          low=$(node -e 'const r=require("/tmp/out/reader.json");console.log(Math.floor(Math.min(10,...r.lessons.map(l=>+l.score||0))))')
+          node -e 'const r=require("/tmp/out/reader.json");console.log(r.lessons.map(l=>String(l.file).split("/").pop()+" "+l.score+"/10").join(", ")+". "+r.summary)' > /tmp/reader-line.txt
+          echo "low=$low" >> "$GITHUB_OUTPUT"
+          url=
+          if [ "$WHERE" = test ] && [ -s /tmp/out/fix.patch ]; then
+            cd work
+            git apply --include='agentic-ai/*.html' /tmp/out/fix.patch
+            branch="reader/fixes-${GITHUB_RUN_NUMBER}"
+            git config user.name "TX Learns reader"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git checkout -b "$branch"
+            git add -- 'agentic-ai/*.html'
+            git commit -m "Reader: clearer wording for newcomers" -m "Suggested by the reader agent (Claude) after the test deploy."
+            auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+            git -c "http.https://github.com/.extraheader=$auth" push -u origin "$branch"
+            { cat /tmp/out/reader-comment.md; echo; echo "These fixes only land if you merge this pull request."; } > /tmp/pr-body.md
+            url=$(gh pr create --base test --head "$branch" --title "Reader: clearer wording ($(cut -c1-60 /tmp/reader-line.txt))" --body-file /tmp/pr-body.md)
+            gh pr edit "$url" --add-assignee "${{ github.repository_owner }}" || true
+            cd ..
+          elif [ -n "$PR" ]; then
+            gh pr comment "$PR" -R "$GITHUB_REPOSITORY" --body-file /tmp/out/reader-comment.md
+            url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/pull/$PR"
+          else
+            url=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/comments" -F body=@/tmp/out/reader-comment.md --jq .html_url)
+          fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+      - name: Tell TX on Telegram
+        if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          URL: ${{ steps.share.outputs.url }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -n "$URL" ]; then
+            { echo "📖 Reader check: $(cat /tmp/reader-line.txt)"; echo "$URL";
+              case "$URL" in */pull/*) [ "$WHERE" = test ] && echo "Fixes are in that pull request. Merge it if you agree.";; esac; } \
+              | node $T/notify-telegram.mjs
+          else
+            node $T/notify-telegram.mjs "⚠️ The reader agent could not finish. Logs: $RUN"
+          fi
+      - name: Record status for the Ecosystem page
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LOW: ${{ steps.share.outputs.low }}
+          LINK: ${{ steps.share.outputs.url }}
+        run: |
+          [ -f $T/record-status.mjs ] || { echo "No record script on the default branch yet."; exit 0; }
+          if [ -z "$LOW" ]; then STATE=fail; SUMMARY="Could not finish reading."
+          elif [ "$LOW" -ge 8 ]; then STATE=ok; SUMMARY="$(cat /tmp/reader-line.txt)"
+          else STATE=flag; SUMMARY="$(cat /tmp/reader-line.txt)"; fi
+          STATE=$STATE SUMMARY="$SUMMARY" node $T/record-status.mjs reader

@@ -1,0 +1,176 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>How TX Learns works</title><link rel="stylesheet" href="assets/site.css">
+<style>
+.eco-hero .mega{font-size:clamp(2.2rem,6.4vw,4.6rem)}
+.conn{display:none;margin:0 auto 10px;max-width:760px;font-size:14px;color:var(--mut);text-align:center;padding:10px 16px;border:1px dashed var(--line);border-radius:14px}
+.conn.on{display:block}
+/* backbone */
+.flow{list-style:none;margin:28px 0 0;padding:0;display:grid;grid-template-columns:repeat(6,auto minmax(14px,1fr)) auto;align-items:start}
+.stop{display:flex;flex-direction:column;align-items:center;text-align:center;width:118px;cursor:default}
+.stop.has{cursor:pointer}
+.stop .ic{width:62px;height:62px;border-radius:20px;display:grid;place-items:center;font-size:28px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(14px);position:relative;transition:.3s}
+.stop.has .ic{border-color:color-mix(in srgb,var(--acc) 55%,var(--line));box-shadow:0 0 26px var(--glow)}
+.stop.has:hover .ic{transform:translateY(-3px)}
+.stop.me .ic{background:var(--grad);color:#fff;border:0}
+.stop b{display:block;margin-top:10px;font-size:14.5px;letter-spacing:-.01em}
+.stop small{display:block;margin-top:3px;font-size:12.5px;line-height:1.4;color:var(--mut)}
+.stop .live{position:absolute;top:-7px;right:-9px;min-width:22px;height:22px;padding:0 6px;border-radius:99px;font:700 11px/22px Inter,sans-serif;color:#fff;background:var(--mut)}
+.stop .live.ok{background:var(--ok)}.stop .live.flag{background:var(--warn)}.stop .live.fail{background:var(--bad)}
+.link{position:relative;width:100%;min-width:14px;height:2px;margin-top:31px;background:linear-gradient(90deg,var(--line),color-mix(in srgb,var(--acc) 50%,var(--line)),var(--line));overflow:visible}
+.link i{position:absolute;top:-3px;left:0;width:8px;height:8px;border-radius:50%;background:var(--acc2);box-shadow:0 0 12px var(--acc2);animation:run 2.4s linear infinite;animation-delay:var(--d,0s);opacity:0}
+@keyframes run{0%{left:0;opacity:0}15%{opacity:1}85%{opacity:1}100%{left:calc(100% - 8px);opacity:0}}
+@media(max-width:900px){
+  .flow{grid-template-columns:1fr;justify-content:start;max-width:420px;margin-left:auto;margin-right:auto}
+  .stop{flex-direction:row;text-align:left;width:auto;gap:14px}
+  .stop .ic{flex:none;width:54px;height:54px;font-size:24px}
+  .stop b{margin-top:0}
+  .link{width:2px;height:30px;min-width:0;margin:4px 0 4px 26px;background:linear-gradient(180deg,var(--line),color-mix(in srgb,var(--acc) 50%,var(--line)),var(--line))}
+  .link i{left:-3px;animation-name:runv}
+  @keyframes runv{0%{top:0;opacity:0}15%{opacity:1}85%{opacity:1}100%{top:calc(100% - 8px);opacity:0}}
+}
+@media(prefers-reduced-motion:reduce){.link i{animation:none;display:none}}
+/* agents */
+.grp{margin-top:34px}
+.grp h3{display:flex;align-items:center;gap:10px;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc2);margin:0 0 12px}
+.agents{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.agent{padding:18px 20px;margin:0;display:flex;flex-direction:column;gap:8px;scroll-margin-top:70px}
+.agent .hd{display:flex;align-items:center;gap:12px}
+.agent .ai{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;font-size:20px;background:var(--glass);border:1px solid var(--line);flex:none;position:relative}
+.agent .ai.fresh::after{content:"";position:absolute;inset:-4px;border-radius:16px;border:2px solid var(--acc2);animation:ping 1.6s ease-out infinite}
+@keyframes ping{from{opacity:.9;transform:scale(.9)}to{opacity:0;transform:scale(1.25)}}
+.agent h4{margin:0;font-size:16px;letter-spacing:-.01em}
+.agent .when{font-size:12.5px;color:var(--mut)}
+.agent p{margin:0;font-size:14.5px;line-height:1.6}
+.agent .trig{font-size:12.5px;color:var(--mut)}
+.agent .last{font-size:13.5px;line-height:1.55;padding:10px 12px;border-radius:12px;background:var(--glass);border:1px solid var(--line);overflow-wrap:anywhere}
+.agent .last a{font-weight:600;white-space:nowrap}
+.pill{margin-left:auto;flex:none;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:99px;border:1px solid var(--line);color:var(--mut)}
+.pill.ok{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 50%,transparent)}
+.pill.flag{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 50%,transparent)}
+.pill.fail{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 50%,transparent)}
+.agent.later{opacity:.6;border-style:dashed}
+.agent:target{border-color:var(--acc)}
+/* activity */
+.feed{list-style:none;margin:14px 0 0;padding:0}
+.feed li{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:baseline;padding:11px 4px;border-bottom:1px solid var(--line);font-size:14px;line-height:1.5}
+.feed .dot{width:9px;height:9px;border-radius:50%;background:var(--mut);transform:translateY(-1px)}
+.feed .dot.ok{background:var(--ok)}.feed .dot.flag{background:var(--warn)}.feed .dot.fail{background:var(--bad)}
+.feed .tm{font-size:12.5px;color:var(--mut);white-space:nowrap}
+.feed .tx{overflow-wrap:anywhere}
+.feed .empty{display:block;color:var(--mut);border:0}
+.rule{margin-top:40px;text-align:center;font-size:15px;color:var(--mut)}
+.rule b{color:var(--fg)}
+</style></head><body>
+<main class="wide">
+<header class="stage compact eco-hero"><div class="orb"></div>
+<span class="eyebrow"><span class="en">Behind the scenes</span><span class="zh">幕后</span></span>
+<h1 class="mega"><span class="en">From something I learn<br>to a page you can read.</span><span class="zh">从我学到的东西，<br>到你能读的一页。</span></h1>
+<p class="sub"><span class="en">This is the whole pipeline. Small AI agents watch every step, and nothing goes live until I say yes.</span><span class="zh">这是整条流水线。每一步都有小 AI agent 在看着，我点头之前，什么都不会上线。</span></p>
+</header>
+
+<section>
+<h2><span class="en">The backbone</span><span class="zh">主干</span></h2>
+<p><span class="en">Every lesson travels the same road. The dots are notes on their way through. Tap GitHub or Vercel to see the agents working there.</span><span class="zh">每一课都走同一条路。小圆点就是正在路上的笔记。点 GitHub 或 Vercel，看看那里有哪些 agent 在工作。</span></p>
+<ol class="flow" id="flow"></ol>
+</section>
+
+<section id="agents">
+<h2><span class="en">Agents at work</span><span class="zh">正在工作的 agent</span></h2>
+<p class="conn" id="conn"></p>
+<div class="grp" id="g-github"><h3>🐙 <span class="en">On GitHub: checking every change</span><span class="zh">在 GitHub：检查每一次改动</span></h3><div class="agents"></div></div>
+<div class="grp" id="g-vercel"><h3>▲ <span class="en">On Vercel: is it good enough to read?</span><span class="zh">在 Vercel：读起来够好吗？</span></h3><div class="agents"></div></div>
+<div class="grp" id="g-later"><h3>🌱 <span class="en">Coming next</span><span class="zh">即将加入</span></h3><div class="agents"></div></div>
+</section>
+
+<section>
+<h2><span class="en">Recent activity</span><span class="zh">最近动态</span></h2>
+<ul class="feed" id="feed"></ul>
+<p class="rule"><span class="en"><b>Agents suggest. I decide.</b> Every change is a pull request, and only I merge.</span><span class="zh"><b>Agent 提建议，我来决定。</b>每个改动都是一个 pull request，只有我能合并。</span></p>
+</section>
+</main>
+<script src="tracks.js"></script><script src="assets/site.js"></script>
+<script>
+(function(){
+  function t(en,zh){return '<span class="en">'+en+'</span><span class="zh">'+zh+'</span>'}
+  function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  var STOPS=[
+    {ic:'🎧',en:'Learning sources',zh:'学习来源',sen:'Videos, classes, docs and books',szh:'视频、课堂、文档和书'},
+    {ic:'🧠',en:'My brain',zh:'我的大脑',sen:'Where it has to make sense first',szh:'先在这里想明白',me:1},
+    {ic:'📝',en:'My notes',zh:'我的笔记',sen:'Raw notes, code and what confused me',szh:'原始笔记、代码和让我困惑的地方'},
+    {ic:'✨',en:'AI helpers',zh:'AI 助手',sen:'Claude today. GPT and MiMo maybe later',szh:'现在用 Claude，以后可能加 GPT 和 MiMo'},
+    {ic:'🐙',en:'GitHub',zh:'GitHub',sen:'Every change is a pull request',szh:'每个改动都是 pull request',g:'github'},
+    {ic:'▲',en:'Vercel',zh:'Vercel',sen:'A preview first, then the live site',szh:'先预览，再上线',g:'vercel'},
+    {ic:'👋',en:'Readers',zh:'读者',sen:'You, and friends new to AI',szh:'你，还有刚接触 AI 的朋友'}];
+  var AGENTS=[
+    {id:'writer',g:'github',ic:'✍️',en:'Writer',zh:'写手',
+     den:'Turns my raw notes into a lesson draft that follows the style guide, then opens a pull request for me.',
+     dzh:'把我的原始笔记写成一篇符合写作指南的课的草稿，然后给我开一个 pull request。',
+     ten:'Runs when notes land in the inbox',tzh:'笔记放进 inbox 时运行'},
+    {id:'copy-check',g:'github',ic:'🛡️',en:'Copy check',zh:'原创检查',
+     den:'Scans every page for source names and numbering, so each lesson stays in my own words.',
+     dzh:'扫描每一页，找出来源名称和编号，让每一课都用我自己的话。',
+     ten:'Runs on every pull request and every push to test',tzh:'每个 pull request 和每次推送到 test 时运行'},
+    {id:'reviewer',g:'github',ic:'🔎',en:'Reviewer',zh:'审稿人',
+     den:'Reads each release like an editor: the story, the facts, the code, and whether EN and 中文 match.',
+     dzh:'像编辑一样读每次发布：故事、事实、代码，还有中英文是否一致。',
+     ten:'Runs before anything goes live',tzh:'上线之前运行'},
+    {id:'reader',g:'vercel',ic:'📖',en:'Reader',zh:'读者',
+     den:'Reads new lessons as someone new to AI would, scores how clear they are and suggests fixes.',
+     dzh:'像刚接触 AI 的人那样读新课，给清晰度打分，并提出修改建议。',
+     ten:'Runs after every preview deploy',tzh:'每次预览部署后运行'},
+    {id:'recall',g:'later',ic:'🔁',en:'Spaced recall',zh:'间隔回顾',
+     den:'Brings back an old lesson right before I would forget it.',dzh:'在我快忘记之前，把旧课翻出来让我复习。',ten:'Planned',tzh:'计划中',later:1},
+    {id:'gaps',g:'later',ic:'🧩',en:'Gap finder',zh:'缺口查找',
+     den:'Spots topics I skipped or only half covered.',dzh:'找出我跳过或只学了一半的主题。',ten:'Planned',tzh:'计划中',later:1}];
+  var NAME={};AGENTS.forEach(function(a){NAME[a.id]=a});
+
+  function ago(iso){var s=(Date.now()-new Date(iso))/1000;if(!(s>=0))return '';
+    if(s<60)return t('just now','刚刚');var m=Math.round(s/60);if(m<60)return t(m+' min ago',m+' 分钟前');
+    var h=Math.round(m/60);if(h<36)return t(h+' h ago',h+' 小时前');var d=Math.round(h/24);return t(d+' days ago',d+' 天前')}
+  var PILL={ok:t('✓ Passed','✓ 通过'),flag:t('⚠ Flagged','⚠ 有问题'),fail:t('✕ Failed','✕ 失败'),skip:t('Skipped','跳过')};
+
+  function drawFlow(S){
+    var html='';STOPS.forEach(function(s,i){
+      var live='';if(s.g){var ag=AGENTS.filter(function(a){return a.g===s.g}),st=ag.map(function(a){return (S[a.id]||{}).state}),
+        cls=st.indexOf('fail')>=0?'fail':st.indexOf('flag')>=0?'flag':st.indexOf('ok')>=0?'ok':'';live='<span class="live '+cls+'" title="agents">'+ag.length+'</span>'}
+      html+='<li class="stop'+(s.g?' has':'')+(s.me?' me':'')+'"'+(s.g?' data-g="'+s.g+'" tabindex="0" role="link"':'')+'><span class="ic">'+s.ic+live+'</span><span><b>'+t(s.en,s.zh)+'</b><small>'+t(s.sen,s.szh)+'</small></span></li>';
+      if(i<STOPS.length-1)html+='<li class="link" aria-hidden="true"><i style="--d:'+(i*.35)+'s"></i><i style="--d:'+(i*.35+1.2)+'s"></i></li>'});
+    var f=document.getElementById('flow');f.innerHTML=html;
+    f.querySelectorAll('.stop.has').forEach(function(el){var go=function(){document.getElementById('g-'+el.dataset.g).scrollIntoView({behavior:'smooth',block:'start'})};
+      el.onclick=go;el.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}}})}
+
+  function drawAgents(S,live){
+    ['github','vercel','later'].forEach(function(g){
+      document.querySelector('#g-'+g+' .agents').innerHTML=AGENTS.filter(function(a){return a.g===g}).map(function(a){
+        var s=S[a.id],pill,last='',st=s&&PILL[s.state]?s.state:'';
+        if(a.later)pill='<span class="pill">'+t('Later','以后')+'</span>';
+        else if(s){pill='<span class="pill '+st+'">'+(PILL[st]||'?')+'</span>';
+          last='<div class="last">'+esc(s.summary||'')+(s.link?' <a href="'+esc(s.link)+'" target="_blank" rel="noopener">'+t('See it →','查看 →')+'</a>':'')+'</div>'}
+        else pill='<span class="pill">'+(live?t('No runs yet','还没运行'):t('Offline','离线'))+'</span>';
+        var fresh=s&&(Date.now()-new Date(s.at))<15*60e3;
+        return '<article class="card agent spot'+(a.later?' later':'')+'" id="a-'+a.id+'"><div class="hd"><span class="ai'+(fresh?' fresh" title="Finished in the last 15 min · 15 分钟内刚完成':'')+'">'+a.ic+'</span><div><h4>'+t(a.en,a.zh)+'</h4>'+
+          '<div class="when">'+(s?ago(s.at)+(s.runs?' · '+t(s.runs+' runs',s.runs+' 次'):''):t(a.ten,a.tzh))+'</div></div>'+pill+'</div>'+
+          '<p>'+t(a.den,a.dzh)+'</p>'+(s?'<div class="trig">'+t(a.ten,a.tzh)+'</div>':'')+last+'</article>'}).join('')})}
+
+  function drawFeed(S,live){
+    var all=[];Object.keys(S).forEach(function(k){(S[k].history||[]).forEach(function(h){all.push({id:k,h:h})})});
+    all.sort(function(a,b){return new Date(b.h.at)-new Date(a.h.at)});
+    var f=document.getElementById('feed');
+    if(!all.length){f.innerHTML='<li class="empty">'+(live?t('Nothing yet. The first agent run will show up here.','还没有动态。第一次运行后会显示在这里。'):t('Live activity shows on the published site.','实时动态只在线上网站显示。'))+'</li>';return}
+    f.innerHTML=all.slice(0,10).map(function(x){var a=NAME[x.id]||{ic:'•',en:x.id,zh:x.id};
+      return '<li><span class="dot '+(PILL[x.h.state]?x.h.state:'')+'"></span><span class="tx">'+a.ic+' <b>'+t(a.en,a.zh)+'</b> · '+esc(x.h.summary)+'</span><span class="tm">'+ago(x.h.at)+'</span></li>'}).join('')}
+
+  function draw(data){
+    var live=!!(data&&data.connected),S=(data&&data.agents)||{};
+    var c=document.getElementById('conn');
+    if(!live){c.classList.add('on');c.innerHTML=data&&data.reason==='no-token'
+      ?t('Live status is not connected yet. The agents still run; this page just cannot see them.','实时状态还没接上。agent 照常运行，只是这一页还看不到。')
+      :t('Live status is not available right now.','暂时看不到实时状态。')}
+    else c.classList.remove('on');
+    drawFlow(S);drawAgents(S,live);drawFeed(S,live)}
+
+  draw(null);
+  function load(){fetch('api/status',{cache:'no-store'}).then(function(r){return r.json()}).then(draw).catch(function(){draw({connected:false})})}
+  load();setInterval(function(){if(!document.hidden)load()},60e3);
+})();
+</script></body></html>

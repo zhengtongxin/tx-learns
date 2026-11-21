@@ -21,6 +21,9 @@ concurrency:
 jobs:
   review:
     runs-on: ubuntu-latest
+    outputs:
+      state: ${{ steps.verdict.outputs.state }}
+      summary: ${{ steps.verdict.outputs.summary }}
     env:
       PR: ${{ github.event.pull_request.number || inputs.pr }}
     steps:
@@ -73,3 +76,32 @@ jobs:
           else
             node scripts/notify-telegram.mjs "⚠️ The reviewer agent could not finish on PR #$PR ($STATUS). Logs: $URL/checks"
           fi
+      - name: Pass the verdict to the status job
+        id: verdict
+        if: always()
+        run: |
+          first=$(head -1 /tmp/review-summary.txt 2>/dev/null)
+          case "$first" in *✅*) state=ok;; *⚠️*|*"Fix before"*) state=flag;; *) state=fail;; esac
+          if [ -s /tmp/review-summary.txt ]; then summary="PR #$PR: $(head -c 300 /tmp/review-summary.txt | tr '\n' ' ')"; else summary="PR #$PR: could not finish the review."; fi
+          echo "state=$state" >> "$GITHUB_OUTPUT"
+          { echo "summary<<EOF"; echo "$summary"; echo "EOF"; } >> "$GITHUB_OUTPUT"
+  # Separate job so the write token never reaches the Claude step above.
+  record:
+    needs: review
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: scripts
+          persist-credentials: false
+      - name: Record status for the Ecosystem page
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATE: ${{ needs.review.outputs.state || 'fail' }}
+          SUMMARY: ${{ needs.review.outputs.summary }}
+          LINK: ${{ github.server_url }}/${{ github.repository }}/pull/${{ github.event.pull_request.number || inputs.pr }}
+        run: "[ -f scripts/record-status.mjs ] && node scripts/record-status.mjs reviewer || echo \"No record script on the default branch yet.\""
