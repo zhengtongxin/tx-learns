@@ -8,7 +8,7 @@ on:
     branches: [test]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write # only to record status on the data-only agent-status branch
 jobs:
   copy-check:
     runs-on: ubuntu-latest
@@ -28,3 +28,13 @@ jobs:
         run: |
           { echo "🚫 Copy check failed on ${GITHUB_REF_NAME}"; echo "$WHERE"; echo; head -c 2500 copy-check.txt; } \
             | node scripts/notify-telegram.mjs
+      - name: Record status for the Ecosystem page
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OUTCOME: ${{ job.status }}
+          WHERE_NAME: ${{ github.head_ref || github.ref_name }}
+          LINK: ${{ github.event.pull_request.html_url || format('{0}/{1}/actions/runs/{2}', github.server_url, github.repository, github.run_id) }}
+        run: |
+          if [ "$OUTCOME" = success ]; then STATE=ok; else STATE=flag; fi
+          STATE=$STATE SUMMARY="On $WHERE_NAME: $(tail -1 copy-check.txt 2>/dev/null)" node scripts/record-status.mjs copy-check

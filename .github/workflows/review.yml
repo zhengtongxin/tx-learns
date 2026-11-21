@@ -11,7 +11,7 @@ on:
         description: Pull request number to review
         required: true
 permissions:
-  contents: read
+  contents: write # only to record status on the data-only agent-status branch
   pull-requests: write
   issues: write
   id-token: write
@@ -73,3 +73,13 @@ jobs:
           else
             node scripts/notify-telegram.mjs "⚠️ The reviewer agent could not finish on PR #$PR ($STATUS). Logs: $URL/checks"
           fi
+      - name: Record status for the Ecosystem page
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LINK: ${{ github.server_url }}/${{ github.repository }}/pull/${{ env.PR }}
+        run: |
+          first=$(head -1 /tmp/review-summary.txt 2>/dev/null)
+          case "$first" in *✅*) STATE=ok;; *⚠️*|*"Fix before"*) STATE=flag;; *) STATE=fail;; esac
+          if [ -s /tmp/review-summary.txt ]; then SUMMARY="PR #$PR: $(head -c 300 /tmp/review-summary.txt)"; else SUMMARY="PR #$PR: could not finish the review."; fi
+          STATE=$STATE SUMMARY="$SUMMARY" node scripts/record-status.mjs reviewer

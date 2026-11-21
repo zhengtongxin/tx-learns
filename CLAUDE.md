@@ -5,11 +5,13 @@ Bilingual (EN/中文) interactive learning site. Static HTML/CSS/JS, no build st
 ## Layout
 
 - `index.html` home page; `tracks.js` lists learning tracks (`window.TRACKS`).
+- `ecosystem.html` the "How it works" page: the backbone (sources → brain → notes → AI → GitHub → Vercel → readers) and live agent cards. It reads `api/status` (`api/status.js`, a Vercel function that needs the read-only token `STATUS_GITHUB_TOKEN` in Vercel env).
 - `inbox/` raw notes for the writer agent; never deployed (`.vercelignore`).
 - `agentic-ai/` one track. `lessons.js` (`window.TRACK`) groups lessons into concept topics; a lesson with `file` is published, one without is "coming soon".
 - `agentic-ai/NN-slug.html` one lesson per file; `_template.html` is the starting point.
 - `assets/site.css|js` shared layout, nav, progress; `assets/teach.css|js` lesson widgets (`TX2.game`, `TX2.predict`, ...).
 - `scripts/check-copy.mjs` + `banned-words.txt` the copyright scrubber.
+- `scripts/record-status.mjs <agent>` records an agent's last run in `status/all.json` on the data-only `agent-status` branch (never deployed, never merged).
 - `scripts/notify-telegram.mjs` sends TX a Telegram message (secrets `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`; without the chat id it only sends a one-time setup tip).
 
 ## Agents (GitHub Actions)
@@ -19,6 +21,7 @@ Bilingual (EN/中文) interactive learning site. Static HTML/CSS/JS, no build st
 | `copy-check.yml` | PRs into main/test, pushes to test | Runs the scrubber; fails and tells TX on Telegram |
 | `review.yml` | PRs into main | Claude reviews against `STYLE.md`, comments once, Telegram summary. Never pushes |
 | `writer.yml` | Pushes to `inbox/**` on test, or manual | Claude turns a notes folder into a lesson draft and opens a PR into test, Telegram link |
+| `reader.yml` | Every finished Vercel preview deploy, or manual | Claude reads changed lessons as a newcomer, scores clarity, Telegram summary. On test it opens a fix PR into test; elsewhere it comments |
 | `telegram-ping.yml` | Manual | Sends a test Telegram message |
 
 ## Rules
@@ -26,7 +29,7 @@ Bilingual (EN/中文) interactive learning site. Static HTML/CSS/JS, no build st
 1. **Write every lesson to `STYLE.md`.** Read it before writing or editing a lesson. Do not wait to be reminded.
 2. **Source-neutral, always.** No platform, program, instructor names, no "course"/课程, no week/day numbering, no copied examples. Run `node scripts/check-copy.mjs` before every commit; it must pass.
 3. **Branches.** Work goes to `test` (Vercel builds a preview). `main` is the live site and changes only through a reviewed pull request from `test`.
-4. **Agents notify before changing.** An agent never pushes straight to `main` or `test`. It opens a pull request or posts a comment, and TX merges.
+4. **Agents notify before changing.** An agent never pushes straight to `main` or `test`. It opens a pull request or posts a comment, and TX merges. The only thing agents push directly is the run log on the `agent-status` branch.
 5. Keep English and 中文 in step: every `.en` has a matching `.zh`.
 6. No build tools or frameworks. Plain files that open from disk.
 
