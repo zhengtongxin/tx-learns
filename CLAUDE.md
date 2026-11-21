@@ -24,6 +24,8 @@ Bilingual (EN/中文) interactive learning site. Static HTML/CSS/JS, no build st
 | `reader.yml` | Every finished Vercel preview deploy, or manual | Claude reads changed lessons as a newcomer, scores clarity, Telegram summary. On test it opens a fix PR into test; elsewhere it comments |
 | `telegram-ping.yml` | Manual | Sends a test Telegram message |
 
+Claude auth: the writer, reviewer and reader use TX's Claude subscription through the `CLAUDE_CODE_OAUTH_TOKEN` secret (made with `claude setup-token`). `ANTHROPIC_API_KEY` is only a fallback when that secret is missing. Subscription runs share TX's plan usage limits.
+
 ## Rules
 
 1. **Write every lesson to `STYLE.md`.** Read it before writing or editing a lesson. Do not wait to be reminded.
