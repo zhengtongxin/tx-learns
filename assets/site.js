@@ -22,7 +22,7 @@
 
     var bar=document.createElement('div');bar.className='prog';document.body.prepend(bar);
     var top=document.createElement('div');top.className='top';
-    top.innerHTML='<a class="brand" href="'+(C?'../index.html':'index.html')+'"><b></b>TX Learns</a>'+(C?'<button class="icon-btn menu-btn" aria-expanded="false">☰ <span class="en">Topics</span><span class="zh">主题</span></button>':'')+'<span class="sp"></span>'+'<a class="icon-btn eco-btn" href="'+(C?'../':'')+'ecosystem.html" title="How it works">🌐<span class="lbl"> <span class="en">How it works</span><span class="zh">运作方式</span></span></a>'+
+    top.innerHTML='<a class="brand" href="'+(C?'../index.html':'index.html')+'"><b></b>TX Learns</a>'+(C?'<button class="icon-btn menu-btn" aria-expanded="false">☰ <span class="en">Topics</span><span class="zh">主题</span></button>':'')+'<span class="sp"></span>'+'<a class="icon-btn eco-btn" href="'+(C?'../':'')+'ecosystem.html" title="How it works · 运作方式" aria-label="How it works · 运作方式">🌐<span class="lbl"> <span class="en">How it works</span><span class="zh">运作方式</span></span></a>'+
       '<div class="seg"><button data-l="en">EN</button><button data-l="zh">中文</button></div><button class="icon-btn th" aria-label="theme"></button>';
     document.body.insertBefore(top,bar.nextSibling);
     function mark(){top.querySelectorAll('[data-l]').forEach(function(b){b.classList.toggle('on',b.dataset.l===root.getAttribute('data-lang'))});top.querySelector('.th').textContent=root.getAttribute('data-theme')==='dark'?'☀︎':'☾'}
