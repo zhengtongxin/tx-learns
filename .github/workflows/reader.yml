@@ -31,6 +31,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.deployment.sha || github.sha }}
+          persist-credentials: false # keep the write token out of .git/config, where Claude could read it
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -40,7 +41,6 @@ jobs:
           FILES: ${{ inputs.files }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git fetch -q origin test main
           where=other; pr=
           if [ "$(git rev-parse origin/test)" = "$SHA" ]; then where=test; fi
           if [ "$where" = other ]; then
@@ -105,7 +105,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           test -s /tmp/reader.json || { echo "The reader wrote no result."; exit 1; }
-          low=$(node -e 'const r=require("/tmp/reader.json");console.log(Math.min(...r.lessons.map(l=>l.score)))')
+          low=$(node -e 'const r=require("/tmp/reader.json");console.log(Math.floor(Math.min(10,...r.lessons.map(l=>+l.score||0))))')
           node -e 'const r=require("/tmp/reader.json");console.log(r.lessons.map(l=>l.file.split("/").pop()+" "+l.score+"/10").join(", ")+". "+r.summary)' > /tmp/reader-line.txt
           echo "low=$low" >> "$GITHUB_OUTPUT"
           url=
@@ -118,7 +118,8 @@ jobs:
             git checkout -b "$branch"
             git add -- 'agentic-ai/*.html'
             git commit -m "Reader: clearer wording for newcomers" -m "Suggested by the reader agent (Claude) after the test deploy."
-            git push -u origin "$branch"
+            auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+            git -c "http.https://github.com/.extraheader=$auth" push -u origin "$branch"
             { cat /tmp/reader-comment.md; echo; echo "These fixes only land if you merge this pull request."; } > /tmp/pr-body.md
             url=$(gh pr create --base test --head "$branch" --title "Reader: clearer wording ($(cat /tmp/reader-line.txt | cut -c1-60))" --body-file /tmp/pr-body.md)
             gh pr edit "$url" --add-assignee "${{ github.repository_owner }}" || true

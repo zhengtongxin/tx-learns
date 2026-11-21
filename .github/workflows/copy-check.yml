@@ -8,10 +8,12 @@ on:
     branches: [test]
   workflow_dispatch:
 permissions:
-  contents: write # only to record status on the data-only agent-status branch
+  contents: read
 jobs:
   copy-check:
     runs-on: ubuntu-latest
+    outputs:
+      line: ${{ steps.result.outputs.line }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -28,13 +30,27 @@ jobs:
         run: |
           { echo "🚫 Copy check failed on ${GITHUB_REF_NAME}"; echo "$WHERE"; echo; head -c 2500 copy-check.txt; } \
             | node scripts/notify-telegram.mjs
-      - name: Record status for the Ecosystem page
+      - name: Pass the result to the status job
+        id: result
         if: always()
+        run: echo "line=$(tail -1 copy-check.txt 2>/dev/null)" >> "$GITHUB_OUTPUT"
+  # Separate job: the write token never runs alongside branch code.
+  record:
+    needs: copy-check
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: scripts
+          persist-credentials: false
+      - name: Record status for the Ecosystem page
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OUTCOME: ${{ job.status }}
-          WHERE_NAME: ${{ github.head_ref || github.ref_name }}
+          STATE: ${{ needs.copy-check.result == 'success' && 'ok' || 'flag' }}
+          SUMMARY: "On ${{ github.head_ref || github.ref_name }}: ${{ needs.copy-check.outputs.line }}"
           LINK: ${{ github.event.pull_request.html_url || format('{0}/{1}/actions/runs/{2}', github.server_url, github.repository, github.run_id) }}
-        run: |
-          if [ "$OUTCOME" = success ]; then STATE=ok; else STATE=flag; fi
-          STATE=$STATE SUMMARY="On $WHERE_NAME: $(tail -1 copy-check.txt 2>/dev/null)" node scripts/record-status.mjs copy-check
+        run: "[ -f scripts/record-status.mjs ] && node scripts/record-status.mjs copy-check || echo \"No record script on the default branch yet.\""
