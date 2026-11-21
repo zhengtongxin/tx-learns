@@ -11,6 +11,7 @@ on:
         required: true
 permissions:
   contents: read
+  pull-requests: read
 concurrency:
   group: reader-${{ github.event.deployment.sha || github.sha }}
   cancel-in-progress: false
@@ -47,7 +48,8 @@ jobs:
           where=other; pr=
           if [ "$(git rev-parse origin/test)" = "$SHA" ]; then where=test; fi
           if [ "$where" = other ]; then
-            pr=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/pulls" --jq '[.[]|select(.state=="open")][0].number // empty' || true)
+            pr=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/pulls" --jq '[.[]|select(.state=="open")][0].number // empty' 2>/dev/null || true)
+            case "$pr" in ''|*[!0-9]*) pr= ;; esac
           fi
           msg=$(git log -1 --format=%s "$SHA")
           if [ -n "$FILES" ]; then files="$FILES"
@@ -62,11 +64,14 @@ jobs:
       - name: Read the lessons with Claude
         if: steps.find.outputs.files != ''
         env:
+          # Prefer TX's Claude subscription (CLAUDE_CODE_OAUTH_TOKEN from `claude setup-token`); the API key is only a fallback.
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           FILES: ${{ steps.find.outputs.files }}
           WHERE: ${{ steps.find.outputs.where }}
         run: |
           set -o pipefail
+          if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then unset ANTHROPIC_API_KEY; echo "Auth: Claude subscription"; else unset CLAUDE_CODE_OAUTH_TOKEN; echo "Auth: API key (no CLAUDE_CODE_OAUTH_TOKEN secret)"; fi
           if [ "$WHERE" = test ]; then
             EDIT="7. Then fix what you flagged, in the lesson files only: small wording changes, a missing step or
              definition, a clearer analogy. Keep TX's voice, the story and the structure. Change EN and 中文 together.

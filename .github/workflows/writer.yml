@@ -51,10 +51,13 @@ jobs:
       - name: Write the lesson with Claude
         if: steps.notes.outputs.dirs != ''
         env:
+          # Prefer TX's Claude subscription (CLAUDE_CODE_OAUTH_TOKEN from `claude setup-token`); the API key is only a fallback.
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           DIRS: ${{ steps.notes.outputs.dirs }}
         run: |
           set -o pipefail
+          if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then unset ANTHROPIC_API_KEY; echo "Auth: Claude subscription"; else unset CLAUDE_CODE_OAUTH_TOKEN; echo "Auth: API key (no CLAUDE_CODE_OAUTH_TOKEN secret)"; fi
           cat > /tmp/writer-prompt.md <<'PROMPT'
           You are the writer for TX Learns, a bilingual (EN/中文) interactive learning site about agentic AI.
           TX has dropped raw notes in these inbox folders:
