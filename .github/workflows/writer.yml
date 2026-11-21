@@ -15,8 +15,6 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  issues: write
-  id-token: write
 concurrency:
   group: writer
   cancel-in-progress: false
@@ -47,38 +45,44 @@ jobs:
           echo "Folders: $dirs"
           { echo "dirs<<EOF"; echo "$dirs"; echo "EOF"; } >> "$GITHUB_OUTPUT"
           echo "slug=$(echo "$dirs" | head -1 | cut -d/ -f2 | tr -cd 'a-z0-9-' | cut -c1-40)" >> "$GITHUB_OUTPUT"
-      - uses: anthropics/claude-code-action@v1
+      - name: Install Claude Code
         if: steps.notes.outputs.dirs != ''
-        with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          claude_args: >-
-            --max-turns 80
-            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(ls:*)"
-          prompt: |
-            You are the writer for TX Learns, a bilingual (EN/中文) interactive learning site about agentic AI.
-            TX has dropped raw notes in these inbox folders:
-            ${{ steps.notes.outputs.dirs }}
+        run: npm install -g @anthropic-ai/claude-code
+      - name: Write the lesson with Claude
+        if: steps.notes.outputs.dirs != ''
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          DIRS: ${{ steps.notes.outputs.dirs }}
+        run: |
+          cat > /tmp/writer-prompt.md <<'PROMPT'
+          You are the writer for TX Learns, a bilingual (EN/中文) interactive learning site about agentic AI.
+          TX has dropped raw notes in these inbox folders:
+          __DIRS__
 
-            Turn each folder into ONE new lesson. Work only on files; do not run git.
+          Turn each folder into ONE new lesson. Work only on files; do not run git.
 
-            1. Read CLAUDE.md and STYLE.md. Follow STYLE.md exactly; it is the whole point.
-            2. Read every file in the folder (notes, code, images). TX's own confusions and "aha" moments are
-               the human touch: keep them, especially for the "What I got wrong" callout.
-            3. Study agentic-ai/07-agents-sdk-basics.html and assets/teach.js as the model for structure and widgets
-               (.story, .teach, .codebox with .dim/.chg, TX2.predict, TX2.game, .cl checklist, .card takeaways).
-               Reuse those widgets; do not invent new CSS unless needed.
-            4. Read agentic-ai/lessons.js. If a planned item (no file) matches the concept, use it; otherwise add a new
-               item under the best-fitting topic. Name the file agentic-ai/NN-slug.html with the next free NN,
-               set its tag to "<Topic> · Lesson N" (N = its position in that topic), and add file:'NN-slug.html'.
-               Update the "N topics · M lessons" counts in agentic-ai/index.html, index.html and tracks.js if they change.
-            5. Source-neutral: invent your own story, character names and examples. Never copy names, prompts,
-               project names or numbering from the notes if they look like they came from a paid source.
-               Code may use real library APIs, but rewrite comments, variable names and prompts.
-            6. Every .en block needs a matching, natural .zh block.
-            7. Run `node scripts/check-copy.mjs` and fix everything it reports until it passes.
-            8. Write /tmp/writer-summary.md: the lesson title, file name, topic, a 3-line summary of the story,
-               and anything in the notes you were unsure about or left out (as questions for TX).
+          1. Read CLAUDE.md and STYLE.md. Follow STYLE.md exactly; it is the whole point.
+          2. Read every file in the folder (notes, code, images). TX's own confusions and "aha" moments are
+             the human touch: keep them, especially for the "What I got wrong" callout.
+          3. Study agentic-ai/07-agents-sdk-basics.html and assets/teach.js as the model for structure and widgets
+             (.story, .teach, .codebox with .dim/.chg, TX2.predict, TX2.game, .cl checklist, .card takeaways).
+             Reuse those widgets; do not invent new CSS unless needed.
+          4. Read agentic-ai/lessons.js. If a planned item (no file) matches the concept, use it; otherwise add a new
+             item under the best-fitting topic. Name the file agentic-ai/NN-slug.html with the next free NN,
+             set its tag to "<Topic> · Lesson N" (N = its position in that topic), and add file:'NN-slug.html'.
+             Update the "N topics · M lessons" counts in agentic-ai/index.html, index.html and tracks.js if they change.
+          5. Source-neutral: invent your own story, character names and examples. Never copy names, prompts,
+             project names or numbering from the notes if they look like they came from a paid source.
+             Code may use real library APIs, but rewrite comments, variable names and prompts.
+          6. Every .en block needs a matching, natural .zh block.
+          7. Run `node scripts/check-copy.mjs` and fix everything it reports until it passes.
+          8. Write .writer-summary.md (repo root): the lesson title, file name, topic, a 3-line summary of the story,
+             and anything in the notes you were unsure about or left out (as questions for TX).
+          PROMPT
+          python3 -c "import os,sys;p='/tmp/writer-prompt.md';s=open(p).read().replace('__DIRS__',os.environ['DIRS']);open(p,'w').write(s)"
+          claude -p "$(cat /tmp/writer-prompt.md)" --max-turns 80 \
+            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(ls:*)" \
+            --output-format text | tail -40
       - name: Copy check
         if: steps.notes.outputs.dirs != ''
         run: node scripts/check-copy.mjs | tee /tmp/copy-check.txt; exit ${PIPESTATUS[0]}
@@ -90,16 +94,16 @@ jobs:
           SLUG: ${{ steps.notes.outputs.slug }}
           DIRS: ${{ steps.notes.outputs.dirs }}
         run: |
-          if [ -z "$(git status --porcelain -- . ':!inbox')" ]; then echo "The writer changed nothing."; exit 1; fi
+          if [ -z "$(git status --porcelain -- . ':!inbox' ':!.writer-summary.md')" ]; then echo "The writer changed nothing."; exit 1; fi
           branch="writer/${SLUG:-notes}-${GITHUB_RUN_NUMBER}"
           git config user.name "TX Learns writer"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
-          git add -A -- . ':!inbox'
+          git add -A -- . ':!inbox' ':!.writer-summary.md'
           git commit -m "Draft lesson from ${DIRS//$'\n'/, }" -m "Written by the writer agent (Claude) from TX's notes."
           git push -u origin "$branch"
           { echo "Draft lesson from \`${DIRS//$'\n'/\`, \`}\`, written by the writer agent to STYLE.md."; echo;
-            cat /tmp/writer-summary.md 2>/dev/null; echo; echo "Copy check: $(tail -1 /tmp/copy-check.txt)"; echo;
+            cat .writer-summary.md 2>/dev/null; echo; echo "Copy check: $(tail -1 /tmp/copy-check.txt)"; echo;
             echo "Read the Vercel preview below, comment with changes, then merge into test."; } > /tmp/pr-body.md
           url=$(gh pr create --base test --head "$branch" --title "Draft lesson: ${SLUG:-new notes}" --body-file /tmp/pr-body.md)
           gh pr edit "$url" --add-assignee "${{ github.repository_owner }}" || true
@@ -113,7 +117,7 @@ jobs:
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           if [ -n "$URL" ]; then
-            { echo "✍️ New lesson draft is ready for you"; echo "$URL"; echo; head -c 1500 /tmp/writer-summary.md 2>/dev/null; } | node scripts/notify-telegram.mjs
+            { echo "✍️ New lesson draft is ready for you"; echo "$URL"; echo; head -c 1500 .writer-summary.md 2>/dev/null; } | node scripts/notify-telegram.mjs
           else
             node scripts/notify-telegram.mjs "⚠️ The writer agent could not finish a draft from your notes. Logs: $RUN"
           fi
