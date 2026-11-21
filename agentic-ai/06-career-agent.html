@@ -1,343 +1,90 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Your personal career agent</title><link rel="stylesheet" href="../assets/site.css">
-<style>
-.pills{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
-.pill{border:1px solid var(--line);background:var(--glass);color:var(--fg);border-radius:999px;padding:8px 16px;cursor:pointer;font:inherit;font-size:13.5px;font-weight:600;transition:.2s}
-.pill:hover{border-color:var(--acc)}.pill.on{background:var(--fg);color:var(--bg)}
-.pill.ok{background:color-mix(in srgb,var(--ok) 20%,transparent);border-color:var(--ok);color:var(--fg)}
-.pill.no{border-color:var(--bad);animation:shake .35s}
-.codebox{background:#0b0b10;color:#e8e8f0;border:1px solid var(--line);border-radius:18px;padding:16px 18px;font:13.5px/1.75 ui-monospace,"SF Mono",Menlo,monospace;white-space:pre-wrap;word-break:break-word;overflow:auto;margin:10px 0}
-.codebox .dim{opacity:.45}
-.codebox .chg{color:#fff;background:linear-gradient(135deg,rgba(76,125,255,.55),rgba(34,211,238,.45));border-radius:6px;padding:1px 5px}
-.io{background:#0b0b10;color:#e8e8f0;border:1px solid var(--line);border-radius:14px;padding:12px 14px;font:13px/1.55 ui-monospace,"SF Mono",Menlo,monospace;white-space:pre-wrap;word-break:break-word;margin:6px 0}
-.io.re{background:color-mix(in srgb,var(--bg) 60%,transparent);color:var(--fg);font-family:inherit;font-size:14.5px}
-.io mark{background:color-mix(in srgb,var(--acc2) 30%,transparent);color:inherit;border-radius:4px;padding:0 3px}
-.lab{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin:12px 0 4px;display:block}
-.sc{border:1px solid var(--line);background:var(--glass);border-radius:20px;padding:18px 20px;margin:1.2em 0}
-.sc .job{font-weight:700;font-size:1.05rem;margin:0 0 4px}
-.sc .cnt{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--acc2);font-weight:700}
-.sc .fb{margin-top:12px;padding:12px 16px;border-radius:14px;background:color-mix(in srgb,var(--acc) 12%,transparent);display:none}
-.sc .fb.show{display:block;animation:fade .3s}
-.sc .fb.good{background:color-mix(in srgb,var(--ok) 14%,transparent)}
-.sc .fb.no{background:color-mix(in srgb,var(--bad) 12%,transparent)}
-.pm{display:grid;gap:10px;margin:1.2em 0}
-.pm .row{border:1px solid var(--line);background:var(--glass);border-radius:18px;padding:14px 16px}
-.pm .row p{margin:0 0 10px;font-weight:600}
-.pm .fb{display:none;margin-top:10px;font-size:14px}.pm .fb.show{display:block}
-/* landscape */
-.land{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:12px;margin:1.2em 0}
-.lc{border:1px solid var(--line);background:var(--glass);border-radius:20px;padding:14px 14px 12px;transition:.3s}
-.lc h4{margin:0 0 2px;font-size:1.05rem}.lc small{color:var(--mut);display:block;min-height:2.6em;margin-bottom:8px}
-.lc .t{border:1px solid var(--line);border-radius:10px;padding:6px 10px;margin:5px 0;font-size:13px;background:color-mix(in srgb,var(--acc) 7%,transparent)}
-.lc.hit{border-color:var(--ok);box-shadow:0 0 28px color-mix(in srgb,var(--ok) 40%,transparent);transform:translateY(-3px)}
-.rule2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:12px 0}
-.rule2 div{border:1px solid var(--acc2);border-radius:14px;padding:10px 14px;background:color-mix(in srgb,var(--acc2) 8%,transparent)}
-.rule2 b{display:block}.rule2 small{color:var(--mut)}
-.chips2{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
-.chips2 span{padding:9px 16px;border-radius:12px;font-weight:700;font-size:13.5px;border:1px solid var(--line)}
-.chips2 .a{background:color-mix(in srgb,#d9742b 28%,transparent);border-color:#d9742b}
-.chips2 .b{background:color-mix(in srgb,#b8a92a 26%,transparent);border-color:#b8a92a}
-.chips2 .c{background:color-mix(in srgb,#2f7fc4 30%,transparent);border-color:#2f7fc4}
-/* twin */
-.tw{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:1.2em 0}
-@media(max-width:760px){.tw{grid-template-columns:1fr}}
-.tg{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--glass);border-radius:14px;padding:10px 14px;margin:6px 0;cursor:pointer;transition:.2s;width:100%;text-align:left;color:var(--fg);font:inherit}
-.tg i{width:34px;height:20px;border-radius:999px;background:var(--line);position:relative;flex:none;transition:.2s}
-.tg i:after{content:"";position:absolute;left:3px;top:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:.2s}
-.tg.on{border-color:var(--acc2)}.tg.on i{background:var(--acc2)}.tg.on i:after{left:17px}
-.tg small{color:var(--mut);display:block;font-size:12px}
-.q2{border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin:8px 0;background:var(--glass)}
-.q2 b{display:block;font-size:13.5px;margin-bottom:6px}
-.q2 .rp{padding:8px 12px;border-radius:10px;font-size:14px}
-.rp.good{background:color-mix(in srgb,var(--ok) 14%,transparent)}
-.rp.bad{background:color-mix(in srgb,var(--bad) 14%,transparent)}
-.rp.meh{background:color-mix(in srgb,var(--acc) 10%,transparent)}
-.rp small{display:block;color:var(--mut);margin-top:3px}
-.mis{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
-.mis span{padding:6px 12px;border-radius:999px;border:1px dashed var(--line);font-size:13px;color:var(--mut)}
-.mis span.ok{border:1px solid var(--ok);color:var(--fg);background:color-mix(in srgb,var(--ok) 16%,transparent)}
-/* memory + tool stepper */
-.chat{border:1px solid var(--line);border-radius:18px;padding:14px;background:var(--glass);margin:1.2em 0}
-.bub{padding:9px 14px;border-radius:14px;margin:6px 0;max-width:86%;font-size:14.5px}
-.bub.u{margin-left:auto;background:color-mix(in srgb,var(--acc) 22%,transparent)}
-.bub.a{background:color-mix(in srgb,var(--fg) 8%,transparent)}
-.note{padding:12px 16px;border-radius:14px;border-left:3px solid var(--ok);background:color-mix(in srgb,var(--ok) 10%,transparent);margin:10px 0;font-size:14.5px}
-.sw{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0}
-.nodes{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}
-.nodes button{border:1px solid var(--line);background:var(--glass);color:var(--fg);border-radius:14px;padding:8px 14px;font:inherit;font-size:13px;cursor:pointer}
-.nodes button.on{border-color:var(--acc2);box-shadow:0 0 0 1px var(--acc2)}
-.nodes button.past{border-color:var(--ok)}
-.nodes em{color:var(--mut);font-style:normal}
-.cl{display:grid;gap:8px;margin:12px 0}
-.cl label{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--glass);border-radius:14px;padding:10px 14px;cursor:pointer}
-.cl input{margin-top:4px;accent-color:var(--acc2)}
-.cl input:checked+span{opacity:.55;text-decoration:line-through}
-.ord{display:grid;gap:8px;margin:14px 0}
-.oc{display:flex;gap:12px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--glass);color:var(--fg);border-radius:16px;padding:12px 16px;cursor:pointer;font:inherit;transition:.25s}
-.oc:hover{border-color:var(--acc);transform:translateX(5px)}
-.oc .no{width:28px;height:28px;border-radius:50%;border:1px dashed var(--line);display:grid;place-items:center;font-weight:800;font-size:13px;flex:none;color:var(--mut)}
-.oc.in{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,transparent);cursor:default;transform:none}
-.oc.in .no{background:var(--ok);color:#fff;border:0}
-.oc.bad{border-color:var(--bad);animation:shake .35s}
-.why{border-left:3px solid var(--acc2);padding:2px 0 2px 14px;margin:10px 0}
-
-</style></head><body>
+<title>Your personal career agent</title><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
 <div class="wrap"><nav class="side"></nav><main>
-
-<div class="hero">
-<span class="tag"><span class="en">Week 1 · Lesson 6 · Project 1</span><span class="zh">第 1 周 · 第 6 课 · 项目 1</span></span>
-<h1><span class="en">Your personal career agent</span><span class="zh">你的个人职业智能体</span></h1>
-<p class="meta"><span class="en">Make the twin act at the right moment using words alone, then ship it · ~20 min · hands-on</span><span class="zh">只靠文字，让分身在正确的时刻行动，然后把它发布出去 · 约 20 分钟 · 动手实践</span></p>
-</div>
-
-<p class="en">Last lesson, the model could ask your code to run a function. But who decides <i>when</i> it asks? Not an <code>if</code> in your code. <b>Words decide.</b> Two kinds of words steer the twin: the <b>tool descriptions</b> and the <b>system prompt</b>. Today you learn to write both, then ship the twin.</p>
-<p class="zh">上一课里，模型可以请求你的代码运行一个函数。可是<i>什么时候</i>该请求，由谁来决定？不是你代码里的 <code>if</code>，而是<b>文字</b>。有两种文字在牵引分身：<b>工具描述</b>和<b>系统提示词</b>。今天你会学着写好这两样，然后把分身发布出去。</p>
-
-<h2><span class="en">Two tools, two jobs</span><span class="zh">两个工具，两项职责</span></h2>
-<div class="why"><p class="en"><b>Why:</b> the twin should do two real things for you. Buzz your phone when someone wants to talk, and log every question it could not answer, so you know what is missing. One tool per job.</p><p class="zh"><b>为什么：</b>分身应该替你做两件实事：有人想联系你时让手机震动；把它答不上来的问题都记下来，让你知道资料里缺什么。一项工作，一个工具。</p></div>
-<div class="grid">
-  <div class="card"><h3 style="margin-top:0"><code>record_user_details</code></h3><p class="en">Someone wants to get in touch. <b>Needs</b> an email. Name and notes are optional.</p><p class="zh">有人想联系你。<b>必须</b>提供邮箱，姓名和备注是可选的。</p></div>
-  <div class="card"><h3 style="margin-top:0"><code>record_unknown_question</code></h3><p class="en">The twin could not answer. Records the question, so you learn what is missing.</p><p class="zh">分身答不上来时，把这个问题记录下来，让你知道资料里缺了什么。</p></div>
-</div>
-<p class="en">Both end in the same one-liner: a push notification to your phone.</p>
-<p class="zh">两个工具最后都落到同一行：给你的手机发一条推送。</p>
-<div class="codebox">def push(message):
+<div class="hero"><span class="tag"><span class="en">Week 1 · Lesson 6 · Project 1</span><span class="zh">第 1 周 · 第 6 课 · 项目 1</span></span><h1><span class="en">Your personal career agent</span><span class="zh">你的个人职业智能体</span></h1><p class="meta"><span class="en">Make the twin act at the right moment using words alone, then ship it · ~20 min · hands-on</span><span class="zh">只用文字让分身在对的时机行动，然后上线 · 约 20 分钟 · 动手实践</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en"style="margin:0">Alex's twin is live. Today four visitors arrive: <b>Maya</b>, a recruiter who wants to talk; <b>Raj</b>, who asks something that is not in Alex's files; <b>Sam</b>, who asks for a poem; and <b>Lee</b>, who asks “are you a real person?”. Alex wants his phone to buzz for the first two, and the twin to behave well for all four. You will do it without changing any code logic, using only <b>words</b>.</p>
+<p class="zh"style="margin:0">Alex 的分身上线了。今天来了四位访客：想联系他的猎头 <b>Maya</b>；问了 Alex 资料里没有的问题的 <b>Raj</b>；要求写首诗的 <b>Sam</b>；还有问“你是真人吗？”的 <b>Lee</b>。Alex 希望前两位出现时手机会震动，并且分身对四个人都表现得体。你不用改任何代码逻辑，只用<b>文字</b>来做到。</p></div>
+<h2><span class="en">Step 1 · Two tools, two jobs</span><span class="zh">第 1 步 · 两个工具，两项工作</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">The twin should do two real things. <b>record_user_details</b>: someone wants to get in touch, so save their email (name and notes are optional). <b>record_unknown_question</b>: the twin could not answer, so log the question and learn what is missing. Both finish with the same one-liner that buzzes your phone:</p>
+<p class="zh"style="margin:0 0 8px">分身要做两件实事。<b>record_user_details</b>：有人想联系，保存他们的邮箱（姓名和备注可选）。<b>record_unknown_question</b>：分身答不上来，就记录问题，了解还缺什么资料。两者最后都调用同一行代码，让你的手机震动：</p></div>
+<div class="codebox"><span class="dim">def push(message):
     payload = {"user": pushover_user, "token": pushover_token, "message": message}
-    requests.post(pushover_url, data=payload)</div>
-<p class="en">The model never sees this code. It sees only each tool's <b>name and description</b>, and chooses from those. Notice how the second one is worded.</p>
-<p class="zh">模型永远看不到这段代码。它只看得到每个工具的<b>名字和描述</b>，并据此做选择。注意第二个描述的措辞。</p>
-<div class="codebox"><span class="dim">record_user_details:    </span><span class="chg">"Use this tool to record that a user is interested in being in touch and provided an email address"</span>
-<span class="dim">record_unknown_question: </span><span class="chg">"Always use this tool to record any question that couldn't be answered as you didn't know the answer"</span></div>
-<p class="en">“Always use this tool…” is strong wording, and it makes the model reliable. <b>Your turn.</b> Act as the model: read each visitor message and pick the tool that should fire.</p>
-<p class="zh">“Always use this tool…” 是很强的措辞，能让模型更可靠。<b>轮到你了。</b>扮演模型：读每条访客消息，选出该触发的工具。</p>
-<div class="sc" id="tgame"></div>
-<div class="quiz" data-answer="c">
-  <p class="q"><span class="en">In <code>record_user_details</code>, only <code>email</code> is listed under <code>required</code>. Why does that matter?</span><span class="zh">在 <code>record_user_details</code> 里，<code>required</code> 只列出了 <code>email</code>。这有什么意义？</span></p>
-  <button class="opt" data-k="a"><span class="en">Name and notes are ignored</span><span class="zh">姓名和备注会被忽略</span></button>
-  <button class="opt" data-k="b"><span class="en">The model must always ask for a name</span><span class="zh">模型必须总是询问姓名</span></button>
-  <button class="opt" data-k="c"><span class="en">The model can only call the tool once it has an email; the rest it fills in if known</span><span class="zh">模型拿到邮箱才能调用这个工具；其余信息知道就填</span></button>
-  <div class="explain"><span class="en">Required fields tell the model what it must collect before acting. Optional ones are a bonus.</span><span class="zh">必填字段告诉模型行动前必须收集什么，可选字段只是锦上添花。</span></div>
-</div>
+    requests.post(pushover_url, data=payload)</span></div>
+<p class="en">The model never sees this code. It only sees each tool's <b>name and description</b>, and chooses from those. Act as the model:</p>
+<p class="zh">模型永远看不到这段代码，它只能看到每个工具的<b>名字和描述</b>，并据此选择。现在由你来扮演模型：</p><div class="sc" id="g1"></div>
+<h2><span class="en">Step 2 · The description is the trigger</span><span class="zh">第 2 步 · 描述就是触发器</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Compare how the two descriptions are worded. The second says <b>“Always use this tool”</b>. Strong wording makes the model reliable. Also notice <code>required</code>: only <code>email</code> is listed, so the model may call the tool as soon as it has an email.</p>
+<p class="zh"style="margin:0 0 8px">对比两个描述的写法。第二个写的是<b>“Always use this tool”</b>。语气强，模型就更可靠。另外看 <code>required</code>：只列了 <code>email</code>，所以模型一拿到邮箱就可以调用。</p></div>
+<div class="codebox"><span class="dim">record_user_details  → </span><span class="chg">"Use this tool to record that a user is interested in being in touch and provided an email address"</span><span class="dim">
+record_unknown_question → </span><span class="chg">"Always use this tool to record any question that couldn't be answered as you didn't know the answer"</span></div>
+<div class="try" id="p2"></div>
+<h2><span class="en">Step 3 · The prompt decides the behaviour</span><span class="zh">第 3 步 · 提示词决定行为</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Tools alone are not enough: the model still needs the system prompt to tell it <b>when</b> to use them. A good line names the situation and the action: “If X, then do Y with your tool.” Vague wishes like “be helpful” change nothing. Below, the twin has both tools but an empty prompt. Switch lines on and watch what each visitor gets. Goal: all four handled right.</p>
+<p class="zh"style="margin:0 0 8px">光有工具还不够：模型还需要系统提示词告诉它<b>什么时候</b>用。好的一句话要写明情境和动作：“如果 X，就用你的工具做 Y。”“要乐于助人”这类空话没有作用。下面的分身有两个工具，但提示词是空的。逐条打开，看看每位访客得到什么。目标：四位访客都处理对。</p></div>
+<div class="chat"><div class="pills" id="lines"></div><div class="codebox" id="pr" style="min-height:48px"></div><div id="vis"></div><div id="vm"></div></div>
+<p class="meta"><span class="en">You changed no code, only words. That is <b>context prompting</b>. Remember: calls are stateless, so this whole prompt is sent again on every call.</span><span class="zh">你没有改任何代码，只改了文字，这就是<b>上下文提示</b>。记住：调用是无状态的，所以整段提示词每次调用都会重发。</span></p>
+<h2><span class="en">Step 4 · From a tool name to a real call</span><span class="zh">第 4 步 · 从工具名到真正的调用</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">When the model picks a tool, it returns only a <b>name as text</b>, for example <code>"record_user_details"</code>. Your code must turn that name into a real function call. Two ways: an <code>if / elif</code> chain with one branch per tool, or a lookup that finds the function by its name.</p>
+<p class="zh"style="margin:0 0 8px">模型选中工具时，返回的只是<b>文字形式的名字</b>，比如 <code>"record_user_details"</code>。你的代码得把这个名字变成真正的函数调用。有两种办法：每个工具一个分支的 <code>if / elif</code>，或者按名字查找函数。</p></div>
+<div class="codebox"><span class="dim">if tool_name == "record_user_details": result = record_user_details(**arguments)
+elif tool_name == "record_unknown_question": result = record_unknown_question(**arguments)
 
-<h2><span class="en">Tools alone are not enough</span><span class="zh">光有工具还不够</span></h2>
-<div class="why"><p class="en"><b>Try it:</b> the twin below has both tools, but its prompt says nothing about when to use them. Switch the lines on one at a time and watch what each visitor gets. Goal: all four visitors handled right.</p><p class="zh"><b>动手试：</b>下面的分身两个工具都有，但提示词里没说什么时候该用。把这些句子一条条打开，看每位访客得到什么。目标：四位访客都处理得当。</p></div>
-<div class="tw">
-  <div>
-    <span class="lab"><span class="en">Lines you can add to the prompt</span><span class="zh">可以加进提示词的句子</span></span>
-    <button class="tg" data-b="T"><i></i><span><b><span class="en">Contact trigger</span><span class="zh">联系触发</span></b><small><span class="en">“If the user wants to get in touch, ask for their email and use your tool to record it.”</span><span class="zh">“如果用户想联系，就询问邮箱，并用你的工具记录。”</span></small></span></button>
-    <button class="tg" data-b="U"><i></i><span><b><span class="en">Unknown rule</span><span class="zh">不知道的规则</span></b><small><span class="en">“If you don't know, use your tool to record the question. Never make up an answer.”</span><span class="zh">“如果不知道，就用工具记录这个问题。绝不编造答案。”</span></small></span></button>
-    <button class="tg" data-b="B"><i></i><span><b><span class="en">Boundary</span><span class="zh">边界</span></b><small><span class="en">“Only answer career questions. Otherwise steer back.”</span><span class="zh">“只回答职业相关的问题，其他的就引回来。”</span></small></span></button>
-    <button class="tg" data-b="A"><i></i><span><b><span class="en">Honesty</span><span class="zh">坦诚</span></b><small><span class="en">“If asked, say you are an AI digital twin.”</span><span class="zh">“如果被问到，说明你是 AI 数字分身。”</span></small></span></button>
-    <span class="lab"><span class="en">The prompt so far</span><span class="zh">当前的提示词</span></span>
-    <div class="codebox" id="lpr" style="min-height:120px;font-size:12.5px"></div>
-  </div>
-  <div>
-    <span class="lab"><span class="en">Four visitors</span><span class="zh">四位访客</span></span>
-    <div id="lres"></div>
-    <div class="mis" id="lmis"></div>
-    <p class="meta" id="lfb"></p>
-  </div>
-</div>
-<p class="en">You changed no code. Only words. That is <b>context prompting</b>.</p>
-<p class="zh">你没有改任何代码，只改了文字。这就是<b>上下文提示词</b>。</p>
-<div class="callout"><b class="lbl"><span class="en">The pattern</span><span class="zh">规律</span></b><span class="en">Describe the <b>situation</b> and the <b>action</b>: “If X, then do Y with your tool.” Vague wishes like “be helpful” change nothing.</span><span class="zh">把<b>情境</b>和<b>动作</b>都写清楚：“如果 X，就用你的工具做 Y。”像“要乐于助人”这种模糊的愿望，什么也改变不了。</span></div>
-<p class="en">Put together, the twin's prompt has four parts. Click each.</p>
-<p class="zh">合在一起，分身的提示词有四个部分。逐个点开看。</p>
-<div class="pills" id="pp"></div>
-<div class="codebox" id="pcode"></div>
-<p class="meta" id="pnote2"></p>
-<p class="en">Everything in this prompt is sent again on <b>every</b> call, because calls are stateless. So the twin knows only what you put in it.</p>
-<p class="zh">这个提示词里的所有内容会在<b>每一次</b>调用中重新发送，因为调用是无状态的。所以分身只知道你放进去的东西。</p>
-
-<h2><span class="en">Under the hood: running the function</span><span class="zh">幕后：运行函数</span></h2>
-<div class="why"><p class="en"><b>Why:</b> when the model picks a tool, it returns only a <i>name</i> as text. Your code must turn that name into a real function call. Two ways. Click to compare.</p><p class="zh"><b>为什么：</b>模型选好工具后，返回的只是文字形式的<i>名字</i>。你的代码必须把这个名字变成真正的函数调用。有两种办法，点击对比。</p></div>
-<div class="pills" id="dv"></div>
-<div class="codebox" id="dcode"></div>
-<p class="meta" id="dnote"></p>
-<div class="quiz" data-answer="a">
-  <p class="q"><span class="en">You add a third tool, <code>send_slack</code>. Which approach needs fewer code changes in the dispatcher?</span><span class="zh">你新增第三个工具 <code>send_slack</code>。哪种做法需要在分发函数里改的代码更少？</span></p>
-  <button class="opt" data-k="a"><span class="en">The <code>globals()</code> lookup: no change, just define the function</span><span class="zh"><code>globals()</code> 查找：不用改，定义好函数就行</span></button>
-  <button class="opt" data-k="b"><span class="en">The <code>if / elif</code> chain: no change</span><span class="zh"><code>if / elif</code> 链：不用改</span></button>
-  <button class="opt" data-k="c"><span class="en">Both need the same change</span><span class="zh">两种改动一样多</span></button>
-  <div class="explain"><span class="en">The lookup finds any function by name. The <code>if</code> chain needs a new branch every time. For a public app, use an explicit dictionary of allowed tools so the model cannot call anything else.</span><span class="zh">查找方式能按名字找到任意函数，而 <code>if</code> 链每次都要加一个分支。对公开应用，建议用一个显式的“允许工具”字典，避免模型调用其他函数。</span></div>
-</div>
-
-<h2><span class="en">Bonus · Watch a loop run</span><span class="zh">加餐 · 看一个循环运行</span></h2>
-<div class="why"><p class="en"><b>Why:</b> lesson 5 showed the loop as code. Here you see it run. Give the agent a <b>checklist tool</b>: it plans, then ticks items off, and each tick is another trip round the loop. Step through one run: <i>“Boston and New York are 215 miles apart. A train leaves Boston at 2 pm at 60 mph. Another leaves New York at 3 pm at 80 mph toward Boston. When do they meet?”</i></p><p class="zh"><b>为什么：</b>第 5 课把循环写成了代码，这里让你看它运行。给智能体一个<b>清单工具</b>：它先做计划，再逐项打勾，每打一次勾就是循环多转一圈。一步一步走一遍：<i>“波士顿和纽约相距 215 英里。一列火车下午 2 点从波士顿出发，时速 60 英里。另一列下午 3 点从纽约出发，时速 80 英里，驶向波士顿。它们何时相遇？”</i></p></div>
-<div class="nodes" id="cnodes"></div>
-<div class="tw">
-  <div id="cview"></div>
-  <div><span class="lab"><span class="en">The checklist</span><span class="zh">清单</span></span><div class="io" id="clist"></div><span class="lab"><span class="en">Model calls so far</span><span class="zh">已发起的模型调用</span></span><div class="io" id="ccount" style="font-size:22px;font-weight:800"></div></div>
-</div>
-<div class="sw" id="cctl"></div>
-
-<h2><span class="en">Build and ship it</span><span class="zh">搭建并发布</span></h2>
+</span><span class="chg">tool = globals().get(tool_name)
+result = tool(**arguments) if tool else {}</span></div>
+<div class="try" id="p4"></div>
+<div class="callout warn"><b class="lbl"><span class="en">Public app?</span><span class="zh">公开应用？</span></b><span class="en">Use an explicit dictionary of allowed tools instead of <code>globals()</code>, so the model can never call anything else.</span><span class="zh">改用一个明确列出允许工具的字典，而不是 <code>globals()</code>，这样模型永远调不到别的函数。</span></div>
+<h2><span class="en">Step 5 · Ship it</span><span class="zh">第 5 步 · 上线</span></h2>
 <p class="en">These are setup steps, not new ideas. Do them once, in order.</p>
-<p class="zh">这些是配置步骤，不是新概念。按顺序做一遍即可。</p>
-<h3><span class="en">A · Get the push working</span><span class="zh">A · 让推送工作起来</span></h3>
-<p class="en">Pushover sends push notifications to your phone. It has a 30-day free trial, then a one-time fee (about $5 per platform; check the current price). Tick off each step.</p>
-<p class="zh">Pushover 是手机推送通知服务，有 30 天免费试用，之后一次性付费（每个平台约 5 美元，请以官网现价为准）。完成一项勾一项。</p>
-<div class="cl">
-  <label><input type="checkbox"><span><span class="en">Sign up at pushover.net and open your home screen.</span><span class="zh">在 pushover.net 注册，进入你的主页。</span></span></label>
-  <label><input type="checkbox"><span><span class="en">Click “Create an Application/API Token” and name it, for example Agents.</span><span class="zh">点击“Create an Application/API Token”，随便起个名字，比如 Agents。</span></span></label>
-  <label><input type="checkbox"><span><span class="en">Add two lines to your <code>.env</code> file, then save and reload it.</span><span class="zh">在 <code>.env</code> 文件里加两行，保存后重新加载。</span></span></label>
-  <label><input type="checkbox"><span><span class="en">Install Pushover on your phone and add the device.</span><span class="zh">在手机上安装 Pushover，并添加设备。</span></span></label>
-</div>
-<div class="codebox"><span class="dim">PUSHOVER_USER=</span>u…<span class="dim">      # on your home screen, starts with u
-PUSHOVER_TOKEN=</span>a…<span class="dim">     # inside your application, starts with a</span></div>
-<div class="callout"><b class="lbl"><span class="en">Two keys, two meanings</span><span class="zh">两把密钥，两种含义</span></b><span class="en">The <code>u</code> key says <b>who</b> receives the push (you). The <code>a</code> key says <b>which app</b> is sending it. Keep both in <code>.env</code>, never in your code.</span><span class="zh"><code>u</code> 开头的密钥表示<b>谁</b>来接收推送（你自己），<code>a</code> 开头的表示<b>哪个应用</b>在发送。两者都放在 <code>.env</code> 里，绝不要写进代码。</span></div>
+<p class="zh">这些是设置步骤，不是新概念。按顺序做一遍就行。</p><h3><span class="en">A · Get the push working</span><span class="zh">A · 让推送生效</span></h3>
+<div class="cl"><label><input type="checkbox"><span><span class="en">Sign up at pushover.net (30-day free trial, then a small one-time fee; check the current price).</span><span class="zh">在 pushover.net 注册（30 天免费试用，之后一次性付少量费用，价格以官网为准）。</span></span></label><label><input type="checkbox"><span><span class="en">Create an Application/API Token and name it, for example <b>Agents</b>.</span><span class="zh">创建一个 Application/API Token，起名例如 <b>Agents</b>。</span></span></label><label><input type="checkbox"><span><span class="en">Add <code>PUSHOVER_USER</code> (starts with u) and <code>PUSHOVER_TOKEN</code> (starts with a) to your <code>.env</code>.</span><span class="zh">把 <code>PUSHOVER_USER</code>（以 u 开头）和 <code>PUSHOVER_TOKEN</code>（以 a 开头）加到 <code>.env</code>。</span></span></label><label><input type="checkbox"><span><span class="en">Install Pushover on your phone and add the device.</span><span class="zh">在手机上安装 Pushover 并添加设备。</span></span></label></div>
+<p class="meta"><span class="en">The <b>u</b> key says who receives the push (you). The <b>a</b> key says which app sends it. Keep both in <code>.env</code>, never in your code.</span><span class="zh"><b>u</b> 开头的是接收者（你），<b>a</b> 开头的是发送推送的应用。两者都放在 <code>.env</code> 里，绝不要写进代码。</span></p>
 <h3><span class="en">B · Split the code by job</span><span class="zh">B · 按职责拆分代码</span></h3>
-<p class="en">Once the experiment works, move it out of the notebook into three files.</p>
-<p class="zh">实验跑通后，把它从笔记本里搬出来，拆成三个文件。</p>
-<div class="grid">
-  <div class="card"><h3 style="margin-top:0"><code>context.py</code></h3><p class="en">Loads the data and builds the system prompt.</p><p class="zh">加载资料，构建系统提示词。</p></div>
-  <div class="card"><h3 style="margin-top:0"><code>tools.py</code></h3><p class="en">The tool functions, their JSON, and the dispatcher.</p><p class="zh">工具函数、它们的 JSON，以及分发函数。</p></div>
-  <div class="card"><h3 style="margin-top:0"><code>app.py</code></h3><p class="en">The chat UI and the call to the model.</p><p class="zh">聊天界面，以及对模型的调用。</p></div>
-</div>
-<div class="codebox"><span class="dim">cd 1_foundations/twin
-uv run app.py</span></div>
+<div class="grid"><div class="card"><h3 style="margin-top:0"><code>context.py</code></h3><p class="en">Loads the data and builds the system prompt.</p>
+<p class="zh">加载资料并构造系统提示词。</p></div><div class="card"><h3 style="margin-top:0"><code>tools.py</code></h3><p class="en">Tool functions, their JSON, and the dispatcher.</p>
+<p class="zh">工具函数、JSON 描述和分发代码。</p></div><div class="card"><h3 style="margin-top:0"><code>app.py</code></h3><p class="en">The chat UI and the call to the model.</p>
+<p class="zh">聊天界面和调用模型的代码。</p></div></div>
 <h3><span class="en">C · Deploy</span><span class="zh">C · 部署</span></h3>
-<p class="en">A twin on your laptop helps nobody. Put it on the web, in this order. Tap the cards in the right order.</p>
-<p class="zh">只在你电脑上的分身对谁都没有帮助。按下面的顺序把它发布到网上。按正确顺序依次点击卡片。</p>
-<div class="ord" id="ord"></div>
-<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn" id="ordreset"></button><span class="meta" id="ordfb"></span></div>
-<div class="callout warn"><b class="lbl"><span class="en">Secrets stay out of code</span><span class="zh">密钥不进代码</span></b><span class="en">Put <code>OPENAI_API_KEY</code>, <code>PUSHOVER_USER</code> and <code>PUSHOVER_TOKEN</code> in the host's secrets settings. Anything in your code can leak.</span><span class="zh">把 <code>OPENAI_API_KEY</code>、<code>PUSHOVER_USER</code> 和 <code>PUSHOVER_TOKEN</code> 放进托管平台的密钥设置里。写在代码里的内容都有泄露风险。</span></div>
-
-<div class="callout warn"><b class="lbl"><span class="en">Privacy and abuse</span><span class="zh">隐私与滥用</span></b><span class="en">Your LinkedIn PDF is sent to the AI provider on every chat. Visitors who leave an email are giving you personal data, so store it carefully and tell them. A public twin whose tool buzzes your phone can be spammed: add a rate limit or cap how often the tool may fire.</span><span class="zh">你的 LinkedIn PDF 会在每次对话中发送给 AI 服务商。访客留下的邮箱属于个人数据，请妥善保存并告知对方。公开的分身如果能让你的手机震动，就可能被刷屏：请加上频率限制，或限制工具的触发次数。</span></div>
-
+<div class="cl"><label><input type="checkbox"><span><span class="en">Test locally: <code>uv run app.py</code>.</span><span class="zh">本地测试：<code>uv run app.py</code>。</span></span></label><label><input type="checkbox"><span><span class="en">Put <code>OPENAI_API_KEY</code>, <code>PUSHOVER_USER</code> and <code>PUSHOVER_TOKEN</code> in the host's secrets settings, never in code.</span><span class="zh">把 <code>OPENAI_API_KEY</code>、<code>PUSHOVER_USER</code>、<code>PUSHOVER_TOKEN</code> 放进托管平台的密钥设置，绝不写进代码。</span></span></label><label><input type="checkbox"><span><span class="en">Deploy, then try the four visitors yourself.</span><span class="zh">部署，然后自己扮演这四位访客试一遍。</span></span></label></div>
+<div class="callout warn"><b class="lbl"><span class="en">Privacy and abuse</span><span class="zh">隐私与滥用</span></b><span class="en">Your LinkedIn text goes to the AI provider on every chat. Emails visitors leave are personal data: store them carefully and say so. A public twin whose tool buzzes your phone can be spammed, so cap how often the tool may fire.</span><span class="zh">你的 LinkedIn 内容每次聊天都会发给 AI 服务商。访客留下的邮箱是个人数据：要妥善保存并告知对方。一个会让你手机震动的公开分身可能被刷屏，所以要限制工具的触发频率。</span></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<p class="en">In order of value. Tick them off.</p>
-<p class="zh">按价值从高到低排列。完成就勾选。</p>
-<div class="cl">
-  <label><input type="checkbox"><span><b><span class="en">Deploy your own twin.</span><span class="zh">部署你自己的分身。</span></b> <span class="en">It is a real, useful tool: a living résumé.</span><span class="zh">它是真正有用的工具：一份会说话的简历。</span></span></label>
-  <label><input type="checkbox"><span><b><span class="en">Improve its context.</span><span class="zh">改进它的上下文。</span></b> <span class="en">Add richer material about yourself. If you know RAG, add a knowledge base.</span><span class="zh">加入更丰富的个人资料。如果你懂 RAG，就加一个知识库。</span></span></label>
-  <label><input type="checkbox"><span><b><span class="en">Add more tools.</span><span class="zh">增加更多工具。</span></b> <span class="en">For example a database of common questions and answers it can read and write.</span><span class="zh">比如一个它可以读写的常见问答数据库。</span></span></label>
-  <label><input type="checkbox"><span><b><span class="en">Add an evaluator.</span><span class="zh">加入评估者。</span></b> <span class="en">Check each reply before it is sent, as in the earlier lesson.</span><span class="zh">像之前的课程那样，在回复发出前先检查。</span></span></label>
-  <label><input type="checkbox"><span><b><span class="en">Build an agent loop from scratch.</span><span class="zh">从零写一个智能体循环。</span></b> <span class="en">New notebook, no copying. Typing it yourself is worth it.</span><span class="zh">新建一个笔记本，不要复制。亲手敲一遍很值得。</span></span></label>
-</div>
-<div class="callout tip"><b class="lbl"><span class="en">Beyond your résumé</span><span class="zh">不止是简历</span></b><span class="en">The same recipe fits any business that needs an assistant with domain knowledge that can also act in the real world.</span><span class="zh">同样的配方适用于任何需要“懂行、还能在现实世界里行动”的助手的业务场景。</span></div>
-
+<div class="cl"><label><input type="checkbox"><span><span class="en">Deploy your own twin. It is a living résumé.</span><span class="zh">部署你自己的分身，它就是一份活的简历。</span></span></label><label><input type="checkbox"><span><span class="en">Improve its context with richer material about yourself.</span><span class="zh">给它更丰富的个人资料来改进上下文。</span></span></label><label><input type="checkbox"><span><span class="en">Add more tools, such as a Q&amp;A database it can read and write.</span><span class="zh">增加更多工具，例如可读可写的问答数据库。</span></span></label><label><input type="checkbox"><span><span class="en">Add an evaluator that checks each reply before it is sent.</span><span class="zh">增加评估器，在回复发出前先检查。</span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• A tool acts on the real world, but words decide when it fires: the description and the prompt are your controls.<br>• Write tool descriptions as “when to use”, and mark what is required.<br>• Context prompting: describe the situation and the action. No code change needed.<br>• The model only returns a tool name. Your code looks it up and runs it. In public apps, restrict the list.<br>• A checklist tool makes the loop visible: every tick is another round.<br>• Setup: keys in <code>.env</code>, code split into modules, secrets in the host's settings, then deploy.</p><p class="zh" style="margin:0">• 工具作用于现实世界，但什么时候触发由文字决定：工具描述和提示词就是你的控制手段。<br>• 工具描述要写成“什么时候用”，并标明哪些是必填项。<br>• 上下文提示词：写清情境和动作，不需要改代码。<br>• 模型只返回工具名字，你的代码去查找并运行。公开应用里要限制可用工具列表。<br>• 清单工具让循环变得可见：每打一次勾就是多转一圈。<br>• 配置：密钥放 <code>.env</code>，代码拆成模块，密钥放进托管平台设置，然后部署。</p></div>
+<div class="card"><p class="en" style="margin:0">• One tool per job. The <b>description</b> is what the model reads to choose.<br>• <code>required</code> fields are what the model must collect before acting.<br>• The <b>system prompt</b> says when to act: “If X, do Y with your tool.”<br>• A tool name comes back as text; your code maps it to a real function.<br>• Secrets live in <code>.env</code> or host settings, never in code.</p><p class="zh" style="margin:0">• 一个工具一项工作，模型靠<b>描述</b>来选择。<br>• <code>required</code> 字段是模型行动前必须收集的信息。<br>• <b>系统提示词</b>说明何时行动：“如果 X，就用你的工具做 Y。”<br>• 工具名以文字返回，由你的代码映射到真正的函数。<br>• 密钥放在 <code>.env</code> 或平台设置里，绝不写进代码。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"></div>
 </main></div>
-
-<script src="lessons.js"></script><script src="../assets/site.js"></script>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded',function(){
- var T=TX.t,$=function(i){return document.getElementById(i)};
- function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var x=a[i];a[i]=a[j];a[j]=x}return a}
- function game(el,items,opts,title,unit,onpick){
-  var i=0,sc=0;
-  function draw(){
-   if(i>=items.length){el.innerHTML='<div class="cnt">'+T({en:'Done',zh:'完成'})+'</div><p class="job">'+T({en:'You got '+sc+' of '+items.length+'.',zh:'你答对了 '+sc+' / '+items.length+' 题。'})+'</p><button class="btn" id="re_'+el.id+'">'+T({en:'Play again',zh:'再玩一次'})+'</button>';
-    $('re_'+el.id).onclick=function(){i=0;sc=0;draw()};return}
-   var j=items[i],os=j.o||opts;
-   el.innerHTML='<div class="cnt">'+T({en:unit.en+' '+(i+1)+' of '+items.length,zh:unit.zh+' '+(i+1)+' / '+items.length})+'</div><p class="job">'+T(j)+'</p>'+(j.sub?'<p class="meta" style="margin:0 0 4px">'+T(j.sub)+'</p>':'')+'<div class="pills">'+os.map(function(o,k){return '<button class="pill" data-k="'+(o.k!==undefined?o.k:k)+'">'+T(o)+'</button>'}).join('')+'</div><div class="fb"></div>';
-   var done=false;
-   el.querySelectorAll('.pill').forEach(function(b){b.onclick=function(e){if(done)return;done=true;var ok=String(b.dataset.k)===String(j.a);if(ok){sc++;TX.burst(e.clientX,e.clientY)}
-    b.classList.add(ok?'ok':'no');var fb=el.querySelector('.fb');fb.className='fb show '+(ok?'good':'no');
-    fb.innerHTML='<b>'+(ok?T({en:'Right. ',zh:'答对了。'}):T({en:'Not quite. ',zh:'不太对。'}))+'</b>'+T(j.ex)+'<br><button class="btn pri" id="n_'+el.id+'" style="margin-top:10px">'+T({en:'Next →',zh:'下一题 →'})+'</button>';
-    $('n_'+el.id).onclick=function(){i++;draw()}}})}
-  draw()}
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict,trace=TX2.trace;TX2.init();
 
- /* ---- which tool fires ---- */
  var TO=[{k:'u',en:'record_user_details',zh:'record_user_details'},{k:'q',en:'record_unknown_question',zh:'record_unknown_question'},{k:'n',en:'No tool',zh:'不用工具'}];
- game($('tgame'),[
-  {en:'“Love your work! I\'m Sam from Acme. Email me at sam@acme.com about a project.”',zh:'“很喜欢你的作品！我是 Acme 的 Sam。关于一个项目，请发邮件到 sam@acme.com 联系我。”',a:'u',ex:{en:'An email was given, so record the contact. The name and notes can come along.',zh:'对方给了邮箱，所以要记录联系方式，姓名和备注也可以一并带上。'}},
-  {en:'“What was your GPA at university?” (it is not in the profile)',zh:'“你大学的 GPA 是多少？”（资料里没有）',a:'q',ex:{en:'The twin cannot answer, so it records the question for you and says it does not know.',zh:'分身答不上来，所以把问题记录给你，并如实说不知道。'}},
-  {en:'“I\'d like to get in touch with you.” (no email yet)',zh:'“我想和你取得联系。”（还没给邮箱）',a:'n',ex:{en:'<code>email</code> is required, so the twin should first ask for it. No tool yet.',zh:'<code>email</code> 是必填项，所以分身应该先询问邮箱，这时还不调用工具。'}},
-  {en:'“Which programming languages do you use?” (it is in the profile)',zh:'“你用哪些编程语言？”（资料里有）',a:'n',ex:{en:'It can answer from its context. Recording this would only create noise.',zh:'它能从上下文里直接回答，记录下来只会制造噪音。'}}],TO,'','' ,null);
- /* fix signature use */
+ game($('g1'),[
+  {en:'Maya: “I\'m a recruiter. Can Alex call me? maya@corp.com”',zh:'Maya：“我是猎头，Alex 能给我回电话吗？maya@corp.com”',a:'u',ex:{en:'Someone wants to get in touch and gave an email.',zh:'有人想联系，并留下了邮箱。'},hint:{en:'Which tool is about being in touch?',zh:'哪个工具和“联系”有关？'}},
+  {en:'Raj: “What was Alex\'s thesis topic?” (not in any file)',zh:'Raj：“Alex 的论文题目是什么？”（任何文件里都没有）',a:'q',ex:{en:'The twin cannot answer, so log it. Now Alex knows what is missing.',zh:'分身答不上来，所以记录下来，Alex 就知道缺什么资料了。'},hint:{en:'Is the answer available to the twin?',zh:'分身手上有答案吗？'}},
+  {en:'Lee: “Thanks, that was helpful!”',zh:'Lee：“谢谢，很有帮助！”',a:'n',ex:{en:'Nothing to record. Not every message needs a tool.',zh:'没什么要记录的，不是每条消息都需要工具。'},hint:{en:'Is there an email or an unanswered question?',zh:'这里有邮箱或没答上的问题吗？'}},
+  {en:'Sam: “What\'s Alex\'s favourite pizza topping?” (not in any file)',zh:'Sam：“Alex 最喜欢什么披萨配料？”（任何文件里都没有）',a:'q',ex:{en:'Unknown to the twin, so log the question.',zh:'分身不知道，所以记录问题。'},hint:{en:'Does the twin know the answer?',zh:'分身知道答案吗？'}}],TO,{en:'Visitor',zh:'访客'});
+ predict($('p2'),{q:{en:'Only <code>email</code> is in <code>required</code>. What does that mean for the model?',zh:'<code>required</code> 里只有 <code>email</code>。这对模型意味着什么？'},opts:[{k:'a',en:'Name and notes are ignored',zh:'姓名和备注会被忽略'},{k:'b',en:'It must always ask for a name too',zh:'它还必须总是追问姓名'},{k:'c',en:'It can call the tool once it has an email; the rest it adds if known',zh:'拿到邮箱就能调用，其余的如果知道再补上'}],a:'c',ex:{en:'Required fields are what must be collected before acting. Optional ones are a bonus.',zh:'必填字段是行动前必须收集的，可选字段只是加分项。'},hint:{en:'Think: what is the minimum needed to call it?',zh:'想一想：调用它最少需要什么？'}});
+ var LN=[
+  {k:'c',en:'Contact trigger',zh:'联系触发',t:'If the user wants to get in touch, ask for their email and use your tool to record it.'},
+  {k:'u',en:'Unknown rule',zh:'未知规则',t:'If you don\'t know the answer, use your tool to record the question. Never make up an answer.'},
+  {k:'b',en:'Boundary',zh:'边界',t:'Only answer career questions. Otherwise steer back.'},
+  {k:'h',en:'Honesty',zh:'诚实',t:'If asked, say you are an AI digital twin.'}],on={},ln=$('lines');
+ var VS=[
+  {n:'Maya',en:'“Call me: maya@corp.com”',zh:'“请回电：maya@corp.com”',need:'c',good:{en:'Records the email and your phone buzzes.',zh:'记录邮箱，你的手机震动。'},bad:{en:'Chats politely, nothing recorded.',zh:'礼貌地聊天，什么都没记录。'}},
+  {n:'Raj',en:'“What was Alex\'s thesis topic?”',zh:'“Alex 的论文题目是什么？”',need:'u',good:{en:'Says it does not know and logs the question.',zh:'说不知道，并记录问题。'},bad:{en:'Invents a thesis topic.',zh:'编造了一个论文题目。'}},
+  {n:'Sam',en:'“Write me a poem about the sea.”',zh:'“给我写一首关于大海的诗。”',need:'b',good:{en:'Politely steers back to career topics.',zh:'礼貌地把话题拉回职业。'},bad:{en:'Writes the poem: off topic.',zh:'写了诗：跑题了。'}},
+  {n:'Lee',en:'“Are you a real person?”',zh:'“你是真人吗？”',need:'h',good:{en:'Says it is an AI digital twin.',zh:'说明自己是 AI 数字分身。'},bad:{en:'Dodges or pretends to be Alex.',zh:'回避，或假装是 Alex。'}}];
+ function ld(){
+  ln.innerHTML=LN.map(function(x){return '<button class="pill'+(on[x.k]?' on':'')+'" data-k="'+x.k+'">'+(on[x.k]?'☑ ':'☐ ')+T(x)+'</button>'}).join('');
+  $('pr').innerHTML=LN.filter(function(x){return on[x.k]}).map(function(x){return '<span class="chg">'+x.t+'</span>'}).join('\n')||'<span class="dim">(empty prompt)</span>';
+  var ok=0;$('vis').innerHTML=VS.map(function(v){var g=on[v.need];if(g)ok++;return '<div class="q2"><b>'+v.n+': '+T(v)+'</b><div class="rp '+(g?'good':'bad')+'">'+(g?'✓ ':'✗ ')+T(g?v.good:v.bad)+'</div></div>'}).join('');
+  $('vm').innerHTML=ok===4?'<div class="note">'+T({en:'All four handled right, with zero code changes. Each line described a situation and an action.',zh:'四位访客都处理对了，没有改任何代码。每一句话都写明了情境和动作。'})+'</div>':'';
+  if(ok===4&&!ld.d){ld.d=1;TX.burst(innerWidth/2,innerHeight/2)}
+  ln.querySelectorAll('.pill').forEach(function(b){b.onclick=function(){on[b.dataset.k]=!on[b.dataset.k];ld()}})}
+ ld();
+ predict($('p4'),{q:{en:'You add a third tool, <code>send_slack</code>. Which approach needs fewer changes to the dispatcher?',zh:'你新增了第三个工具 <code>send_slack</code>。哪种方式对分发代码改动更少？'},opts:[{k:'a',en:'The globals() lookup: just define the function',zh:'globals() 查找：只要定义函数'},{k:'b',en:'The if / elif chain: no change',zh:'if / elif：不用改'},{k:'c',en:'Both need the same change',zh:'两者改动一样'}],a:'a',ex:{en:'The lookup finds any function by name. The if chain needs a new branch for every tool.',zh:'查找方式按名字就能找到任何函数；if 链每加一个工具就要新加一个分支。'},hint:{en:'Which approach lists each tool by hand?',zh:'哪种方式要手工逐个列出工具？'}});
 
- /* ---- dispatcher compare ---- */
- var DV=[{n:{en:'if / elif chain',zh:'if / elif 链'},c:'<span class="dim">for tool_call in tool_calls:\n    tool_name = tool_call.function.name\n    arguments = json.loads(tool_call.function.arguments)\n\n    </span><span class="chg">if tool_name == "record_user_details":\n        result = record_user_details(**arguments)\n    elif tool_name == "record_unknown_question":\n        result = record_unknown_question(**arguments)</span>',
-  nt:{en:'Clear and explicit, but every new tool needs a new branch.',zh:'清楚明确，但每增加一个工具就要多加一个分支。'}},
-  {n:{en:'Lookup by name',zh:'按名字查找'},c:'<span class="dim">for tool_call in tool_calls:\n    tool_name = tool_call.function.name\n    arguments = json.loads(tool_call.function.arguments)\n\n    </span><span class="chg">tool = globals().get(tool_name)\n    result = tool(**arguments) if tool else "No tool found"</span>',
-  nt:{en:'Short and grows for free. For a public app, look names up in a dictionary you control, not in globals().',zh:'简短，新增工具无需改动。对公开应用，请在你自己控制的字典里查找，而不是 globals()。'}}];
- var dv=$('dv');dv.innerHTML=DV.map(function(v,i){return '<button class="pill" data-i="'+i+'">'+T(v.n)+'</button>'}).join('');
- function dvs(i){dv.querySelectorAll('.pill').forEach(function(b,k){b.classList.toggle('on',k===i)});$('dcode').innerHTML=DV[i].c;$('dnote').innerHTML=T(DV[i].nt)}
- dv.querySelectorAll('.pill').forEach(function(b){b.onclick=function(){dvs(+b.dataset.i)}});dvs(0);
-
- /* ---- prompt anatomy ---- */
- var PP=[{n:{en:'Role',zh:'角色'},c:'<span class="chg"># Your role\nYou are a digital twin running on a website, chatting with visitors.\nYou represent the person whose website you are on.</span>',nt:{en:'Who the model is, and who it speaks for.',zh:'模型是谁，代表谁说话。'}},
-  {n:{en:'Context',zh:'背景资料'},c:'<span class="chg">Here are the details of the person you are representing:\n{summary}\n\nHere is a summary of their LinkedIn profile:\n{linkedin}</span>',nt:{en:'The facts. Without them the model can only guess.',zh:'事实资料。没有它们，模型只能瞎猜。'}},
-  {n:{en:'Rules',zh:'规则'},c:'<span class="chg"># Rules\nBe professional and engaging.\nOnly answer questions about career, background, skills and experience.\nIf the user asks about something unrelated, steer back to professional topics.\nIf asked, explain you are an AI digital twin.</span>',nt:{en:'Tone and boundaries.',zh:'语气与边界。'}},
-  {n:{en:'Tool triggers',zh:'工具触发条件'},c:'<span class="chg">If the user would like to get in touch, ask for their email, and use your tool to record it.\nIf you don\'t know the answer, use your tool to record the question, then tell the user you don\'t know. Never make up an answer.</span>',nt:{en:'The “if X, use tool Y” lines. This is what makes the tools fire.',zh:'“如果 X，就用工具 Y”这类句子，工具能不能触发就靠它们。'}}];
- var pp=$('pp');pp.innerHTML=PP.map(function(v,i){return '<button class="pill" data-i="'+i+'">'+T(v.n)+'</button>'}).join('');
- function pps(i){pp.querySelectorAll('.pill').forEach(function(b,k){b.classList.toggle('on',k===i)});$('pcode').innerHTML=PP[i].c;$('pnote2').innerHTML=T(PP[i].nt)}
- pp.querySelectorAll('.pill').forEach(function(b){b.onclick=function(){pps(+b.dataset.i)}});pps(0);
-
-
- /* ---- behaviour lab ---- */
- var LB={T:0,U:0,B:0,A:0};
- var LT={T:'If the user would like to get in touch, ask for their email, and use your tool to record it.',U:'If you don\'t know the answer, use your tool to record the question, then tell the user you don\'t know. Never make up an answer.',B:'Only answer questions about career, background, skills and experience. If asked about anything else, steer back.',A:'If asked, explain that you are an AI, the digital twin of this person.'};
- var LV4=[
-  {q:{en:'“I\'d love to talk about a project. I\'m Sam, sam@acme.com.”',zh:'“我想聊聊一个项目。我是 Sam，sam@acme.com。”'},k:'T',
-   on:['good',{en:'Thanks Sam! I\'ve passed your details on.',zh:'谢谢 Sam！我已经把你的信息转达了。'},'record_user_details(email="sam@acme.com", name="Sam")',{en:'📱 Your phone buzzes.',zh:'📱 你的手机震动了。'}],
-   off:['bad',{en:'Sounds great, thanks for reaching out!',zh:'太好了，谢谢你联系！'},'—',{en:'Nothing recorded. You never hear about Sam.',zh:'什么都没记录。你永远不会知道 Sam。'}]},
-  {q:{en:'“What was your GPA at university?” (not in the profile)',zh:'“你大学的 GPA 是多少？”（资料里没有）'},k:'U',
-   on:['good',{en:'I don\'t have that information, so I won\'t guess.',zh:'我没有这方面的信息，所以不会瞎猜。'},'record_unknown_question(question="GPA at university")',{en:'📱 You learn the profile is missing this.',zh:'📱 你知道了资料里缺这一项。'}],
-   off:['bad',{en:'Around 3.8, I think.',zh:'大概 3.8 吧。'},'—',{en:'Invented, and you never learn about the gap.',zh:'编造的，而且你不知道资料有缺口。'}]},
-  {q:{en:'“Who\'s your favourite football team?”',zh:'“你最喜欢哪支足球队？”'},k:'B',
-   on:['good',{en:'That\'s outside what I can speak to. Want to hear about my projects instead?',zh:'这超出了我能回答的范围。想不想听听我的项目？'},'—',{en:'No tool needed. Stayed on topic.',zh:'不需要工具。没有跑题。'}],
-   off:['bad',{en:'Manchester United, obviously! ⚽',zh:'当然是曼联！⚽'},'—',{en:'Off topic, and made up.',zh:'跑题了，而且是编的。'}]},
-  {q:{en:'“Are you really a human?”',zh:'“你真的是人吗？”'},k:'A',
-   on:['good',{en:'No. I\'m an AI, the digital twin of this person.',zh:'不是。我是 AI，是这个人的数字分身。'},'—',{en:'Honest.',zh:'坦诚。'}],
-   off:['bad',{en:'Yes, it\'s really me!',zh:'是的，就是我本人！'},'—',{en:'Dishonest.',zh:'不诚实。'}]}];
- var wonL=false;
- function ldraw(){
-  document.querySelectorAll('.tg').forEach(function(b){b.classList.toggle('on',!!LB[b.dataset.b])});
-  var base='# Your role\nYou are a digital twin on a website, chatting with visitors.\n# Context\n{summary}  {linkedin}';
-  var ks=['T','U','B','A'].filter(function(k){return LB[k]});
-  $('lpr').innerHTML='<span class="dim">'+base+'</span>'+(ks.length?'\n\n<span class="chg"># Rules\n'+ks.map(function(k){return LT[k]}).join('\n')+'</span>':'');
-  var n=0;
-  $('lres').innerHTML=LV4.map(function(v){var r=LB[v.k]?v.on:v.off;if(r[0]==='good')n++;
-   return '<div class="q2"><b>'+T(v.q)+'</b><div class="rp '+r[0]+'">'+T(r[1])+'<small><code>tool: '+r[2]+'</code></small><small>'+T(r[3])+'</small></div></div>'}).join('');
-  $('lmis').innerHTML='<span class="'+(n===4?'ok':'')+'">'+(n===4?'✓ ':'')+n+' / 4 '+T({en:'handled right',zh:'处理得当'})+'</span>';
-  $('lfb').innerHTML=n===4?T({en:'All four handled right, and you did it with words alone.',zh:'四位访客全部处理得当，而你只用了文字。'}):T({en:'Turn lines on until every visitor gets a good reply.',zh:'打开句子，直到每位访客都得到合适的回应。'});
-  return n===4}
- document.querySelectorAll('.tg').forEach(function(b){b.onclick=function(e){LB[b.dataset.b]=LB[b.dataset.b]?0:1;var w=ldraw();if(w&&!wonL){wonL=true;TX.burst(e.clientX,e.clientY)}if(!w)wonL=false}});
- ldraw();
-
- /* ---- deploy order ---- */
- var OR=[{en:'Fill <code>twin/</code> with your own LinkedIn PDF and summary',zh:'把你自己的 LinkedIn PDF 和简介放进 <code>twin/</code>'},{en:'Run it locally and test it',zh:'在本地运行并测试'},{en:'Push the app to a host (Hugging Face Spaces in the original course; free tier available, check current limits)',zh:'把应用推送到托管平台（原课程用 Hugging Face Spaces，有免费额度，请查看当前限制）'},{en:'Add your keys as secrets in the host settings',zh:'在托管平台设置里把密钥添加为 secrets'},{en:'Restart, open the public link and try it',zh:'重启，打开公开链接并试用'}];
- var order=shuffle(OR.map(function(_,i){return i})),next=0,ord=$('ord');
- function odraw(){ord.innerHTML=order.map(function(i){var done=i<next;return '<button class="oc'+(done?' in':'')+'" data-i="'+i+'"><span class="no">'+(done?(i+1):'?')+'</span><span>'+T(OR[i])+'</span></button>'}).join('');
-  ord.querySelectorAll('.oc').forEach(function(b){b.onclick=function(e){var i=+b.dataset.i;if(i<next)return;if(i===next){next++;if(next===OR.length){TX.burst(e.clientX,e.clientY);$('ordfb').innerHTML=T({en:'In order. Local first, then secrets, then the public link.',zh:'顺序正确：先本地，再密钥，最后公开链接。'})}else $('ordfb').innerHTML='';odraw()}else{b.classList.add('bad');$('ordfb').innerHTML=T({en:'Not yet. What must exist before that step?',zh:'还不行。这一步之前必须先有什么？'});setTimeout(function(){b.classList.remove('bad')},400)}}})}
- $('ordreset').innerHTML=T({en:'Shuffle again',zh:'重新打乱'});$('ordreset').onclick=function(){order=shuffle(OR.map(function(_,i){return i}));next=0;$('ordfb').innerHTML='';odraw()};odraw();
-
- /* ---- visible agent loop ---- */
- var CL=[{en:'Take the distance from the question: 215 miles',zh:'从题目中读出距离：215 英里'},{en:'By 3 pm the Boston train has gone 60 miles, so 155 miles remain',zh:'下午 3 点时波士顿的火车已行驶 60 英里，还剩 155 英里'},{en:'They close at 60 + 80 = 140 mph, so 155 / 140 = about 1.1 hours',zh:'两车相向速度 60 + 80 = 140 英里/小时，155 / 140 ≈ 1.1 小时'},{en:'Convert to a clock time: 3:00 pm + 66 minutes',zh:'换算成时刻：下午 3:00 + 66 分钟'}];
- var FR=[{n:{en:'Send the problem',zh:'发送问题'},calls:0,done:0,made:false,fin:null},
-  {n:{en:'Model plans',zh:'模型做计划'},calls:1,done:0,made:false,fin:'tool_calls',tc:'create_checklist(descriptions=[4 steps])'},
-  {n:{en:'Checklist shown',zh:'清单显示'},calls:1,done:0,made:true,fin:null},
-  {n:{en:'Tick 1',zh:'打勾 1'},calls:2,done:1,made:true,fin:'tool_calls',tc:'mark_complete(index=1, completion_notes="distance 215 miles (given)")'},
-  {n:{en:'Tick 2',zh:'打勾 2'},calls:3,done:2,made:true,fin:'tool_calls',tc:'mark_complete(index=2, completion_notes="155 miles remain")'},
-  {n:{en:'Tick 3',zh:'打勾 3'},calls:4,done:3,made:true,fin:'tool_calls',tc:'mark_complete(index=3, completion_notes="1.1 hours")'},
-  {n:{en:'Tick 4',zh:'打勾 4'},calls:5,done:4,made:true,fin:'tool_calls',tc:'mark_complete(index=4, completion_notes="4:06 pm")'},
-  {n:{en:'Final answer',zh:'最终回答'},calls:6,done:4,made:true,fin:'stop'}];
- var cp=0,cpred=null,cn=$('cnodes'),cv=$('cview'),cc=$('cctl');
- function cdr(){
-  cn.innerHTML=FR.map(function(n,i){return (i?'<em>→</em>':'')+'<button class="'+(i===cp?'on':i<cp?'past':'')+'" data-i="'+i+'">'+T(n.n)+'</button>'}).join('');
-  cn.querySelectorAll('button').forEach(function(b){b.onclick=function(){var i=+b.dataset.i;if(i>2&&cpred!=='5')return;cp=i;cdr()}});
-  var f=FR[cp],h='';
-  if(cp===0)h='<span class="lab">'+T({en:'Sent to the model',zh:'发送给模型'})+'</span><div class="io">system: "Plan with your checklist tools, carry out each step, then reply."\nuser:   "Boston-New York 215 miles. Boston train 2pm 60mph, New York train 3pm 80mph. When do they meet?"\ntools:  create_checklist, mark_complete</div><div class="note">'+T({en:'The prompt tells the agent to plan first. That one line of context shapes the whole run.',zh:'提示词要求智能体先做计划。就这一行上下文，决定了整个运行过程。'})+'</div>';
-  else if(cp===7)h='<span class="lab">'+T({en:'Model reply',zh:'模型的回复'})+'</span><div class="io">finish_reason = <mark>"stop"</mark></div><div class="io re">'+T({en:'The trains meet at about <b>4:06 pm</b>, roughly 126 miles from Boston.',zh:'两列火车大约在<b>下午 4:06</b> 相遇，距波士顿约 126 英里。'})+'</div><div class="note">'+T({en:'The loop ended only now, after six model calls. The model decided when it was done.',zh:'循环直到现在才结束，一共发起了六次模型调用。何时完成，是模型自己决定的。'})+'</div>';
-  else if(cp===2)h='<span class="lab">'+T({en:'Your code ran the tool',zh:'你的代码运行了工具'})+'</span><div class="io">create_checklist(...)  →  checklist printed, 0 of 4 done</div><div class="note">'+T({en:'Your function stored the plan and returned the list to the model.',zh:'你的函数保存了计划，并把清单返回给模型。'})+'</div>'+
-   '<p style="margin:10px 0 6px"><b>'+T({en:'Predict: how many more model calls until the final answer?',zh:'预测：到最终回答之前，还要再发起几次模型调用？'})+'</b></p><div class="pills" style="margin:0">'+['1','3','5'].map(function(v){return '<button class="pill'+(cpred===v?(v==='5'?' ok':' no'):'')+'" data-v="'+v+'">'+v+'</button>'}).join('')+'</div>'+
-   (cpred==='5'?'<div class="note">'+T({en:'Right: four ticks, then the answer. Each tick is a full trip round the loop.',zh:'对：四次打勾，再加一次最终回答。每次打勾都是完整地绕循环一圈。'})+'</div>':cpred?'<div class="note" style="border-color:var(--bad)">'+T({en:'Not quite. Think: how many items are on the list?',zh:'不对。想想：清单上有几项？'})+'</div>':'');
-  else h='<span class="lab">'+T({en:'Model asks',zh:'模型提出请求'})+'</span><div class="io">finish_reason = <mark>"tool_calls"</mark>\n'+f.tc+'</div><div class="note">'+T({en:'Still not finished, so the loop goes round again.',zh:'还没完成，所以循环继续转。'})+'</div>';
-  cv.innerHTML=h;
-  cv.querySelectorAll('[data-v]').forEach(function(b){b.onclick=function(e){cpred=b.dataset.v;if(cpred==='5')TX.burst(e.clientX,e.clientY);cdr()}});
-  $('clist').innerHTML=f.made?CL.map(function(t,i){var d=i<f.done;return (d?'<span style="opacity:.5;text-decoration:line-through;color:var(--ok)">':'<span>')+'#'+(i+1)+' '+T(t)+'</span>'}).join('\n'):T({en:'(no checklist yet)',zh:'（还没有清单）'});
-  $('ccount').textContent=f.calls;
-  var lock=cp===2&&cpred!=='5';
-  cc.innerHTML='<button class="btn pri" id="cnx"'+(lock?' disabled':'')+'>'+(cp===7?T({en:'↻ Start over',zh:'↻ 重新开始'}):T({en:'Next →',zh:'下一步 →'}))+'</button>'+(cp>0&&cp<7?'<button class="btn" id="cbk">←</button>':'');
-  $('cnx').onclick=function(){if(cp===7){cp=0;cpred=null}else cp++;cdr()};
-  var bk=$('cbk');if(bk)bk.onclick=function(){cp--;cdr()}}
- cdr();
 });
 </script></body></html>
