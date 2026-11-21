@@ -10,7 +10,7 @@ window.TRACK={id:'agentic-ai',title:{en:'Agentic AI',zh:'智能体 AI'},topics:[
   {k:'p',file:'06-career-agent.html',title:{en:'Project: an agent that answers for you',zh:'项目：替你回答问题的智能体'}}]},
  {n:3,title:{en:'Agent SDKs',zh:'智能体 SDK'},items:[
   {k:'c',file:'07-agents-sdk-basics.html',title:{en:'OpenAI Agents SDK: the basics',zh:'OpenAI Agents SDK 基础'}},
-  {k:'c',title:{en:'Agents as tools, handoffs and guardrails',zh:'智能体当工具、交接与护栏'}},
+  {k:'c',file:'08-agents-tools-handoffs.html',title:{en:'Agents as tools, handoffs and guardrails',zh:'智能体当工具、交接与护栏'}},
   {k:'p',title:{en:'Project: an outreach email helper',zh:'项目：外联邮件助手'}},
   {k:'p',title:{en:'Project: a research assistant',zh:'项目：研究助手'}}]},
  {n:4,title:{en:'Multi-agent teams',zh:'多智能体团队'},items:[

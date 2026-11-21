@@ -11,4 +11,4 @@ Within a few minutes the writer agent opens a pull request into `test` with the 
 and messages you on Telegram. Read the Vercel preview, ask for changes in the PR, then merge.
 
 This folder is never published to the site (see `.vercelignore`), but it is in the git repo.
-Do not drop slides, transcripts or paid material here; write notes in your own words.
+Do not drop slides, transcripts or paid material here, and leave out platform and instructor names; write notes in your own words.
