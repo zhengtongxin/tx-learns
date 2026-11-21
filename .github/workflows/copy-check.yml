@@ -1,0 +1,30 @@
+# Copyright scrubber: blocks a pull request, and warns on a push to test, when a page
+# names a source, a course, an instructor or a source's week/day structure.
+name: Copy check
+on:
+  pull_request:
+    branches: [main, test]
+  push:
+    branches: [test]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  copy-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Scan served files
+        run: node scripts/check-copy.mjs | tee copy-check.txt; exit ${PIPESTATUS[0]}
+      - name: Tell TX on Telegram
+        if: failure()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          WHERE: ${{ github.event.pull_request.html_url || format('{0}/{1}/commit/{2}', github.server_url, github.repository, github.sha) }}
+        run: |
+          { echo "🚫 Copy check failed on ${GITHUB_REF_NAME}"; echo "$WHERE"; echo; head -c 2500 copy-check.txt; } \
+            | node scripts/notify-telegram.mjs
