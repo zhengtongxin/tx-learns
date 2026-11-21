@@ -13,7 +13,9 @@ module.exports = async (req, res) => {
     const r = await fetch(`https://api.github.com/repos/${repo}/contents/status/all.json?ref=agent-status`, {
       headers: { authorization: `Bearer ${token}`, accept: 'application/vnd.github.raw+json', 'user-agent': 'tx-learns-status' },
     });
-    if (r.status === 404) { res.setHeader('cache-control', 's-maxage=30'); return res.end(JSON.stringify({ connected: true, agents: {} })); }
+    // 404 means either no agent has recorded yet, or the token cannot see this private repo.
+    if (r.status === 404) { res.setHeader('cache-control', 's-maxage=30'); return res.end(JSON.stringify({ connected: true, agents: {}, reason: 'not-found' })); }
+    if (r.status === 401 || r.status === 403) { res.setHeader('cache-control', 'no-store'); return res.end(JSON.stringify({ connected: false, reason: 'token-rejected' })); }
     if (!r.ok) throw new Error(`GitHub ${r.status}`);
     const data = await r.json();
     // Links point into a private repo; keep them, since TX is the one who opens them.
