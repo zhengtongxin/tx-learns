@@ -11,6 +11,7 @@ on:
         required: true
 permissions:
   contents: read
+  pull-requests: read
 concurrency:
   group: reader-${{ github.event.deployment.sha || github.sha }}
   cancel-in-progress: false
@@ -47,7 +48,8 @@ jobs:
           where=other; pr=
           if [ "$(git rev-parse origin/test)" = "$SHA" ]; then where=test; fi
           if [ "$where" = other ]; then
-            pr=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/pulls" --jq '[.[]|select(.state=="open")][0].number // empty' || true)
+            pr=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/pulls" --jq '[.[]|select(.state=="open")][0].number // empty' 2>/dev/null || true)
+            case "$pr" in ''|*[!0-9]*) pr= ;; esac
           fi
           msg=$(git log -1 --format=%s "$SHA")
           if [ -n "$FILES" ]; then files="$FILES"
