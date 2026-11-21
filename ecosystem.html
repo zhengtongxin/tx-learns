@@ -163,9 +163,12 @@
   function draw(data){
     var live=!!(data&&data.connected),S=(data&&data.agents)||{};
     var c=document.getElementById('conn');
-    if(!live){c.classList.add('on');c.innerHTML=data&&data.reason==='no-token'
+    var why=data&&data.reason;
+    if(!live){c.classList.add('on');c.innerHTML=why==='no-token'
       ?t('Live status is not connected yet. The agents still run; this page just cannot see them.','实时状态还没接上。agent 照常运行，只是这一页还看不到。')
+      :why==='token-rejected'?t('The live status token was rejected. Check STATUS_GITHUB_TOKEN in Vercel.','实时状态的令牌被拒绝了，请检查 Vercel 里的 STATUS_GITHUB_TOKEN。')
       :t('Live status is not available right now.','暂时看不到实时状态。')}
+    else if(why==='not-found'&&!Object.keys(S).length){c.classList.add('on');c.innerHTML=t('No agent status found yet. If agents have run, the token may not have access to the repo.','还没有找到 agent 状态。如果 agent 已经运行过，可能是令牌没有这个仓库的权限。')}
     else c.classList.remove('on');
     drawFlow(S);drawAgents(S,live);drawFeed(S,live)}
 

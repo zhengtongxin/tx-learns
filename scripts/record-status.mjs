@@ -15,8 +15,8 @@ import { readFileSync } from 'node:fs';
 let banned = [];
 try {
   banned = readFileSync(new URL('../banned-words.txt', import.meta.url), 'utf8').split('\n')
-    .map(l => l.trim()).filter(l => l && !l.startsWith('#')).map(l => new RegExp(l, 'gi'));
-} catch {}
+    .map(l => l.trim()).filter(l => l && !l.startsWith('#')).map(l => new RegExp(l, 'giu'));
+} catch { console.log('::warning::record-status: banned-words.txt not found, summary not scrubbed'); }
 const scrub = t => banned.reduce((acc, re) => acc.replace(re, '[source]'), t);
 
 const entry = {
