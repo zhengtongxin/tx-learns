@@ -36,7 +36,7 @@
 .agent{padding:18px 20px;margin:0;display:flex;flex-direction:column;gap:8px;scroll-margin-top:70px}
 .agent .hd{display:flex;align-items:center;gap:12px}
 .agent .ai{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;font-size:20px;background:var(--glass);border:1px solid var(--line);flex:none;position:relative}
-.agent .ai.busy::after{content:"";position:absolute;inset:-4px;border-radius:16px;border:2px solid var(--acc2);animation:ping 1.6s ease-out infinite}
+.agent .ai.fresh::after{content:"";position:absolute;inset:-4px;border-radius:16px;border:2px solid var(--acc2);animation:ping 1.6s ease-out infinite}
 @keyframes ping{from{opacity:.9;transform:scale(.9)}to{opacity:0;transform:scale(1.25)}}
 .agent h4{margin:0;font-size:16px;letter-spacing:-.01em}
 .agent .when{font-size:12.5px;color:var(--mut)}
@@ -142,13 +142,13 @@
   function drawAgents(S,live){
     ['github','vercel','later'].forEach(function(g){
       document.querySelector('#g-'+g+' .agents').innerHTML=AGENTS.filter(function(a){return a.g===g}).map(function(a){
-        var s=S[a.id],pill,last='';
+        var s=S[a.id],pill,last='',st=s&&PILL[s.state]?s.state:'';
         if(a.later)pill='<span class="pill">'+t('Later','以后')+'</span>';
-        else if(s){pill='<span class="pill '+s.state+'">'+(PILL[s.state]||s.state)+'</span>';
+        else if(s){pill='<span class="pill '+st+'">'+(PILL[st]||'?')+'</span>';
           last='<div class="last">'+esc(s.summary||'')+(s.link?' <a href="'+esc(s.link)+'" target="_blank" rel="noopener">'+t('See it →','查看 →')+'</a>':'')+'</div>'}
         else pill='<span class="pill">'+(live?t('No runs yet','还没运行'):t('Offline','离线'))+'</span>';
-        var busy=s&&(Date.now()-new Date(s.at))<15*60e3;
-        return '<article class="card agent spot'+(a.later?' later':'')+'" id="a-'+a.id+'"><div class="hd"><span class="ai'+(busy?' busy':'')+'">'+a.ic+'</span><div><h4>'+t(a.en,a.zh)+'</h4>'+
+        var fresh=s&&(Date.now()-new Date(s.at))<15*60e3;
+        return '<article class="card agent spot'+(a.later?' later':'')+'" id="a-'+a.id+'"><div class="hd"><span class="ai'+(fresh?' fresh" title="Finished in the last 15 min · 15 分钟内刚完成':'')+'">'+a.ic+'</span><div><h4>'+t(a.en,a.zh)+'</h4>'+
           '<div class="when">'+(s?ago(s.at)+(s.runs?' · '+t(s.runs+' runs',s.runs+' 次'):''):t(a.ten,a.tzh))+'</div></div>'+pill+'</div>'+
           '<p>'+t(a.den,a.dzh)+'</p>'+(s?'<div class="trig">'+t(a.ten,a.tzh)+'</div>':'')+last+'</article>'}).join('')})}
 
@@ -158,7 +158,7 @@
     var f=document.getElementById('feed');
     if(!all.length){f.innerHTML='<li class="empty">'+(live?t('Nothing yet. The first agent run will show up here.','还没有动态。第一次运行后会显示在这里。'):t('Live activity shows on the published site.','实时动态只在线上网站显示。'))+'</li>';return}
     f.innerHTML=all.slice(0,10).map(function(x){var a=NAME[x.id]||{ic:'•',en:x.id,zh:x.id};
-      return '<li><span class="dot '+x.h.state+'"></span><span class="tx">'+a.ic+' <b>'+t(a.en,a.zh)+'</b> · '+esc(x.h.summary)+'</span><span class="tm">'+ago(x.h.at)+'</span></li>'}).join('')}
+      return '<li><span class="dot '+(PILL[x.h.state]?x.h.state:'')+'"></span><span class="tx">'+a.ic+' <b>'+t(a.en,a.zh)+'</b> · '+esc(x.h.summary)+'</span><span class="tm">'+ago(x.h.at)+'</span></li>'}).join('')}
 
   function draw(data){
     var live=!!(data&&data.connected),S=(data&&data.agents)||{};
