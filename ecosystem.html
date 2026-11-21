@@ -4,31 +4,47 @@
 .eco-hero .mega{font-size:clamp(2.2rem,6.4vw,4.6rem)}
 .conn{display:none;margin:0 auto 10px;max-width:760px;font-size:14px;color:var(--mut);text-align:center;padding:10px 16px;border:1px dashed var(--line);border-radius:14px}
 .conn.on{display:block}
-/* backbone */
-.flow{list-style:none;margin:28px 0 0;padding:0;display:grid;grid-template-columns:repeat(6,auto minmax(14px,1fr)) auto;align-items:start}
-.stop{display:flex;flex-direction:column;align-items:center;text-align:center;width:118px;cursor:default}
-.stop.has{cursor:pointer}
-.stop .ic{width:62px;height:62px;border-radius:20px;display:grid;place-items:center;font-size:28px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(14px);position:relative;transition:.3s}
-.stop.has .ic{border-color:color-mix(in srgb,var(--acc) 55%,var(--line));box-shadow:0 0 26px var(--glow)}
-.stop.has:hover .ic{transform:translateY(-3px)}
-.stop.me .ic{background:var(--grad);color:#fff;border:0}
-.stop b{display:block;margin-top:10px;font-size:14.5px;letter-spacing:-.01em}
-.stop small{display:block;margin-top:3px;font-size:12.5px;line-height:1.4;color:var(--mut)}
-.stop .live{position:absolute;top:-7px;right:-9px;min-width:22px;height:22px;padding:0 6px;border-radius:99px;font:700 11px/22px Inter,sans-serif;color:#fff;background:var(--mut)}
-.stop .live.ok{background:var(--ok)}.stop .live.flag{background:var(--warn)}.stop .live.fail{background:var(--bad)}
-.link{position:relative;width:100%;min-width:14px;height:2px;margin-top:31px;background:linear-gradient(90deg,var(--line),color-mix(in srgb,var(--acc) 50%,var(--line)),var(--line));overflow:visible}
-.link i{position:absolute;top:-3px;left:0;width:8px;height:8px;border-radius:50%;background:var(--acc2);box-shadow:0 0 12px var(--acc2);animation:run 2.4s linear infinite;animation-delay:var(--d,0s);opacity:0}
-@keyframes run{0%{left:0;opacity:0}15%{opacity:1}85%{opacity:1}100%{left:calc(100% - 8px);opacity:0}}
-@media(max-width:900px){
-  .flow{grid-template-columns:1fr;justify-content:start;max-width:420px;margin-left:auto;margin-right:auto}
-  .stop{flex-direction:row;text-align:left;width:auto;gap:14px}
-  .stop .ic{flex:none;width:54px;height:54px;font-size:24px}
-  .stop b{margin-top:0}
-  .link{width:2px;height:30px;min-width:0;margin:4px 0 4px 26px;background:linear-gradient(180deg,var(--line),color-mix(in srgb,var(--acc) 50%,var(--line)),var(--line))}
-  .link i{left:-3px;animation-name:runv}
-  @keyframes runv{0%{top:0;opacity:0}15%{opacity:1}85%{opacity:1}100%{top:calc(100% - 8px);opacity:0}}
+/* mind map */
+.mm-wrap{position:relative;margin-top:22px;padding:8px;border-radius:28px;border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(14px)}
+.mm{display:block;width:100%;height:auto;font-family:Inter,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+.mm .edge{fill:none;stroke:color-mix(in srgb,var(--acc) 45%,var(--line));stroke-width:2}
+.mm .edge.main{stroke-width:3;stroke-dasharray:3 9;stroke-linecap:round;animation:flowd 1.4s linear infinite}
+@keyframes flowd{to{stroke-dashoffset:-24}}
+.mm .edge.later{stroke-dasharray:4 6;opacity:.6}
+.mm .bn circle{fill:var(--node);stroke:color-mix(in srgb,var(--acc) 60%,var(--line));stroke-width:2}
+.mm .bn.live circle.ring{fill:none;stroke:var(--acc2);stroke-width:2;animation:pr 2.2s ease-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes pr{from{opacity:.8;transform:scale(1)}to{opacity:0;transform:scale(1.5)}}
+.mm text{fill:var(--fg);font-size:15px}
+.mm .bl{font-weight:700;font-size:16px}
+.mm .lf text{font-size:13.5px;fill:color-mix(in srgb,var(--fg) 82%,transparent)}
+.mm .lf circle{fill:var(--acc);stroke:var(--node);stroke-width:2}
+.mm .lf.ag circle{fill:var(--mut)}
+.mm .lf.ok circle{fill:var(--ok)}.mm .lf.flag circle{fill:var(--warn)}.mm .lf.fail circle{fill:var(--bad)}
+.mm .lf.ag text{font-weight:600;fill:var(--fg)}
+.mm .lf.dim{opacity:.55}
+.mm .lf.go{cursor:pointer}.mm .lf.go:hover text{fill:var(--acc)}
+.mm .br{transition:opacity .25s}
+.mm.focus .br:not(.on){opacity:.18}
+.mm .bn{cursor:pointer}
+.mm .core text{fill:#fff;font-weight:800}
+.mm-legend{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin:12px 0 2px;font-size:12.5px;color:var(--mut)}
+.mm-legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:0}
+.mm-list{display:none}
+.trip{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:16px;font-size:13px;color:var(--mut)}
+.trip b{font-weight:600;color:var(--fg);padding:4px 10px;border-radius:99px;border:1px solid var(--line);background:var(--glass)}
+@media(max-width:760px){
+  .mm-wrap{display:none}
+  .mm-list{display:grid;gap:12px;margin-top:20px}
+  .mm-list .card{margin:0;padding:14px 16px}
+  .mm-list h4{margin:0 0 8px;font-size:15.5px;display:flex;align-items:center;gap:8px}
+  .mm-list .kids{display:flex;flex-wrap:wrap;gap:6px}
+  .mm-list .kid{font-size:13px;padding:4px 10px;border-radius:99px;border:1px solid var(--line);background:var(--glass);text-decoration:none;color:var(--fg)}
+  .mm-list .kid i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:var(--mut)}
+  .mm-list .kid.ok i{background:var(--ok)}.mm-list .kid.flag i{background:var(--warn)}.mm-list .kid.fail i{background:var(--bad)}
+  .mm-list .kid.dim{opacity:.6}
+  .mm-list .core{background:var(--grad);color:#fff;border:0}
 }
-@media(prefers-reduced-motion:reduce){.link i{animation:none;display:none}}
+@media(prefers-reduced-motion:reduce){.mm .edge.main,.mm .bn.live circle.ring{animation:none}}
 /* agents */
 .grp{margin-top:34px}
 .grp h3{display:flex;align-items:center;gap:10px;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc2);margin:0 0 12px}
@@ -49,7 +65,7 @@
 .pill.flag{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 50%,transparent)}
 .pill.fail{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 50%,transparent)}
 .agent.later{opacity:.6;border-style:dashed}
-.agent:target{border-color:var(--acc)}
+.agent:target,.agent.hl{border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 35%,transparent)}
 /* activity */
 .feed{list-style:none;margin:14px 0 0;padding:0}
 .feed li{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:baseline;padding:11px 4px;border-bottom:1px solid var(--line);font-size:14px;line-height:1.5}
@@ -69,9 +85,12 @@
 </header>
 
 <section>
-<h2><span class="en">The backbone</span><span class="zh">主干</span></h2>
-<p><span class="en">Every lesson travels the same road. The dots are notes on their way through. Tap GitHub or Vercel to see the agents working there.</span><span class="zh">每一课都走同一条路。小圆点就是正在路上的笔记。点 GitHub 或 Vercel，看看那里有哪些 agent 在工作。</span></p>
-<ol class="flow" id="flow"></ol>
+<h2><span class="en">The map</span><span class="zh">全景图</span></h2>
+<p><span class="en">Everything starts in my head and branches out from there. Hover or tap a branch to focus on it. The coloured dots are agents, live: green passed, orange flagged something, red failed.</span><span class="zh">一切从我的脑子开始，再向外分支。把鼠标移到（或点一下）某个分支就能聚焦它。彩色小圆点是实时的 agent：绿色通过，橙色发现问题，红色失败。</span></p>
+<div class="mm-wrap"><svg class="mm" id="mm" viewBox="0 0 1100 760" role="img" aria-label="Mind map of how TX Learns works"></svg>
+<div class="mm-legend"><span><i style="background:var(--ok)"></i><span class="en">Passed</span><span class="zh">通过</span></span><span><i style="background:var(--warn)"></i><span class="en">Flagged</span><span class="zh">有问题</span></span><span><i style="background:var(--bad)"></i><span class="en">Failed</span><span class="zh">失败</span></span><span><i style="background:var(--mut)"></i><span class="en">No runs yet</span><span class="zh">还没运行</span></span></div></div>
+<div class="mm-list" id="mm-list"></div>
+<div class="trip"><span class="en">How a lesson travels:</span><span class="zh">一课的旅程：</span> <b>🎧</b>→<b>🧠</b>→<b>📝</b>→<b>✨</b>→<b>🐙 GitHub</b>→<b>▲ Vercel</b>→<b>👋</b></div>
 </section>
 
 <section id="agents">
@@ -93,14 +112,15 @@
 (function(){
   function t(en,zh){return '<span class="en">'+en+'</span><span class="zh">'+zh+'</span>'}
   function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-  var STOPS=[
-    {ic:'🎧',en:'Learning sources',zh:'学习来源',sen:'Videos, classes, docs and books',szh:'视频、课堂、文档和书'},
-    {ic:'🧠',en:'My brain',zh:'我的大脑',sen:'Where it has to make sense first',szh:'先在这里想明白',me:1},
-    {ic:'📝',en:'My notes',zh:'我的笔记',sen:'Raw notes, code and what confused me',szh:'原始笔记、代码和让我困惑的地方'},
-    {ic:'✨',en:'AI helpers',zh:'AI 助手',sen:'Claude today. GPT and MiMo maybe later',szh:'现在用 Claude，以后可能加 GPT 和 MiMo'},
-    {ic:'🐙',en:'GitHub',zh:'GitHub',sen:'Every change is a pull request',szh:'每个改动都是 pull request',g:'github'},
-    {ic:'▲',en:'Vercel',zh:'Vercel',sen:'A preview first, then the live site',szh:'先预览，再上线',g:'vercel'},
-    {ic:'👋',en:'Readers',zh:'读者',sen:'You, and friends new to AI',szh:'你，还有刚接触 AI 的朋友'}];
+  var MAP=[
+    {id:'sources',ic:'🎧',en:'Learning sources',zh:'学习来源',a:212,kids:[{en:'Videos',zh:'视频'},{en:'Classes',zh:'课堂'},{en:'Docs',zh:'文档'},{en:'Books',zh:'书'}]},
+    {id:'notes',ic:'📝',en:'My notes',zh:'我的笔记',a:253,kids:[{en:'Raw notes',zh:'原始笔记'},{en:'Code',zh:'代码'},{en:'What confused me',zh:'让我困惑的地方'}]},
+    {id:'ai',ic:'✨',en:'AI helpers',zh:'AI 助手',a:296,kids:[{en:'Claude (in use)',zh:'Claude（在用）'},{en:'GPT (maybe later)',zh:'GPT（以后可能）',dim:1},{en:'MiMo (maybe later)',zh:'MiMo（以后可能）',dim:1}]},
+    {id:'github',ic:'🐙',en:'GitHub',zh:'GitHub',a:342,kids:[{agent:'writer'},{agent:'copy-check'},{agent:'reviewer'}]},
+    {id:'vercel',ic:'▲',en:'Vercel',zh:'Vercel',a:26,kids:[{en:'Preview',zh:'预览'},{agent:'reader'},{en:'Live site',zh:'线上网站'}]},
+    {id:'readers',ic:'👋',en:'Readers',zh:'读者',a:58,kids:[{en:'Me',zh:'我自己'},{en:'Friends new to AI',zh:'刚接触 AI 的朋友'}]},
+    {id:'topics',ic:'📚',en:'What I know',zh:'我学会的',a:148,step:9,kids:[]},
+    {id:'later',ic:'🌱',en:'Coming next',zh:'即将加入',a:100,step:20,kids:[{agent:'recall'},{agent:'gaps'}]}];
   var AGENTS=[
     {id:'writer',g:'github',ic:'✍️',en:'Writer',zh:'写手',
      den:'Turns my raw notes into a lesson draft that follows the style guide, then opens a pull request for me.',
@@ -129,15 +149,47 @@
     var h=Math.round(m/60);if(h<36)return t(h+' h ago',h+' 小时前');var d=Math.round(h/24);return t(d+' days ago',d+' 天前')}
   var PILL={ok:t('✓ Passed','✓ 通过'),flag:t('⚠ Flagged','⚠ 有问题'),fail:t('✕ Failed','✕ 失败'),skip:t('Skipped','跳过')};
 
-  function drawFlow(S){
-    var html='';STOPS.forEach(function(s,i){
-      var live='';if(s.g){var ag=AGENTS.filter(function(a){return a.g===s.g}),st=ag.map(function(a){return (S[a.id]||{}).state}),
-        cls=st.indexOf('fail')>=0?'fail':st.indexOf('flag')>=0?'flag':st.indexOf('ok')>=0?'ok':'';live='<span class="live '+cls+'" aria-hidden="true">'+ag.length+'</span>'}
-      html+='<li class="stop'+(s.g?' has':'')+(s.me?' me':'')+'"'+(s.g?' data-g="'+s.g+'" tabindex="0" role="button"':'')+'><span class="ic">'+s.ic+live+'</span><span><b>'+t(s.en,s.zh)+'</b><small>'+t(s.sen,s.szh)+'</small></span></li>';
-      if(i<STOPS.length-1)html+='<li class="link" aria-hidden="true"><i style="--d:'+(i*.35)+'s"></i><i style="--d:'+(i*.35+1.2)+'s"></i></li>'});
-    var f=document.getElementById('flow');f.innerHTML=html;
-    f.querySelectorAll('.stop.has').forEach(function(el){var go=function(){document.getElementById('g-'+el.dataset.g).scrollIntoView({behavior:'smooth',block:'start'})};
+  // Mind map: my brain in the centre, eight branches, leaves around each branch. Agent leaves carry live status.
+  var CX=550,CY=380,R1=170,R2=318;
+  function P(a,r){var q=a*Math.PI/180;return [CX+Math.cos(q)*r*1.18,CY+Math.sin(q)*r*.95]}
+  function tx(x,y,en,zh,cls,anchor){var a=' x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" text-anchor="'+(anchor||'middle')+'"'+(cls?' class="'+cls+'"':'');
+    return '<text'+a.replace('class="','class="en ')+(cls?'':' class="en"')+'>'+esc(en)+'</text><text'+a.replace('class="','class="zh ')+(cls?'':' class="zh"')+'>'+esc(zh)+'</text>'}
+  function leafInfo(k,S){if(!k.agent)return {en:k.en,zh:k.zh,cls:k.dim?' dim':'',href:k.href};
+    var a=NAME[k.agent],s=S[k.agent],st=s&&PILL[s.state]?' '+s.state:'';return {en:a.ic+' '+a.en,zh:a.ic+' '+a.zh,cls:' ag go'+st+(a.later?' dim':''),agent:k.agent}}
+  function drawMap(S){
+    var svg='<defs><linearGradient id="mmg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c7dff"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs>',list='';
+    MAP.forEach(function(b){
+      var bp=P(b.a,R1),n=b.kids.length,step=b.step||13,g='',items='';
+      var live=b.kids.some(function(k){return k.agent&&S[k.agent]&&(Date.now()-new Date(S[k.agent].at))<15*60e3});
+      g+='<path class="edge main'+(b.id==='later'?' later':'')+'" d="M'+CX+','+CY+' Q'+P(b.a-8,R1*.55).join(',')+' '+bp.join(',')+'"/>';
+      b.kids.forEach(function(k,i){var a=b.a+(i-(n-1)/2)*step,lp=P(a,R2),c=P(b.a,(R1+R2)/2),L=leafInfo(k,S),cos=Math.cos(a*Math.PI/180),sin=Math.sin(a*Math.PI/180);
+        var anc=cos>.28?'start':cos<-.28?'end':'middle',lx=lp[0]+(anc==='start'?13:anc==='end'?-13:0),ly=lp[1]+(anc==='middle'?(sin>0?24:-14):5);
+        g+='<path class="edge'+(b.id==='later'?' later':'')+'" d="M'+bp.join(',')+' Q'+c.join(',')+' '+lp.join(',')+'"/>';
+        g+='<g class="lf'+L.cls+'"'+(L.agent?' data-agent="'+L.agent+'" tabindex="0" role="button"':L.href?' data-href="'+L.href+'" tabindex="0" role="link"':'')+'><circle cx="'+lp[0].toFixed(1)+'" cy="'+lp[1].toFixed(1)+'" r="'+(L.agent?8:5.5)+'"/>'+tx(lx,ly,L.en,L.zh,'',anc)+'</g>';
+        items+=L.agent?'<a class="kid'+L.cls.replace(' ag go','')+'" href="#a-'+L.agent+'"><i></i>'+t(esc(L.en),esc(L.zh))+'</a>':'<'+(L.href?'a href="'+L.href+'"':'span')+' class="kid'+L.cls+'">'+t(esc(L.en),esc(L.zh))+'</'+(L.href?'a':'span')+'>'});
+      g+='<g class="bn'+(live?' live':'')+'" tabindex="0" role="button"><circle class="ring" cx="'+bp[0].toFixed(1)+'" cy="'+bp[1].toFixed(1)+'" r="30" style="'+(live?'':'display:none')+'"/><circle cx="'+bp[0].toFixed(1)+'" cy="'+bp[1].toFixed(1)+'" r="30"/>'+
+        '<text x="'+bp[0].toFixed(1)+'" y="'+(bp[1]+8).toFixed(1)+'" text-anchor="middle" style="font-size:24px">'+b.ic+'</text>'+tx(bp[0],bp[1]+52,b.en,b.zh,'bl')+'</g>';
+      svg+='<g class="br" data-b="'+b.id+'">'+g+'</g>';
+      list+='<div class="card"><h4>'+b.ic+' '+t(b.en,b.zh)+'</h4><div class="kids">'+(items||'<span class="kid dim">…</span>')+'</div></div>'});
+    svg+='<g class="core"><circle cx="'+CX+'" cy="'+CY+'" r="62" fill="url(#mmg)" style="filter:drop-shadow(0 0 22px rgba(76,125,255,.55))"/><text x="'+CX+'" y="'+(CY-4)+'" text-anchor="middle" style="font-size:34px">🧠</text>'+tx(CX,CY+28,'My brain','我的大脑','')+'</g>';
+    var m=document.getElementById('mm');m.innerHTML=svg;
+    document.getElementById('mm-list').innerHTML='<div class="card core"><h4>🧠 '+t('My brain: where it all starts','我的大脑：一切的起点')+'</h4></div>'+list;
+    m.querySelectorAll('.br').forEach(function(br){var bn=br.querySelector('.bn'),on=function(){m.classList.add('focus');br.classList.add('on')},off=function(){m.classList.remove('focus');br.classList.remove('on')};
+      br.onmouseenter=on;br.onmouseleave=off;bn.onfocus=on;bn.onblur=off;
+      bn.onclick=function(){var was=br.classList.contains('on')&&m.classList.contains('focus');m.querySelectorAll('.br.on').forEach(function(x){x.classList.remove('on')});if(was){off()}else{on()}}});
+    m.querySelectorAll('.lf[data-agent],.lf[data-href]').forEach(function(el){var go=function(){if(el.dataset.href){location.href=el.dataset.href;return}
+        var c=document.getElementById('a-'+el.dataset.agent);if(c){c.scrollIntoView({behavior:'smooth',block:'center'});c.classList.add('hl');setTimeout(function(){c.classList.remove('hl')},1600)}};
       el.onclick=go;el.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}}})}
+
+  // Topics come from the track's lessons.js, loaded after site.js has set up the page (so it stays a home-level page).
+  var LAST={};
+  (function loadTopics(){var sc=document.createElement('script');sc.src='agentic-ai/lessons.js';
+    sc.onload=function(){var T=window.TRACK;try{delete window.TRACK}catch(e){window.TRACK=undefined}
+      if(!T||!T.topics)return;var tb=MAP.filter(function(b){return b.id==='topics'})[0];
+      tb.kids=T.topics.map(function(w){var all=w.items.length,done=w.items.filter(function(x){return x.file}).length;
+        return {en:w.title.en+' · '+done+'/'+all,zh:w.title.zh+' · '+done+'/'+all,dim:!done,href:'agentic-ai/index.html'}});
+      drawMap(LAST)};
+    document.body.appendChild(sc)})();
 
   function drawAgents(S,live){
     ['github','vercel','later'].forEach(function(g){
@@ -170,7 +222,7 @@
       :t('Live status is not available right now.','暂时看不到实时状态。')}
     else if(why==='not-found'&&!Object.keys(S).length){c.classList.add('on');c.innerHTML=t('No agent status found yet. If agents have run, the token may not have access to the repo.','还没有找到 agent 状态。如果 agent 已经运行过，可能是令牌没有这个仓库的权限。')}
     else c.classList.remove('on');
-    drawFlow(S);drawAgents(S,live);drawFeed(S,live)}
+    LAST=S;drawMap(S);drawAgents(S,live);drawFeed(S,live)}
 
   draw(null);
   function load(){fetch('api/status',{cache:'no-store'}).then(function(r){return r.json()}).then(draw).catch(function(){draw({connected:false})})}
