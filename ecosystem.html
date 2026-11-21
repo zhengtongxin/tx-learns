@@ -181,15 +181,15 @@
     {id:'topics',ic:'📚',en:'What I know',zh:'我学会的',a:148,step:9,kids:[]},
     {id:'later',ic:'🌱',en:'Coming next',zh:'即将加入',a:100,step:20,kids:[{agent:'recall'},{agent:'gaps'}]}];
   var AGENTS=[
-    {id:'writer',ev:'push · test · inbox/**',mdl:'Claude · ≤80 turns',rd:['notes, style guide, a model lesson','笔记、写作指南、一篇范例课'],tl:'Read Write Edit Glob Grep · check-copy',wr:['draft lesson → PR into test','课的草稿 → 提交到 test 的 PR'],tk:'contents:write · pull-requests:write',gt:['I merge it into test','我把它合并进 test'],g:'github',ic:'✍️',en:'Writer',zh:'写手',
+    {id:'writer',ev:'push · test · inbox/**',mdl:'Claude · ≤80 turns',rd:['notes, style guide, a model lesson','笔记、写作指南、一篇范例课'],tl:'Read Write Edit Glob Grep · ls · check-copy',wr:['draft lesson → PR into test','课的草稿 → 提交到 test 的 PR'],tk:'contents:write · pull-requests:write',gt:['I merge it into test','我把它合并进 test'],g:'github',ic:'✍️',en:'Writer',zh:'写手',
      den:'Turns my raw notes into a lesson draft that follows the style guide, then opens a pull request for me.',
      dzh:'把我的原始笔记写成一篇符合写作指南的课的草稿，然后给我开一个 pull request。',
      ten:'Runs when notes land in the inbox',tzh:'笔记放进 inbox 时运行'},
-    {id:'copy-check',ev:'pull_request → main|test · push → test',mdl:['script, no AI','脚本，不用 AI'],rd:['every page + banned word list','每一页 + 禁用词表'],tl:'node scripts/check-copy.mjs',wr:['pass / fail check on the PR','PR 上的通过 / 失败检查'],tk:'contents:read',gt:['I see red before I merge','我合并前就能看到红色'],g:'github',ic:'🛡️',en:'Copy check',zh:'原创检查',
+    {id:'copy-check',ev:'pull_request → main|test · push → test',mdl:['script, no AI','脚本，不用 AI'],rd:['every page + banned word list','每一页 + 禁用词表'],tl:'node scripts/check-copy.mjs',wr:['pass / fail check on the PR','PR 上的通过 / 失败检查'],tk:['check job: contents:read · status job: write','检查任务：contents:read · 状态任务：可写'],gt:['I see red before I merge','我合并前就能看到红色'],g:'github',ic:'🛡️',en:'Copy check',zh:'原创检查',
      den:'Scans every page for source names and numbering, so each lesson stays in my own words.',
      dzh:'扫描每一页，找出来源名称和编号，让每一课都用我自己的话。',
      ten:'Runs on every pull request and every push to test',tzh:'每个 pull request 和每次推送到 test 时运行'},
-    {id:'reviewer',ev:'pull_request → main',mdl:'Claude · ≤40 turns',rd:['the diff, style guide, copy check result','改动、写作指南、原创检查结果'],tl:'Read Glob Grep · gh pr diff/view/comment · git diff/log',wr:['one comment with a verdict ✅ / ⚠️','一条带结论的评论 ✅ / ⚠️'],tk:'contents:read · pull-requests:write',gt:['I merge to the live site','我合并到线上网站'],g:'github',ic:'🔎',en:'Reviewer',zh:'审稿人',
+    {id:'reviewer',ev:'pull_request → main',mdl:'Claude · ≤40 turns',rd:['the diff, style guide, copy check result','改动、写作指南、原创检查结果'],tl:'Read Write Glob Grep · gh pr diff/view/comment · git diff/log · check-copy',wr:['one comment with a verdict ✅ / ⚠️','一条带结论的评论 ✅ / ⚠️'],tk:'contents:read · pull-requests:write · issues:write',gt:['I merge to the live site','我合并到线上网站'],g:'github',ic:'🔎',en:'Reviewer',zh:'审稿人',
      den:'Reads each release like an editor: the story, the facts, the code, and whether EN and 中文 match.',
      dzh:'像编辑一样读每次发布：故事、事实、代码，还有中英文是否一致。',
      ten:'Runs before anything goes live',tzh:'上线之前运行'},
@@ -324,25 +324,25 @@
       '<text class="m" x="'+nx+'" y="'+(B+19)+'" text-anchor="middle"><tspan class="en">loop guard: the reader skips its own fixes</tspan><tspan class="zh">防打转：试读员会跳过自己的修改</tspan></text>';
     o+=link(1,2,C)+link(2,3,C)+link(3,4,C,0,1)+link(4,5,C,1,0)+link(5,6,C);
     o+=node(0,A,'ev','📥','Notes pushed','笔记推送','push inbox/**')+node(1,A,'ai','✍️','Writer','写手','claude · 80 turns')+node(2,A,'','🔀','PR → test','PR → test','pull_request')+
-      node(3,A,'','🛡️','Copy check','原创检查','script · read-only')+gate(4,A,'merge to test','合并进 test')+node(5,A,'ev','▲','Preview built','预览生成','deployment_status')+
+      node(3,A,'','🛡️','Copy check','原创检查','script')+gate(4,A,'merge to test','合并进 test')+node(5,A,'ev','▲','Preview built','预览生成','deployment_status')+
       node(6,A,'ai','📖','Reader','试读员','claude · read-only')+node(6,B,'','🔧','Fix PR → test','修改 PR → test','lesson files only');
-    o+=node(1,C,'ev','🚀','Release PR','发布 PR','test → main')+node(2,C,'','🛡️','Copy check','原创检查','script · read-only')+node(3,C,'ai','🔎','Reviewer','审稿人','claude · comment only')+
+    o+=node(1,C,'ev','🚀','Release PR','发布 PR','test → main')+node(2,C,'','🛡️','Copy check','原创检查','script')+node(3,C,'ai','🔎','Reviewer','审稿人','claude · comment only')+
       gate(4,C,'merge to main','合并到 main')+node(5,C,'','🌐','Live site','线上网站','vercel production')+node(6,C,'','👋','Readers','读者','you');
     o+='<text class="note" x="'+X(0)+'" y="'+(C+4)+'" text-anchor="middle"><tspan class="en">when test</tspan><tspan class="zh">test 看起来</tspan></text><text class="note" x="'+X(0)+'" y="'+(C+18)+'" text-anchor="middle"><tspan class="en">looks good</tspan><tspan class="zh">没问题时</tspan></text>';
     o+='<text class="m" x="550" y="408" text-anchor="middle"><tspan class="en">every agent → 📨 Telegram to TX · every run → status log → this page</tspan><tspan class="zh">每个 agent → 📨 Telegram 通知 TX · 每次运行 → 状态日志 → 这一页</tspan></text>';
     document.getElementById('flow').innerHTML=o;
     var L=[['h','Draft loop · test','草稿回路 · test'],['','📥 Notes pushed to the inbox','📥 笔记推送到 inbox','push inbox/**'],['','✍️ Writer drafts a lesson','✍️ 写手写出课的草稿','claude · 80 turns'],['','🔀 Pull request into test','🔀 提交到 test 的 pull request',''],
-      ['','🛡️ Copy check','🛡️ 原创检查','script · read-only'],['g','I merge into test','我合并进 test',''],['','▲ Vercel builds a preview','▲ Vercel 生成预览','deployment_status'],['','📖 Reader scores clarity','📖 试读员给清晰度打分','claude · read-only'],
+      ['','🛡️ Copy check','🛡️ 原创检查','script'],['g','I merge into test','我合并进 test',''],['','▲ Vercel builds a preview','▲ Vercel 生成预览','deployment_status'],['','📖 Reader scores clarity','📖 试读员给清晰度打分','claude · read-only'],
       ['lp','🔧 Fix PR goes back to the copy check','🔧 修改 PR 回到原创检查','lesson files only'],['h','Release · main','发布 · main'],['','🚀 Release PR test → main','🚀 发布 PR test → main',''],['','🔎 Reviewer leaves a verdict','🔎 审稿人给出结论','claude · comment only'],
       ['g','I merge to main','我合并到 main',''],['','🌐 Live site, then readers','🌐 线上网站，然后是读者','vercel production']];
     document.getElementById('flow-list').innerHTML=L.map(function(r){return '<li class="'+r[0]+'">'+t(r[1],r[2])+(r[3]?'<small>'+r[3]+'</small>':'')+'</li>'}).join('');
-    var G=[['read-only brains','The reviewer and reader think in a read-only job. A second job, running trusted scripts from main, does the writing.','审稿人和试读员在只读任务里思考，另一个运行 main 上可信脚本的任务负责写入。'],
+    var G=[['read-only brains','The reader thinks in a read-only job; a second job, running trusted scripts from main, does the writing. The reviewer can only comment, never push.','试读员在只读任务里思考，另一个运行 main 上可信脚本的任务负责写入。审稿人只能评论，不能推送。'],
       ['allowlisted tools','Each agent gets a short list of tools. No free shell.','每个 agent 只拿到一小串工具，没有随意的 shell。'],
       ['turn budget','40 to 80 turns per run, then it stops.','每次运行 40 到 80 轮，到了就停。'],
       ['scoped patches','A reader fix can only touch lesson files.','试读员的修改只能碰课文件。'],
       ['loop guard','The reader skips its own fixes, so it never chases its tail.','试读员会跳过自己的修改，不会原地打转。'],
       ['human gate','Nothing reaches main without a pull request I merge.','没有我合并的 pull request，什么都进不了 main。'],
-      ['scrubbed output','Source names are removed from pages and from the status shown here.','来源名称会从页面和这里显示的状态里去掉。'],
+      ['scrubbed output','Pages that name a source fail the check; status summaries shown here are scrubbed.','提到来源的页面通不过检查；这里显示的状态摘要会被清洗。'],
       ['one direct push','Agents push straight only to the status log branch. Everything else is a PR.','agent 只会直接推送到状态日志分支，其他一律走 PR。']];
     document.getElementById('guards').innerHTML=G.map(function(g){return '<div class="card guard"><code>'+g[0]+'</code>'+t(g[1],g[2])+'</div>'}).join('')})();
 
