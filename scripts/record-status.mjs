@@ -10,9 +10,18 @@ const { GITHUB_TOKEN: token, GITHUB_REPOSITORY: repo } = process.env;
 const BRANCH = 'agent-status', PATH = 'status/all.json', KEEP = 12;
 if (!agent || !token || !repo) { console.log('::warning::record-status: missing agent, GITHUB_TOKEN or GITHUB_REPOSITORY'); process.exit(0); }
 
+// Summaries end up on the public Ecosystem page, so scrub banned terms (source names etc.) first.
+import { readFileSync } from 'node:fs';
+let banned = [];
+try {
+  banned = readFileSync(new URL('../banned-words.txt', import.meta.url), 'utf8').split('\n')
+    .map(l => l.trim()).filter(l => l && !l.startsWith('#')).map(l => new RegExp(l, 'gi'));
+} catch {}
+const scrub = t => banned.reduce((acc, re) => acc.replace(re, '[source]'), t);
+
 const entry = {
   state: ['ok', 'flag', 'fail', 'skip'].includes(process.env.STATE) ? process.env.STATE : 'ok',
-  summary: (process.env.SUMMARY || '').replace(/\s+/g, ' ').trim().slice(0, 400),
+  summary: scrub(process.env.SUMMARY || '').replace(/\s+/g, ' ').trim().slice(0, 400),
   link: process.env.LINK || `${process.env.GITHUB_SERVER_URL || 'https://github.com'}/${repo}/actions/runs/${process.env.GITHUB_RUN_ID || ''}`,
   at: new Date().toISOString(),
 };
