@@ -14,15 +14,15 @@
   window.TX={t:t,burst:burst};
   var TYPE={f:{en:'Foundations',zh:'基础'},c:{en:'Concept',zh:'概念'},p:{en:'Project',zh:'项目'}};
 
-  if(window.COURSE&&!window.COURSES)document.write('<script src="../courses.js"><\/script>');
+  if(window.TRACK&&!window.TRACKS)document.write('<script src="../tracks.js"><\/script>');
   document.addEventListener('DOMContentLoaded',function(){
-    var C=window.COURSE,here=location.pathname.split('/').pop()||'index.html',d=done();
-    if(C){C.all=[];C.weeks.forEach(function(w){w.items.forEach(function(it,i){it.w=w.n;it.i=i+1;it.g=C.all.length+1;C.all.push(it)})});C.lessons=C.all.filter(function(x){return x.file});C.total=C.all.length}
+    var C=window.TRACK,here=location.pathname.split('/').pop()||'index.html',d=done();
+    if(C){C.all=[];C.topics.forEach(function(w){w.items.forEach(function(it,i){it.w=w.n;it.i=i+1;it.g=C.all.length+1;C.all.push(it)})});C.lessons=C.all.filter(function(x){return x.file});C.total=C.all.length}
     function count(c){var n=0;for(var k in d)if(k.indexOf(c+'/')===0)n++;return n}
 
     var bar=document.createElement('div');bar.className='prog';document.body.prepend(bar);
     var top=document.createElement('div');top.className='top';
-    top.innerHTML='<a class="brand" href="'+(C?'../index.html':'index.html')+'"><b></b>TX Learns</a>'+(C?'<button class="icon-btn menu-btn" aria-expanded="false">☰ <span class="en">Courses</span><span class="zh">课程</span></button>':'')+'<span class="sp"></span>'+
+    top.innerHTML='<a class="brand" href="'+(C?'../index.html':'index.html')+'"><b></b>TX Learns</a>'+(C?'<button class="icon-btn menu-btn" aria-expanded="false">☰ <span class="en">Topics</span><span class="zh">主题</span></button>':'')+'<span class="sp"></span>'+
       '<div class="seg"><button data-l="en">EN</button><button data-l="zh">中文</button></div><button class="icon-btn th" aria-label="theme"></button>';
     document.body.insertBefore(top,bar.nextSibling);
     function mark(){top.querySelectorAll('[data-l]').forEach(function(b){b.classList.toggle('on',b.dataset.l===root.getAttribute('data-lang'))});top.querySelector('.th').textContent=root.getAttribute('data-theme')==='dark'?'☀︎':'☾'}
@@ -33,13 +33,13 @@
     var side=document.querySelector('.side'),scrim;
     if(C&&side){
       var NK='learn-nav',ns={};try{ns=JSON.parse(localStorage.getItem(NK)||'{}')}catch(e){}
-      var list=(window.COURSES&&window.COURSES.length)?window.COURSES:[{id:C.id,icon:'',title:C.title,href:'agentic-ai/index.html'}];
+      var list=(window.TRACKS&&window.TRACKS.length)?window.TRACKS:[{id:C.id,icon:'',title:C.title,href:'agentic-ai/index.html'}];
       side.innerHTML=list.map(function(c){
         var cur=c.id===C.id,open=ns[c.id]!==undefined?ns[c.id]:cur,body;
-        if(cur)body='<a href="index.html" class="'+(here==='index.html'?'cur':'')+'">⌂ '+t({en:'Course overview',zh:'课程总览'})+'</a>'+
-          C.weeks.map(function(w){return '<h5>'+t({en:'Week '+w.n+' · '+w.title.en,zh:'第 '+w.n+' 周 · '+w.title.zh})+'</h5>'+w.items.map(function(l){
+        if(cur)body='<a href="index.html" class="'+(here==='index.html'?'cur':'')+'">⌂ '+t({en:'Overview',zh:'总览'})+'</a>'+
+          C.topics.map(function(w){return '<h5>'+t(w.title)+'</h5>'+w.items.map(function(l){
             return l.file?'<a href="'+l.file+'" class="'+(l.file===here?'cur ':'')+(d[C.id+'/'+l.file]?'done':'')+'">'+t(l.title)+'</a>':'<span class="soon">'+t(l.title)+'</span>'}).join('')}).join('');
-        else body='<a href="../'+c.href+'">⌂ '+t({en:'Course overview',zh:'课程总览'})+'</a>';
+        else body='<a href="../'+c.href+'">⌂ '+t({en:'Overview',zh:'总览'})+'</a>';
         return '<div class="cg'+(open?' open':'')+(cur?' cur':'')+'" data-c="'+c.id+'"><button class="cg-h" aria-expanded="'+open+'"><span class="ic">'+(c.icon||'')+'</span><span class="tt">'+t(c.title)+'</span><span class="pg">'+count(c.id)+'/'+(cur?C.total:c.total||'')+'</span><i class="chev"></i></button><div class="cg-b"><div>'+body+'</div></div></div>'}).join('');
       side.querySelectorAll('.cg-h').forEach(function(h){h.onclick=function(){var g=h.parentNode,o=!g.classList.contains('open');g.classList.toggle('open',o);h.setAttribute('aria-expanded',o);ns[g.dataset.c]=o;try{localStorage.setItem(NK,JSON.stringify(ns))}catch(e){}}});
       scrim=document.createElement('div');scrim.className='scrim';document.body.appendChild(scrim);
@@ -58,14 +58,14 @@
     var sb=document.querySelector('.startbtn');
     if(C&&sb&&C.lessons.length){sb.href=C.lessons[0].file;sb.innerHTML=t({en:'Start learning →',zh:'开始学习 →'})}
 
-    /* journey: week tabs + lesson cards */
+    /* journey: topic tabs + lesson cards */
     var jr=document.querySelector('.journey');
     if(C&&jr){
-      var cur=0;for(var wi=0;wi<C.weeks.length;wi++){if(C.weeks[wi].items.some(function(x){return x.file})){cur=wi;break}}
+      var cur=0;for(var wi=0;wi<C.topics.length;wi++){if(C.topics[wi].items.some(function(x){return x.file})){cur=wi;break}}
       var draw=function(){
-        var w=C.weeks[cur],rd=w.items.filter(function(x){return x.file}).length;
-        jr.innerHTML='<div class="wtabs">'+C.weeks.map(function(x,i){return '<button class="wtab'+(i===cur?' on':'')+'" data-i="'+i+'">'+t({en:'Week '+x.n,zh:'第 '+x.n+' 周'})+'</button>'}).join('')+'</div>'+
-          '<div class="wph"><div><div class="ey">'+t({en:'Week '+w.n,zh:'第 '+w.n+' 周'})+'</div><h3>'+t(w.title)+'</h3></div><div class="meta">'+t({en:rd+' of '+w.items.length+' lessons available',zh:'已发布 '+rd+' / '+w.items.length+' 课'})+'</div></div>'+
+        var w=C.topics[cur],rd=w.items.filter(function(x){return x.file}).length;
+        jr.innerHTML='<div class="wtabs">'+C.topics.map(function(x,i){return '<button class="wtab'+(i===cur?' on':'')+'" data-i="'+i+'">'+t(x.title)+'</button>'}).join('')+'</div>'+
+          '<div class="wph"><div><div class="ey">'+t({en:'Topic '+w.n,zh:'主题 '+w.n})+'</div><h3>'+t(w.title)+'</h3></div><div class="meta">'+t({en:rd+' of '+w.items.length+' lessons available',zh:'已发布 '+rd+' / '+w.items.length+' 课'})+'</div></div>'+
           '<div class="lgrid">'+w.items.map(function(l){
             var no=('0'+l.g).slice(-2),chip='<span class="chip '+l.k+'">'+t(TYPE[l.k])+'</span>';
             if(l.file){var fin=d[C.id+'/'+l.file];return '<a class="lcard ready spot" href="'+l.file+'"><span class="n">'+no+'</span>'+chip+'<h4>'+t(l.title)+'</h4><span class="st">'+(fin?t({en:'✓ Completed',zh:'✓ 已完成'}):t({en:'Start →',zh:'开始 →'}))+'</span></a>'}
@@ -76,9 +76,9 @@
     }
 
     /* hub */
-    var hub=document.querySelector('.course-list');
-    if(hub&&window.COURSES)hub.innerHTML=window.COURSES.map(function(c){var n=count(c.id);
-      return '<a class="cc spot" href="'+c.href+'"><div class="orbi">'+c.icon+'</div><div><h3>'+t(c.title)+'</h3><div class="meta" style="margin-top:4px">'+t(c.desc)+'</div><div class="chips"><span class="chip">'+t({en:c.weeks+' weeks',zh:c.weeks+' 周'})+'</span><span class="chip">'+t({en:c.total+' lessons',zh:c.total+' 课'})+'</span><span class="chip">'+t({en:'Bilingual',zh:'双语'})+'</span></div><div class="mini"><i style="width:'+(n/c.total*100)+'%"></i></div></div><div class="go">→</div></a>'}).join('');
+    var hub=document.querySelector('.track-list');
+    if(hub&&window.TRACKS)hub.innerHTML=window.TRACKS.map(function(c){var n=count(c.id);
+      return '<a class="cc spot" href="'+c.href+'"><div class="orbi">'+c.icon+'</div><div><h3>'+t(c.title)+'</h3><div class="meta" style="margin-top:4px">'+t(c.desc)+'</div><div class="chips"><span class="chip">'+t({en:c.topics+' topics',zh:c.topics+' 个主题'})+'</span><span class="chip">'+t({en:c.total+' lessons',zh:c.total+' 课'})+'</span><span class="chip">'+t({en:'Bilingual',zh:'双语'})+'</span></div><div class="mini"><i style="width:'+(n/c.total*100)+'%"></i></div></div><div class="go">→</div></a>'}).join('');
 
     /* lesson: prev/next + done + dock */
     var db=document.querySelector('.mark-done'),idx=C?C.lessons.findIndex(function(l){return l.file===here}):-1;
@@ -89,7 +89,7 @@
         var lbl=function(){db.className='btn big mark-done'+(done()[key]?'':' pri');db.innerHTML=done()[key]?t({en:'✓ Completed — click to undo',zh:'✓ 已完成（点击撤销）'}):t({en:'Mark lesson as completed',zh:'标记本课已完成'})};
         db.onclick=function(e){var x=done();if(x[key])delete x[key];else{x[key]=1;burst(e.clientX,e.clientY)}set(DONE,JSON.stringify(x));lbl()};lbl()}
       var dock=document.createElement('div');dock.className='dock';var RR=18,LL=2*Math.PI*RR;
-      dock.innerHTML='<button class="dk" data-a="m" title="Course">☰</button>'+(p?'<a class="dk" href="'+p.file+'" title="Previous">‹</a>':'<span class="dk off">‹</span>')+
+      dock.innerHTML='<button class="dk" data-a="m" title="Menu">☰</button>'+(p?'<a class="dk" href="'+p.file+'" title="Previous">‹</a>':'<span class="dk off">‹</span>')+
         '<div class="dk ring"><svg width="44" height="44" viewBox="0 0 44 44"><circle class="bg" cx="22" cy="22" r="'+RR+'"/><circle class="fg" cx="22" cy="22" r="'+RR+'" stroke-dasharray="'+LL+'" stroke-dashoffset="'+LL+'"/></svg><b>0</b></div>'+
         (n?'<a class="dk" href="'+n.file+'" title="Next">›</a>':'<span class="dk off">›</span>')+'<button class="dk" data-a="t" title="Top">↑</button>';
       document.body.appendChild(dock);
@@ -125,6 +125,6 @@
     document.addEventListener('mouseout',function(e){var c=e.target.closest&&e.target.closest('.cc');if(c&&!c.contains(e.relatedTarget))c.style.transform=''});
     document.querySelectorAll('[data-count]').forEach(function(el){var to=+el.dataset.count,s=performance.now();(function tick(n){var k=Math.min(1,(n-s)/1200);el.textContent=Math.round(to*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(tick)})(s)});
     var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.06});
-    document.querySelectorAll('main > h2,main > .card,main > .callout,main > .quiz,main > .stepper,main > .grid,main > .flow,main > .wfwrap,main > p,main > section,main > .course-list').forEach(function(e){e.classList.add('rv');io.observe(e)});
+    document.querySelectorAll('main > h2,main > .card,main > .callout,main > .quiz,main > .stepper,main > .grid,main > .flow,main > .wfwrap,main > p,main > section,main > .track-list').forEach(function(e){e.classList.add('rv');io.observe(e)});
   });
 })();
