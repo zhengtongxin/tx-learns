@@ -1,0 +1,163 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Project: an outreach email helper</title><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Agent SDKs · Project</span><span class="zh">智能体 SDK · 项目</span></span><h1><span class="en">Project: an outreach email helper</span><span class="zh">项目：外联邮件助手</span></h1><p class="meta"><span class="en">You build the same agent team twice, once with your code as the boss and once with an LLM as the boss · ~30 min · hands-on</span><span class="zh">同一支智能体团队你会搭两次：一次由你的代码当老板，一次由大模型当老板 · 约 30 分钟 · 动手实践</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en"style="margin:0">Lina runs <b>Little Lanterns</b>, a small weekend tutoring centre. She is starting a <b>Saturday coding club</b> for kids aged 9 to 12 and wants to email parents about it. She has no time to write the email herself. So you build her a little team: three writers with different tones, someone to pick the best draft, and someone to send it. Each step today moves that one email closer to the parents' inboxes.</p>
+<p class="zh"style="margin:0">Lina 开了一家周末小辅导班 <b>Little Lanterns</b>。她要开一个面向 9 到 12 岁孩子的<b>周六编程俱乐部</b>，想发邮件告诉家长们。可她没空自己写。于是你给她搭一支小团队：三个语气不同的写手，一个挑出最佳草稿的人，再加一个负责发送的人。今天每一步，都让这封邮件离家长的收件箱更近一点。</p></div>
+
+<h2><span class="en">Step 1 · Sending, the boring part first</span><span class="zh">第 1 步 · 先把发送这件无聊事搞定</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">The team needs a way to actually send. Proper email services want a domain you own plus DNS records, which is a lot of setup for a demo. The easiest free way is plain <b>SMTP</b> from your own mailbox, with an <b>app password</b> (a separate password just for scripts) kept in <code>.env</code>. If even that is not set up yet, a phone push message is a fine stand-in.</p>
+<p class="zh"style="margin:0 0 8px">团队得有办法真正把邮件发出去。正规的邮件服务需要你拥有一个域名，还要配 DNS 记录，做个演示太折腾了。最简单的免费办法是用你自己邮箱的 <b>SMTP</b>，配一个<b>应用专用密码</b>（专门给脚本用的独立密码），放在 <code>.env</code> 里。如果连这个都还没配好，用手机推送消息代替也完全可以。</p></div>
+<div class="codebox"><span class="dim">import os, smtplib
+from email.message import EmailMessage
+
+def send_by_email(subject: str, body: str) -> None:
+    msg = EmailMessage()
+    msg["Subject"], msg["From"], msg["To"] = subject, os.environ["MAIL_FROM"], os.environ["MAIL_TO"]
+    msg.set_content(body)
+    with smtplib.SMTP(os.environ["SMTP_HOST"], 587) as server:
+        </span><span class="chg">server.starttls()                                   # encrypt first
+        server.login(os.environ["MAIL_FROM"], os.environ["SMTP_APP_PASSWORD"])</span><span class="dim">
+        server.send_message(msg)
+
+</span><span class="chg">def send_message(subject: str, body: str) -> None:
+    """One door for sending. The agents never know which way it went."""
+    if os.getenv("SMTP_APP_PASSWORD"):
+        send_by_email(subject, body)
+    else:
+        push(f"{subject}\n\n{body}")                        # phone push fallback</span></div>
+<div class="callout tip"><b class="lbl"><span class="en">Note to self</span><span class="zh">提醒自己</span></b><span class="en">The sending is not the lesson. The agent work is. Get <code>send_message</code> working once, then forget about it.</span><span class="zh">发送不是这一课的重点，智能体才是。把 <code>send_message</code> 调通一次，然后就别管它了。</span></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · By code: three writers at once, then a picker</span><span class="zh">第 2 步 · 由代码编排：三个写手同时开工，再来一个挑选者</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Lina does not know which tone parents like, so try three. Same base instructions, three tones: formal, playful, and short for busy parents. <code>asyncio.gather</code> runs all three at the same time, like asking three friends for a draft at once instead of one after another. A fourth agent, the <b>picker</b>, reads all drafts and replies with the best one only.</p>
+<p class="zh"style="margin:0 0 8px">Lina 不知道家长喜欢哪种语气，那就三种都试试。基础指令相同，语气不同：正式、活泼、给忙碌家长的简短版。<code>asyncio.gather</code> 让三个同时运行，就像同时请三个朋友各写一稿，而不是一个接一个地等。第四个智能体是<b>挑选者</b>，读完所有草稿后只回复最好的那一份。</p></div>
+<div class="codebox"><span class="dim">base = ("You write emails for Little Lanterns, a weekend tutoring centre. "
+        "Invite parents to the new Saturday coding club for kids aged 9 to 12.")
+writers = [
+    Agent(name="Formal writer",  instructions=base + " Tone: polite and professional.", model="gpt-5.4-mini"),
+    Agent(name="Playful writer", instructions=base + " Tone: warm and a little playful.", model="gpt-5.4-mini"),
+    Agent(name="Brief writer",   instructions=base + " Tone: short and clear for busy parents. Under 80 words.", model="gpt-5.4-mini")]
+picker = Agent(name="Picker", model="gpt-5.4-mini",
+    instructions="You get several email drafts. Pick the one a busy parent is most likely to answer. Reply with that draft only.")
+
+</span><span class="chg">with trace("Coding club outreach"):</span><span class="dim">
+    drafts = </span><span class="chg">await asyncio.gather(*(Runner.run(w, "Write the invitation email") for w in writers))</span><span class="dim">
+    joined = "Drafts:\n\n" + "\n\n---\n\n".join(d.final_output for d in drafts)
+    best = await Runner.run(picker, joined)
+    send_message("A new Saturday coding club", best.final_output)</span></div>
+<p class="en">Wrapping it all in <code>trace</code> makes the whole run show up as one entry in the traces dashboard. When something goes odd, that trace is your best debugger.</p>
+<p class="zh">把整个过程包在 <code>trace</code> 里，这次运行就会在 trace 面板里显示成一条记录。出了怪问题时，trace 就是你最好的调试工具。</p>
+<div class="try" id="p2"></div>
+<div class="try" id="p2b"></div>
+
+<h2><span class="en">Step 3 · Make sending a real tool, and make the agent use it</span><span class="zh">第 3 步 · 把发送做成真正的工具，并逼智能体用它</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">In Step 2 your code sent the email. Next, an agent will decide to send, so it needs <code>send_message</code> as a tool. <code>@function_tool</code> reads your type hints and docstring and builds the JSON schema for you. One surprise: a small model may just <b>say</b> “Email sent!” without calling anything. <code>ModelSettings(tool_choice="required")</code> forces a real tool call.</p>
+<p class="zh"style="margin:0 0 8px">第 2 步里是你的代码发的邮件。接下来要让智能体自己决定发送，所以它需要把 <code>send_message</code> 当成工具。<code>@function_tool</code> 会读你的类型标注和文档字符串，替你生成 JSON schema。有个意外：小模型可能只是<b>嘴上说</b>“邮件已发送！”，其实什么都没调用。<code>ModelSettings(tool_choice="required")</code> 强制它真正调用工具。</p></div>
+<div class="codebox"><span class="chg">@function_tool</span><span class="dim">
+def send_email(</span><span class="chg">subject: str, body: str</span><span class="dim">) -> str:
+    </span><span class="chg">"""Send one email to the parents' mailing list.
+
+    Args:
+        subject: The subject line parents will see.
+        body: The plain-text body of the email.
+    """</span><span class="dim">
+    send_message(subject, body)
+    return "Sent"
+
+print(send_email.params_json_schema)     # look: the SDK wrote the schema
+
+mailroom = Agent(name="Mailroom", model="gpt-5.4-mini",
+    instructions="Turn the draft you get into a clear subject and body, then send it with send_email.",
+    tools=[send_email], </span><span class="chg">model_settings=ModelSettings(tool_choice="required")</span><span class="dim">)</span></div>
+<div class="try" id="p3"></div>
+<div class="try" id="p3b"></div>
+
+<h2><span class="en">Step 4 · By the LLM: a manager with agents as tools</span><span class="zh">第 4 步 · 由大模型编排：用“智能体当工具”的主管</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">So far your Python decided the order. Now you hand that job to a <b>Coordinator</b> agent. Each writer becomes a tool with <code>.as_tool()</code>, and the Coordinator also gets <code>send_email</code>. Its instructions are the plan, in numbered steps. Control comes back to the Coordinator after every call: A → B → A, like a manager who keeps asking the team and decides alone.</p>
+<p class="zh"style="margin:0 0 8px">到目前为止，顺序都是你的 Python 定的。现在把这件事交给一个 <b>Coordinator</b>（协调者）智能体。每个写手用 <code>.as_tool()</code> 变成一个工具，Coordinator 还拿到 <code>send_email</code>。它的指令就是计划，按步骤编号写清楚。每次调用后控制权都回到 Coordinator：A → B → A，像一位主管不断向团队要东西，最后自己拍板。</p></div>
+<div class="codebox"><span class="dim">writer_tools = [</span><span class="chg">w.as_tool(tool_name=w.name.lower().replace(" ", "_"),
+                          tool_description="Write a draft invitation email in this tone")</span><span class="dim">
+                for w in writers]
+
+coordinator = Agent(name="Coordinator", model="gpt-5.4-mini",
+    tools=</span><span class="chg">writer_tools + [send_email]</span><span class="dim">,
+    instructions=</span><span class="chg">"""You send one invitation email for Little Lanterns.
+1. Get one draft from each of the three writer tools. Do not go on until you have all three.
+2. Choose the single best draft yourself.
+3. Send exactly one email with send_email. Never send more than one."""</span><span class="dim">)
+
+with trace("Coding club, manager version"):
+    result = await Runner.run(coordinator, "Send the coding club invitation to parents")</span></div>
+<p class="en">Step through one run. Watch who gets control back.</p>
+<p class="zh">一步步看一次运行，注意控制权每次回到谁手里。</p>
+<div id="t4"></div>
+<div class="try" id="p4"></div>
+
+<h2><span class="en">Step 5 · By the LLM: a handoff to the sender</span><span class="zh">第 5 步 · 由大模型编排：交接给发送者</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Another way: the Coordinator only collects drafts and picks one, then <b>hands the job</b> to Mailroom, which formats and sends. A handoff moves control across, A → B, and it does not come back. Fun fact: under the hood the SDK implements a handoff as a tool call too, named like <code>transfer_to_mailroom</code>.</p>
+<p class="zh"style="margin:0 0 8px">另一种做法：Coordinator 只负责收集草稿、挑一份，然后把活<b>交接</b>给 Mailroom，由它排版并发送。交接是把控制权交过去，A → B，不会再回来。有个冷知识：在底层，SDK 也是用一次工具调用来实现交接的，名字类似 <code>transfer_to_mailroom</code>。</p></div>
+<div class="codebox"><span class="dim">mailroom = Agent(name="Mailroom", ..., tools=[send_email],
+    </span><span class="chg">handoff_description="Formats the chosen draft and sends it to parents",</span><span class="dim">
+    model_settings=ModelSettings(tool_choice="required"))
+
+coordinator = Agent(name="Coordinator", model="gpt-5.4-mini",
+    tools=writer_tools, </span><span class="chg">handoffs=[mailroom]</span><span class="dim">,
+    instructions="""1. Get one draft from each of the three writer tools.
+2. Choose the single best draft.
+3. Hand off to Mailroom with that draft. Do not write the email yourself.""")</span></div>
+<div class="try" id="p5"></div>
+
+<h2><span class="en">Step 6 · Code or LLM: who should be the manager?</span><span class="zh">第 6 步 · 代码还是大模型：谁来当主管？</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">You now have the same team run two ways. <b>By code</b> is predictable, repeatable and easy to debug, because the steps are written in Python. <b>By the LLM</b> is flexible: the path can change with the content, but the model may not follow your plan every time. Rule of thumb: fixed steps, use code; a path that depends on what comes in, use the LLM.</p>
+<p class="zh"style="margin:0 0 8px">现在同一支团队你有了两种跑法。<b>由代码编排</b>可预测、可重复、好调试，因为步骤就写在 Python 里。<b>由大模型编排</b>更灵活：路径可以随内容变化，但模型不一定每次都照你的计划走。经验法则：步骤固定，用代码；路径取决于输入内容，用大模型。</p></div>
+<div class="callout tip"><b class="lbl"><span class="en">The moment it clicked</span><span class="zh">恍然大悟的那一刻</span></b><span class="en">“By code” is me being the manager. “By the LLM” is hiring a manager and hoping they follow the plan.</span><span class="zh">“由代码编排”就是我自己当主管；“由大模型编排”就是雇一个主管，然后祈祷他照着计划办事。</span></div>
+<p class="en">Sort each of Lina's jobs.</p>
+<p class="zh">给 Lina 的每件事分类。</p>
+<div class="sc" id="g6"></div>
+
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我踩过的坑</span></b><span class="en">With the small model, the manager versions were flaky. Sometimes the Coordinator asked only two writers. Sometimes it sent two emails. With the handoff, Mailroom sometimes never sent at all. My first instructions were one loose sentence. Three fixes helped: clear numbered steps (“do not go on until you have all three drafts”, “send exactly one email”), forcing tool use with <code>tool_choice="required"</code>, and, when all else fails, a bigger model. And yes, my test email landed in spam. No surprise there: it was a cold email.</span><span class="zh">用小模型时，主管版本很不稳定。有时 Coordinator 只问了两个写手；有时它发了两封邮件；用交接时，Mailroom 有时干脆没发。我最初的指令只是一句笼统的话。三个办法有用：写清楚编号步骤（“三份草稿都拿到之前不要继续”“只发一封邮件”）、用 <code>tool_choice="required"</code> 强制调用工具，实在不行就换更大的模型。还有，我的测试邮件进了垃圾箱。当然会了，毕竟是一封陌生人发来的推广邮件。</span></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Add a polish round.</b> Before sending, let an editor agent improve the chosen draft. Build it by code first, then let the Coordinator do it, and compare the traces.</span><span class="zh"><b>加一轮润色。</b>发送前让一个编辑智能体改进选中的草稿。先用代码实现，再交给 Coordinator 去做，然后对比两份 trace。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Draw your team.</b> Install Graphviz and <code>pip install "openai-agents[viz]"</code>, then call <code>draw_graph(coordinator)</code> from <code>agents.extensions.visualization</code> to see the agent and its tools.</span><span class="zh"><b>把团队画出来。</b>安装 Graphviz，再 <code>pip install "openai-agents[viz]"</code>，然后从 <code>agents.extensions.visualization</code> 调用 <code>draw_graph(coordinator)</code>，看看智能体和它的工具。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Harder: keep the conversation going.</b> Use a real email service, read the parents' replies, and let an agent answer them.</span><span class="zh"><b>进阶：让对话继续下去。</b>换成正规的邮件服务，读取家长的回复，再让智能体回信。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Get sending working once behind one <code>send_message</code> wrapper, then focus on the agents.<br>• <code>asyncio.gather</code> runs several agents at the same time. The wait is the slowest one, not the sum.<br>• <b>By code</b>: your Python decides the order. Predictable and easy to debug.<br>• <b>By the LLM</b>: a manager agent decides, using agents as tools (A → B → A) or handoffs (A → B).<br>• <code>@function_tool</code> builds the schema from type hints and the docstring. <code>tool_choice="required"</code> stops “pretend” sends.<br>• Flaky manager? Numbered steps, forced tool use, or a bigger model.<br>• Wrap runs in <code>trace(...)</code>. The trace is your best debugger.</p><p class="zh" style="margin:0">• 先用一个 <code>send_message</code> 包装函数把发送调通，然后专心做智能体。<br>• <code>asyncio.gather</code> 让多个智能体同时运行，等待时间是最慢的那个，而不是总和。<br>• <b>由代码编排</b>：你的 Python 决定顺序，可预测、好调试。<br>• <b>由大模型编排</b>：主管智能体来决定，用“智能体当工具”（A → B → A）或交接（A → B）。<br>• <code>@function_tool</code> 根据类型标注和文档字符串生成 schema；<code>tool_choice="required"</code> 防止“假装发送”。<br>• 主管不靠谱？写编号步骤、强制调用工具，或换更大的模型。<br>• 把运行包在 <code>trace(...)</code> 里，trace 是你最好的调试工具。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict,trace=TX2.trace;TX2.init();
+
+ predict($('p1'),{q:{en:'Lina has not created her app password yet. Her agents call <code>send_message</code>. What happens?',zh:'Lina 还没有创建应用专用密码。她的智能体调用了 <code>send_message</code>，会怎样？'},opts:[{k:'a',en:'The run crashes, so she must rewrite the agent code',zh:'运行崩溃，她得重写智能体代码'},{k:'b',en:'Her phone gets a push message, and the agent code stays the same',zh:'她的手机收到一条推送，智能体代码一行不改'},{k:'c',en:'The email goes out anyway without a password',zh:'没有密码邮件也照样发出去'}],a:'b',ex:{en:'The wrapper picks email or push. The agents only ever see send_message, so they do not care which way it went.',zh:'包装函数自己选邮件还是推送。智能体只看得到 send_message，所以不在乎走的是哪条路。'},hint:{en:'Look at the if inside send_message. What happens when the password is missing?',zh:'看看 send_message 里的 if。没有密码时走哪条路？'}});
+
+ predict($('p2'),{q:{en:'Each writer takes about 6 seconds. Roughly how long does the <code>gather</code> line take?',zh:'每个写手大约要 6 秒。<code>gather</code> 那一行大约要多久？'},opts:[{k:'a',en:'About 6 seconds',zh:'大约 6 秒'},{k:'b',en:'About 18 seconds',zh:'大约 18 秒'},{k:'c',en:'About 2 seconds',zh:'大约 2 秒'}],a:'a',ex:{en:'All three wait for the network at the same time, so you wait about as long as the slowest one.',zh:'三个同时在等网络，所以你等的时间大约是最慢那个的时长。'},hint:{en:'Are the three writers running one after another, or at the same time?',zh:'三个写手是一个接一个，还是同时在跑？'}});
+
+ predict($('p2b'),{q:{en:'What exactly does the picker receive as its input?',zh:'挑选者收到的输入到底是什么？'},opts:[{k:'a',en:'Three separate messages, one per writer',zh:'三条独立的消息，每个写手一条'},{k:'b',en:'One string with all three drafts joined by ---',zh:'一个字符串，三份草稿用 --- 拼在一起'},{k:'c',en:'The three writer agents themselves',zh:'那三个写手智能体本身'}],a:'b',ex:{en:'Your code joins the final_output of each draft into one message. The picker just reads text.',zh:'你的代码把每份草稿的 final_output 拼成一条消息。挑选者只是在读一段文字。'},hint:{en:'Look at the joined = ... line.',zh:'看看 joined = ... 那一行。'}});
+
+ predict($('p3'),{q:{en:'You print <code>send_email.params_json_schema</code>. Where does the description of <code>subject</code> come from?',zh:'你打印 <code>send_email.params_json_schema</code>。<code>subject</code> 的描述从哪儿来？'},opts:[{k:'a',en:'You must write it in a separate JSON file',zh:'得另外写一个 JSON 文件'},{k:'b',en:'The Args section of the docstring',zh:'文档字符串里的 Args 部分'},{k:'c',en:'The model guesses it at run time',zh:'模型在运行时猜出来'}],a:'b',out:{en:'{"properties": {"subject": {"description": "The subject line parents will see", "type": "string"}, "body": {...}}, "required": ["subject", "body"], ...}',zh:'{"properties": {"subject": {"description": "The subject line parents will see", "type": "string"}, "body": {...}}, "required": ["subject", "body"], ...}'},ex:{en:'Type hints give the types, the docstring gives the descriptions. The hand-written JSON from earlier lessons is gone.',zh:'类型标注给出类型，文档字符串给出描述。之前几课里手写的 JSON 不用再写了。'},hint:{en:'What did you write under Args: in the function?',zh:'你在函数的 Args: 下面写了什么？'}});
+
+ predict($('p3b'),{q:{en:'Without <code>tool_choice="required"</code>, Mailroom replies “Done! The email is on its way.” Lina\'s inbox is empty. Why?',zh:'没有 <code>tool_choice="required"</code> 时，Mailroom 回复“好了！邮件已经发出。”可 Lina 的收件箱是空的。为什么？'},opts:[{k:'a',en:'SMTP is slow, so wait a minute',zh:'SMTP 很慢，再等一分钟'},{k:'b',en:'The model answered in text and never called send_email',zh:'模型只是用文字回答，根本没调用 send_email'},{k:'c',en:'The docstring was too long',zh:'文档字符串太长了'}],a:'b',ex:{en:'Words are not actions. Only a tool call sends. The trace would show no send_email call at all.',zh:'说了不等于做了，只有工具调用才会发送。trace 里会看到压根没有 send_email 调用。'},hint:{en:'Open the trace in your head: is there a tool call in it?',zh:'在脑子里打开 trace：里面有工具调用吗？'}});
+
+ trace($('t4'),[
+  {k:'you',en:'Send the coding club invitation to parents.',zh:'把编程俱乐部的邀请发给家长们。'},
+  {k:'llm',en:'Coordinator: step 1. Call formal_writer, playful_writer and brief_writer.',zh:'Coordinator：第 1 步，调用 formal_writer、playful_writer 和 brief_writer。',why:{en:'To the Coordinator, each writer is just a tool in its list.',zh:'在 Coordinator 看来，每个写手只是工具列表里的一个工具。'}},
+  {k:'tool',en:'Each writer runs its own small agent run and returns a draft.',zh:'每个写手各自跑一次小的智能体运行，交回一份草稿。',why:{en:'The drafts go back to the Coordinator, not to Lina. That is A → B → A.',zh:'草稿交回给 Coordinator，而不是 Lina。这就是 A → B → A。'}},
+  {k:'llm',en:'Coordinator: the brief one is best for busy parents. Call send_email(subject, body).',zh:'Coordinator：简短那份最适合忙碌的家长。调用 send_email(subject, body)。',why:{en:'The choosing now happens inside the model, not in your Python.',zh:'现在“挑选”发生在模型里，而不是你的 Python 里。'}},
+  {k:'tool',en:'send_email → "Sent"',zh:'send_email → "Sent"'},
+  {k:'llm',en:'Coordinator: “Done. I sent the short version to the parents.”',zh:'Coordinator：“完成。我把简短版发给了家长们。”',why:{en:'The Coordinator stayed in charge the whole time and wrote the final answer.',zh:'Coordinator 全程掌控，并写下了最终回答。'}}]);
+
+ predict($('p4'),{q:{en:'Compared with Step 2, what disappeared from your Python?',zh:'和第 2 步相比，你的 Python 里少了什么？'},opts:[{k:'a',en:'The order of the steps and the picking',zh:'步骤顺序和挑选这件事'},{k:'b',en:'The writer agents',zh:'写手智能体'},{k:'c',en:'Nothing, it is the same code',zh:'什么都没少，代码一样'}],a:'a',ex:{en:'No gather, no join, no picker call. The plan now lives in the Coordinator\'s instructions, and the model follows it (most of the time).',zh:'没有 gather、没有拼接、也不用调用挑选者。计划现在写在 Coordinator 的指令里，由模型来执行（大多数时候）。'},hint:{en:'Who decides when to call each writer now?',zh:'现在由谁决定什么时候调用每个写手？'}});
+
+ predict($('p5'),{q:{en:'After the handoff run, what is <code>result.last_agent.name</code>?',zh:'交接版本运行结束后，<code>result.last_agent.name</code> 是什么？'},opts:[{k:'a',en:'"Coordinator"',zh:'"Coordinator"'},{k:'b',en:'"Mailroom"',zh:'"Mailroom"'},{k:'c',en:'"Brief writer"',zh:'"Brief writer"'}],a:'b',out:{en:'print(result.last_agent.name)\n→ Mailroom',zh:'print(result.last_agent.name)\n→ Mailroom'},ex:{en:'A handoff is A → B with no way back. Mailroom took over, sent the email and gave the final answer.',zh:'交接是 A → B，不会回头。Mailroom 接手、发出邮件，并给出最终回答。'},hint:{en:'Does control come back to the Coordinator after a handoff?',zh:'交接之后，控制权还会回到 Coordinator 吗？'}});
+
+ game($('g6'),[
+  {en:'Every Monday: write three drafts, pick one, send it. Always the same steps.',zh:'每周一：写三份草稿，挑一份，发出去。步骤永远一样。',a:'c',ex:{en:'Fixed steps. Your code can run them the same way every time.',zh:'步骤固定，你的代码每次都能用同样的方式跑完。'},hint:{en:'Does the path ever change?',zh:'路径会变吗？'}},
+  {en:'A parent replies. It might be a question, a sign-up or a complaint, and each needs a different next step.',zh:'有家长回信了。可能是提问、报名，也可能是投诉，每种都需要不同的下一步。',a:'l',ex:{en:'The path depends on what the message says. Let a manager agent decide.',zh:'路径取决于消息内容，交给主管智能体来决定。'},hint:{en:'Can you know the next step before reading the reply?',zh:'不读回信，你能知道下一步吗？'}},
+  {en:'Send the same reminder to all parents the night before each club meeting.',zh:'每次俱乐部活动前一晚，给所有家长发同一条提醒。',a:'c',ex:{en:'Same steps every time, and you want it to never surprise you.',zh:'每次步骤都一样，而且你希望它绝不出意外。'},hint:{en:'Is there any decision to make here?',zh:'这里有什么需要临场判断的吗？'}},
+  {en:'Lina says: “Find out what parents worry about and draft whatever would help most.”',zh:'Lina 说：“弄清楚家长们在担心什么，然后起草最有帮助的东西。”',a:'l',ex:{en:'Open-ended. Which helpers to call and in what order depends on what turns up.',zh:'这是开放式任务，调用哪些帮手、按什么顺序，取决于发现了什么。'},hint:{en:'Could you write the steps down in advance?',zh:'你能提前把步骤写下来吗？'}}],[{k:'c',en:'By code',zh:'由代码编排'},{k:'l',en:'By the LLM',zh:'由大模型编排'}],{en:'Job',zh:'任务'});
+});
+</script></body></html>
