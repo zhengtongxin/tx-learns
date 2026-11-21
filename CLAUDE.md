@@ -9,7 +9,7 @@ Bilingual (EN/中文) interactive learning site. Static HTML/CSS/JS, no build st
 - `agentic-ai/NN-slug.html` one lesson per file; `_template.html` is the starting point.
 - `assets/site.css|js` shared layout, nav, progress; `assets/teach.css|js` lesson widgets (`TX2.game`, `TX2.predict`, ...).
 - `scripts/check-copy.mjs` + `banned-words.txt` the copyright scrubber.
-- `scripts/notify-telegram.mjs` sends TX a Telegram message (secrets `TELEGRAM_BOT_TOKEN`, optional `TELEGRAM_CHAT_ID`).
+- `scripts/notify-telegram.mjs` sends TX a Telegram message (secrets `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`; without the chat id it only sends a one-time setup tip).
 
 ## Agents (GitHub Actions)
 
