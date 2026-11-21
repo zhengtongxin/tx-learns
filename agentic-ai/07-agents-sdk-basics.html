@@ -1,9 +1,9 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>OpenAI Agents SDK: the basics</title><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
 <div class="wrap"><nav class="side"></nav><main>
-<div class="hero"><span class="tag"><span class="en">Week 2 · Day 1</span><span class="zh">第 2 周 · 第 1 天</span></span><h1><span class="en">OpenAI Agents SDK: the basics</span><span class="zh">OpenAI Agents SDK 基础</span></h1><p class="meta"><span class="en">Last week you hand-built the harness. Now a few lines do it · ~20 min · hands-on</span><span class="zh">上周你亲手写了外壳，现在几行代码就够 · 约 20 分钟 · 动手实践</span></p></div>
-<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en"style="margin:0">You are building <b>Jokester</b>, a tiny assistant. First it tells a joke. Then it can buzz your phone. Then it remembers your name. Last week each of these meant writing the prompt, the history, the tool JSON and a <code>while</code> loop yourself. Today the <b>OpenAI Agents SDK</b> carries all of that, and you only describe what you want.</p>
-<p class="zh"style="margin:0">你要做一个小助手 <b>Jokester</b>。先让它讲笑话，再让它能震动你的手机，再让它记住你的名字。上周每一步都意味着自己写提示词、历史记录、工具 JSON 和 <code>while</code> 循环。今天 <b>OpenAI Agents SDK</b> 把这些都包办了，你只需要描述想要什么。</p></div>
+<div class="hero"><span class="tag"><span class="en">Agent SDKs · Lesson 1</span><span class="zh">智能体 SDK · 第 1 课</span></span><h1><span class="en">OpenAI Agents SDK: the basics</span><span class="zh">OpenAI Agents SDK 基础</span></h1><p class="meta"><span class="en">In the last topic you hand-built the harness. Now a few lines do it · ~20 min · hands-on</span><span class="zh">上一个主题里你亲手写了外壳，现在几行代码就够 · 约 20 分钟 · 动手实践</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en"style="margin:0">You are building <b>Quip</b>, a tiny assistant. First it tells a joke. Then it can buzz your phone. Then it remembers your name. Before, each of these meant writing the prompt, the history, the tool JSON and a <code>while</code> loop yourself. Today the <b>OpenAI Agents SDK</b> carries all of that, and you only describe what you want.</p>
+<p class="zh"style="margin:0">你要做一个小助手 <b>Quip</b>。先让它讲笑话，再让它能震动你的手机，再让它记住你的名字。之前每一步都意味着自己写提示词、历史记录、工具 JSON 和 <code>while</code> 循环。今天 <b>OpenAI Agents SDK</b> 把这些都包办了，你只需要描述想要什么。</p></div>
 <h2><span class="en">Step 0 · One new keyword pair: async / await</span><span class="zh">第 0 步 · 一对新关键字：async / await</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Calling a model means waiting for the network. Think of ordering a coffee: while it is being made, you do not freeze, you can still do other things. <code>async def</code> marks a function that is allowed to wait like that. <code>await</code> means “wait here for this result” and only works inside an <code>async def</code>. One twist: a Jupyter notebook already runs an event loop, so there you may write <code>await</code> at the top level. In a normal <code>.py</code> file you wrap it:</p>
 <p class="zh"style="margin:0 0 8px">调用模型要等网络。就像点咖啡：等咖啡做好时你不会僵住，还可以做别的事。<code>async def</code> 标记一个允许这样等待的函数；<code>await</code> 表示“在这里等这个结果”，只能写在 <code>async def</code> 里面。一个特例：Jupyter 笔记本本身已经有事件循环，所以在那里可以直接在最外层写 <code>await</code>。普通 <code>.py</code> 文件里则要这样包一层：</p></div>
@@ -16,59 +16,59 @@
 <p class="en">Which of these will run? Decide for each snippet.</p>
 <p class="zh">下面哪些能运行？逐个判断。</p><div class="sc" id="g0"></div>
 <h2><span class="en">Step 1 · Agent: a model with a role and tools</span><span class="zh">第 1 步 · Agent：带角色和工具的模型</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">An <b>Agent</b> is just one LLM plus a system prompt plus tools. In code it is four fields, and each replaces something you wrote by hand last week. Click each field to see which.</p>
-<p class="zh"style="margin:0 0 8px"><b>Agent</b> 就是一个大模型加系统提示词再加工具。代码里是四个字段，每个都替代了你上周手写的某样东西。点开每个字段看看。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">An <b>Agent</b> is just one LLM plus a system prompt plus tools. In code it is four fields, and each replaces something you wrote by hand earlier. Click each field to see which.</p>
+<p class="zh"style="margin:0 0 8px"><b>Agent</b> 就是一个大模型加系统提示词再加工具。代码里是四个字段，每个都替代了你之前手写的某样东西。点开每个字段看看。</p></div>
 <div class="pills" id="ap"></div><div class="codebox" id="acode"></div><p class="meta" id="anote"></p>
 <div class="try" id="p1"></div>
 <h2><span class="en">Step 2 · Runner: the agent loop, for free</span><span class="zh">第 2 步 · Runner：现成的智能体循环</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Jokester exists, but nothing has run yet. <code>Runner.run</code> does the running: it calls the model, runs any tools it asks for, and repeats until the model stops asking. That is last week's <code>while</code> loop, with a turn limit built in.</p>
-<p class="zh"style="margin:0 0 8px">Jokester 已经定义好了，但还没运行。<code>Runner.run</code> 负责运行：调用模型、执行它请求的工具、重复，直到模型不再请求。这就是上周的 <code>while</code> 循环，还自带轮数上限。</p></div>
-<div class="codebox"><span class="dim">agent = Agent(name="Jokester", instructions="You are a joke teller", model="gpt-5.4-mini")
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Quip exists, but nothing has run yet. <code>Runner.run</code> does the running: it calls the model, runs any tools it asks for, and repeats until the model stops asking. That is your old <code>while</code> loop, with a turn limit built in.</p>
+<p class="zh"style="margin:0 0 8px">Quip 已经定义好了，但还没运行。<code>Runner.run</code> 负责运行：调用模型、执行它请求的工具、重复，直到模型不再请求。这就是你之前写的 <code>while</code> 循环，还自带轮数上限。</p></div>
+<div class="codebox"><span class="dim">agent = Agent(name="Quip", instructions="You tell short, friendly jokes", model="gpt-5.4-mini")
 
-</span><span class="chg">result = await Runner.run(agent, "Tell a joke about Autonomous AI Agents")</span><span class="dim">
+</span><span class="chg">result = await Runner.run(agent, "Tell a joke about debugging on a Friday")</span><span class="dim">
 print(result.final_output)      # the answer
 result.to_input_list()          # every message of the run</span></div>
 <div class="try" id="p2"></div>
 <div class="callout warn"><b class="lbl"><span class="en">Install name</span><span class="zh">安装名称</span></b><span class="en">The package is <code>openai-agents</code> (<code>pip install openai-agents</code>), imported with <code>from agents import Agent, Runner</code>. Do not <code>pip install agents</code>: that is a different, older library.</span><span class="zh">安装包名是 <code>openai-agents</code>（<code>pip install openai-agents</code>），导入写 <code>from agents import Agent, Runner</code>。不要装 <code>agents</code>，那是另一个旧的库。</span></div>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Two ways to see inside a run. <b>trace</b> groups your calls under one name so you can inspect every step at <b>platform.openai.com/traces</b>. <b>Streaming</b> hands you the text piece by piece as it is written, so a chat feels fast.</p>
 <p class="zh"style="margin:0 0 8px">有两种方式看清一次运行的内部。<b>trace</b> 把你的调用归在一个名字下，可以在 <b>platform.openai.com/traces</b> 查看每一步。<b>流式输出</b>则边生成边把文字一段段交给你，让聊天显得很快。</p></div>
-<div class="codebox"><span class="chg">with trace("Telling a joke"):</span><span class="dim">
+<div class="codebox"><span class="chg">with trace("Quip warm-up"):</span><span class="dim">
     result = await Runner.run(agent, "Tell a joke")
 
-</span><span class="chg">result = Runner.run_streamed(agent, input="Tell me 5 jokes")</span><span class="dim">
+</span><span class="chg">result = Runner.run_streamed(agent, input="Tell me 3 jokes about coffee")</span><span class="dim">
 async for event in result.stream_events():
     if event.type == "raw_response_event" and isinstance(event.data, ResponseTextDeltaEvent):
         print(event.data.delta, end="", flush=True)</span></div>
 <div class="try" id="p2b"></div>
 <h2><span class="en">Step 3 · Tool: one decorator</span><span class="zh">第 3 步 · 工具：一个装饰器</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Now Jokester should buzz your phone. You already have a plain function, <code>push</code>, from last week. Last week you also wrote its JSON by hand. The SDK reads your function instead: the <b>docstring</b> becomes the description and the <b>type hints</b> become the inputs.</p>
-<p class="zh"style="margin:0 0 8px">现在让 Jokester 能震动你的手机。上周你已经有了普通函数 <code>push</code>，而且当时还手写了它的 JSON。现在 SDK 直接读你的函数：<b>文档字符串</b>变成描述，<b>类型标注</b>变成输入参数。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Now Quip should buzz your phone. You already have a plain function, <code>push</code>, from the career agent. Back then you also wrote its JSON by hand. The SDK reads your function instead: the <b>docstring</b> becomes the description and the <b>type hints</b> become the inputs.</p>
+<p class="zh"style="margin:0 0 8px">现在让 Quip 能震动你的手机。在职业智能体里你已经有了普通函数 <code>push</code>，而且当时还手写了它的 JSON。现在 SDK 直接读你的函数：<b>文档字符串</b>变成描述，<b>类型标注</b>变成输入参数。</p></div>
 <div class="codebox"><span class="chg">@function_tool</span><span class="dim">
 def push_tool(</span><span class="chg">message: str</span><span class="dim">) -> str:
-    </span><span class="chg">"""Send the given message to the user as a push notification"""</span><span class="dim">
+    </span><span class="chg">"""Send this message to my phone as a push notification. Use it when the user asks to be notified."""</span><span class="dim">
     payload = {"user": pushover_user, "token": pushover_token, "message": message}
     status = requests.post(pushover_url, data=payload).status_code
-    return f"Push sent with API status code {status}"
+    return f"Push sent, status {status}"
 
-notifier = Agent(name="Notifier", model="gpt-5.4-mini", instructions="You notify the user upon request", tools=[push_tool])</span></div>
+notifier = Agent(name="Notifier", model="gpt-5.4-mini", instructions="You send the user a push message when asked", tools=[push_tool])</span></div>
 <div class="try" id="p3"></div>
 <h2><span class="en">Step 4 · Memory: sessions</span><span class="zh">第 4 步 · 记忆：Session</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">You tell Jokester “My name is Ed”, then ask “What's my name?”. Each <code>Runner.run</code> starts fresh, just like last week's stateless calls. Two ways to remember: <b>by hand</b>, pass <code>response.to_input_list()</code> plus the new message (last week's history), or <b>with a session</b>, where the SDK stores and replays it for you.</p>
-<p class="zh"style="margin:0 0 8px">你告诉 Jokester“我叫 Ed”，然后问“我叫什么？”。每次 <code>Runner.run</code> 都是全新开始，和上周讲的无状态调用一样。有两种记住的方式：<b>手动</b>，把 <code>response.to_input_list()</code> 加上新消息传回去（就是上周的历史记录）；或者<b>用 session</b>，由 SDK 替你保存并回放。</p></div>
-<div class="codebox"><span class="dim">session = SQLiteSession("12346")     # in memory. For a file: SQLiteSession("12346", "memory.db")
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">You tell Quip “My name is Mei”, then ask “What's my name?”. Each <code>Runner.run</code> starts fresh, just like the stateless calls in “Autonomy and tools”. Two ways to remember: <b>by hand</b>, pass <code>response.to_input_list()</code> plus the new message (the history you kept by hand before), or <b>with a session</b>, where the SDK stores and replays it for you.</p>
+<p class="zh"style="margin:0 0 8px">你告诉 Quip“我叫 Mei”，然后问“我叫什么？”。每次 <code>Runner.run</code> 都是全新开始，和《自主性与工具》里讲的无状态调用一样。有两种记住的方式：<b>手动</b>，把 <code>response.to_input_list()</code> 加上新消息传回去（就是你之前手动维护的历史记录）；或者<b>用 session</b>，由 SDK 替你保存并回放。</p></div>
+<div class="codebox"><span class="dim">session = SQLiteSession("mei-chat")     # in memory. For a file: SQLiteSession("mei-chat", "memory.db")
 
-response = await Runner.run(agent, "Hi there. My name is Ed.", </span><span class="chg">session=session</span><span class="dim">)
+response = await Runner.run(agent, "Hey! I am Mei, nice to meet you.", </span><span class="chg">session=session</span><span class="dim">)
 response = await Runner.run(agent, "What's my name?", </span><span class="chg">session=session</span><span class="dim">)</span></div>
 <div class="chat" id="smem"></div>
 <h2><span class="en">Step 5 · Preview: agents working together</span><span class="zh">第 5 步 · 预览：智能体如何协作</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">One agent is only the start. The next labs combine agents in two ways, and one question tells them apart: <b>who talks to the user next?</b> With <b>an agent as a tool</b>, a manager calls another agent like a function, gets the result back and stays in control. With a <b>handoff</b>, one agent passes the whole conversation to another, which takes over and replies.</p>
-<p class="zh"style="margin:0 0 8px">一个智能体只是开始。后面的实验会用两种方式把智能体组合起来，用一个问题就能分辨：<b>接下来由谁来和用户说话？</b><b>智能体当工具</b>时，主管像调用函数一样调用另一个智能体，拿回结果并继续掌控；<b>交接（handoff）</b>时，一个智能体把整段对话交给另一个，由后者接手并回复。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">One agent is only the start. The next lessons combine agents in two ways, and one question tells them apart: <b>who talks to the user next?</b> With <b>an agent as a tool</b>, a manager calls another agent like a function, gets the result back and stays in control. With a <b>handoff</b>, one agent passes the whole conversation to another, which takes over and replies.</p>
+<p class="zh"style="margin:0 0 8px">一个智能体只是开始。后面的课会用两种方式把智能体组合起来，用一个问题就能分辨：<b>接下来由谁来和用户说话？</b><b>智能体当工具</b>时，主管像调用函数一样调用另一个智能体，拿回结果并继续掌控；<b>交接（handoff）</b>时，一个智能体把整段对话交给另一个，由后者接手并回复。</p></div>
 <div class="sc" id="hgame"></div>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px"><b>Guardrails</b> are checks that can stop a run. An <b>input</b> guardrail checks what comes in, before the main work. An <b>output</b> guardrail checks what goes out, before the user sees it.</p>
 <p class="zh"style="margin:0 0 8px"><b>护栏（guardrail）</b>是可以叫停运行的检查。<b>输入护栏</b>在主要工作开始前检查传入内容；<b>输出护栏</b>在用户看到之前检查传出内容。</p></div>
 <div class="sc" id="ggame"></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Rebuild a Week 1 project with the SDK.</b> The digital twin or the checklist loop. Notice how short it gets.</span><span class="zh"><b>用 SDK 重做一个第 1 周的项目。</b>数字分身或清单循环都行，感受一下它变得多短。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Open the trace.</b> Run your agent inside <code>with trace(...)</code> and find the run at platform.openai.com/traces.</span><span class="zh"><b>打开 trace。</b>在 <code>with trace(...)</code> 里运行你的智能体，并在 platform.openai.com/traces 找到这次运行。</span></span></label></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Rebuild an earlier project with the SDK.</b> The digital twin or the checklist loop. Notice how short it gets.</span><span class="zh"><b>用 SDK 重做之前的一个项目。</b>数字分身或清单循环都行，感受一下它变得多短。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Open the trace.</b> Run your agent inside <code>with trace(...)</code> and find the run at platform.openai.com/traces.</span><span class="zh"><b>打开 trace。</b>在 <code>with trace(...)</code> 里运行你的智能体，并在 platform.openai.com/traces 找到这次运行。</span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• <code>await</code> waits for the model. Only inside <code>async def</code>, or at the top level of a notebook.<br>• An <b>Agent</b> is a model, instructions (the system prompt) and tools.<br>• <b>Runner.run</b> is the agent loop. <code>final_output</code> is the answer.<br>• <b>trace</b> shows every step. <b>Streaming</b> shows text as it is written.<br>• <code>@function_tool</code> builds the tool JSON from your function. The docstring is the description.<br>• Each run is stateless. Pass a <b>session</b> to remember.<br>• Agents as tools keep control, handoffs pass it on, guardrails check inputs and outputs.</p><p class="zh" style="margin:0">• <code>await</code> 用来等模型，只能写在 <code>async def</code> 里，或笔记本最外层。<br>• <b>Agent</b> = 模型 + instructions（系统提示词）+ 工具。<br>• <b>Runner.run</b> 就是智能体循环，<code>final_output</code> 是最终答案。<br>• <b>trace</b> 展示每一步，<b>流式输出</b>边写边显示。<br>• <code>@function_tool</code> 根据函数生成工具 JSON，文档字符串就是描述。<br>• 每次运行都是无状态的，传入 <b>session</b> 才能记住。<br>• 智能体当工具会保持控制，交接会把控制权交出去，护栏检查输入和输出。</p></div>
 
@@ -87,28 +87,28 @@ document.addEventListener('DOMContentLoaded',function(){
   {en:'In a notebook: result = Runner.run(agent, "Hi")   then   print(result.final_output)',zh:'在笔记本里：result = Runner.run(agent, "Hi")，然后 print(result.final_output)',a:'n',ex:{en:'Without await you get a coroutine object, not a result, so final_output fails.',zh:'没有 await，拿到的是协程对象而不是结果，所以 final_output 会报错。'},hint:{en:'Is the word await there?',zh:'有 await 这个词吗？'}}],[{k:'y',en:'Runs',zh:'能运行'},{k:'n',en:'Fails',zh:'会出错'}],{en:'Snippet',zh:'代码'});
  var AP=[
   {n:'name',hi:1,nt:{en:'A label. It shows up in traces, and later when agents hand off to each other.',zh:'一个标签。会出现在 trace 里，之后智能体互相交接时也会用到。'}},
-  {n:'instructions',hi:2,nt:{en:'The system prompt. Last week: the string you put first in messages.',zh:'系统提示词。对应上周 messages 最前面的那段字符串。'}},
-  {n:'model',hi:3,nt:{en:'Which brain answers. Last week: the model= argument of the API call.',zh:'由哪个模型回答。对应上周 API 调用里的 model= 参数。'}},
-  {n:'tools',hi:4,nt:{en:'Functions the model may ask for. Last week: the tools JSON plus your dispatcher.',zh:'模型可以请求的函数。对应上周的工具 JSON 加上你的分发代码。'}}];
- var APL=['agent = Agent(','    name="Notifier",','    instructions="You notify the user upon request",','    model="gpt-5.4-mini",','    tools=[push_tool])'];
+  {n:'instructions',hi:2,nt:{en:'The system prompt. Before: the string you put first in messages.',zh:'系统提示词。对应之前 messages 最前面的那段字符串。'}},
+  {n:'model',hi:3,nt:{en:'Which brain answers. Before: the model= argument of the API call.',zh:'由哪个模型回答。对应之前 API 调用里的 model= 参数。'}},
+  {n:'tools',hi:4,nt:{en:'Functions the model may ask for. Before: the tools JSON plus your dispatcher.',zh:'模型可以请求的函数。对应之前的工具 JSON 加上你的分发代码。'}}];
+ var APL=['agent = Agent(','    name="Notifier",','    instructions="You send the user a push message when asked",','    model="gpt-5.4-mini",','    tools=[push_tool])'];
  var ap=$('ap');ap.innerHTML=AP.map(function(v,i){return '<button class="pill" data-i="'+i+'">'+v.n+'</button>'}).join('');
  function aps(i){ap.querySelectorAll('.pill').forEach(function(b,k){b.classList.toggle('on',k===i)});
   $('acode').innerHTML=APL.map(function(l,k){return k===AP[i].hi?'<span class="chg">'+l+'</span>':'<span class="dim">'+l+'</span>'}).join('\n');
   $('anote').innerHTML=T(AP[i].nt)}
  ap.querySelectorAll('.pill').forEach(function(b){b.onclick=function(){aps(+b.dataset.i)}});aps(1);
- predict($('p1'),{q:{en:'You want Jokester to always answer in rhyme. Which field do you change?',zh:'你想让 Jokester 总是用押韵的方式回答。要改哪个字段？'},opts:[{k:'a',en:'name',zh:'name'},{k:'b',en:'instructions',zh:'instructions'},{k:'c',en:'model',zh:'model'},{k:'d',en:'tools',zh:'tools'}],a:'b',ex:{en:'instructions is the system prompt, where behaviour and style are set.',zh:'instructions 就是系统提示词，行为和风格都在这里设定。'},hint:{en:'Which field is the system prompt?',zh:'哪个字段是系统提示词？'}});
+ predict($('p1'),{q:{en:'You want Quip to always answer in rhyme. Which field do you change?',zh:'你想让 Quip 总是用押韵的方式回答。要改哪个字段？'},opts:[{k:'a',en:'name',zh:'name'},{k:'b',en:'instructions',zh:'instructions'},{k:'c',en:'model',zh:'model'},{k:'d',en:'tools',zh:'tools'}],a:'b',ex:{en:'instructions is the system prompt, where behaviour and style are set.',zh:'instructions 就是系统提示词，行为和风格都在这里设定。'},hint:{en:'Which field is the system prompt?',zh:'哪个字段是系统提示词？'}});
  predict($('p2'),{q:{en:'After <code>result = await Runner.run(agent, "Tell a joke")</code>, which attribute holds the joke text?',zh:'运行 <code>result = await Runner.run(agent, "Tell a joke")</code> 之后，哪个属性里是笑话文本？'},opts:[{k:'a',en:'result.final_output',zh:'result.final_output'},{k:'b',en:'result.to_input_list()',zh:'result.to_input_list()'}],a:'a',out:{en:'print(result.final_output)\n→ Why did the AI agent cross the road? To reach its next tool call.',zh:'print(result.final_output)\n→ 这里会打印出一则笑话文本。'},ex:{en:'final_output is the answer. to_input_list() is every message of the run, handy for debugging.',zh:'final_output 是最终答案；to_input_list() 是这次运行的所有消息，调试时很有用。'},hint:{en:'Which one is “the answer”?',zh:'哪一个是“最终答案”？'}});
  predict($('p2b'),{q:{en:'What does streaming change?',zh:'流式输出改变了什么？'},opts:[{k:'a',en:'The model gives a better answer',zh:'模型给出更好的答案'},{k:'b',en:'You see the text as it is generated, instead of waiting for all of it',zh:'你能边生成边看到文字，不用等全部写完'},{k:'c',en:'The agent skips its tools',zh:'智能体会跳过工具'}],a:'b',ex:{en:'Same answer, delivered sooner. That is why chat apps feel fast.',zh:'答案相同，只是更早到达。聊天应用因此显得很快。'},hint:{en:'Did the words in the answer change, or only when you see them?',zh:'答案的内容变了，还是只是你看到的时间变了？'}});
- predict($('p3'),{q:{en:'Where does the SDK get the tool\'s <i>description</i> (when to use it)?',zh:'SDK 从哪里得到工具的<i>描述</i>（什么时候用）？'},opts:[{k:'a',en:'From the function name only',zh:'只来自函数名'},{k:'b',en:'From the Agent\'s instructions',zh:'来自 Agent 的 instructions'},{k:'c',en:'From the docstring. The type hint <code>message: str</code> gives the inputs',zh:'来自文档字符串；类型标注 <code>message: str</code> 提供输入参数'}],a:'c',ex:{en:'So the docstring is your tool description. Same rule as last week: say <b>when</b> to use it.',zh:'所以文档字符串就是你的工具描述。规则和上周一样：写清<b>什么时候</b>用。'},hint:{en:'Look at the line inside the function, between triple quotes.',zh:'看看函数里三个引号之间的那一行。'}});
+ predict($('p3'),{q:{en:'Where does the SDK get the tool\'s <i>description</i> (when to use it)?',zh:'SDK 从哪里得到工具的<i>描述</i>（什么时候用）？'},opts:[{k:'a',en:'From the function name only',zh:'只来自函数名'},{k:'b',en:'From the Agent\'s instructions',zh:'来自 Agent 的 instructions'},{k:'c',en:'From the docstring. The type hint <code>message: str</code> gives the inputs',zh:'来自文档字符串；类型标注 <code>message: str</code> 提供输入参数'}],a:'c',ex:{en:'So the docstring is your tool description. Same rule as before: say <b>when</b> to use it.',zh:'所以文档字符串就是你的工具描述。规则和之前一样：写清<b>什么时候</b>用。'},hint:{en:'Look at the line inside the function, between triple quotes.',zh:'看看函数里三个引号之间的那一行。'}});
  var sm=$('smem'),sOn=false,sPred=null,sRep=null;
  function sdraw(){
-  var h='<div class="bub u">Hi there. My name is Ed.</div><div class="bub a">Hi Ed! Nice to meet you.</div>';
+  var h='<div class="bub u">Hey! I am Mei, nice to meet you.</div><div class="bub a">Nice to meet you too, Mei!</div>';
   h+='<span class="lab">'+T({en:'Second run',zh:'第二次运行'})+'</span><div class="bub u">What\'s my name?</div>';
   h+='<div class="sw"><button class="pill'+(sOn?' on':'')+'" id="son">'+(sOn?'☑ ':'☐ ')+T({en:'Pass session=session',zh:'传入 session=session'})+'</button></div>';
   h+='<p style="margin:6px 0"><b>'+T({en:'Predict: will it know the name?',zh:'预测：它会知道名字吗？'})+'</b></p><div class="pills" style="margin:0 0 8px"><button class="pill'+(sPred==='y'?' on':'')+'" data-p="y">'+T({en:'Yes',zh:'知道'})+'</button><button class="pill'+(sPred==='n'?' on':'')+'" data-p="n">'+T({en:'No',zh:'不知道'})+'</button></div>';
   h+='<button class="btn pri" id="ssend"'+(sPred?'':' disabled')+'>'+T({en:'Run ▶',zh:'运行 ▶'})+'</button>';
   if(sRep){var knows=sRep.s,ok=(sRep.p==='y')===knows;
-   h+='<div class="bub a" style="margin-top:12px">'+(knows?'Your name is Ed.':T({en:'I don\'t know your name yet.',zh:'我还不知道你的名字。'}))+'</div><div class="note">'+(ok?'✓ ':'✗ ')+(knows?T({en:'The session replayed the first exchange, so the model saw it again.',zh:'session 回放了第一轮对话，所以模型又看到了它。'}):T({en:'A bare Runner.run sends nothing from before. Now tick the box and run again.',zh:'单独的 Runner.run 不会带上之前的内容。现在勾上选项再运行一次。'}))+'</div>'}
+   h+='<div class="bub a" style="margin-top:12px">'+(knows?'Your name is Mei.':T({en:'I don\'t know your name yet.',zh:'我还不知道你的名字。'}))+'</div><div class="note">'+(ok?'✓ ':'✗ ')+(knows?T({en:'The session replayed the first exchange, so the model saw it again.',zh:'session 回放了第一轮对话，所以模型又看到了它。'}):T({en:'A bare Runner.run sends nothing from before. Now tick the box and run again.',zh:'单独的 Runner.run 不会带上之前的内容。现在勾上选项再运行一次。'}))+'</div>'}
   sm.innerHTML=h;
   $('son').onclick=function(){sOn=!sOn;sRep=null;sdraw()};
   sm.querySelectorAll('[data-p]').forEach(function(b){b.onclick=function(){sPred=b.dataset.p;sdraw()}});
@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded',function(){
  game($('hgame'),[
   {en:'A manager agent asks a translator agent for one sentence, then writes the final reply itself.',zh:'主管智能体向翻译智能体要一句译文，然后自己写最终回复。',a:'t',ex:{en:'The manager keeps control and uses the translator like a function.',zh:'主管保持控制，把翻译智能体当函数用。'},hint:{en:'Who writes the final reply to the user?',zh:'谁写给用户的最终回复？'}},
   {en:'A triage agent decides it is a billing question and passes the whole chat to a billing agent, who replies to the customer.',zh:'分诊智能体判断这是账单问题，把整个对话交给账单智能体，由后者回复客户。',a:'h',ex:{en:'Control moves to the billing agent. That is a handoff.',zh:'控制权转到账单智能体手上，这就是交接。'},hint:{en:'Who talks to the customer next?',zh:'接下来由谁和客户说话？'}},
-  {en:'Three agents each draft a sales email, and a picker agent chooses the best one.',zh:'三个智能体各写一封销售邮件，由挑选智能体选出最好的一封。',a:'t',ex:{en:'The picker calls the writers as tools and stays in charge.',zh:'挑选者把写手当工具调用，并始终掌控全局。'},hint:{en:'Who stays in charge: the picker or the writers?',zh:'谁一直在掌控：挑选者还是写手？'}},
+  {en:'Three agents each draft a birthday message, and a picker agent chooses the best one.',zh:'三个智能体各写一条生日祝福，由挑选智能体选出最好的一条。',a:'t',ex:{en:'The picker calls the writers as tools and stays in charge.',zh:'挑选者把写手当工具调用，并始终掌控全局。'},hint:{en:'Who stays in charge: the picker or the writers?',zh:'谁一直在掌控：挑选者还是写手？'}},
   {en:'A general support agent cannot help, so a specialist takes over the conversation.',zh:'通用客服智能体解决不了，由专家接手这段对话。',a:'h',ex:{en:'The specialist takes over, so use a handoff.',zh:'由专家接手，所以用交接。'},hint:{en:'Does the first agent keep talking?',zh:'第一个智能体还会继续说话吗？'}}],[{k:'t',en:'Agent as a tool',zh:'智能体当工具'},{k:'h',en:'Handoff',zh:'交接'}],{en:'Case',zh:'情景'});
  game($('ggame'),[
   {en:'Block a user message that asks the agent to do their homework.',zh:'拦下让智能体帮忙写作业的用户消息。',a:'i',ex:{en:'It checks what comes in, before the agent works.',zh:'它检查传入的内容，在智能体开工之前。'},hint:{en:'Is the thing being checked coming in or going out?',zh:'被检查的内容是进来的还是出去的？'}},
