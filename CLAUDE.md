@@ -5,6 +5,7 @@ Bilingual (EN/中文) interactive learning site. Static HTML/CSS/JS, no build st
 ## Layout
 
 - `index.html` home page; `tracks.js` lists learning tracks (`window.TRACKS`).
+- `inbox/` raw notes for the writer agent; never deployed (`.vercelignore`).
 - `agentic-ai/` one track. `lessons.js` (`window.TRACK`) groups lessons into concept topics; a lesson with `file` is published, one without is "coming soon".
 - `agentic-ai/NN-slug.html` one lesson per file; `_template.html` is the starting point.
 - `assets/site.css|js` shared layout, nav, progress; `assets/teach.css|js` lesson widgets (`TX2.game`, `TX2.predict`, ...).
@@ -17,6 +18,8 @@ Bilingual (EN/中文) interactive learning site. Static HTML/CSS/JS, no build st
 | --- | --- | --- |
 | `copy-check.yml` | PRs into main/test, pushes to test | Runs the scrubber; fails and tells TX on Telegram |
 | `review.yml` | PRs into main | Claude reviews against `STYLE.md`, comments once, Telegram summary. Never pushes |
+| `writer.yml` | Pushes to `inbox/**` on test, or manual | Claude turns a notes folder into a lesson draft and opens a PR into test, Telegram link |
+| `telegram-ping.yml` | Manual | Sends a test Telegram message |
 
 ## Rules
 
@@ -28,6 +31,9 @@ Bilingual (EN/中文) interactive learning site. Static HTML/CSS/JS, no build st
 6. No build tools or frameworks. Plain files that open from disk.
 
 ## Adding a lesson
+
+Easiest: drop notes in `inbox/<concept>/` on test and let the writer agent draft it (see `inbox/README.md`). By hand:
+
 
 1. Copy `agentic-ai/_template.html` to `agentic-ai/NN-slug.html` (next free number).
 2. Write it to `STYLE.md`, with the tag `<Topic> · Lesson N`.
