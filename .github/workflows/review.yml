@@ -30,7 +30,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || format('refs/pull/{0}/head', inputs.pr) }}
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
       - name: Copy check result for the reviewer
         run: node scripts/check-copy.mjs > /tmp/copy-check.txt 2>&1 || true
       - uses: anthropics/claude-code-action@v1
