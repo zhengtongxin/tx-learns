@@ -77,7 +77,7 @@
 .agent.later{opacity:.6;border-style:dashed}
 .agent.hl{border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 35%,transparent)}
 .hint{font-size:12.5px;color:var(--mut);margin:4px 0 0}
-@media(max-width:760px){.agents{grid-template-columns:1fr}.agent .more{position:static;width:auto;margin-top:10px;box-shadow:none;background:transparent;border:0;padding:0}.agent:hover .more{display:none}.agent.open .more{display:flex}}
+@media(max-width:760px){.agents{grid-template-columns:1fr}.agent .more{position:static;width:auto;margin-top:10px;box-shadow:none;background:transparent;border:0;padding:0}.agent:hover .more{display:none}.agent.open .more,.agent:target .more{display:flex}}
 /* activity */
 .feed{list-style:none;margin:14px 0 0;padding:0}
 .feed li{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:baseline;padding:11px 4px;border-bottom:1px solid var(--line);font-size:14px;line-height:1.5}
@@ -148,7 +148,7 @@
 <div class="flow-wrap"><svg class="flow" id="flow" viewBox="0 0 1100 420" role="img" aria-label="Agent pipeline: draft loop on test and release to main"></svg>
 <div class="flow-key"><span><i style="border-style:dashed"></i><span class="en">event</span><span class="zh">事件</span></span><span><i style="border-color:var(--acc)"></i><span class="en">Claude agent</span><span class="zh">Claude agent</span></span><span><i></i><span class="en">script / artefact</span><span class="zh">脚本 / 产物</span></span><span><i style="border-color:var(--warn);transform:rotate(45deg) scale(.7)"></i><span class="en">human gate</span><span class="zh">人工关卡</span></span><span><i style="border-color:var(--acc2);border-style:dashed"></i><span class="en">feedback loop</span><span class="zh">反馈回路</span></span></div></div>
 <ol class="flow-list" id="flow-list"></ol>
-<h3 class="sr" style="margin:26px 0 0;font-size:15px"><span class="en">Guardrails</span><span class="zh">护栏</span></h3>
+<h3 style="margin:26px 0 0;font-size:15px"><span class="en">Guardrails</span><span class="zh">护栏</span></h3>
 <div class="guards" id="guards"></div>
 <p class="plumb"><b>record-status.mjs</b> → <b>agent-status</b> branch → <b>/api/status</b> <span class="en">(read-only token)</span><span class="zh">（只读令牌）</span> → <span class="en">this page, every 60 s</span><span class="zh">这一页，每 60 秒</span></p>
 </section>
@@ -325,14 +325,14 @@
     o+=link(1,2,C)+link(2,3,C)+link(3,4,C,0,1)+link(4,5,C,1,0)+link(5,6,C);
     o+=node(0,A,'ev','📥','Notes pushed','笔记推送','push inbox/**')+node(1,A,'ai','✍️','Writer','写手','claude · 80 turns')+node(2,A,'','🔀','PR → test','PR → test','pull_request')+
       node(3,A,'','🛡️','Copy check','原创检查','script')+gate(4,A,'merge to test','合并进 test')+node(5,A,'ev','▲','Preview built','预览生成','deployment_status')+
-      node(6,A,'ai','📖','Reader','试读员','claude · read-only')+node(6,B,'','🔧','Fix PR → test','修改 PR → test','lesson files only');
+      node(6,A,'ai','📖','Reader','试读员','claude · read-only token')+node(6,B,'','🔧','Fix PR → test','修改 PR → test','lesson files only');
     o+=node(1,C,'ev','🚀','Release PR','发布 PR','test → main')+node(2,C,'','🛡️','Copy check','原创检查','script')+node(3,C,'ai','🔎','Reviewer','审稿人','claude · comment only')+
       gate(4,C,'merge to main','合并到 main')+node(5,C,'','🌐','Live site','线上网站','vercel production')+node(6,C,'','👋','Readers','读者','you');
     o+='<text class="note" x="'+X(0)+'" y="'+(C+4)+'" text-anchor="middle"><tspan class="en">when test</tspan><tspan class="zh">test 看起来</tspan></text><text class="note" x="'+X(0)+'" y="'+(C+18)+'" text-anchor="middle"><tspan class="en">looks good</tspan><tspan class="zh">没问题时</tspan></text>';
     o+='<text class="m" x="550" y="408" text-anchor="middle"><tspan class="en">every agent → 📨 Telegram to TX · every run → status log → this page</tspan><tspan class="zh">每个 agent → 📨 Telegram 通知 TX · 每次运行 → 状态日志 → 这一页</tspan></text>';
     document.getElementById('flow').innerHTML=o;
     var L=[['h','Draft loop · test','草稿回路 · test'],['','📥 Notes pushed to the inbox','📥 笔记推送到 inbox','push inbox/**'],['','✍️ Writer drafts a lesson','✍️ 写手写出课的草稿','claude · 80 turns'],['','🔀 Pull request into test','🔀 提交到 test 的 pull request',''],
-      ['','🛡️ Copy check','🛡️ 原创检查','script'],['g','I merge into test','我合并进 test',''],['','▲ Vercel builds a preview','▲ Vercel 生成预览','deployment_status'],['','📖 Reader scores clarity','📖 试读员给清晰度打分','claude · read-only'],
+      ['','🛡️ Copy check','🛡️ 原创检查','script'],['g','I merge into test','我合并进 test',''],['','▲ Vercel builds a preview','▲ Vercel 生成预览','deployment_status'],['','📖 Reader scores clarity','📖 试读员给清晰度打分','claude · read-only token'],
       ['lp','🔧 Fix PR goes back to the copy check','🔧 修改 PR 回到原创检查','lesson files only'],['h','Release · main','发布 · main'],['','🚀 Release PR test → main','🚀 发布 PR test → main',''],['','🔎 Reviewer leaves a verdict','🔎 审稿人给出结论','claude · comment only'],
       ['g','I merge to main','我合并到 main',''],['','🌐 Live site, then readers','🌐 线上网站，然后是读者','vercel production']];
     document.getElementById('flow-list').innerHTML=L.map(function(r){return '<li class="'+r[0]+'">'+t(r[1],r[2])+(r[3]?'<small>'+r[3]+'</small>':'')+'</li>'}).join('');
