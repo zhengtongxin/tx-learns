@@ -114,7 +114,7 @@
      den:'Reads each release like an editor: the story, the facts, the code, and whether EN and 中文 match.',
      dzh:'像编辑一样读每次发布：故事、事实、代码，还有中英文是否一致。',
      ten:'Runs before anything goes live',tzh:'上线之前运行'},
-    {id:'reader',g:'vercel',ic:'📖',en:'Reader',zh:'读者',
+    {id:'reader',g:'vercel',ic:'📖',en:'Reader',zh:'试读员',
      den:'Reads new lessons as someone new to AI would, scores how clear they are and suggests fixes.',
      dzh:'像刚接触 AI 的人那样读新课，给清晰度打分，并提出修改建议。',
      ten:'Runs after every preview deploy',tzh:'每次预览部署后运行'},
@@ -132,8 +132,8 @@
   function drawFlow(S){
     var html='';STOPS.forEach(function(s,i){
       var live='';if(s.g){var ag=AGENTS.filter(function(a){return a.g===s.g}),st=ag.map(function(a){return (S[a.id]||{}).state}),
-        cls=st.indexOf('fail')>=0?'fail':st.indexOf('flag')>=0?'flag':st.indexOf('ok')>=0?'ok':'';live='<span class="live '+cls+'" title="agents">'+ag.length+'</span>'}
-      html+='<li class="stop'+(s.g?' has':'')+(s.me?' me':'')+'"'+(s.g?' data-g="'+s.g+'" tabindex="0" role="link"':'')+'><span class="ic">'+s.ic+live+'</span><span><b>'+t(s.en,s.zh)+'</b><small>'+t(s.sen,s.szh)+'</small></span></li>';
+        cls=st.indexOf('fail')>=0?'fail':st.indexOf('flag')>=0?'flag':st.indexOf('ok')>=0?'ok':'';live='<span class="live '+cls+'" aria-hidden="true">'+ag.length+'</span>'}
+      html+='<li class="stop'+(s.g?' has':'')+(s.me?' me':'')+'"'+(s.g?' data-g="'+s.g+'" tabindex="0" role="button"':'')+'><span class="ic">'+s.ic+live+'</span><span><b>'+t(s.en,s.zh)+'</b><small>'+t(s.sen,s.szh)+'</small></span></li>';
       if(i<STOPS.length-1)html+='<li class="link" aria-hidden="true"><i style="--d:'+(i*.35)+'s"></i><i style="--d:'+(i*.35+1.2)+'s"></i></li>'});
     var f=document.getElementById('flow');f.innerHTML=html;
     f.querySelectorAll('.stop.has').forEach(function(el){var go=function(){document.getElementById('g-'+el.dataset.g).scrollIntoView({behavior:'smooth',block:'start'})};
@@ -148,7 +148,7 @@
           last='<div class="last">'+esc(s.summary||'')+(s.link?' <a href="'+esc(s.link)+'" target="_blank" rel="noopener">'+t('See it →','查看 →')+'</a>':'')+'</div>'}
         else pill='<span class="pill">'+(live?t('No runs yet','还没运行'):t('Offline','离线'))+'</span>';
         var fresh=s&&(Date.now()-new Date(s.at))<15*60e3;
-        return '<article class="card agent spot'+(a.later?' later':'')+'" id="a-'+a.id+'"><div class="hd"><span class="ai'+(fresh?' fresh" title="Finished in the last 15 min · 15 分钟内刚完成':'')+'">'+a.ic+'</span><div><h4>'+t(a.en,a.zh)+'</h4>'+
+        return '<article class="card agent spot'+(a.later?' later':'')+'" id="a-'+a.id+'"><div class="hd"><span class="ai'+(fresh?' fresh':'')+'">'+a.ic+'</span><div><h4>'+t(a.en,a.zh)+'</h4>'+
           '<div class="when">'+(s?ago(s.at)+(s.runs?' · '+t(s.runs+' runs',s.runs+' 次'):''):t(a.ten,a.tzh))+'</div></div>'+pill+'</div>'+
           '<p>'+t(a.den,a.dzh)+'</p>'+(s?'<div class="trig">'+t(a.ten,a.tzh)+'</div>':'')+last+'</article>'}).join('')})}
 
