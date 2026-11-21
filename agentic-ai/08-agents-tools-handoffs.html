@@ -52,8 +52,8 @@ print(</span><span class="chg">result.last_agent.name</span><span class="dim">) 
 <div class="sc" id="g3"></div>
 
 <h2><span class="en">Step 4 · Input guardrail: check what comes in</span><span class="zh">第 4 步 · 输入护栏：检查进来的内容</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Some customers paste their full card number into the chat. Fern should never even read it. An <b>input guardrail</b> is a check that runs on the customer's message at the start of the run. It returns <code>GuardrailFunctionOutput</code>, and if <code>tripwire_triggered</code> is true, the SDK stops the run by raising <code>InputGuardrailTripwireTriggered</code>. Like a smoke alarm: it does not cook, it only stops things when it sees trouble.</p>
-<p class="zh"style="margin:0 0 8px">有些顾客会把完整的银行卡号贴进聊天框。Fern 根本不该读到它。<b>输入护栏</b>是在运行开始时检查顾客消息的一道关卡。它返回 <code>GuardrailFunctionOutput</code>；如果 <code>tripwire_triggered</code> 为真，SDK 就抛出 <code>InputGuardrailTripwireTriggered</code> 叫停运行。就像烟雾报警器：它不做饭，只在发现问题时喊停。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Some customers paste their full card number into the chat. Fern must never act on it. An <b>input guardrail</b> is a check on the customer's message that can stop the run before Fern replies. It returns <code>GuardrailFunctionOutput</code>, and if <code>tripwire_triggered</code> is true, the SDK stops the run by raising <code>InputGuardrailTripwireTriggered</code>. Like a smoke alarm: it does not cook, it only stops things when it sees trouble.</p>
+<p class="zh"style="margin:0 0 8px">有些顾客会把完整的银行卡号贴进聊天框。Fern 绝不能据此行事。<b>输入护栏</b>是检查顾客消息的一道关卡，能在 Fern 回复之前叫停运行。它返回 <code>GuardrailFunctionOutput</code>；如果 <code>tripwire_triggered</code> 为真，SDK 就抛出 <code>InputGuardrailTripwireTriggered</code> 叫停运行。就像烟雾报警器：它不做饭，只在发现问题时喊停。</p></div>
 <div class="codebox"><span class="dim">import re
 from agents import input_guardrail, GuardrailFunctionOutput, InputGuardrailTripwireTriggered
 
