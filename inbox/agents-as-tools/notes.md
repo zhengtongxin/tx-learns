@@ -28,3 +28,4 @@ manager = Agent(
     input_guardrails=[no_homework],
 )
 ```
+- Second thought: as_tool is like a function call that happens to be an agent.
