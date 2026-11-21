@@ -1,0 +1,426 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agents and agentic patterns</title><link rel="stylesheet" href="../assets/site.css">
+<style>
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px}
+.tabs button,.pk button,.yn button{border:1px solid var(--line);background:var(--glass);color:var(--fg);border-radius:999px;padding:7px 15px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;transition:.25s}
+.tabs button{color:var(--mut)}
+.tabs button:hover,.pk button:hover,.yn button:hover{border-color:var(--acc);color:var(--fg)}
+.tabs button.on,.yn button.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.dsvg{width:100%;height:auto;display:block;background-image:radial-gradient(var(--line) 1px,transparent 1px);background-size:22px 22px;border-radius:16px}
+.dsvg .edge{fill:none;stroke:var(--mut);stroke-width:2;opacity:.55}.dsvg .edge.sub{stroke-dasharray:5 5}
+.dsvg .edge.on{stroke:var(--acc2);stroke-width:3.5;opacity:1;stroke-dasharray:7 6;animation:dash .5s linear infinite;filter:drop-shadow(0 0 6px var(--acc2))}
+.dsvg .node rect{fill:var(--node);stroke:var(--line);stroke-width:2;transition:.25s}
+.dsvg .node.llm rect{stroke:var(--acc)}.dsvg .node.tool rect{stroke-dasharray:5 4;stroke:var(--warn)}
+.dsvg .node.on rect{stroke:var(--ok);stroke-width:3.5;filter:drop-shadow(0 0 12px var(--ok))}
+.dsvg text{fill:var(--fg);font:600 13px "Inter","PingFang SC",sans-serif;text-anchor:middle;pointer-events:none}
+.dsvg .elab{font-size:11px;fill:var(--acc2);font-weight:700}.dsvg .ah{fill:var(--mut)}
+.cap{min-height:48px;margin-top:12px;padding:12px 16px;border-radius:16px;background:color-mix(in srgb,var(--acc) 10%,transparent);font-size:.98rem}
+.nav{display:flex;gap:10px;align-items:center;margin-top:10px}.nav small{color:var(--mut);font-weight:600}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:12px}
+.facts div{border:1px solid var(--line);border-radius:16px;padding:12px 14px;background:var(--glass);font-size:.95rem}
+.facts b{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc2);margin-bottom:4px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}.three{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:1.2em 0}
+.card h4{margin:0 0 6px;font-size:1rem}
+.known{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.known span{font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:99px;border:1px solid var(--line);background:var(--glass);color:var(--mut)}
+.known span.y{color:var(--ok);border-color:var(--ok)}
+.acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin:12px 0}
+.ent{border-left:3px solid var(--acc);padding:6px 12px;margin:8px 0;animation:fade .3s;font-size:.96rem}.ent.o{border-color:var(--warn);color:var(--mut)}
+.roles{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:6px;align-items:stretch;margin:14px 0}
+.roles .r{border:1px solid var(--line);border-radius:16px;padding:10px 12px;background:var(--glass);font-size:13px;line-height:1.4;text-align:center}
+.roles .r b{display:block;font-size:14px}.roles .r small{color:var(--mut)}
+.roles .r.me{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc),0 8px 30px var(--glow)}
+.roles .ar{align-self:center;color:var(--mut)}
+.lbl2{display:block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin:14px 0 6px;font-weight:700}
+.lbl2.me{color:var(--acc)}
+.ent.me{border-color:var(--acc)}
+.logbox{border:1px dashed var(--line);border-radius:14px;padding:8px 12px;min-height:54px}
+.logbox .empty{color:var(--mut);font-size:.93rem;padding:6px 0}
+@media(max-width:720px){.roles{grid-template-columns:1fr}.roles .ar{transform:rotate(90deg);justify-self:center}}
+.sc{border:1px solid var(--line);border-radius:18px;padding:14px 16px;margin:12px 0;background:var(--glass)}
+.pk,.yn{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.pk button.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 16%,transparent)}
+.pk button.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 16%,transparent)}
+.sc .ex{display:none;margin-top:10px;font-size:.93rem;color:var(--mut)}.sc.done .ex{display:block}
+.dsvg .node.leaf rect{stroke:var(--acc2)}
+.dsvg .node.leaf.on rect{stroke:var(--ok)}
+.dsvg .note{font-size:12px;fill:var(--mut);font-weight:500;text-anchor:start}
+.mt{position:relative;display:grid;grid-template-columns:1fr 1fr;column-gap:clamp(48px,14vw,150px);margin:14px 0}
+.mt svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.mt .col{display:grid;gap:10px;align-content:start}
+.mt path{fill:none;stroke:var(--acc2);stroke-width:3;stroke-linecap:round}
+.mt path.ok{stroke:var(--ok)}.mt path.no{stroke:var(--bad)}.mt path.tmp{stroke-dasharray:6 6;opacity:.8}
+.mi{border:1px solid var(--line);background:var(--glass);border-radius:14px;padding:10px 14px;font-size:14px;line-height:1.45;cursor:pointer;transition:.2s;position:relative;user-select:none;min-height:66px;display:flex;align-items:center}
+.mi.r{justify-content:center;font-weight:700;text-align:center}
+.mi:hover{border-color:var(--acc)}
+.mi.sel{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc),0 8px 26px var(--glow)}
+.mi.linked{border-color:var(--acc2)}
+.mi.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,transparent)}
+.mi.no{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,transparent)}
+.mi .dot{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;background:var(--acc2);transform:translateY(-50%);opacity:.5}
+.mi.l .dot{right:-7px}.mi.r .dot{left:-7px}.mi.linked .dot,.mi.sel .dot{opacity:1}
+.mw{margin:10px 0}.mw .row{border-left:3px solid var(--line);padding:6px 12px;margin:6px 0;font-size:.95rem}.mw .row.ok{border-color:var(--ok)}.mw .row.no{border-color:var(--bad)}
+.tk{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin:1.2em 0}
+.tk .c{position:relative;border:1px solid var(--line);border-radius:22px;padding:20px 22px 18px;background:var(--glass);overflow:hidden}
+.tk .c .n{font:800 3rem/1 "Inter",sans-serif;letter-spacing:-.05em;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tk .c h4{margin:6px 0 10px;font-size:1.12rem;letter-spacing:-.02em}
+.tk .c .rw{margin:8px 0;font-size:.95rem;line-height:1.55}
+.tk .c .rw b{display:inline-block;min-width:74px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);vertical-align:1px}
+.tk .c .rw.imp b{color:var(--bad)}.tk .c .rw.do b{color:var(--ok)}
+.bars{display:flex;align-items:flex-end;gap:6px;height:96px;margin:6px 0 2px}
+.bars i{flex:1;border-radius:6px 6px 0 0;background:var(--line);transition:height .5s cubic-bezier(.2,.8,.2,1);height:0;position:relative}
+.bars.wf i{background:color-mix(in srgb,var(--acc) 70%,transparent)}.bars.ag i{background:linear-gradient(180deg,var(--warn),color-mix(in srgb,var(--warn) 40%,transparent))}
+.bars i b{position:absolute;top:-17px;left:0;right:0;text-align:center;font-size:11px;font-weight:700;color:var(--mut)}
+.simsum{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:10px}
+.simsum div{border:1px solid var(--line);border-radius:14px;padding:10px 14px;font-size:.93rem;background:var(--glass)}
+.simsum b{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc2)}
+@media(max-width:720px){.two{grid-template-columns:1fr}}
+</style></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+
+<div class="hero">
+<span class="tag"><span class="en">Week 1 · Lesson 2</span><span class="zh">第 1 周 · 第 2 课</span></span>
+<h1><span class="en">Agents and agentic patterns</span><span class="zh">智能体与智能体模式</span></h1>
+<p class="meta"><span class="en">Learn by doing: play the agent, step through the patterns, make the call yourself · ~15 min</span><span class="zh">边做边学：亲自扮演智能体、逐步拆解模式、自己做判断 · 约 15 分钟</span></p>
+</div>
+
+<h2><span class="en">Step 1 · Be the agent</span><span class="zh">第 1 步 · 亲自当智能体</span></h2>
+<p class="en">Role-play before any definition: <b>you are the brain of an AI agent (the LLM).</b> In a real agent, a model makes the choice below every turn. Today that model is you.</p>
+<p class="zh">先角色扮演，再看定义：<b>你就是 AI 智能体的“大脑”（大模型）。</b>在真实的智能体里，下面每一轮的选择都由模型来做，今天由你来做。</p>
+<div class="roles">
+  <div class="r me"><b>🧠 <span class="en">You = the LLM</span><span class="zh">你 = 大模型</span></b><small><span class="en">read the log, pick a tool</span><span class="zh">读日志，选工具</span></small></div>
+  <div class="ar">→</div>
+  <div class="r"><b>🔧 <span class="en">Tools</span><span class="zh">工具</span></b><small><span class="en">do the work, return a result</span><span class="zh">执行并返回结果</span></small></div>
+  <div class="ar">→</div>
+  <div class="r"><b>📜 <span class="en">Log</span><span class="zh">日志</span></b><small><span class="en">the only thing you can see</span><span class="zh">你唯一能看到的信息</span></small></div>
+</div>
+<p class="en">Repeat until the goal is done, in as few turns as you can.</p>
+<p class="zh">重复这个过程，直到目标完成，轮数越少越好。</p>
+<div class="wfwrap">
+  <span class="role"><span class="en">Goal</span><span class="zh">目标</span></span>
+  <p style="margin:.3em 0"><span class="en"><b>Find a KL → Tokyo flight price, work out the total for 2 tickets in SGD, email me the total, then give the final answer.</b></span><span class="zh"><b>查出吉隆坡→东京的机票价格，算出 2 张票的新元总价，把总价发邮件给我，然后给出最终答案。</b></span></p>
+  <span class="lbl2"><span class="en">Checklist</span><span class="zh">进度清单</span></span>
+  <div class="known" id="bk"></div>
+  <span class="lbl2"><span class="en">📜 Log: what the LLM has seen so far</span><span class="zh">📜 日志：大模型目前看到的内容</span></span>
+  <div class="logbox" id="bl"></div>
+  <span class="lbl2 me"><span class="en">🧠 Your turn as the LLM: which tool do you call next?</span><span class="zh">🧠 轮到你这个大模型了：下一步调用哪个工具？</span></span>
+  <div class="acts" id="bacts"></div>
+  <div id="bres"></div>
+</div>
+
+<h2><span class="en">Step 2 · What you just did</span><span class="zh">第 2 步 · 你刚才做了什么</span></h2>
+<p class="en">Each turn you looked at what you knew, <b>chose an action</b>, got a result, and decided again. That cycle is the heart of an agent. Step through it:</p>
+<p class="zh">每一轮你都先看自己已知的信息，<b>选一个动作</b>，拿到结果，再做决定。这个循环就是智能体的核心。逐步看一遍：</p>
+<div class="wfwrap">
+  <svg class="dsvg" id="lsvg" viewBox="0 0 720 260" role="img"></svg>
+  <div class="cap" id="lcap"></div>
+  <div class="nav"><button class="btn" id="lp">←</button><button class="btn pri" id="ln">→</button><small id="lc"></small></div>
+</div>
+<p class="en">People define “agent” in three ways. They are not rivals: they are <b>one idea at three zoom levels</b>. Press <b>Zoom in</b> and watch the box open up.</p>
+<p class="zh">人们用三种方式定义“智能体”。它们不是互相竞争，而是<b>同一个想法的三个放大层级</b>。点“放大”，看这个盒子被打开。</p>
+<div class="wfwrap">
+  <div class="tabs" id="zt"></div>
+  <svg class="dsvg" id="zsvg" viewBox="0 0 720 260" role="img"></svg>
+  <div class="cap" id="zcap"></div>
+  <div class="nav"><button class="btn" id="zp"></button><button class="btn pri" id="zn"></button><small id="zc"></small></div>
+  <div class="facts" id="zfacts"></div>
+</div>
+<div class="callout tip"><b class="lbl"><span class="en">Remember this</span><span class="zh">记住这句</span></b><span class="en"><b>An agent is an LLM with tools, running in a loop, to achieve a goal.</b></span><span class="zh"><b>智能体 = 带着工具、在循环中运行、为达成目标而工作的大模型。</b></span></div>
+<div class="quiz" data-answer="b">
+  <p class="q"><span class="en">In the game, what made it an agent and not a fixed script?</span><span class="zh">在刚才的游戏里，是什么让它成为智能体而不是固定脚本？</span></p>
+  <button class="opt" data-k="a"><span class="en">It used a calculator tool</span><span class="zh">它用了计算器工具</span></button>
+  <button class="opt" data-k="b"><span class="en">The LLM chose each next step based on the results so far</span><span class="zh">大模型根据已有结果自己选择每一步</span></button>
+  <button class="opt" data-k="c"><span class="en">It sent an email</span><span class="zh">它发了邮件</span></button>
+  <div class="explain"><span class="en">Tools alone don’t make an agent. A script can call tools too. The LLM choosing the path does.</span><span class="zh">光有工具不算智能体，脚本也能调用工具。关键在于由大模型来选路径。</span></div>
+</div>
+
+<h2><span class="en">Step 3 · Workflow vs agent</span><span class="zh">第 3 步 · 工作流 vs 智能体</span></h2>
+<p class="en">Your task could also be built as a <b>workflow</b>: you write the route in code (search → rate → calculate → email → answer), and the LLM only fills in each step. Both are <b>agentic systems</b>. The difference is who decides.</p>
+<p class="zh">同一个任务也可以做成<b>工作流</b>：路线由你用代码写死（搜索→汇率→计算→发邮件→回答），大模型只负责填每一步的内容。两者都叫<b>智能体系统</b>，区别在于由谁决定。</p>
+<table>
+  <tr><th></th><th>⚙️ <span class="en">Workflow</span><span class="zh">工作流</span></th><th>🧭 <span class="en">Agent</span><span class="zh">智能体</span></th></tr>
+  <tr><td><b><span class="en">Who picks the next step</span><span class="zh">谁决定下一步</span></b></td><td><span class="en">Your code</span><span class="zh">你的代码</span></td><td><span class="en">The LLM</span><span class="zh">大模型</span></td></tr>
+  <tr><td><b><span class="en">Path</span><span class="zh">路径</span></b></td><td><span class="en">Same every run</span><span class="zh">每次相同</span></td><td><span class="en">Can differ each run</span><span class="zh">每次可能不同</span></td></tr>
+  <tr><td><b><span class="en">Steps and cost</span><span class="zh">步数与成本</span></b></td><td><span class="en">Predictable</span><span class="zh">可预测</span></td><td><span class="en">Varies (you saw your own step count)</span><span class="zh">会变化（你已看到自己的步数）</span></td></tr>
+  <tr><td><b><span class="en">Best when</span><span class="zh">适用于</span></b></td><td><span class="en">You know the steps</span><span class="zh">步骤已知</span></td><td><span class="en">Open-ended; the steps depend on what turns up</span><span class="zh">开放式；步骤取决于途中发现什么</span></td></tr>
+</table>
+
+<h2><span class="en">Step 4 · The 5 workflow patterns</span><span class="zh">第 4 步 · 5 种工作流模式</span></h2>
+<p class="en">Most workflows are built from five shapes. Pick one, then use <b>→</b> to walk through it at your own pace.</p>
+<p class="zh">大多数工作流由五种形状搭成。选一个，然后用 <b>→</b> 按自己的节奏逐步查看。</p>
+<div class="wfwrap">
+  <div class="tabs" id="pt"></div>
+  <svg class="dsvg" id="psvg" viewBox="0 0 720 250" role="img"></svg>
+  <div class="cap" id="pcap"></div>
+  <div class="nav"><button class="btn" id="pp">←</button><button class="btn pri" id="pn">→</button><small id="pc"></small></div>
+  <div class="facts" id="pfacts"></div>
+</div>
+<h3><span class="en">Your turn: draw the lines</span><span class="zh">轮到你：连线</span></h3>
+<p class="en">Connect each situation to the pattern that fits. Click a situation, then a pattern, or drag from one to the other. Press <b>Check</b> when all five are linked.</p>
+<p class="zh">把每个场景连到合适的模式。先点场景再点模式，或者直接从一个拖到另一个。五条都连好后点<b>检查</b>。</p>
+<div class="mt" id="mt"><svg id="mtsvg"></svg><div class="col" id="mtl"></div><div class="col" id="mtr"></div></div>
+<div class="nav"><button class="btn pri" id="mtc"></button><button class="btn" id="mtx"></button><small id="mts"></small></div>
+<div class="mw" id="mtw"></div>
+
+<h2><span class="en">Step 5 · The price of freedom</span><span class="zh">第 5 步 · 自由的代价</span></h2>
+<p class="en">An agent’s path, output and cost are <b>unpredictable</b>. Two tools keep that under control:</p>
+<p class="zh">智能体的路径、输出和成本都<b>难以预测</b>。有两样工具可以把它管住：</p>
+<div class="two">
+  <div class="callout tip" style="margin:0"><b class="lbl"><span class="en">Monitor</span><span class="zh">监控</span></b><span class="en"><b>Observability</b> shows what happened. <b>Evals</b> measure how good it is.</span><span class="zh"><b>可观测性</b>让你看清发生了什么，<b>评测</b>衡量效果好坏。</span></div>
+  <div class="callout tip" style="margin:0"><b class="lbl"><span class="en">Guardrails</span><span class="zh">护栏</span></b><span class="en">Keep behaviour <b>safe</b>, <b>consistent</b> and inside <b>intended boundaries</b>.</span><span class="zh">让行为<b>安全</b>、<b>一致</b>，并在<b>设定的边界</b>之内。</span></div>
+</div>
+<div class="quiz" data-answer="c">
+  <p class="q"><span class="en">Same input: last week the agent took 3 steps, today 14. Which tool tells you what happened?</span><span class="zh">同样的输入：上周智能体用了 3 步，今天用了 14 步。哪个工具能告诉你发生了什么？</span></p>
+  <button class="opt" data-k="a"><span class="en">Guardrails</span><span class="zh">护栏</span></button>
+  <button class="opt" data-k="b"><span class="en">A bigger model</span><span class="zh">更大的模型</span></button>
+  <button class="opt" data-k="c"><span class="en">Monitoring (traces of every step)</span><span class="zh">监控（记录每一步的轨迹）</span></button>
+  <div class="explain"><span class="en">You can’t fix what you can’t see. Traces show the path it took.</span><span class="zh">看不见就没法修。轨迹能显示它走了哪条路。</span></div>
+</div>
+<div class="quiz" data-answer="a">
+  <p class="q"><span class="en">Your agent starts emailing customers off-topic replies. What stops that?</span><span class="zh">你的智能体开始给客户发跑题的回复。用什么来阻止？</span></p>
+  <button class="opt" data-k="a"><span class="en">Guardrails (block unsafe or off-topic output)</span><span class="zh">护栏（拦截不安全或跑题的输出）</span></button>
+  <button class="opt" data-k="b"><span class="en">A longer prompt</span><span class="zh">更长的提示词</span></button>
+  <button class="opt" data-k="c"><span class="en">More tools</span><span class="zh">更多工具</span></button>
+  <div class="explain"><span class="en">Guardrails check output and limit what the agent may do. Remember the step limit in the game?</span><span class="zh">护栏会检查输出并限制智能体能做的事。还记得游戏里的步数上限吗？</span></div>
+</div>
+
+<h2><span class="en">Step 6 · Two traps</span><span class="zh">第 6 步 · 两个陷阱</span></h2>
+<div class="two">
+  <div class="card" style="margin:0"><h4>🎯 <span class="en">No business problem</span><span class="zh">没有业务问题</span></h4>
+    <p class="en" style="margin:0">LLMs <i>generate</i> content; that doesn’t make it <i>good</i>. Name the business outcome you are improving and a <b>metric</b> for it. Without a metric you can’t tell if the agent helps.</p>
+    <p class="zh" style="margin:0">大模型擅长<i>生成</i>，但不代表<i>好</i>。先明确要改善的业务结果和对应的<b>指标</b>。没有指标，就无法判断智能体是否有用。</p></div>
+  <div class="card" style="margin:0"><h4>🧑‍💼 <span class="en">Anthropomorphizing</span><span class="zh">拟人化</span></h4>
+    <p class="en" style="margin:0">A “CEO agent” and an “intern agent” feel natural, but an LLM is <b>not a person</b>. It predicts plausible text. Role prompts are a useful technique (Week 3 uses them), but design the system around the task, not an org chart.</p>
+    <p class="zh" style="margin:0">“CEO 智能体”“实习生智能体”听起来很自然，但大模型<b>不是人</b>，它只是预测合理的文字。给模型设定角色是有用的技巧（第 3 周会用到），但系统要围绕任务来设计，而不是组织架构图。</p></div>
+</div>
+
+<h2><span class="en">Step 7 · Decide: workflow or agent?</span><span class="zh">第 7 步 · 判断：工作流还是智能体？</span></h2>
+<p class="en">The right approach: start simple, measure, and only climb when it pays off. Think of a real task of yours and answer honestly.</p>
+<p class="zh">正确做法：从简单开始、衡量，只有值得时才往上走。想一个你自己的真实任务，如实回答。</p>
+<div class="wfwrap">
+  <svg class="dsvg" id="tsvg" viewBox="0 0 880 380" role="img"></svg>
+  <div class="cap"><span class="en">The full map. Answer the three questions below and your path lights up.</span><span class="zh">完整地图。回答下面三个问题，你的路径就会亮起来。</span></div>
+</div>
+<div id="dec"></div>
+<div id="dres"></div>
+
+<h2><span class="en">Takeaways: why this lesson matters</span><span class="zh">要点回顾：这一课为什么重要</span></h2>
+<div class="callout"><b class="lbl"><span class="en">The one idea</span><span class="zh">核心一句</span></b><span class="en"><b>Agents are powerful and unpredictable. Decide with a metric, not with hype.</b> Skip this and you pay more, get more variation, and cannot prove it helped.</span><span class="zh"><b>智能体强大，但难以预测。用指标做决定，而不是靠热度。</b>忽略这一点，你会花更多钱、得到更大的波动，还无法证明它有用。</span></div>
+<div class="tk">
+  <div class="c"><div class="n">01</div><h4><span class="en">Measure what matters</span><span class="zh">衡量真正重要的东西</span></h4>
+    <div class="rw"><b><span class="en">Means</span><span class="zh">含义</span></b><span class="en">Start from a business problem and a number you can track.</span><span class="zh">从业务问题和一个可追踪的数字出发。</span></div>
+    <div class="rw imp"><b><span class="en">Impact</span><span class="zh">影响</span></b><span class="en">No metric, no proof. You can spend weeks building and never know if it helps.</span><span class="zh">没有指标就没有证据。你可能花数周搭建，却始终不知道有没有用。</span></div>
+    <div class="rw do"><b><span class="en">Do this</span><span class="zh">怎么做</span></b><span class="en">Write one metric before you build, such as minutes saved per ticket.</span><span class="zh">动手前先写下一个指标，例如每张工单节省的分钟数。</span></div></div>
+  <div class="c"><div class="n">02</div><h4><span class="en">Let performance pick the design</span><span class="zh">让实际表现决定方案</span></h4>
+    <div class="rw"><b><span class="en">Means</span><span class="zh">含义</span></b><span class="en">Single call, then workflow, then agent. Climb only when the metric improves.</span><span class="zh">先单次调用，再工作流，最后才是智能体。只有指标改善才往上走。</span></div>
+    <div class="rw imp"><b><span class="en">Impact</span><span class="zh">影响</span></b><span class="en">Agents add cost, variation and risk. Jumping straight to one burns budget.</span><span class="zh">智能体会增加成本、波动和风险。一上来就用它会白白烧预算。</span></div>
+    <div class="rw do"><b><span class="en">Do this</span><span class="zh">怎么做</span></b><span class="en">Baseline with the simplest option, then compare the next one up.</span><span class="zh">先用最简单的方案做基线，再和上一级方案对比。</span></div></div>
+  <div class="c"><div class="n">03</div><h4><span class="en">Plausible is not accurate</span><span class="zh">合理不等于准确</span></h4>
+    <div class="rw"><b><span class="en">Means</span><span class="zh">含义</span></b><span class="en">An LLM writes likely text. It can sound right and be wrong.</span><span class="zh">大模型生成的是“很可能”的文字，听起来对，也可能是错的。</span></div>
+    <div class="rw imp"><b><span class="en">Impact</span><span class="zh">影响</span></b><span class="en">Confident mistakes reach customers and decisions.</span><span class="zh">自信的错误会流向客户和决策。</span></div>
+    <div class="rw do"><b><span class="en">Do this</span><span class="zh">怎么做</span></b><span class="en">Add evals, guardrails and a human check for high-stakes output.</span><span class="zh">加入评测、护栏，高风险输出再加人工复核。</span></div></div>
+  <div class="c"><div class="n">04</div><h4><span class="en">Tie output to business results</span><span class="zh">让输出对齐业务结果</span></h4>
+    <div class="rw"><b><span class="en">Means</span><span class="zh">含义</span></b><span class="en">A great demo is not value. Value is a number that moved.</span><span class="zh">漂亮的演示不等于价值，价值是某个数字真的变了。</span></div>
+    <div class="rw imp"><b><span class="en">Impact</span><span class="zh">影响</span></b><span class="en">Teams ship impressive agents that change nothing the business cares about.</span><span class="zh">团队做出了很惊艳的智能体，却没改变业务关心的任何东西。</span></div>
+    <div class="rw do"><b><span class="en">Do this</span><span class="zh">怎么做</span></b><span class="en">Report in business units: hours saved, cost per case, error rate.</span><span class="zh">用业务单位汇报：节省工时、单案成本、错误率。</span></div></div>
+</div>
+<h3><span class="en">See the impact: run the same task 10 times</span><span class="zh">看看影响：同一任务运行 10 次</span></h3>
+<p class="en">Same goal as the game. Each bar is how many steps one run took. In a workflow only some steps are LLM calls; the rest is plain code.</p>
+<p class="zh">目标和前面的游戏相同。每根柱子表示一次运行用了多少步。工作流中只有部分步骤是大模型调用，其余是普通代码。</p>
+<div class="wfwrap">
+  <span class="lbl2"><span class="en">⚙️ Workflow</span><span class="zh">⚙️ 工作流</span></span><div class="bars wf" id="bwf"></div>
+  <span class="lbl2"><span class="en">🧭 Agent</span><span class="zh">🧭 智能体</span></span><div class="bars ag" id="bag"></div>
+  <div class="nav"><button class="btn pri" id="simgo"></button></div>
+  <div class="simsum" id="simsum"></div>
+</div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script>
+<script>
+(function(){
+ var t=TX.t;function $(i){return document.getElementById(i)}
+ function N(id,x,y,w,h,en,zh,k){return {id:id,x:x,y:y,w:w,h:h,en:en,zh:zh,k:k||''}}
+ function E(id,a,b,o){o=o||{};o.id=id;o.a=a;o.b=b;return o}
+ function render(svg,spec){
+  var by={};spec.nodes.forEach(function(n){by[n.id]=n});
+  var h='<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker></defs>';
+  spec.edges.forEach(function(e){var d=e.d;if(!d){var a=by[e.a],b=by[e.b],x1=a.x+a.w,y1=a.y+a.h/2,x2=b.x,y2=b.y+b.h/2,mx=(x1+x2)/2;d='M'+x1+','+y1+' C'+mx+','+y1+' '+mx+','+y2+' '+x2+','+y2}
+   h+='<path class="edge'+(e.s?' sub':'')+'" data-e="'+e.id+'" d="'+d+'" marker-end="url(#ar)"/>';
+   if(e.l)h+='<text class="elab en" x="'+e.lx+'" y="'+e.ly+'">'+e.l.en+'</text><text class="elab zh" x="'+e.lx+'" y="'+e.ly+'">'+e.l.zh+'</text>'});
+  spec.nodes.forEach(function(n){var cx=n.x+n.w/2,cy=n.y+n.h/2+5;
+   h+='<g class="node '+n.k+'" data-id="'+n.id+'"><rect x="'+n.x+'" y="'+n.y+'" width="'+n.w+'" height="'+n.h+'" rx="14"/><text class="en" x="'+cx+'" y="'+cy+'">'+n.en+'</text><text class="zh" x="'+cx+'" y="'+cy+'">'+n.zh+'</text></g>'});
+  svg.innerHTML=h}
+ function stepper(svg,cap,pv,nx,ct,get){var i=0;
+  function show(){var sp=get(),s=sp.steps[i];svg.querySelectorAll('.on').forEach(function(x){x.classList.remove('on')});
+   (s.n||[]).forEach(function(id){var q=svg.querySelector('.node[data-id="'+id+'"]');if(q)q.classList.add('on')});
+   (s.e||[]).forEach(function(id){var q=svg.querySelector('.edge[data-e="'+id+'"]');if(q)q.classList.add('on')});
+   cap.innerHTML='<span class="en">'+s.note.en+'</span><span class="zh">'+s.note.zh+'</span>';ct.textContent=(i+1)+' / '+sp.steps.length;pv.disabled=i===0;nx.disabled=i===sp.steps.length-1}
+  pv.onclick=function(){i--;show()};nx.onclick=function(){i++;show()};
+  return {reset:function(){i=0;show()}}}
+ function st(n,e,en,zh){return {n:n,e:e,note:{en:en,zh:zh}}}
+
+ /* 1 · be the agent */
+ var K=[['price',{en:'Flight price',zh:'机票价格'}],['rate',{en:'USD→SGD rate',zh:'美元兑新元汇率'}],['total',{en:'Total in SGD',zh:'新元总价'}],['sent',{en:'Email sent',zh:'邮件已发送'}]];
+ var A=[['s','🔎',{en:'Search flight price',zh:'搜索机票价格'}],['r','💱',{en:'Look up exchange rate',zh:'查询汇率'}],['c','🧮',{en:'Calculate total',zh:'计算总价'}],['e','📧',{en:'Send email',zh:'发送邮件'}],['a','✅',{en:'Give final answer',zh:'给出最终答案'}]];
+ var MAX=8,f,n,fin,kn=$('bk'),lg=$('bl'),ac=$('bacts'),rs=$('bres');
+ A.forEach(function(a){var b=document.createElement('button');b.className='btn';b.innerHTML=a[1]+' '+t(a[2]);b.title='tool';b.onclick=function(){act(a[0])};ac.appendChild(b)});
+ function draw(){kn.innerHTML=K.map(function(k){return '<span class="'+(f[k[0]]?'y':'')+'">'+(f[k[0]]?'✓ ':'○ ')+t(k[1])+'</span>'}).join('')+'<span>'+t({en:'Turn '+n+' / '+MAX,zh:'第 '+n+' / '+MAX+' 轮'})+'</span>';
+  ac.querySelectorAll('button').forEach(function(b){b.disabled=!!fin})}
+ function ent(c,h){var e0=lg.querySelector('.empty');if(e0)e0.remove();var d=document.createElement('div');d.className='ent '+c;d.innerHTML=h;lg.appendChild(d)}
+ function reset(){f={price:0,rate:0,total:0,sent:0};n=0;fin=0;lg.innerHTML='<div class="empty">'+t({en:'Empty so far. Pick a tool below to make your first call.',zh:'目前为空。从下方选一个工具，发出你的第一次调用。'})+'</div>';rs.innerHTML='';draw()}
+ function end(cls,en,zh){fin=1;rs.innerHTML='<div class="callout '+cls+'">'+t({en:en,zh:zh})+'<div style="margin-top:10px"><button class="btn" id="again">↻ '+t({en:'Try a different route',zh:'换一条路线再试'})+'</button></div></div>';$('again').onclick=reset;draw()}
+ function act(k){if(fin)return;n++;var a=A.filter(function(x){return x[0]===k})[0],o;
+  ent('me','<b>'+t({en:'Turn '+n,zh:'第 '+n+' 轮'})+'</b> · 🧠 '+t({en:'You (LLM) call:',zh:'你（大模型）调用：'})+' '+a[1]+' '+t(a[2]));
+  if(k==='a'){if(f.total&&f.sent){end('tip','<b>Goal met in '+n+' steps.</b> A workflow would run the same 5 steps every time. You chose your own route; that is what makes it an agent. It also means steps (and cost) change from run to run'+(n>5?', and your extra steps were extra LLM calls (each agent step is one)':'')+'.','<b>用 '+n+' 步完成目标。</b>工作流每次都会固定执行同样的 5 步。你自己选了路线，这正是智能体的特点，也意味着步数（和成本）每次可能不同'+(n>5?'，而你多出来的步骤就是多花的大模型调用':'')+'。')}
+   else end('warn','<b>Answered too early.</b> The goal was not finished yet (still missing: '+(f.total?'the email':'the total and the email')+'). An agent must check its progress before it stops.','<b>回答得太早。</b>目标还没完成（还缺：'+(f.total?'发送邮件':'总价和发送邮件')+'）。智能体停下之前必须检查进度。');draw();return}
+  if(k==='s'){f.price=1;o={en:'Flight KL→Tokyo: USD 300 per ticket.',zh:'吉隆坡→东京机票：每张 300 美元。'}}
+  else if(k==='r'){f.rate=1;o={en:'1 USD = 1.35 SGD.',zh:'1 美元 = 1.35 新元。'}}
+  else if(k==='c'){if(f.price&&f.rate){f.total=1;o={en:'2 × 300 × 1.35 = SGD 810.',zh:'2 × 300 × 1.35 = 810 新元。'}}
+   else{var m=[];if(!f.price)m.push(['the flight price','机票价格']);if(!f.rate)m.push(['the exchange rate','汇率']);o={en:'Cannot calculate yet. Missing: '+m.map(function(x){return x[0]}).join(' and ')+'.',zh:'暂时无法计算。缺少：'+m.map(function(x){return x[1]}).join('和')+'。'}}}
+  else if(k==='e'){if(f.total){f.sent=1;o={en:'Email sent: “Total for 2 tickets: SGD 810”.',zh:'邮件已发送：“2 张机票总价：810 新元”。'}}else o={en:'Nothing to send: no total exists yet.',zh:'没有可发送的内容：还没有总价。'}}
+  ent('o','🔧 '+t({en:'Tool returns:',zh:'工具返回：'})+' '+t(o));
+  if(n>=MAX&&!fin)end('warn','<b>Step limit reached.</b> Real agents have a maximum number of turns so they cannot loop (and spend money) forever. That is a guardrail.','<b>已达步数上限。</b>真实的智能体都会设置最大轮数，避免无休止地循环（和花钱）。这就是一种护栏。');
+  draw()}
+ reset();
+
+ /* 2 · the loop, stepped */
+ var LS={nodes:[N('goal',10,100,90,50,'Goal','目标'),N('llm',180,100,130,50,'LLM','大模型','llm'),N('tools',440,100,130,50,'Tools','工具','tool'),N('done',180,195,130,40,'Done ✓','完成 ✓')],
+  edges:[E('e1','goal','llm'),E('act','llm','tools',{d:'M310,112 C370,55 385,55 440,112',l:{en:'act',zh:'行动'},lx:375,ly:62}),E('obs','tools','llm',{d:'M440,138 C385,195 370,195 310,138',l:{en:'observe',zh:'观察'},lx:375,ly:208}),E('dn','llm','done',{d:'M245,150 L245,195',l:{en:'goal met?',zh:'达成目标？'},lx:300,ly:178})],
+  steps:[st(['goal'],['e1'],'You are given a goal.','你拿到一个目标。'),st(['llm'],[],'Think: what do I know, what is missing, what next?','思考：我知道什么、缺什么、下一步做什么？'),st(['tools'],['act'],'Act: call a tool (search, calculator, email…).','行动：调用一个工具（搜索、计算器、邮件……）。'),st(['llm'],['obs'],'Observe: read the result, then think again. Repeat.','观察：读取结果，再次思考，如此重复。'),st(['done'],['dn'],'Stop only when the goal is met (or a step limit hits).','只有目标达成（或触及步数上限）才停止。')]};
+ render($('lsvg'),LS);var lsp=stepper($('lsvg'),$('lcap'),$('lp'),$('ln'),$('lc'),function(){return LS});lsp.reset();
+
+ /* 2b · three definitions as zoom levels */
+ var Z=[
+  {tab:{en:'1 · Does work for you',zh:'1 · 替你干活'},
+   nodes:[N('goal',10,105,100,50,'Goal','目标'),N('ag',220,85,280,90,'AI system (a black box)','AI 系统（黑盒）','llm'),N('res',600,105,110,50,'Result ✓','结果 ✓')],
+   edges:[E('a1','goal','ag'),E('a2','ag','res')],hl:['goal','ag','res'],he:['a1','a2'],
+   note:{en:'From outside you see a goal going in and a result coming out. How it works is hidden.',zh:'从外面看，只有目标进去、结果出来，内部怎么运作是看不见的。'},
+   who:{en:'Sam Altman: an AI system that can do work for you independently.',zh:'Sam Altman：能独立替你完成工作的 AI 系统。'},focus:{en:'The result',zh:'结果'},inside:{en:'Nothing shown. It is a black box.',zh:'什么都没展示，是个黑盒。'}},
+  {tab:{en:'2 · LLM controls the flow',zh:'2 · 大模型掌控流程'},
+   nodes:[N('goal',10,105,90,50,'Goal','目标'),N('llm',150,105,120,50,'LLM','大模型','llm'),N('a',360,20,120,44,'Step A','步骤 A'),N('b',360,108,120,44,'Step B','步骤 B'),N('c',360,196,120,44,'Step C','步骤 C'),N('res',590,105,110,50,'Result ✓','结果 ✓')],
+   edges:[E('g1','goal','llm'),E('la','llm','a',{s:1,l:{en:'LLM picks the path',zh:'大模型选路径'},lx:290,ly:50}),E('lb','llm','b',{s:1}),E('lc','llm','c',{s:1}),E('ar','a','res',{s:1}),E('br','b','res',{s:1}),E('cr','c','res',{s:1})],hl:['goal','llm','b','res'],he:['g1','lb','br'],
+   note:{en:'Zoom in: inside the box, an LLM decides which steps run and in what order.',zh:'放大一层：盒子里是一个大模型，由它决定运行哪些步骤、什么顺序。'},
+   who:{en:'Early-2025 consensus (Anthropic, Hugging Face): an LLM decides the workflow.',zh:'2025 年初共识（Anthropic、Hugging Face）：由大模型决定流程。'},focus:{en:'Who decides',zh:'谁来决定'},inside:{en:'An LLM choosing among steps.',zh:'一个在多个步骤间做选择的大模型。'}},
+  {tab:{en:'3 · Tools in a loop',zh:'3 · 循环中的工具'},
+   nodes:LS.nodes,edges:LS.edges,hl:['llm','tools'],he:['act','obs'],
+   note:{en:'Zoom in again: the LLM calls tools, reads the result, and repeats until the goal is met. This is what you played.',zh:'再放大一层：大模型调用工具、读取结果，重复直到目标达成。这就是你刚才玩的。'},
+   who:{en:'Today’s view: an LLM with tools, in a loop, to achieve a goal.',zh:'当前主流：带着工具、在循环中为达成目标而运行的大模型。'},focus:{en:'How it works',zh:'如何运作'},inside:{en:'Think → act (tool) → observe → repeat.',zh:'思考 → 行动（工具）→ 观察 → 重复。'}}
+ ];
+ var zi=0,zs=$('zsvg'),zt=$('zt');
+ function zshow(){var z=Z[zi];render(zs,z);z.hl.forEach(function(id){var q=zs.querySelector('.node[data-id="'+id+'"]');if(q)q.classList.add('on')});z.he.forEach(function(id){var q=zs.querySelector('.edge[data-e="'+id+'"]');if(q)q.classList.add('on')});
+  $('zcap').innerHTML=t(z.note);$('zc').textContent=(zi+1)+' / '+Z.length;$('zp').disabled=zi===0;$('zn').disabled=zi===Z.length-1;
+  zt.querySelectorAll('button').forEach(function(b,k){b.classList.toggle('on',k===zi)});
+  $('zfacts').innerHTML='<div><b>'+t({en:'Said by',zh:'谁提出的'})+'</b>'+t(z.who)+'</div><div><b>'+t({en:'Focus',zh:'关注点'})+'</b>'+t(z.focus)+'</div><div><b>'+t({en:'Inside the box',zh:'盒子里面'})+'</b>'+t(z.inside)+'</div>'}
+ Z.forEach(function(z,i){var b=document.createElement('button');b.innerHTML=t(z.tab);b.onclick=function(){zi=i;zshow()};zt.appendChild(b)});
+ $('zp').innerHTML='− '+t({en:'Zoom out',zh:'缩小'});$('zn').innerHTML=t({en:'Zoom in',zh:'放大'})+' +';
+ $('zp').onclick=function(){zi--;zshow()};$('zn').onclick=function(){zi++;zshow()};zshow();
+
+ /* 4 · patterns */
+ var P=[
+  {tab:{en:'1 Prompt chaining',zh:'1 提示链'},
+   nodes:[N('in',10,100,90,50,'Input','输入'),N('s1',140,100,110,50,'Step 1','步骤 1','llm'),N('s2',290,100,110,50,'Step 2','步骤 2','llm'),N('s3',440,100,110,50,'Step 3','步骤 3','llm'),N('out',590,100,90,50,'Output','输出')],
+   edges:[E('e0','in','s1'),E('e1','s1','s2'),E('e2','s2','s3'),E('e3','s3','out')],
+   steps:[st(['in'],[],'A task comes in and is split into fixed sub-tasks that always run in the same order.','任务进来后被拆成固定的子任务，始终按同样顺序执行。'),st(['s1'],['e0'],'Step 1 does its part…','步骤 1 完成它的部分……'),st(['s2'],['e1'],'…its output becomes the input to Step 2…','……其输出成为步骤 2 的输入……'),st(['s3'],['e2'],'…and so on.','……依此类推。'),st(['out'],['e3'],'The last step returns the final result.','最后一步返回最终结果。')],
+   idea:{en:'Break a job into a fixed sequence of smaller calls. Each call is simpler and easier to get right.',zh:'把工作拆成一串固定顺序的小调用。每次调用更简单，也更容易做对。'},ex:{en:'Write an outline → write the article → translate it.',zh:'写大纲 → 写文章 → 翻译。'},use:{en:'The steps are known in advance.',zh:'步骤事先已知。'}},
+  {tab:{en:'2 Routing',zh:'2 路由'},
+   nodes:[N('in',10,100,90,50,'Input','输入'),N('r',150,100,120,50,'Router','路由器','llm'),N('a',350,20,130,50,'Billing','账单'),N('b',350,100,130,50,'Tech support','技术支持'),N('c',350,180,130,50,'Sales','销售'),N('out',590,100,90,50,'Reply','回复')],
+   edges:[E('ir','in','r'),E('ra','r','a',{s:1}),E('rb','r','b',{s:1}),E('rc','r','c',{s:1}),E('ao','a','out',{s:1}),E('bo','b','out',{s:1}),E('co','c','out',{s:1})],
+   steps:[st(['in'],[],'A customer message arrives.','一条客户消息到来。'),st(['r'],['ir'],'The router (an LLM) reads it and classifies what kind of request it is.','路由器（一个大模型）读取消息，判断这是哪类请求。'),st(['b'],['rb'],'It sends the message to one specialist, here Tech support.','它把消息交给一位专家，这里是技术支持。'),st(['out'],['bo'],'The specialist answers. Each specialist stays focused on its own job.','专家作答。每位专家只专注于自己的工作。')],
+   idea:{en:'Classify the input, then send it to the specialised sub-task that suits it. This keeps concerns separate.',zh:'先对输入分类，再交给最合适的专门子任务，实现关注点分离。'},ex:{en:'Billing questions vs technical problems vs sales enquiries.',zh:'账单问题、技术故障、销售咨询各走各的通道。'},use:{en:'Different inputs need different handling.',zh:'不同输入需要不同处理。'}},
+  {tab:{en:'3 Parallelization',zh:'3 并行化'},
+   nodes:[N('in',10,100,90,50,'Input','输入'),N('w1',210,20,140,50,'Security check','安全检查','llm'),N('w2',210,100,140,50,'Style check','风格检查','llm'),N('w3',210,180,140,50,'Speed check','性能检查','llm'),N('j',430,100,110,50,'Combine','汇总'),N('out',590,100,90,50,'Output','输出')],
+   edges:[E('i1','in','w1'),E('i2','in','w2'),E('i3','in','w3'),E('o1','w1','j'),E('o2','w2','j'),E('o3','w3','j'),E('jo','j','out')],
+   steps:[st(['in'],[],'One input, several independent sub-tasks.','一个输入，若干彼此独立的子任务。'),st(['w1','w2','w3'],['i1','i2','i3'],'All sub-tasks run at the same time, so it finishes sooner.','所有子任务同时运行，所以更快完成。'),st(['j'],['o1','o2','o3'],'Their results are gathered and combined.','它们的结果被收集并汇总。'),st(['out'],['jo'],'One merged answer comes out.','输出一份合并后的答案。')],
+   idea:{en:'Split work into independent pieces, run them concurrently, then combine the results.',zh:'把工作拆成相互独立的部分，并发运行，再汇总结果。'},ex:{en:'Review the same code for security, style and speed at once.',zh:'同时从安全、风格、性能三方面审查同一段代码。'},use:{en:'Sub-tasks don’t depend on each other.',zh:'子任务之间互不依赖。'}},
+  {tab:{en:'4 Orchestrator-worker',zh:'4 编排者-工作者'},
+   nodes:[N('in',10,100,90,50,'Input','输入'),N('o',140,100,140,50,'Orchestrator','编排者','llm'),N('w1',350,20,130,50,'Worker A','工作者 A','llm'),N('w2',350,100,130,50,'Worker B','工作者 B','llm'),N('w3',350,180,130,50,'Worker C','工作者 C','llm'),N('s',520,100,100,50,'Combine','汇总','llm'),N('out',640,100,70,50,'Result','结果')],
+   edges:[E('io','in','o'),E('ow1','o','w1',{s:1}),E('ow2','o','w2',{s:1}),E('ow3','o','w3',{s:1}),E('s1','w1','s'),E('s2','w2','s'),E('s3','w3','s'),E('so','s','out')],
+   steps:[st(['in'],[],'A complex request arrives. Unlike a fixed workflow, nobody knows the sub-tasks yet.','一个复杂请求到来。和固定工作流不同，此时还没人知道有哪些子任务。'),st(['o'],['io'],'The orchestrator (an LLM) plans: what sub-tasks does this need?','编排者（一个大模型）规划：这个请求需要哪些子任务？'),st(['w1','w2','w3'],['ow1','ow2','ow3'],'It hands them to workers. Here it chose three; for another request it might choose two or five.','它把子任务交给工作者。这次选了三个；换一个请求，可能是两个或五个。'),st(['s'],['s1','s2','s3'],'Worker results are brought back and combined.','工作者的结果被收回并汇总。'),st(['out'],['so'],'The combined answer is returned.','返回汇总后的答案。')],
+   idea:{en:'A boss LLM breaks the task down dynamically at run time, delegates to workers, and merges their results.',zh:'由“老板”大模型在运行时动态拆解任务，委派给工作者，再合并结果。'},ex:{en:'“Fix this bug” may touch 2 files today and 7 tomorrow.',zh:'“修这个 bug”今天可能涉及 2 个文件，明天可能是 7 个。'},use:{en:'You can’t predict the sub-tasks in advance.',zh:'无法预先预测子任务。'}},
+  {tab:{en:'5 Evaluator-optimizer',zh:'5 评估-优化'},
+   nodes:[N('in',10,100,90,50,'Input','输入'),N('g',150,100,120,50,'Generator','生成者','llm'),N('v',340,100,120,50,'Evaluator','评估者','llm'),N('out',560,100,100,50,'Output','输出')],
+   edges:[E('ig','in','g'),E('gv','g','v'),E('vo','v','out',{l:{en:'pass',zh:'通过'},lx:510,ly:118}),E('fb','v','g',{d:'M400,150 C400,230 210,230 210,150',l:{en:'revise',zh:'修改'},lx:305,ly:228})],
+   steps:[st(['in'],[],'A task comes in.','任务进来。'),st(['g'],['ig'],'The generator produces a first draft.','生成者产出初稿。'),st(['v'],['gv'],'The evaluator, another LLM, checks it against the criteria.','评估者（另一个大模型）按标准检查。'),st(['g'],['fb'],'Not good enough: feedback goes back and the generator revises.','不够好：反馈送回，生成者修改。'),st(['v'],['gv'],'The evaluator checks the new version…','评估者检查新版本……'),st(['out'],['vo'],'…it passes, so the result is released.','……通过，于是放行结果。')],
+   idea:{en:'One LLM produces, another judges. Loop until the output passes.',zh:'一个大模型负责产出，另一个负责评判。循环直到输出通过。'},ex:{en:'Draft an email → check tone and facts → revise.',zh:'起草邮件 → 检查语气和事实 → 修改。'},use:{en:'Clear quality criteria exist and revision helps.',zh:'有明确的质量标准，且修改能带来改进。'}}
+ ];
+ var psvg=$('psvg'),pf=$('pfacts'),pi=0,tb=$('pt');
+ var pst=stepper(psvg,$('pcap'),$('pp'),$('pn'),$('pc'),function(){return P[pi]});
+ P.forEach(function(p,i){var b=document.createElement('button');b.innerHTML=t(p.tab);b.onclick=function(){tb.querySelectorAll('button').forEach(function(x){x.classList.remove('on')});b.classList.add('on');pi=i;render(psvg,p);pst.reset();
+  pf.innerHTML='<div><b>'+t({en:'The idea',zh:'思路'})+'</b>'+t(p.idea)+'</div><div><b>'+t({en:'Example',zh:'例子'})+'</b>'+t(p.ex)+'</div><div><b>'+t({en:'Use when',zh:'适用于'})+'</b>'+t(p.use)+'</div>'};tb.appendChild(b)});
+ tb.firstChild.click();
+
+ /* match game: draw the lines */
+ var PN=[{en:'Prompt chaining',zh:'提示链'},{en:'Routing',zh:'路由'},{en:'Parallelization',zh:'并行化'},{en:'Orchestrator-worker',zh:'编排者-工作者'},{en:'Evaluator-optimizer',zh:'评估-优化'}];
+ var M=[
+  {q:{en:'Write an outline, then the article, then translate it. The steps never change.',zh:'先写大纲，再写文章，再翻译。步骤永远不变。'},a:0,why:{en:'Fixed sequence where each output feeds the next: prompt chaining.',zh:'固定顺序，上一步输出喂给下一步：提示链。'}},
+  {q:{en:'Customer messages must go to Billing, Tech or Sales depending on what they say.',zh:'客户消息要根据内容分派给账单、技术或销售。'},a:1,why:{en:'Classify first, then send to a specialist: routing.',zh:'先分类，再交给专家：路由。'}},
+  {q:{en:'Review one piece of code for security, style and speed at the same time.',zh:'同时从安全、风格、性能三方面审查同一段代码。'},a:2,why:{en:'Independent checks that can run together: parallelization.',zh:'彼此独立、可同时运行的检查：并行化。'}},
+  {q:{en:'“Fix this bug.” You can’t know how many files need changing until the LLM looks.',zh:'“修这个 bug。”在大模型查看之前，你不知道要改几个文件。'},a:3,why:{en:'Sub-tasks are unknown up front, so a boss LLM plans them at run time: orchestrator-worker.',zh:'子任务事先未知，由“老板”大模型在运行时规划：编排者-工作者。'}},
+  {q:{en:'Draft an email; a second LLM checks tone and facts; rewrite until it passes.',zh:'起草邮件；第二个大模型检查语气和事实；不通过就重写直到通过。'},a:4,why:{en:'One produces, another judges, loop until pass: evaluator-optimizer.',zh:'一个产出、一个评判，循环到通过：评估-优化。'}}
+ ];
+ function shuf(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),x=a[i];a[i]=a[j];a[j]=x}return a}
+ var mt=$('mt'),msv=$('mtsvg'),mL=$('mtl'),mR=$('mtr'),mlo=shuf([0,1,2,3,4]),mro=shuf([0,1,2,3,4]),lk={},msel=null,mchk=false,mdrag=null,msup=false,LE=[],RE=[];
+ mlo.forEach(function(qi){var d=document.createElement('div');d.className='mi l';d.dataset.q=qi;d.innerHTML=t(M[qi].q)+'<i class="dot"></i>';mL.appendChild(d);LE[qi]=d});
+ mro.forEach(function(pi2){var d=document.createElement('div');d.className='mi r';d.dataset.p=pi2;d.innerHTML=t(PN[pi2])+'<i class="dot"></i>';mR.appendChild(d);RE[pi2]=d});
+ function mpt(el,side){var c=mt.getBoundingClientRect(),r=el.getBoundingClientRect();return [(side==='l'?r.right:r.left)-c.left,r.top-c.top+r.height/2]}
+ function mpath(x1,y1,x2,y2){var m=(x1+x2)/2;return 'M'+x1+','+y1+' C'+m+','+y1+' '+m+','+y2+' '+x2+','+y2}
+ function mdraw(){var h='';for(var q in lk){var a1=mpt(LE[q],'l'),b1=mpt(RE[lk[q]],'r');var cls=mchk?(lk[q]===M[q].a?'ok':'no'):'';h+='<path class="'+cls+'" d="'+mpath(a1[0],a1[1],b1[0],b1[1])+'"/>'}
+  if(mdrag){var a2=mpt(LE[mdrag.q],'l');h+='<path class="tmp" d="'+mpath(a2[0],a2[1],mdrag.x,mdrag.y)+'"/>'}msv.innerHTML=h;
+  LE.forEach(function(e,q){e.classList.toggle('sel',msel===q);e.classList.toggle('linked',lk[q]!==undefined);e.classList.toggle('ok',mchk&&lk[q]===M[q].a);e.classList.toggle('no',mchk&&lk[q]!==undefined&&lk[q]!==M[q].a)});
+  var used={};for(var k in lk)used[lk[k]]=k;RE.forEach(function(e,p){e.classList.toggle('linked',used[p]!==undefined);e.classList.toggle('ok',mchk&&used[p]!==undefined&&lk[used[p]]===M[used[p]].a&&M[used[p]].a===p);e.classList.toggle('no',mchk&&used[p]!==undefined&&lk[used[p]]!==M[used[p]].a)});
+  var n=Object.keys(lk).length;$('mts').textContent=n+' / 5';$('mtc').disabled=n<5}
+ function mconnect(q,p){for(var k in lk)if(lk[k]===p)delete lk[k];lk[q]=p;msel=null;mchk=false;$('mtw').innerHTML='';mdraw()}
+ LE.forEach(function(e,q){e.onclick=function(){if(msup){msup=false;return}msel=msel===q?null:q;mdraw()};
+  e.onpointerdown=function(ev){if(ev.button)return;var sx=ev.clientX,sy=ev.clientY,moved=false;
+   function mv(m){if(!moved&&Math.hypot(m.clientX-sx,m.clientY-sy)<8)return;moved=true;var c=mt.getBoundingClientRect();mdrag={q:q,x:m.clientX-c.left,y:m.clientY-c.top};mdraw()}
+   function up(u){document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);if(moved){msup=true;var el=document.elementFromPoint(u.clientX,u.clientY),r=el&&el.closest&&el.closest('.mi.r');mdrag=null;if(r)mconnect(q,+r.dataset.p);else mdraw()}}
+   document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up)}});
+ RE.forEach(function(e,p){e.onclick=function(){if(msel!==null)mconnect(msel,p)}});
+ $('mtc').innerHTML=t({en:'Check',zh:'检查'});$('mtx').innerHTML=t({en:'Reset',zh:'重置'});
+ $('mtc').onclick=function(ev){mchk=true;var ok=0,h='';mlo.forEach(function(q){var good=lk[q]===M[q].a;if(good)ok++;h+='<div class="row '+(good?'ok':'no')+'">'+(good?'✓ ':'✗ ')+t(M[q].why)+(good?'':' <i>('+t({en:'You linked: ',zh:'你连的是：'})+t(PN[lk[q]])+')</i>')+'</div>'});
+  $('mtw').innerHTML='<b>'+t({en:'Matched '+ok+' / 5',zh:'连对 '+ok+' / 5'})+'</b>'+h;mdraw();if(ok===5)TX.burst(ev.clientX,ev.clientY)};
+ $('mtx').onclick=function(){lk={};msel=null;mchk=false;$('mtw').innerHTML='';mdraw()};
+ window.addEventListener('resize',mdraw);window.addEventListener('load',mdraw);new MutationObserver(function(){setTimeout(mdraw,60)}).observe(document.documentElement,{attributes:true,attributeFilter:['data-lang']});mdraw();
+
+ /* decide tool */
+ var Q=[{k:'metric',q:{en:'Do you have a measurable success metric for this task?',zh:'这个任务有可衡量的成功指标吗？'},y:{en:'Yes',zh:'有'},n:{en:'No',zh:'没有'}},
+  {k:'single',q:{en:'Does one plain LLM call already hit that metric?',zh:'单次普通大模型调用就能达标吗？'},y:{en:'Yes',zh:'能'},n:{en:'No / not tested',zh:'不能 / 没测过'}},
+  {k:'steps',q:{en:'Can you write down all the steps in advance?',zh:'你能提前写出全部步骤吗？'},y:{en:'Yes',zh:'能'},n:{en:'No, it depends on what turns up',zh:'不能，要看途中发现什么'}}];
+ var ans={},dc=$('dec'),dr=$('dres');
+ function verdict(){treeHL();if(!ans.metric||!ans.single||!ans.steps){dr.innerHTML='';return}
+  var h;if(ans.metric==='n')h=['0',{en:'Stop: define a metric first',zh:'先停下：先定义指标'},{en:'Without a measurable business metric you can’t tell whether any design works (trap 1). Decide what “better” means, then come back.',zh:'没有可衡量的业务指标，就无法判断任何方案是否有效（陷阱 1）。先想清楚“更好”是什么意思，再回来。'}];
+  else if(ans.single==='y')h=['1',{en:'Use a single LLM call',zh:'用单次大模型调用'},{en:'It already meets your metric. Anything fancier adds cost and risk for no gain.',zh:'它已经达标。再复杂只会增加成本和风险，没有收益。'}];
+  else if(ans.steps==='y')h=['2',{en:'Build a workflow',zh:'搭建工作流'},{en:'You know the route, so fix it in code. Choose a pattern from Step 4 (chain, route, parallel…) and check the metric improves.',zh:'路线已知，就用代码固定下来。从第 4 步里选一种模式（链式、路由、并行……），并检查指标是否改善。'}];
+  else h=['3',{en:'Consider an agent',zh:'可以考虑智能体'},{en:'The path can’t be fixed in advance. Add monitoring and guardrails, and compare against a simpler workflow before committing.',zh:'路径无法提前固定。加上监控和护栏，并在定案前与更简单的工作流对比。'}];
+  dr.innerHTML='<div class="callout tip"><b class="lbl">'+t({en:'Level '+h[0],zh:'级别 '+h[0]})+'</b><b>'+t(h[1])+'</b><br>'+t(h[2])+'</div>'}
+ Q.forEach(function(q){var d=document.createElement('div');d.className='sc';d.innerHTML='<div><b>'+t(q.q)+'</b></div><div class="yn"></div>';var yn=d.querySelector('.yn');
+  ['y','n'].forEach(function(v){var b=document.createElement('button');b.innerHTML=t(q[v]);b.onclick=function(){ans[q.k]=v;yn.querySelectorAll('button').forEach(function(x){x.classList.remove('on')});b.classList.add('on');verdict()};yn.appendChild(b)});dc.appendChild(d)});
+ /* decision tree */
+ var TN=[N('st',8,168,70,44,'Task','任务'),N('q1',108,158,150,64,'Measurable metric?','有可衡量的指标？','llm'),N('q2',318,158,150,64,'One call enough?','单次调用够用吗？','llm'),N('q3',528,158,150,64,'Steps known?','步骤已知吗？','llm'),
+  N('l0',108,300,150,56,'L0 · Set a metric','L0 · 先定指标','leaf'),N('l1',318,40,150,56,'L1 · One LLM call','L1 · 单次调用','leaf'),N('l2',528,40,150,56,'L2 · Workflow','L2 · 工作流','leaf'),N('l3',528,300,150,56,'L3 · Agent','L3 · 智能体','leaf')];
+ var TE=[E('e0','st','q1',{d:'M78,190 L108,190'}),E('q1l0','q1','l0',{d:'M183,222 L183,300',l:{en:'No',zh:'否'},lx:200,ly:266}),E('q1q2','q1','q2',{d:'M258,190 L318,190',l:{en:'Yes',zh:'是'},lx:288,ly:182}),
+  E('q2l1','q2','l1',{d:'M393,158 L393,96',l:{en:'Yes',zh:'是'},lx:412,ly:132}),E('q2q3','q2','q3',{d:'M468,190 L528,190',l:{en:'No',zh:'否'},lx:498,ly:182}),
+  E('q3l2','q3','l2',{d:'M603,158 L603,96',l:{en:'Yes',zh:'是'},lx:622,ly:132}),E('q3l3','q3','l3',{d:'M603,222 L603,300',l:{en:'No',zh:'否'},lx:622,ly:266})];
+ var tsv=$('tsvg');render(tsv,{nodes:TN,edges:TE});
+ function note(x,y,en,zh){return '<text class="note en" x="'+x+'" y="'+y+'">'+en+'</text><text class="note zh" x="'+x+'" y="'+y+'">'+zh+'</text>'}
+ tsv.insertAdjacentHTML('beforeend',note(272,322,'Decide what “better” means first','先想清楚“更好”是什么')+note(108,70,'Simplest and cheapest','最简单、最便宜')+note(700,62,'Pick a pattern (Step 4)','选一种模式（第 4 步）')+note(700,80,'chain · route · parallel…','链式 · 路由 · 并行……')+note(700,322,'Add monitoring + guardrails','加上监控和护栏')+note(700,340,'Compare with a workflow first','先和工作流对比'));
+ function treeHL(){tsv.querySelectorAll('.on').forEach(function(x){x.classList.remove('on')});var n=['st','q1'],e=['e0'];
+  if(ans.metric==='n'){e.push('q1l0');n.push('l0')}
+  else if(ans.metric==='y'){e.push('q1q2');n.push('q2');
+   if(ans.single==='y'){e.push('q2l1');n.push('l1')}
+   else if(ans.single==='n'){e.push('q2q3');n.push('q3');
+    if(ans.steps==='y'){e.push('q3l2');n.push('l2')}else if(ans.steps==='n'){e.push('q3l3');n.push('l3')}}}
+  n.forEach(function(id){var q=tsv.querySelector('.node[data-id="'+id+'"]');if(q)q.classList.add('on')});e.forEach(function(id){var q=tsv.querySelector('.edge[data-e="'+id+'"]');if(q)q.classList.add('on')})}
+
+ /* impact sim */
+ var sg=$('simgo');sg.innerHTML=t({en:'▶ Run both 10 times',zh:'▶ 两者各运行 10 次'});
+ function bars(el,arr,mx){el.innerHTML=arr.map(function(){return '<i></i>'}).join('');var is=el.querySelectorAll('i');setTimeout(function(){is.forEach(function(i,k){i.style.height=(arr[k]/mx*100)+'%';i.innerHTML='<b>'+arr[k]+'</b>'})},30)}
+ function sim(){var wf=[],ag=[];for(var i=0;i<10;i++){wf.push(5);ag.push(5+Math.floor(Math.pow(Math.random(),2)*8))}
+  bars($('bwf'),wf,12);bars($('bag'),ag,12);var sum=ag.reduce(function(a,b){return a+b},0),mn=Math.min.apply(0,ag),mx=Math.max.apply(0,ag);
+  $('simsum').innerHTML='<div><b>'+t({en:'Workflow',zh:'工作流'})+'</b>'+t({en:'50 steps in total. Every run is the same, so cost is predictable.',zh:'共 50 步。每次运行都一样，成本可预测。'})+'</div><div><b>'+t({en:'Agent',zh:'智能体'})+'</b>'+t({en:sum+' steps in total. One run took '+mn+', another '+mx+'. Cost swings, so you must monitor it.',zh:'共 '+sum+' 步。有一次用了 '+mn+' 步，另一次用了 '+mx+' 步。成本会波动，所以必须监控。'})+'</div><div><b>'+t({en:'So what',zh:'意味着'})+'</b>'+t({en:'Choose the agent only if the better results are worth this variation.',zh:'只有当更好的效果值得这种波动时，才选智能体。'})+'</div>'}
+ sg.onclick=sim;sim();
+
+})();
+</script></body></html>

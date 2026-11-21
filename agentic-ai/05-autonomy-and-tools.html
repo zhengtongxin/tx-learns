@@ -1,0 +1,421 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Autonomy and tools</title><link rel="stylesheet" href="../assets/site.css">
+<style>
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.pill{border:1px solid var(--line);background:var(--glass);color:var(--fg);border-radius:999px;padding:8px 16px;cursor:pointer;font:inherit;font-size:13.5px;font-weight:600;transition:.2s}
+.pill:hover{border-color:var(--acc)}.pill.on{background:var(--fg);color:var(--bg)}
+.pill.ok{background:color-mix(in srgb,var(--ok) 20%,transparent);border-color:var(--ok);color:var(--fg)}
+.pill.no{border-color:var(--bad);animation:shake .35s}
+.codebox{background:#0b0b10;color:#e8e8f0;border:1px solid var(--line);border-radius:18px;padding:16px 18px;font:13.5px/1.75 ui-monospace,"SF Mono",Menlo,monospace;white-space:pre-wrap;word-break:break-word;overflow:auto;margin:10px 0}
+.codebox .dim{opacity:.45}
+.codebox .chg{color:#fff;background:linear-gradient(135deg,rgba(76,125,255,.55),rgba(34,211,238,.45));border-radius:6px;padding:1px 5px}
+.io{background:#0b0b10;color:#e8e8f0;border:1px solid var(--line);border-radius:14px;padding:12px 14px;font:13px/1.55 ui-monospace,"SF Mono",Menlo,monospace;white-space:pre-wrap;word-break:break-word;margin:6px 0}
+.io.re{background:color-mix(in srgb,var(--bg) 60%,transparent);color:var(--fg);font-family:inherit;font-size:14.5px}
+.io mark{background:color-mix(in srgb,var(--acc2) 30%,transparent);color:inherit;border-radius:4px;padding:0 3px}
+.lab{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin:12px 0 4px;display:block}
+.sc{border:1px solid var(--line);background:var(--glass);border-radius:20px;padding:18px 20px;margin:1.2em 0}
+.sc .job{font-weight:700;font-size:1.05rem;margin:0 0 4px}
+.sc .cnt{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--acc2);font-weight:700}
+.sc .fb{margin-top:12px;padding:12px 16px;border-radius:14px;background:color-mix(in srgb,var(--acc) 12%,transparent);display:none}
+.sc .fb.show{display:block;animation:fade .3s}
+.sc .fb.good{background:color-mix(in srgb,var(--ok) 14%,transparent)}
+.sc .fb.no{background:color-mix(in srgb,var(--bad) 12%,transparent)}
+.pm{display:grid;gap:10px;margin:1.2em 0}
+.pm .row{border:1px solid var(--line);background:var(--glass);border-radius:18px;padding:14px 16px}
+.pm .row p{margin:0 0 10px;font-weight:600}
+.pm .fb{display:none;margin-top:10px;font-size:14px}.pm .fb.show{display:block}
+/* landscape */
+.land{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:12px;margin:1.2em 0}
+.lc{border:1px solid var(--line);background:var(--glass);border-radius:20px;padding:14px 14px 12px;transition:.3s}
+.lc h4{margin:0 0 2px;font-size:1.05rem}.lc small{color:var(--mut);display:block;min-height:2.6em;margin-bottom:8px}
+.lc .t{border:1px solid var(--line);border-radius:10px;padding:6px 10px;margin:5px 0;font-size:13px;background:color-mix(in srgb,var(--acc) 7%,transparent)}
+.lc.hit{border-color:var(--ok);box-shadow:0 0 28px color-mix(in srgb,var(--ok) 40%,transparent);transform:translateY(-3px)}
+.rule2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:12px 0}
+.rule2 div{border:1px solid var(--acc2);border-radius:14px;padding:10px 14px;background:color-mix(in srgb,var(--acc2) 8%,transparent)}
+.rule2 b{display:block}.rule2 small{color:var(--mut)}
+.chips2{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.chips2 span{padding:9px 16px;border-radius:12px;font-weight:700;font-size:13.5px;border:1px solid var(--line)}
+.chips2 .a{background:color-mix(in srgb,#d9742b 28%,transparent);border-color:#d9742b}
+.chips2 .b{background:color-mix(in srgb,#b8a92a 26%,transparent);border-color:#b8a92a}
+.chips2 .c{background:color-mix(in srgb,#2f7fc4 30%,transparent);border-color:#2f7fc4}
+/* twin */
+.tw{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:1.2em 0}
+@media(max-width:760px){.tw{grid-template-columns:1fr}}
+.tg{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--glass);border-radius:14px;padding:10px 14px;margin:6px 0;cursor:pointer;transition:.2s;width:100%;text-align:left;color:var(--fg);font:inherit}
+.tg i{width:34px;height:20px;border-radius:999px;background:var(--line);position:relative;flex:none;transition:.2s}
+.tg i:after{content:"";position:absolute;left:3px;top:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:.2s}
+.tg.on{border-color:var(--acc2)}.tg.on i{background:var(--acc2)}.tg.on i:after{left:17px}
+.tg small{color:var(--mut);display:block;font-size:12px}
+.q2{border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin:8px 0;background:var(--glass)}
+.q2 b{display:block;font-size:13.5px;margin-bottom:6px}
+.q2 .rp{padding:8px 12px;border-radius:10px;font-size:14px}
+.rp.good{background:color-mix(in srgb,var(--ok) 14%,transparent)}
+.rp.bad{background:color-mix(in srgb,var(--bad) 14%,transparent)}
+.rp.meh{background:color-mix(in srgb,var(--acc) 10%,transparent)}
+.rp small{display:block;color:var(--mut);margin-top:3px}
+.mis{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.mis span{padding:6px 12px;border-radius:999px;border:1px dashed var(--line);font-size:13px;color:var(--mut)}
+.mis span.ok{border:1px solid var(--ok);color:var(--fg);background:color-mix(in srgb,var(--ok) 16%,transparent)}
+/* memory + tool stepper */
+.chat{border:1px solid var(--line);border-radius:18px;padding:14px;background:var(--glass);margin:1.2em 0}
+.bub{padding:9px 14px;border-radius:14px;margin:6px 0;max-width:86%;font-size:14.5px}
+.bub.u{margin-left:auto;background:color-mix(in srgb,var(--acc) 22%,transparent)}
+.bub.a{background:color-mix(in srgb,var(--fg) 8%,transparent)}
+.note{padding:12px 16px;border-radius:14px;border-left:3px solid var(--ok);background:color-mix(in srgb,var(--ok) 10%,transparent);margin:10px 0;font-size:14.5px}
+.sw{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0}
+.nodes{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}
+.nodes button{border:1px solid var(--line);background:var(--glass);color:var(--fg);border-radius:14px;padding:8px 14px;font:inherit;font-size:13px;cursor:pointer}
+.nodes button.on{border-color:var(--acc2);box-shadow:0 0 0 1px var(--acc2)}
+.nodes button.past{border-color:var(--ok)}
+.nodes em{color:var(--mut);font-style:normal}
+.cl{display:grid;gap:8px;margin:12px 0}
+.cl label{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--glass);border-radius:14px;padding:10px 14px;cursor:pointer}
+.cl input{margin-top:4px;accent-color:var(--acc2)}
+.cl input:checked+span{opacity:.55;text-decoration:line-through}
+.hx{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
+.hx div{border:1px solid var(--line);background:var(--glass);border-radius:14px;padding:10px 14px;font-size:13.5px;font-weight:600}
+.hx div.m{border-color:var(--acc2);background:color-mix(in srgb,var(--acc2) 10%,transparent)}
+.hx em{color:var(--mut);font-style:normal}
+.why{border-left:3px solid var(--acc2);padding:2px 0 2px 14px;margin:10px 0}
+
+</style></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+
+
+<div class="hero">
+<span class="tag"><span class="en">Week 1 · Lesson 5</span><span class="zh">第 1 周 · 第 5 课</span></span>
+<h1><span class="en">Autonomy and tools</span><span class="zh">自主性与工具</span></h1>
+<p class="meta"><span class="en">Why a model alone cannot act, and the four parts that make it act · ~18 min · hands-on</span><span class="zh">为什么模型自己无法行动，以及让它行动起来的四个部分 · 约 18 分钟 · 动手实践</span></p>
+</div>
+
+<p class="en">A chatbot can only talk. Yet a useful agent saves a visitor's email, looks things up, and keeps going until a job is done. This lesson answers one question: <b>what must you add around an LLM so that it can act?</b> You will build a digital twin step by step, with no framework.</p>
+<p class="zh">聊天机器人只会说话。可一个有用的智能体能记下访客的邮箱、查资料，并且一直做到任务完成。这节课只回答一个问题：<b>要在大模型外面加上什么，它才能行动？</b>你会不借助任何框架，一步步搭出一个数字分身。</p>
+
+<h2><span class="en">The problem: a model only talks</span><span class="zh">问题：模型只会说话</span></h2>
+<p class="en">A visitor on your twin's website types their email. You want it saved so you can reply. Try it on a plain model with nothing around it.</p>
+<p class="zh">访客在你的分身网站上输入了自己的邮箱。你希望把它存下来，方便回复。拿一个没有任何外壳的普通模型试试。</p>
+<div class="chat" id="hook"></div>
+<p class="en">A model turns text into text. Anything else, like saving a file, must be done by <b>your code</b>. The <b>harness</b> is that code: it builds the input, reads the output, acts on it, and repeats.</p>
+<p class="zh">模型只能把文字变成文字。保存文件之类的其他事，必须由<b>你的代码</b>来做。<b>外壳</b>就是这些代码：构造输入、读取输出、据此行动，然后重复。</p>
+<div class="hx"><div><span class="en">Your code builds the input</span><span class="zh">你的代码构造输入</span></div><em>→</em><div class="m"><span class="en">The LLM writes text</span><span class="zh">大模型写出文字</span></div><em>→</em><div><span class="en">Your code reads it and acts</span><span class="zh">你的代码读取并行动</span></div><em>↺</em><div><span class="en">Repeat if needed</span><span class="zh">需要就重复</span></div></div>
+<p class="en">The next four sections build this harness one part at a time:</p>
+<p class="zh">接下来的四个部分，一次搭一块这个外壳：</p>
+<div class="rule2">
+  <div><b>① <span class="en">Context</span><span class="zh">上下文</span></b><small><span class="en">Tell it who it is and what it may say</span><span class="zh">告诉它它是谁、能说什么</span></small></div>
+  <div><b>② <span class="en">Memory</span><span class="zh">记忆</span></b><small><span class="en">Make a chat feel continuous</span><span class="zh">让对话感觉连贯</span></small></div>
+  <div><b>③ <span class="en">Tool</span><span class="zh">工具</span></b><small><span class="en">Let it ask your code to act</span><span class="zh">让它请求你的代码行动</span></small></div>
+  <div><b>④ <span class="en">Loop</span><span class="zh">循环</span></b><small><span class="en">Let it keep going until done</span><span class="zh">让它一直做到完成</span></small></div>
+</div>
+
+<h2><span class="en">① Context: tell it who it is</span><span class="zh">① 上下文：告诉它它是谁</span></h2>
+<div class="why"><p class="en"><b>Why:</b> the model knows nothing about Alex. Whatever it should say about him, you have to put into its prompt.</p><p class="zh"><b>为什么：</b>模型对 Alex 一无所知。它该说的关于他的一切，都得由你放进提示词里。</p></div>
+<p class="en">The project is a <b>digital twin</b>: a chat assistant on a website that answers questions about one person's career. It needs two files in a folder called <code>twin</code>. Tick them off.</p>
+<p class="zh">这个项目是一个<b>数字分身</b>：网站上的聊天助手，回答关于某个人职业经历的问题。它需要在 <code>twin</code> 文件夹里放两个文件。做完一项就勾一项。</p>
+<div class="cl">
+  <label><input type="checkbox"><span><code>linkedin.pdf</code> — <span class="en">download your LinkedIn profile as a PDF. Any résumé PDF works too.</span><span class="zh">把你的 LinkedIn 主页下载成 PDF。任何简历 PDF 也可以。</span></span></label>
+  <label><input type="checkbox"><span><code>summary.txt</code> — <span class="en">a few lines about you, in your own words.</span><span class="zh">用你自己的话写几行关于你的介绍。</span></span></label>
+</div>
+<div class="codebox"><span class="dim">reader = PdfReader("twin/linkedin.pdf")
+linkedin = ""
+for page in reader.pages:
+    text = page.extract_text()
+    if text:                      # scanned pages return nothing
+        linkedin += text
+
+with open("twin/summary.txt") as f:
+    summary = f.read()</span></div>
+<p class="en">That code turns both files into two plain text variables, <code>linkedin</code> and <code>summary</code>. Everything after this is about what you do with those two strings.</p>
+<p class="zh">这段代码把两个文件变成两个普通文本变量：<code>linkedin</code> 和 <code>summary</code>。接下来的一切，都是围绕怎么使用这两段文字展开的。</p>
+
+<h3><span class="en">Build the system prompt</span><span class="zh">搭建系统提示词</span></h3>
+<p class="en">The system prompt is the part of the input that sets the context for the whole chat. Here it is made of four blocks. Meet Alex, a sample person. Switch blocks on and watch how the twin answers two questions.</p>
+<p class="zh">系统提示词是输入里负责设定整场对话背景的部分。这里它由四个模块组成。认识一下示例人物 Alex。打开模块，看看分身怎么回答两个问题。</p>
+<div class="tw">
+  <div>
+    <span class="lab"><span class="en">Blocks in the prompt</span><span class="zh">提示词里的模块</span></span>
+    <button class="tg" data-b="role"><i></i><span><b><span class="en">Role</span><span class="zh">角色</span></b><small><span class="en">“You are Alex's digital twin”</span><span class="zh">“你是 Alex 的数字分身”</span></small></span></button>
+    <button class="tg" data-b="sum"><i></i><span><b><span class="en">Summary</span><span class="zh">个人简介</span></b><small><span class="en">a few lines in Alex's words</span><span class="zh">Alex 自己写的几行介绍</span></small></span></button>
+    <button class="tg" data-b="li"><i></i><span><b>LinkedIn</b><small><span class="en">the job history text</span><span class="zh">工作经历文本</span></small></span></button>
+    <button class="tg" data-b="rules"><i></i><span><b><span class="en">Rules</span><span class="zh">规则</span></b><small><span class="en">stay on topic, never make things up</span><span class="zh">不跑题，绝不编造</span></small></span></button>
+    <span class="lab"><span class="en">The prompt so far</span><span class="zh">当前的提示词</span></span>
+    <div class="codebox" id="tpr" style="min-height:120px;font-size:12.5px"></div>
+  </div>
+  <div>
+    <span class="lab"><span class="en">Simulated replies</span><span class="zh">模拟回复</span></span>
+    <div class="q2"><b><span class="en">Q1 · What did you work on in your last job?</span><span class="zh">问题 1 · 你上一份工作做什么？</span></b><div class="rp" id="r1"></div></div>
+    <div class="q2"><b><span class="en">Q2 · What's your favourite pizza topping?</span><span class="zh">问题 2 · 你最喜欢什么披萨配料？</span></b><div class="rp" id="r2"></div></div>
+    <span class="lab"><span class="en">Mission</span><span class="zh">任务</span></span>
+    <div class="mis" id="mis"></div>
+    <p class="meta" id="tfb"></p>
+  </div>
+</div>
+<div class="quiz" data-answer="b">
+  <p class="q"><span class="en">With the Rules block off, Q2 got an invented answer. What does that teach you?</span><span class="zh">关掉规则模块后，问题 2 得到了编造的回答。这说明什么？</span></p>
+  <button class="opt" data-k="a"><span class="en">The model is broken</span><span class="zh">模型坏了</span></button>
+  <button class="opt" data-k="b"><span class="en">Without an instruction to admit gaps, the model fills them with a plausible guess</span><span class="zh">没有“承认不知道”的指令，模型就会用貌似合理的猜测填补空白</span></button>
+  <button class="opt" data-k="c"><span class="en">Rules only matter for long prompts</span><span class="zh">规则只对长提示词有用</span></button>
+  <div class="explain"><span class="en">Your prompt is the only guardrail you have. “If you don't know, say so” is one of the most valuable lines you can write.</span><span class="zh">提示词是你唯一的护栏。“不知道就说不知道”是你能写的最有价值的句子之一。</span></div>
+</div>
+
+<h2><span class="en">② Memory: why a chat feels continuous</span><span class="zh">② 记忆：聊天为什么感觉连贯</span></h2>
+<div class="why"><p class="en"><b>Why:</b> a visitor says “my name is Ed”, then asks about it a message later. The twin must connect the two. Predict whether it can.</p><p class="zh"><b>为什么：</b>访客先说“我叫 Ed”，下一条消息又问起这件事。分身必须把两者联系起来。先预测它能不能做到。</p></div>
+<p class="en">Every call to an LLM is <b>stateless</b>. The model remembers nothing between calls. A chat only feels continuous because your code sends the <b>whole conversation so far</b> each time.</p>
+<p class="zh">每一次调用大模型都是<b>无状态</b>的，两次调用之间模型什么都不记得。聊天之所以感觉连贯，只是因为你的代码每次都把<b>到目前为止的整段对话</b>一起发了过去。</p>
+<div class="chat" id="mem"></div>
+<div class="codebox"><span class="dim">def chat(message, history):
+    messages = [{"role": "system", "content": system_prompt}]</span> <span class="chg">+ history</span> <span class="dim">+ [{"role": "user", "content": message}]
+    response = client.chat.completions.create(model="gpt-5.4-mini", messages=messages)
+    return response.choices[0].message.content</span></div>
+<p class="en">That highlighted <code>history</code> is the whole trick. A chat window such as Gradio's <code>ChatInterface</code> hands it to your function every turn.</p>
+<p class="zh">高亮的 <code>history</code> 就是全部的秘密。像 Gradio 的 <code>ChatInterface</code> 这样的聊天界面，每一轮都会把它交给你的函数。</p>
+
+<h2><span class="en">③ Tool: let the model ask your code to act</span><span class="zh">③ 工具：让模型请求你的代码行动</span></h2>
+<div class="why"><p class="en"><b>Back to the problem:</b> the model said “saved” but did nothing. The fix is to let it <i>ask</i>. A tool has three parts: a plain function you write, a description the model can read, and your code that runs the function when the model asks. Part 1 is the function. This one records an email address.</p><p class="zh"><b>回到最初的问题：</b>模型说了“已保存”，却什么也没做。解决办法是让它去<i>请求</i>。一个工具有三部分：你写的普通函数、模型能读到的描述，以及在模型提出请求时运行函数的你的代码。第 1 部分是函数。这个函数负责记录邮箱。</p></div>
+<div class="codebox">def record_email_tool(email):
+    print(f"Tool called to record an email: {email}")
+    with open("emails.txt", "a") as f:
+        f.write(email + "\n")
+    return "Email recorded"</div>
+<p class="en">The model cannot see your Python. So you also describe the tool in <b>JSON</b>: its name, what it is for, and what inputs it needs.</p>
+<p class="zh">模型看不到你的 Python 代码。所以你还要用 <b>JSON</b> 来描述这个工具：名字、用途、需要哪些输入。</p>
+<div class="codebox"><span class="dim">record_email_tool_json = {
+    "name": "record_email_tool",</span>
+    <span class="chg">"description": "???"</span><span class="dim">,
+    "parameters": {"type": "object",
+        "properties": {"email": {"type": "string", "description": "The email address of this user"}},
+        "required": ["email"]}
+}
+tools = [{"type": "function", "function": record_email_tool_json}]</span></div>
+<div class="quiz" data-answer="b">
+  <p class="q"><span class="en">Fill in the <code>???</code>. Which description lets the model decide <i>when</i> to call the tool?</span><span class="zh">填空 <code>???</code>。哪一个描述能让模型判断<i>什么时候</i>该调用这个工具？</span></p>
+  <button class="opt" data-k="a"><span class="en">“email”</span><span class="zh">“email”</span></button>
+  <button class="opt" data-k="b"><span class="en">“Use this tool to record that a user provided their email address”</span><span class="zh">“当用户提供了邮箱地址时，使用这个工具来记录”</span></button>
+  <button class="opt" data-k="c"><span class="en">“A Python function that opens a file”</span><span class="zh">“一个会打开文件的 Python 函数”</span></button>
+  <div class="explain"><span class="en">The model reads the description to decide whether the tool fits the moment. Say <b>when</b> to use it, not how it is built.</span><span class="zh">模型靠读描述来判断这个工具是否适用于当下。要写清楚<b>什么时候</b>用，而不是它怎么实现的。</span></div>
+</div>
+
+<h3><span class="en">Walk through one tool call</span><span class="zh">走一遍一次工具调用</span></h3>
+<p class="en">Now all three parts work together. A visitor writes: <i>“Hi, you can reach me at ed@example.com”</i>. Step through, one half-step at a time. At the first reply, predict before you continue.</p>
+<p class="zh">现在三个部分一起工作。访客写道：<i>“你好，可以通过 ed@example.com 联系我”</i>。一次走半步。在第一个回复处，先预测再继续。</p>
+<div class="nodes" id="tnodes"></div>
+<div id="tview"></div>
+<div class="sw" id="tctl"></div>
+
+<h2><span class="en">④ Loop: what if one call is not enough?</span><span class="zh">④ 循环：一次调用不够怎么办？</span></h2>
+<div class="why"><p class="en"><b>Why:</b> the walk-through handled one request with an <code>if</code>. But a visitor might share two emails at once, or the model might need one tool's result before choosing the next. You cannot know in advance how many rounds a task takes. Three versions of the same function, each handling more. Click to compare.</p><p class="zh"><b>为什么：</b>刚才的流程只用一个 <code>if</code> 处理一次请求。但访客可能一次给出两个邮箱，模型也可能要先拿到一个工具的结果，才能决定下一个。你无法提前知道任务要几轮。同一个函数的三个版本，一个比一个能处理的情况多。点击对比。</p></div>
+<div class="pills" id="lv"></div>
+<div class="codebox" id="lcode"></div>
+<p class="en"><b>Your turn.</b> For each situation, choose the <b>simplest</b> version that handles it.</p>
+<p class="zh"><b>轮到你了。</b>对每种情况，选出能处理它的<b>最简单</b>的版本。</p>
+<div class="sc" id="lgame"></div>
+<div class="callout"><b class="lbl"><span class="en">You just wrote an agent loop</span><span class="zh">你刚刚写出了一个智能体循环</span></b><span class="en">An LLM, tools, and a <code>while</code> loop that keeps going until the model stops asking for tools. That is the core of every agent. A framework simply hides these <code>if</code> and <code>while</code> lines behind a neat abstraction.</span><span class="zh">一个大模型、一组工具，加上一个会一直转到模型不再请求工具为止的 <code>while</code> 循环。这就是所有智能体的核心。框架只是把这些 <code>if</code> 和 <code>while</code> 藏在一层整洁的抽象后面。</span></div>
+
+<h2><span class="en">Where the autonomy comes from</span><span class="zh">自主性从哪里来</span></h2>
+<p class="en">Look back at the code. Nowhere did you write “if the message contains an email, record it”. The model made that call on its own, from the tool description alone.</p>
+<p class="zh">回头看看代码。你从来没有写过“如果消息里有邮箱，就记录下来”。是模型自己、仅凭工具描述做出了这个判断。</p>
+<div class="quiz" data-answer="c">
+  <p class="q"><span class="en">Who decides to call <code>record_email_tool</code>?</span><span class="zh">谁来决定调用 <code>record_email_tool</code>？</span></p>
+  <button class="opt" data-k="a"><span class="en">An <code>if</code> in your code that looks for “@”</span><span class="zh">你代码里查找 “@” 的 <code>if</code></span></button>
+  <button class="opt" data-k="b"><span class="en">The visitor, by pressing a button</span><span class="zh">访客，通过点一个按钮</span></button>
+  <button class="opt" data-k="c"><span class="en">The model. Your code only runs the function when asked</span><span class="zh">模型。你的代码只在被请求时才运行函数</span></button>
+  <div class="explain"><span class="en">The model decides <b>whether</b> and <b>with what inputs</b>. Your code decides <b>how</b> it runs. That split is what “autonomous” means here.</span><span class="zh">模型决定<b>要不要调用</b>以及<b>传什么参数</b>，你的代码决定<b>怎么执行</b>。这种分工就是这里所说的“自主”。</span></div>
+</div>
+<div class="callout warn"><b class="lbl"><span class="en">Autonomy has a price</span><span class="zh">自主性是有代价的</span></b><span class="en">A model that chooses its own actions can choose wrongly. Keep tools small and safe, and describe them carefully.</span><span class="zh">能自己选择行动的模型，也可能选错。让工具保持小而安全，并认真写好描述。</span></div>
+
+<h2><span class="en">Where frameworks fit</span><span class="zh">框架在哪里</span></h2>
+<div class="why"><p class="en"><b>Why now:</b> you just hand-wrote a whole harness: prompt, history, tool, loop. An agent framework is <b>helper code</b> that packages these same jobs so they are faster to write. Match each task to the job it belongs to.</p><p class="zh"><b>为什么现在讲：</b>你刚刚亲手写完了一整套外壳：提示词、历史、工具、循环。智能体框架就是<b>辅助代码</b>，把这些同样的工作打包起来，让它们写得更快。把每项任务对应到它所属的那件事上。</p></div>
+<div class="pm" id="fw"></div>
+<p class="en">You can pick any of these, or <b>none</b>. Frameworks are never required.</p>
+<p class="zh">这些你可以任选一个，也可以<b>一个都不用</b>。框架从来不是必需品。</p>
+<div class="chips2"><span class="a">CrewAI</span><span class="a">LangGraph / LangChain</span><span class="b">OpenAI Agents SDK</span><span class="b">Google ADK</span><span class="b">AWS Strands Agents</span><span class="c"><span class="en">No framework</span><span class="zh">不用框架</span></span></div>
+<div class="callout"><b class="lbl"><span class="en">Today's choice</span><span class="zh">今天的选择</span></b><span class="en">You went without a framework. Having written the plain code once, you now know what every framework does for you.</span><span class="zh">今天你没有用框架。亲手写过一遍朴素的代码，你就明白了每个框架在背后替你做什么。</span></div>
+
+<h2><span class="en">One more map: the agent landscape</span><span class="zh">再看一张地图：智能体全景图</span></h2>
+<p class="en">Last step: a map of the whole field, so you know where your own work fits. Two questions sort every agent offering.</p>
+<p class="zh">最后一步：一张覆盖整个领域的地图，让你知道自己的工作处在哪里。两个问题就能给所有智能体相关的产品归类。</p>
+<div class="rule2">
+  <div><b>1 · <span class="en">Who is it for?</span><span class="zh">给谁用？</span></b><small><span class="en">Non-technical people, or technical people</span><span class="zh">非技术人员，还是技术人员</span></small></div>
+  <div><b>2 · <span class="en">What do they do with agents?</span><span class="zh">他们拿智能体做什么？</span></b><small><span class="en">Build, use, execute or develop</span><span class="zh">构建、使用、运行，还是开发</span></small></div>
+</div>
+<div class="land" id="land"></div>
+<p class="en"><b>Your turn.</b> Which column does each person need? The matching column lights up.</p>
+<p class="zh"><b>轮到你了。</b>每个人需要哪一列？对应的列会亮起来。</p>
+<div class="sc" id="landgame"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<p class="en">Two exercises. Tick them off when done.</p>
+<p class="zh">两个练习。完成后勾选。</p>
+<div class="cl">
+  <label><input type="checkbox"><span><b><span class="en">Add a second LLM call.</span><span class="zh">加入第二次大模型调用。</span></b> <span class="en">After the twin writes its reply, ask another model to check the reply is strictly about work. If not, rewrite it. (Which Lesson 2 pattern is that?)</span><span class="zh">分身写出回复后，让另一个模型检查回复是否严格只涉及工作。如果不是就重写。（这是第 2 课里的哪种模式？）</span></span></label>
+  <label><input type="checkbox"><span><b><span class="en">Apply it to your business.</span><span class="zh">应用到你的业务上。</span></b> <span class="en">Build an assistant that answers questions about your own area, and uses the tool to record the email of anyone who wants to get in touch.</span><span class="zh">做一个回答你自己业务领域问题的助手，并用这个工具记录任何想联系你的人的邮箱。</span></span></label>
+</div>
+
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A plain model only turns text into text. It can say “saved” without saving anything.<br>• The harness is your code around the model: build the input, read the output, act, repeat.<br>• ① Context: put what it should know in the system prompt, plus a rule to admit gaps.<br>• ② Memory: every call is stateless, so your code resends the conversation.<br>• ③ Tool: a function plus a description. The model asks, your code runs it.<br>• ④ Loop: <code>if</code> for one call, <code>for</code> for several, <code>while</code> for an unknown number.<br>• Frameworks package these jobs. You never need one.</p><p class="zh" style="margin:0">• 普通模型只会把文字变成文字。它可以说“已保存”，却什么也没保存。<br>• 外壳就是包在模型外面的你的代码：构造输入、读取输出、行动、重复。<br>• ① 上下文：把它该知道的放进系统提示词，再加一条“不知道就承认”的规则。<br>• ② 记忆：每次调用都是无状态的，所以你的代码要重新发送对话。<br>• ③ 工具：一个函数加一份描述。模型提出请求，你的代码来执行。<br>• ④ 循环：一次调用用 <code>if</code>，多次用 <code>for</code>，次数不确定用 <code>while</code>。<br>• 框架只是把这些工作打包起来。你从来不需要它。</p></div>
+
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX.t,$=function(i){return document.getElementById(i)};
+
+ /* ---- hook: a plain model only talks ---- */
+ var hk=$('hook'),hp=null,hs=false;
+ function hdraw(){
+  var h='<div class="bub u">Hi! Please save my email so Alex can reply: ed@example.com</div>';
+  h+='<p style="margin:10px 0 6px"><b>'+T({en:'Predict: after the model replies, will ed@example.com be in emails.txt?',zh:'预测：模型回复之后，ed@example.com 会出现在 emails.txt 里吗？'})+'</b></p>';
+  h+='<div class="pills" style="margin:0 0 8px"><button class="pill'+(hp==='y'?' on':'')+'" data-p="y"'+(hs?' disabled':'')+'>'+T({en:'Yes, saved',zh:'会，已保存'})+'</button><button class="pill'+(hp==='n'?' on':'')+'" data-p="n"'+(hs?' disabled':'')+'>'+T({en:'No, not saved',zh:'不会，没保存'})+'</button></div>';
+  h+='<button class="btn pri" id="hsend"'+(hp&&!hs?'':' disabled')+'>'+T({en:'Send to a plain model ▶',zh:'发送给普通模型 ▶'})+'</button>';
+  if(hs){
+   h+='<div class="bub a" style="margin-top:12px">Done! I\'ve saved your email, ed@example.com.</div><span class="lab">emails.txt</span><div class="io">'+T({en:'(empty)',zh:'（空）'})+'</div>';
+   h+='<div class="note">'+(hp==='n'?'✓ ':'✗ ')+T({en:'The model only wrote a sentence. It cannot open files, so nothing was saved, yet it sounded sure. To really act, it needs your code to act for it.',zh:'模型只是写了一句话。它无法打开文件，所以什么都没保存，口气却很笃定。要真正行动，它需要你的代码替它动手。'})+'</div><button class="btn" id="hre">'+T({en:'↻ Try again',zh:'↻ 再试一次'})+'</button>'}
+  hk.innerHTML=h;
+  hk.querySelectorAll('[data-p]').forEach(function(b){b.onclick=function(){hp=b.dataset.p;hdraw()}});
+  var s=$('hsend');if(s)s.onclick=function(e){hs=true;if(hp==='n')TX.burst(e.clientX,e.clientY);hdraw()};
+  var r=$('hre');if(r)r.onclick=function(){hp=null;hs=false;hdraw()}}
+ hdraw();
+
+ /* ---- landscape ---- */
+ var LC=[
+  {k:'b',t:{en:'Builders',zh:'构建器'},w:{en:'Non-technical people can build AI agents',zh:'非技术人员也能构建智能体'},x:['n8n','ElevenLabs','OpenAI Agent Builder','CrewAI Studio']},
+  {k:'p',t:{en:'Products',zh:'成品'},w:{en:'Non-technical people can use AI agents',zh:'非技术人员可以直接使用智能体'},x:['Claude app','Cowork','OpenClaw','Claude Design']},
+  {k:'r',t:{en:'Runtimes',zh:'运行环境'},w:{en:'Technical people can execute AI agents',zh:'技术人员可以运行智能体'},x:['AWS Lambda','AWS Bedrock AgentCore','Claude Managed Agents','Vertex AI Agent Engine']},
+  {k:'f',t:{en:'Frameworks',zh:'框架'},w:{en:'Technical people can develop AI agents',zh:'技术人员可以开发智能体'},x:['OpenAI Agents SDK','CrewAI','LangGraph / LangChain','Google ADK']}];
+ $('land').innerHTML=LC.map(function(c){return '<div class="lc" data-k="'+c.k+'"><h4>'+T(c.t)+'</h4><small>'+T(c.w)+'</small>'+c.x.map(function(n){return '<div class="t">'+n+'</div>'}).join('')+'</div>'}).join('');
+ function lit(k){document.querySelectorAll('#land .lc').forEach(function(e){e.classList.toggle('hit',e.dataset.k===k)})}
+ var LJ=[
+  {en:'Priya in marketing cannot code. She wants to drag blocks together to make an agent that drafts email replies.',zh:'市场部的 Priya 不会写代码。她想通过拖拽模块，做一个帮她起草邮件回复的智能体。',a:'b',ex:{en:'Builders let non-technical people create agents visually.',zh:'构建器让非技术人员通过可视化方式创建智能体。'}},
+  {en:'Your manager cannot code and just wants a ready-made agent that helps with her daily work.',zh:'你的经理不会写代码，只想直接用一个现成的智能体帮她处理日常工作。',a:'p',ex:{en:'Products are finished agents that non-technical people simply use.',zh:'成品是做好的智能体，非技术人员直接使用即可。'}},
+  {en:'Your team wrote an agent in Python and needs a place to run it in the cloud, around the clock.',zh:'你的团队用 Python 写好了一个智能体，需要一个可以在云端全天候运行它的地方。',a:'r',ex:{en:'Runtimes are where technical people execute agents they already built.',zh:'运行环境是技术人员运行已写好智能体的地方。'}},
+  {en:'A developer wants to write the agent code herself and wire up the LLM calls.',zh:'一位开发者想自己写智能体代码，并亲手接好大模型调用。',a:'f',ex:{en:'Frameworks are code libraries for developing agents.',zh:'框架是用来开发智能体的代码库。'}}];
+ var li=0,ls=0,lg=$('landgame');
+ function ldraw(){
+  if(li>=LJ.length){lit(null);lg.innerHTML='<div class="cnt">'+T({en:'Done',zh:'完成'})+'</div><p class="job">'+T({en:'You got '+ls+' of '+LJ.length+'.',zh:'你答对了 '+ls+' / '+LJ.length+' 题。'})+'</p><button class="btn" id="lre">'+T({en:'Play again',zh:'再玩一次'})+'</button>';
+   $('lre').onclick=function(){li=0;ls=0;ldraw()};return}
+  var j=LJ[li];
+  lg.innerHTML='<div class="cnt">'+T({en:'Person '+(li+1)+' of '+LJ.length,zh:'第 '+(li+1)+' / '+LJ.length+' 位'})+'</div><p class="job">'+T(j)+'</p><div class="pills">'+LC.map(function(c){return '<button class="pill" data-k="'+c.k+'">'+T(c.t)+'</button>'}).join('')+'</div><div class="fb"></div>';
+  var done=false;
+  lg.querySelectorAll('.pill').forEach(function(b){b.onclick=function(e){if(done)return;done=true;var ok=b.dataset.k===j.a;if(ok){ls++;TX.burst(e.clientX,e.clientY)}
+   lit(j.a);b.classList.add(ok?'ok':'no');var fb=lg.querySelector('.fb');fb.className='fb show '+(ok?'good':'no');
+   fb.innerHTML='<b>'+(ok?T({en:'Right. ',zh:'答对了。'}):T({en:'Not quite. ',zh:'不太对。'}))+'</b>'+T(j.ex)+'<br><button class="btn pri" id="ln" style="margin-top:10px">'+T({en:'Next →',zh:'下一题 →'})+'</button>';
+   $('ln').onclick=function(){li++;ldraw()}}})}
+ ldraw();
+
+ /* ---- framework jobs ---- */
+ var FJ=[{en:'Chain one LLM call after another, passing results along',zh:'把一次次大模型调用串起来，把结果往下传',a:0},
+  {en:'Let the LLM use a function, like sending an email or searching the web',zh:'让大模型能使用某个函数，比如发邮件或搜索网页',a:1},
+  {en:'Format the messages going in and parse the structured reply coming out',zh:'整理送进去的消息，并解析返回的结构化回复',a:2}];
+ var FP=[{en:'Orchestration',zh:'编排'},{en:'Tool calling',zh:'工具调用'},{en:'Inputs and outputs',zh:'输入与输出'}];
+ $('fw').innerHTML=FJ.map(function(j,i){return '<div class="row" data-i="'+i+'"><p>'+T(j)+'</p><div class="pills" style="margin:0">'+FP.map(function(p,k){return '<button class="pill" data-k="'+k+'">'+T(p)+'</button>'}).join('')+'</div><div class="fb"></div></div>'}).join('');
+ document.querySelectorAll('#fw .row').forEach(function(r){var j=FJ[+r.dataset.i],ok=false;
+  r.querySelectorAll('.pill').forEach(function(b){b.onclick=function(){if(ok)return;var good=+b.dataset.k===j.a;
+   if(good){ok=true;b.classList.add('ok');var f=r.querySelector('.fb');f.className='fb show';f.innerHTML='✓ '+T({en:'Yes, that is '+FP[j.a].en.toLowerCase()+'.',zh:'对，这就是“'+FP[j.a].zh+'”。'})}
+   else{b.classList.add('no');setTimeout(function(){b.classList.remove('no')},400)}}})});
+
+ /* ---- twin prompt builder ---- */
+ var TB={role:0,sum:0,li:0,rules:0},BT={
+  role:'# Your role\nYou are the digital twin of Alex on their website. You answer questions about Alex\'s career.',
+  sum:'# Summary\nAlex is a data engineer who builds pipelines and writes a weekly newsletter.',
+  li:'# LinkedIn profile\nBrightwave: Data Engineer, 2021 to now\nNorthport Bank: Analyst, 2018 to 2021',
+  rules:'# Rules\nStay on career topics. If you do not know, say so. Never make up an answer.'};
+ function rep(q){var f=TB;
+  if(q===1){
+   if(!f.role)return ['meh',{en:'I\'m an AI assistant, so I don\'t have a job. How can I help you?',zh:'我是一个 AI 助手，没有工作。有什么可以帮你的吗？'},{en:'Generic: it does not know it is Alex\'s twin.',zh:'泛泛而谈：它不知道自己是 Alex 的分身。'}];
+   if(f.li)return ['good',{en:'At Brightwave I have been a data engineer since 2021. Before that I was an analyst at Northport Bank.',zh:'自 2021 年起，我在 Brightwave 担任数据工程师。在那之前，我是 Northport Bank 的分析师。'},{en:'Grounded in the LinkedIn text.',zh:'答案来自 LinkedIn 文本。'}];
+   if(f.sum)return ['meh',{en:'I\'m a data engineer who builds pipelines. For the job-by-job history I would need more detail.',zh:'我是一名搭建数据管道的数据工程师。具体的逐份工作经历，我还需要更多信息。'},{en:'Partly grounded: the summary is short.',zh:'部分有依据：简介内容太少。'}];
+   if(f.rules)return ['good',{en:'I don\'t have details about that, so I won\'t guess.',zh:'我没有这方面的信息，所以不会瞎猜。'},{en:'Honest, but not useful yet. Give it data.',zh:'诚实，但还不够有用。给它一些资料。'}];
+   return ['bad',{en:'I led a team of 12 engineers at Google for five years.',zh:'我在 Google 带领一个 12 人的工程团队，做了五年。'},{en:'Made up. Nothing in the prompt says this.',zh:'编造的。提示词里根本没有这些。'}]}
+  if(!f.role)return ['meh',{en:'I don\'t eat, but pepperoni is a classic. What else is on your mind?',zh:'我不吃东西，不过意式香肠是经典选择。你还想聊点什么？'},{en:'Chatty and off topic.',zh:'闲聊跑题了。'}];
+  if(f.rules)return ['good',{en:'That\'s outside what I can speak to. I\'m here to talk about Alex\'s career. Want to hear about their projects?',zh:'这超出了我能回答的范围。我在这里是聊 Alex 的职业经历的。想听听他们的项目吗？'},{en:'Stayed on topic and steered back.',zh:'没有跑题，并把话题引了回来。'}];
+  return ['bad',{en:'Pineapple, obviously! Alex loves it.',zh:'当然是菠萝！Alex 超爱。'},{en:'Made up. Alex never said this.',zh:'编造的。Alex 从没说过这话。'}]}
+ function tdraw(){
+  document.querySelectorAll('.tg').forEach(function(b){b.classList.toggle('on',!!TB[b.dataset.b])});
+  var ks=['role','sum','li','rules'].filter(function(k){return TB[k]});
+  $('tpr').textContent=ks.length?ks.map(function(k){return BT[k]}).join('\n\n'):'(empty)';
+  [1,2].forEach(function(q){var r=rep(q),el=$('r'+q);el.className='rp '+r[0];el.innerHTML=T(r[1])+'<small>'+T(r[2])+'</small>'});
+  var m=[[TB.role,{en:'Knows its role',zh:'知道自己的角色'}],[TB.li||TB.sum,{en:'Has real facts',zh:'掌握了真实资料'}],[TB.rules,{en:'Admits gaps',zh:'会承认不知道'}]];
+  $('mis').innerHTML=m.map(function(x){return '<span class="'+(x[0]?'ok':'')+'">'+(x[0]?'✓ ':'')+T(x[1])+'</span>'}).join('');
+  var win=TB.role&&TB.li&&TB.rules;
+  $('tfb').innerHTML=win?T({en:'Mission complete: a grounded answer to Q1 and a polite refusal for Q2.',zh:'任务完成：问题 1 有依据地回答，问题 2 礼貌地婉拒。'}):T({en:'Goal: answer Q1 from real facts and refuse Q2, with nothing made up.',zh:'目标：问题 1 依据真实资料作答，问题 2 婉拒，且不编造任何内容。'});
+  return win}
+ var wonT=false;
+ document.querySelectorAll('.tg').forEach(function(b){b.onclick=function(e){TB[b.dataset.b]=TB[b.dataset.b]?0:1;var w=tdraw();if(w&&!wonT){wonT=true;TX.burst(e.clientX,e.clientY)}if(!w)wonT=false}});
+ tdraw();
+
+ /* ---- memory ---- */
+ var mem=$('mem'),mp=0,hist=false,pred=null,mrep=null;
+ function pay(withH){var s='messages = [\n  {"role": "system", "content": "…"},\n';
+  if(withH)s+='  <mark>{"role": "user", "content": "Hi, my name is Ed"},\n  {"role": "assistant", "content": "Hi Ed! Nice to meet you."},</mark>\n';
+  return s+'  {"role": "user", "content": "What\'s my name?"}\n]'}
+ function mdraw(){
+  if(mp===0){mem.innerHTML='<div class="lab">'+T({en:'Message 1',zh:'第 1 条消息'})+'</div><p style="margin:0 0 10px">'+T({en:'Start the chat as a visitor.',zh:'先以访客的身份开始对话。'})+'</p><button class="btn pri" id="m1">'+T({en:'Send: “Hi, my name is Ed”',zh:'发送：“Hi, my name is Ed”'})+'</button>';
+   $('m1').onclick=function(){mp=1;mdraw()};return}
+  var h='<div class="bub u">Hi, my name is Ed</div><div class="bub a">Hi Ed! Nice to meet you.</div>';
+  h+='<div class="lab">'+T({en:'Message 2',zh:'第 2 条消息'})+'</div><div class="bub u">What\'s my name?</div>';
+  h+='<div class="sw"><button class="pill'+(hist?' on':'')+'" id="mh">'+(hist?'☑ ':'☐ ')+T({en:'Also send the earlier messages',zh:'同时发送之前的消息'})+'</button></div>';
+  h+='<p style="margin:6px 0"><b>'+T({en:'Predict: will the model know the name?',zh:'预测：模型会知道名字吗？'})+'</b></p><div class="pills" style="margin:0 0 8px"><button class="pill'+(pred==='y'?' on':'')+'" data-p="y">'+T({en:'Yes, it knows',zh:'知道'})+'</button><button class="pill'+(pred==='n'?' on':'')+'" data-p="n">'+T({en:'No, it does not',zh:'不知道'})+'</button></div>';
+  h+='<div class="lab">'+T({en:'What is actually sent',zh:'实际发送的内容'})+'</div><div class="io">'+pay(hist)+'</div>';
+  h+='<button class="btn pri" id="msend"'+(pred?'':' disabled')+'>'+T({en:'Send message 2 ▶',zh:'发送第 2 条 ▶'})+'</button>';
+  if(mrep){var knows=mrep.h,ok=(mrep.p==='y')===knows;
+   h+='<div class="bub a" style="margin-top:12px">'+(knows?'Your name is Ed.':T({en:'I don\'t know your name. You haven\'t told me yet.',zh:'我不知道你的名字，你还没告诉我。'}))+'</div>'+
+   '<div class="note">'+(ok?'✓ ':'✗ ')+(knows?T({en:'It knows only because you sent the earlier messages again.',zh:'它知道，仅仅是因为你把之前的消息又发了一遍。'}):T({en:'Nothing was sent about Ed, so there is nothing to remember. Now tick the box and send again.',zh:'没有发送任何关于 Ed 的内容，所以它无从“记起”。现在勾选上面的选项，再发送一次。'}))+'</div>'}
+  mem.innerHTML=h;
+  $('mh').onclick=function(){hist=!hist;mrep=null;mdraw()};
+  mem.querySelectorAll('[data-p]').forEach(function(b){b.onclick=function(){pred=b.dataset.p;mdraw()}});
+  $('msend').onclick=function(e){mrep={h:hist,p:pred};if(hist===(pred==='y'))TX.burst(e.clientX,e.clientY);mdraw()}}
+ mdraw();
+
+ /* ---- tool-call stepper ---- */
+ var tp=0,tpred=null,tn=$('tnodes'),tv=$('tview'),tc=$('tctl');
+ var NL=[{en:'Send call 1',zh:'发送第 1 次调用'},{en:'Model asks',zh:'模型提出请求'},{en:'Your code runs it',zh:'你的代码执行'},{en:'Build call 2',zh:'构建第 2 次调用'},{en:'Final answer',zh:'最终回答'}];
+ var SYS='{"role": "system", "content": "…twin prompt…"}',USR='{"role": "user", "content": "Hi, you can reach me at ed@example.com"}';
+ var ASS='{"role": "assistant", "tool_calls": [{"id": "call_a1", "function": {"name": "record_email_tool", "arguments": "{\\"email\\": \\"ed@example.com\\"}"}}]}',TOOL='{"role": "tool", "tool_call_id": "call_a1", "content": "Email recorded"}';
+ function tdr(){
+  tn.innerHTML=NL.map(function(n,i){return (i?'<em>→</em>':'')+'<button class="'+(i===tp?'on':i<tp?'past':'')+'" data-i="'+i+'">'+(i+1)+'. '+T(n)+'</button>'}).join('');
+  tn.querySelectorAll('button').forEach(function(b){b.onclick=function(){var i=+b.dataset.i;if(i>1&&tpred===null)return;tp=i;tdr()}});
+  var h='';
+  if(tp===0)h='<span class="lab">'+T({en:'Sent to the model',zh:'发送给模型'})+'</span><div class="io">messages = [\n  '+SYS+',\n  '+USR+'\n]\ntools = [record_email_tool_json]</div><div class="note">'+T({en:'The model receives the conversation <b>and</b> the tool description.',zh:'模型收到的是对话<b>和</b>工具描述。'})+'</div>';
+  if(tp===1)h='<span class="lab">'+T({en:'Model reply',zh:'模型的回复'})+'</span><div class="io">finish_reason = <mark>"tool_calls"</mark>\ntool_calls[0].function.name      = "record_email_tool"\ntool_calls[0].function.arguments = \'{"email": "ed@example.com"}\'</div><div class="note">'+T({en:'No text answer yet. The model only <b>asked</b> for something to be done.',zh:'还没有文字回答。模型只是<b>请求</b>去做一件事。'})+'</div>'+
+   '<p style="margin:10px 0 6px"><b>'+T({en:'Predict: who will run record_email_tool?',zh:'预测：谁来运行 record_email_tool？'})+'</b></p><div class="pills" style="margin:0"><button class="pill'+(tpred==='m'?' no':tpred==='c'?' ok':'')+'" data-a="m">'+T({en:'The model',zh:'模型'})+'</button><button class="pill'+(tpred==='c'?' ok':'')+'" data-a="c">'+T({en:'My code',zh:'我的代码'})+'</button></div>'+
+   (tpred==='c'?'<div class="note">'+T({en:'Right. The model cannot touch your computer. Your code reads the request and runs the function.',zh:'对。模型碰不到你的电脑。是你的代码读取请求并运行函数。'})+'</div>':tpred==='m'?'<div class="note" style="border-color:var(--bad)">'+T({en:'Not quite. A model only produces text. Try again.',zh:'不对。模型只会输出文字。再试一次。'})+'</div>':'');
+  if(tp===2)h='<span class="lab">'+T({en:'Your code',zh:'你的代码'})+'</span><div class="io">email = json.loads(tool_call.function.arguments).get("email")\n<mark>record_email_tool(email)</mark>\n→ prints: Tool called to record an email: ed@example.com\n→ emails.txt now ends with: ed@example.com</div><div class="note">'+T({en:'The function ran on <b>your</b> machine. The model has no idea yet whether it worked.',zh:'函数是在<b>你的</b>机器上运行的。模型目前还不知道它有没有成功。'})+'</div>';
+  if(tp===3)h='<span class="lab">'+T({en:'Sent to the model, call 2',zh:'发送给模型：第 2 次调用'})+'</span><div class="io">messages = [\n  '+SYS+',\n  '+USR+',\n  <mark>'+ASS+'</mark>,\n  <mark>'+TOOL+'</mark>\n]</div><div class="note">'+T({en:'Two messages were added: the model\'s request, and the result of running it. <code>tool_call_id</code> links them together.',zh:'新增了两条消息：模型的请求，以及运行它的结果。<code>tool_call_id</code> 把二者关联起来。'})+'</div>';
+  if(tp===4)h='<span class="lab">'+T({en:'Model reply',zh:'模型的回复'})+'</span><div class="io">finish_reason = <mark>"stop"</mark></div><div class="io re">Thanks! I\'ve noted your email, ed@example.com. Is there anything about my work you\'d like to know?</div><div class="note">'+T({en:'<code>stop</code> means the model is done. This text goes back to the visitor.',zh:'<code>stop</code> 表示模型已经完成。这段文字会回到访客面前。'})+'</div>';
+  tv.innerHTML=h;
+  tv.querySelectorAll('[data-a]').forEach(function(b){b.onclick=function(e){tpred=b.dataset.a;if(tpred==='c')TX.burst(e.clientX,e.clientY);tdr()}});
+  var lb=[{en:'Send call 1 ▶',zh:'发送第 1 次调用 ▶'},{en:'Next: your code runs it →',zh:'下一步：你的代码执行 →'},{en:'Next: build call 2 →',zh:'下一步：构建第 2 次调用 →'},{en:'Send call 2 ▶',zh:'发送第 2 次调用 ▶'},{en:'↻ Start over',zh:'↻ 重新开始'}];
+  var lock=tp===1&&tpred!=='c';
+  tc.innerHTML='<button class="btn pri" id="tn"'+(lock?' disabled':'')+'>'+T(lb[tp])+'</button>'+(tp>0&&tp<4?'<button class="btn" id="tb">←</button>':'');
+  $('tn').onclick=function(){if(tp===4){tp=0;tpred=null}else tp++;tdr()};
+  var tb=$('tb');if(tb)tb.onclick=function(){tp--;tdr()}}
+ tdr();
+
+ /* ---- loop versions ---- */
+ var LV=[{n:{en:'① if',zh:'① if'},c:'<span class="dim">response = client.chat.completions.create(..., tools=tools)\n\n</span><span class="chg">if response.choices[0].finish_reason == "tool_calls":</span><span class="dim">\n    message = response.choices[0].message\n    messages.append(message)\n    tool_call = message.tool_calls[0]</span>  <span class="dim"># only the FIRST request</span><span class="dim">\n    ...run it, append the result...\n    response = client.chat.completions.create(..., tools=tools)\n\nreturn response.choices[0].message.content</span>'},
+  {n:{en:'② if + for',zh:'② if + for'},c:'<span class="dim">response = client.chat.completions.create(..., tools=tools)\n\nif response.choices[0].finish_reason == "tool_calls":\n    message = response.choices[0].message\n    messages.append(message)\n    </span><span class="chg">for tool_call in message.tool_calls:</span><span class="dim">   # EVERY request in this reply\n        ...run it, append the result...\n    response = client.chat.completions.create(..., tools=tools)\n\nreturn response.choices[0].message.content</span>'},
+  {n:{en:'③ while + for',zh:'③ while + for'},c:'<span class="dim">response = client.chat.completions.create(..., tools=tools)\n\n</span><span class="dim">max_turns = 10\nturns = 0\n</span><span class="chg">while response.choices[0].finish_reason == "tool_calls" and turns &lt; max_turns:</span><span class="dim">   # until done, or the limit\n    turns += 1\n    message = response.choices[0].message\n    messages.append(message)\n    for tool_call in message.tool_calls:\n        ...run it, append the result...\n    response = client.chat.completions.create(..., tools=tools)\n\nreturn response.choices[0].message.content</span>'}];
+ var lv=$('lv');lv.innerHTML=LV.map(function(v,i){return '<button class="pill" data-i="'+i+'">'+T(v.n)+'</button>'}).join('');
+ function lvs(i){lv.querySelectorAll('.pill').forEach(function(b,k){b.classList.toggle('on',k===i)});$('lcode').innerHTML=LV[i].c}
+ lv.querySelectorAll('.pill').forEach(function(b){b.onclick=function(){lvs(+b.dataset.i)}});lvs(0);
+ var LS=[{en:'A visitor shares one email. The model calls the tool once, then answers.',zh:'访客分享了一个邮箱。模型调用一次工具，然后回答。',a:0,ex:{en:'One request, one answer. A plain <code>if</code> is enough.',zh:'一次请求、一次回答，简单的 <code>if</code> 就够了。'}},
+  {en:'A visitor pastes two emails. The model asks to record both in a single reply.',zh:'访客贴了两个邮箱。模型在同一次回复里请求把两个都记录下来。',a:1,ex:{en:'One reply, several requests. You need a <code>for</code> to run them all, otherwise one result is missing and the API errors.',zh:'一次回复包含多个请求，需要用 <code>for</code> 全部执行；否则会缺少一个结果，API 会报错。'}},
+  {en:'The model calls a tool, reads the result, then decides it needs another tool before it can answer.',zh:'模型调用了一个工具，读完结果后，发现回答前还需要再调用另一个工具。',a:2,ex:{en:'After the second call the model asks for a tool again. Only a <code>while</code> keeps going.',zh:'第二次调用之后，模型又请求了工具。只有 <code>while</code> 会继续往下走。'}},
+  {en:'You cannot know in advance how many rounds of tool use a task will take.',zh:'你无法提前知道一个任务要经过几轮工具使用。',a:2,ex:{en:'An unknown number of rounds is exactly what <code>while</code> is for.',zh:'轮数不确定，正是 <code>while</code> 的用武之地。'}}];
+ var gi=0,gs=0,gm=$('lgame');
+ function gdraw(){
+  if(gi>=LS.length){gm.innerHTML='<div class="cnt">'+T({en:'Done',zh:'完成'})+'</div><p class="job">'+T({en:'You got '+gs+' of '+LS.length+'.',zh:'你答对了 '+gs+' / '+LS.length+' 题。'})+'</p><button class="btn" id="gre">'+T({en:'Play again',zh:'再玩一次'})+'</button>';
+   $('gre').onclick=function(){gi=0;gs=0;gdraw()};return}
+  var j=LS[gi];
+  gm.innerHTML='<div class="cnt">'+T({en:'Situation '+(gi+1)+' of '+LS.length,zh:'情况 '+(gi+1)+' / '+LS.length})+'</div><p class="job">'+T(j)+'</p><div class="pills">'+LV.map(function(v,i){return '<button class="pill" data-k="'+i+'">'+T(v.n)+'</button>'}).join('')+'</div><div class="fb"></div>';
+  var done=false;
+  gm.querySelectorAll('.pill').forEach(function(b){b.onclick=function(e){if(done)return;done=true;var ok=+b.dataset.k===j.a;if(ok){gs++;TX.burst(e.clientX,e.clientY)}
+   lvs(j.a);b.classList.add(ok?'ok':'no');var fb=gm.querySelector('.fb');fb.className='fb show '+(ok?'good':'no');
+   fb.innerHTML='<b>'+(ok?T({en:'Right. ',zh:'答对了。'}):T({en:'Not quite. ',zh:'不太对。'}))+'</b>'+T(j.ex)+'<br><button class="btn pri" id="gn" style="margin-top:10px">'+T({en:'Next →',zh:'下一题 →'})+'</button>';
+   $('gn').onclick=function(){gi++;gdraw()}}})}
+ gdraw();
+});
+</script></body></html>
