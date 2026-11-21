@@ -10,9 +10,7 @@ on:
         description: Lessons to read, space separated, e.g. agentic-ai/08-agents-tools-handoffs.html
         required: true
 permissions:
-  contents: write
-  pull-requests: write
-  issues: write
+  contents: read
 concurrency:
   group: reader-${{ github.event.deployment.sha || github.sha }}
   cancel-in-progress: false
@@ -22,8 +20,13 @@ jobs:
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (github.event.deployment_status.state == 'success' &&
-       !contains(github.event.deployment.environment, 'roduction'))
+       github.event.deployment.environment != 'Production')
     runs-on: ubuntu-latest
+    # Read-only job: Claude never shares a job with a write token. The share job below does the writing.
+    outputs:
+      files: ${{ steps.find.outputs.files }}
+      where: ${{ steps.find.outputs.where }}
+      pr: ${{ steps.find.outputs.pr }}
     env:
       SHA: ${{ github.event.deployment.sha || github.sha }}
     steps:
@@ -31,7 +34,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.deployment.sha || github.sha }}
-          persist-credentials: false # keep the write token out of .git/config, where Claude could read it
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -96,22 +99,65 @@ jobs:
           claude -p "$(cat /tmp/reader-prompt.md)" --max-turns 50 \
             --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*)" \
             --output-format text | tail -30
+      - name: Package the result for the share job
+        if: always() && steps.find.outputs.files != ''
+        run: |
+          mkdir -p /tmp/out
+          cp /tmp/reader.json /tmp/reader-comment.md /tmp/out/ 2>/dev/null || true
+          git diff -- 'agentic-ai/*.html' > /tmp/out/fix.patch
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.find.outputs.files != ''
+        with:
+          name: reader
+          path: /tmp/out/
+          if-no-files-found: ignore
+
+  # Write job: only trusted scripts from the default branch run here, never files Claude could have touched.
+  share:
+    needs: read
+    if: always() && needs.read.outputs.files != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    env:
+      SHA: ${{ github.event.deployment.sha || github.sha }}
+      WHERE: ${{ needs.read.outputs.where }}
+      PR: ${{ needs.read.outputs.pr }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      T: trusted/scripts
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          path: trusted
+          sparse-checkout: scripts
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.deployment.sha || github.sha }}
+          path: work
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: reader
+          path: /tmp/out
       - name: Share the result
         id: share
-        if: steps.find.outputs.files != ''
-        env:
-          WHERE: ${{ steps.find.outputs.where }}
-          PR: ${{ steps.find.outputs.pr }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          test -s /tmp/reader.json || { echo "The reader wrote no result."; exit 1; }
-          low=$(node -e 'const r=require("/tmp/reader.json");console.log(Math.floor(Math.min(10,...r.lessons.map(l=>+l.score||0))))')
-          node -e 'const r=require("/tmp/reader.json");console.log(r.lessons.map(l=>l.file.split("/").pop()+" "+l.score+"/10").join(", ")+". "+r.summary)' > /tmp/reader-line.txt
+          test -s /tmp/out/reader.json || { echo "The reader wrote no result."; exit 1; }
+          low=$(node -e 'const r=require("/tmp/out/reader.json");console.log(Math.floor(Math.min(10,...r.lessons.map(l=>+l.score||0))))')
+          node -e 'const r=require("/tmp/out/reader.json");console.log(r.lessons.map(l=>String(l.file).split("/").pop()+" "+l.score+"/10").join(", ")+". "+r.summary)' > /tmp/reader-line.txt
           echo "low=$low" >> "$GITHUB_OUTPUT"
           url=
-          changed=$(git status --porcelain -- 'agentic-ai/*.html')
-          if [ "$WHERE" = test ] && [ -n "$changed" ]; then
-            node scripts/check-copy.mjs | tee /tmp/copy-check.txt
+          if [ "$WHERE" = test ] && [ -s /tmp/out/fix.patch ]; then
+            cd work
+            git apply --include='agentic-ai/*.html' /tmp/out/fix.patch
             branch="reader/fixes-${GITHUB_RUN_NUMBER}"
             git config user.name "TX Learns reader"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -120,19 +166,19 @@ jobs:
             git commit -m "Reader: clearer wording for newcomers" -m "Suggested by the reader agent (Claude) after the test deploy."
             auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
             git -c "http.https://github.com/.extraheader=$auth" push -u origin "$branch"
-            { cat /tmp/reader-comment.md; echo; echo "These fixes only land if you merge this pull request."; } > /tmp/pr-body.md
-            url=$(gh pr create --base test --head "$branch" --title "Reader: clearer wording ($(cat /tmp/reader-line.txt | cut -c1-60))" --body-file /tmp/pr-body.md)
+            { cat /tmp/out/reader-comment.md; echo; echo "These fixes only land if you merge this pull request."; } > /tmp/pr-body.md
+            url=$(gh pr create --base test --head "$branch" --title "Reader: clearer wording ($(cut -c1-60 /tmp/reader-line.txt))" --body-file /tmp/pr-body.md)
             gh pr edit "$url" --add-assignee "${{ github.repository_owner }}" || true
+            cd ..
           elif [ -n "$PR" ]; then
-            gh pr comment "$PR" --body-file /tmp/reader-comment.md
+            gh pr comment "$PR" -R "$GITHUB_REPOSITORY" --body-file /tmp/out/reader-comment.md
             url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/pull/$PR"
           else
-            gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/comments" -F body=@/tmp/reader-comment.md --jq .html_url > /tmp/url.txt
-            url=$(cat /tmp/url.txt)
+            url=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/comments" -F body=@/tmp/out/reader-comment.md --jq .html_url)
           fi
           echo "url=$url" >> "$GITHUB_OUTPUT"
       - name: Tell TX on Telegram
-        if: always() && steps.find.outputs.files != ''
+        if: always()
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -141,19 +187,20 @@ jobs:
         run: |
           if [ -n "$URL" ]; then
             { echo "📖 Reader check: $(cat /tmp/reader-line.txt)"; echo "$URL";
-              case "$URL" in */pull/*) [ "${{ steps.find.outputs.where }}" = test ] && echo "Fixes are in that pull request. Merge it if you agree.";; esac; } \
-              | node scripts/notify-telegram.mjs
+              case "$URL" in */pull/*) [ "$WHERE" = test ] && echo "Fixes are in that pull request. Merge it if you agree.";; esac; } \
+              | node $T/notify-telegram.mjs
           else
-            node scripts/notify-telegram.mjs "⚠️ The reader agent could not finish. Logs: $RUN"
+            node $T/notify-telegram.mjs "⚠️ The reader agent could not finish. Logs: $RUN"
           fi
       - name: Record status for the Ecosystem page
-        if: always() && steps.find.outputs.files != ''
+        if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LOW: ${{ steps.share.outputs.low }}
           LINK: ${{ steps.share.outputs.url }}
         run: |
+          [ -f $T/record-status.mjs ] || { echo "No record script on the default branch yet."; exit 0; }
           if [ -z "$LOW" ]; then STATE=fail; SUMMARY="Could not finish reading."
           elif [ "$LOW" -ge 8 ]; then STATE=ok; SUMMARY="$(cat /tmp/reader-line.txt)"
           else STATE=flag; SUMMARY="$(cat /tmp/reader-line.txt)"; fi
-          STATE=$STATE SUMMARY="$SUMMARY" node scripts/record-status.mjs reader
+          STATE=$STATE SUMMARY="$SUMMARY" node $T/record-status.mjs reader
