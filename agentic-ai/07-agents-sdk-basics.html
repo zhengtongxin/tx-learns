@@ -1,0 +1,276 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OpenAI Agents SDK: the basics</title><link rel="stylesheet" href="../assets/site.css">
+<style>
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.pill{border:1px solid var(--line);background:var(--glass);color:var(--fg);border-radius:999px;padding:8px 16px;cursor:pointer;font:inherit;font-size:13.5px;font-weight:600;transition:.2s}
+.pill:hover{border-color:var(--acc)}.pill.on{background:var(--fg);color:var(--bg)}
+.pill.ok{background:color-mix(in srgb,var(--ok) 20%,transparent);border-color:var(--ok);color:var(--fg)}
+.pill.no{border-color:var(--bad);animation:shake .35s}
+.codebox{background:#0b0b10;color:#e8e8f0;border:1px solid var(--line);border-radius:18px;padding:16px 18px;font:13.5px/1.75 ui-monospace,"SF Mono",Menlo,monospace;white-space:pre-wrap;word-break:break-word;overflow:auto;margin:10px 0}
+.codebox .dim{opacity:.45}
+.codebox .chg{color:#fff;background:linear-gradient(135deg,rgba(76,125,255,.55),rgba(34,211,238,.45));border-radius:6px;padding:1px 5px}
+.io{background:#0b0b10;color:#e8e8f0;border:1px solid var(--line);border-radius:14px;padding:12px 14px;font:13px/1.55 ui-monospace,"SF Mono",Menlo,monospace;white-space:pre-wrap;word-break:break-word;margin:6px 0}
+.io.re{background:color-mix(in srgb,var(--bg) 60%,transparent);color:var(--fg);font-family:inherit;font-size:14.5px}
+.io mark{background:color-mix(in srgb,var(--acc2) 30%,transparent);color:inherit;border-radius:4px;padding:0 3px}
+.lab{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin:12px 0 4px;display:block}
+.sc{border:1px solid var(--line);background:var(--glass);border-radius:20px;padding:18px 20px;margin:1.2em 0}
+.sc .job{font-weight:700;font-size:1.05rem;margin:0 0 4px}
+.sc .cnt{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--acc2);font-weight:700}
+.sc .fb{margin-top:12px;padding:12px 16px;border-radius:14px;background:color-mix(in srgb,var(--acc) 12%,transparent);display:none}
+.sc .fb.show{display:block;animation:fade .3s}
+.sc .fb.good{background:color-mix(in srgb,var(--ok) 14%,transparent)}
+.sc .fb.no{background:color-mix(in srgb,var(--bad) 12%,transparent)}
+.pm{display:grid;gap:10px;margin:1.2em 0}
+.pm .row{border:1px solid var(--line);background:var(--glass);border-radius:18px;padding:14px 16px}
+.pm .row p{margin:0 0 10px;font-weight:600}
+.pm .fb{display:none;margin-top:10px;font-size:14px}.pm .fb.show{display:block}
+/* landscape */
+.land{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:12px;margin:1.2em 0}
+.lc{border:1px solid var(--line);background:var(--glass);border-radius:20px;padding:14px 14px 12px;transition:.3s}
+.lc h4{margin:0 0 2px;font-size:1.05rem}.lc small{color:var(--mut);display:block;min-height:2.6em;margin-bottom:8px}
+.lc .t{border:1px solid var(--line);border-radius:10px;padding:6px 10px;margin:5px 0;font-size:13px;background:color-mix(in srgb,var(--acc) 7%,transparent)}
+.lc.hit{border-color:var(--ok);box-shadow:0 0 28px color-mix(in srgb,var(--ok) 40%,transparent);transform:translateY(-3px)}
+.rule2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:12px 0}
+.rule2 div{border:1px solid var(--acc2);border-radius:14px;padding:10px 14px;background:color-mix(in srgb,var(--acc2) 8%,transparent)}
+.rule2 b{display:block}.rule2 small{color:var(--mut)}
+.chips2{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.chips2 span{padding:9px 16px;border-radius:12px;font-weight:700;font-size:13.5px;border:1px solid var(--line)}
+.chips2 .a{background:color-mix(in srgb,#d9742b 28%,transparent);border-color:#d9742b}
+.chips2 .b{background:color-mix(in srgb,#b8a92a 26%,transparent);border-color:#b8a92a}
+.chips2 .c{background:color-mix(in srgb,#2f7fc4 30%,transparent);border-color:#2f7fc4}
+/* twin */
+.tw{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:1.2em 0}
+@media(max-width:760px){.tw{grid-template-columns:1fr}}
+.tg{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--glass);border-radius:14px;padding:10px 14px;margin:6px 0;cursor:pointer;transition:.2s;width:100%;text-align:left;color:var(--fg);font:inherit}
+.tg i{width:34px;height:20px;border-radius:999px;background:var(--line);position:relative;flex:none;transition:.2s}
+.tg i:after{content:"";position:absolute;left:3px;top:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:.2s}
+.tg.on{border-color:var(--acc2)}.tg.on i{background:var(--acc2)}.tg.on i:after{left:17px}
+.tg small{color:var(--mut);display:block;font-size:12px}
+.q2{border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin:8px 0;background:var(--glass)}
+.q2 b{display:block;font-size:13.5px;margin-bottom:6px}
+.q2 .rp{padding:8px 12px;border-radius:10px;font-size:14px}
+.rp.good{background:color-mix(in srgb,var(--ok) 14%,transparent)}
+.rp.bad{background:color-mix(in srgb,var(--bad) 14%,transparent)}
+.rp.meh{background:color-mix(in srgb,var(--acc) 10%,transparent)}
+.rp small{display:block;color:var(--mut);margin-top:3px}
+.mis{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.mis span{padding:6px 12px;border-radius:999px;border:1px dashed var(--line);font-size:13px;color:var(--mut)}
+.mis span.ok{border:1px solid var(--ok);color:var(--fg);background:color-mix(in srgb,var(--ok) 16%,transparent)}
+/* memory + tool stepper */
+.chat{border:1px solid var(--line);border-radius:18px;padding:14px;background:var(--glass);margin:1.2em 0}
+.bub{padding:9px 14px;border-radius:14px;margin:6px 0;max-width:86%;font-size:14.5px}
+.bub.u{margin-left:auto;background:color-mix(in srgb,var(--acc) 22%,transparent)}
+.bub.a{background:color-mix(in srgb,var(--fg) 8%,transparent)}
+.note{padding:12px 16px;border-radius:14px;border-left:3px solid var(--ok);background:color-mix(in srgb,var(--ok) 10%,transparent);margin:10px 0;font-size:14.5px}
+.sw{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0}
+.nodes{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}
+.nodes button{border:1px solid var(--line);background:var(--glass);color:var(--fg);border-radius:14px;padding:8px 14px;font:inherit;font-size:13px;cursor:pointer}
+.nodes button.on{border-color:var(--acc2);box-shadow:0 0 0 1px var(--acc2)}
+.nodes button.past{border-color:var(--ok)}
+.nodes em{color:var(--mut);font-style:normal}
+.cl{display:grid;gap:8px;margin:12px 0}
+.cl label{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--glass);border-radius:14px;padding:10px 14px;cursor:pointer}
+.cl input{margin-top:4px;accent-color:var(--acc2)}
+.cl input:checked+span{opacity:.55;text-decoration:line-through}
+.ord{display:grid;gap:8px;margin:14px 0}
+.oc{display:flex;gap:12px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--glass);color:var(--fg);border-radius:16px;padding:12px 16px;cursor:pointer;font:inherit;transition:.25s}
+.oc:hover{border-color:var(--acc);transform:translateX(5px)}
+.oc .no{width:28px;height:28px;border-radius:50%;border:1px dashed var(--line);display:grid;place-items:center;font-weight:800;font-size:13px;flex:none;color:var(--mut)}
+.oc.in{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,transparent);cursor:default;transform:none}
+.oc.in .no{background:var(--ok);color:#fff;border:0}
+.oc.bad{border-color:var(--bad);animation:shake .35s}
+.why{border-left:3px solid var(--acc2);padding:2px 0 2px 14px;margin:10px 0}
+
+</style></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+
+<div class="hero">
+<span class="tag"><span class="en">Week 2 · Day 1</span><span class="zh">第 2 周 · 第 1 天</span></span>
+<h1><span class="en">OpenAI Agents SDK: the basics</span><span class="zh">OpenAI Agents SDK 基础</span></h1>
+<p class="meta"><span class="en">Last week you hand-built the harness. Now the SDK does it in a few lines · ~20 min · hands-on</span><span class="zh">上周你亲手写了外壳，现在 SDK 几行代码就能搞定 · 约 20 分钟 · 动手实践</span></p>
+</div>
+
+<p class="en">Last week you wrote the prompt, the history, the tool JSON and the <code>while</code> loop yourself. The <b>OpenAI Agents SDK</b> is a lightweight framework that packages exactly those jobs. Today: one new keyword pair (<code>async</code> / <code>await</code>), then four building blocks: <b>Agent</b>, <b>Runner</b>, <b>tools</b> and <b>memory</b>. Then a preview of how agents work together.</p>
+<p class="zh">上周你亲手写了提示词、历史记录、工具 JSON 和 <code>while</code> 循环。<b>OpenAI Agents SDK</b> 是一个轻量框架，把这些工作打包好了。今天先学一对新关键字（<code>async</code> / <code>await</code>），再学四个积木：<b>Agent</b>、<b>Runner</b>、<b>工具</b>和<b>记忆</b>，最后预览智能体如何协作。</p>
+
+<h2><span class="en">First: async and await</span><span class="zh">先学：async 与 await</span></h2>
+<div class="why"><p class="en"><b>Why:</b> every SDK example uses <code>await Runner.run(...)</code>. Calling a model means waiting on the network, and <code>async</code> is how Python waits without freezing everything else.</p><p class="zh"><b>为什么：</b>SDK 的每个例子都用 <code>await Runner.run(...)</code>。调用模型要等网络，<code>async</code> 就是让 Python 等待时不卡住其他事情的办法。</p></div>
+<div class="grid">
+  <div class="card"><h3 style="margin-top:0"><code>async def</code></h3><p class="en">Defines a function that is allowed to pause while it waits.</p><p class="zh">定义一个可以在等待时暂停的函数。</p></div>
+  <div class="card"><h3 style="margin-top:0"><code>await</code></h3><p class="en">Means "wait here for this result". Only allowed inside an <code>async def</code>.</p><p class="zh">表示“在这里等这个结果”。只能写在 <code>async def</code> 里面。</p></div>
+</div>
+<p class="en"><b>Your turn.</b> Will each line run? One twist: a Jupyter notebook already runs an event loop, so it lets you <code>await</code> at the top level.</p>
+<p class="zh"><b>轮到你了。</b>每段代码能运行吗？有个特例：Jupyter 笔记本本身已经有事件循环，所以允许在最外层直接 <code>await</code>。</p>
+<div class="sc" id="agame"></div>
+<div class="callout"><b class="lbl"><span class="en">Rule of thumb</span><span class="zh">经验法则</span></b><span class="en">Calling an agent? Put <code>await</code> in front. In a notebook, just write it. In a <code>.py</code> file, wrap it in <code>async def main()</code> and start it with <code>asyncio.run(main())</code>.</span><span class="zh">调用智能体？前面加 <code>await</code>。在笔记本里直接写；在 <code>.py</code> 文件里，包进 <code>async def main()</code>，并用 <code>asyncio.run(main())</code> 启动。</span></div>
+
+<h2><span class="en">Agent: a model with a role and tools</span><span class="zh">Agent：带角色和工具的模型</span></h2>
+<div class="why"><p class="en"><b>Why:</b> an agent is simply one LLM, plus a system prompt, plus tools. Click each part to see where it lives in the code and what it replaced.</p><p class="zh"><b>为什么：</b>智能体就是一个大模型，加上系统提示词，再加上工具。点开每个部分，看它在代码里的位置，以及它取代了你上周写的什么。</p></div>
+<div class="pills" id="ap"></div>
+<div class="codebox" id="acode"></div>
+<p class="meta" id="anote"></p>
+
+<h2><span class="en">Runner: the agent loop, for free</span><span class="zh">Runner：现成的智能体循环</span></h2>
+<div class="why"><p class="en"><b>Why:</b> last week's loop was the hard part. See how much of your Week 1 harness the SDK now carries. Match each Week 1 job to its SDK piece.</p><p class="zh"><b>为什么：</b>上周最难的就是那个循环。看看 SDK 现在替你承担了多少。把上周的每项工作对应到 SDK 里的零件。</p></div>
+<div class="sc" id="mgame"></div>
+<div class="codebox"><span class="dim">agent = Agent(name="Jokester", instructions="You are a joke teller", model="gpt-5.4-mini")
+
+</span><span class="chg">result = await Runner.run(agent, "Tell a joke about Autonomous AI Agents")</span><span class="dim">
+print(result.final_output)       # the answer
+result.to_input_list()           # every message of the run</span></div>
+<p class="en"><code>Runner.run</code> keeps calling the model and running tools until the model stops asking for tools: your <code>while</code> loop, with a turn limit built in. <code>final_output</code> is the answer; <code>to_input_list()</code> shows every message, handy for debugging.</p>
+<p class="zh"><code>Runner.run</code> 会不断调用模型、运行工具，直到模型不再请求工具：就是你写的 <code>while</code> 循环，还自带轮数上限。<code>final_output</code> 是最终答案；<code>to_input_list()</code> 展示每一条消息，方便调试。</p>
+<div class="callout warn"><b class="lbl"><span class="en">Install name</span><span class="zh">安装名称</span></b><span class="en">The package is <code>openai-agents</code> (<code>pip install openai-agents</code>), imported as <code>from agents import Agent, Runner</code>. Do not <code>pip install agents</code>: that is a different, older library.</span><span class="zh">安装包名是 <code>openai-agents</code>（<code>pip install openai-agents</code>），导入写 <code>from agents import Agent, Runner</code>。不要装 <code>agents</code>，那是另一个旧的库。</span></div>
+
+<h3><span class="en">See inside: trace and stream</span><span class="zh">看清内部：trace 与流式输出</span></h3>
+<div class="codebox"><span class="chg">with trace("Telling a joke"):</span><span class="dim">
+    result = await Runner.run(agent, "Tell a joke about Autonomous AI Agents")
+
+</span><span class="chg">result = Runner.run_streamed(agent, input="Please tell me 5 jokes about AI Agents.")</span><span class="dim">
+async for event in result.stream_events():
+    if event.type == "raw_response_event" and isinstance(event.data, ResponseTextDeltaEvent):
+        print(event.data.delta, end="", flush=True)</span></div>
+<p class="en"><code>trace</code> groups the calls under one name so you can inspect every step at <b>platform.openai.com/traces</b>. <code>run_streamed</code> hands you the text piece by piece, as it is written.</p>
+<p class="zh"><code>trace</code> 把这些调用归在一个名字下，你可以在 <b>platform.openai.com/traces</b> 查看每一步。<code>run_streamed</code> 则边生成边把文字一段段交给你。</p>
+<div class="quiz" data-answer="b">
+  <p class="q"><span class="en">What does streaming change?</span><span class="zh">流式输出改变了什么？</span></p>
+  <button class="opt" data-k="a"><span class="en">The model gives a better answer</span><span class="zh">模型给出更好的答案</span></button>
+  <button class="opt" data-k="b"><span class="en">You see the text as it is generated, instead of waiting for all of it</span><span class="zh">你能边生成边看到文字，而不用等全部写完</span></button>
+  <button class="opt" data-k="c"><span class="en">The agent skips its tools</span><span class="zh">智能体会跳过工具</span></button>
+  <div class="explain"><span class="en">Same answer, delivered sooner. That is why chat apps feel fast.</span><span class="zh">答案相同，只是更早到达。聊天应用因此显得很快。</span></div>
+</div>
+
+<h2><span class="en">Tools: one decorator</span><span class="zh">工具：一个装饰器</span></h2>
+<div class="why"><p class="en"><b>Why:</b> last week you wrote the tool's JSON by hand. The SDK reads your function instead. You already have the plain function, <code>push</code>, from last week.</p><p class="zh"><b>为什么：</b>上周你手写了工具的 JSON，现在 SDK 直接读你的函数。上周的普通函数 <code>push</code> 你已经有了。</p></div>
+<div class="codebox"><span class="chg">@function_tool</span><span class="dim">
+def push_tool(</span><span class="chg">message: str</span><span class="dim">) -> str:
+    </span><span class="chg">""" Send the given message to the user as a push notification """</span><span class="dim">
+    payload = {"user": pushover_user, "token": pushover_token, "message": message}
+    result = requests.post(pushover_url, data=payload).status_code
+    return f"Push sent with API status code {result}"
+
+notifier = Agent(name="Notifier", model="gpt-5.4-mini",
+                 instructions="You notify the user upon request", tools=[push_tool])</span></div>
+<div class="quiz" data-answer="c">
+  <p class="q"><span class="en">The SDK builds the tool JSON for you. Where does it get the tool's <i>description</i> (when to use it)?</span><span class="zh">SDK 帮你生成了工具 JSON。工具的<i>描述</i>（什么时候用）从哪里来？</span></p>
+  <button class="opt" data-k="a"><span class="en">From the function name only</span><span class="zh">只来自函数名</span></button>
+  <button class="opt" data-k="b"><span class="en">From the Agent's instructions</span><span class="zh">来自 Agent 的 instructions</span></button>
+  <button class="opt" data-k="c"><span class="en">From the function's docstring. The type hint <code>message: str</code> gives the inputs</span><span class="zh">来自函数的文档字符串；类型标注 <code>message: str</code> 提供输入参数</span></button>
+  <div class="explain"><span class="en">So the docstring is now your tool description. Same rule as last week: say <b>when</b> to use it. Check with <code>push_tool.description</code>.</span><span class="zh">所以文档字符串就是你的工具描述。规则和上周一样：写清<b>什么时候</b>用。可用 <code>push_tool.description</code> 查看。</span></div>
+</div>
+
+<h2><span class="en">Memory: sessions</span><span class="zh">记忆：Session</span></h2>
+<div class="why"><p class="en"><b>Why:</b> each <code>Runner.run</code> starts fresh, just like last week's stateless calls. Predict first, then switch the session on.</p><p class="zh"><b>为什么：</b>每次 <code>Runner.run</code> 都是全新开始，和上周讲的无状态调用一样。先预测，再打开 session 看看。</p></div>
+<div class="chat" id="smem"></div>
+<div class="codebox"><span class="dim">session = SQLiteSession("12346")        # in memory. For a file: SQLiteSession("12346", "memory.db")
+
+response = await Runner.run(agent, "Hi there. My name is Ed.", </span><span class="chg">session=session</span><span class="dim">)
+response = await Runner.run(agent, "What's my name?", </span><span class="chg">session=session</span><span class="dim">)</span></div>
+<p class="en">Two ways to remember. <b>By hand</b>: <code>response.to_input_list() + [{"role": "user", ...}]</code>, exactly Week 1's history. <b>With a session</b>: the SDK stores and replays it for you.</p>
+<p class="zh">两种记忆方式。<b>手动</b>：<code>response.to_input_list() + [{"role": "user", ...}]</code>，就是第 1 周的历史记录。<b>用 session</b>：SDK 替你保存并回放。</p>
+
+<h2><span class="en">Preview: agents working together</span><span class="zh">预览：智能体如何协作</span></h2>
+<div class="why"><p class="en"><b>Why:</b> one agent is only the start. The next labs combine them in two ways. The key question is always: <b>who talks to the user next?</b></p><p class="zh"><b>为什么：</b>一个智能体只是开始，后面的实验会用两种方式把它们组合起来。关键问题永远是：<b>接下来由谁来和用户说话？</b></p></div>
+<div class="grid">
+  <div class="card"><h3 style="margin-top:0"><span class="en">Agent as a tool</span><span class="zh">智能体当工具</span></h3><p class="en">A manager calls another agent like a function, gets its result back, and <b>stays in control</b>.</p><p class="zh">主管像调用函数一样调用另一个智能体，拿回结果，并且<b>继续掌控全局</b>。</p></div>
+  <div class="card"><h3 style="margin-top:0"><span class="en">Handoff</span><span class="zh">交接（Handoff）</span></h3><p class="en">One agent passes the conversation to another, which <b>takes over</b> and replies.</p><p class="zh">一个智能体把对话交给另一个，由后者<b>接手</b>并回复。</p></div>
+</div>
+<div class="sc" id="hgame"></div>
+<h3><span class="en">Guardrails: controls</span><span class="zh">护栏：控制措施</span></h3>
+<p class="en">A <b>guardrail</b> is a check that can stop a run. An <b>input</b> guardrail checks what comes in, before the main work. An <b>output</b> guardrail checks what goes out, before the user sees it.</p>
+<p class="zh"><b>护栏</b>是一道可以叫停运行的检查。<b>输入护栏</b>在主要工作开始前检查传入的内容；<b>输出护栏</b>在用户看到之前检查传出的内容。</p>
+<div class="sc" id="ggame"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl">
+  <label><input type="checkbox"><span><b><span class="en">Rebuild a Week 1 project with the SDK.</span><span class="zh">用 SDK 重做一个第 1 周的项目。</span></b> <span class="en">The digital twin or the checklist loop. You will be astonished how short it gets.</span><span class="zh">数字分身或清单循环都行。你会惊讶它变得多短。</span></span></label>
+  <label><input type="checkbox"><span><b><span class="en">Open the trace.</span><span class="zh">打开 trace。</span></b> <span class="en">Run your agent inside <code>with trace(...)</code> and find the run on platform.openai.com/traces.</span><span class="zh">在 <code>with trace(...)</code> 里运行你的智能体，并在 platform.openai.com/traces 找到这次运行。</span></span></label>
+</div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• <code>await</code> waits for the model. Only inside <code>async def</code>, or at the top level of a notebook.<br>• An <b>Agent</b> is a model, instructions (the system prompt) and tools.<br>• <b>Runner.run</b> is the agent loop. <code>final_output</code> is the answer.<br>• <b>trace</b> shows every step. <b>Streaming</b> shows text as it is written.<br>• <code>@function_tool</code> builds the tool JSON from your function, using the docstring as the description.<br>• Each run is stateless. Pass a <b>session</b> (or the history list) to remember.<br>• Preview: agents as tools keep control, handoffs pass it on, guardrails check inputs and outputs.</p><p class="zh" style="margin:0">• <code>await</code> 用来等模型，只能写在 <code>async def</code> 里，或笔记本的最外层。<br>• <b>Agent</b> = 模型 + instructions（系统提示词）+ 工具。<br>• <b>Runner.run</b> 就是智能体循环，<code>final_output</code> 是最终答案。<br>• <b>trace</b> 展示每一步，<b>流式输出</b>边写边显示。<br>• <code>@function_tool</code> 根据你的函数生成工具 JSON，文档字符串就是描述。<br>• 每次运行都是无状态的，传入 <b>session</b>（或历史列表）才能记住。<br>• 预览：智能体当工具会保持控制，交接会把控制权交出去，护栏检查输入和输出。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX.t,$=function(i){return document.getElementById(i)};
+ function game(el,items,opts,title,unit,onpick){
+  var i=0,sc=0;
+  function draw(){
+   if(i>=items.length){el.innerHTML='<div class="cnt">'+T({en:'Done',zh:'完成'})+'</div><p class="job">'+T({en:'You got '+sc+' of '+items.length+'.',zh:'你答对了 '+sc+' / '+items.length+' 题。'})+'</p><button class="btn" id="re_'+el.id+'">'+T({en:'Play again',zh:'再玩一次'})+'</button>';
+    $('re_'+el.id).onclick=function(){i=0;sc=0;draw()};return}
+   var j=items[i],os=j.o||opts;
+   el.innerHTML='<div class="cnt">'+T({en:unit.en+' '+(i+1)+' of '+items.length,zh:unit.zh+' '+(i+1)+' / '+items.length})+'</div><p class="job">'+T(j)+'</p>'+(j.sub?'<p class="meta" style="margin:0 0 4px">'+T(j.sub)+'</p>':'')+'<div class="pills">'+os.map(function(o,k){return '<button class="pill" data-k="'+(o.k!==undefined?o.k:k)+'">'+T(o)+'</button>'}).join('')+'</div><div class="fb"></div>';
+   var done=false;
+   el.querySelectorAll('.pill').forEach(function(b){b.onclick=function(e){if(done)return;done=true;var ok=String(b.dataset.k)===String(j.a);if(ok){sc++;TX.burst(e.clientX,e.clientY)}
+    b.classList.add(ok?'ok':'no');var fb=el.querySelector('.fb');fb.className='fb show '+(ok?'good':'no');
+    fb.innerHTML='<b>'+(ok?T({en:'Right. ',zh:'答对了。'}):T({en:'Not quite. ',zh:'不太对。'}))+'</b>'+T(j.ex)+'<br><button class="btn pri" id="n_'+el.id+'" style="margin-top:10px">'+T({en:'Next →',zh:'下一题 →'})+'</button>';
+    $('n_'+el.id).onclick=function(){i++;draw()}}})}
+  draw()}
+
+ /* ---- async / await ---- */
+ var AO=[{k:'y',en:'Works',zh:'能运行'},{k:'n',en:'Fails',zh:'会出错'}];
+ game($('agame'),[
+  {en:'In a Jupyter cell: result = await Runner.run(agent, "Hi")',zh:'在 Jupyter 单元格里：result = await Runner.run(agent, "Hi")',a:'y',ex:{en:'Notebooks already run an event loop, so top-level await is allowed.',zh:'笔记本已经有事件循环，所以最外层可以直接 await。'}},
+  {en:'At the top of a .py file: result = await Runner.run(agent, "Hi")',zh:'在 .py 文件最外层：result = await Runner.run(agent, "Hi")',a:'n',ex:{en:'SyntaxError: await outside a function. Wrap it in async def main().',zh:'语法错误：await 出现在函数之外。请包进 async def main()。'}},
+  {en:'In a .py file: async def main(): result = await Runner.run(agent, "Hi")  then  asyncio.run(main())',zh:'在 .py 文件里：async def main(): result = await Runner.run(agent, "Hi")，再 asyncio.run(main())',a:'y',ex:{en:'The standard pattern for scripts.',zh:'脚本里的标准写法。'}},
+  {en:'In a notebook: result = Runner.run(agent, "Hi")  then  print(result.final_output)',zh:'在笔记本里：result = Runner.run(agent, "Hi")，再 print(result.final_output)',a:'n',ex:{en:'Without await you get a coroutine object, not a result, so final_output fails.',zh:'没有 await，拿到的是协程对象而不是结果，所以 final_output 会报错。'}}],AO,'',{en:'Snippet',zh:'代码'},null);
+
+ /* ---- agent anatomy ---- */
+ var AP=[
+  {n:{en:'name',zh:'name'},hi:1,nt:{en:'A label. It shows up in traces, and later when agents hand off to each other.',zh:'一个标签。会出现在 trace 里，之后智能体互相交接时也会用到。'}},
+  {n:{en:'instructions',zh:'instructions'},hi:2,nt:{en:'The system prompt. Last week: the string you put first in messages.',zh:'系统提示词。对应上周 messages 最前面的那段字符串。'}},
+  {n:{en:'model',zh:'model'},hi:3,nt:{en:'Which brain answers. Last week: the model= argument of the API call.',zh:'由哪个模型回答。对应上周 API 调用里的 model= 参数。'}},
+  {n:{en:'tools',zh:'tools'},hi:4,nt:{en:'Functions the model may ask for. Last week: the tools JSON plus your dispatcher.',zh:'模型可以请求的函数。对应上周的工具 JSON 加上你的分发代码。'}}];
+ var APL=['agent = Agent(','    name="Notifier",','    instructions="You notify the user upon request",','    model="gpt-5.4-mini",','    tools=[push_tool])'];
+ var ap=$('ap');ap.innerHTML=AP.map(function(v,i){return '<button class="pill" data-i="'+i+'">'+T(v.n)+'</button>'}).join('');
+ function aps(i){ap.querySelectorAll('.pill').forEach(function(b,k){b.classList.toggle('on',k===i)});
+  $('acode').innerHTML=APL.map(function(l,k){return k===AP[i].hi?'<span class="chg">'+l+'</span>':'<span class="dim">'+l+'</span>'}).join('\n');
+  $('anote').innerHTML=T(AP[i].nt)}
+ ap.querySelectorAll('.pill').forEach(function(b){b.onclick=function(){aps(+b.dataset.i)}});aps(1);
+
+ /* ---- week 1 -> SDK ---- */
+ var MO=[{k:'a',en:'Agent',zh:'Agent'},{k:'r',en:'Runner.run',zh:'Runner.run'},{k:'t',en:'@function_tool',zh:'@function_tool'},{k:'s',en:'Session',zh:'Session'},{k:'x',en:'trace',zh:'trace'}];
+ game($('mgame'),[
+  {en:'You wrote a system prompt string and picked a model name.',zh:'你写了一段系统提示词，并选了模型名。',a:'a',ex:{en:'An Agent bundles the prompt (instructions), model and tools.',zh:'Agent 把提示词（instructions）、模型和工具打包在一起。'}},
+  {en:'You wrote the while loop that keeps calling until finish_reason is "stop".',zh:'你写了那个 while 循环，一直调用到 finish_reason 为 "stop"。',a:'r',ex:{en:'Runner.run is that loop, with a turn limit built in.',zh:'Runner.run 就是这个循环，还自带轮数上限。'}},
+  {en:'You wrote the tool JSON by hand, name, description and parameters.',zh:'你手写了工具 JSON：名字、描述和参数。',a:'t',ex:{en:'The decorator reads your function: name, docstring and type hints.',zh:'装饰器会读你的函数：名字、文档字符串和类型标注。'}},
+  {en:'You re-sent the whole message history on every call.',zh:'你每次调用都重新发送整段历史消息。',a:'s',ex:{en:'A Session stores the history and replays it for you.',zh:'Session 会保存历史并替你回放。'}},
+  {en:'You wished you could see every step of a run afterwards.',zh:'你希望事后能看到一次运行的每一步。',a:'x',ex:{en:'A trace records each call, tool use and result, viewable online.',zh:'trace 会记录每次调用、工具使用和结果，可在线查看。'}}],MO,'',{en:'Job',zh:'工作'},null);
+
+ /* ---- session memory ---- */
+ var sm=$('smem'),sOn=false,sPred=null,sRep=null;
+ function sdraw(){
+  var h='<div class="bub u">Hi there. My name is Ed.</div><div class="bub a">Hi Ed! Nice to meet you.</div>';
+  h+='<div class="lab">'+T({en:'Second run',zh:'第二次运行'})+'</div><div class="bub u">What\'s my name?</div>';
+  h+='<div class="sw"><button class="pill'+(sOn?' on':'')+'" id="son">'+(sOn?'☑ ':'☐ ')+T({en:'Pass session=session',zh:'传入 session=session'})+'</button></div>';
+  h+='<p style="margin:6px 0"><b>'+T({en:'Predict: will it know the name?',zh:'预测：它会知道名字吗？'})+'</b></p><div class="pills" style="margin:0 0 8px"><button class="pill'+(sPred==='y'?' on':'')+'" data-p="y">'+T({en:'Yes',zh:'知道'})+'</button><button class="pill'+(sPred==='n'?' on':'')+'" data-p="n">'+T({en:'No',zh:'不知道'})+'</button></div>';
+  h+='<button class="btn pri" id="ssend"'+(sPred?'':' disabled')+'>'+T({en:'Run ▶',zh:'运行 ▶'})+'</button>';
+  if(sRep){var knows=sRep.s,ok=(sRep.p==='y')===knows;
+   h+='<div class="bub a" style="margin-top:12px">'+(knows?'Your name is Ed.':T({en:'I don\'t know your name yet.',zh:'我还不知道你的名字。'}))+'</div><div class="note">'+(ok?'✓ ':'✗ ')+(knows?T({en:'The session replayed the first exchange, so the model saw it again.',zh:'session 回放了第一轮对话，所以模型又看到了它。'}):T({en:'A bare Runner.run sends nothing from before. Now tick the box and run again.',zh:'单独的 Runner.run 不会带上之前的内容。现在勾上选项再运行一次。'}))+'</div>'}
+  sm.innerHTML=h;
+  $('son').onclick=function(){sOn=!sOn;sRep=null;sdraw()};
+  sm.querySelectorAll('[data-p]').forEach(function(b){b.onclick=function(){sPred=b.dataset.p;sdraw()}});
+  $('ssend').onclick=function(e){sRep={s:sOn,p:sPred};if(sOn===(sPred==='y'))TX.burst(e.clientX,e.clientY);sdraw()}}
+ sdraw();
+
+ /* ---- tool vs handoff ---- */
+ var HO=[{k:'t',en:'Agent as a tool',zh:'智能体当工具'},{k:'h',en:'Handoff',zh:'交接'}];
+ game($('hgame'),[
+  {en:'A manager agent asks a translator agent for one sentence, then writes the final reply itself.',zh:'主管智能体向翻译智能体要一句译文，然后自己写最终回复。',a:'t',ex:{en:'The manager keeps control and uses the translator like a function.',zh:'主管保持控制，把翻译智能体当函数用。'}},
+  {en:'A triage agent decides it is a billing question and passes the whole chat to a billing agent, who replies to the customer.',zh:'分诊智能体判断这是账单问题，把整个对话交给账单智能体，由后者回复客户。',a:'h',ex:{en:'Control moves to the billing agent. That is a handoff.',zh:'控制权转到账单智能体手上，这就是交接。'}},
+  {en:'Three agents each draft a sales email, and a picker agent chooses the best one.',zh:'三个智能体各写一封销售邮件，由挑选智能体选出最好的一封。',a:'t',ex:{en:'The picker calls the writers as tools and stays in charge.',zh:'挑选者把写手当工具来调用，并始终掌控全局。'}},
+  {en:'A general support agent cannot help, so a specialist should take over the conversation.',zh:'通用客服智能体解决不了，应该让专家接手这段对话。',a:'h',ex:{en:'The specialist takes over, so use a handoff.',zh:'由专家接手，所以用交接。'}}],HO,'',{en:'Case',zh:'情景'},null);
+
+ /* ---- guardrails ---- */
+ var GO=[{k:'i',en:'Input guardrail',zh:'输入护栏'},{k:'o',en:'Output guardrail',zh:'输出护栏'}];
+ game($('ggame'),[
+  {en:'Block a user message that asks the agent to do their homework.',zh:'拦下让智能体帮忙写作业的用户消息。',a:'i',ex:{en:'It checks what comes in, before the agent works.',zh:'它检查传入的内容，在智能体开工之前。'}},
+  {en:'Make sure the reply never contains the company\'s private data.',zh:'确保回复里不会出现公司的私密数据。',a:'o',ex:{en:'It checks what goes out, before the user sees it.',zh:'它检查传出的内容，在用户看到之前。'}},
+  {en:'Stop a request before the expensive model even runs.',zh:'在昂贵的模型运行之前就叫停请求。',a:'i',ex:{en:'Checking early saves cost.',zh:'越早检查越省钱。'}},
+  {en:'Catch a rude tone in the final answer.',zh:'发现最终回答里的无礼语气。',a:'o',ex:{en:'Tone is only known once the answer exists.',zh:'语气只有在答案生成之后才知道。'}}],GO,'',{en:'Check',zh:'检查'},null);
+});
+</script></body></html>

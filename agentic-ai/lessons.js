@@ -7,7 +7,7 @@ window.COURSE={id:'agentic-ai',title:{en:'Agentic AI',zh:'智能体 AI'},weeks:[
   {k:'f',file:'05-autonomy-and-tools.html',title:{en:'Autonomy and tools',zh:'自主性与工具'}},
   {k:'p',file:'06-career-agent.html',title:{en:'Project 1: Your personal career agent',zh:'项目 1：你的个人职业智能体'}}]},
  {n:2,title:{en:'OpenAI Agents SDK',zh:'OpenAI Agents SDK'},items:[
-  {k:'c',title:{en:'OpenAI Agents SDK concepts',zh:'OpenAI Agents SDK 核心概念'}},
+  {k:'c',file:'07-agents-sdk-basics.html',title:{en:'OpenAI Agents SDK concepts',zh:'OpenAI Agents SDK 核心概念'}},
   {k:'p',title:{en:'Project 2: An SDR',zh:'项目 2：销售开发代表（SDR）'}},
   {k:'c',title:{en:'Tools vs agents, guardrails',zh:'工具 vs 智能体，护栏'}},
   {k:'p',title:{en:'Project 3: Deep Research',zh:'项目 3：深度研究'}},
