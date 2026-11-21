@@ -62,7 +62,7 @@ jobs:
                "✅ Ready to merge" or "⚠️ Fix before merging". Then a short list of findings, most important first,
                each with file, the exact text and a suggested rewrite. Keep it under 400 words, plain and friendly.
                End with: "_Reviewed by the TX Learns reviewer agent (Claude)._"
-            6. Write a 3 to 5 line plain-text summary (verdict + top issues) to /tmp/review-summary.txt. It is shown publicly: never quote a banned term or source name in it; name the file and step instead.
+            6. Write a 3 to 5 line plain-text summary to /tmp/review-summary.txt. Its first line must start with the same verdict ("✅ Ready to merge" or "⚠️ Fix before merging"), then the top issues. It is shown publicly: never quote a banned term or source name in it; name the file and step instead.
       - name: Tell TX on Telegram
         if: always()
         env:
@@ -81,7 +81,7 @@ jobs:
         if: always()
         run: |
           first=$(head -1 /tmp/review-summary.txt 2>/dev/null)
-          case "$first" in *✅*) state=ok;; *⚠️*|*"Fix before"*) state=flag;; *) state=fail;; esac
+          case "$first" in *⚠️*|*"Fix before"*) state=flag;; *✅*|*"Ready to merge"*) state=ok;; *) state=fail;; esac
           if [ -s /tmp/review-summary.txt ]; then summary="PR #$PR: $(head -c 300 /tmp/review-summary.txt | tr '\n' ' ')"; else summary="PR #$PR: could not finish the review."; fi
           echo "state=$state" >> "$GITHUB_OUTPUT"
           { echo "summary<<EOF"; echo "$summary"; echo "EOF"; } >> "$GITHUB_OUTPUT"
