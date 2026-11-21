@@ -1,0 +1,74 @@
+# Reviewer agent: Claude reviews every pull request into main against STYLE.md and CLAUDE.md,
+# posts one review comment, and sends TX a short summary on Telegram. It never pushes changes.
+name: Claude review
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Pull request number to review
+        required: true
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  id-token: write
+concurrency:
+  group: review-${{ github.event.pull_request.number || inputs.pr }}
+  cancel-in-progress: true
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    env:
+      PR: ${{ github.event.pull_request.number || inputs.pr }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Copy check result for the reviewer
+        run: node scripts/check-copy.mjs > /tmp/copy-check.txt 2>&1 || true
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          claude_args: >-
+            --max-turns 40
+            --allowedTools "Read,Glob,Grep,Write,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr comment:*),Bash(git diff:*),Bash(git log:*),Bash(node scripts/check-copy.mjs:*)"
+          prompt: |
+            You are the reviewer for TX Learns, a bilingual (EN/中文) learning site. Review pull request #${{ env.PR }} in ${{ github.repository }}.
+            You only review. Do not edit lesson files, commit or push.
+
+            1. Read CLAUDE.md and STYLE.md first. They are the rules.
+            2. Read the diff with `gh pr diff ${{ env.PR }}` and open each changed lesson in full.
+            3. Read /tmp/copy-check.txt (the copyright scrubber's output for this branch).
+            4. Check each changed lesson for:
+               - Copyright: any platform, program or instructor name, "course"/课程, week/day/"Project N" numbering,
+                 or examples, prompts and code comments that look copied from a source rather than written in our own words.
+               - Human touch per STYLE.md: one running story, Learn / Show / Test in every step, plain short sentences,
+                 an analogy where it helps, takeaways. Would a newcomer to AI follow it without the source?
+               - Correctness: code that would actually run (package names, imports, await placement), facts about tools.
+               - EN and 中文 say the same thing; every .en has a .zh.
+               - lessons.js lists the lesson with its file; links and the pager work; no broken HTML.
+            5. Post ONE comment with `gh pr comment ${{ env.PR }} --body-file <file>`. Start it with a verdict line:
+               "✅ Ready to merge" or "⚠️ Fix before merging". Then a short list of findings, most important first,
+               each with file, the exact text and a suggested rewrite. Keep it under 400 words, plain and friendly.
+               End with: "_Reviewed by the TX Learns reviewer agent (Claude)._"
+            6. Write a 3 to 5 line plain-text summary (verdict + top issues) to /tmp/review-summary.txt.
+      - name: Tell TX on Telegram
+        if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          URL: ${{ github.server_url }}/${{ github.repository }}/pull/${{ env.PR }}
+          STATUS: ${{ job.status }}
+        run: |
+          if [ -s /tmp/review-summary.txt ]; then
+            { echo "🔎 Review of PR #$PR"; echo "$URL"; echo; cat /tmp/review-summary.txt; } | node scripts/notify-telegram.mjs
+          else
+            node scripts/notify-telegram.mjs "⚠️ The reviewer agent could not finish on PR #$PR ($STATUS). Logs: $URL/checks"
+          fi
