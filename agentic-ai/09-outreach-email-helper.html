@@ -20,6 +20,9 @@ def send_by_email(subject: str, body: str) -> None:
         server.login(os.environ["MAIL_FROM"], os.environ["SMTP_APP_PASSWORD"])</span><span class="dim">
         server.send_message(msg)
 
+def push(text: str) -> None:
+    ...  # your own small helper from earlier lessons: posts text to a phone push service
+
 </span><span class="chg">def send_message(subject: str, body: str) -> None:
     """One door for sending. The agents never know which way it went."""
     if os.getenv("SMTP_APP_PASSWORD"):
@@ -32,7 +35,10 @@ def send_by_email(subject: str, body: str) -> None:
 <h2><span class="en">Step 2 · By code: three writers at once, then a picker</span><span class="zh">第 2 步 · 由代码编排：三个写手同时开工，再来一个挑选者</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Lina does not know which tone parents like, so try three. Same base instructions, three tones: formal, playful, and short for busy parents. <code>asyncio.gather</code> runs all three at the same time, like asking three friends for a draft at once instead of one after another. A fourth agent, the <b>picker</b>, reads all drafts and replies with the best one only.</p><p class="en" style="margin:0 0 8px"><code>Agent</code>, <code>Runner</code> and <code>trace</code> come from the Agents SDK you met in the last two lessons. <code>Runner.run</code> is async, so each call needs <code>await</code>, which means “wait here until this answer comes back”.</p>
 <p class="zh"style="margin:0 0 8px">Lina 不知道家长喜欢哪种语气，那就三种都试试。基础指令相同，语气不同：正式、活泼、给忙碌家长的简短版。<code>asyncio.gather</code> 让三个同时运行，就像同时请三个朋友各写一稿，而不是一个接一个地等。第四个智能体是<b>挑选者</b>，读完所有草稿后只回复最好的那一份。</p><p class="zh" style="margin:0 0 8px"><code>Agent</code>、<code>Runner</code> 和 <code>trace</code> 都来自前两课用过的 Agents SDK。<code>Runner.run</code> 是异步的，所以每次调用前都要加 <code>await</code>，意思是“在这儿等结果回来再往下走”。</p></div>
-<div class="codebox"><span class="dim">base = ("You write emails for Little Lanterns, a weekend tutoring centre. "
+<div class="codebox"><span class="dim">import asyncio
+from agents import Agent, Runner, trace
+
+base = ("You write emails for Little Lanterns, a weekend tutoring centre. "
         "Invite parents to the new Saturday coding club for kids aged 9 to 12.")
 writers = [
     Agent(name="Formal writer",  instructions=base + " Tone: polite and professional.", model="gpt-5.4-mini"),
@@ -48,6 +54,8 @@ picker = Agent(name="Picker", model="gpt-5.4-mini",
     send_message("A new Saturday coding club", best.final_output)</span></div>
 <p class="en">Wrapping it all in <code>trace</code> makes the whole run show up as one entry in the traces dashboard. When something goes odd, that trace is your best debugger.</p>
 <p class="zh">把整个过程包在 <code>trace</code> 里，这次运行就会在 trace 面板里显示成一条记录。出了怪问题时，trace 就是你最好的调试工具。</p>
+<p class="en">One catch: a bare <code>await</code> at the top level only works in a notebook. In a <code>.py</code> script, put the code inside <code>async def main():</code> and start it with <code>asyncio.run(main())</code>.</p>
+<p class="zh">注意：直接在最外层写 <code>await</code> 只在 notebook 里行得通。如果是 <code>.py</code> 脚本，要把代码放进 <code>async def main():</code>，再用 <code>asyncio.run(main())</code> 启动。</p>
 <div class="try" id="p2"></div>
 <div class="try" id="p2b"></div>
 
@@ -105,13 +113,15 @@ coordinator = Agent(name="Coordinator", model="gpt-5.4-mini",
     tools=writer_tools, </span><span class="chg">handoffs=[mailroom]</span><span class="dim">,
     instructions="""1. Get one draft from each of the three writer tools.
 2. Choose the single best draft.
-3. Hand off to Mailroom with that draft. Do not write the email yourself.""")</span></div>
+3. Hand off to Mailroom with that draft. Do not write the email yourself.""")
+
+result = await Runner.run(coordinator, "Send the coding club invitation")</span></div>
 <div class="try" id="p5"></div>
 
 <h2><span class="en">Step 6 · Code or LLM: who should be the manager?</span><span class="zh">第 6 步 · 代码还是大模型：谁来当主管？</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">You now have the same team run two ways. <b>By code</b> is predictable, repeatable and easy to debug, because the steps are written in Python. <b>By the LLM</b> is flexible: the path can change with the content, but the model may not follow your plan every time. Rule of thumb: fixed steps, use code; a path that depends on what comes in, use the LLM.</p>
 <p class="zh"style="margin:0 0 8px">现在同一支团队你有了两种跑法。<b>由代码编排</b>可预测、可重复、好调试，因为步骤就写在 Python 里。<b>由大模型编排</b>更灵活：路径可以随内容变化，但模型不一定每次都照你的计划走。经验法则：步骤固定，用代码；路径取决于输入内容，用大模型。</p></div>
-<div class="callout tip"><b class="lbl"><span class="en">The moment it clicked</span><span class="zh">恍然大悟的那一刻</span></b><span class="en">“By code” is me being the manager. “By the LLM” is hiring a manager and hoping they follow the plan.</span><span class="zh">“由代码编排”就是我自己当主管；“由大模型编排”就是雇一个主管，然后祈祷他照着计划办事。</span></div>
+<div class="callout tip"><b class="lbl"><span class="en">The moment it clicked</span><span class="zh">恍然大悟的那一刻</span></b><span class="en">“By code” is me being the manager. “By the LLM” is hiring a manager and hoping they follow the plan.</span><span class="zh">“由代码编排”就是我自己当主管；“由大模型编排”就是雇一个主管，然后祈祷对方照着计划办事。</span></div>
 <p class="en">Sort each of Lina's jobs.</p>
 <p class="zh">给 Lina 的每件事分类。</p>
 <div class="sc" id="g6"></div>
@@ -119,7 +129,7 @@ coordinator = Agent(name="Coordinator", model="gpt-5.4-mini",
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我踩过的坑</span></b><span class="en">With the small model, the manager versions were flaky. Sometimes the Coordinator asked only two writers. Sometimes it sent two emails. With the handoff, Mailroom sometimes never sent at all. My first instructions were one loose sentence. Three fixes helped: clear numbered steps (“do not go on until you have all three drafts”, “send exactly one email”), forcing tool use with <code>tool_choice="required"</code>, and, when all else fails, a bigger model. And yes, my test email landed in spam. No surprise there: it was a cold email.</span><span class="zh">用小模型时，主管版本很不稳定。有时 Coordinator 只问了两个写手；有时它发了两封邮件；用交接时，Mailroom 有时干脆没发。我最初的指令只是一句笼统的话。三个办法有用：写清楚编号步骤（“三份草稿都拿到之前不要继续”“只发一封邮件”）、用 <code>tool_choice="required"</code> 强制调用工具，实在不行就换更大的模型。还有，我的测试邮件进了垃圾箱。这也不奇怪，毕竟是发给陌生人的推广邮件。</span></div>
 
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Add a polish round.</b> Before sending, let an editor agent improve the chosen draft. Build it by code first, then let the Coordinator do it, and compare the traces.</span><span class="zh"><b>加一轮润色。</b>发送前让一个编辑智能体改进选中的草稿。先用代码实现，再交给 Coordinator 去做，然后对比两份 trace。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Draw your team.</b> Install Graphviz and <code>pip install "openai-agents[viz]"</code>, then call <code>draw_graph(coordinator)</code> from <code>agents.extensions.visualization</code> to see the agent and its tools.</span><span class="zh"><b>把团队画出来。</b>安装 Graphviz，再 <code>pip install "openai-agents[viz]"</code>，然后从 <code>agents.extensions.visualization</code> 调用 <code>draw_graph(coordinator)</code>，看看智能体和它的工具。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Harder: keep the conversation going.</b> Use a real email service, read the parents' replies, and let an agent answer them.</span><span class="zh"><b>进阶：让对话继续下去。</b>换成正规的邮件服务，读取家长的回复，再让智能体回信。</span></span></label></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Add a polish round.</b> Before sending, let an editor agent improve the chosen draft. Build it by code first, then let the Coordinator do it, and compare the traces.</span><span class="zh"><b>加一轮润色。</b>发送前让一个编辑智能体改进选中的草稿。先用代码实现，再交给 Coordinator 去做，然后对比两份 trace。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Give the picker a point of view.</b> Instead of “pick the best”, tell it who it is, say a parent who reads email on the bus, and see if it chooses differently.</span><span class="zh"><b>给挑选者一个视角。</b>别只说“挑最好的”，告诉它自己是谁，比如一位在公交上看邮件的家长，看看它的选择会不会变。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Draw your team.</b> Install Graphviz and <code>pip install "openai-agents[viz]"</code>, then call <code>draw_graph(coordinator)</code> from <code>agents.extensions.visualization</code> to see the agent and its tools.</span><span class="zh"><b>把团队画出来。</b>安装 Graphviz，再 <code>pip install "openai-agents[viz]"</code>，然后从 <code>agents.extensions.visualization</code> 调用 <code>draw_graph(coordinator)</code>，看看智能体和它的工具。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Harder: keep the conversation going.</b> Use a real email service, read the parents' replies, and let an agent answer them.</span><span class="zh"><b>进阶：让对话继续下去。</b>换成正规的邮件服务，读取家长的回复，再让智能体回信。</span></span></label></div>
 
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• Get sending working once behind one <code>send_message</code> wrapper, then focus on the agents.<br>• <code>asyncio.gather</code> runs several agents at the same time. The wait is the slowest one, not the sum.<br>• <b>By code</b>: your Python decides the order. Predictable and easy to debug.<br>• <b>By the LLM</b>: a manager agent decides, using agents as tools (A → B → A) or handoffs (A → B).<br>• <code>@function_tool</code> builds the schema from type hints and the docstring. <code>tool_choice="required"</code> stops “pretend” sends.<br>• Flaky manager? Numbered steps, forced tool use, or a bigger model.<br>• Wrap runs in <code>trace(...)</code>. The trace is your best debugger.</p><p class="zh" style="margin:0">• 先用一个 <code>send_message</code> 包装函数把发送调通，然后专心做智能体。<br>• <code>asyncio.gather</code> 让多个智能体同时运行，等待时间是最慢的那个，而不是总和。<br>• <b>由代码编排</b>：你的 Python 决定顺序，可预测、好调试。<br>• <b>由大模型编排</b>：主管智能体来决定，用“智能体当工具”（A → B → A）或交接（A → B）。<br>• <code>@function_tool</code> 根据类型标注和文档字符串生成 schema；<code>tool_choice="required"</code> 防止“假装发送”。<br>• 主管不靠谱？写编号步骤、强制调用工具，或换更大的模型。<br>• 把运行包在 <code>trace(...)</code> 里，trace 是你最好的调试工具。</p></div>
