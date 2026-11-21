@@ -34,7 +34,6 @@ Bilingual (EN/中文) interactive learning site. Static HTML/CSS/JS, no build st
 
 Easiest: drop notes in `inbox/<concept>/` on test and let the writer agent draft it (see `inbox/README.md`). By hand:
 
-
 1. Copy `agentic-ai/_template.html` to `agentic-ai/NN-slug.html` (next free number).
 2. Write it to `STYLE.md`, with the tag `<Topic> · Lesson N`.
 3. Add `file:'NN-slug.html'` to its item in `agentic-ai/lessons.js` (or add the item under the right topic).
