@@ -1,0 +1,19 @@
+# Manual test of Telegram notices. Run it from the Actions tab after messaging your bot.
+# Without TELEGRAM_CHAT_ID it replies with your chat id to save as that secret.
+name: Telegram ping
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: node scripts/notify-telegram.mjs "👋 TX Learns agents can reach you here. You'll get copy check failures and review summaries."
