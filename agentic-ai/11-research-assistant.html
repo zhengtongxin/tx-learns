@@ -52,15 +52,34 @@ async def search_all(search_plan: SearchPlan) -> list[str]:
 <h2><span class="en">Step 4 · Code is the boss, not a manager agent</span><span class="zh">第 4 步 · 由代码当老板，而不是主管智能体</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">In the outreach helper a manager agent chose what to call next. Here the recipe never changes: plan, search, write, email. So your own Python runs the steps in order, one <code>Runner.run()</code> each. It is predictable, every step returns a typed object, and if something breaks you know which step. A manager agent is more flexible, but it can skip a step or loop. For a fixed recipe, code wins. Wrap the run in <code>with trace(...)</code> so all four agents show as one run in the trace viewer.</p>
 <p class="zh"style="margin:0 0 8px">在外联邮件助手里，是主管智能体决定下一步调谁。这里的流程永远不变：规划、搜索、写作、发邮件。所以让你自己的 Python 按顺序执行，每一步一个 <code>Runner.run()</code>。这样结果可预期，每一步都返回有类型的对象，出了问题也知道是哪一步。主管智能体更灵活，但它可能漏掉一步或者转圈。流程固定时，代码更胜一筹。用 <code>with trace(...)</code> 把整个运行包起来，四个智能体就会在 trace 查看器里显示为同一次运行。</p></div>
-<div class="codebox"><span class="dim">async def main():
+<div class="codebox"><span class="dim">from agents import trace
+
+QUESTION = "What is the cheapest way for a small kopitiam in Penang to take cashless payments in 2026?"
+
+class Report(BaseModel):                      # the writer answers with structured output too
+    summary: str = Field(description="The answer in 2-3 sentences.")
+    report_md: str = Field(description="The full report in markdown, with headings.")
+    next_questions: list[str] = Field(description="Good questions to research next.")
+
+writer = Agent(name="Writer", model="gpt-5.4-mini", output_type=Report,
+               instructions="You write a clear research report for a small business owner from the search summaries.")
+
+async def plan(question: str) -> SearchPlan:
+    return (await Runner.run(planner, f"Question: {question}")).final_output
+
+async def write(question: str, findings: list[str]) -> Report:
+    return (await Runner.run(writer, f"Question: {question}\nSearch summaries: {findings}")).final_output
+
+async def email(report: Report) -> None:
+    await Runner.run(mailroom, report.report_md)    # the mailroom agent comes in Step 5
+
+async def main():
     with trace("Kopitiam payments research"):
         </span><span class="chg">search_plan = await plan(QUESTION)
         findings   = await search_all(search_plan)
         report     = await write(QUESTION, findings)
         await email(report)</span><span class="dim">
-    print(report.summary)
-
-asyncio.run(main())    # in a notebook, just write: await main()</span></div>
+    print(report.summary)</span></div>
 <div class="try" id="p4"></div>
 <p class="en">Which agent does each job? Sort them.</p><p class="zh">每项工作该由哪个智能体来做？请分类。</p>
 <div class="sc" id="g1"></div>
@@ -68,12 +87,24 @@ asyncio.run(main())    # in a notebook, just write: await main()</span></div>
 <h2><span class="en">Step 5 · The mailroom</span><span class="zh">第 5 步 · 收发室</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">The last agent turns the report into a tidy HTML email and sends it with a tool. It is the same trick as the outreach helper: a plain helper <code>send_message(...)</code> does the sending, and a <code>@function_tool</code> called <code>send_report</code> wraps it for the agent. While testing, a <code>SEND_EMAIL = False</code> switch makes it print the email instead. Flip it on once your mail settings are in <code>.env</code>.</p>
 <p class="zh"style="margin:0 0 8px">最后一个智能体把报告排成整洁的 HTML 邮件，并用工具发出去。做法和外联邮件助手一样：一个普通的辅助函数 <code>send_message(...)</code> 负责发送，再用 <code>@function_tool</code> 把它包成给智能体用的 <code>send_report</code>。测试时用 <code>SEND_EMAIL = False</code> 这个开关，让它只打印邮件而不真发。等邮箱设置写进 <code>.env</code> 后再打开。</p></div>
-<div class="codebox"><span class="dim">SEND_EMAIL = False    # True = really send
+<div class="codebox"><span class="dim">import os, smtplib
+from email.message import EmailMessage
+from agents import function_tool
+
+SEND_EMAIL = False    # True = really send (needs MY_EMAIL, SMTP_SERVER, SMTP_APP_PASSWORD in .env)
 
 def send_message(subject, text_body, html_body):    # plain helper, your code can call this
     if not SEND_EMAIL:
         print("Not sent:", subject); return
-    ...   # build the message and send it over SMTP, as in the outreach helper
+    msg = EmailMessage()
+    msg["From"] = msg["To"] = os.getenv("MY_EMAIL")
+    msg["Subject"] = subject
+    msg.set_content(text_body)
+    msg.add_alternative(html_body, subtype="html")
+    with smtplib.SMTP(os.getenv("SMTP_SERVER"), 587) as server:
+        server.starttls()
+        server.login(os.getenv("MY_EMAIL"), os.getenv("SMTP_APP_PASSWORD"))
+        server.send_message(msg)
 
 </span><span class="chg">@function_tool</span><span class="dim">
 def send_report(subject: str, text_body: str, html_body: str) -> str:
@@ -88,7 +119,9 @@ def send_report(subject: str, text_body: str, html_body: str) -> str:
     return "Sent"
 
 mailroom = Agent(name="Mailroom", model="gpt-5.4-mini", tools=[send_report],
-                 instructions="You get a report in markdown. Make a clean HTML email and send it with send_report.")</span></div>
+                 instructions="You get a report in markdown. Make a clean HTML email and send it with send_report.")
+
+asyncio.run(main())    # all four agents exist now, so run it. In a notebook, just write: await main()</span></div>
 <div class="try" id="p5"></div>
 
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en">First, <code>await Runner.run(...)</code> worked in a notebook, then was a SyntaxError in a <code>.py</code> file. Outside a notebook, everything goes inside <code>async def main()</code> and you start it with <code>asyncio.run(main())</code>. Second, without <code>tool_choice="required"</code> the searcher sometimes answered from memory with old facts. The trace shows whether a real web search happened, so I check it there. Third, I ran five searches before I noticed they cost money. Three is plenty for learning. Fourth, the report ran on and on until I asked for “around 800-1200 words”.</span><span class="zh">第一，<code>await Runner.run(...)</code> 在笔记本里能跑，放进 <code>.py</code> 文件就是 SyntaxError。在笔记本之外，所有内容都要放进 <code>async def main()</code>，再用 <code>asyncio.run(main())</code> 启动。第二，没写 <code>tool_choice="required"</code> 时，搜索员有时直接凭记忆回答，用的是旧信息。trace 能看出有没有真的发起网络搜索，所以我去那里确认。第三，我跑了五个搜索才发现要收费，学习用三个就够了。第四，报告越写越长，直到我要求“大约 800-1200 字”才收住。</span></div>
