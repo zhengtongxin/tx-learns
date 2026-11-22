@@ -4,6 +4,7 @@
 // Usage: node scripts/check-copy.mjs [files...]   (no files = every .html/.js/.css the site serves)
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { execFileSync } from 'node:child_process';
 
 const root = new URL('..', import.meta.url).pathname;
 const SKIP = new Set(['.git', 'node_modules', 'scripts', '.github', 'inbox']);
@@ -37,6 +38,15 @@ for (const f of files) {
       }
     }
   });
+}
+// Stray build files (a full run only): compiled Python, OS clutter, installed packages.
+if (process.argv.length <= 2) {
+  let tracked = [];
+  try { tracked = execFileSync('git', ['ls-files'], { cwd: root, encoding: 'utf8' }).split('\n'); } catch { /* not a git checkout */ }
+  for (const f of tracked.filter(f => /(^|\/)(__pycache__|node_modules)\/|\.py[co]$|(^|\/)\.DS_Store$/.test(f))) {
+    hits++;
+    console.log(`${f}: stray build file. Delete it (git rm --cached) and keep it out with .gitignore.`);
+  }
 }
 if (hits) { console.log(`\n${hits} problem(s). Rewrite them in your own words, or name the concept instead of the source.`); process.exit(1); }
 console.log(`Copy check passed: ${files.length} files, ${patterns.length} rules.`);

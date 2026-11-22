@@ -1,5 +1,8 @@
 # Copyright scrubber: blocks a pull request, and warns on a push to test, when a page
-# names a source, a course, an instructor or a source's week/day structure.
+# names a source, a course, an instructor or a source's week/day structure, or when a stray
+# build file (.pyc, __pycache__, .DS_Store, node_modules) is committed.
+# On a release (a pull request into main) a second job turns red while a pull request into test
+# that changes one of the released pages is still open, so fixes land before the release does.
 # It also runs the count check: topic and lesson counts, the lesson list and lesson tags must agree with lessons.js.
 name: Copy check
 on:
@@ -38,6 +41,44 @@ jobs:
         id: result
         if: always()
         run: echo "line=$(tail -1 copy-check.txt 2>/dev/null) $(tail -1 counts.txt 2>/dev/null)" >> "$GITHUB_OUTPUT"
+  release-check:
+    name: Release waits for open fixes
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: scripts
+          persist-credentials: false
+      - name: Look for open pull requests into test that change the same pages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr view "$PR" -R "$GITHUB_REPOSITORY" --json files --jq '.files[].path' > /tmp/release.txt
+          gh pr list -R "$GITHUB_REPOSITORY" --base test --state open --limit 50 --json number,title,url,files > /tmp/open.json
+          node -e '
+            const fs=require("fs"),rel=new Set(fs.readFileSync("/tmp/release.txt","utf8").split("\n").filter(Boolean));
+            const hit=require("/tmp/open.json").map(p=>({...p,same:(p.files||[]).map(f=>f.path).filter(f=>rel.has(f))})).filter(p=>p.same.length);
+            fs.writeFileSync("/tmp/waiting.txt",hit.map(p=>"#"+p.number+" "+p.title+"\n"+p.url+"\n  changes "+p.same.join(", ")).join("\n"));'
+          if [ -s /tmp/waiting.txt ]; then
+            echo "These pull requests into test change pages in this release and are still open. Merge or close them first:"; cat /tmp/waiting.txt; exit 1
+          fi
+          echo "No open fixes for the pages in this release."
+      - name: Tell TX on Telegram
+        if: failure()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          [ -f scripts/notify-telegram.mjs ] || exit 0
+          { echo "⏸️ Release $URL changes pages that still have open fixes. Merge or close these first:"; echo; head -c 2500 /tmp/waiting.txt 2>/dev/null; } \
+            | node scripts/notify-telegram.mjs
   # Separate job: the write token never runs alongside branch code.
   record:
     needs: copy-check
