@@ -51,7 +51,7 @@ check = (await Runner.run(checker, draft)).final_output
 </span><span class="chg">if check.has_placeholders or not check.is_friendly or check.price_mentioned != "RM8.50":</span><span class="dim">
     print("Not sending, fix the draft first")
 else:
-    send_message("This month's breakfast set", draft)   # the plain helper from the outreach helper lesson</span></div>
+    send_message("This month's breakfast set", draft)   # a plain helper that sends the email (not the agent tool from Step 1); see the outreach helper lesson</span></div>
 <div class="try" id="p3"></div>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Optional, once the <code>if</code> works: a <b>guardrail</b> is a check the SDK runs for you around an agent, and an output guardrail checks the agent's answer. It returns <code>tripwire_triggered=True</code> when something is wrong, like a trip wire across a doorway, and the SDK then stops the run with <code>OutputGuardrailTripwireTriggered</code>, an error you catch. Keep the whole <code>EmailCheck</code> in <code>output_info</code> so you can see why it tripped. The rule from the guardrails lesson still holds: an output guardrail only runs on the agent that gives the <i>final</i> answer. A writer used as a tool inside the manager never triggers its own.</p>
 <p class="zh"style="margin:0 0 8px">可选内容，等 <code>if</code> 跑通后再看：<b>护栏</b>是 SDK 在智能体周围替你运行的检查，输出护栏检查的是智能体的回答。发现问题时它返回 <code>tripwire_triggered=True</code>，就像门口拉了一根绊线；SDK 随即用 <code>OutputGuardrailTripwireTriggered</code> 叫停运行，这是一个由你捕获的错误。把完整的 <code>EmailCheck</code> 放进 <code>output_info</code>，就能看到为什么被拦下。护栏那一课的规则依然成立：输出护栏只在给出<i>最终</i>答案的智能体上运行；被当作工具放在主管里的写手，不会触发它自己的护栏。</p></div>
@@ -59,7 +59,7 @@ else:
 
 </span><span class="chg">@output_guardrail</span><span class="dim">
 async def shop_email_check(ctx, agent, message):   # ctx: run details, you can ignore it for now
-    check = (await Runner.run(checker, message, context=ctx.context)).final_output
+    check = (await Runner.run(checker, message, context=ctx.context)).final_output   # message: the writer's answer; pass ctx.context along as is
     bad = check.has_placeholders or not check.is_friendly or check.price_mentioned != "RM8.50"
     return GuardrailFunctionOutput(</span><span class="chg">output_info={"check": check}, tripwire_triggered=bad</span><span class="dim">)
 
