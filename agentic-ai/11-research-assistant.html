@@ -53,40 +53,43 @@ async def search_all(search_plan: SearchPlan) -> list[str]:
     return </span><span class="chg">await asyncio.gather(*jobs)</span><span class="dim">    # the * hands gather each job separately; it runs them together</span></div>
 <div class="try" id="p3"></div>
 
-<h2><span class="en">Step 4 · Code is the boss, not a manager agent</span><span class="zh">第 4 步 · 由代码当老板，而不是主管智能体</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">In the outreach helper a manager agent chose what to call next. Here the recipe never changes: plan, search, write, email. So your own Python runs the steps in order, one <code>Runner.run()</code> each. It is predictable, every step returns a typed object, and if something breaks you know which step. A manager agent is more flexible, but it can skip a step or loop. For a fixed recipe, code wins. Wrap the run in <code>with trace(...)</code> so all four agents show as one run in the trace viewer. The box also adds the last pieces: the <b>writer</b> agent, whose <code>Report</code> form has a short summary, the full report and next questions; three tiny functions, <code>plan</code>, <code>write</code> and <code>email</code>, each wrapping one <code>Runner.run()</code>; and a call to the mailroom agent, which you build in Step 5. That is why you start <code>main()</code> at the end of Step 5.</p>
-<p class="zh"style="margin:0 0 8px">在外联邮件助手里，是主管智能体决定下一步调谁。这里的流程永远不变：规划、搜索、写作、发邮件。所以让你自己的 Python 按顺序执行，每一步一个 <code>Runner.run()</code>。这样结果可预期，每一步都返回有类型的对象，出了问题也知道是哪一步。主管智能体更灵活，但它可能漏掉一步或者转圈。流程固定时，代码更胜一筹。用 <code>with trace(...)</code> 把整个运行包起来，四个智能体就会在 trace 查看器里显示为同一次运行。这一段代码还补上了最后几块：<b>写作员</b>智能体，它的 <code>Report</code> 表格包含简短摘要、完整报告和后续问题；三个小函数 <code>plan</code>、<code>write</code> 和 <code>email</code>，每个只包一次 <code>Runner.run()</code>；以及对收发室智能体的调用，它在第 5 步才建好。所以要到第 5 步结尾才启动 <code>main()</code>。</p></div>
-<div class="codebox"><span class="dim">from agents import trace
-
-QUESTION = "What is the cheapest way for a small kopitiam in Penang to take cashless payments in 2026?"
-
-class Report(BaseModel):                      # the writer answers with structured output too
+<h2><span class="en">Step 4 · The writer hands back a report</span><span class="zh">第 4 步 · 写作员交回一份报告</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">The writer gets the question plus every search summary and turns them into one report. It uses structured output too: a <code>Report</code> form with three blanks, a short <code>summary</code> for a quick answer, the full <code>report_md</code> in markdown, and <code>next_questions</code> to research later. The small <code>write</code> function wraps one <code>Runner.run()</code> so the next step can just call it.</p>
+<p class="zh"style="margin:0 0 8px">写作员拿到问题和每一份搜索摘要，把它们写成一份报告。它也用结构化输出：一张 <code>Report</code> 表格，有三个空格：用于快速回答的简短 <code>summary</code>、markdown 格式的完整 <code>report_md</code>，以及之后可以继续研究的 <code>next_questions</code>。小函数 <code>write</code> 只包一次 <code>Runner.run()</code>，下一步直接调用它就行。</p></div>
+<div class="codebox"><span class="dim">class Report(BaseModel):
     summary: str = Field(description="The answer in 2-3 sentences.")
     report_md: str = Field(description="The full report in markdown, with headings.")
     next_questions: list[str] = Field(description="Good questions to research next.")
 
-writer = Agent(name="Writer", model="gpt-5.4-mini", output_type=Report,
+writer = Agent(name="Writer", model="gpt-5.4-mini", </span><span class="chg">output_type=Report</span><span class="dim">,
                instructions="You write a clear research report for a small business owner from the search summaries.")
+
+async def write(question: str, findings: list[str]) -> Report:
+    return (await Runner.run(writer, f"Question: {question}\nSearch summaries: {findings}")).final_output</span></div>
+
+<h2><span class="en">Step 5 · Code is the boss, not a manager agent</span><span class="zh">第 5 步 · 由代码当老板，而不是主管智能体</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">In <a href="09-outreach-email-helper.html">the outreach helper</a> a <b>manager agent</b>, an agent whose tools are other agents, chose what to call next. Here the recipe never changes: plan, search, write, deliver. So your own Python runs the steps in order, one <code>Runner.run()</code> each. It is predictable, every step returns a typed object, and if something breaks you know which step. A manager agent is more flexible, but it can skip a step or loop. For a fixed recipe, code wins. Wrap the run in <code>with trace(...)</code>. A <b>trace</b> is the step-by-step record of a run: every agent, tool call and web search, with timings. Open it on the Traces page of your OpenAI dashboard, where all four agents show as one run.</p>
+<p class="zh"style="margin:0 0 8px">在<a href="09-outreach-email-helper.html">外联邮件助手</a>里，是<b>主管智能体</b>（把其他智能体当工具用的智能体）决定下一步调谁。这里的流程永远不变：规划、搜索、写作、送达。所以让你自己的 Python 按顺序执行，每一步一个 <code>Runner.run()</code>。这样结果可预期，每一步都返回有类型的对象，出了问题也知道是哪一步。主管智能体更灵活，但它可能漏掉一步或者转圈。流程固定时，代码更胜一筹。用 <code>with trace(...)</code> 把整个运行包起来。<b>trace</b> 是一次运行的逐步记录：每个智能体、每次工具调用和网络搜索，以及耗时。在 OpenAI 控制台的 Traces 页面打开它，四个智能体会显示为同一次运行。</p></div>
+<div class="codebox"><span class="dim">from agents import trace
+
+QUESTION = "What is the cheapest way for a small kopitiam in Penang to take cashless payments in 2026?"
 
 async def plan(question: str) -> SearchPlan:
     return (await Runner.run(planner, f"Question: {question}")).final_output
 
-async def write(question: str, findings: list[str]) -> Report:
-    return (await Runner.run(writer, f"Question: {question}\nSearch summaries: {findings}")).final_output
-
-async def email(report: Report) -> None:
-    await Runner.run(mailroom, report.report_md)    # the mailroom agent comes in Step 5
+async def deliver(report: Report) -> None:
+    await Runner.run(mailroom, report.report_md)    # works once you build the mailroom in Step 6
 
 async def main():
     with trace("Kopitiam payments research"):
         </span><span class="chg">search_plan = await plan(QUESTION)
         findings   = await search_all(search_plan)
         report     = await write(QUESTION, findings)
-        await email(report)</span><span class="dim">
+        await deliver(report)</span><span class="dim">
     print(report.summary)</span></div>
 <div class="try" id="p4"></div>
 
-<h2><span class="en">Step 5 · The mailroom</span><span class="zh">第 5 步 · 收发室</span></h2>
+<h2><span class="en">Step 6 · The mailroom</span><span class="zh">第 6 步 · 收发室</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">The last agent turns the report into a tidy HTML email and sends it with a tool. It is the same trick as the outreach helper: a plain helper <code>send_message(...)</code> does the sending, and a <code>@function_tool</code> called <code>send_report</code> wraps it for the agent. While testing, a <code>SEND_EMAIL = False</code> switch makes it print the email instead. Flip it on once your mail settings are in <code>.env</code>. Three words in that code: <code>.env</code> is a small private file next to your script that holds keys and passwords, read by <code>load_dotenv()</code>. <b>SMTP</b> is the standard way a program hands an email to a mail server. An <b>app password</b> is a separate password your email provider gives you just for a script, so your real password stays private.</p>
 <p class="zh"style="margin:0 0 8px">最后一个智能体把报告排成整洁的 HTML 邮件，并用工具发出去。做法和外联邮件助手一样：一个普通的辅助函数 <code>send_message(...)</code> 负责发送，再用 <code>@function_tool</code> 把它包成给智能体用的 <code>send_report</code>。测试时用 <code>SEND_EMAIL = False</code> 这个开关，让它只打印邮件而不真发。等邮箱设置写进 <code>.env</code> 后再打开。代码里有三个词：<code>.env</code> 是放在脚本旁边、保存密钥和密码的小私密文件，由 <code>load_dotenv()</code> 读取。<b>SMTP</b> 是程序把邮件交给邮件服务器的标准方式。<b>应用专用密码</b>是邮箱服务商专门给脚本用的另一个密码，这样你的真实密码不会外泄。</p></div>
 <div class="codebox"><span class="dim">import os, smtplib
@@ -124,6 +127,7 @@ mailroom = Agent(name="Mailroom", model="gpt-5.4-mini", tools=[send_report],
                  instructions="You get a report in markdown. Make a clean HTML email and send it with send_report.")
 
 asyncio.run(main())    # all four agents exist now, so run it. In a notebook, just write: await main()</span></div>
+<p class="en">While <code>SEND_EMAIL</code> is False you should see <code>Not sent: &lt;the subject&gt;</code>, then the report summary. Open the trace to see each search.</p><p class="zh">当 <code>SEND_EMAIL</code> 为 False 时，你会看到 <code>Not sent: &lt;邮件主题&gt;</code>，然后是报告摘要。打开 trace，可以看到每一次搜索。</p>
 <div class="try" id="p5"></div>
 <p class="en">Which agent does each job? Sort them.</p><p class="zh">每项工作该由哪个智能体来做？请分类。</p>
 <div class="sc" id="g1"></div>
