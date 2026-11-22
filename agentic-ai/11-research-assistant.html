@@ -6,8 +6,8 @@
 <p class="zh"style="margin:0">Aina 在槟城帮她的 Lim 叔叔打理 <b>kopitiam</b>（街坊咖啡店）。顾客总问“boleh scan?”（能扫码付款吗？）。Lim 叔叔想知道最便宜的无现金收款方式：DuitNow 二维码、Touch 'n Go 或 GrabPay 这样的电子钱包，还是刷卡机。各自的费用是多少，怎么开通？Aina 可能要花一整个晚上上网搜。她决定做一个<b>研究助手</b>：一个智能体规划搜索，一个去搜，第三个写报告，第四个把报告发到她的邮箱。</p></div>
 
 <h2><span class="en">Step 1 · A hosted tool: web search</span><span class="zh">第 1 步 · 托管工具：联网搜索</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">A model on its own only knows what it learnt in the past, and fees change. So the searcher needs the live web. Until now every tool was your own Python function. A <b>hosted tool</b> is different: it runs on the provider's servers, not on your computer. You just add it to the agent with <code>WebSearchTool()</code>. The catch: each search is charged, and you are tied to one provider. Keep the number of searches small while testing. One more setting: <code>ModelSettings(tool_choice="required")</code> tells the model it <i>must</i> call a tool before it answers, so the searcher cannot skip the search.</p>
-<p class="zh"style="margin:0 0 8px">模型自己只知道过去学到的东西，而费用经常变，所以搜索员需要实时的网络。到目前为止，每个工具都是你自己写的 Python 函数。<b>托管工具</b>不一样：它跑在提供商的服务器上，不在你的电脑上。你只要用 <code>WebSearchTool()</code> 把它加进智能体就行。代价是：每次搜索都要收费，而且你被绑定在一家提供商上。测试时要把搜索次数控制得小一点。还有一个设置：<code>ModelSettings(tool_choice="required")</code> 告诉模型回答之前<i>必须</i>先调用工具，这样搜索员就不能跳过搜索。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">A model on its own only knows what it learnt in the past, and fees change. So the searcher needs the live web. Until now every tool was your own Python function. A <b>hosted tool</b> is different: it runs on the provider's servers (the company behind the model, here OpenAI), not on your computer. You just add it to the agent with <code>WebSearchTool()</code>. The catch: each search is charged, and you are tied to one provider. Keep the number of searches small while testing. One more setting: <code>ModelSettings(tool_choice="required")</code> tells the model it <i>must</i> call a tool before it answers, so the searcher cannot skip the search.</p>
+<p class="zh"style="margin:0 0 8px">模型自己只知道过去学到的东西，而费用经常变，所以搜索员需要实时的网络。到目前为止，每个工具都是你自己写的 Python 函数。<b>托管工具</b>不一样：它跑在提供商（模型背后的公司，这里是 OpenAI）的服务器上，不在你的电脑上。你只要用 <code>WebSearchTool()</code> 把它加进智能体就行。代价是：每次搜索都要收费，而且你被绑定在一家提供商上。测试时要把搜索次数控制得小一点。还有一个设置：<code>ModelSettings(tool_choice="required")</code> 告诉模型回答之前<i>必须</i>先调用工具，这样搜索员就不能跳过搜索。</p></div>
 <div class="codebox"><span class="dim">from dotenv import load_dotenv
 from agents import Agent, ModelSettings, WebSearchTool
 
@@ -102,7 +102,7 @@ def send_message(subject, text_body, html_body):    # plain helper, your code ca
     if not SEND_EMAIL:
         print("Not sent:", subject); return
     msg = EmailMessage()
-    msg["From"] = msg["To"] = os.getenv("MY_EMAIL")
+    msg["From"] = msg["To"] = os.getenv("MY_EMAIL")    # you email yourself
     msg["Subject"] = subject
     msg.set_content(text_body)
     msg.add_alternative(html_body, subtype="html")
