@@ -40,8 +40,6 @@
 .olist .it.ag{border-left-color:var(--box)}
 .olist .it.ag a{font-weight:650;border-bottom-color:var(--h)}
 .olist .it.ag:not([data-n])::before{background:color-mix(in srgb,var(--h) 35%,var(--node));border-color:var(--h)}
-.agent{border-left:3px solid var(--h)}
-.agent .ai{color:color-mix(in srgb,var(--h) 80%,var(--fg));border-color:color-mix(in srgb,var(--h) 55%,transparent);background:color-mix(in srgb,var(--h) 13%,transparent)}
 .panel .nd.ag .seq rect{fill:var(--fg);stroke:none;filter:none}
 .panel .seq rect{fill:var(--fg)}.panel .seq text{fill:var(--bg);font:700 10.5px var(--mono)}
 .panel .lock rect{fill:var(--fg)}.panel .lock path{fill:none;stroke:var(--fg);stroke-width:1.6}
@@ -62,11 +60,13 @@
 .key svg{width:11px;height:13px}
 .kb{margin:12px 0 0;text-align:center;font:12px/1.6 var(--mono);color:var(--mut)}
 .kb b{color:var(--fg);font-weight:600}
-.tip{position:absolute;z-index:20;display:none;width:min(360px,calc(100% - 20px));padding:12px 14px;border-radius:8px;border:1px solid var(--box);background:var(--node);box-shadow:0 18px 50px rgba(0,0,0,.35);font-size:13.5px;line-height:1.55;pointer-events:none}
+/* the one popup: it lives on <body>, outside the glass panels, so no later card or panel can paint over it, and its background is solid */
+.tip{position:absolute;z-index:45;display:none;width:min(380px,calc(100vw - 20px));padding:12px 14px;border-radius:8px;border:1px solid var(--box);background:var(--node);box-shadow:0 18px 50px rgba(0,0,0,.45);font-size:13.5px;line-height:1.55;pointer-events:none;isolation:isolate}
+.tip.pin{pointer-events:auto}.tip .x{float:right;margin:-4px -6px 0 8px;border:0;background:none;color:var(--mut);font-size:18px;line-height:1;cursor:pointer;display:none}.tip.pin .x{display:block}
 .tip.on{display:block}
 .tip h5{margin:0 0 4px;font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
 .tip p{margin:0 0 8px;font-size:13.5px;line-height:1.55}
-.tip .last{margin-top:8px;font-size:12.5px;padding:8px 10px;border-radius:6px;background:var(--glass);border:1px solid var(--line);overflow-wrap:anywhere}
+.tip .last{margin-top:10px;font-size:12.5px;padding:8px 0 0;border-top:1px solid var(--line);overflow-wrap:anywhere}.tip .last a{font-weight:600;white-space:nowrap}
 .spec{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;margin:2px 0 0;font:11.5px/1.5 var(--mono)}
 .spec dt{color:var(--mut)}.spec dd{margin:0;color:var(--fg);overflow-wrap:anywhere}
 .gh{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 20px;margin-top:34px}
@@ -85,7 +85,6 @@
 .guard em{display:block;margin-bottom:1px;font:700 10px var(--mono);font-style:normal;letter-spacing:.08em;text-transform:uppercase}
 .guard .risk{color:var(--mut)}.guard .risk em{color:var(--bad)}
 .guard .imp em{color:var(--ok)}
-.agents{margin-top:14px}
 .plumb{margin-top:14px;font:12px/1.7 var(--mono);color:var(--mut);text-align:center;overflow-wrap:anywhere}
 .plumb b{color:var(--fg);font-weight:600}
 /* phone: the diagrams become ordered lists */
@@ -101,38 +100,11 @@
 .olist a{color:var(--fg);text-decoration:none;border-bottom:1px dotted var(--edge)}
 .olist .st{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--mut);margin-right:7px;vertical-align:1px}
 .olist .st.ok{background:var(--ok)}.olist .st.flag{background:var(--warn)}.olist .st.fail{background:var(--bad)}
+.olist .ob{all:unset;cursor:pointer;font-weight:650;border-bottom:1px dotted var(--h,var(--edge))}.olist .ob:focus-visible{outline:2px solid var(--h);outline-offset:2px}
+.olist .more{display:none;margin:8px 0 4px;padding:10px 12px;border-radius:6px;border:1px solid var(--box);background:var(--node)}.olist .it.open .more{display:block}.olist .more .last{margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font-size:13px;overflow-wrap:anywhere}.olist .more p{margin:0 0 8px;font-size:14px}
 .olist .lk{font:10px var(--mono);color:var(--mut);margin-left:6px;letter-spacing:.06em}
 @media(max-width:760px){.panel{display:none}.olist{display:block}}
 @media(prefers-reduced-motion:reduce){.panel .ring{animation:none}}
-/* agents */
-.agents{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-top:14px}
-.agent.spot{overflow:visible}.agent.open{z-index:5}
-.agent{position:relative;min-width:0;margin:0;padding:12px 14px;scroll-margin-top:90px;cursor:default;outline:none;border-radius:8px}
-.agent .hd{display:flex;align-items:center;gap:10px}
-.agent .hd>div{flex:1;min-width:0}
-.agent .ai{width:34px;height:34px;border-radius:6px;display:grid;place-items:center;font:700 11px var(--mono);letter-spacing:.04em;background:var(--glass);border:1px solid var(--box);flex:none;position:relative}
-.agent .ai.fresh::after{content:"";position:absolute;inset:-4px;border-radius:8px;border:1.5px solid var(--acc2);animation:ping 1.6s ease-out infinite}
-@keyframes ping{from{opacity:.9;transform:scale(.9)}to{opacity:0;transform:scale(1.25)}}
-.agent h4{margin:0;font-size:14.5px;letter-spacing:-.01em;display:flex;flex-wrap:wrap;align-items:baseline;gap:0 6px}
-.agent h4 small{font:600 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
-.agent .when{font-size:12px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.agent .more{display:none;position:absolute;z-index:20;top:calc(100% + 8px);left:0;width:min(360px,calc(100vw - 32px));padding:14px 16px;border-radius:8px;border:1px solid var(--box);background:var(--node);box-shadow:0 18px 50px rgba(0,0,0,.35);flex-direction:column;gap:8px}
-.agent.r .more{left:auto;right:0}
-.agent.open .more{display:flex}
-.agent:hover,.agent:focus-visible,.agent.open{border-color:var(--edge)}
-.agent p{margin:0;font-size:14px;line-height:1.6}
-.agent .trig{font-size:12.5px;color:var(--mut)}
-.agent .last{font-size:13px;line-height:1.55;padding:9px 11px;border-radius:6px;background:var(--glass);border:1px solid var(--line);overflow-wrap:anywhere}
-.agent .last a{font-weight:600;white-space:nowrap}
-.pill{margin-left:auto;flex:none;font:700 10px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:4px;border:1px solid var(--line);color:var(--mut)}
-.pill.ok{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 50%,transparent)}
-.pill.flag{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 50%,transparent)}
-.pill.fail{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 50%,transparent)}
-.agent.later{opacity:.6;border-style:dashed}
-.agent.hl{border-color:var(--fg);box-shadow:0 0 0 3px color-mix(in srgb,var(--fg) 18%,transparent)}
-.agent.agent{border-left-color:var(--h)}
-.hint{font-size:12.5px;color:var(--mut);margin:4px 0 0}
-@media(max-width:760px){.agents{grid-template-columns:minmax(0,1fr)}.agent .more{position:static;width:auto;margin-top:10px;box-shadow:none;background:transparent;border:0;padding:0}.agent:hover .more{display:none}.agent.open .more{display:flex}}
 /* activity */
 .feed{list-style:none;margin:14px 0 0;padding:0}
 .feed li{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:baseline;padding:11px 4px;border-bottom:1px solid var(--line);font-size:14px;line-height:1.5}
@@ -154,11 +126,10 @@
 
 <section id="system">
 <h2><span class="no">01</span><span class="en">The system</span><span class="zh">系统全貌</span></h2>
-<p><span class="en">Read it left to right. The numbers follow one lesson from the moment I learn something to the moment you read it. The coloured boxes are the agents working for me, each with its live status; the grey boxes are the plumbing they work on. Hover an agent for its tools, token and last run.</span><span class="zh">从左往右读。数字跟着一课走：从我学到东西的那一刻，到你读到它的那一刻。彩色的方框是替我干活的 agent，带着实时状态；灰色的方框是它们干活用的管道。把鼠标移到 agent 上，可以看到它的工具、令牌和上次运行。</span></p>
-<div class="panel" id="ov-panel"><svg id="ov" viewBox="0 0 1100 540" role="img" aria-label="System diagram: input, notes, AI agents, GitHub, Vercel, readers"></svg><div class="tip" id="tip" role="tooltip"></div></div>
+<p><span class="en">Read it left to right. The numbers follow one lesson from the moment I learn something to the moment you read it. The coloured boxes are the agents working for me, each with its live status; the grey boxes are the plumbing they work on. Hover or tap an agent for its tools, token and last run; click it to keep the details open.</span><span class="zh">从左往右读。数字跟着一课走：从我学到东西的那一刻，到你读到它的那一刻。彩色的方框是替我干活的 agent，带着实时状态；灰色的方框是它们干活用的管道。把鼠标移到 agent 上或点一下，可以看到它的工具、令牌和上次运行；点击可以让详情保持打开。</span></p>
+<div class="panel" id="ov-panel"><svg id="ov" viewBox="0 0 1100 540" role="img" aria-label="System diagram: input, notes, AI agents, GitHub, Vercel, readers"></svg></div>
 <ol class="olist" id="ov-list"></ol>
 <p class="conn" id="conn"></p>
-<div class="agents" id="agents-grid"></div>
 <div class="key" id="key"></div>
 <p class="kb" id="kb"></p>
 <div class="gh" id="hood"><h3><span class="en">Guardrails</span><span class="zh">护栏</span></h3>
@@ -173,6 +144,7 @@
 <p class="rule-line"><span class="en"><b>Agents suggest. I decide.</b> Every change is a pull request, and only I merge.</span><span class="zh"><b>Agent 提建议，我来决定。</b>每个改动都是一个 pull request，只有我能合并。</span></p>
 </section>
 </main>
+<div class="tip" id="tip" role="tooltip"></div>
 <script src="tracks.js"></script><script src="assets/site.js"></script>
 <script>
 (function(){
@@ -286,25 +258,39 @@
     Object.keys(N).forEach(function(k){o+=box(k,S)});
     o+='<text class="foot" x="1084" y="530" text-anchor="end">'+ts('every agent → Telegram to TX · every run → this page','每个 agent → Telegram 通知 TX · 每次运行 → 这一页')+'</text>';
     var svg=document.getElementById('ov');svg.innerHTML=o;
-    var tip=document.getElementById('tip'),pan=document.getElementById('ov-panel');
-    function show(el){var a=NAME[el.dataset.agent],s=S[a.id],pr=pan.getBoundingClientRect(),r=el.getBoundingClientRect();
-      tip.style.setProperty('--h',a.hue||'var(--mut)');
-      tip.innerHTML='<h5>'+t(a.en,a.zh)+(s&&PILL[s.state]?' · '+PILL[s.state]:a.later?' · '+t('planned','计划中'):'')+(s?' · '+ago(s.at):'')+'</h5><p>'+t(a.den,a.dzh)+'</p>'+specOf(a)+lastOf(s);
-      tip.classList.add('on');var tw=tip.offsetWidth,th=tip.offsetHeight,x=r.left-pr.left+r.width/2-tw/2,y=r.bottom-pr.top+8;
-      x=Math.max(10,Math.min(x,pr.width-tw-10));if(y+th>pr.height+40&&r.top-pr.top-th-8>0)y=r.top-pr.top-th-8;
-      tip.style.left=x+'px';tip.style.top=y+'px';el.classList.add('hot')}
-    function hide(el){tip.classList.remove('on');el.classList.remove('hot')}
+    // One popup for the whole page. Hover or focus shows it, click pins it, Escape or a click elsewhere closes it.
     svg.querySelectorAll('[data-agent]').forEach(function(el){
-      var go=function(){var c=document.getElementById('a-'+el.dataset.agent);if(c){c.scrollIntoView({behavior:'smooth',block:'center'});document.querySelectorAll('.agent.open').forEach(function(x){x.classList.remove('open','pin')});c.classList.add('hl','open','pin');setTimeout(function(){c.classList.remove('hl')},1600)}};
-      el.onmouseenter=function(){show(el)};el.onmouseleave=function(){hide(el)};el.onfocus=function(){show(el)};el.onblur=function(){hide(el)};
-      el.onclick=go;el.onkeydown=function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();go()}}});
+      el.onmouseenter=function(){showTip(el,S,false)};el.onmouseleave=function(){if(!PIN)hideTip()};
+      el.onfocus=function(){showTip(el,S,false)};el.onblur=function(){if(!PIN)hideTip()};
+      var go=function(){if(PIN===el.dataset.agent){hideTip()}else showTip(el,S,true)};
+      el.onclick=function(ev){ev.stopPropagation();go()};el.onkeydown=function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();go()}}});
+    if(PIN){var pe=svg.querySelector('[data-agent="'+PIN+'"]');if(pe)showTip(pe,S,true);else hideTip()}
     // phone version: the same layers as an ordered list
     var L=[[0,['src']],[1,['notes']],[2,['writer','reader','reviewer']],[3,['test','cc','main']],[4,['prev','live']],[5,['ui','readers']]];
     function li(id){var n=N[id],a=n.agent&&NAME[n.agent],s=a&&S[a.id],st=s&&PP[s.state]?s.state:'';
-      if(a)return '<li class="it ag" style="--h:'+a.hue+'"'+(n.seq?' data-n="'+n.seq+'"':'')+'><a href="#a-'+a.id+'"><span class="st '+st+'"></span>'+t(a.en,a.zh)+'</a><small class="hx">'+t(a.on[0],a.on[1])+'</small><small>'+(s?(PILL[st]||'')+' · '+ago(s.at):LIVE?t('no runs yet','还没运行'):t('status offline','状态离线'))+'</small></li>';
+      if(a)return '<li class="it ag'+(OPEN===a.id?' open':'')+'" style="--h:'+a.hue+'" data-agent="'+a.id+'"'+(n.seq?' data-n="'+n.seq+'"':'')+'><button class="ob" aria-expanded="'+(OPEN===a.id)+'"><span class="st '+st+'"></span>'+t(a.en,a.zh)+'</button><small class="hx">'+t(a.on[0],a.on[1])+'</small><small>'+(s?(PILL[st]||'')+' · '+ago(s.at)+runsOf(s):LIVE?t('no runs yet','还没运行'):t('status offline','状态离线'))+'</small><div class="more"><p>'+t(a.den,a.dzh)+'</p>'+specOf(a)+lastOf(s)+'</div></li>';
       return '<li class="it"'+(n.seq?' data-n="'+n.seq+'"':'')+'>'+t(esc(n.en),esc(n.zh))+(n.lock?'<span class="lk">'+t('TX APPROVES','TX 批准')+'</span>':'')+'<small>'+t(esc(n.m[0]),esc(n.m[1]))+'</small></li>'}
     document.getElementById('ov-list').innerHTML=L.map(function(l){return '<li class="h">0'+(l[0]+1)+' · '+t(COLS[l[0]][0],COLS[l[0]][1])+'</li>'+l[1].map(li).join('')}).join('')+
-      '<li class="h">'+t('Coming next','即将加入')+'</li><li class="it lp">'+t('Spaced recall · Gap finder','间隔回顾 · 缺口查找')+'</li>'}
+      '<li class="h">'+t('Coming next','即将加入')+'</li><li class="it lp">'+t('Spaced recall · Gap finder','间隔回顾 · 缺口查找')+'</li>';
+    // Phone: tapping an agent opens its details in place and closes any other.
+    document.querySelectorAll('#ov-list .ob').forEach(function(b){b.onclick=function(){var it=b.parentNode,was=it.classList.contains('open');
+      document.querySelectorAll('#ov-list .it.open').forEach(function(x){x.classList.remove('open');x.querySelector('.ob').setAttribute('aria-expanded','false')});
+      OPEN=was?'':it.dataset.agent;if(!was){it.classList.add('open');b.setAttribute('aria-expanded','true')}}})}
+
+  var PIN='',OPEN='',TIP=document.getElementById('tip');
+  function runsOf(s){return s&&s.runs?' · '+t(s.runs+' runs',s.runs+' 次'):''}
+  function showTip(el,S,pin){var a=NAME[el.dataset.agent],s=S[a.id];
+    document.querySelectorAll('#ov .hot').forEach(function(x){x.classList.remove('hot')});
+    PIN=pin?a.id:'';TIP.classList.toggle('pin',pin);TIP.style.setProperty('--h',a.hue||'var(--mut)');
+    TIP.innerHTML='<button class="x" aria-label="Close">×</button><h5>'+t(a.en,a.zh)+(s&&PILL[s.state]?' · '+PILL[s.state]:a.later?' · '+t('planned','计划中'):'')+(s?' · '+ago(s.at)+runsOf(s):'')+'</h5><p>'+t(a.den,a.dzh)+'</p>'+specOf(a)+lastOf(s);
+    TIP.querySelector('.x').onclick=hideTip;
+    TIP.classList.add('on');var r=el.getBoundingClientRect(),tw=TIP.offsetWidth,th=TIP.offsetHeight,W=document.documentElement.clientWidth;
+    var x=Math.max(10,Math.min(r.left+r.width/2-tw/2,W-tw-10)),y=r.bottom+8;
+    if(y+th>innerHeight-8&&r.top-th-8>60)y=r.top-th-8;
+    TIP.style.left=(x+scrollX)+'px';TIP.style.top=(y+scrollY)+'px';el.classList.add('hot')}
+  function hideTip(){PIN='';TIP.classList.remove('on','pin');document.querySelectorAll('#ov .hot').forEach(function(x){x.classList.remove('hot')})}
+  document.addEventListener('click',function(ev){if(PIN&&!TIP.contains(ev.target))hideTip()});
+  document.addEventListener('keydown',function(ev){if(ev.key==='Escape')hideTip()});
 
   // Knowledge base line comes from the track's lessons.js, loaded after site.js has set up the page (so it stays a home-level page).
   (function loadTopics(){var sc=document.createElement('script');sc.src='agentic-ai/lessons.js';
@@ -350,27 +336,6 @@
     '<span><svg viewBox="-6 -8 12 16" aria-hidden="true"><g class="lock" style="fill:var(--fg);stroke:var(--fg)">'+LOCK.replace('<path','<path fill="none" stroke-width="1.6"')+'</g></svg>'+t('TX approves','TX 批准')+'</span>'+
     '<span><i class="dt" style="background:var(--ok)"></i>'+t('passed','通过')+'</span><span><i class="dt" style="background:var(--warn)"></i>'+t('flagged','有问题')+'</span><span><i class="dt" style="background:var(--bad)"></i>'+t('failed','失败')+'</span><span><i class="dt"></i>'+t('no runs yet','还没运行')+'</span>';
 
-  var GL={github:'GitHub',vercel:'Vercel',later:t('Later','以后')};
-  function drawAgents(S,live){
-    var box=document.getElementById('agents-grid'),open=(box.querySelector('.agent.open')||{}).id||location.hash.slice(1);
-    box.innerHTML=AGENTS.map(function(a){
-      var s=S[a.id],pill,st=s&&PILL[s.state]?s.state:'';
-      if(a.later)pill='<span class="pill">'+t('Later','以后')+'</span>';
-      else if(s)pill='<span class="pill '+st+'">'+(PILL[st]||'?')+'</span>';
-      else pill='<span class="pill">'+(live?t('No runs yet','还没运行'):t('Offline','离线'))+'</span>';
-      return '<article style="--h:'+(a.hue||'var(--mut)')+'" class="card agent spot'+(a.later?' later':'')+('a-'+a.id===open?' open':'')+'" id="a-'+a.id+'" tabindex="0"><div class="hd"><span class="ai'+(fresh(s)?' fresh':'')+'">'+a.ic+'</span><div><h4>'+t(a.en,a.zh)+' <small>'+(a.g==='later'?'':GL[a.g])+'</small></h4>'+
-        '<div class="when">'+(s?ago(s.at)+(s.runs?' · '+t(s.runs+' runs',s.runs+' 次'):''):t(a.ten,a.tzh))+'</div></div>'+pill+'</div>'+
-        '<div class="more"><p>'+t(a.den,a.dzh)+'</p>'+specOf(a)+lastOf(s)+'</div></article>'}).join('');
-    box.querySelectorAll('.agent').forEach(function(el){
-      var side=function(){el.classList.remove('r');var r=el.getBoundingClientRect();if(r.left+Math.min(360,innerWidth-32)>innerWidth-16)el.classList.add('r')};
-      // Only one card's details show at a time: opening one closes any other, even a pinned one.
-      var only=function(){side();box.querySelectorAll('.agent.open').forEach(function(x){if(x!==el)x.classList.remove('open','pin')});el.classList.add('open')};
-      el.onmouseenter=function(){if(matchMedia('(hover:hover)').matches)only()};
-      el.onmouseleave=function(){if(!el.classList.contains('pin'))el.classList.remove('open')};
-      el.onfocus=only;
-      el.onblur=function(ev){if(!el.contains(ev.relatedTarget)&&!el.classList.contains('pin'))el.classList.remove('open')};
-      el.onclick=function(ev){if(ev.target.closest('a'))return;var was=el.classList.contains('pin');only();el.classList.toggle('pin',!was);if(was)el.classList.remove('open')}})}
-
   function drawFeed(S,live){
     var all=[];Object.keys(S).forEach(function(k){(S[k].history||[]).forEach(function(h){all.push({id:k,h:h})})});
     all.sort(function(a,b){return new Date(b.h.at)-new Date(a.h.at)});
@@ -394,9 +359,7 @@
       :t('Live status is not available right now.','暂时看不到实时状态。')}
     else if(why==='not-found'&&!Object.keys(S).length){c.classList.add('on');c.innerHTML=t('No agent status found yet. If agents have run, the token may not have access to the repo.','还没有找到 agent 状态。如果 agent 已经运行过，可能是令牌没有这个仓库的权限。')}
     else c.classList.remove('on');
-    LIVE=live;drawOverview(S);drawBar(S,live);drawAgents(S,live);drawFeed(S,live)}
-  addEventListener('hashchange',function(){
-    var c=document.getElementById(location.hash.slice(1));if(c&&c.classList.contains('agent')){document.querySelectorAll('.agent.open').forEach(function(x){x.classList.remove('open')});c.classList.add('open')}});
+    LIVE=live;drawOverview(S);drawBar(S,live);drawFeed(S,live)}
   draw(null);
   function load(){fetch('api/status',{cache:'no-store'}).then(function(r){return r.json()}).then(draw).catch(function(){draw({connected:false})})}
   load();setInterval(function(){if(!document.hidden)load()},60e3);
