@@ -221,6 +221,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           STATE: ${{ steps.share.outputs.state || 'fail' }}
-          SUMMARY: ${{ steps.share.outputs.summary || format('PR #{0}: could not finish the review.', github.event.pull_request.number || inputs.pr) }}
+          SUMMARY: "${{ steps.share.outputs.summary || format('PR #{0}: could not finish the review.', github.event.pull_request.number || inputs.pr) }}"
           LINK: ${{ github.server_url }}/${{ github.repository }}/pull/${{ github.event.pull_request.number || inputs.pr }}
         run: node $T/record-status.mjs reviewer
