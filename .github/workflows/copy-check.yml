@@ -4,6 +4,9 @@
 # On a release (a pull request into main) a second job turns red while a pull request into test
 # that changes one of the released pages is still open, so fixes land before the release does.
 # It also runs the count check: topic and lesson counts, the lesson list and lesson tags must agree with lessons.js.
+# Agents that open or push to a pull request with the workflow token start it by hand (workflow_dispatch on that
+# branch, and with `pr` for a release), because such pushes do not start workflows on their own. Its job names
+# "copy-check" and "Release waits for open fixes" are the required checks in .github/rulesets/.
 name: Copy check
 on:
   pull_request:
@@ -11,6 +14,10 @@ on:
   push:
     branches: [test]
   workflow_dispatch:
+    inputs:
+      pr:
+        description: Release pull request into main to check for open fixes (optional)
+        required: false
 permissions:
   contents: read
 jobs:
@@ -43,7 +50,7 @@ jobs:
         run: echo "line=$(tail -1 copy-check.txt 2>/dev/null) $(tail -1 counts.txt 2>/dev/null)" >> "$GITHUB_OUTPUT"
   release-check:
     name: Release waits for open fixes
-    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    if: (github.event_name == 'pull_request' && github.base_ref == 'main') || inputs.pr != ''
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -57,7 +64,7 @@ jobs:
       - name: Look for open pull requests into test that change the same pages
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR: ${{ github.event.pull_request.number }}
+          PR: ${{ github.event.pull_request.number || inputs.pr }}
         run: |
           gh pr view "$PR" -R "$GITHUB_REPOSITORY" --json files --jq '.files[].path' > /tmp/release.txt
           gh pr list -R "$GITHUB_REPOSITORY" --base test --state open --limit 50 --json number,title,url,files > /tmp/open.json
@@ -74,7 +81,7 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          URL: ${{ github.event.pull_request.html_url }}
+          URL: ${{ github.event.pull_request.html_url || format('{0}/{1}/pull/{2}', github.server_url, github.repository, inputs.pr) }}
         run: |
           [ -f scripts/notify-telegram.mjs ] || exit 0
           { echo "⏸️ Release $URL changes pages that still have open fixes. Merge or close these first:"; echo; head -c 2500 /tmp/waiting.txt 2>/dev/null; } \
