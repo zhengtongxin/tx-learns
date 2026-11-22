@@ -1,0 +1,243 @@
+# UI check agent: after Vercel finishes a preview deploy, a headless browser uses every page the way a person
+# does. It hovers, clicks and Tabs through each interactive element on a desktop and a phone screen and flags
+# popups that stay open and overlap, popups off the screen, content wider than the screen, script errors and
+# missing files. That part is a plain script, so the pass/fail result is the same every time. Claude then looks
+# at screenshots of the pages that changed and notes visual problems a script cannot see (text running into
+# text, cut-off words, unreadable colours); those notes never fail the check on their own.
+# It posts one comment on the pull request (updated on each run), sets a "UI check" status and tells TX on
+# Telegram when something needs a look. It never pushes or edits files.
+name: UI check
+on:
+  deployment_status:
+  workflow_dispatch:
+    inputs:
+      pages:
+        description: Pages to test, space separated (empty = all). e.g. ecosystem.html agentic-ai/09-outreach-email-helper.html
+        required: false
+permissions:
+  contents: read
+concurrency:
+  group: ui-check-${{ github.event.deployment.sha || github.sha }}
+  cancel-in-progress: true
+env:
+  SHA: ${{ github.event.deployment.sha || github.sha }}
+  CONTEXT: UI check
+jobs:
+  # Shows a yellow "UI check" dot on the pull request while the browser runs.
+  start:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.deployment_status.state == 'success' && github.event.deployment.environment != 'Production')
+    runs-on: ubuntu-latest
+    permissions:
+      statuses: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: gh api "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state=pending -f context="$CONTEXT" -f description="Clicking through the preview…" -f target_url="$RUN" >/dev/null || true
+
+  # Read-only job: branch code and Claude never share a job with a write token. The share job does the writing.
+  check:
+    needs: start
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      pr: ${{ steps.find.outputs.pr }}
+      ran: ${{ steps.run.outputs.ran }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ env.SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Find the pull request and the pages that changed
+        id: find
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pr=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/pulls" --jq '[.[]|select(.state=="open")][0].number // empty' 2>/dev/null || true)
+          case "$pr" in ''|*[!0-9]*) pr= ;; esac
+          if [ -n "$pr" ]; then changed=$(gh pr diff "$pr" -R "$GITHUB_REPOSITORY" --name-only 2>/dev/null || true)
+          else changed=$(git diff --name-only "$SHA^1" "$SHA" 2>/dev/null || true); fi
+          # Pages Claude looks at: served pages that changed, at most 4.
+          shots=$(echo "$changed" | grep -E '\.html$' | grep -vE '^(inbox/|scripts/|\.github/)|_template\.html$' | while read -r f; do [ -f "$f" ] && echo "$f"; done | head -4 | tr '\n' ' ')
+          echo "pr=$pr shots=$shots"
+          { echo "pr=$pr"; echo "shots=$shots"; } >> "$GITHUB_OUTPUT"
+      - name: Install a headless browser
+        run: |
+          npm install --no-save --no-audit --no-fund --prefix "$RUNNER_TEMP/pw" playwright@1.49.1
+          "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Hover, click and Tab through every page
+        id: run
+        env:
+          PLAYWRIGHT_DIR: ${{ runner.temp }}/pw
+          PAGES: ${{ inputs.pages }}
+          SHOTS: ${{ steps.find.outputs.shots }}
+          # Optional. With Vercel's "Protection Bypass for Automation" secret the check opens the real preview;
+          # without it, it serves this commit's files itself (the site is plain static files, so they are the same).
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          PREVIEW: ${{ github.event.deployment_status.environment_url || github.event.deployment_status.target_url }}
+        run: |
+          if [ ! -f scripts/ui-check.mjs ]; then echo "This commit has no scripts/ui-check.mjs yet; nothing to run."; exit 0; fi
+          echo "ran=1" >> "$GITHUB_OUTPUT"
+          args=(--out /tmp/out)
+          [ -n "$PAGES" ] && args+=(--pages "$PAGES")
+          [ -n "$SHOTS" ] && args+=(--shots "$SHOTS")
+          if [ -n "$VERCEL_AUTOMATION_BYPASS_SECRET" ] && [ -n "$PREVIEW" ]; then args+=(--base "$PREVIEW"); fi
+          set +e; node scripts/ui-check.mjs "${args[@]}"; code=$?; set -e
+          echo "Exit code $code (0 = passed, 1 = problems found, 2 = the check broke)"
+          [ "$code" -le 1 ]
+      - name: Install Claude Code
+        if: steps.find.outputs.shots != '' && steps.run.outputs.ran == '1'
+        run: npm install -g @anthropic-ai/claude-code
+      - name: Visual pass with Claude
+        if: steps.find.outputs.shots != '' && steps.run.outputs.ran == '1'
+        continue-on-error: true
+        env:
+          # Prefer TX's Claude subscription (CLAUDE_CODE_OAUTH_TOKEN from `claude setup-token`); the API key is only a fallback.
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then unset ANTHROPIC_API_KEY; echo "Auth: Claude subscription"; else unset CLAUDE_CODE_OAUTH_TOKEN; echo "Auth: API key (no CLAUDE_CODE_OAUTH_TOKEN secret)"; fi
+          ls /tmp/out/shots/*-[0-9].png > /tmp/out/tiles.txt || { echo 'No screenshot tiles to look at.'; exit 0; }
+          cat > /tmp/ui-prompt.md <<'PROMPT'
+          You are the UI checker for TX Learns, a bilingual (EN/中文) learning site. The pages that changed were
+          screenshotted on a 1280px desktop and a 390px phone, cut into tiles from the top of the page down.
+          Tiles are listed in /tmp/out/tiles.txt, named <page>-<desktop|phone>-<n>.png.
+          A script has already hovered, clicked and Tabbed through every page; its findings are in /tmp/out/ui-check.json.
+          Do not repeat those.
+
+          Look at every tile with the Read tool and report only clear visual bugs a visitor would notice:
+          text running into or over other text, words or buttons cut off, boxes spilling out of their container,
+          text you cannot read against its background, a widget or diagram that looks broken or empty,
+          a phone layout squeezed into unreadable columns. Ignore taste, wording, and the decorative glow.
+          The 中文 text is hidden on purpose when the page is in English.
+
+          A short subtitle that ends in "…" on purpose is a design choice, not a bug.
+
+          Your final answer must be only one JSON object, nothing before or after it, exactly like:
+          {"issues":[{"page":"ecosystem.html","screen":"phone","where":"agent cards","what":"the status pill is cut off at the right edge"}]}
+          At most 6 issues, most visible first. Answer {"issues":[]} if you see none.
+          PROMPT
+          # Claude can only read. Its answer is captured from the output instead of giving it a write tool.
+          claude -p "$(cat /tmp/ui-prompt.md)" --max-turns 30 --add-dir /tmp/out --allowedTools "Read" --output-format text > /tmp/out/visual.txt || true
+          tail -20 /tmp/out/visual.txt
+          node -e 'const fs=require("fs"),t=fs.readFileSync("/tmp/out/visual.txt","utf8"),v=JSON.parse(t.slice(t.indexOf("{"),t.lastIndexOf("}")+1));if(!Array.isArray(v.issues))throw new Error("no issues list");fs.writeFileSync("/tmp/out/visual.json",JSON.stringify({issues:v.issues.slice(0,6)}))' \
+            && echo "Visual notes saved." || echo "::warning::The visual pass gave no readable result."
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.run.outputs.ran == '1'
+        with:
+          name: ui-check
+          path: /tmp/out/
+          if-no-files-found: ignore
+
+  # Write job: only trusted scripts from the default branch run here, never files from the branch under test.
+  share:
+    needs: [start, check]
+    if: always() && needs.start.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      statuses: write
+      pull-requests: write
+      issues: write
+    env:
+      PR: ${{ needs.check.outputs.pr }}
+      RAN: ${{ needs.check.outputs.ran }}
+      CHECK: ${{ needs.check.result }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      T: trusted/scripts
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          path: trusted
+          sparse-checkout: |
+            scripts
+            banned-words.txt
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        if: needs.check.outputs.ran == '1'
+        continue-on-error: true
+        with:
+          name: ui-check
+          path: /tmp/out
+      - name: Comment and set the status
+        id: share
+        run: |
+          # A check job that broke before the browser ran must never look like a pass.
+          if [ "$RAN" != 1 ] && [ "$CHECK" != success ]; then
+            gh api "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state=error -f context="$CONTEXT" -f description="The UI check could not finish. See the logs." -f target_url="$RUN" >/dev/null
+            echo "state=fail" >> "$GITHUB_OUTPUT"; echo "The UI check could not finish." > /tmp/line.txt; exit 0
+          fi
+          if [ "$RAN" != 1 ]; then
+            gh api "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state=success -f context="$CONTEXT" -f description="Skipped: this commit has no UI check script yet" -f target_url="$RUN" >/dev/null
+            echo "state=skip" >> "$GITHUB_OUTPUT"; echo "This commit has no UI check script yet." > /tmp/line.txt; exit 0
+          fi
+          if [ ! -s /tmp/out/ui-check.json ]; then
+            gh api "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state=error -f context="$CONTEXT" -f description="The UI check could not finish. See the logs." -f target_url="$RUN" >/dev/null
+            echo "state=fail" >> "$GITHUB_OUTPUT"; echo "The UI check could not finish." > /tmp/line.txt; exit 0
+          fi
+          node - <<'JS'
+          const fs = require('fs');
+          const r = JSON.parse(fs.readFileSync('/tmp/out/ui-check.json', 'utf8'));
+          let v = { issues: [] }; try { v = JSON.parse(fs.readFileSync('/tmp/out/visual.json', 'utf8')); } catch {}
+          const vis = (Array.isArray(v.issues) ? v.issues : []).slice(0, 6);
+          const cell = s => String(s || '').replace(/[|\n\r]/g, ' ').slice(0, 300);
+          let md = '<!-- tx-ui-check -->\n' + fs.readFileSync('/tmp/out/ui-check.md', 'utf8');
+          if (vis.length) {
+            md += '\n👀 **Visual pass (Claude)** on the pages that changed. These are notes, they do not fail the check:\n\n';
+            md += vis.map(i => `- \`${cell(i.page)}\` (${cell(i.screen)}), ${cell(i.where)}: ${cell(i.what)}`).join('\n') + '\n';
+          }
+          md += `\nScreenshots and logs: [this run](${process.env.RUN}). _Checked by the TX Learns UI check agent._\n`;
+          fs.writeFileSync('/tmp/comment.md', md);
+          const state = r.issues ? 'flag' : vis.length ? 'flag' : 'ok';
+          const line = r.summary + (vis.length ? ` Claude also noted ${vis.length} visual thing${vis.length > 1 ? 's' : ''} to look at.` : '');
+          fs.writeFileSync('/tmp/line.txt', line);
+          fs.writeFileSync(process.env.GITHUB_OUTPUT, `state=${state}\nfailed=${r.issues ? 1 : 0}\nvisual=${vis.length}\n`, { flag: 'a' });
+          JS
+          failed=$(node -e 'console.log(require("/tmp/out/ui-check.json").issues)')
+          if [ "$failed" -gt 0 ]; then st=failure; desc="$failed UI problem(s) found. Details in the comment."; else st=success; desc="Hovered, clicked and Tabbed through every page."; fi
+          url=
+          if [ -n "$PR" ]; then
+            id=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate --jq '.[] | select(.body | startswith("<!-- tx-ui-check -->")) | .id' | tail -1)
+            if [ -n "$id" ]; then url=$(gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F body=@/tmp/comment.md --jq .html_url)
+            else url=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" -F body=@/tmp/comment.md --jq .html_url); fi
+          elif [ "$failed" -gt 0 ] || { [ -s /tmp/out/visual.json ] && [ "$(node -e 'console.log((require("/tmp/out/visual.json").issues||[]).length)' 2>/dev/null || echo 0)" -gt 0 ]; }; then
+            url=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/comments" -F body=@/tmp/comment.md --jq .html_url)
+          fi
+          gh api "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state=$st -f context="$CONTEXT" -f description="$desc" -f target_url="${url:-$RUN}" >/dev/null
+          echo "url=${url:-$RUN}" >> "$GITHUB_OUTPUT"
+      - name: Tell TX on Telegram
+        # Quiet when everything passes: the green status on the PR and the Ecosystem page say so.
+        if: always() && steps.share.outputs.state != 'ok' && steps.share.outputs.state != 'skip'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          URL: ${{ steps.share.outputs.url }}
+          STATE: ${{ steps.share.outputs.state }}
+        run: |
+          if [ "$STATE" = flag ]; then
+            { echo "🖱️ UI check on ${PR:+PR #$PR}${PR:-$(echo "$SHA" | cut -c1-7)}: $(cat /tmp/line.txt)"; echo "$URL"; } | node $T/notify-telegram.mjs
+          else
+            node $T/notify-telegram.mjs "⚠️ The UI check agent could not finish. Logs: $RUN"
+          fi
+      - name: Record status for the Ecosystem page
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATE: ${{ steps.share.outputs.state || 'fail' }}
+          LINK: ${{ steps.share.outputs.url }}
+        run: |
+          [ -f $T/record-status.mjs ] || { echo "No record script on the default branch yet."; exit 0; }
+          SUMMARY="$(cat /tmp/line.txt 2>/dev/null || echo 'Could not finish.')" node $T/record-status.mjs ui-check
