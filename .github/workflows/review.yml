@@ -35,7 +35,9 @@ jobs:
         with:
           node-version: 22
       - name: Copy check result for the reviewer
-        run: node scripts/check-copy.mjs > /tmp/copy-check.txt 2>&1 || true
+        run: |
+          node scripts/check-copy.mjs > /tmp/copy-check.txt 2>&1 || true
+          [ -f scripts/check-counts.mjs ] && node scripts/check-counts.mjs >> /tmp/copy-check.txt 2>&1 || true
       - uses: anthropics/claude-code-action@v1
         with:
           # Prefer TX's Claude subscription; fall back to the API key only when the OAuth token secret is missing.
@@ -51,7 +53,8 @@ jobs:
 
             1. Read CLAUDE.md and STYLE.md first. They are the rules.
             2. Read the diff with `gh pr diff ${{ env.PR }}` and open each changed lesson in full.
-            3. Read /tmp/copy-check.txt (the copyright scrubber's output for this branch).
+            3. Read /tmp/copy-check.txt (the copyright scrubber's and the count check's output for this branch).
+               Any ✗ in it is a blocker.
             4. Check each changed lesson for:
                - Copyright: any platform, program or instructor name, "course"/课程, week/day/"Project N" numbering,
                  or examples, prompts and code comments that look copied from a source rather than written in our own words.

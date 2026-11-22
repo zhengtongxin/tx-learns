@@ -1,0 +1,163 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Project: a research assistant</title><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Agent SDKs · Project</span><span class="zh">智能体 SDK · 项目</span></span><h1><span class="en">Project: a research assistant</span><span class="zh">项目：研究助手</span></h1><p class="meta"><span class="en">Turn one big question into a report in your inbox, with four small agents and plain Python · ~30 min · hands-on</span><span class="zh">用四个小智能体加普通 Python，把一个大问题变成收件箱里的一份报告 · 约 30 分钟 · 动手实践</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en"style="margin:0">Aina helps her Uncle Lim at his <b>kopitiam</b> in Penang. Customers keep asking “boleh scan?” (can I scan to pay?). Uncle Lim wants the cheapest way to take cashless payments: a DuitNow QR code, an e-wallet such as Touch 'n Go or GrabPay, or a card terminal. What are the fees, and how does he set each one up? Aina could lose a whole evening to googling. Instead she builds a <b>research helper</b>: one agent plans the searches, another runs them, a third writes the report, and a fourth emails it to her.</p>
+<p class="zh"style="margin:0">Aina 在槟城帮她的 Lim 叔叔打理 <b>kopitiam</b>（街坊咖啡店）。顾客总问“boleh scan?”（能扫码付款吗？）。Lim 叔叔想知道最便宜的无现金收款方式：DuitNow 二维码、Touch 'n Go 或 GrabPay 这样的电子钱包，还是刷卡机。各自的费用是多少，怎么开通？Aina 可能要花一整个晚上上网搜。她决定做一个<b>研究助手</b>：一个智能体规划搜索，一个去搜，第三个写报告，第四个把报告发到她的邮箱。</p></div>
+
+<h2><span class="en">Step 1 · A hosted tool: web search</span><span class="zh">第 1 步 · 托管工具：联网搜索</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">A model on its own only knows what it learnt in the past, and fees change. So the searcher needs the live web. Until now every tool was your own Python function. A <b>hosted tool</b> is different: it runs on the provider's servers, not on your computer. You just add it to the agent with <code>WebSearchTool()</code>. The catch: each search is charged, and you are tied to one provider. Keep the number of searches small while testing.</p><p class="en"style="margin:0 0 8px">One more setting: <code>ModelSettings(tool_choice="required")</code> tells the model it <i>must</i> call a tool before it answers, so the searcher cannot skip the search.</p>
+<p class="zh"style="margin:0 0 8px">模型自己只知道过去学到的东西，而费用经常变，所以搜索员需要实时的网络。到目前为止，每个工具都是你自己写的 Python 函数。<b>托管工具</b>不一样：它跑在提供商的服务器上，不在你的电脑上。你只要用 <code>WebSearchTool()</code> 把它加进智能体就行。代价是：每次搜索都要收费，而且你被绑定在一家提供商上。测试时要把搜索次数控制得小一点。</p><p class="zh"style="margin:0 0 8px">还有一个设置：<code>ModelSettings(tool_choice="required")</code> 告诉模型回答之前<i>必须</i>先调用工具，这样搜索员就不能跳过搜索。</p></div>
+<div class="codebox"><span class="dim">from dotenv import load_dotenv
+from agents import Agent, ModelSettings, WebSearchTool
+
+load_dotenv(override=True)    # reads OPENAI_API_KEY from your .env file
+
+searcher = Agent(
+    name="Searcher",
+    instructions="You get one search term. Search the web and summarise what you find in under 300 words.",
+    model="gpt-5.4-mini",
+    </span><span class="chg">tools=[WebSearchTool()],
+    model_settings=ModelSettings(tool_choice="required"),</span><span class="dim">   # must search, no answering from memory
+)</span></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · The planner returns a plan, not a paragraph</span><span class="zh">第 2 步 · 规划员交出一份计划，而不是一段话</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">A big question is better split into a few small searches. The planner does that thinking and does <i>not</i> search. Its answer has to be a list your code can loop over, so it uses structured output, the form idea from “Structured outputs and a checker agent”. Each search gets a <code>why</code> and a <code>query</code>. Put <code>why</code> first: the model thinks about the reason before it picks the words, and the search comes out better. Quick reminder: a class built on <code>BaseModel</code> is a form with named blanks, and each <code>Field(description=...)</code> tells the model what to write in that blank.</p>
+<p class="zh"style="margin:0 0 8px">大问题最好拆成几个小搜索。规划员负责这份思考，但它<i>不</i>搜索。它的答案必须是代码能逐项处理的列表，所以用结构化输出，也就是《结构化输出与检查员智能体》里的“表格”思路。每个搜索有一个 <code>why</code> 和一个 <code>query</code>。把 <code>why</code> 放在前面：模型先想理由再选关键词，搜索会更准。快速回顾：基于 <code>BaseModel</code> 的类就是一张有具名空格的表格，每个 <code>Field(description=...)</code> 告诉模型那个空格该填什么。</p></div>
+<div class="codebox"><span class="dim">from pydantic import BaseModel, Field
+
+class SearchIdea(BaseModel):
+    </span><span class="chg">why: str = Field(description="Why this search helps answer the question.")</span><span class="dim">
+    query: str = Field(description="The exact words to type into a web search.")
+
+class SearchPlan(BaseModel):
+    searches: list[SearchIdea] = Field(description="The web searches to run.")
+
+planner = Agent(name="Planner", model="gpt-5.4-mini", </span><span class="chg">output_type=SearchPlan</span><span class="dim">,
+                instructions="You plan research. Given a question, list 3 web searches that together answer it.")</span></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Run the searches at the same time</span><span class="zh">第 3 步 · 让搜索同时进行</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Each search takes a few seconds. Three in a row is slow, like three people queuing at one coffee counter. <code>asyncio.gather</code> sends them all off together and waits until every one is back, so three searches take about as long as one. The two words to know: <code>async def</code> marks a function that can pause, and <code>await</code> means “wait for this, but let other work run meanwhile”.</p>
+<p class="zh"style="margin:0 0 8px">每个搜索要几秒钟。三个排队跑很慢，就像三个人挤在同一个咖啡柜台前。<code>asyncio.gather</code> 把它们一起派出去，等所有结果都回来，所以三个搜索的耗时和一个差不多。要记住两个词：<code>async def</code> 标记一个可以暂停的函数；<code>await</code> 的意思是“等这件事，但让别的事先跑着”。</p></div>
+<div class="codebox"><span class="dim">import asyncio
+from agents import Runner
+
+async def search_one(idea: SearchIdea) -> str:
+    result = await Runner.run(searcher, f"Search term: {idea.query}\nWhy: {idea.why}")
+    return result.final_output
+
+async def search_all(search_plan: SearchPlan) -> list[str]:
+    jobs = [search_one(idea) for idea in search_plan.searches]   # one job per search, none started yet
+    return </span><span class="chg">await asyncio.gather(*jobs)</span><span class="dim">    # the * hands gather each job separately; it runs them together</span></div>
+<div class="try" id="p3"></div>
+
+<h2><span class="en">Step 4 · The writer hands back a report</span><span class="zh">第 4 步 · 写作员交回一份报告</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">The writer gets the question plus every search summary and turns them into one report. It uses structured output too: a <code>Report</code> form with three blanks, a short <code>summary</code> for a quick answer, the full <code>report_md</code> in markdown, and <code>next_questions</code> to research later. The small <code>write</code> function wraps one <code>Runner.run()</code> so the next step can just call it.</p>
+<p class="zh"style="margin:0 0 8px">写作员拿到问题和每一份搜索摘要，把它们写成一份报告。它也用结构化输出：一张 <code>Report</code> 表格，有三个空格：用于快速回答的简短 <code>summary</code>、markdown 格式的完整 <code>report_md</code>，以及之后可以继续研究的 <code>next_questions</code>。小函数 <code>write</code> 只包一次 <code>Runner.run()</code>，下一步直接调用它就行。</p></div>
+<div class="codebox"><span class="dim">class Report(BaseModel):
+    summary: str = Field(description="The answer in 2-3 sentences.")
+    report_md: str = Field(description="The full report in markdown, with headings.")
+    next_questions: list[str] = Field(description="Good questions to research next.")
+
+writer = Agent(name="Writer", model="gpt-5.4-mini", </span><span class="chg">output_type=Report</span><span class="dim">,
+               instructions="You write a clear research report for a small business owner from the search summaries.")
+
+async def write(question: str, findings: list[str]) -> Report:
+    return (await Runner.run(writer, f"Question: {question}\nSearch summaries: {findings}")).final_output</span></div>
+<div class="try" id="p4"></div>
+
+<h2><span class="en">Step 5 · Code is the boss, not a manager agent</span><span class="zh">第 5 步 · 由代码当老板，而不是主管智能体</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">In <a href="09-outreach-email-helper.html">the outreach helper</a> a <b>manager agent</b>, an agent whose tools are other agents, chose what to call next. Here the recipe never changes: plan, search, write, deliver. So your own Python runs the steps in order, one <code>Runner.run()</code> each. It is predictable, every step returns a typed object, and if something breaks you know which step. A manager agent is more flexible, but it can skip a step or loop. For a fixed recipe, code wins.</p><p class="en"style="margin:0 0 8px">Wrap the run in <code>with trace(...)</code>. A <b>trace</b> is the step-by-step record of a run: every agent, tool call and web search, with timings. Open it on the Traces page of your OpenAI dashboard, where all four agents show as one run.</p>
+<p class="zh"style="margin:0 0 8px">在<a href="09-outreach-email-helper.html">外联邮件助手</a>里，是<b>主管智能体</b>（把其他智能体当工具用的智能体）决定下一步调谁。这里的流程永远不变：规划、搜索、写作、送达。所以让你自己的 Python 按顺序执行，每一步一个 <code>Runner.run()</code>。这样结果可预期，每一步都返回有类型的对象，出了问题也知道是哪一步。主管智能体更灵活，但它可能漏掉一步或者转圈。流程固定时，代码更胜一筹。</p><p class="zh"style="margin:0 0 8px">用 <code>with trace(...)</code> 把整个运行包起来。<b>trace</b> 是一次运行的逐步记录：每个智能体、每次工具调用和网络搜索，以及耗时。在 OpenAI 控制台的 Traces 页面打开它，四个智能体会显示为同一次运行。</p></div>
+<div class="codebox"><span class="dim">from agents import trace
+
+QUESTION = "What is the cheapest way for a small kopitiam in Penang to take cashless payments in 2026?"
+
+async def plan(question: str) -> SearchPlan:
+    return (await Runner.run(planner, f"Question: {question}")).final_output
+
+async def deliver(report: Report) -> None:
+    await Runner.run(mailroom, report.report_md)    # works once you build the mailroom in Step 6
+
+async def main():
+    with trace("Kopitiam payments research"):
+        </span><span class="chg">search_plan = await plan(QUESTION)
+        findings   = await search_all(search_plan)
+        report     = await write(QUESTION, findings)
+        await deliver(report)</span><span class="dim">
+    print(report.summary)</span></div>
+<div class="try" id="p5"></div>
+
+<h2><span class="en">Step 6 · The mailroom</span><span class="zh">第 6 步 · 收发室</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">The last agent turns the report into a tidy HTML email and sends it with a tool. It is the same trick as the outreach helper: a plain helper <code>send_message(...)</code> does the sending, and a <code>@function_tool</code> called <code>send_report</code> wraps it for the agent. While testing, a <code>SEND_EMAIL = False</code> switch makes it print the email instead. Flip it on once your mail settings are in <code>.env</code>.</p><p class="en"style="margin:0 0 8px">Three words in that code. <code>.env</code> is a small private file next to your script that holds keys and passwords, read by <code>load_dotenv()</code>.</p><p class="en"style="margin:0 0 8px"><b>SMTP</b> is the standard way a program hands an email to a mail server. An <b>app password</b> is a separate password your email provider gives you just for a script, so your real password stays private.</p>
+<p class="zh"style="margin:0 0 8px">最后一个智能体把报告排成整洁的 HTML 邮件，并用工具发出去。做法和外联邮件助手一样：一个普通的辅助函数 <code>send_message(...)</code> 负责发送，再用 <code>@function_tool</code> 把它包成给智能体用的 <code>send_report</code>。测试时用 <code>SEND_EMAIL = False</code> 这个开关，让它只打印邮件而不真发。等邮箱设置写进 <code>.env</code> 后再打开。</p><p class="zh"style="margin:0 0 8px">代码里有三个词。<code>.env</code> 是放在脚本旁边、保存密钥和密码的小私密文件，由 <code>load_dotenv()</code> 读取。</p><p class="zh"style="margin:0 0 8px"><b>SMTP</b> 是程序把邮件交给邮件服务器的标准方式。<b>应用专用密码</b>是邮箱服务商专门给脚本用的另一个密码，这样你的真实密码不会外泄。</p></div>
+<div class="codebox"><span class="dim">import os, smtplib
+from email.message import EmailMessage
+from agents import function_tool
+
+SEND_EMAIL = False    # True = really send (needs MY_EMAIL, SMTP_SERVER, SMTP_APP_PASSWORD in .env)
+
+def send_message(subject, text_body, html_body):    # plain helper, your code can call this
+    if not SEND_EMAIL:
+        print("Not sent:", subject); return
+    msg = EmailMessage()
+    msg["From"] = msg["To"] = os.getenv("MY_EMAIL")
+    msg["Subject"] = subject
+    msg.set_content(text_body)
+    msg.add_alternative(html_body, subtype="html")
+    with smtplib.SMTP(os.getenv("SMTP_SERVER"), 587) as server:
+        server.starttls()
+        server.login(os.getenv("MY_EMAIL"), os.getenv("SMTP_APP_PASSWORD"))
+        server.send_message(msg)
+
+</span><span class="chg">@function_tool</span><span class="dim">
+def send_report(subject: str, text_body: str, html_body: str) -> str:
+    """Email the finished report to me.
+
+    Args:
+        subject: A short, clear subject line.
+        text_body: The report as plain text.
+        html_body: The report as simple, clean HTML.
+    """
+    send_message(subject, text_body, html_body)
+    return "Sent"
+
+mailroom = Agent(name="Mailroom", model="gpt-5.4-mini", tools=[send_report],
+                 instructions="You get a report in markdown. Make a clean HTML email and send it with send_report.")
+
+asyncio.run(main())    # all four agents exist now, so run it. In a notebook, just write: await main()</span></div>
+<p class="en">While <code>SEND_EMAIL</code> is False you should see <code>Not sent: &lt;the subject&gt;</code>, then the report summary. Open the trace to see each search.</p><p class="zh">当 <code>SEND_EMAIL</code> 为 False 时，你会看到 <code>Not sent: &lt;邮件主题&gt;</code>，然后是报告摘要。打开 trace，可以看到每一次搜索。</p>
+<div class="try" id="p6"></div>
+<p class="en">Which agent does each job? Sort them.</p><p class="zh">每项工作该由哪个智能体来做？请分类。</p>
+<div class="sc" id="g1"></div>
+
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en">First, <code>await Runner.run(...)</code> worked in a notebook, then was a SyntaxError in a <code>.py</code> file. Outside a notebook, everything goes inside <code>async def main()</code> and you start it with <code>asyncio.run(main())</code>. Second, without <code>tool_choice="required"</code> the searcher sometimes answered from memory with old facts. The trace shows whether a real web search happened, so I check it there. Third, I ran five searches before I noticed they cost money. Three is plenty for learning. Fourth, the report ran on and on until I asked for “around 800-1200 words”.</span><span class="zh">第一，<code>await Runner.run(...)</code> 在笔记本里能跑，放进 <code>.py</code> 文件就是 SyntaxError。在笔记本之外，所有内容都要放进 <code>async def main()</code>，再用 <code>asyncio.run(main())</code> 启动。第二，没写 <code>tool_choice="required"</code> 时，搜索员有时直接凭记忆回答，用的是旧信息。trace 能看出有没有真的发起网络搜索，所以我去那里确认。第三，我跑了五个搜索才发现要收费，学习用三个就够了。第四，报告越写越长，直到我要求“大约 800-1200 字”才收住。</span></div>
+<div class="callout"><b class="lbl"><span class="en">Check before you trust it</span><span class="zh">相信之前先核对</span></b><span class="en">The report is only as good as its searches. Fees and promotions change. Before Uncle Lim signs anything, Aina opens the sources and checks the numbers herself.</span><span class="zh">报告的质量取决于搜索。费用和优惠常常变动。在 Lim 叔叔签任何东西之前，Aina 要自己打开来源，核对那些数字。</span></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Ask your own question.</b> Compare suppliers, check a new rule or plan a trip. Keep it at 3 searches and open the trace to see each one.</span><span class="zh"><b>问你自己的问题。</b>比较供应商、查一条新规定或规划一次旅行。保持 3 个搜索，并打开 trace 看看每一次搜索。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Let the planner choose how many searches</b> it needs, with a maximum.</span><span class="zh"><b>让规划员自己决定要几个搜索</b>，但设一个上限。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a checker agent</b> from the structured outputs lesson that flags any fee in the report without a source.</span><span class="zh"><b>加一个检查员智能体</b>（用结构化输出那一课的做法），标出报告里没有来源的费用。</span></span></label></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Deep research follows one pattern: plan, search, write, deliver.<br>• A <b>hosted tool</b> like <code>WebSearchTool()</code> runs on the provider's side. It is quick to use but charged per call.<br>• <code>tool_choice="required"</code> stops the searcher from answering from memory.<br>• Structured output lets the planner return a list your code can loop over.<br>• <code>asyncio.gather</code> runs the searches together, so three take about as long as one.<br>• For a fixed recipe, plain Python in charge beats a manager agent: predictable and easy to debug.<br>• A <code>@function_tool</code> is for the agent. To send from your own code, call the plain helper.<br>• Open the sources before you trust a number.</p><p class="zh" style="margin:0">• 深度研究只有一个套路：规划、搜索、写作、送达。<br>• <code>WebSearchTool()</code> 这样的<b>托管工具</b>跑在提供商那边，用起来快，但按次收费。<br>• <code>tool_choice="required"</code> 让搜索员不能凭记忆作答。<br>• 结构化输出让规划员交出代码能逐项处理的列表。<br>• <code>asyncio.gather</code> 让搜索同时进行，三个的耗时和一个差不多。<br>• 流程固定时，让普通 Python 当老板胜过主管智能体：可预期，也好排错。<br>• <code>@function_tool</code> 是给智能体用的。想在自己的代码里发邮件，就调用那个普通辅助函数。<br>• 相信数字之前，先打开来源。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var $=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('p1'),{q:{en:'You leave out <code>tool_choice="required"</code>. What might the searcher do?',zh:'你去掉了 <code>tool_choice="required"</code>。搜索员可能会怎样？'},opts:[{k:'a',en:'Answer from memory, with old facts and no search',zh:'凭记忆回答，信息过时，也没有搜索'},{k:'b',en:'Refuse to run',zh:'拒绝运行'},{k:'c',en:'Search twice as much',zh:'搜索次数翻倍'}],a:'a',ex:{en:'Without it the model may decide it already knows. Check the trace to see if a real search happened.',zh:'没有它，模型可能觉得自己已经知道了。看 trace 就能确认是否真的搜索过。'},hint:{en:'Who decides whether to use the tool?',zh:'谁来决定要不要用这个工具？'}});
+ predict($('p2'),{q:{en:'Why is the planner given structured output?',zh:'为什么给规划员用结构化输出？'},opts:[{k:'a',en:'So it can search the web',zh:'这样它才能联网搜索'},{k:'b',en:'So your code gets a list of searches it can loop over',zh:'这样代码拿到的是能逐项处理的搜索列表'},{k:'c',en:'To make it cheaper',zh:'为了更便宜'}],a:'b',ex:{en:'A typed list is data. A paragraph would have to be read like a human.',zh:'有类型的列表就是数据。一段话得像人一样去读。'},hint:{en:'What does the next step need to do with the plan?',zh:'下一步要拿这份计划做什么？'}});
+ predict($('p3'),{q:{en:'Each search takes 5 seconds. With <code>asyncio.gather</code>, about how long do 3 searches take?',zh:'每个搜索要 5 秒。用 <code>asyncio.gather</code>，3 个搜索大约要多久？'},opts:[{k:'a',en:'About 5 seconds',zh:'大约 5 秒'},{k:'b',en:'About 15 seconds',zh:'大约 15 秒'}],a:'a',out:{en:'about 5 s, not 15 s',zh:'大约 5 秒，而不是 15 秒'},ex:{en:'They all start together and gather waits for the slowest.',zh:'它们一起出发，gather 等最慢的那个。'},hint:{en:'Do they run one after another, or together?',zh:'它们是一个接一个，还是一起跑？'}});
+ predict($('p4'),{q:{en:'Why does <code>Report</code> have both a <code>summary</code> and a <code>report_md</code>?',zh:'为什么 <code>Report</code> 里既有 <code>summary</code> 又有 <code>report_md</code>？'},opts:[{k:'a',en:'One is the quick answer, the other is the full report',zh:'一个是快速回答，另一个是完整报告'},{k:'b',en:'The model needs two tries to get it right',zh:'模型要试两次才能写对'},{k:'c',en:'Markdown cannot hold a short answer',zh:'markdown 装不下简短的回答'}],a:'a',ex:{en:'Your code prints the summary at the end, and the mailroom gets the full report to email. Each blank has its own reader.',zh:'你的代码最后打印摘要，收发室拿到完整报告去发邮件。每个空格都有自己的读者。'},hint:{en:'Who reads each one?',zh:'各自是谁在读？'}});
+ predict($('p5'),{q:{en:'Why does main() decide the order instead of a manager agent?',zh:'为什么由 main() 决定顺序，而不是主管智能体？'},opts:[{k:'a',en:'The order is fixed, so code is predictable and shows which step failed',zh:'顺序是固定的，所以用代码更可预期，也能看出哪一步失败'},{k:'b',en:'Agents cannot call other agents',zh:'智能体不能调用别的智能体'},{k:'c',en:'Code is always faster',zh:'代码总是更快'}],a:'a',ex:{en:'Agents can call agents, but for a fixed recipe a manager adds the risk of skipped steps or loops.',zh:'智能体可以调用智能体，但流程固定时，主管只会增加漏步骤或转圈的风险。'},hint:{en:'What do you gain when the steps never change?',zh:'步骤从不改变时，你得到什么？'}});
+ predict($('p6'),{q:{en:'You want to send the report from your own code. What do you call?',zh:'你想在自己的代码里发送报告。该调用什么？'},opts:[{k:'a',en:'send_report(...)',zh:'send_report(...)'},{k:'b',en:'send_message(...)',zh:'send_message(...)'}],a:'b',ex:{en:'@function_tool turns send_report into a tool object for the agent, not a normal function. The plain helper is the one to call.',zh:'@function_tool 把 send_report 变成给智能体用的工具对象，而不是普通函数。该调用的是那个普通辅助函数。'},hint:{en:'Which one is not wrapped by @function_tool?',zh:'哪一个没有被 @function_tool 包起来？'}});
+ game($('g1'),[
+  {en:'Thinks up 3 searches worth doing',zh:'想出值得做的 3 个搜索',a:'p',ex:{en:'Planning is its only job. It never searches.',zh:'规划是它唯一的工作，它从不搜索。'},hint:{en:'Who works before any search happens?',zh:'谁在任何搜索之前工作？'}},
+  {en:'Looks up one search term on the web',zh:'在网上查一个搜索词',a:'s',ex:{en:'It holds the hosted web search tool.',zh:'托管的联网搜索工具在它手上。'},hint:{en:'Who has WebSearchTool?',zh:'谁带着 WebSearchTool？'}},
+  {en:'Turns all the summaries into one report',zh:'把所有摘要写成一份报告',a:'w',ex:{en:'It gets the question plus every summary.',zh:'它拿到问题和全部摘要。'},hint:{en:'Who sees all the summaries together?',zh:'谁能同时看到所有摘要？'}},
+  {en:'Makes a neat HTML email and sends it',zh:'做成整洁的 HTML 邮件并发送',a:'m',ex:{en:'It holds the send_report tool.',zh:'send_report 工具在它手上。'},hint:{en:'Who delivers the result?',zh:'谁负责送达结果？'}}],[{k:'p',en:'Planner',zh:'规划员'},{k:'s',en:'Searcher',zh:'搜索员'},{k:'w',en:'Writer',zh:'写作员'},{k:'m',en:'Mailroom',zh:'收发室'}],{en:'Job',zh:'工作'});
+});
+</script></body></html>
