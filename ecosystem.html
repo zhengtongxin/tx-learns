@@ -106,7 +106,7 @@
 @media(prefers-reduced-motion:reduce){.panel .ring{animation:none}}
 /* agents */
 .agents{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-top:14px}
-.agent.spot{overflow:visible}.agent:hover,.agent.open{z-index:5}
+.agent.spot{overflow:visible}.agent.open{z-index:5}
 .agent{position:relative;margin:0;padding:12px 14px;scroll-margin-top:90px;cursor:default;outline:none;border-radius:8px}
 .agent .hd{display:flex;align-items:center;gap:10px}
 .agent .hd>div{flex:1;min-width:0}
@@ -118,7 +118,7 @@
 .agent .when{font-size:12px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .agent .more{display:none;position:absolute;z-index:20;top:calc(100% + 8px);left:0;width:min(360px,calc(100vw - 32px));padding:14px 16px;border-radius:8px;border:1px solid var(--box);background:var(--node);box-shadow:0 18px 50px rgba(0,0,0,.35);flex-direction:column;gap:8px}
 .agent.r .more{left:auto;right:0}
-.agent:hover .more,.agent:focus-within .more,.agent.open .more{display:flex}
+.agent.open .more{display:flex}
 .agent:hover,.agent:focus-visible,.agent.open{border-color:var(--edge)}
 .agent p{margin:0;font-size:14px;line-height:1.6}
 .agent .trig{font-size:12.5px;color:var(--mut)}
@@ -288,7 +288,7 @@
       tip.style.left=x+'px';tip.style.top=y+'px';el.classList.add('hot')}
     function hide(el){tip.classList.remove('on');el.classList.remove('hot')}
     svg.querySelectorAll('[data-agent]').forEach(function(el){
-      var go=function(){var c=document.getElementById('a-'+el.dataset.agent);if(c){c.scrollIntoView({behavior:'smooth',block:'center'});c.classList.add('hl','open');setTimeout(function(){c.classList.remove('hl')},1600)}};
+      var go=function(){var c=document.getElementById('a-'+el.dataset.agent);if(c){c.scrollIntoView({behavior:'smooth',block:'center'});document.querySelectorAll('.agent.open').forEach(function(x){x.classList.remove('open','pin')});c.classList.add('hl','open','pin');setTimeout(function(){c.classList.remove('hl')},1600)}};
       el.onmouseenter=function(){show(el)};el.onmouseleave=function(){hide(el)};el.onfocus=function(){show(el)};el.onblur=function(){hide(el)};
       el.onclick=go;el.onkeydown=function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();go()}}});
     // phone version: the same layers as an ordered list
@@ -356,8 +356,13 @@
         '<div class="more"><p>'+t(a.den,a.dzh)+'</p>'+specOf(a)+lastOf(s)+'</div></article>'}).join('');
     box.querySelectorAll('.agent').forEach(function(el){
       var side=function(){el.classList.remove('r');var r=el.getBoundingClientRect();if(r.left+Math.min(360,innerWidth-32)>innerWidth-16)el.classList.add('r')};
-      el.onmouseenter=side;el.onfocus=side;
-      el.onclick=function(ev){if(ev.target.closest('a'))return;side();var was=el.classList.contains('open');box.querySelectorAll('.agent.open').forEach(function(x){x.classList.remove('open')});if(!was)el.classList.add('open')}})}
+      // Only one card's details show at a time: opening one closes any other, even a pinned one.
+      var only=function(){side();box.querySelectorAll('.agent.open').forEach(function(x){if(x!==el)x.classList.remove('open','pin')});el.classList.add('open')};
+      el.onmouseenter=function(){if(matchMedia('(hover:hover)').matches)only()};
+      el.onmouseleave=function(){if(!el.classList.contains('pin'))el.classList.remove('open')};
+      el.onfocus=only;
+      el.onblur=function(ev){if(!el.contains(ev.relatedTarget)&&!el.classList.contains('pin'))el.classList.remove('open')};
+      el.onclick=function(ev){if(ev.target.closest('a'))return;var was=el.classList.contains('pin');only();el.classList.toggle('pin',!was);if(was)el.classList.remove('open')}})}
 
   function drawFeed(S,live){
     var all=[];Object.keys(S).forEach(function(k){(S[k].history||[]).forEach(function(h){all.push({id:k,h:h})})});
