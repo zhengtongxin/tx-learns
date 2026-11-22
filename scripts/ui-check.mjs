@@ -3,6 +3,8 @@
 // and Tabs through every interactive element, on a desktop and a phone screen, and flags:
 //   popup-overlap   two popups open at once and covering each other (one should close when the other opens)
 //   popup-offscreen a popup that runs off the side of the screen
+//   popup-covered   other content paints over an open popup (it opens "behind" the page)
+//   popup-see-through a popup whose background lets the page show through, so its text is hard to read
 //   overflow        the page is wider than the screen (sideways scrolling on a phone)
 //   js-error        an uncaught error, console.error, or a request for a file that is missing
 //   load            the page did not load
@@ -51,6 +53,7 @@ function serve() {
     const srv = createServer((q, r) => {
       let p = decodeURIComponent(new URL(q.url, 'http://x').pathname);
       if (p.endsWith('/')) p += 'index.html';
+      if (p === '/api/status') { r.writeHead(200, { 'content-type': 'application/json' }); return r.end(fakeStatus()); }
       const f = join(ROOT, p);
       if (!f.startsWith(ROOT) || !existsSync(f) || !statSync(f).isFile()) { r.writeHead(404); return r.end('not found'); }
       r.writeHead(200, { 'content-type': TYPES[extname(f)] || 'application/octet-stream' });
@@ -58,6 +61,19 @@ function serve() {
     });
     srv.listen(0, '127.0.0.1', () => ok({ srv, base: `http://127.0.0.1:${srv.address().port}/` }));
   });
+}
+
+// What /api/status returns on the live site, filled with long summaries, so the local copy shows full-size popups.
+function fakeStatus() {
+  let ids = [];
+  try { ids = [...readFileSync(join(ROOT, 'ecosystem.html'), 'utf8').matchAll(/\{id:'([a-z0-9-]+)'/g)].map(m => m[1]); } catch {}
+  const at = new Date(Date.now() - 5 * 60e3).toISOString(), agents = {};
+  const summary = 'PR #99: Ready to merge. No lesson files changed. This run checked every page and every widget, and the copy check passed. One minor note about a long line that wraps on a narrow phone screen.';
+  for (const id of ids) {
+    const e = { state: 'ok', summary, link: 'https://github.com/', at };
+    agents[id] = { ...e, runs: 12, history: [e, e, e] };
+  }
+  return JSON.stringify({ connected: true, agents, updated: at });
 }
 
 // Runs inside the page. Marks interactive elements, finds popups and checks them.
@@ -112,6 +128,31 @@ function pageHelpers(SKIP) {
         const w = Math.min(A.right, B.right) - Math.max(A.left, B.left), h = Math.min(A.bottom, B.bottom) - Math.max(A.top, B.top);
         if (w > 12 && h > 12) issues.push({ kind: 'popup-overlap', key: desc(ps[a].el) + '|' + desc(ps[b].el),
           msg: `Two popups are open at once and overlap: ${desc(ps[a].el)} and ${desc(ps[b].el)}. Opening one should close the other.`, step });
+      }
+      // Is anything painted over the popup? Probe a grid of points inside its visible part.
+      if (!document.getElementById('__uic_probe')) {
+        const st = document.createElement('style'); st.id = '__uic_probe';
+        st.textContent = '[data-uic-probe],[data-uic-probe] *{pointer-events:auto!important}'; document.head.appendChild(st);
+      }
+      const H = innerHeight;
+      for (const { el, r } of ps) {
+        const L = Math.max(r.left, 0) + 4, R = Math.min(r.right, W) - 4, T = Math.max(r.top, 0) + 4, B = Math.min(r.bottom, H) - 4;
+        if (R - L > 40 && B - T > 30) {
+          el.setAttribute('data-uic-probe', '');
+          let n = 0, hit = 0, by = null;
+          for (let i = 0; i < 6; i++) for (let j = 0; j < 6; j++) {
+            const x = L + (R - L) * i / 5, y = T + (B - T) * j / 5, top = document.elementFromPoint(x, y);
+            if (!top) continue; n++;
+            if (!el.contains(top) && !top.closest(SKIP)) { hit++; by = by || top; }
+          }
+          el.removeAttribute('data-uic-probe');
+          if (n && hit / n > 0.12) issues.push({ kind: 'popup-covered', key: desc(el), msg: `Other content is drawn on top of an open popup (${Math.round(100 * hit / n)}% of it is covered, by ${desc(by)}), so the popup looks like it is behind the page: ${desc(el)}.`, step });
+        }
+        // See-through: the popup's own background must be (nearly) solid.
+        const bg = getComputedStyle(el).backgroundColor, m = bg.match(/rgba?\(([^)]+)\)/), parts = m ? m[1].split(/[ ,/]+/).filter(Boolean) : [];
+        const alpha = bg === 'transparent' ? 0 : parts.length > 3 ? parseFloat(parts[3]) : 1;
+        if (alpha < 0.9 && getComputedStyle(el).backgroundImage === 'none' && (el.innerText || '').trim())
+          issues.push({ kind: 'popup-see-through', key: desc(el), msg: `A popup has a see-through background (opacity ${alpha.toFixed(2)}), so the page shows through its text: ${desc(el)}.`, step });
       }
       for (const { el, r } of ps) if (r.left < -2 || r.right > W + 2)
         issues.push({ kind: 'popup-offscreen', key: desc(el), msg: `A popup runs off the ${r.left < -2 ? 'left' : 'right'} edge of the screen by ${Math.round(r.left < -2 ? -r.left : r.right - W)}px: ${desc(el)}.`, step });
@@ -219,7 +260,7 @@ async function main() {
   const bad = results.filter(r => r.issues.length);
   const summary = issues
     ? `${issues} UI problem${issues > 1 ? 's' : ''} on ${new Set(bad.map(r => r.page)).size} of ${pages.length} pages: ${[...new Set(bad.flatMap(r => r.issues.map(i => i.kind)))].join(', ')}.`
-    : `All ${pages.length} pages passed on desktop and phone: no overlapping popups, content wider than the screen or script errors.`;
+    : `All ${pages.length} pages passed on desktop and phone: no overlapping, covered or see-through popups, content wider than the screen or script errors.`;
   writeFileSync(join(OUT, 'ui-check.json'), JSON.stringify({ base: local ? 'local' : base, pages, issues, summary, results }, null, 1));
   writeFileSync(join(OUT, 'ui-check.md'), report(results, summary, issues));
   console.log('\n' + summary);
@@ -238,7 +279,7 @@ async function tiles(page, path, name) {
   return out;
 }
 
-const LABEL = { 'popup-overlap': 'Overlapping popups', 'popup-offscreen': 'Popup off screen', overflow: 'Wider than the screen', 'js-error': 'Script or file error', load: 'Page did not load' };
+const LABEL = { 'popup-overlap': 'Overlapping popups', 'popup-offscreen': 'Popup off screen', 'popup-covered': 'Popup behind other content', 'popup-see-through': 'See-through popup', overflow: 'Wider than the screen', 'js-error': 'Script or file error', load: 'Page did not load' };
 function report(results, summary, issues) {
   let md = `${issues ? '🖱️❌' : '🖱️✅'} **UI check**: ${summary}\n\n`;
   const bad = results.filter(r => r.issues.length);
