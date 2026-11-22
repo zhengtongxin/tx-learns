@@ -11,6 +11,7 @@ Bilingual (EN/中文) interactive learning site. Static HTML/CSS/JS, no build st
 - `agentic-ai/NN-slug.html` one lesson per file; `_template.html` is the starting point.
 - `assets/site.css|js` shared layout, nav, progress; `assets/teach.css|js` lesson widgets (`TX2.game`, `TX2.predict`, ...).
 - `scripts/check-copy.mjs` + `banned-words.txt` the copyright scrubber.
+- `scripts/check-counts.mjs` the count check. `lessons.js` is the only source of truth for topic and lesson counts: pages compute them (`assets/site.js`), and the check fails on any count typed by hand, a lesson file missing from or doubled in `lessons.js`, or a tag that does not match its place.
 - `scripts/record-status.mjs <agent>` records an agent's last run in `status/all.json` on the data-only `agent-status` branch (never deployed, never merged).
 - `scripts/ui-check.mjs` the UI check agent's browser test. Run `node scripts/ui-check.mjs --pages <page.html>` after changing anything people hover, click or open (needs Playwright).
 - `scripts/notify-telegram.mjs` sends TX a Telegram message (secrets `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`; without the chat id it only sends a one-time setup tip).
@@ -19,7 +20,7 @@ Bilingual (EN/中文) interactive learning site. Static HTML/CSS/JS, no build st
 
 | Workflow | Runs on | Does |
 | --- | --- | --- |
-| `copy-check.yml` | PRs into main/test, pushes to test | Runs the scrubber; fails and tells TX on Telegram |
+| `copy-check.yml` | PRs into main/test, pushes to test | Runs the scrubber and the count check; fails and tells TX on Telegram |
 | `review.yml` | PRs into main | Claude reviews against `STYLE.md`, comments once, Telegram summary. Never pushes |
 | `writer.yml` | Pushes to `inbox/**` on test, or manual | Claude turns a notes folder into a lesson draft and opens a PR into test, Telegram link |
 | `reader.yml` | Every finished Vercel preview deploy, or manual | Claude reads changed lessons as a newcomer, scores clarity, Telegram summary. On test it opens a fix PR into test; elsewhere it comments |
@@ -31,7 +32,7 @@ Claude auth: the writer, reviewer and reader use TX's Claude subscription throug
 ## Rules
 
 1. **Write every lesson to `STYLE.md`.** Read it before writing or editing a lesson. Do not wait to be reminded.
-2. **Source-neutral, always.** No platform, program, instructor names, no "course"/课程, no week/day numbering, no copied examples. Run `node scripts/check-copy.mjs` before every commit; it must pass.
+2. **Source-neutral, always.** No platform, program, instructor names, no "course"/课程, no week/day numbering, no copied examples. Run `node scripts/check-copy.mjs` and `node scripts/check-counts.mjs` before every commit; both must pass. Never type a topic or lesson count into a page.
 3. **Branches.** Work goes to `test` (Vercel builds a preview). `main` is the live site and changes only through a reviewed pull request from `test`.
 4. **Agents notify before changing.** An agent never pushes straight to `main` or `test`. It opens a pull request or posts a comment, and TX merges. The only thing agents push directly is the run log on the `agent-status` branch.
 5. Keep English and 中文 in step: every `.en` has a matching `.zh`.
@@ -44,4 +45,4 @@ Easiest: drop notes in `inbox/<concept>/` on test and let the writer agent draft
 1. Copy `agentic-ai/_template.html` to `agentic-ai/NN-slug.html` (next free number).
 2. Write it to `STYLE.md`, with the tag `<Topic> · Lesson N`.
 3. Add `file:'NN-slug.html'` to its item in `agentic-ai/lessons.js` (or add the item under the right topic).
-4. Run `node scripts/check-copy.mjs`, then open the page in a browser and click every widget.
+4. Run `node scripts/check-copy.mjs` and `node scripts/check-counts.mjs`, then open the page in a browser and click every widget.

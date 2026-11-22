@@ -75,7 +75,8 @@ jobs:
           if [ "$WHERE" = test ]; then
             EDIT="7. Then fix what you flagged, in the lesson files only: small wording changes, a missing step or
              definition, a clearer analogy. Keep TX's voice, the story and the structure. Change EN and 中文 together.
-             Do not touch anything you scored as fine. Run node scripts/check-copy.mjs until it passes."
+             Do not touch anything you scored as fine. Run node scripts/check-copy.mjs and
+             node scripts/check-counts.mjs until both pass."
           else
             EDIT="7. Do not edit any file except /tmp/reader.json and /tmp/reader-comment.md."
           fi
@@ -103,7 +104,7 @@ jobs:
           Do not run git.
           PROMPT
           claude -p "$(cat /tmp/reader-prompt.md)" --max-turns 50 \
-            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*)" \
+            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(node scripts/check-counts.mjs:*)" \
             --output-format text | tail -30
       - name: Package the result for the share job
         if: always() && steps.find.outputs.files != ''
