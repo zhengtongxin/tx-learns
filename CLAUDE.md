@@ -5,7 +5,7 @@ Bilingual (EN/中文) interactive learning site. Static HTML/CSS/JS, no build st
 ## Layout
 
 - `index.html` home page; `tracks.js` lists learning tracks (`window.TRACKS`).
-- `ecosystem.html` the "How it works" page: a mind map with the lesson journey as numbered arrows, an "Under the hood" system view (triggers, tokens, human gates, feedback loop, guardrails) and compact live agent chips with specs on hover. Keep the agent specs in its `AGENTS` array true to `.github/workflows/`. It reads `api/status` (`api/status.js`, a Vercel function that needs the read-only token `STATUS_GITHUB_TOKEN` in Vercel env).
+- `ecosystem.html` the "How it works" page: "Under the hood" system view (triggers, tokens, human gates, feedback loop, guardrails); live agent boxes show specs on hover. Keep the agent specs in its `AGENTS` array true to `.github/workflows/`. It reads `api/status` (`api/status.js`, a Vercel function that needs the read-only token `STATUS_GITHUB_TOKEN` in Vercel env).
 - `inbox/` raw notes for the writer agent; never deployed (`.vercelignore`).
 - `agentic-ai/` one track. `lessons.js` (`window.TRACK`) groups lessons into concept topics; a lesson with `file` is published, one without is "coming soon".
 - `agentic-ai/NN-slug.html` one lesson per file; `_template.html` is the starting point.
