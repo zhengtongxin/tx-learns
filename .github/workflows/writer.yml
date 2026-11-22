@@ -76,22 +76,26 @@ jobs:
              and add file:'NN-slug.html'. Tag: a project item (k:'p') gets "<Topic> · Project"; any other item gets
              "<Topic> · Lesson N", where N counts only the non-project items of that topic up to and including it.
              Check the tags of the topic's existing lessons and follow them. If the notes name a tag, use it.
-             Update the "N topics · M lessons" counts in agentic-ai/index.html, index.html and tracks.js if they change.
+             Never type a topic or lesson count into any page or tracks.js: every count is computed from lessons.js.
           5. Source-neutral: invent your own story, character names and examples. Never copy names, prompts,
              project names or numbering from the notes if they look like they came from a paid source.
              Code may use real library APIs, but rewrite comments, variable names and prompts.
           6. Every .en block needs a matching, natural .zh block.
-          7. Run `node scripts/check-copy.mjs` and fix everything it reports until it passes.
+          7. Run `node scripts/check-copy.mjs` and `node scripts/check-counts.mjs` and fix everything they report until both pass.
           8. Write .writer-summary.md (repo root): the lesson title, file name, topic, a 3-line summary of the story,
              and anything in the notes you were unsure about or left out (as questions for TX).
           PROMPT
           python3 -c "import os,sys;p='/tmp/writer-prompt.md';s=open(p).read().replace('__DIRS__',os.environ['DIRS']);open(p,'w').write(s)"
           claude -p "$(cat /tmp/writer-prompt.md)" --max-turns 80 \
-            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(ls:*)" \
+            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(node scripts/check-counts.mjs:*),Bash(ls:*)" \
             --output-format text | tail -40
       - name: Copy check
         if: steps.notes.outputs.dirs != ''
         run: node scripts/check-copy.mjs | tee /tmp/copy-check.txt; exit ${PIPESTATUS[0]}
+      # Writer PRs are opened with GITHUB_TOKEN, so the Copy check workflow does not run on them: check here.
+      - name: Count check
+        if: steps.notes.outputs.dirs != ''
+        run: node scripts/check-counts.mjs
       - name: Open a pull request into test
         id: pr
         if: steps.notes.outputs.dirs != ''
