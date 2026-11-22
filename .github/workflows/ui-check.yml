@@ -105,7 +105,7 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then unset ANTHROPIC_API_KEY; echo "Auth: Claude subscription"; else unset CLAUDE_CODE_OAUTH_TOKEN; echo "Auth: API key (no CLAUDE_CODE_OAUTH_TOKEN secret)"; fi
-          ls /tmp/out/shots/*-[0-9].png > /tmp/out/tiles.txt
+          ls /tmp/out/shots/*-[0-9].png > /tmp/out/tiles.txt || { echo 'No screenshot tiles to look at.'; exit 0; }
           cat > /tmp/ui-prompt.md <<'PROMPT'
           You are the UI checker for TX Learns, a bilingual (EN/中文) learning site. The pages that changed were
           screenshotted on a 1280px desktop and a 390px phone, cut into tiles from the top of the page down.
@@ -144,6 +144,7 @@ jobs:
     env:
       PR: ${{ needs.check.outputs.pr }}
       RAN: ${{ needs.check.outputs.ran }}
+      CHECK: ${{ needs.check.result }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
       T: trusted/scripts
@@ -168,6 +169,11 @@ jobs:
       - name: Comment and set the status
         id: share
         run: |
+          # A check job that broke before the browser ran must never look like a pass.
+          if [ "$RAN" != 1 ] && [ "$CHECK" != success ]; then
+            gh api "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state=error -f context="$CONTEXT" -f description="The UI check could not finish. See the logs." -f target_url="$RUN" >/dev/null
+            echo "state=fail" >> "$GITHUB_OUTPUT"; echo "The UI check could not finish." > /tmp/line.txt; exit 0
+          fi
           if [ "$RAN" != 1 ]; then
             gh api "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state=success -f context="$CONTEXT" -f description="Skipped: this commit has no UI check script yet" -f target_url="$RUN" >/dev/null
             echo "state=skip" >> "$GITHUB_OUTPUT"; echo "This commit has no UI check script yet." > /tmp/line.txt; exit 0
