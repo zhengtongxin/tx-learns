@@ -30,7 +30,7 @@
 .panel .nd[data-agent]{cursor:pointer;outline:none}
 .panel .nd[data-agent]:hover rect,.panel .nd[data-agent]:focus-visible rect,.panel .nd.hot rect{stroke:var(--fg);stroke-width:1.6}
 .panel .nd.ag rect{fill:color-mix(in srgb,var(--h) 14%,var(--node));stroke:var(--h);stroke-width:1.5}
-.panel .nd.ag .t{font-size:14.5px;font-weight:700}
+.panel .nd.ag .t{font-size:14px;font-weight:700}
 .panel .nd.ag .code{font:700 10px var(--mono);fill:color-mix(in srgb,var(--h) 75%,var(--fg));letter-spacing:.06em}
 .panel .nd.ag .hx,.olist .hx{font:10.5px var(--mono);fill:color-mix(in srgb,var(--h) 75%,var(--fg));color:color-mix(in srgb,var(--h) 75%,var(--fg))}
 .panel .nd.ag.run rect{filter:drop-shadow(0 0 10px color-mix(in srgb,var(--h) 70%,transparent))}
@@ -69,9 +69,23 @@
 .tip .last{margin-top:8px;font-size:12.5px;padding:8px 10px;border-radius:6px;background:var(--glass);border:1px solid var(--line);overflow-wrap:anywhere}
 .spec{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;margin:2px 0 0;font:11.5px/1.5 var(--mono)}
 .spec dt{color:var(--mut)}.spec dd{margin:0;color:var(--fg);overflow-wrap:anywhere}
-.guards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-top:16px}
-.guard{margin:0;padding:12px 14px;font-size:13.5px;line-height:1.55;border-radius:8px}
-.guard code{display:block;font:11.5px var(--mono);color:var(--fg);margin-bottom:4px;letter-spacing:.02em}
+.gh{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 20px;margin-top:34px}
+.gh h3{margin:0;font-size:15px}
+.worst{margin:0;font-size:14px;color:var(--mut)}.worst b{color:var(--fg)}
+.guards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-top:14px}
+.guard{margin:0;padding:14px 16px;border-radius:8px;display:flex;flex-direction:column;gap:8px}
+.guard .gt{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.guard code{font:600 11.5px var(--mono);color:var(--fg);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;background:none;border:0;padding:0}
+.guard .tags{display:flex;gap:4px}
+.guard .tags i{font:700 9.5px/1 var(--mono);font-style:normal;padding:3px 5px;border-radius:3px;color:color-mix(in srgb,var(--h) 80%,var(--fg));border:1px solid color-mix(in srgb,var(--h) 60%,transparent);background:color-mix(in srgb,var(--h) 14%,transparent)}
+.guard .stat{display:flex;align-items:baseline;gap:10px;padding:6px 0 8px;border-bottom:1px solid var(--line)}
+.guard .stat b{display:inline;white-space:nowrap;font:700 30px/1 var(--mono);letter-spacing:-.02em}
+.guard .stat span{font:11.5px/1.35 var(--mono);color:var(--mut);text-transform:none;letter-spacing:0}
+.guard p{margin:0;font-size:13.5px;line-height:1.5}
+.guard em{display:block;margin-bottom:1px;font:700 10px var(--mono);font-style:normal;letter-spacing:.08em;text-transform:uppercase}
+.guard .risk{color:var(--mut)}.guard .risk em{color:var(--bad)}
+.guard .imp em{color:var(--ok)}
+.agents{margin-top:14px}
 .plumb{margin-top:14px;font:12px/1.7 var(--mono);color:var(--mut);text-align:center;overflow-wrap:anywhere}
 .plumb b{color:var(--fg);font-weight:600}
 /* phone: the diagrams become ordered lists */
@@ -143,22 +157,18 @@
 <p><span class="en">Read it left to right. The numbers follow one lesson from the moment I learn something to the moment you read it. The coloured boxes are the agents working for me, each with its live status; the grey boxes are the plumbing they work on. Hover an agent for its tools, token and last run.</span><span class="zh">从左往右读。数字跟着一课走：从我学到东西的那一刻，到你读到它的那一刻。彩色的方框是替我干活的 agent，带着实时状态；灰色的方框是它们干活用的管道。把鼠标移到 agent 上，可以看到它的工具、令牌和上次运行。</span></p>
 <div class="panel" id="ov-panel"><svg id="ov" viewBox="0 0 1100 540" role="img" aria-label="System diagram: input, notes, AI agents, GitHub, Vercel, readers"></svg><div class="tip" id="tip" role="tooltip"></div></div>
 <ol class="olist" id="ov-list"></ol>
+<p class="conn" id="conn"></p>
+<div class="agents" id="agents-grid"></div>
 <div class="key" id="key"></div>
 <p class="kb" id="kb"></p>
-<h3 id="hood" style="margin:26px 0 0;font-size:15px;scroll-margin-top:80px"><span class="en">Guardrails</span><span class="zh">护栏</span></h3>
+<div class="gh" id="hood"><h3><span class="en">Guardrails</span><span class="zh">护栏</span></h3>
+<p class="worst"><span class="en">If an agent gets something wrong, the worst it can do is <b>open a pull request I close</b>.</span><span class="zh">就算 agent 出错，它最多也只能<b>开一个被我关掉的 pull request</b>。</span></p></div>
 <div class="guards" id="guards"></div>
 <p class="plumb"><b>record-status.mjs</b> → <b>agent-status</b> branch → <b>/api/status</b> <span class="en">(read-only token)</span><span class="zh">（只读令牌）</span> → <span class="en">this page, every 60 s</span><span class="zh">这一页，每 60 秒</span></p>
 </section>
 
-<section id="agents">
-<h2><span class="no">02</span><span class="en">Agents at work</span><span class="zh">正在工作的 agent</span></h2>
-<p class="conn" id="conn"></p>
-<p class="hint"><span class="en">Hover over an agent (or tap it) for what it does and what it said last.</span><span class="zh">把鼠标移到 agent 上（或点一下），看它做什么、上次说了什么。</span></p>
-<div class="agents" id="agents-grid"></div>
-</section>
-
 <section>
-<h2><span class="no">03</span><span class="en">Recent activity</span><span class="zh">最近动态</span></h2>
+<h2><span class="no">02</span><span class="en">Recent activity</span><span class="zh">最近动态</span></h2>
 <ul class="feed" id="feed"></ul>
 <p class="rule-line"><span class="en"><b>Agents suggest. I decide.</b> Every change is a pull request, and only I merge.</span><span class="zh"><b>Agent 提建议，我来决定。</b>每个改动都是一个 pull request，只有我能合并。</span></p>
 </section>
@@ -171,25 +181,25 @@
   function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
   // Keep these specs true to .github/workflows/.
   var AGENTS=[
-    {id:'writer',hue:'#8b7cff',on:['on push · inbox/**','推送 inbox/** 时'],ev:'push · test · inbox/**',mdl:'Claude · ≤80 turns',rd:['notes, style guide, a model lesson','笔记、写作指南、一篇范例课'],tl:'Read Write Edit Glob Grep · ls · check-copy',wr:['draft lesson → PR into test','课的草稿 → 提交到 test 的 PR'],tk:'contents:write · pull-requests:write',gt:['I merge it into test','我把它合并进 test'],g:'github',ic:'WR',en:'Writer',zh:'写手',
+    {id:'writer',hue:'#8b7cff',on:['on push · inbox/**','推送 inbox/** 时'],ev:'push · test · inbox/**',mdl:'Claude · ≤80 turns',rd:['notes, style guide, a model lesson','笔记、写作指南、一篇范例课'],tl:'Read Write Edit Glob Grep · ls · check-copy',wr:['draft lesson → PR into test','课的草稿 → 提交到 test 的 PR'],tk:'contents:write · pull-requests:write',gt:['I merge it into test','我把它合并进 test'],g:'github',ic:'WR',en:'Writer agent',zh:'写手 agent',
      den:'Turns my raw notes into a lesson draft that follows the style guide, then opens a pull request for me.',
      dzh:'把我的原始笔记写成一篇符合写作指南的课的草稿，然后给我开一个 pull request。',
      ten:'Runs when notes land in the inbox',tzh:'笔记放进 inbox 时运行'},
-    {id:'copy-check',hue:'#4f9dff',on:['on every PR · script','每个 PR · 脚本'],ev:'pull_request → main|test · push → test',mdl:['script, no AI','脚本，不用 AI'],rd:['every page + banned word list','每一页 + 禁用词表'],tl:'node scripts/check-copy.mjs',wr:['pass / fail check on the PR','PR 上的通过 / 失败检查'],tk:['check job: contents:read · status job: write','检查任务：contents:read · 状态任务：可写'],gt:['I see red before I merge','我合并前就能看到红色'],g:'github',ic:'CC',en:'Copy check',zh:'原创检查',
+    {id:'copy-check',hue:'#4f9dff',on:['on every PR · script','每个 PR · 脚本'],ev:'pull_request → main|test · push → test',mdl:['script, no AI','脚本，不用 AI'],rd:['every page + banned word list','每一页 + 禁用词表'],tl:'node scripts/check-copy.mjs',wr:['pass / fail check on the PR','PR 上的通过 / 失败检查'],tk:['check job: contents:read · status job: write','检查任务：contents:read · 状态任务：可写'],gt:['I see red before I merge','我合并前就能看到红色'],g:'github',ic:'CC',en:'Copy check agent',zh:'原创检查 agent',
      den:'Scans every page for source names and numbering, so each lesson stays in my own words.',
      dzh:'扫描每一页，找出来源名称和编号，让每一课都用我自己的话。',
      ten:'Runs on every pull request and every push to test',tzh:'每个 pull request 和每次推送到 test 时运行'},
-    {id:'reviewer',hue:'#f472b6',on:['on release PR → main','发布 PR → main 时'],ev:'pull_request → main',mdl:'Claude · ≤40 turns',rd:['the diff, style guide, copy check result','改动、写作指南、原创检查结果'],tl:'Read Write Glob Grep · gh pr diff/view/comment · git diff/log · check-copy',wr:['one comment with a verdict ✅ / ⚠️','一条带结论的评论 ✅ / ⚠️'],tk:'contents:read · pull-requests:write · issues:write',gt:['I merge to the live site','我合并到线上网站'],g:'github',ic:'RV',en:'Reviewer',zh:'审稿人',
+    {id:'reviewer',hue:'#f472b6',on:['on release PR → main','发布 PR → main 时'],ev:'pull_request → main',mdl:'Claude · ≤40 turns',rd:['the diff, style guide, copy check result','改动、写作指南、原创检查结果'],tl:'Read Write Glob Grep · gh pr diff/view/comment · git diff/log · check-copy',wr:['one comment with a verdict ✅ / ⚠️','一条带结论的评论 ✅ / ⚠️'],tk:'contents:read · pull-requests:write · issues:write',gt:['I merge to the live site','我合并到线上网站'],g:'github',ic:'RV',en:'Reviewer agent',zh:'审稿人 agent',
      den:'Reads each release like an editor: the story, the facts, the code, and whether EN and 中文 match.',
      dzh:'像编辑一样读每次发布：故事、事实、代码，还有中英文是否一致。',
      ten:'Runs before anything goes live',tzh:'上线之前运行'},
-    {id:'reader',hue:'#22d3ee',on:['on each preview','每次预览后'],ev:'deployment_status · preview ready',mdl:'Claude · ≤50 turns',rd:['the lessons that changed','改动过的课'],tl:'Read Write Edit Glob Grep · check-copy',wr:['clarity score + fix PR into test (lesson files only)','清晰度评分 + 提交到 test 的修改 PR（只改课文件）'],tk:['read job: contents:read · share job: write','读取任务：contents:read · 分享任务：可写'],gt:['I merge the fix','我合并修改'],g:'vercel',ic:'RD',en:'Reader',zh:'试读员',
+    {id:'reader',hue:'#22d3ee',on:['on each preview','每次预览后'],ev:'deployment_status · preview ready',mdl:'Claude · ≤50 turns',rd:['the lessons that changed','改动过的课'],tl:'Read Write Edit Glob Grep · check-copy',wr:['clarity score + fix PR into test (lesson files only)','清晰度评分 + 提交到 test 的修改 PR（只改课文件）'],tk:['read job: contents:read · share job: write','读取任务：contents:read · 分享任务：可写'],gt:['I merge the fix','我合并修改'],g:'vercel',ic:'RD',en:'Reader agent',zh:'试读员 agent',
      den:'Reads new lessons as someone new to AI would, scores how clear they are and suggests fixes.',
      dzh:'像刚接触 AI 的人那样读新课，给清晰度打分，并提出修改建议。',
      ten:'Runs after every preview deploy',tzh:'每次预览部署后运行'},
-    {id:'recall',g:'later',ic:'SR',en:'Spaced recall',zh:'间隔回顾',
+    {id:'recall',g:'later',ic:'SR',en:'Spaced recall agent',zh:'间隔回顾 agent',
      den:'Brings back an old lesson right before I would forget it.',dzh:'在我快忘记之前，把旧课翻出来让我复习。',ten:'Planned',tzh:'计划中',later:1},
-    {id:'gaps',g:'later',ic:'GF',en:'Gap finder',zh:'缺口查找',
+    {id:'gaps',g:'later',ic:'GF',en:'Gap finder agent',zh:'缺口查找 agent',
      den:'Spots topics I skipped or only half covered.',dzh:'找出我跳过或只学了一半的主题。',ten:'Planned',tzh:'计划中',later:1}];
   var NAME={};AGENTS.forEach(function(a){NAME[a.id]=a});
 
@@ -234,7 +244,7 @@
       o='<g class="nd ag'+(run?' run':'')+'" style="--h:'+a.hue+'" data-agent="'+a.id+'" tabindex="0" role="button" aria-label="'+esc(a.en)+'">';
       o+='<rect x="'+f(g.l)+'" y="'+f(g.t)+'" width="'+g.w+'" height="'+g.h+'" rx="6"/>';
       o+=(run?'<circle class="ring" cx="'+f(dx)+'" cy="'+(g.y-17)+'" r="4.5"/>':'')+'<circle class="dot '+st+'" cx="'+f(dx)+'" cy="'+(g.y-17)+'" r="4.5"/>';
-      o+='<text class="t" x="'+f(dx+12)+'" y="'+(g.y-12)+'">'+ts(a.en,a.zh)+'</text><text class="code" x="'+f(g.r-12)+'" y="'+(g.y-12)+'" text-anchor="end">'+a.ic+'</text>';
+      o+='<text class="t" x="'+f(dx+12)+'" y="'+(g.y-12)+'">'+ts(a.en,a.zh)+'</text>';
       o+='<text class="hx" x="'+f(g.l+12)+'" y="'+(g.y+7)+'">'+ts(a.on[0],a.on[1])+'</text>';
       o+='<text class="m" x="'+f(g.l+12)+'" y="'+(g.y+24)+'">'+ts(stl[0],stl[1])+'</text>'}
     else{o='<g class="nd"><rect x="'+f(g.l)+'" y="'+f(g.t)+'" width="'+g.w+'" height="'+g.h+'" rx="4"/>'+
@@ -296,15 +306,36 @@
       document.getElementById('kb').innerHTML=t('knowledge base: <b>'+T.topics.length+'</b> topics · <b>'+done+'</b> of '+all+' lessons live · ','知识库：<b>'+T.topics.length+'</b> 个主题 · 已上线 <b>'+done+'</b> / '+all+' 课 · ')+'<a href="agentic-ai/index.html">'+t('browse →','去看看 →')+'</a>'};
     document.body.appendChild(sc)})();
 
-  var G=[['read-only brains','The reader thinks in a read-only job; a second job, running trusted scripts from main, does the writing. The reviewer can only comment, never push.','试读员在只读任务里思考，另一个运行 main 上可信脚本的任务负责写入。审稿人只能评论，不能推送。'],
-    ['allowlisted tools','Each agent gets a short list of tools. No free shell.','每个 agent 只拿到一小串工具，没有随意的 shell。'],
-    ['turn budget','40 to 80 turns per run, then it stops.','每次运行 40 到 80 轮，到了就停。'],
-    ['scoped patches','A reader fix can only touch lesson files.','试读员的修改只能碰课文件。'],
-    ['loop guard','The reader skips its own fixes, so it never chases its tail.','试读员会跳过自己的修改，不会原地打转。'],
-    ['human gate','Nothing reaches main without a pull request I merge.','没有我合并的 pull request，什么都进不了 main。'],
-    ['scrubbed output','Pages that name a source fail the check; status summaries shown here are scrubbed.','提到来源的页面通不过检查；这里显示的状态摘要会被清洗。'],
-    ['one direct push','Agents push straight only to the status log branch. Everything else is a PR.','agent 只会直接推送到状态日志分支，其他一律走 PR。']];
-  document.getElementById('guards').innerHTML=G.map(function(g){return '<div class="card guard"><code>'+g[0]+'</code>'+t(g[1],g[2])+'</div>'}).join('');
+  // Guardrails: what each one stops, and what that means in practice. Numbers are true to .github/workflows/.
+  var G=[
+    {k:'human gate',ag:['writer','reader','reviewer','copy-check'],n:'2',u:['locks before anything is live','上线前有 2 把锁'],
+     r:['An agent publishes a mistake to the live site.','agent 把错误直接发布到线上网站。'],
+     i:['Every change waits for my merge, into test and again into main.','每个改动都要等我合并：进 test 一次，进 main 再一次。']},
+    {k:'read-only brains',ag:['reader','reviewer'],n:'0',u:['write access while the AI thinks','AI 思考时的写权限'],
+     r:['A lesson with tricky text talks the AI into changing the repo.','一篇课里的刁钻文字诱导 AI 去改仓库。'],
+     i:['The thinking job can only read. A separate job, running trusted scripts from main, does the writing. The reviewer agent can only comment.','思考的任务只能读，另一个运行 main 上可信脚本的任务负责写入。审稿人 agent 只能评论。']},
+    {k:'allowlisted tools',ag:['writer','reader','reviewer'],n:'6–10',u:['tools per agent, no free shell','每个 agent 的工具数，没有随意的 shell'],
+     r:['An agent runs any command it likes.','agent 想跑什么命令就跑什么。'],
+     i:['Each agent can read and edit files and run the copy check. Only the reviewer agent can read and comment on a PR.','每个 agent 只能读写文件、跑原创检查；只有审稿人 agent 能读 PR 和评论。']},
+    {k:'turn budget',ag:['writer','reader','reviewer'],n:'40–80',u:['turns, then it stops','轮，到了就停'],
+     r:['A confused agent loops and burns my plan usage.','一个糊涂的 agent 原地打转，耗光我的额度。'],
+     i:['Every run has a hard stop, so a bad run costs minutes, not hours.','每次运行都有硬上限，一次失败只浪费几分钟，而不是几小时。']},
+    {k:'scoped patches',ag:['reader'],n:'1',u:['kind of file it may fix: lessons','它能改的文件只有一种：课'],
+     r:['A "fix" quietly edits scripts or workflows.','一个“修改”悄悄动了脚本或工作流。'],
+     i:['The reader agent\'s fix PR can only touch lesson files. Anything else is dropped.','试读员 agent 的修改 PR 只能碰课文件，其他改动会被丢掉。']},
+    {k:'loop guard',ag:['reader'],n:'0',u:['fixes of its own fixes','对自己修改的再修改'],
+     r:['The reader agent fixes its own fix, again and again.','试读员 agent 一遍又一遍地修改自己的修改。'],
+     i:['It skips PRs it opened, so each change gets one clean pass.','它会跳过自己开的 PR，每次改动只读一遍。']},
+    {k:'copy scrub',ag:['copy-check'],n:'100%',u:['of pages scanned on every PR','的页面在每个 PR 上被扫描'],
+     r:['The name of a source or platform slips into a lesson.','来源或平台的名字混进课里。'],
+     i:['The PR turns red before I merge, and status shown on this page is scrubbed too.','合并前 PR 就会变红；这一页显示的状态也会被清洗。']},
+    {k:'one direct push',ag:['writer','reader','reviewer','copy-check'],n:'1',u:['branch agents may push to','agent 唯一能直接推送的分支'],
+     r:['An agent pushes straight to the live site.','agent 直接推送到线上网站。'],
+     i:['Agents only push run logs to agent-status. Everything else is a pull request.','agent 只把运行日志推到 agent-status，其他一律走 pull request。']}];
+  document.getElementById('guards').innerHTML=G.map(function(g){
+    return '<article class="card guard"><div class="gt"><code>'+g.k+'</code><span class="tags">'+g.ag.map(function(id){var a=NAME[id];return '<i style="--h:'+a.hue+'" title="'+esc(a.en)+'">'+a.ic+'</i>'}).join('')+'</span></div>'+
+      '<div class="stat"><b>'+g.n+'</b><span>'+t(g.u[0],g.u[1])+'</span></div>'+
+      '<p class="risk"><em>'+t('stops','阻止')+'</em>'+t(g.r[0],g.r[1])+'</p><p class="imp"><em>'+t('so','于是')+'</em>'+t(g.i[0],g.i[1])+'</p></article>'}).join('');
 
   document.getElementById('key').innerHTML=
     AGENTS.filter(function(a){return a.hue}).map(function(a){return '<span><i class="sw" style="--h:'+a.hue+'"></i>'+t(a.en,a.zh)+'</span>'}).join('')+
