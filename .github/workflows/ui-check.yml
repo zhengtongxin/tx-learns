@@ -123,7 +123,7 @@ jobs:
           {"issues":[{"page":"ecosystem.html","screen":"phone","where":"agent cards","what":"the status pill is cut off at the right edge"}]}
           At most 6 issues, most visible first. Write {"issues":[]} if you see none. Edit no other file.
           PROMPT
-          claude -p "$(cat /tmp/ui-prompt.md)" --max-turns 30 --allowedTools "Read,Write(/tmp/out/visual.json)" --output-format text | tail -20
+          claude -p "$(cat /tmp/ui-prompt.md)" --max-turns 30 --add-dir /tmp/out --allowedTools "Read,Edit(/tmp/out/visual.json)" --output-format text | tail -20
       - uses: actions/upload-artifact@v4
         if: always() && steps.run.outputs.ran == '1'
         with:

@@ -33,7 +33,7 @@ const VIEWPORTS = [
   { name: 'desktop', viewport: { width: 1280, height: 800 }, hover: true },
   { name: 'phone', viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, hover: false },
 ];
-const MAX_TARGETS = 60, MAX_TABS = 40, MAX_TILES = 4;
+const MAX_TARGETS = 60, MAX_TABS = 40, MAX_TILES = 6;
 // Site chrome (top bar, side menu) is the same on every page and changes language/theme; skip it.
 const SKIP = '.top, .side, .prog, [data-uicheck-skip]';
 
@@ -98,11 +98,11 @@ function pageHelpers(SKIP) {
       window.__uicBase = new Set();
       for (const el of document.body.querySelectorAll('*')) if (floating(el) && vis(el)) window.__uicBase.add(el);
     },
-    mark() {
+    mark(MAX) {
       const sel = 'button, [role=button], [tabindex]:not([tabindex="-1"]), summary, [data-agent], .agent, [onclick], input[type=checkbox], input[type=radio]';
       const els = [...document.querySelectorAll(sel)].filter(el => !el.closest(SKIP) && vis(el));
-      els.slice(0, 60).forEach((el, i) => el.setAttribute('data-uic', i));
-      return els.slice(0, 60).map((el, i) => ({ i, desc: desc(el), link: !!el.closest('a[href]') && !el.closest('a[href^="#"]') }));
+      els.slice(0, MAX).forEach((el, i) => el.setAttribute('data-uic', i));
+      return els.slice(0, MAX).map((el, i) => ({ i, desc: desc(el), link: !!el.closest('a[href]') && !el.closest('a[href^="#"]') }));
     },
     check(step) {
       const issues = [], W = document.documentElement.clientWidth;
@@ -166,9 +166,14 @@ async function main() {
       const open = async () => {
         const r = await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
         if (!r || r.status() >= 400) throw new Error(`HTTP ${r ? r.status() : 'no response'}`);
-        await page.waitForTimeout(400);
+        // Scroll to the bottom and back so sections that fade in on scroll are on screen, like for a reader.
+        await page.evaluate(async () => {
+          for (let y = 0; y < document.documentElement.scrollHeight; y += innerHeight / 2) { scrollTo(0, y); await new Promise(r => setTimeout(r, 40)); }
+          scrollTo(0, 0);
+        });
+        await page.waitForTimeout(900);
         await page.evaluate(() => window.__uic.init());
-        return page.evaluate(() => window.__uic.mark());
+        return page.evaluate(n => window.__uic.mark(n), MAX_TARGETS);
       };
       try {
         let targets = await open();
@@ -224,7 +229,7 @@ async function main() {
 const slug = p => p.replace(/\.html$/, '').replace(/[^a-z0-9]+/gi, '-');
 // Screenshots cut into screen-sized tiles, so a long page stays readable for the visual pass.
 async function tiles(page, path, name) {
-  const H = page.viewportSize().height * 2, total = await page.evaluate(() => document.documentElement.scrollHeight), out = [];
+  const H = page.viewportSize().height * (name === 'phone' ? 1.5 : 1), total = await page.evaluate(() => document.documentElement.scrollHeight), out = [];
   for (let y = 0, k = 1; y < total && k <= MAX_TILES; y += H, k++) {
     const f = join(OUT, 'shots', `${slug(path)}-${name}-${k}.png`);
     await page.screenshot({ path: f, fullPage: true, clip: { x: 0, y, width: page.viewportSize().width, height: Math.min(H, total - y) } });
