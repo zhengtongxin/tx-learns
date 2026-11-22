@@ -1,0 +1,98 @@
+# Recall agent: every Sunday at 9 AM Malaysia time (Sunday 01:00 UTC) TX gets one Telegram message with the
+# lessons due for spaced review (1, 3, 7, 14, 30, 60... days after each went live), two recall questions for
+# each with the answer hidden behind a tap, and the gaps: topics with lessons still to learn and the next one.
+# Claude only writes the questions and can only read (its answer is captured from its output). It never pushes.
+name: Recall
+on:
+  schedule:
+    - cron: '0 1 * * 0'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  # Read-only job: Claude never shares a job with a write token or the Telegram secrets.
+  think:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Pick the lessons due for review and the gaps
+        run: mkdir -p /tmp/out && node scripts/recall.mjs plan --out /tmp/out/plan.json
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+      - name: Write recall questions with Claude
+        continue-on-error: true
+        env:
+          # Prefer TX's Claude subscription (CLAUDE_CODE_OAUTH_TOKEN from `claude setup-token`); the API key is only a fallback.
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then unset ANTHROPIC_API_KEY; echo "Auth: Claude subscription"; else unset CLAUDE_CODE_OAUTH_TOKEN; echo "Auth: API key (no CLAUDE_CODE_OAUTH_TOKEN secret)"; fi
+          files=$(node -e 'console.log(require("/tmp/out/plan.json").due.map(l=>l.file).join(" "))')
+          [ -z "$files" ] && { echo "No lessons due."; exit 0; }
+          cat > /tmp/recall-prompt.md <<PROMPT
+          You help TX remember what they learned. TX wrote these lessons some time ago: $files
+          Read each lesson (English parts only; skip the .zh text). For each, write two short recall questions
+          that test the main idea, the way a friend would quiz you: one "why" or "when" question and one
+          "what happens if" or "which would you pick" question. Each answer is one plain sentence.
+          Use the lesson's own story and words. Never name a platform, program or instructor.
+          Your final answer must be only one JSON object, nothing before or after it, exactly like:
+          {"lessons":[{"file":"agentic-ai/01-example.html","qs":[{"q":"...","a":"..."},{"q":"...","a":"..."}]}]}
+          PROMPT
+          claude -p "$(cat /tmp/recall-prompt.md)" --max-turns 20 --allowedTools "Read" --output-format text > /tmp/out/claude.txt || true
+          tail -5 /tmp/out/claude.txt
+          node -e 'const fs=require("fs"),t=fs.readFileSync("/tmp/out/claude.txt","utf8"),v=JSON.parse(t.slice(t.indexOf("{"),t.lastIndexOf("}")+1));if(!Array.isArray(v.lessons))throw 0;fs.writeFileSync("/tmp/out/questions.json",JSON.stringify(v))' \
+            && echo "Questions saved." || echo "::warning::No readable questions; the message goes out without them."
+      - uses: actions/upload-artifact@v4
+        with:
+          name: recall
+          path: /tmp/out/
+  # Send job: only trusted scripts from main; the questions are passed as data and escaped.
+  send:
+    needs: think
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: |
+            scripts
+            banned-words.txt
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: recall
+          path: /tmp/out
+      - name: Send the weekly review
+        id: send
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          test -s /tmp/out/plan.json || { echo "state=fail" >> "$GITHUB_OUTPUT"; node scripts/notify-telegram.mjs "⚠️ The recall agent could not pick this week's lessons."; exit 1; }
+          node scripts/recall.mjs message --plan /tmp/out/plan.json --questions /tmp/out/questions.json > /tmp/msg.html
+          cat /tmp/msg.html
+          node --input-type=module -e 'import {readFileSync} from "fs"; import {telegram, scrub} from "./scripts/lib.mjs"; await telegram(scrub(readFileSync("/tmp/msg.html","utf8")), {html:true})'
+          n=$(node -e 'const p=require("/tmp/out/plan.json");console.log(p.due.map(l=>l.title.en).join(", "))')
+          q=$([ -s /tmp/out/questions.json ] && echo " with questions" || echo "")
+          { echo "state=ok"; echo "summary=Sent the weekly review$q: $n."; } >> "$GITHUB_OUTPUT"
+      - name: Record status for the Ecosystem page
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATE: ${{ steps.send.outputs.state || 'fail' }}
+          SUMMARY: ${{ steps.send.outputs.summary || 'Could not send the weekly review.' }}
+        run: node scripts/record-status.mjs recall

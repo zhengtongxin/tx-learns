@@ -1,0 +1,63 @@
+# Release agent: test goes to main once a day, only when everything is green. TX approves lessons, not releases.
+#   8 PM Malaysia time (12:00 UTC): open or update the release PR test → main, ask the reviewer agent and the
+#        copy check to look at it, and send the one daily Telegram digest (what ran, what waits for TX, tonight's release).
+#   10 PM Malaysia time (14:00 UTC): merge the release PR if every gate passes (see scripts/release.mjs);
+#        otherwise hold it, tell TX why, and try again the next day.
+# TX can stop a release by adding the label "hold" to the release PR, or release earlier by merging it once green.
+# No AI here, and only trusted scripts from main run (scheduled runs always use the default branch).
+name: Release
+on:
+  schedule:
+    - cron: '0 12 * * *'
+    - cron: '0 14 * * *'
+  workflow_dispatch:
+    inputs:
+      step:
+        description: prepare (open the release PR and send the digest), ship (release now if green) or digest
+        required: true
+        default: prepare
+        type: choice
+        options: [prepare, ship, digest]
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: write
+  checks: read
+  statuses: read
+concurrency:
+  group: release
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: |
+            scripts
+            banned-words.txt
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run the release agent
+        id: run
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SHIP_AT: 10 PM
+          STEP: ${{ inputs.step || (github.event.schedule == '0 14 * * *' && 'ship' || 'prepare') }}
+        run: |
+          echo "Step: $STEP"
+          if [ "$STEP" = prepare ]; then node scripts/release.mjs prepare --digest; else node scripts/release.mjs "$STEP"; fi
+      - name: Record status for the Ecosystem page
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATE: ${{ steps.run.outputs.state || 'fail' }}
+          SUMMARY: ${{ steps.run.outputs.summary || 'The release agent could not finish.' }}
+          LINK: ${{ steps.run.outputs.link }}
+        run: node scripts/record-status.mjs release

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Records what an agent just did, for the live Ecosystem page.
-// Usage: node scripts/record-status.mjs <agent>   (agent = writer | copy-check | reviewer | reader)
+// Usage: node scripts/record-status.mjs <agent>   (agent = an id in the AGENTS list on ecosystem.html, e.g. writer, release)
 // Env: STATE = ok | flag | fail | skip, SUMMARY = one or two plain sentences, LINK = where to see more,
 //      GITHUB_TOKEN with contents: write, GITHUB_REPOSITORY.
 // It writes status/all.json on the `agent-status` branch, a data-only branch that is never deployed and

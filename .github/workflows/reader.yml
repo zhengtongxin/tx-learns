@@ -1,8 +1,9 @@
 # Reader agent: after Vercel finishes a preview deploy, Claude reads the lessons that changed as a newcomer
-# to AI would, scores how clear each one is and flags the confusing parts. On test it also drafts fixes in a
-# pull request into test; on other branches it comments on the pull request. It never pushes to test or main.
-# One round of fixes: it skips its own fix commits, opens no fix PR when every lesson scores 8/10 or more,
-# and while a fix PR for the same lesson is still open it comments there instead of opening another.
+# to AI would, scores how clear each one is and flags the confusing parts.
+# On a lesson's own pull request (a writer/ branch into test) it adds its fixes to that pull request as one
+# commit when a lesson scores under 8/10, comments with the scores, and then asks the reviewer agent to review.
+# Anywhere else it only comments. It never opens a separate fix PR and never pushes to test or main.
+# One round of fixes: it skips its own and the reviewer's fix commits, and fixes a branch at most once.
 name: Claude reader
 on:
   deployment_status:
@@ -19,7 +20,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   read:
-    # Only finished preview deploys. Production is skipped: the same lessons were already read on test.
+    # Only finished preview deploys. Production is skipped: the same lessons were already read on their PR.
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (github.event.deployment_status.state == 'success' &&
@@ -28,8 +29,9 @@ jobs:
     # Read-only job: Claude never shares a job with a write token. The share job below does the writing.
     outputs:
       files: ${{ steps.find.outputs.files }}
-      where: ${{ steps.find.outputs.where }}
       pr: ${{ steps.find.outputs.pr }}
+      head: ${{ steps.find.outputs.head }}
+      fix: ${{ steps.find.outputs.fix }}
     env:
       SHA: ${{ github.event.deployment.sha || github.sha }}
     steps:
@@ -47,19 +49,22 @@ jobs:
           FILES: ${{ inputs.files }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          where=other; pr=
-          if [ "$(git rev-parse origin/test)" = "$SHA" ]; then where=test; fi
-          if [ "$where" = other ]; then
-            pr=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/pulls" --jq '[.[]|select(.state=="open")][0].number // empty' 2>/dev/null || true)
-            case "$pr" in ''|*[!0-9]*) pr= ;; esac
+          pr=; head=; fix=
+          pr=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/pulls" --jq '[.[]|select(.state=="open" and .base.ref=="test")][0].number // empty' 2>/dev/null || true)
+          case "$pr" in ''|*[!0-9]*) pr= ;; esac
+          if [ -n "$pr" ]; then
+            head=$(gh pr view "$pr" -R "$GITHUB_REPOSITORY" --json headRefName --jq .headRefName)
+            # Fixes go onto the lesson's own PR, once: only a writer branch, and only if no reader fix is on it yet.
+            case "$head" in writer/*) git log --format=%s "origin/test..$SHA" | grep -q '^Reader:' || fix=1;; esac
           fi
           msg=$(git log -1 --format=%s "$SHA")
           if [ -n "$FILES" ]; then files="$FILES"
-          elif echo "$msg" | grep -qE 'reader/|^Reader:'; then echo "This deploy is the reader's own fix; not reading it again."; files=
+          elif echo "$msg" | grep -qE '^(Reader|Reviewer):'; then echo "This deploy is an agent's own fix; not reading it again."; files=
+          elif echo "$msg" | grep -qE '^Merge pull request #[0-9]+ from [^ ]+/(writer|reader)/'; then echo "This lesson was already read on its own pull request."; files=
           else files=$(git diff --name-only --diff-filter=AM "$SHA^1" "$SHA" -- 'agentic-ai/[0-9]*.html' | tr '\n' ' '); fi
           files=$(echo $files)
-          echo "where=$where pr=$pr files=$files"
-          { echo "where=$where"; echo "pr=$pr"; echo "files=$files"; } >> "$GITHUB_OUTPUT"
+          echo "pr=$pr head=$head fix=$fix files=$files"
+          { echo "pr=$pr"; echo "head=$head"; echo "fix=$fix"; echo "files=$files"; } >> "$GITHUB_OUTPUT"
       - name: Install Claude Code
         if: steps.find.outputs.files != ''
         run: npm install -g @anthropic-ai/claude-code
@@ -70,11 +75,11 @@ jobs:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           FILES: ${{ steps.find.outputs.files }}
-          WHERE: ${{ steps.find.outputs.where }}
+          FIX: ${{ steps.find.outputs.fix }}
         run: |
           set -o pipefail
           if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then unset ANTHROPIC_API_KEY; echo "Auth: Claude subscription"; else unset CLAUDE_CODE_OAUTH_TOKEN; echo "Auth: API key (no CLAUDE_CODE_OAUTH_TOKEN secret)"; fi
-          if [ "$WHERE" = test ]; then
+          if [ "$FIX" = 1 ]; then
             EDIT="7. Then, only for a lesson you scored under 8, fix what you flagged, in the lesson files only: small wording changes, a missing step or
              definition, a clearer analogy. Keep TX's voice, the story and the structure. Change EN and 中文 together.
              Do not touch anything you scored as fine. Run node scripts/check-copy.mjs and
@@ -130,11 +135,12 @@ jobs:
       contents: write
       pull-requests: write
       issues: write
+      actions: write
     env:
       SHA: ${{ github.event.deployment.sha || github.sha }}
-      WHERE: ${{ needs.read.outputs.where }}
       PR: ${{ needs.read.outputs.pr }}
-      FILES: ${{ needs.read.outputs.files }}
+      HEAD: ${{ needs.read.outputs.head }}
+      FIX: ${{ needs.read.outputs.fix }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       T: trusted/scripts
     steps:
@@ -142,7 +148,9 @@ jobs:
         with:
           ref: ${{ github.event.repository.default_branch }}
           path: trusted
-          sparse-checkout: scripts
+          sparse-checkout: |
+            scripts
+            banned-words.txt
           persist-credentials: false
       - uses: actions/checkout@v4
         with:
@@ -164,65 +172,54 @@ jobs:
           low=$(node -e 'const r=require("/tmp/out/reader.json");console.log(Math.floor(Math.min(10,...r.lessons.map(l=>+l.score||0))))')
           node -e 'const r=require("/tmp/out/reader.json");console.log(r.lessons.map(l=>String(l.file).split("/").pop()+" "+l.score+"/10").join(", ")+". "+r.summary)' > /tmp/reader-line.txt
           echo "low=$low" >> "$GITHUB_OUTPUT"
-          url=; open=
-          if [ "$WHERE" = test ] && [ -s /tmp/out/fix.patch ]; then
-            # An open reader fix PR that touches one of these lessons? Then add to it instead of opening another.
-            gh pr list -R "$GITHUB_REPOSITORY" --base test --state open --json number,headRefName,files --limit 50 > /tmp/open.json || echo '[]' > /tmp/open.json
-            open=$(node -e 'const f=process.env.FILES.split(/\s+/).filter(Boolean),o=require("/tmp/open.json");const p=o.find(x=>x.headRefName.startsWith("reader/")&&(x.files||[]).some(y=>f.includes(y.path)));console.log(p?p.number:"")')
-          fi
-          if [ "$WHERE" = test ] && [ -s /tmp/out/fix.patch ] && [ "$low" -lt 8 ] && [ -z "$open" ]; then
+          url=; pushed=
+          cp /tmp/out/reader-comment.md /tmp/c.md
+          if [ "$FIX" = 1 ] && [ -s /tmp/out/fix.patch ] && [ "$low" -lt 8 ]; then
+            # The fix lands on the lesson's own pull request, so TX still merges once per lesson.
             cd work
             git apply --include='agentic-ai/*.html' /tmp/out/fix.patch
-            branch="reader/fixes-${GITHUB_RUN_NUMBER}"
             git config user.name "TX Learns reader"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git checkout -b "$branch"
             git add -- 'agentic-ai/*.html'
-            git commit -m "Reader: clearer wording for newcomers" -m "Suggested by the reader agent (Claude) after the test deploy."
+            git commit -m "Reader: clearer wording for newcomers" -m "Suggested by the reader agent (Claude) after reading the preview."
             auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
-            git -c "http.https://github.com/.extraheader=$auth" push -u origin "$branch"
-            { cat /tmp/out/reader-comment.md; echo; echo "These fixes only land if you merge this pull request."; } > /tmp/pr-body.md
-            url=$(gh pr create --base test --head "$branch" --title "Reader: clearer wording ($(cut -c1-60 /tmp/reader-line.txt))" --body-file /tmp/pr-body.md)
-            gh pr edit "$url" --add-assignee "${{ github.repository_owner }}" || true
+            git -c "http.https://github.com/.extraheader=$auth" push origin "HEAD:refs/heads/$HEAD"
             cd ..
-          elif [ -n "$open" ]; then
-            { cat /tmp/out/reader-comment.md; echo; echo "A newer read of the same lesson. This pull request still holds the earlier fixes: merge or close it, and the reader agent drafts again on the next deploy."; } > /tmp/c.md
-            gh pr comment "$open" -R "$GITHUB_REPOSITORY" --body-file /tmp/c.md
-            url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/pull/$open"
-          elif [ -n "$PR" ]; then
-            gh pr comment "$PR" -R "$GITHUB_REPOSITORY" --body-file /tmp/out/reader-comment.md
+            pushed=1
+            { echo; echo "I added these fixes to this pull request as one commit (\"Reader: clearer wording for newcomers\"). Revert it if you disagree."; } >> /tmp/c.md
+            # The workflow token's push starts no workflows: start the required copy check on the branch.
+            gh workflow run copy-check.yml --ref "$HEAD" -R "$GITHUB_REPOSITORY" || echo "::warning::Could not start the copy check."
+          fi
+          if [ -n "$PR" ]; then
+            gh pr comment "$PR" -R "$GITHUB_REPOSITORY" --body-file /tmp/c.md
             url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/pull/$PR"
           else
-            url=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/comments" -F body=@/tmp/out/reader-comment.md --jq .html_url)
+            url=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/comments" -F body=@/tmp/c.md --jq .html_url)
           fi
           echo "url=$url" >> "$GITHUB_OUTPUT"
-          echo "open=$open" >> "$GITHUB_OUTPUT"
+          echo "pushed=$pushed" >> "$GITHUB_OUTPUT"
+      - name: Ask the reviewer agent to review the lesson pull request
+        # After the reader (with or without fixes), so the reviewer sees the final wording. Runs even if the reader failed.
+        if: always() && startsWith(needs.read.outputs.head, 'writer/') && needs.read.outputs.pr != ''
+        run: gh workflow run review.yml -R "$GITHUB_REPOSITORY" -f pr="$PR" || echo "::warning::Could not start the reviewer agent."
       - name: Tell TX on Telegram
-        if: always()
+        # Quiet when it works: scores go into the daily digest, and the reviewer agent pings when the lesson is ready.
+        if: failure()
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          URL: ${{ steps.share.outputs.url }}
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          OPEN: ${{ steps.share.outputs.open }}
-        run: |
-          if [ -n "$URL" ]; then
-            { echo "📖 Reader check: $(cat /tmp/reader-line.txt)"; echo "$URL";
-              if [ -n "$OPEN" ]; then echo "Added to the fix PR that is still open. Merge or close it before you release.";
-              else case "$URL" in */pull/*) [ "$WHERE" = test ] && echo "Fixes are in that pull request. Merge it if you agree.";; esac; fi; } \
-              | node $T/notify-telegram.mjs
-          else
-            node $T/notify-telegram.mjs "⚠️ The reader agent could not finish. Logs: $RUN"
-          fi
+        run: node $T/notify-telegram.mjs "⚠️ The reader agent could not finish${PR:+ on PR #$PR}. Logs: $RUN"
       - name: Record status for the Ecosystem page
         if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LOW: ${{ steps.share.outputs.low }}
           LINK: ${{ steps.share.outputs.url }}
+          PUSHED: ${{ steps.share.outputs.pushed }}
         run: |
           [ -f $T/record-status.mjs ] || { echo "No record script on the default branch yet."; exit 0; }
           if [ -z "$LOW" ]; then STATE=fail; SUMMARY="Could not finish reading."
           elif [ "$LOW" -ge 8 ]; then STATE=ok; SUMMARY="$(cat /tmp/reader-line.txt)"
-          else STATE=flag; SUMMARY="$(cat /tmp/reader-line.txt)"; fi
+          else STATE=flag; SUMMARY="$(cat /tmp/reader-line.txt)${PUSHED:+ Fixes added to the lesson PR.}"; fi
           STATE=$STATE SUMMARY="$SUMMARY" node $T/record-status.mjs reader
