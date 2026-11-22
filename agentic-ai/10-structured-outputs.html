@@ -1,14 +1,15 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Structured outputs and a checker agent</title><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
 <div class="wrap"><nav class="side"></nav><main>
-<div class="hero"><span class="tag"><span class="en">Agent SDKs · Lesson 4</span><span class="zh">智能体 SDK · 第 4 课</span></span><h1><span class="en">Structured outputs and a checker agent</span><span class="zh">结构化输出与检查员智能体</span></h1><p class="meta"><span class="en">Turn an AI's opinion into data your code can check · ~25 min · hands-on</span><span class="zh">把 AI 的“意见”变成代码能检查的数据 · 约 25 分钟 · 动手实践</span></p></div>
+<div class="hero"><span class="tag"><span class="en">Agent SDKs · Lesson 3</span><span class="zh">智能体 SDK · 第 3 课</span></span><h1><span class="en">Structured outputs and a checker agent</span><span class="zh">结构化输出与检查员智能体</span></h1><p class="meta"><span class="en">Turn an AI's opinion into data your code can check · ~25 min · hands-on</span><span class="zh">把 AI 的“意见”变成代码能检查的数据 · 约 25 分钟 · 动手实践</span></p></div>
 <div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en"style="margin:0">Uncle Lim runs a small <b>kopitiam</b> (a neighbourhood coffee shop) and emails his regulars every month. This month there is a new breakfast set: kaya toast, soft-boiled eggs and kopi for <b>RM8.50</b>. Three writer agents, each on a different model provider, draft the announcement. A manager picks the best one. Then a <b>checker agent</b> makes sure nothing embarrassing goes out: a leftover “[Customer Name]”, a rude tone, a wrong price.</p>
 <p class="zh"style="margin:0">Lim 叔叔开了一家小小的 <b>kopitiam</b>（街坊咖啡店），每个月给老顾客发邮件。这个月有新的早餐套餐：咖椰吐司、半熟蛋加咖啡，<b>RM8.50</b>。三个写手智能体分别跑在不同的模型提供商上，各写一版公告；主管挑出最好的一版；最后由<b>检查员智能体</b>确保不会发出尴尬的内容：忘了替换的“[Customer Name]”、无礼的语气、写错的价格。</p></div>
 
 <h2><span class="en">Step 1 · One team, many model providers</span><span class="zh">第 1 步 · 一个团队，多家模型提供商</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Uncle Lim wants to compare drafts from different “brains”. In “Many models, one API” you saw that many providers speak the same language if you change the <code>base_url</code>. The SDK uses the same trick. Three steps per provider: find its OpenAI-compatible URL, make a <b>client</b> (the small object that carries your messages to that provider's server) with that URL and your key, then wrap the client as a model and give it to the <code>Agent</code>. As in the outreach helper, each writer becomes a tool for the manager with <code>.as_tool()</code>, and the manager also gets a <code>send_email</code> tool, a plain Python function marked <code>@function_tool</code>. This step is the warm-up. The main idea starts in Step 2.</p>
 <p class="zh"style="margin:0 0 8px">Lim 叔叔想比较不同“大脑”写出的草稿。在《多个模型，同一套 API》里你见过：只要换掉 <code>base_url</code>，很多提供商都说同一种“语言”。SDK 用的是同一招。每家提供商三步：找到它兼容 OpenAI 的网址；用这个网址和你的密钥建一个<b>客户端</b>（把你的消息送到该提供商服务器的小对象）；把客户端包成模型，交给 <code>Agent</code>。和外联邮件助手一样，每个写手通过 <code>.as_tool()</code> 变成主管的工具，主管还多一个 <code>send_email</code> 工具：一个标了 <code>@function_tool</code> 的普通 Python 函数。这一步只是热身，重点从第 2 步开始。</p></div>
-<div class="codebox"><span class="dim">shop_voice = "You write friendly emails for Uncle Lim's kopitiam."   # shared by all three writers
+<div class="codebox"><span class="dim"># imports as in "Many models, one API": os, AsyncOpenAI, and Agent, OpenAIChatCompletionsModel from agents
+shop_voice = "You write friendly emails for Uncle Lim's kopitiam."   # shared by all three writers
 other = </span><span class="chg">AsyncOpenAI(base_url=OTHER_BASE_URL, api_key=os.getenv("OTHER_API_KEY"))</span><span class="dim">
 
 writer_a = Agent(name="Writer A", instructions=shop_voice,
@@ -50,7 +51,7 @@ check = (await Runner.run(checker, draft)).final_output
 </span><span class="chg">if check.has_placeholders or not check.is_friendly or check.price_mentioned != "RM8.50":</span><span class="dim">
     print("Not sending, fix the draft first")
 else:
-    send_email(draft)</span></div>
+    send_message("This month's breakfast set", draft)   # the plain helper from the outreach helper lesson</span></div>
 <div class="try" id="p3"></div>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Optional, once the <code>if</code> works: a <b>guardrail</b> is a check the SDK runs for you around an agent, and an output guardrail checks the agent's answer. It returns <code>tripwire_triggered=True</code> when something is wrong, like a trip wire across a doorway, and the SDK then stops the run with <code>OutputGuardrailTripwireTriggered</code>, an error you catch. Keep the whole <code>EmailCheck</code> in <code>output_info</code> so you can see why it tripped. The rule from the guardrails lesson still holds: an output guardrail only runs on the agent that gives the <i>final</i> answer. A writer used as a tool inside the manager never triggers its own.</p>
 <p class="zh"style="margin:0 0 8px">可选内容，等 <code>if</code> 跑通后再看：<b>护栏</b>是 SDK 在智能体周围替你运行的检查，输出护栏检查的是智能体的回答。发现问题时它返回 <code>tripwire_triggered=True</code>，就像门口拉了一根绊线；SDK 随即用 <code>OutputGuardrailTripwireTriggered</code> 叫停运行，这是一个由你捕获的错误。把完整的 <code>EmailCheck</code> 放进 <code>output_info</code>，就能看到为什么被拦下。护栏那一课的规则依然成立：输出护栏只在给出<i>最终</i>答案的智能体上运行；被当作工具放在主管里的写手，不会触发它自己的护栏。</p></div>
@@ -62,7 +63,8 @@ async def shop_email_check(ctx, agent, message):   # ctx: run details, you can i
     bad = check.has_placeholders or not check.is_friendly or check.price_mentioned != "RM8.50"
     return GuardrailFunctionOutput(</span><span class="chg">output_info={"check": check}, tripwire_triggered=bad</span><span class="dim">)
 
-writer = Agent(name="Writer", instructions=shop_voice, output_guardrails=[shop_email_check])
+writer = Agent(name="Writer", instructions=shop_voice,   # shop_voice from Step 1
+               output_guardrails=[shop_email_check])
 try:
     result = await Runner.run(writer, "Write this month's email")
 </span><span class="chg">except OutputGuardrailTripwireTriggered:</span><span class="dim">
