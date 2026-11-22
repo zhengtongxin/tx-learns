@@ -231,7 +231,7 @@
     if(n.tg){var al=TG().filter(function(a){return a.tga}),pr=TG().filter(function(a){return !a.tga});
       var dots=function(L,y,hollow){return L.map(function(a,i){return '<circle class="tgd" cx="'+f(g.r-16-(L.length-1-i)*13)+'" cy="'+(y-3.5)+'" r="4" style="stroke:'+a.hue+';fill:'+(hollow?'none':a.hue)+'"><title>'+esc(a.en)+'</title></circle>'}).join('')};
       return '<g class="nd tgn"><rect class="bx" x="'+f(g.l)+'" y="'+f(g.t)+'" width="'+g.w+'" height="'+g.h+'" rx="6"/>'+plane(g.l+18,g.y-16)+
-        '<text class="t" x="'+f(g.l+30)+'" y="'+(g.y-12)+'">'+ts('Telegram → my phone','Telegram → 我的手机')+'</text>'+
+        '<text class="t" x="'+f(g.l+30)+'" y="'+(g.y-12)+'">'+ts('Telegram → me','Telegram → 我')+'</text>'+
         '<text class="m" x="'+f(g.l+12)+'" y="'+(g.y+7)+'">'+ts('every run','每次运行')+'</text>'+dots(al,g.y+7)+
         '<text class="m" x="'+f(g.l+12)+'" y="'+(g.y+24)+'">'+ts('on a problem','出问题时')+'</text>'+dots(pr,g.y+24,1)+'</g>'}
     if(a&&n.short)return '<g class="nd planned" data-agent="'+a.id+'" tabindex="0" role="button" aria-label="'+esc(a.en)+'"><rect x="'+f(g.l)+'" y="'+f(g.t)+'" width="'+g.w+'" height="'+g.h+'" rx="4"/><text class="m" x="'+f(g.x)+'" y="'+(g.y+4)+'" text-anchor="middle">'+ts(n.short[0],n.short[1])+'</text></g>';
@@ -290,7 +290,7 @@
     var L=[[0,['src']],[1,['notes']],[2,['writer','reader','reviewer']],[3,['test','cc','main']],[4,['prev','live']],[5,['ui','tg','readers']]];
     function li(id){var n=N[id],a=n.agent&&NAME[n.agent],s=a&&S[a.id],st=s&&PP[s.state]?s.state:'';
       if(n.tg){var nm=function(L){return L.map(function(a){return a.en.replace(/ agent$/,'')}).join(', ')},nz=function(L){return L.map(function(a){return a.zh.replace(/ agent$/,'')}).join('、')},al=TG().filter(function(a){return a.tga}),pr=TG().filter(function(a){return !a.tga});
-        return '<li class="it">'+t('Telegram → my phone','Telegram → 我的手机')+'<small>'+t('every run: '+nm(al),'每次运行：'+nz(al))+'</small><small>'+t('only on a problem: '+nm(pr),'只在出问题时：'+nz(pr))+'</small></li>'}
+        return '<li class="it">'+t('Telegram → me','Telegram → 我')+'<small>'+t('every run: '+nm(al),'每次运行：'+nz(al))+'</small><small>'+t('only on a problem: '+nm(pr),'只在出问题时：'+nz(pr))+'</small></li>'}
       if(a)return '<li class="it ag'+(OPEN===a.id?' open':'')+'" style="--h:'+a.hue+'" data-agent="'+a.id+'"'+(n.seq?' data-n="'+n.seq+'"':'')+'><button class="ob" aria-expanded="'+(OPEN===a.id)+'"><span class="st '+st+'"></span>'+t(a.en,a.zh)+'</button><small class="hx">'+t(a.on[0],a.on[1])+'</small><small>'+(s?(PILL[st]||'')+' · '+ago(s.at)+runsOf(s):LIVE?t('no runs yet','还没运行'):t('status offline','状态离线'))+'</small>'+(a.tg?'<small class="tgl">✈ '+t('Telegram: '+a.tg[0],'Telegram：'+a.tg[1])+'</small>':'')+'<div class="more"><p>'+t(a.den,a.dzh)+'</p>'+specOf(a)+lastOf(s)+'</div></li>';
       return '<li class="it"'+(n.seq?' data-n="'+n.seq+'"':'')+'>'+t(esc(n.en),esc(n.zh))+(n.lock?'<span class="lk">'+t('TX APPROVES','TX 批准')+'</span>':'')+'<small>'+t(esc(n.m[0]),esc(n.m[1]))+'</small></li>'}
     document.getElementById('ov-list').innerHTML=L.map(function(l){return '<li class="h">0'+(l[0]+1)+' · '+t(COLS[l[0]][0],COLS[l[0]][1])+'</li>'+l[1].map(li).join('')}).join('')+
