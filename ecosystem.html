@@ -12,14 +12,6 @@
 .code{font-family:var(--mono);font-size:.86em;padding:1px 6px;border-radius:4px;background:var(--glass);border:1px solid var(--line)}
 
 /* the system: one diagram, two views */
-.sys-top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 20px}
-.sys-top h2{margin-bottom:0}
-.vt{display:inline-flex;border:1px solid var(--box);border-radius:6px;overflow:hidden;font:12px var(--mono)}
-.vt button{border:0;background:none;color:var(--mut);padding:7px 14px;cursor:pointer;font:inherit;letter-spacing:.06em;text-transform:uppercase}
-.vt button+button{border-left:1px solid var(--box)}
-.vt button.on{background:var(--fg);color:var(--bg)}
-.vt button:focus-visible{outline:2px solid var(--acc2);outline-offset:-2px}
-.view{display:none}.view.on{display:block}
 .panel{position:relative;margin-top:18px;padding:10px;border-radius:10px;border:1px solid var(--line);background-color:color-mix(in srgb,var(--node) 88%,transparent);background-image:radial-gradient(color-mix(in srgb,var(--fg) 9%,transparent) 1px,transparent 1.2px);background-size:22px 22px}
 .panel svg{display:block;width:100%;height:auto}
 .panel text{fill:var(--fg);font-family:Inter,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
@@ -37,6 +29,20 @@
 .panel .nd.planned rect{stroke-dasharray:3 3;fill:transparent}.panel .nd.planned text{fill:var(--mut)}
 .panel .nd[data-agent]{cursor:pointer;outline:none}
 .panel .nd[data-agent]:hover rect,.panel .nd[data-agent]:focus-visible rect,.panel .nd.hot rect{stroke:var(--fg);stroke-width:1.6}
+.panel .nd.ag rect{fill:color-mix(in srgb,var(--h) 14%,var(--node));stroke:var(--h);stroke-width:1.5}
+.panel .nd.ag .t{font-size:14.5px;font-weight:700}
+.panel .nd.ag .code{font:700 10px var(--mono);fill:color-mix(in srgb,var(--h) 75%,var(--fg));letter-spacing:.06em}
+.panel .nd.ag .hx,.olist .hx{font:10.5px var(--mono);fill:color-mix(in srgb,var(--h) 75%,var(--fg));color:color-mix(in srgb,var(--h) 75%,var(--fg))}
+.panel .nd.ag.run rect{filter:drop-shadow(0 0 10px color-mix(in srgb,var(--h) 70%,transparent))}
+.panel .nd.ag:hover rect,.panel .nd.ag:focus-visible rect,.panel .nd.ag.hot rect{stroke:var(--h);stroke-width:2.4;filter:drop-shadow(0 0 12px color-mix(in srgb,var(--h) 60%,transparent))}
+.key .sw{width:12px;height:12px;border-radius:3px;border:1.5px solid var(--h);background:color-mix(in srgb,var(--h) 25%,transparent)}
+.tip{border-top:3px solid var(--h,var(--box))}
+.olist .it.ag{border-left-color:var(--box)}
+.olist .it.ag a{font-weight:650;border-bottom-color:var(--h)}
+.olist .it.ag:not([data-n])::before{background:color-mix(in srgb,var(--h) 35%,var(--node));border-color:var(--h)}
+.agent{border-left:3px solid var(--h)}
+.agent .ai{color:color-mix(in srgb,var(--h) 80%,var(--fg));border-color:color-mix(in srgb,var(--h) 55%,transparent);background:color-mix(in srgb,var(--h) 13%,transparent)}
+.panel .nd.ag .seq rect{fill:var(--fg);stroke:none;filter:none}
 .panel .seq rect{fill:var(--fg)}.panel .seq text{fill:var(--bg);font:700 10.5px var(--mono)}
 .panel .lock rect{fill:var(--fg)}.panel .lock path{fill:none;stroke:var(--fg);stroke-width:1.6}
 .panel .dot{fill:var(--mut)}.panel .dot.ok{fill:var(--ok)}.panel .dot.flag{fill:var(--warn)}.panel .dot.fail{fill:var(--bad)}
@@ -110,6 +116,7 @@
 .pill.fail{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 50%,transparent)}
 .agent.later{opacity:.6;border-style:dashed}
 .agent.hl{border-color:var(--fg);box-shadow:0 0 0 3px color-mix(in srgb,var(--fg) 18%,transparent)}
+.agent.agent{border-left-color:var(--h)}
 .hint{font-size:12.5px;color:var(--mut);margin:4px 0 0}
 @media(max-width:760px){.agents{grid-template-columns:1fr}.agent .more{position:static;width:auto;margin-top:10px;box-shadow:none;background:transparent;border:0;padding:0}.agent:hover .more{display:none}.agent.open .more{display:flex}}
 /* activity */
@@ -132,28 +139,15 @@
 </header>
 
 <section id="system">
-<div class="sys-top">
 <h2><span class="no">01</span><span class="en">The system</span><span class="zh">系统全貌</span></h2>
-<div class="vt" role="tablist" aria-label="View"><button role="tab" data-v="overview"><span class="en">Overview</span><span class="zh">概览</span></button><button role="tab" data-v="detail"><span class="en">Detail</span><span class="zh">细节</span></button></div>
-</div>
-
-<div class="view" id="v-overview">
-<p><span class="en">Read it left to right. The numbers follow one lesson from the moment I learn something to the moment you read it. Hover an agent to see what it does and what it did last.</span><span class="zh">从左往右读。数字跟着一课走：从我学到东西的那一刻，到你读到它的那一刻。把鼠标移到某个 agent 上，可以看到它做什么、上次做了什么。</span></p>
-<div class="panel" id="ov-panel"><svg id="ov" viewBox="0 0 1100 486" role="img" aria-label="System overview: input, notes, AI agents, GitHub, Vercel, readers"></svg><div class="tip" id="tip" role="tooltip"></div></div>
+<p><span class="en">Read it left to right. The numbers follow one lesson from the moment I learn something to the moment you read it. The coloured boxes are the agents working for me, each with its live status; the grey boxes are the plumbing they work on. Hover an agent for its tools, token and last run.</span><span class="zh">从左往右读。数字跟着一课走：从我学到东西的那一刻，到你读到它的那一刻。彩色的方框是替我干活的 agent，带着实时状态；灰色的方框是它们干活用的管道。把鼠标移到 agent 上，可以看到它的工具、令牌和上次运行。</span></p>
+<div class="panel" id="ov-panel"><svg id="ov" viewBox="0 0 1100 540" role="img" aria-label="System diagram: input, notes, AI agents, GitHub, Vercel, readers"></svg><div class="tip" id="tip" role="tooltip"></div></div>
 <ol class="olist" id="ov-list"></ol>
+<div class="key" id="key"></div>
 <p class="kb" id="kb"></p>
-</div>
-
-<div class="view" id="v-detail">
-<p><span class="en">The same system, one level down. Events wake agents up, each agent gets only the tools and token it needs, and every path into the live site passes through me. When the reader fixes something, its fix goes back through the same checks.</span><span class="zh">同一个系统，再往下看一层：事件唤醒 agent，每个 agent 只拿到它需要的工具和令牌，任何通往线上网站的路都要经过我。试读员改了东西，它的修改也要重新走一遍同样的检查。</span></p>
-<div class="panel"><svg id="flow" viewBox="0 0 1100 420" role="img" aria-label="Agent pipeline: draft loop on test and release to main"></svg></div>
-<ol class="olist" id="flow-list"></ol>
-<h3 style="margin:26px 0 0;font-size:15px"><span class="en">Guardrails</span><span class="zh">护栏</span></h3>
+<h3 id="hood" style="margin:26px 0 0;font-size:15px;scroll-margin-top:80px"><span class="en">Guardrails</span><span class="zh">护栏</span></h3>
 <div class="guards" id="guards"></div>
 <p class="plumb"><b>record-status.mjs</b> → <b>agent-status</b> branch → <b>/api/status</b> <span class="en">(read-only token)</span><span class="zh">（只读令牌）</span> → <span class="en">this page, every 60 s</span><span class="zh">这一页，每 60 秒</span></p>
-</div>
-
-<div class="key" id="key"></div>
 </section>
 
 <section id="agents">
@@ -177,19 +171,19 @@
   function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
   // Keep these specs true to .github/workflows/.
   var AGENTS=[
-    {id:'writer',ev:'push · test · inbox/**',mdl:'Claude · ≤80 turns',rd:['notes, style guide, a model lesson','笔记、写作指南、一篇范例课'],tl:'Read Write Edit Glob Grep · ls · check-copy',wr:['draft lesson → PR into test','课的草稿 → 提交到 test 的 PR'],tk:'contents:write · pull-requests:write',gt:['I merge it into test','我把它合并进 test'],g:'github',ic:'WR',en:'Writer',zh:'写手',
+    {id:'writer',hue:'#8b7cff',on:['on push · inbox/**','推送 inbox/** 时'],ev:'push · test · inbox/**',mdl:'Claude · ≤80 turns',rd:['notes, style guide, a model lesson','笔记、写作指南、一篇范例课'],tl:'Read Write Edit Glob Grep · ls · check-copy',wr:['draft lesson → PR into test','课的草稿 → 提交到 test 的 PR'],tk:'contents:write · pull-requests:write',gt:['I merge it into test','我把它合并进 test'],g:'github',ic:'WR',en:'Writer',zh:'写手',
      den:'Turns my raw notes into a lesson draft that follows the style guide, then opens a pull request for me.',
      dzh:'把我的原始笔记写成一篇符合写作指南的课的草稿，然后给我开一个 pull request。',
      ten:'Runs when notes land in the inbox',tzh:'笔记放进 inbox 时运行'},
-    {id:'copy-check',ev:'pull_request → main|test · push → test',mdl:['script, no AI','脚本，不用 AI'],rd:['every page + banned word list','每一页 + 禁用词表'],tl:'node scripts/check-copy.mjs',wr:['pass / fail check on the PR','PR 上的通过 / 失败检查'],tk:['check job: contents:read · status job: write','检查任务：contents:read · 状态任务：可写'],gt:['I see red before I merge','我合并前就能看到红色'],g:'github',ic:'CC',en:'Copy check',zh:'原创检查',
+    {id:'copy-check',hue:'#4f9dff',on:['on every PR · script','每个 PR · 脚本'],ev:'pull_request → main|test · push → test',mdl:['script, no AI','脚本，不用 AI'],rd:['every page + banned word list','每一页 + 禁用词表'],tl:'node scripts/check-copy.mjs',wr:['pass / fail check on the PR','PR 上的通过 / 失败检查'],tk:['check job: contents:read · status job: write','检查任务：contents:read · 状态任务：可写'],gt:['I see red before I merge','我合并前就能看到红色'],g:'github',ic:'CC',en:'Copy check',zh:'原创检查',
      den:'Scans every page for source names and numbering, so each lesson stays in my own words.',
      dzh:'扫描每一页，找出来源名称和编号，让每一课都用我自己的话。',
      ten:'Runs on every pull request and every push to test',tzh:'每个 pull request 和每次推送到 test 时运行'},
-    {id:'reviewer',ev:'pull_request → main',mdl:'Claude · ≤40 turns',rd:['the diff, style guide, copy check result','改动、写作指南、原创检查结果'],tl:'Read Write Glob Grep · gh pr diff/view/comment · git diff/log · check-copy',wr:['one comment with a verdict ✅ / ⚠️','一条带结论的评论 ✅ / ⚠️'],tk:'contents:read · pull-requests:write · issues:write',gt:['I merge to the live site','我合并到线上网站'],g:'github',ic:'RV',en:'Reviewer',zh:'审稿人',
+    {id:'reviewer',hue:'#f472b6',on:['on release PR → main','发布 PR → main 时'],ev:'pull_request → main',mdl:'Claude · ≤40 turns',rd:['the diff, style guide, copy check result','改动、写作指南、原创检查结果'],tl:'Read Write Glob Grep · gh pr diff/view/comment · git diff/log · check-copy',wr:['one comment with a verdict ✅ / ⚠️','一条带结论的评论 ✅ / ⚠️'],tk:'contents:read · pull-requests:write · issues:write',gt:['I merge to the live site','我合并到线上网站'],g:'github',ic:'RV',en:'Reviewer',zh:'审稿人',
      den:'Reads each release like an editor: the story, the facts, the code, and whether EN and 中文 match.',
      dzh:'像编辑一样读每次发布：故事、事实、代码，还有中英文是否一致。',
      ten:'Runs before anything goes live',tzh:'上线之前运行'},
-    {id:'reader',ev:'deployment_status · preview ready',mdl:'Claude · ≤50 turns',rd:['the lessons that changed','改动过的课'],tl:'Read Write Edit Glob Grep · check-copy',wr:['clarity score + fix PR into test (lesson files only)','清晰度评分 + 提交到 test 的修改 PR（只改课文件）'],tk:['read job: contents:read · share job: write','读取任务：contents:read · 分享任务：可写'],gt:['I merge the fix','我合并修改'],g:'vercel',ic:'RD',en:'Reader',zh:'试读员',
+    {id:'reader',hue:'#22d3ee',on:['on each preview','每次预览后'],ev:'deployment_status · preview ready',mdl:'Claude · ≤50 turns',rd:['the lessons that changed','改动过的课'],tl:'Read Write Edit Glob Grep · check-copy',wr:['clarity score + fix PR into test (lesson files only)','清晰度评分 + 提交到 test 的修改 PR（只改课文件）'],tk:['read job: contents:read · share job: write','读取任务：contents:read · 分享任务：可写'],gt:['I merge the fix','我合并修改'],g:'vercel',ic:'RD',en:'Reader',zh:'试读员',
      den:'Reads new lessons as someone new to AI would, scores how clear they are and suggests fixes.',
      dzh:'像刚接触 AI 的人那样读新课，给清晰度打分，并提出修改建议。',
      ten:'Runs after every preview deploy',tzh:'每次预览部署后运行'},
@@ -199,10 +193,12 @@
      den:'Spots topics I skipped or only half covered.',dzh:'找出我跳过或只学了一半的主题。',ten:'Planned',tzh:'计划中',later:1}];
   var NAME={};AGENTS.forEach(function(a){NAME[a.id]=a});
 
-  function ago(iso){var s=(Date.now()-new Date(iso))/1000;if(!(s>=0))return '';
-    if(s<60)return t('just now','刚刚');var m=Math.round(s/60);if(m<60)return t(m+' min ago',m+' 分钟前');
-    var h=Math.round(m/60);if(h<36)return t(h+' h ago',h+' 小时前');var d=Math.round(h/24);return t(d+' days ago',d+' 天前')}
-  var PILL={ok:t('Passed','通过'),flag:t('Flagged','有问题'),fail:t('Failed','失败'),skip:t('Skipped','跳过')};
+  function agoP(iso){var s=(Date.now()-new Date(iso))/1000;if(!(s>=0))return ['',''];
+    if(s<60)return ['just now','刚刚'];var m=Math.round(s/60);if(m<60)return [m+' min ago',m+' 分钟前'];
+    var h=Math.round(m/60);if(h<36)return [h+' h ago',h+' 小时前'];var d=Math.round(h/24);return [d+' days ago',d+' 天前']}
+  function ago(iso){var p=agoP(iso);return p[0]?t(p[0],p[1]):''}
+  var PP={ok:['passed','通过'],flag:['flagged','有问题'],fail:['failed','失败'],skip:['skipped','跳过']};
+  var PILL={};Object.keys(PP).forEach(function(k){PILL[k]=t(PP[k][0].replace(/^./,function(c){return c.toUpperCase()}),PP[k][1])});
   function fresh(s){return s&&(Date.now()-new Date(s.at))<15*60e3}
   function V(x){return typeof x==='string'?esc(x):t(esc(x[0]),esc(x[1]))}
   function specOf(a){if(!a.ev)return '<div class="trig">'+t(a.ten,a.tzh)+'</div>';
@@ -210,66 +206,72 @@
   function lastOf(s){return s?'<div class="last">'+esc(s.summary||'')+(s.link?' <a href="'+esc(s.link)+'" target="_blank" rel="noopener">'+t('See it →','查看 →')+'</a>':'')+'</div>':''}
   var f=function(v){return Math.round(v*10)/10};
   var LOCK='<rect x="-5" y="-1" width="10" height="8" rx="1.5"/><path d="M-3.2,-1 V-3.4 A3.2,3.2 0 0 1 3.2,-3.4 V-1"/>';
-  var DEFS='<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z"/></marker></defs>';
+  function mk(id,col){return '<marker id="'+id+'" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z"'+(col?' style="fill:'+col+'"':'')+'/></marker>'}
+  var DEFS='<defs>'+mk('ah')+AGENTS.filter(function(a){return a.hue}).map(function(a){return mk('ah-'+a.id,a.hue)}).join('')+'</defs>';
 
-  // 01 Overview: six layers, left to right. Nodes are the lesson path (numbered); agents are smaller boxes inside their layer.
-  var CW=1100/6,X=function(c){return CW/2+c*CW},NW=144,NH=46,CHW=128,CHH=34;
-  var RT=104,RA=196,RM=290,RB=384,RP=448;
+  // 01 The system: six layers, left to right. Grey boxes are the lesson path (numbered); coloured boxes are the agents.
+  var CW=1100/6,X=function(c){return CW/2+c*CW},NW=144,NH=46,AW=168,AH=70;
+  var RT=108,RA=212,RM=320,RB=428,RP=504;
   var COLS=[['INPUT','输入'],['NOTES','笔记'],['AI AGENTS','AI AGENT'],['GITHUB','GITHUB'],['VERCEL','VERCEL'],['READERS','读者']];
   var N={
     src:{c:0,y:RA,en:'Learning sources',zh:'学习来源',m:['videos · docs · books','视频 · 文档 · 书'],seq:1},
     notes:{c:1,y:RA,en:'My notes',zh:'我的笔记',m:['inbox/<topic>','inbox/<主题>'],seq:2},
-    writer:{c:2,y:RA,agent:'writer',m:['drafts the lesson','写出课的草稿'],seq:3},
+    writer:{c:2,y:RA,agent:'writer',seq:3},
     test:{c:3,y:RA,en:'Pull request',zh:'Pull request',m:['into branch test','合并进 test'],seq:4,lock:1},
     prev:{c:4,y:RA,en:'Preview',zh:'预览',m:['test build','test 版本'],seq:5},
     main:{c:3,y:RB,en:'Release',zh:'发布',m:['test → main','test → main'],seq:6,lock:1},
     live:{c:4,y:RB,en:'Live site',zh:'线上网站',m:['production','正式环境'],seq:7},
     readers:{c:5,y:RB,en:'Readers',zh:'读者',m:['me · newcomers to AI','我 · AI 新手'],seq:8},
-    reader:{c:2,y:RT,agent:'reader',chip:1},
-    cc:{c:3,y:RM,agent:'copy-check',chip:1},
-    reviewer:{c:2,y:RB,agent:'reviewer',chip:1},
-    recall:{c:2,y:RP,dx:-35,w:62,agent:'recall',chip:1,short:['recall','回顾']},
-    gaps:{c:2,y:RP,dx:35,w:62,agent:'gaps',chip:1,short:['gaps','缺口']}};
-  function geo(n){var w=n.w||(n.chip?CHW:NW),h=n.chip?CHH:NH,x=X(n.c)+(n.dx||0);return {x:x,y:n.y,w:w,h:h,l:x-w/2,r:x+w/2,t:n.y-h/2,b:n.y+h/2}}
-  function box(id,S){var n=N[id],g=geo(n),a=n.agent&&NAME[n.agent],s=a&&S[n.agent],st=s&&PILL[s.state]?s.state:'';
-    var en=a?(n.short?n.short[0]:a.en):n.en,zh=a?(n.short?n.short[1]:a.zh):n.zh,live=a&&!a.later;
-    var o='<g class="nd'+(n.chip?' sm':'')+(a?' ag':'')+(a&&a.later?' planned':'')+'"'+(a?' data-agent="'+n.agent+'" tabindex="0" role="button" aria-label="'+esc(a.en)+'"':'')+'>';
-    o+='<rect x="'+f(g.l)+'" y="'+f(g.t)+'" width="'+g.w+'" height="'+g.h+'" rx="4"/>';
-    var tx=g.x+(live?6:0);
-    if(live){var dx=g.l+14;o+=(fresh(s)?'<circle class="ring" cx="'+f(dx)+'" cy="'+g.y+'" r="4"/>':'')+'<circle class="dot '+st+'" cx="'+f(dx)+'" cy="'+g.y+'" r="4"/>'}
-    if(n.m){o+='<text class="t" x="'+f(tx)+'" y="'+(g.y-3)+'" text-anchor="middle">'+ts(en,zh)+'</text><text class="m" x="'+f(tx)+'" y="'+(g.y+13)+'" text-anchor="middle">'+ts(n.m[0],n.m[1])+'</text>'}
-    else o+='<text class="'+(n.short?'m':'t')+'" x="'+f(tx)+'" y="'+(g.y+4)+'" text-anchor="middle">'+ts(en,zh)+'</text>';
+    reader:{c:2,y:RT,agent:'reader'},
+    cc:{c:3,y:RM,agent:'copy-check'},
+    reviewer:{c:2,y:RB,agent:'reviewer'},
+    recall:{c:2,y:RP,dx:-38,w:70,h:28,agent:'recall',short:['recall','回顾']},
+    gaps:{c:2,y:RP,dx:38,w:70,h:28,agent:'gaps',short:['gaps','缺口']}};
+  function geo(n){var a=n.agent&&!n.short,w=n.w||(a?AW:NW),h=n.h||(a?AH:NH),x=X(n.c)+(n.dx||0);return {x:x,y:n.y,w:w,h:h,l:x-w/2,r:x+w/2,t:n.y-h/2,b:n.y+h/2}}
+  function box(id,S){var n=N[id],g=geo(n),a=n.agent&&NAME[n.agent],s=a&&S[n.agent],st=s&&PP[s.state]?s.state:'',o;
+    if(a&&n.short)return '<g class="nd planned" data-agent="'+a.id+'" tabindex="0" role="button" aria-label="'+esc(a.en)+'"><rect x="'+f(g.l)+'" y="'+f(g.t)+'" width="'+g.w+'" height="'+g.h+'" rx="4"/><text class="m" x="'+f(g.x)+'" y="'+(g.y+4)+'" text-anchor="middle">'+ts(n.short[0],n.short[1])+'</text></g>';
+    if(a){var run=fresh(s),dx=g.l+16,stl=s?[(PP[st]||['?','?'])[0]+' · '+agoP(s.at)[0],(PP[st]||['?','?'])[1]+' · '+agoP(s.at)[1]]:LIVE?['no runs yet','还没运行']:['status offline','状态离线'];
+      o='<g class="nd ag'+(run?' run':'')+'" style="--h:'+a.hue+'" data-agent="'+a.id+'" tabindex="0" role="button" aria-label="'+esc(a.en)+'">';
+      o+='<rect x="'+f(g.l)+'" y="'+f(g.t)+'" width="'+g.w+'" height="'+g.h+'" rx="6"/>';
+      o+=(run?'<circle class="ring" cx="'+f(dx)+'" cy="'+(g.y-17)+'" r="4.5"/>':'')+'<circle class="dot '+st+'" cx="'+f(dx)+'" cy="'+(g.y-17)+'" r="4.5"/>';
+      o+='<text class="t" x="'+f(dx+12)+'" y="'+(g.y-12)+'">'+ts(a.en,a.zh)+'</text><text class="code" x="'+f(g.r-12)+'" y="'+(g.y-12)+'" text-anchor="end">'+a.ic+'</text>';
+      o+='<text class="hx" x="'+f(g.l+12)+'" y="'+(g.y+7)+'">'+ts(a.on[0],a.on[1])+'</text>';
+      o+='<text class="m" x="'+f(g.l+12)+'" y="'+(g.y+24)+'">'+ts(stl[0],stl[1])+'</text>'}
+    else{o='<g class="nd"><rect x="'+f(g.l)+'" y="'+f(g.t)+'" width="'+g.w+'" height="'+g.h+'" rx="4"/>'+
+      '<text class="t" x="'+f(g.x)+'" y="'+(g.y-3)+'" text-anchor="middle">'+ts(n.en,n.zh)+'</text><text class="m" x="'+f(g.x)+'" y="'+(g.y+13)+'" text-anchor="middle">'+ts(n.m[0],n.m[1])+'</text>'}
     if(n.seq)o+='<g class="seq"><rect x="'+f(g.l-6)+'" y="'+(g.t-9)+'" width="20" height="17" rx="2"/><text x="'+f(g.l+4)+'" y="'+(g.t+3)+'" text-anchor="middle">'+n.seq+'</text></g>';
     if(n.lock)o+='<g class="lock" transform="translate('+f(g.r-13)+','+(g.t+12)+')">'+LOCK+'</g>';
     return o+'</g>'}
-  function e(cls,d){return '<path class="e '+cls+'" d="'+d+'" marker-end="url(#ah)"/>'}
-  function lab(x,y,en,zh,anc){return '<text class="lb" x="'+f(x)+'" y="'+f(y)+'" text-anchor="'+(anc||'middle')+'">'+ts(en,zh)+'</text>'}
-  function H(a,b,cls){var A=geo(N[a]),B=geo(N[b]);return e(cls||'','M'+f(A.r)+','+A.y+' H'+f(B.l-2))}
+  function e(cls,d,ag){var a=ag&&NAME[ag];return '<path class="e '+cls+'" d="'+d+'"'+(a?' style="stroke:'+a.hue+'"':'')+' marker-end="url(#ah'+(a?'-'+ag:'')+')"/>'}
+  function lab(x,y,en,zh,anc,ag){var a=ag&&NAME[ag];return '<text class="lb" x="'+f(x)+'" y="'+f(y)+'" text-anchor="'+(anc||'middle')+'"'+(a?' style="fill:color-mix(in srgb,'+a.hue+' 75%,var(--fg))"':'')+'>'+ts(en,zh)+'</text>'}
+  function H(a,b,ag){var A=geo(N[a]),B=geo(N[b]);return e('','M'+f(A.r)+','+A.y+' H'+f(B.l-2),ag)}
+  var LIVE=false;
   function drawOverview(S){
     var o=DEFS;
     COLS.forEach(function(c,i){var x0=i*CW;
-      if(i%2===0)o+='<rect class="band" x="'+f(x0+3)+'" y="6" width="'+f(CW-6)+'" height="474" rx="6"/>';
+      if(i%2===0)o+='<rect class="band" x="'+f(x0+3)+'" y="6" width="'+f(CW-6)+'" height="528" rx="6"/>';
       o+='<text class="col" x="'+f(x0+16)+'" y="32"><tspan class="n">0'+(i+1)+'</tspan>  '+ts(c[0],c[1])+'</text>'+
         '<line class="rule" x1="'+f(x0+16)+'" y1="44" x2="'+f(x0+CW-16)+'" y2="44"/>'});
-    var T=geo(N.test),C=geo(N.cc),M=geo(N.main),P=geo(N.prev),R=geo(N.reader),RV=geo(N.reviewer),W=geo(N.writer);
-    // lesson path
-    o+=H('src','notes')+H('notes','writer')+H('writer','test')+H('test','prev');
-    o+=e('','M'+T.x+','+T.b+' V'+(C.t-2))+e('','M'+T.x+','+C.b+' V'+(M.t-2));
+    var T=geo(N.test),C=geo(N.cc),M=geo(N.main),P=geo(N.prev),R=geo(N.reader),RV=geo(N.reviewer);
+    // lesson path; the edges an agent produces take its colour
+    o+=H('src','notes')+H('notes','writer')+H('writer','test','writer')+H('test','prev');
+    o+=e('','M'+T.x+','+T.b+' V'+(C.t-2),'copy-check')+e('','M'+T.x+','+C.b+' V'+(M.t-2),'copy-check');
     o+=H('main','live')+H('live','readers');
-    o+=lab(T.x+8,(C.b+M.t)/2+3,'release PR','发布 PR','start')+lab(T.x+8,(T.b+C.t)/2+3,'every PR','每个 PR','start');
-    // feedback loop: the reader reads each preview, its fix comes back as a PR into test
+    o+=lab(T.x+8,(C.b+M.t)/2+3,'release PR','发布 PR','start','copy-check')+lab(T.x+8,(T.b+C.t)/2+3,'every PR','每个 PR','start','copy-check');
+    o+=lab((geo(N.writer).r+T.l)/2,T.y-8,'PR','PR','middle','writer');
+    // feedback loop: the reader reads each preview, its fix comes back as a PR into test (it skips its own fixes)
     var fx=T.l+30;
-    o+=e('lp','M'+P.x+','+P.t+' V'+(R.y-8)+' H'+f(R.r+2));
-    o+=e('lp','M'+f(R.r)+','+(R.y+8)+' H'+f(fx-10)+' Q'+f(fx)+','+(R.y+8)+' '+f(fx)+','+(R.y+18)+' V'+(T.t-11));
-    o+=lab((R.r+P.x)/2+40,R.y-15,'reads each preview','读每个预览')+lab(fx+8,(R.y+T.t)/2+12,'fix PR','修改 PR','start');
-    // checks
-    o+=e('ck','M'+f(RV.r)+','+RV.y+' H'+f(M.l-2))+lab((RV.r+M.l)/2,RV.y-7,'verdict','结论');
-    o+=lab(X(2),RP-26,'coming next','即将加入');
+    o+=e('lp','M'+P.x+','+P.t+' V'+(R.y-8)+' H'+f(R.r+2),'reader');
+    o+=e('lp','M'+f(R.r)+','+(R.y+8)+' H'+f(fx-10)+' Q'+f(fx)+','+(R.y+8)+' '+f(fx)+','+(R.y+18)+' V'+(T.t-11),'reader');
+    o+=lab((R.r+P.x)/2+50,R.y-15,'reads each preview','读每个预览','middle','reader')+lab(fx+8,(R.y+T.t)/2+14,'fix PR · lesson files only','修改 PR · 只改课文件','start','reader');
+    o+=e('ck','M'+f(RV.r)+','+RV.y+' H'+f(M.l-2),'reviewer');
+    o+=lab(X(2),RP-22,'coming next','即将加入');
     Object.keys(N).forEach(function(k){o+=box(k,S)});
-    o+='<text class="foot" x="1084" y="478" text-anchor="end">'+ts('every agent → Telegram to TX','每个 agent → Telegram 通知 TX')+'</text>';
+    o+='<text class="foot" x="1084" y="530" text-anchor="end">'+ts('every agent → Telegram to TX · every run → this page','每个 agent → Telegram 通知 TX · 每次运行 → 这一页')+'</text>';
     var svg=document.getElementById('ov');svg.innerHTML=o;
     var tip=document.getElementById('tip'),pan=document.getElementById('ov-panel');
     function show(el){var a=NAME[el.dataset.agent],s=S[a.id],pr=pan.getBoundingClientRect(),r=el.getBoundingClientRect();
+      tip.style.setProperty('--h',a.hue||'var(--mut)');
       tip.innerHTML='<h5>'+t(a.en,a.zh)+(s&&PILL[s.state]?' · '+PILL[s.state]:a.later?' · '+t('planned','计划中'):'')+(s?' · '+ago(s.at):'')+'</h5><p>'+t(a.den,a.dzh)+'</p>'+specOf(a)+lastOf(s);
       tip.classList.add('on');var tw=tip.offsetWidth,th=tip.offsetHeight,x=r.left-pr.left+r.width/2-tw/2,y=r.bottom-pr.top+8;
       x=Math.max(10,Math.min(x,pr.width-tw-10));if(y+th>pr.height+40&&r.top-pr.top-th-8>0)y=r.top-pr.top-th-8;
@@ -281,10 +283,9 @@
       el.onclick=go;el.onkeydown=function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();go()}}});
     // phone version: the same layers as an ordered list
     var L=[[0,['src']],[1,['notes']],[2,['writer','reader','reviewer']],[3,['test','cc','main']],[4,['prev','live']],[5,['readers']]];
-    function li(id){var n=N[id],a=n.agent&&NAME[n.agent],s=a&&S[a.id],st=s&&PILL[s.state]?s.state:'';
-      var name=a?'<a href="#a-'+a.id+'"><span class="st '+st+'"></span>'+t(a.en,a.zh)+'</a>':t(esc(n.en),esc(n.zh));
-      var sub=n.m?t(esc(n.m[0]),esc(n.m[1])):a?t(a.ten,a.tzh):'';
-      return '<li class="it"'+(n.seq?' data-n="'+n.seq+'"':'')+'>'+name+(n.lock?'<span class="lk">'+t('TX APPROVES','TX 批准')+'</span>':'')+(sub?'<small>'+sub+'</small>':'')+'</li>'}
+    function li(id){var n=N[id],a=n.agent&&NAME[n.agent],s=a&&S[a.id],st=s&&PP[s.state]?s.state:'';
+      if(a)return '<li class="it ag" style="--h:'+a.hue+'"'+(n.seq?' data-n="'+n.seq+'"':'')+'><a href="#a-'+a.id+'"><span class="st '+st+'"></span>'+t(a.en,a.zh)+'</a><small class="hx">'+t(a.on[0],a.on[1])+'</small><small>'+(s?(PILL[st]||'')+' · '+ago(s.at):LIVE?t('no runs yet','还没运行'):t('status offline','状态离线'))+'</small></li>';
+      return '<li class="it"'+(n.seq?' data-n="'+n.seq+'"':'')+'>'+t(esc(n.en),esc(n.zh))+(n.lock?'<span class="lk">'+t('TX APPROVES','TX 批准')+'</span>':'')+'<small>'+t(esc(n.m[0]),esc(n.m[1]))+'</small></li>'}
     document.getElementById('ov-list').innerHTML=L.map(function(l){return '<li class="h">0'+(l[0]+1)+' · '+t(COLS[l[0]][0],COLS[l[0]][1])+'</li>'+l[1].map(li).join('')}).join('')+
       '<li class="h">'+t('Coming next','即将加入')+'</li><li class="it lp">'+t('Spaced recall · Gap finder','间隔回顾 · 缺口查找')+'</li>'}
 
@@ -295,60 +296,21 @@
       document.getElementById('kb').innerHTML=t('knowledge base: <b>'+T.topics.length+'</b> topics · <b>'+done+'</b> of '+all+' lessons live · ','知识库：<b>'+T.topics.length+'</b> 个主题 · 已上线 <b>'+done+'</b> / '+all+' 课 · ')+'<a href="agentic-ai/index.html">'+t('browse →','去看看 →')+'</a>'};
     document.body.appendChild(sc)})();
 
-  // 01 Detail: two lanes (draft loop on test, release to main) with a feedback loop.
-  (function drawFlow(){
-    var W=132,Hh=58,X=function(i){return 82+i*156};
-    function node(i,y,cls,en,zh,m){var x=X(i);return '<g class="nd'+(cls?' '+cls:'')+'"><rect x="'+f(x-W/2)+'" y="'+(y-Hh/2)+'" width="'+W+'" height="'+Hh+'" rx="4"/>'+
-      '<text class="t" x="'+x+'" y="'+(y-3)+'" text-anchor="middle">'+ts(en,zh)+'</text><text class="m" x="'+x+'" y="'+(y+15)+'" text-anchor="middle">'+m+'</text></g>'}
-    function gate(i,y,en,zh){var x=X(i);return '<g class="nd"><rect x="'+(x-28)+'" y="'+(y-22)+'" width="56" height="44" rx="4"/><g class="lock" transform="translate('+x+','+(y-5)+')">'+LOCK+'</g>'+
-      '<text class="m" x="'+x+'" y="'+(y+15)+'" text-anchor="middle" style="fill:var(--fg)">TX</text>'+
-      '<text class="m" x="'+x+'" y="'+(y+38)+'" text-anchor="middle">'+ts(en,zh)+'</text></g>'}
-    function link(i,j,y,gi,gj){var a=X(i)+(gi?28:W/2),b=X(j)-(gj?28:W/2);return e('','M'+a+','+y+' H'+(b-2))}
-    var A=78,B=196,C=338,o=DEFS;
-    o+='<text class="col" x="16" y="'+(A-44)+'">DRAFT LOOP · branch test</text><text class="col" x="16" y="'+(C-50)+'">RELEASE · branch main</text>';
-    o+=link(0,1,A)+link(1,2,A)+link(2,3,A)+link(3,4,A,0,1)+link(4,5,A,1,0)+link(5,6,A);
-    o+=e('lp','M'+X(6)+','+(A+Hh/2)+' V'+(B-Hh/2-2));
-    o+=e('lp','M'+(X(6)-W/2)+','+B+' H'+X(3)+' V'+(A+Hh/2+2));
-    var nx=(X(3)+X(6)-W/2)/2;o+=lab(nx,B-9,'the fix goes back through the checks','修改要重新走一遍检查')+lab(nx,B+19,'loop guard: the reader skips its own fixes','防打转：试读员会跳过自己的修改');
-    o+=link(1,2,C)+link(2,3,C)+link(3,4,C,0,1)+link(4,5,C,1,0)+link(5,6,C);
-    o+=node(0,A,'ev','Notes pushed','笔记推送','push inbox/**')+node(1,A,'ag','Writer','写手','claude · 80 turns')+node(2,A,'','PR → test','PR → test','pull_request')+
-      node(3,A,'','Copy check','原创检查','script')+gate(4,A,'merge to test','合并进 test')+node(5,A,'ev','Preview built','预览生成','deployment_status')+
-      node(6,A,'ag','Reader','试读员','claude · RO token')+node(6,B,'','Fix PR → test','修改 PR → test','lesson files only');
-    o+=node(1,C,'ev','Release PR','发布 PR','test → main')+node(2,C,'','Copy check','原创检查','script')+node(3,C,'ag','Reviewer','审稿人','claude · comments')+
-      gate(4,C,'merge to main','合并到 main')+node(5,C,'','Live site','线上网站','vercel production')+node(6,C,'','Readers','读者','you');
-    o+=lab(X(0),C+4,'when test','test 看起来')+lab(X(0),C+18,'looks good','没问题时');
-    o+='<text class="foot" x="550" y="408" text-anchor="middle">'+ts('every agent → Telegram to TX · every run → status log → this page','每个 agent → Telegram 通知 TX · 每次运行 → 状态日志 → 这一页')+'</text>';
-    document.getElementById('flow').innerHTML=o;
-    var L=[['h','Draft loop · test','草稿回路 · test'],['','Notes pushed to the inbox','笔记推送到 inbox','push inbox/**'],['','Writer drafts a lesson','写手写出课的草稿','claude · 80 turns'],['','Pull request into test','提交到 test 的 pull request',''],
-      ['','Copy check','原创检查','script'],['g','I merge into test','我合并进 test',''],['','Vercel builds a preview','Vercel 生成预览','deployment_status'],['','Reader scores clarity','试读员给清晰度打分','claude · read-only token'],
-      ['lp','Fix PR goes back to the copy check','修改 PR 回到原创检查','lesson files only'],['h','Release · main','发布 · main'],['','Release PR test → main','发布 PR test → main',''],['','Copy check','原创检查','script'],['','Reviewer leaves a verdict','审稿人给出结论','claude · comment only'],
-      ['g','I merge to main','我合并到 main',''],['','Live site, then readers','线上网站，然后是读者','vercel production']];
-    document.getElementById('flow-list').innerHTML=L.map(function(r){return '<li class="'+(r[0]==='h'?'h':'it '+r[0])+'">'+t(r[1],r[2])+(r[3]?'<small>'+r[3]+'</small>':'')+'</li>'}).join('');
-    var G=[['read-only brains','The reader thinks in a read-only job; a second job, running trusted scripts from main, does the writing. The reviewer can only comment, never push.','试读员在只读任务里思考，另一个运行 main 上可信脚本的任务负责写入。审稿人只能评论，不能推送。'],
-      ['allowlisted tools','Each agent gets a short list of tools. No free shell.','每个 agent 只拿到一小串工具，没有随意的 shell。'],
-      ['turn budget','40 to 80 turns per run, then it stops.','每次运行 40 到 80 轮，到了就停。'],
-      ['scoped patches','A reader fix can only touch lesson files.','试读员的修改只能碰课文件。'],
-      ['loop guard','The reader skips its own fixes, so it never chases its tail.','试读员会跳过自己的修改，不会原地打转。'],
-      ['human gate','Nothing reaches main without a pull request I merge.','没有我合并的 pull request，什么都进不了 main。'],
-      ['scrubbed output','Pages that name a source fail the check; status summaries shown here are scrubbed.','提到来源的页面通不过检查；这里显示的状态摘要会被清洗。'],
-      ['one direct push','Agents push straight only to the status log branch. Everything else is a PR.','agent 只会直接推送到状态日志分支，其他一律走 PR。']];
-    document.getElementById('guards').innerHTML=G.map(function(g){return '<div class="card guard"><code>'+g[0]+'</code>'+t(g[1],g[2])+'</div>'}).join('')})();
+  var G=[['read-only brains','The reader thinks in a read-only job; a second job, running trusted scripts from main, does the writing. The reviewer can only comment, never push.','试读员在只读任务里思考，另一个运行 main 上可信脚本的任务负责写入。审稿人只能评论，不能推送。'],
+    ['allowlisted tools','Each agent gets a short list of tools. No free shell.','每个 agent 只拿到一小串工具，没有随意的 shell。'],
+    ['turn budget','40 to 80 turns per run, then it stops.','每次运行 40 到 80 轮，到了就停。'],
+    ['scoped patches','A reader fix can only touch lesson files.','试读员的修改只能碰课文件。'],
+    ['loop guard','The reader skips its own fixes, so it never chases its tail.','试读员会跳过自己的修改，不会原地打转。'],
+    ['human gate','Nothing reaches main without a pull request I merge.','没有我合并的 pull request，什么都进不了 main。'],
+    ['scrubbed output','Pages that name a source fail the check; status summaries shown here are scrubbed.','提到来源的页面通不过检查；这里显示的状态摘要会被清洗。'],
+    ['one direct push','Agents push straight only to the status log branch. Everything else is a PR.','agent 只会直接推送到状态日志分支，其他一律走 PR。']];
+  document.getElementById('guards').innerHTML=G.map(function(g){return '<div class="card guard"><code>'+g[0]+'</code>'+t(g[1],g[2])+'</div>'}).join('');
 
-  // Legend, shared by both views.
   document.getElementById('key').innerHTML=
-    '<span><i class="sq">1</i>'+t('lesson path','一课的路径')+'</span><span><i class="ln"></i>'+t('flow','流向')+'</span><span><i class="ln lp"></i>'+t('feedback loop','反馈回路')+'</span><span><i class="ln ck"></i>'+t('check','检查')+'</span>'+
+    AGENTS.filter(function(a){return a.hue}).map(function(a){return '<span><i class="sw" style="--h:'+a.hue+'"></i>'+t(a.en,a.zh)+'</span>'}).join('')+
+    '<span><i class="sq">1</i>'+t('lesson path','一课的路径')+'</span><span><i class="ln lp"></i>'+t('feedback loop','反馈回路')+'</span><span><i class="ln ck"></i>'+t('check','检查')+'</span>'+
     '<span><svg viewBox="-6 -8 12 16" aria-hidden="true"><g class="lock" style="fill:var(--fg);stroke:var(--fg)">'+LOCK.replace('<path','<path fill="none" stroke-width="1.6"')+'</g></svg>'+t('TX approves','TX 批准')+'</span>'+
     '<span><i class="dt" style="background:var(--ok)"></i>'+t('passed','通过')+'</span><span><i class="dt" style="background:var(--warn)"></i>'+t('flagged','有问题')+'</span><span><i class="dt" style="background:var(--bad)"></i>'+t('failed','失败')+'</span><span><i class="dt"></i>'+t('no runs yet','还没运行')+'</span>';
-
-  // Overview / detail toggle. #hood and #detail open the detail view.
-  var KEY='eco-view';
-  function setView(v,save){['overview','detail'].forEach(function(k){document.getElementById('v-'+k).classList.toggle('on',k===v)});
-    document.querySelectorAll('.vt button').forEach(function(b){var on=b.dataset.v===v;b.classList.toggle('on',on);b.setAttribute('aria-selected',on)});
-    if(save){try{localStorage.setItem(KEY,v)}catch(e){}}}
-  document.querySelectorAll('.vt button').forEach(function(b){b.onclick=function(){setView(b.dataset.v,1)}});
-  var start='overview';try{start=localStorage.getItem(KEY)||start}catch(e){}
-  if(/^#(hood|detail)$/.test(location.hash))start='detail';
-  setView(start==='detail'?'detail':'overview');
 
   var GL={github:'GitHub',vercel:'Vercel',later:t('Later','以后')};
   function drawAgents(S,live){
@@ -358,7 +320,7 @@
       if(a.later)pill='<span class="pill">'+t('Later','以后')+'</span>';
       else if(s)pill='<span class="pill '+st+'">'+(PILL[st]||'?')+'</span>';
       else pill='<span class="pill">'+(live?t('No runs yet','还没运行'):t('Offline','离线'))+'</span>';
-      return '<article class="card agent spot'+(a.later?' later':'')+('a-'+a.id===open?' open':'')+'" id="a-'+a.id+'" tabindex="0"><div class="hd"><span class="ai'+(fresh(s)?' fresh':'')+'">'+a.ic+'</span><div><h4>'+t(a.en,a.zh)+' <small>'+(a.g==='later'?'':GL[a.g])+'</small></h4>'+
+      return '<article style="--h:'+(a.hue||'var(--mut)')+'" class="card agent spot'+(a.later?' later':'')+('a-'+a.id===open?' open':'')+'" id="a-'+a.id+'" tabindex="0"><div class="hd"><span class="ai'+(fresh(s)?' fresh':'')+'">'+a.ic+'</span><div><h4>'+t(a.en,a.zh)+' <small>'+(a.g==='later'?'':GL[a.g])+'</small></h4>'+
         '<div class="when">'+(s?ago(s.at)+(s.runs?' · '+t(s.runs+' runs',s.runs+' 次'):''):t(a.ten,a.tzh))+'</div></div>'+pill+'</div>'+
         '<div class="more"><p>'+t(a.den,a.dzh)+'</p>'+specOf(a)+lastOf(s)+'</div></article>'}).join('');
     box.querySelectorAll('.agent').forEach(function(el){
@@ -372,7 +334,7 @@
     var el=document.getElementById('feed');
     if(!all.length){el.innerHTML='<li class="empty">'+(live?t('Nothing yet. The first agent run will show up here.','还没有动态。第一次运行后会显示在这里。'):t('Live activity shows on the published site.','实时动态只在线上网站显示。'))+'</li>';return}
     el.innerHTML=all.slice(0,6).map(function(x){var a=NAME[x.id]||{ic:'··',en:x.id,zh:x.id};
-      return '<li><span class="dot '+(PILL[x.h.state]?x.h.state:'')+'"></span><span class="tx"><span class="code">'+a.ic+'</span> <b>'+t(a.en,a.zh)+'</b> · '+esc(x.h.summary)+'</span><span class="tm">'+ago(x.h.at)+'</span></li>'}).join('')}
+      return '<li><span class="dot '+(PILL[x.h.state]?x.h.state:'')+'"></span><span class="tx"><span class="code" style="color:'+(a.hue||'var(--mut)')+'">'+a.ic+'</span> <b>'+t(a.en,a.zh)+'</b> · '+esc(x.h.summary)+'</span><span class="tm">'+ago(x.h.at)+'</span></li>'}).join('')}
 
   function drawBar(S,live){var act=AGENTS.filter(function(a){return !a.later}),ran=act.filter(function(a){return S[a.id]}),last=0;
     ran.forEach(function(a){var x=+new Date(S[a.id].at);if(x>last)last=x});
@@ -389,8 +351,8 @@
       :t('Live status is not available right now.','暂时看不到实时状态。')}
     else if(why==='not-found'&&!Object.keys(S).length){c.classList.add('on');c.innerHTML=t('No agent status found yet. If agents have run, the token may not have access to the repo.','还没有找到 agent 状态。如果 agent 已经运行过，可能是令牌没有这个仓库的权限。')}
     else c.classList.remove('on');
-    drawOverview(S);drawBar(S,live);drawAgents(S,live);drawFeed(S,live)}
-  addEventListener('hashchange',function(){if(/^#(hood|detail)$/.test(location.hash)){setView('detail');return}
+    LIVE=live;drawOverview(S);drawBar(S,live);drawAgents(S,live);drawFeed(S,live)}
+  addEventListener('hashchange',function(){
     var c=document.getElementById(location.hash.slice(1));if(c&&c.classList.contains('agent')){document.querySelectorAll('.agent.open').forEach(function(x){x.classList.remove('open')});c.classList.add('open')}});
   draw(null);
   function load(){fetch('api/status',{cache:'no-store'}).then(function(r){return r.json()}).then(draw).catch(function(){draw({connected:false})})}

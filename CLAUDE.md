@@ -5,7 +5,7 @@ Bilingual (EN/中文) interactive learning site. Static HTML/CSS/JS, no build st
 ## Layout
 
 - `index.html` home page; `tracks.js` lists learning tracks (`window.TRACKS`).
-- `ecosystem.html` the "How it works" page: one system diagram with an Overview / Detail toggle. Overview is six layers left to right (input, notes, AI agents, GitHub, Vercel, readers) with the numbered lesson path; Detail is the agent pipeline (triggers, tokens, human gates, feedback loop, guardrails). Monochrome style, no emoji; live agent boxes show specs on hover; phones get ordered lists. Keep the agent specs in its `AGENTS` array true to `.github/workflows/`. It reads `api/status` (`api/status.js`, a Vercel function that needs the read-only token `STATUS_GITHUB_TOKEN` in Vercel env).
+- `ecosystem.html` the "How it works" page: one system diagram, six layers left to right (input, notes, AI agents, GitHub, Vercel, readers) with the numbered lesson path. Agents are the focus: each has its own colour (`hue` in `AGENTS`), a trigger line (`on`) and live status in its box, with full specs on hover; the plumbing stays grey. Guardrails sit under the diagram; phones get an ordered list. Keep the agent specs in its `AGENTS` array true to `.github/workflows/`. It reads `api/status` (`api/status.js`, a Vercel function that needs the read-only token `STATUS_GITHUB_TOKEN` in Vercel env).
 - `inbox/` raw notes for the writer agent; never deployed (`.vercelignore`).
 - `agentic-ai/` one track. `lessons.js` (`window.TRACK`) groups lessons into concept topics; a lesson with `file` is published, one without is "coming soon".
 - `agentic-ai/NN-slug.html` one lesson per file; `_template.html` is the starting point.
