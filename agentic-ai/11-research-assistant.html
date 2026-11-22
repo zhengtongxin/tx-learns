@@ -6,9 +6,12 @@
 <p class="zh"style="margin:0">Aina 在槟城帮她的 Lim 叔叔打理 <b>kopitiam</b>（街坊咖啡店）。顾客总问“boleh scan?”（能扫码付款吗？）。Lim 叔叔想知道最便宜的无现金收款方式：DuitNow 二维码、Touch 'n Go 或 GrabPay 这样的电子钱包，还是刷卡机。各自的费用是多少，怎么开通？Aina 可能要花一整个晚上上网搜。她决定做一个<b>研究助手</b>：一个智能体规划搜索，一个去搜，第三个写报告，第四个把报告发到她的邮箱。</p></div>
 
 <h2><span class="en">Step 1 · A hosted tool: web search</span><span class="zh">第 1 步 · 托管工具：联网搜索</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">A model on its own only knows what it learnt in the past, and fees change. So the searcher needs the live web. Until now every tool was your own Python function. A <b>hosted tool</b> is different: it runs on the provider's servers, not on your computer. You just add it to the agent with <code>WebSearchTool()</code>. The catch: each search is charged, and you are tied to one provider. Keep the number of searches small while testing.</p>
-<p class="zh"style="margin:0 0 8px">模型自己只知道过去学到的东西，而费用经常变，所以搜索员需要实时的网络。到目前为止，每个工具都是你自己写的 Python 函数。<b>托管工具</b>不一样：它跑在提供商的服务器上，不在你的电脑上。你只要用 <code>WebSearchTool()</code> 把它加进智能体就行。代价是：每次搜索都要收费，而且你被绑定在一家提供商上。测试时要把搜索次数控制得小一点。</p></div>
-<div class="codebox"><span class="dim">from agents import Agent, ModelSettings, WebSearchTool
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">A model on its own only knows what it learnt in the past, and fees change. So the searcher needs the live web. Until now every tool was your own Python function. A <b>hosted tool</b> is different: it runs on the provider's servers, not on your computer. You just add it to the agent with <code>WebSearchTool()</code>. The catch: each search is charged, and you are tied to one provider. Keep the number of searches small while testing. One more setting: <code>ModelSettings(tool_choice="required")</code> tells the model it <i>must</i> call a tool before it answers, so the searcher cannot skip the search.</p>
+<p class="zh"style="margin:0 0 8px">模型自己只知道过去学到的东西，而费用经常变，所以搜索员需要实时的网络。到目前为止，每个工具都是你自己写的 Python 函数。<b>托管工具</b>不一样：它跑在提供商的服务器上，不在你的电脑上。你只要用 <code>WebSearchTool()</code> 把它加进智能体就行。代价是：每次搜索都要收费，而且你被绑定在一家提供商上。测试时要把搜索次数控制得小一点。还有一个设置：<code>ModelSettings(tool_choice="required")</code> 告诉模型回答之前<i>必须</i>先调用工具，这样搜索员就不能跳过搜索。</p></div>
+<div class="codebox"><span class="dim">from dotenv import load_dotenv
+from agents import Agent, ModelSettings, WebSearchTool
+
+load_dotenv(override=True)    # reads OPENAI_API_KEY from your .env file
 
 searcher = Agent(
     name="Searcher",
@@ -20,8 +23,8 @@ searcher = Agent(
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 2 · The planner returns a plan, not a paragraph</span><span class="zh">第 2 步 · 规划员交出一份计划，而不是一段话</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">A big question is better split into a few small searches. The planner does that thinking and does <i>not</i> search. Its answer has to be a list your code can loop over, so it uses structured output, the form idea from “Structured outputs and a checker agent”. Each search gets a <code>why</code> and a <code>query</code>. Put <code>why</code> first: the model thinks about the reason before it picks the words, and the search comes out better.</p>
-<p class="zh"style="margin:0 0 8px">大问题最好拆成几个小搜索。规划员负责这份思考，但它<i>不</i>搜索。它的答案必须是代码能逐项处理的列表，所以用结构化输出，也就是《结构化输出与检查员智能体》里的“表格”思路。每个搜索有一个 <code>why</code> 和一个 <code>query</code>。把 <code>why</code> 放在前面：模型先想理由再选关键词，搜索会更准。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">A big question is better split into a few small searches. The planner does that thinking and does <i>not</i> search. Its answer has to be a list your code can loop over, so it uses structured output, the form idea from “Structured outputs and a checker agent”. Each search gets a <code>why</code> and a <code>query</code>. Put <code>why</code> first: the model thinks about the reason before it picks the words, and the search comes out better. Quick reminder: a class built on <code>BaseModel</code> is a form with named blanks, and each <code>Field(description=...)</code> tells the model what to write in that blank.</p>
+<p class="zh"style="margin:0 0 8px">大问题最好拆成几个小搜索。规划员负责这份思考，但它<i>不</i>搜索。它的答案必须是代码能逐项处理的列表，所以用结构化输出，也就是《结构化输出与检查员智能体》里的“表格”思路。每个搜索有一个 <code>why</code> 和一个 <code>query</code>。把 <code>why</code> 放在前面：模型先想理由再选关键词，搜索会更准。快速回顾：基于 <code>BaseModel</code> 的类就是一张有具名空格的表格，每个 <code>Field(description=...)</code> 告诉模型那个空格该填什么。</p></div>
 <div class="codebox"><span class="dim">from pydantic import BaseModel, Field
 
 class SearchIdea(BaseModel):
@@ -46,12 +49,13 @@ async def search_one(idea: SearchIdea) -> str:
     return result.final_output
 
 async def search_all(search_plan: SearchPlan) -> list[str]:
-    return </span><span class="chg">await asyncio.gather(*(search_one(idea) for idea in search_plan.searches))</span></div>
+    jobs = [search_one(idea) for idea in search_plan.searches]   # one job per search, none started yet
+    return </span><span class="chg">await asyncio.gather(*jobs)</span><span class="dim">    # the * hands gather each job separately; it runs them together</span></div>
 <div class="try" id="p3"></div>
 
 <h2><span class="en">Step 4 · Code is the boss, not a manager agent</span><span class="zh">第 4 步 · 由代码当老板，而不是主管智能体</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">In the outreach helper a manager agent chose what to call next. Here the recipe never changes: plan, search, write, email. So your own Python runs the steps in order, one <code>Runner.run()</code> each. It is predictable, every step returns a typed object, and if something breaks you know which step. A manager agent is more flexible, but it can skip a step or loop. For a fixed recipe, code wins. Wrap the run in <code>with trace(...)</code> so all four agents show as one run in the trace viewer.</p>
-<p class="zh"style="margin:0 0 8px">在外联邮件助手里，是主管智能体决定下一步调谁。这里的流程永远不变：规划、搜索、写作、发邮件。所以让你自己的 Python 按顺序执行，每一步一个 <code>Runner.run()</code>。这样结果可预期，每一步都返回有类型的对象，出了问题也知道是哪一步。主管智能体更灵活，但它可能漏掉一步或者转圈。流程固定时，代码更胜一筹。用 <code>with trace(...)</code> 把整个运行包起来，四个智能体就会在 trace 查看器里显示为同一次运行。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">In the outreach helper a manager agent chose what to call next. Here the recipe never changes: plan, search, write, email. So your own Python runs the steps in order, one <code>Runner.run()</code> each. It is predictable, every step returns a typed object, and if something breaks you know which step. A manager agent is more flexible, but it can skip a step or loop. For a fixed recipe, code wins. Wrap the run in <code>with trace(...)</code> so all four agents show as one run in the trace viewer. The box also adds the last pieces: the <b>writer</b> agent, whose <code>Report</code> form has a short summary, the full report and next questions; three tiny functions, <code>plan</code>, <code>write</code> and <code>email</code>, each wrapping one <code>Runner.run()</code>; and a call to the mailroom agent, which you build in Step 5. That is why you start <code>main()</code> at the end of Step 5.</p>
+<p class="zh"style="margin:0 0 8px">在外联邮件助手里，是主管智能体决定下一步调谁。这里的流程永远不变：规划、搜索、写作、发邮件。所以让你自己的 Python 按顺序执行，每一步一个 <code>Runner.run()</code>。这样结果可预期，每一步都返回有类型的对象，出了问题也知道是哪一步。主管智能体更灵活，但它可能漏掉一步或者转圈。流程固定时，代码更胜一筹。用 <code>with trace(...)</code> 把整个运行包起来，四个智能体就会在 trace 查看器里显示为同一次运行。这一段代码还补上了最后几块：<b>写作员</b>智能体，它的 <code>Report</code> 表格包含简短摘要、完整报告和后续问题；三个小函数 <code>plan</code>、<code>write</code> 和 <code>email</code>，每个只包一次 <code>Runner.run()</code>；以及对收发室智能体的调用，它在第 5 步才建好。所以要到第 5 步结尾才启动 <code>main()</code>。</p></div>
 <div class="codebox"><span class="dim">from agents import trace
 
 QUESTION = "What is the cheapest way for a small kopitiam in Penang to take cashless payments in 2026?"
@@ -81,12 +85,10 @@ async def main():
         await email(report)</span><span class="dim">
     print(report.summary)</span></div>
 <div class="try" id="p4"></div>
-<p class="en">Which agent does each job? Sort them.</p><p class="zh">每项工作该由哪个智能体来做？请分类。</p>
-<div class="sc" id="g1"></div>
 
 <h2><span class="en">Step 5 · The mailroom</span><span class="zh">第 5 步 · 收发室</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">The last agent turns the report into a tidy HTML email and sends it with a tool. It is the same trick as the outreach helper: a plain helper <code>send_message(...)</code> does the sending, and a <code>@function_tool</code> called <code>send_report</code> wraps it for the agent. While testing, a <code>SEND_EMAIL = False</code> switch makes it print the email instead. Flip it on once your mail settings are in <code>.env</code>.</p>
-<p class="zh"style="margin:0 0 8px">最后一个智能体把报告排成整洁的 HTML 邮件，并用工具发出去。做法和外联邮件助手一样：一个普通的辅助函数 <code>send_message(...)</code> 负责发送，再用 <code>@function_tool</code> 把它包成给智能体用的 <code>send_report</code>。测试时用 <code>SEND_EMAIL = False</code> 这个开关，让它只打印邮件而不真发。等邮箱设置写进 <code>.env</code> 后再打开。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">The last agent turns the report into a tidy HTML email and sends it with a tool. It is the same trick as the outreach helper: a plain helper <code>send_message(...)</code> does the sending, and a <code>@function_tool</code> called <code>send_report</code> wraps it for the agent. While testing, a <code>SEND_EMAIL = False</code> switch makes it print the email instead. Flip it on once your mail settings are in <code>.env</code>. Three words in that code: <code>.env</code> is a small private file next to your script that holds keys and passwords, read by <code>load_dotenv()</code>. <b>SMTP</b> is the standard way a program hands an email to a mail server. An <b>app password</b> is a separate password your email provider gives you just for a script, so your real password stays private.</p>
+<p class="zh"style="margin:0 0 8px">最后一个智能体把报告排成整洁的 HTML 邮件，并用工具发出去。做法和外联邮件助手一样：一个普通的辅助函数 <code>send_message(...)</code> 负责发送，再用 <code>@function_tool</code> 把它包成给智能体用的 <code>send_report</code>。测试时用 <code>SEND_EMAIL = False</code> 这个开关，让它只打印邮件而不真发。等邮箱设置写进 <code>.env</code> 后再打开。代码里有三个词：<code>.env</code> 是放在脚本旁边、保存密钥和密码的小私密文件，由 <code>load_dotenv()</code> 读取。<b>SMTP</b> 是程序把邮件交给邮件服务器的标准方式。<b>应用专用密码</b>是邮箱服务商专门给脚本用的另一个密码，这样你的真实密码不会外泄。</p></div>
 <div class="codebox"><span class="dim">import os, smtplib
 from email.message import EmailMessage
 from agents import function_tool
@@ -123,6 +125,8 @@ mailroom = Agent(name="Mailroom", model="gpt-5.4-mini", tools=[send_report],
 
 asyncio.run(main())    # all four agents exist now, so run it. In a notebook, just write: await main()</span></div>
 <div class="try" id="p5"></div>
+<p class="en">Which agent does each job? Sort them.</p><p class="zh">每项工作该由哪个智能体来做？请分类。</p>
+<div class="sc" id="g1"></div>
 
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en">First, <code>await Runner.run(...)</code> worked in a notebook, then was a SyntaxError in a <code>.py</code> file. Outside a notebook, everything goes inside <code>async def main()</code> and you start it with <code>asyncio.run(main())</code>. Second, without <code>tool_choice="required"</code> the searcher sometimes answered from memory with old facts. The trace shows whether a real web search happened, so I check it there. Third, I ran five searches before I noticed they cost money. Three is plenty for learning. Fourth, the report ran on and on until I asked for “around 800-1200 words”.</span><span class="zh">第一，<code>await Runner.run(...)</code> 在笔记本里能跑，放进 <code>.py</code> 文件就是 SyntaxError。在笔记本之外，所有内容都要放进 <code>async def main()</code>，再用 <code>asyncio.run(main())</code> 启动。第二，没写 <code>tool_choice="required"</code> 时，搜索员有时直接凭记忆回答，用的是旧信息。trace 能看出有没有真的发起网络搜索，所以我去那里确认。第三，我跑了五个搜索才发现要收费，学习用三个就够了。第四，报告越写越长，直到我要求“大约 800-1200 字”才收住。</span></div>
 <div class="callout"><b class="lbl"><span class="en">Check before you trust it</span><span class="zh">相信之前先核对</span></b><span class="en">The report is only as good as its searches. Fees and promotions change. Before Uncle Lim signs anything, Aina opens the sources and checks the numbers herself.</span><span class="zh">报告的质量取决于搜索。费用和优惠常常变动。在 Lim 叔叔签任何东西之前，Aina 要自己打开来源，核对那些数字。</span></div>
