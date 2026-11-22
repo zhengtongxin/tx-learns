@@ -23,7 +23,7 @@ Bilingual (EN/中文) interactive learning site. Static HTML/CSS/JS, no build st
 | `review.yml` | PRs into main | Claude reviews against `STYLE.md`, comments once, Telegram summary. Never pushes |
 | `writer.yml` | Pushes to `inbox/**` on test, or manual | Claude turns a notes folder into a lesson draft and opens a PR into test, Telegram link |
 | `reader.yml` | Every finished Vercel preview deploy, or manual | Claude reads changed lessons as a newcomer, scores clarity, Telegram summary. On test it opens a fix PR into test; elsewhere it comments |
-| `ui-check.yml` | Every finished Vercel preview deploy, or manual | `scripts/ui-check.mjs` hovers, clicks and Tabs through every page in a headless browser (desktop + phone) and flags overlapping popups, content wider than the screen and script errors; Claude looks at screenshots of changed pages. Sets a `UI check` status, one PR comment, Telegram only when something is flagged |
+| `ui-check.yml` | Every finished Vercel preview deploy, or manual | `scripts/ui-check.mjs` hovers, clicks and Tabs through every page in a headless browser (desktop + phone) and flags overlapping popups, content wider than the screen and script errors; Claude looks at screenshots of changed pages. Sets a `UI check` status, one PR comment, Telegram only when something is flagged. The browser and Claude run in a read-only job; a separate share job with trusted scripts from main does the writing |
 | `telegram-ping.yml` | Manual | Sends a test Telegram message |
 
 Claude auth: the writer, reviewer and reader use TX's Claude subscription through the `CLAUDE_CODE_OAUTH_TOKEN` secret (made with `claude setup-token`). `ANTHROPIC_API_KEY` is only a fallback when that secret is missing. Subscription runs share TX's plan usage limits.
