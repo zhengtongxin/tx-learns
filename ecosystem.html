@@ -197,6 +197,10 @@
      den:'Reads new lessons as someone new to AI would, scores how clear they are and suggests fixes.',
      dzh:'像刚接触 AI 的人那样读新课，给清晰度打分，并提出修改建议。',
      ten:'Runs after every preview deploy',tzh:'每次预览部署后运行'},
+    {id:'ui-check',hue:'#fb923c',on:['clicks each preview','点遍每个预览'],ev:'deployment_status · preview ready',mdl:['script + Claude · ≤30 turns','脚本 + Claude · ≤30 轮'],rd:['every page in a desktop and a phone browser','桌面和手机浏览器里的每一页'],tl:'headless browser · Claude: Read + one result file',wr:['pass / fail status + one PR comment','通过 / 失败状态 + 一条 PR 评论'],tk:['check job: contents:read · share job: write','检查任务：contents:read · 分享任务：可写'],gt:['I see red before I merge','我合并前就能看到红色'],g:'vercel',ic:'UI',en:'UI check agent',zh:'界面检查 agent',
+     den:'Uses each preview the way a person does: hovers, clicks and Tabs through every page on a desktop and a phone, and flags popups that overlap, pages wider than the screen and script errors. Claude then looks at screenshots of what changed.',
+     dzh:'像真人一样使用每个预览：在桌面和手机上把每一页都悬停、点击、按 Tab 走一遍，标出重叠的弹窗、比屏幕还宽的页面和脚本错误。然后 Claude 再看一遍改动页面的截图。',
+     ten:'Runs after every preview deploy',tzh:'每次预览部署后运行'},
     {id:'recall',g:'later',ic:'SR',en:'Spaced recall agent',zh:'间隔回顾 agent',
      den:'Brings back an old lesson right before I would forget it.',dzh:'在我快忘记之前，把旧课翻出来让我复习。',ten:'Planned',tzh:'计划中',later:1},
     {id:'gaps',g:'later',ic:'GF',en:'Gap finder agent',zh:'缺口查找 agent',
@@ -235,6 +239,7 @@
     reader:{c:2,y:RT,agent:'reader'},
     cc:{c:3,y:RM,agent:'copy-check'},
     reviewer:{c:2,y:RB,agent:'reviewer'},
+    ui:{c:5,y:RA,agent:'ui-check'},
     recall:{c:2,y:RP,dx:-38,w:70,h:28,agent:'recall',short:['recall','回顾']},
     gaps:{c:2,y:RP,dx:38,w:70,h:28,agent:'gaps',short:['gaps','缺口']}};
   function geo(n){var a=n.agent&&!n.short,w=n.w||(a?AW:NW),h=n.h||(a?AH:NH),x=X(n.c)+(n.dx||0);return {x:x,y:n.y,w:w,h:h,l:x-w/2,r:x+w/2,t:n.y-h/2,b:n.y+h/2}}
@@ -275,6 +280,8 @@
     o+=e('lp','M'+f(R.r)+','+(R.y+8)+' H'+f(fx-10)+' Q'+f(fx)+','+(R.y+8)+' '+f(fx)+','+(R.y+18)+' V'+(T.t-11),'reader');
     o+=lab((R.r+P.x)/2+50,R.y-15,'reads each preview','读每个预览','middle','reader')+lab(fx+8,(R.y+T.t)/2+14,'fix PR · lesson files only','修改 PR · 只改课文件','start','reader');
     o+=e('ck','M'+f(RV.r)+','+RV.y+' H'+f(M.l-2),'reviewer');
+    // the UI check agent clicks through each preview and reports back on the PR
+    var U=geo(N.ui);o+=e('ck','M'+f(P.r)+','+P.y+' H'+f(U.l-2),'ui-check')+lab(U.x,U.b+16,'status + comment on the PR','状态 + PR 上的评论','middle','ui-check');
     o+=lab(X(2),RP-22,'coming next','即将加入');
     Object.keys(N).forEach(function(k){o+=box(k,S)});
     o+='<text class="foot" x="1084" y="530" text-anchor="end">'+ts('every agent → Telegram to TX · every run → this page','每个 agent → Telegram 通知 TX · 每次运行 → 这一页')+'</text>';
@@ -292,7 +299,7 @@
       el.onmouseenter=function(){show(el)};el.onmouseleave=function(){hide(el)};el.onfocus=function(){show(el)};el.onblur=function(){hide(el)};
       el.onclick=go;el.onkeydown=function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();go()}}});
     // phone version: the same layers as an ordered list
-    var L=[[0,['src']],[1,['notes']],[2,['writer','reader','reviewer']],[3,['test','cc','main']],[4,['prev','live']],[5,['readers']]];
+    var L=[[0,['src']],[1,['notes']],[2,['writer','reader','reviewer']],[3,['test','cc','main']],[4,['prev','live']],[5,['ui','readers']]];
     function li(id){var n=N[id],a=n.agent&&NAME[n.agent],s=a&&S[a.id],st=s&&PP[s.state]?s.state:'';
       if(a)return '<li class="it ag" style="--h:'+a.hue+'"'+(n.seq?' data-n="'+n.seq+'"':'')+'><a href="#a-'+a.id+'"><span class="st '+st+'"></span>'+t(a.en,a.zh)+'</a><small class="hx">'+t(a.on[0],a.on[1])+'</small><small>'+(s?(PILL[st]||'')+' · '+ago(s.at):LIVE?t('no runs yet','还没运行'):t('status offline','状态离线'))+'</small></li>';
       return '<li class="it"'+(n.seq?' data-n="'+n.seq+'"':'')+'>'+t(esc(n.en),esc(n.zh))+(n.lock?'<span class="lk">'+t('TX APPROVES','TX 批准')+'</span>':'')+'<small>'+t(esc(n.m[0]),esc(n.m[1]))+'</small></li>'}
@@ -308,16 +315,16 @@
 
   // Guardrails: what each one stops, and what that means in practice. Numbers are true to .github/workflows/.
   var G=[
-    {k:'human gate',ag:['writer','reader','reviewer','copy-check'],n:'2',u:['locks before anything is live','上线前有 2 把锁'],
+    {k:'human gate',ag:['writer','reader','reviewer','copy-check','ui-check'],n:'2',u:['locks before anything is live','上线前有 2 把锁'],
      r:['An agent publishes a mistake to the live site.','agent 把错误直接发布到线上网站。'],
      i:['Every change waits for my merge, into test and again into main.','每个改动都要等我合并：进 test 一次，进 main 再一次。']},
-    {k:'read-only brains',ag:['reader','reviewer'],n:'0',u:['write access while the AI thinks','AI 思考时的写权限'],
+    {k:'read-only brains',ag:['reader','reviewer','ui-check'],n:'0',u:['write access while the AI thinks','AI 思考时的写权限'],
      r:['A lesson with tricky text talks the AI into changing the repo.','一篇课里的刁钻文字诱导 AI 去改仓库。'],
      i:['The thinking job can only read. A separate job, running trusted scripts from main, does the writing. The reviewer agent can only comment.','思考的任务只能读，另一个运行 main 上可信脚本的任务负责写入。审稿人 agent 只能评论。']},
     {k:'allowlisted tools',ag:['writer','reader','reviewer'],n:'6–10',u:['tools per agent, no free shell','每个 agent 的工具数，没有随意的 shell'],
      r:['An agent runs any command it likes.','agent 想跑什么命令就跑什么。'],
      i:['Each agent can read and edit files and run the copy check. Only the reviewer agent can read and comment on a PR.','每个 agent 只能读写文件、跑原创检查；只有审稿人 agent 能读 PR 和评论。']},
-    {k:'turn budget',ag:['writer','reader','reviewer'],n:'40–80',u:['turns, then it stops','轮，到了就停'],
+    {k:'turn budget',ag:['writer','reader','reviewer','ui-check'],n:'30–80',u:['turns, then it stops','轮，到了就停'],
      r:['A confused agent loops and burns my plan usage.','一个糊涂的 agent 原地打转，耗光我的额度。'],
      i:['Every run has a hard stop, so a bad run costs minutes, not hours.','每次运行都有硬上限，一次失败只浪费几分钟，而不是几小时。']},
     {k:'scoped patches',ag:['reader'],n:'1',u:['kind of file it may fix: lessons','它能改的文件只有一种：课'],
@@ -329,7 +336,7 @@
     {k:'copy scrub',ag:['copy-check'],n:'100%',u:['of pages scanned on every PR','的页面在每个 PR 上被扫描'],
      r:['The name of a source or platform slips into a lesson.','来源或平台的名字混进课里。'],
      i:['The PR turns red before I merge, and status shown on this page is scrubbed too.','合并前 PR 就会变红；这一页显示的状态也会被清洗。']},
-    {k:'one direct push',ag:['writer','reader','reviewer','copy-check'],n:'1',u:['branch agents may push to','agent 唯一能直接推送的分支'],
+    {k:'one direct push',ag:['writer','reader','reviewer','copy-check','ui-check'],n:'1',u:['branch agents may push to','agent 唯一能直接推送的分支'],
      r:['An agent pushes straight to the live site.','agent 直接推送到线上网站。'],
      i:['Agents only push run logs to agent-status. Everything else is a pull request.','agent 只把运行日志推到 agent-status，其他一律走 pull request。']}];
   document.getElementById('guards').innerHTML=G.map(function(g){

@@ -1,0 +1,250 @@
+#!/usr/bin/env node
+// UI check agent: opens pages in a headless browser and uses them the way a person does. It hovers, clicks
+// and Tabs through every interactive element, on a desktop and a phone screen, and flags:
+//   popup-overlap   two popups open at once and covering each other (one should close when the other opens)
+//   popup-offscreen a popup that runs off the side of the screen
+//   overflow        the page is wider than the screen (sideways scrolling on a phone)
+//   js-error        an uncaught error, console.error, or a request for a file that is missing
+//   load            the page did not load
+// No AI here: the same page always gets the same result.
+//
+// Usage: node scripts/ui-check.mjs [--base URL] [--pages a.html,b.html] [--out DIR] [--shots a.html,b.html]
+//   --base   site to test. Without it, the repo folder is served locally (the site is plain static files).
+//   --pages  pages to test (default: home, How it works, track index and every published lesson).
+//   --shots  pages to also save tiled screenshots of, for the visual pass (default: none).
+//   --out    where ui-check.json, ui-check.md and the screenshots go (default: ui-check-out).
+// Env: VERCEL_AUTOMATION_BYPASS_SECRET lets it open a protected Vercel preview.
+//      PLAYWRIGHT_DIR is a folder where `playwright` is installed, if it is not resolvable from here.
+// Exit code: 0 when nothing is flagged, 1 when something is, 2 when the check itself broke.
+import { createServer } from 'node:http';
+import { createRequire } from 'node:module';
+import { readFileSync, readdirSync, mkdirSync, writeFileSync, existsSync, statSync } from 'node:fs';
+import { join, extname, resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
+const list = s => (s || '').split(/[,\s]+/).map(x => x.trim().replace(/^\/+/, '')).filter(Boolean);
+const OUT = resolve(arg('out', 'ui-check-out'));
+const req = createRequire(process.env.PLAYWRIGHT_DIR ? join(resolve(process.env.PLAYWRIGHT_DIR), 'node_modules/') : import.meta.url);
+const { chromium } = req('playwright');
+
+const VIEWPORTS = [
+  { name: 'desktop', viewport: { width: 1280, height: 800 }, hover: true },
+  { name: 'phone', viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, hover: false },
+];
+const MAX_TARGETS = 60, MAX_TABS = 40, MAX_TILES = 4;
+// Site chrome (top bar, side menu) is the same on every page and changes language/theme; skip it.
+const SKIP = '.top, .side, .prog, [data-uicheck-skip]';
+
+function defaultPages() {
+  const lessons = existsSync(join(ROOT, 'agentic-ai'))
+    ? readdirSync(join(ROOT, 'agentic-ai')).filter(f => /^\d+.*\.html$/.test(f)).sort().map(f => 'agentic-ai/' + f) : [];
+  return ['index.html', 'ecosystem.html', 'agentic-ai/index.html', ...lessons].filter(p => existsSync(join(ROOT, p)));
+}
+
+// A tiny static server for the repo folder, so the check works without reaching Vercel.
+const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
+  '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.ico': 'image/x-icon', '.woff2': 'font/woff2' };
+function serve() {
+  return new Promise(ok => {
+    const srv = createServer((q, r) => {
+      let p = decodeURIComponent(new URL(q.url, 'http://x').pathname);
+      if (p.endsWith('/')) p += 'index.html';
+      const f = join(ROOT, p);
+      if (!f.startsWith(ROOT) || !existsSync(f) || !statSync(f).isFile()) { r.writeHead(404); return r.end('not found'); }
+      r.writeHead(200, { 'content-type': TYPES[extname(f)] || 'application/octet-stream' });
+      r.end(readFileSync(f));
+    });
+    srv.listen(0, '127.0.0.1', () => ok({ srv, base: `http://127.0.0.1:${srv.address().port}/` }));
+  });
+}
+
+// Runs inside the page. Marks interactive elements, finds popups and checks them.
+function pageHelpers(SKIP) {
+  const vis = el => {
+    const r = el.getBoundingClientRect(); if (r.width < 2 || r.height < 2) return false;
+    for (let e = el; e && e.nodeType === 1; e = e.parentElement) {
+      const s = getComputedStyle(e);
+      if (s.display === 'none' || s.visibility === 'hidden' || +s.opacity < 0.05) return false;
+    }
+    return true;
+  };
+  const desc = el => {
+    if (!el) return '?';
+    let s = el.tagName.toLowerCase();
+    if (el.id) s += '#' + el.id;
+    else if (typeof el.className === 'string' && el.className.trim()) s += '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.');
+    const host = el.closest('[id]');
+    if (host && host !== el) s = '#' + host.id + ' ' + s;
+    const txt = (el.innerText || el.textContent || el.getAttribute('aria-label') || '').replace(/\s+/g, ' ').trim().slice(0, 40);
+    return txt ? `${s} "${txt}"` : s;
+  };
+  const floating = el => { const p = getComputedStyle(el).position; return p === 'absolute' || p === 'fixed'; };
+  // Popups = floating boxes big enough to hold text that were not on screen when the page loaded.
+  const popups = () => {
+    const out = [];
+    for (const el of document.body.querySelectorAll('*')) {
+      if (el.closest(SKIP) || window.__uicBase.has(el) || !floating(el) || el instanceof SVGElement && !(el instanceof SVGSVGElement)) continue;
+      const r = el.getBoundingClientRect();
+      if (r.width < 60 || r.height < 30 || !vis(el)) continue;
+      if (getComputedStyle(el).pointerEvents === 'none' && !(el.innerText || '').trim()) continue;
+      out.push(el);
+    }
+    return out.filter(el => !out.some(o => o !== el && o.contains(el)));
+  };
+  window.__uic = {
+    init() {
+      window.__uicBase = new Set();
+      for (const el of document.body.querySelectorAll('*')) if (floating(el) && vis(el)) window.__uicBase.add(el);
+    },
+    mark() {
+      const sel = 'button, [role=button], [tabindex]:not([tabindex="-1"]), summary, [data-agent], .agent, [onclick], input[type=checkbox], input[type=radio]';
+      const els = [...document.querySelectorAll(sel)].filter(el => !el.closest(SKIP) && vis(el));
+      els.slice(0, 60).forEach((el, i) => el.setAttribute('data-uic', i));
+      return els.slice(0, 60).map((el, i) => ({ i, desc: desc(el), link: !!el.closest('a[href]') && !el.closest('a[href^="#"]') }));
+    },
+    check(step) {
+      const issues = [], W = document.documentElement.clientWidth;
+      const ps = popups().map(el => ({ el, r: el.getBoundingClientRect() }));
+      for (let a = 0; a < ps.length; a++) for (let b = a + 1; b < ps.length; b++) {
+        const A = ps[a].r, B = ps[b].r;
+        const w = Math.min(A.right, B.right) - Math.max(A.left, B.left), h = Math.min(A.bottom, B.bottom) - Math.max(A.top, B.top);
+        if (w > 12 && h > 12) issues.push({ kind: 'popup-overlap', key: desc(ps[a].el) + '|' + desc(ps[b].el),
+          msg: `Two popups are open at once and overlap: ${desc(ps[a].el)} and ${desc(ps[b].el)}. Opening one should close the other.`, step });
+      }
+      for (const { el, r } of ps) if (r.left < -2 || r.right > W + 2)
+        issues.push({ kind: 'popup-offscreen', key: desc(el), msg: `A popup runs off the ${r.left < -2 ? 'left' : 'right'} edge of the screen by ${Math.round(r.left < -2 ? -r.left : r.right - W)}px: ${desc(el)}.`, step });
+      return issues;
+    },
+    overflow() {
+      const W = document.documentElement.clientWidth, sw = document.documentElement.scrollWidth;
+      if (sw <= W + 2) return null;
+      const clips = el => { for (let e = el.parentElement; e && e !== document.body; e = e.parentElement) { const o = getComputedStyle(e).overflowX; if (o !== 'visible') return true; } return false; };
+      const bad = [...document.body.querySelectorAll('*')].filter(el => !(el instanceof SVGElement && !(el instanceof SVGSVGElement)))
+        .filter(el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.right > W + 2 && !clips(el); })
+        .filter((el, _, all) => !all.some(o => o !== el && el.contains(o)));
+      return { by: sw - W, culprits: bad.slice(0, 3).map(desc) };
+    },
+  };
+}
+
+async function main() {
+  const pages = list(arg('pages')).length ? list(arg('pages')) : defaultPages();
+  const shots = new Set(list(arg('shots')));
+  mkdirSync(join(OUT, 'shots'), { recursive: true });
+  let base = arg('base'), local = null;
+  if (!base) { local = await serve(); base = local.base; }
+  if (!base.endsWith('/')) base += '/';
+  const origin = new URL(base).origin, bypass = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
+  console.log(`UI check: ${pages.length} pages on ${local ? 'a local copy of this commit' : base}`);
+
+  const browser = await chromium.launch();
+  const results = [];
+  // Desktop and phone run side by side to keep the job short.
+  await Promise.all(VIEWPORTS.map(async vp => {
+    const { name, hover, ...opts } = vp;
+    const ctx = await browser.newContext({ ...opts, reducedMotion: 'reduce' });
+    // The bypass header goes only to the preview itself, never to font or CDN hosts.
+    if (bypass) await ctx.route('**/*', r => new URL(r.request().url()).origin === origin
+      ? r.continue({ headers: { ...r.request().headers(), 'x-vercel-protection-bypass': bypass, 'x-vercel-set-bypass-cookie': 'true' } })
+      : r.continue());
+    await ctx.addInitScript(`(${pageHelpers})(${JSON.stringify(SKIP)})`);
+    for (const path of pages) {
+      const res = { page: path, viewport: name, issues: [], shots: [] }, seen = new Set();
+      const add = i => { const k = i.kind + '|' + (i.key || i.msg); if (!seen.has(k)) { seen.add(k); res.issues.push(i); } };
+      const page = await ctx.newPage();
+      page.on('dialog', d => d.dismiss().catch(() => {}));
+      page.on('pageerror', e => add({ kind: 'js-error', msg: `Script error: ${String(e.message || e).split('\n')[0].slice(0, 200)}` }));
+      page.on('console', m => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) add({ kind: 'js-error', msg: `Console error: ${m.text().slice(0, 200)}` }); });
+      page.on('response', r => {
+        const u = new URL(r.url());
+        if (r.status() >= 400 && u.origin === origin && !(local && u.pathname.startsWith('/api/')) && !/favicon/.test(u.pathname))
+          add({ kind: 'js-error', msg: `Missing file: ${u.pathname} (${r.status()})` });
+      });
+      const url = base + path;
+      const open = async () => {
+        const r = await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
+        if (!r || r.status() >= 400) throw new Error(`HTTP ${r ? r.status() : 'no response'}`);
+        await page.waitForTimeout(400);
+        await page.evaluate(() => window.__uic.init());
+        return page.evaluate(() => window.__uic.mark());
+      };
+      try {
+        let targets = await open();
+        const ov = await page.evaluate(() => window.__uic.overflow());
+        if (ov) add({ kind: 'overflow', msg: `Content is ${ov.by}px wider than the screen, so it is cut off or the page scrolls sideways. Sticking out: ${ov.culprits.join('; ') || 'unknown'}.` });
+        if (shots.has(path)) res.shots = await tiles(page, path, name);
+        await page.screenshot({ path: join(OUT, 'shots', `${slug(path)}-${name}.png`) });
+
+        // Hover, then click, each element in turn. A popup left open by the last one shows up as an overlap.
+        for (const t of targets) {
+          const loc = page.locator(`[data-uic="${t.i}"]`).first();
+          const step = `${hover ? 'hovered' : 'tapped'} ${t.desc}`;
+          if (hover) { if (await loc.hover({ timeout: 1500 }).then(() => 1, () => 0)) { await page.waitForTimeout(100); (await page.evaluate(s => window.__uic.check(s), 'hovered ' + t.desc)).forEach(add); } }
+          if (t.link) continue;
+          const before = page.url().split('#')[0];
+          if (!(await loc.click({ timeout: 1500 }).then(() => 1, () => 0))) continue;
+          await page.waitForTimeout(150);
+          if (page.url().split('#')[0] !== before) { targets = (await open(), targets); continue; }
+          (await page.evaluate(s => window.__uic.check(s), hover ? 'clicked ' + t.desc : step)).forEach(add);
+        }
+        // Keyboard: Tab through the page from the top.
+        await open();
+        for (let n = 1; n <= MAX_TABS; n++) {
+          await page.keyboard.press('Tab');
+          await page.waitForTimeout(60);
+          const where = await page.evaluate(() => { const a = document.activeElement; return a && a !== document.body ? (a.innerText || a.getAttribute('aria-label') || a.tagName).replace(/\s+/g, ' ').trim().slice(0, 40) : ''; });
+          (await page.evaluate(s => window.__uic.check(s), `pressed Tab ${n}× (on "${where}")`)).forEach(add);
+        }
+      } catch (e) {
+        add({ kind: 'load', msg: `Could not open or test the page: ${String(e.message).split('\n')[0].slice(0, 200)}` });
+      }
+      await page.close();
+      results.push(res);
+      console.log(`${res.issues.length ? '✗' : '✓'} ${path} (${name})${res.issues.map(i => '\n    ' + i.kind + ': ' + i.msg + (i.step ? ` [after: ${i.step}]` : '')).join('')}`);
+    }
+    await ctx.close();
+  }));
+  await browser.close();
+  results.sort((a, b) => pages.indexOf(a.page) - pages.indexOf(b.page) || a.viewport.localeCompare(b.viewport));
+  local?.srv.close();
+
+  const issues = results.reduce((n, r) => n + r.issues.length, 0);
+  const bad = results.filter(r => r.issues.length);
+  const summary = issues
+    ? `${issues} UI problem${issues > 1 ? 's' : ''} on ${new Set(bad.map(r => r.page)).size} of ${pages.length} pages: ${[...new Set(bad.flatMap(r => r.issues.map(i => i.kind)))].join(', ')}.`
+    : `All ${pages.length} pages passed on desktop and phone: no overlapping popups, content wider than the screen or script errors.`;
+  writeFileSync(join(OUT, 'ui-check.json'), JSON.stringify({ base: local ? 'local' : base, pages, issues, summary, results }, null, 1));
+  writeFileSync(join(OUT, 'ui-check.md'), report(results, summary, issues));
+  console.log('\n' + summary);
+  process.exit(issues ? 1 : 0);
+}
+
+const slug = p => p.replace(/\.html$/, '').replace(/[^a-z0-9]+/gi, '-');
+// Screenshots cut into screen-sized tiles, so a long page stays readable for the visual pass.
+async function tiles(page, path, name) {
+  const H = page.viewportSize().height * 2, total = await page.evaluate(() => document.documentElement.scrollHeight), out = [];
+  for (let y = 0, k = 1; y < total && k <= MAX_TILES; y += H, k++) {
+    const f = join(OUT, 'shots', `${slug(path)}-${name}-${k}.png`);
+    await page.screenshot({ path: f, fullPage: true, clip: { x: 0, y, width: page.viewportSize().width, height: Math.min(H, total - y) } });
+    out.push(f);
+  }
+  return out;
+}
+
+const LABEL = { 'popup-overlap': 'Overlapping popups', 'popup-offscreen': 'Popup off screen', overflow: 'Wider than the screen', 'js-error': 'Script or file error', load: 'Page did not load' };
+function report(results, summary, issues) {
+  let md = `${issues ? '🖱️❌' : '🖱️✅'} **UI check**: ${summary}\n\n`;
+  const bad = results.filter(r => r.issues.length);
+  if (bad.length) {
+    md += '| Page | Screen | Problem |\n| --- | --- | --- |\n';
+    for (const r of bad) for (const i of r.issues.slice(0, 8))
+      md += `| \`${r.page}\` | ${r.viewport} | **${LABEL[i.kind] || i.kind}.** ${i.msg.replace(/\|/g, '\\|')}${i.step ? ` _(after: ${i.step.replace(/\|/g, '\\|')})_` : ''} |\n`;
+    md += '\n';
+  }
+  md += `<sub>Hovered, clicked and Tabbed through ${results.length / VIEWPORTS.length} pages on a 1280px desktop and a 390px phone.</sub>\n`;
+  return md;
+}
+
+main().catch(e => { console.error(e); process.exit(2); });
