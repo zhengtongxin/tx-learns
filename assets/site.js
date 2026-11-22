@@ -18,6 +18,7 @@
   document.addEventListener('DOMContentLoaded',function(){
     var C=window.TRACK,here=location.pathname.split('/').pop()||'index.html',d=done();
     if(C){C.all=[];C.topics.forEach(function(w){w.items.forEach(function(it,i){it.w=w.n;it.i=i+1;it.g=C.all.length+1;C.all.push(it)})});C.lessons=C.all.filter(function(x){return x.file});C.total=C.all.length}
+    function countUp(el){var to=+el.dataset.count,s=performance.now();(function tick(n){var k=Math.min(1,(n-s)/1200);el.textContent=Math.round(to*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(tick)})(s)}
     function count(c){var n=0;for(var k in d)if(k.indexOf(c+'/')===0)n++;return n}
 
     var bar=document.createElement('div');bar.className='prog';document.body.prepend(bar);
@@ -55,6 +56,8 @@
     if(C&&rb){var n=count(C.id),R=36,L=2*Math.PI*R,p=n/C.total;
       rb.innerHTML='<div class="bigring"><svg width="84" height="84" viewBox="0 0 84 84"><defs><linearGradient id="rg"><stop offset="0" stop-color="#4c7dff"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><circle class="bg" cx="42" cy="42" r="'+R+'"/><circle class="fg" cx="42" cy="42" r="'+R+'" stroke-dasharray="'+L+'" stroke-dashoffset="'+L+'"/></svg><b>'+Math.round(p*100)+'%</b></div><div style="text-align:left"><div style="font-weight:700">'+t({en:n+' of '+C.total+' lessons completed',zh:'已完成 '+n+' / '+C.total+' 课'})+'</div><div class="meta">'+t({en:C.lessons.length+' available now',zh:'当前已发布 '+C.lessons.length+' 课'})+'</div></div>';
       setTimeout(function(){rb.querySelector('.fg').style.strokeDashoffset=L*(1-p)},200)}
+    var tm=document.querySelector('.track-meta');
+    if(C&&tm)tm.innerHTML=t({en:C.topics.length+' topics · '+C.total+' lessons',zh:C.topics.length+' 个主题 · '+C.total+' 课'});
     var sb=document.querySelector('.startbtn');
     if(C&&sb&&C.lessons.length){sb.href=C.lessons[0].file;sb.innerHTML=t({en:'Start learning →',zh:'开始学习 →'})}
 
@@ -75,10 +78,20 @@
       draw();
     }
 
-    /* hub */
-    var hub=document.querySelector('.track-list');
-    if(hub&&window.TRACKS)hub.innerHTML=window.TRACKS.map(function(c){var n=count(c.id);
-      return '<a class="cc spot" href="'+c.href+'"><div class="orbi">'+c.icon+'</div><div><h3>'+t(c.title)+'</h3><div class="meta" style="margin-top:4px">'+t(c.desc)+'</div><div class="chips"><span class="chip">'+t({en:c.topics+' topics',zh:c.topics+' 个主题'})+'</span><span class="chip">'+t({en:c.total+' lessons',zh:c.total+' 课'})+'</span><span class="chip">'+t({en:'Bilingual',zh:'双语'})+'</span></div><div class="mini"><i style="width:'+(n/c.total*100)+'%"></i></div></div><div class="go">→</div></a>'}).join('');
+    /* hub: topic and lesson counts are never typed by hand. They come from each track's lessons.js
+       (scripts/check-counts.mjs fails a PR that types one). */
+    var hub=document.querySelector('.track-list'),sums=document.querySelectorAll('[data-sum]');
+    function drawHub(){if(hub)hub.innerHTML=window.TRACKS.map(function(c){var n=count(c.id),ok=c.total>0;
+      return '<a class="cc spot" href="'+c.href+'"><div class="orbi">'+c.icon+'</div><div><h3>'+t(c.title)+'</h3><div class="meta" style="margin-top:4px">'+t(c.desc)+'</div><div class="chips">'+(ok?'<span class="chip">'+t({en:c.topics+' topics',zh:c.topics+' 个主题'})+'</span><span class="chip">'+t({en:c.total+' lessons',zh:c.total+' 课'})+'</span>':'')+'<span class="chip">'+t({en:'Bilingual',zh:'双语'})+'</span></div><div class="mini"><i style="width:'+(ok?n/c.total*100:0)+'%"></i></div></div><div class="go">→</div></a>'}).join('')}
+    if(window.TRACKS&&(hub||sums.length)){var q=window.TRACKS.slice();
+      (function next(){var c=q.shift();
+        if(!c){var tot={topics:0,lessons:0};window.TRACKS.forEach(function(x){tot.topics+=x.topics||0;tot.lessons+=x.total||0});
+          sums.forEach(function(el){el.dataset.count=tot[el.dataset.sum];countUp(el)});drawHub();return}
+        var sc=document.createElement('script');sc.src=c.href.replace(/[^\/]*$/,'')+'lessons.js';
+        sc.onload=sc.onerror=function(){var T=window.TRACK;try{delete window.TRACK}catch(e){window.TRACK=undefined}
+          if(T&&T.topics){c.topics=T.topics.length;c.total=0;T.topics.forEach(function(w){c.total+=w.items.length})}
+          next()};
+        document.body.appendChild(sc)})()}
 
     /* lesson: prev/next + done + dock */
     var db=document.querySelector('.mark-done'),idx=C?C.lessons.findIndex(function(l){return l.file===here}):-1;
@@ -123,7 +136,7 @@
     document.addEventListener('mousemove',function(e){var s=e.target.closest&&e.target.closest('.spot');if(s){var r=s.getBoundingClientRect();s.style.setProperty('--mx',(e.clientX-r.left)+'px');s.style.setProperty('--my',(e.clientY-r.top)+'px')}
       var c=e.target.closest&&e.target.closest('.cc');if(c){var r2=c.getBoundingClientRect(),x=(e.clientX-r2.left)/r2.width-.5,y=(e.clientY-r2.top)/r2.height-.5;c.style.transform='perspective(900px) rotateX('+(-y*5)+'deg) rotateY('+(x*7)+'deg) translateY(-4px)'}});
     document.addEventListener('mouseout',function(e){var c=e.target.closest&&e.target.closest('.cc');if(c&&!c.contains(e.relatedTarget))c.style.transform=''});
-    document.querySelectorAll('[data-count]').forEach(function(el){var to=+el.dataset.count,s=performance.now();(function tick(n){var k=Math.min(1,(n-s)/1200);el.textContent=Math.round(to*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(tick)})(s)});
+    document.querySelectorAll('[data-count]').forEach(countUp);
     var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:0,rootMargin:'0px 0px -8% 0px'});
     document.querySelectorAll('main > h2,main > .card,main > .callout,main > .quiz,main > .stepper,main > .grid,main > .flow,main > .wfwrap,main > p,main > section,main > .track-list').forEach(function(e){e.classList.add('rv');io.observe(e)});
   });

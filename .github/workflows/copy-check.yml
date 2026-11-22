@@ -3,6 +3,7 @@
 # build file (.pyc, __pycache__, .DS_Store, node_modules) is committed.
 # On a release (a pull request into main) a second job turns red while a pull request into test
 # that changes one of the released pages is still open, so fixes land before the release does.
+# It also runs the count check: topic and lesson counts, the lesson list and lesson tags must agree with lessons.js.
 name: Copy check
 on:
   pull_request:
@@ -24,6 +25,9 @@ jobs:
           node-version: 22
       - name: Scan served files
         run: node scripts/check-copy.mjs | tee copy-check.txt; exit ${PIPESTATUS[0]}
+      - name: Check lesson counts and tags
+        if: success() || failure()
+        run: "[ -f scripts/check-counts.mjs ] || { echo 'No count check on this branch yet.' > counts.txt; exit 0; }; node scripts/check-counts.mjs | tee counts.txt; exit ${PIPESTATUS[0]}"
       - name: Tell TX on Telegram
         if: failure()
         env:
@@ -31,12 +35,12 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           WHERE: ${{ github.event.pull_request.html_url || format('{0}/{1}/commit/{2}', github.server_url, github.repository, github.sha) }}
         run: |
-          { echo "🚫 Copy check failed on ${GITHUB_REF_NAME}"; echo "$WHERE"; echo; head -c 2500 copy-check.txt; } \
+          { echo "🚫 Copy check failed on ${GITHUB_REF_NAME}"; echo "$WHERE"; echo; cat copy-check.txt counts.txt 2>/dev/null | head -c 3000; } \
             | node scripts/notify-telegram.mjs
       - name: Pass the result to the status job
         id: result
         if: always()
-        run: echo "line=$(tail -1 copy-check.txt 2>/dev/null)" >> "$GITHUB_OUTPUT"
+        run: echo "line=$(tail -1 copy-check.txt 2>/dev/null) $(tail -1 counts.txt 2>/dev/null)" >> "$GITHUB_OUTPUT"
   release-check:
     name: Release waits for open fixes
     if: github.event_name == 'pull_request' && github.base_ref == 'main'
