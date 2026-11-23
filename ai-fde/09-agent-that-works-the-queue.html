@@ -74,7 +74,7 @@ def save_todo():
 
 def plan(ids):
     for claim_id in ids:
-        todo[claim_id] = {"state": "to_do", "tries": 0, "line": "", "read": []}
+        todo.setdefault(claim_id, {"state": "to_do", "tries": 0, "line": "", "read": []})   # keep what an earlier run knew
     save_todo()
 
 def show_todo():
@@ -144,12 +144,16 @@ def run_helper(claim_id):
 <div class="try" id="p4"></div>
 
 <h2><span class="en">Step 6 · Failures that fix themselves</span><span class="zh">第 6 步 · 会自己修好的失败</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Four rules, all in code. A claim that fails before it is decided goes back to the queue. If it fails twice, it is left for a handler. And no claim is ever decided twice, so before any work the code checks whether a decision already exists. The fourth closes the gap from a killed run: on start, anything still “in progress” goes back to “to do”.</p>
-<p class="zh" style="margin:0 0 8px">四条规矩，全在代码里。还没决定就失败的理赔，回到队列。失败两次，就留给理赔员。任何理赔都不会被决定两次，所以动手之前，代码先检查是否已经有决定。第四条，补上运行被杀掉留下的漏洞：启动时，任何还停在“处理中”的理赔，都回到“待办”。</p></div>
-<div class="codebox"><span class="chg">MAX_TRIES = 2
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Four rules, all in code. A claim that fails before it is decided goes back to the queue. If it fails twice, it is left for a handler. And no claim is ever decided twice, so before any work the code checks whether a decision already exists. The fourth closes the gap from a killed run: on start, the code first loads the saved to-do file, then anything still “in progress” goes back to “to do”. This also means the pilot’s <code>record_decision</code> must save decisions to disk, otherwise the “never decide twice” check cannot see an earlier run.</p>
+<p class="zh" style="margin:0 0 8px">四条规矩，全在代码里。还没决定就失败的理赔，回到队列。失败两次，就留给理赔员。任何理赔都不会被决定两次，所以动手之前，代码先检查是否已经有决定。第四条，补上运行被杀掉留下的漏洞：启动时，代码先读回保存的待办文件，再把仍停在“处理中”的理赔都放回“待办”。这也意味着试点里的 <code>record_decision</code> 必须把决定存到磁盘，否则“不重复决定”的检查看不到上一次运行。</p></div>
+<div class="codebox"><span class="chg">import os
+
+MAX_TRIES = 2
 
 def recover():
     """After a killed run, nothing may stay in_progress."""
+    if os.path.exists(TODO_FILE):
+        todo.update(json.load(open(TODO_FILE)))   # load what the last run saved
     for item in todo.values():
         if item["state"] == "in_progress":
             item["state"] = "to_do"
