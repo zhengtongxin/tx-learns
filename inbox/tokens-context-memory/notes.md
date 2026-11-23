@@ -7,7 +7,7 @@ Models do not read letters or words. They read tokens: chunks of text turned int
 ```python
 import tiktoken
 enc = tiktoken.get_encoding("o200k_base")
-ids = enc.encode("Two teh tarik, one roti canai, less sugar please")
+ids = enc.encode("Two teh peng, one chicken rice, less chilli please")
 for i in ids:
     print(i, repr(enc.decode([i])))
 ```
@@ -20,8 +20,8 @@ So the "memory" in a chat product is a trick. The app sends the whole conversati
 ```python
 messages = [
     {"role": "system", "content": "You are a helpful assistant"},
-    {"role": "user", "content": "Hi, I'm Hafiz and I fix phones."},
-    {"role": "assistant", "content": "Hi Hafiz! How can I help?"},
+    {"role": "user", "content": "Hi, I'm Wei Jie and I fix phones."},
+    {"role": "assistant", "content": "Hi Wei Jie! How can I help?"},
     {"role": "user", "content": "What do I do for a living?"},
 ]
 ```

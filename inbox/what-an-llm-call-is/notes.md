@@ -19,7 +19,7 @@ headers = {"Authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}", "Content-Ty
 payload = {
     "model": "gpt-5-mini",
     "messages": [
-        {"role": "system", "content": "You are a friendly market-stall helper."},
+        {"role": "system", "content": "You are a friendly neighbourhood helper."},
         {"role": "user", "content": "Give me one fun fact about durian."},
     ],
 }
