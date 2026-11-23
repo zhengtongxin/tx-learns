@@ -10,12 +10,12 @@ import vm from 'node:vm';
 export const REPO = process.env.GITHUB_REPOSITORY || 'zhengtongxin/tx-learns';
 const API = (process.env.GITHUB_API || 'https://api.github.com').replace(/\/$/, '');
 
-export async function gh(method, path, body, { raw = false, ok404 = false } = {}) {
+export async function gh(method, path, body, { raw = false, ok404 = false, token = '' } = {}) {
   const url = /^https?:/.test(path) ? path : `${API}/repos/${REPO}${path}`;
   const r = await fetch(url, {
     method,
     headers: {
-      authorization: `Bearer ${process.env.GITHUB_TOKEN || ''}`,
+      authorization: `Bearer ${token || process.env.GITHUB_TOKEN || ''}`,
       accept: raw ? 'application/vnd.github.raw+json' : 'application/vnd.github+json',
       'content-type': 'application/json', 'user-agent': 'tx-learns-agents',
     },
