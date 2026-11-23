@@ -44,6 +44,7 @@ from pydantic import BaseModel, Field
 </span><span class="chg">chatty = create_agent(model="openai:gpt-5.4-mini", tools=[stall_price], checkpointer=MemorySaver())
 cfg = {"configurable": {"thread_id": "cousin-hui"}}</span><span class="dim">
 chatty.invoke({"messages": [{"role": "user", "content": "My budget is RM800 for equipment."}]}, cfg)
+print(chatty.invoke({"messages": [{"role": "user", "content": "What is my budget?"}]}, cfg)["messages"][-1].content)  # remembers RM800
 
 class Plan(BaseModel):
     items: list[str] = Field(description="Breakfast items to sell")
@@ -67,8 +68,8 @@ watched = create_agent(model="openai:gpt-5.4-mini", tools=[stall_price], middlew
 <div class="sc" id="g3"></div>
 
 <h2><span class="en">Step 4 · Tools someone else wrote: MCP and a real browser</span><span class="zh">第 4 步 · 别人写好的工具：MCP 与真正的浏览器</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Tools do not have to be your own Python functions. <b>MCP</b> is a standard plug that lets an agent use tools someone else wrote (it gets its own topic later). With <code>langchain-mcp-adapters</code> you load the tools an MCP server offers. The Playwright server gives your agent a real browser, and needs Node and <code>npx</code>. These tools are <b>async</b>, so the call changes from <code>invoke</code> to <code>await ainvoke</code>. In a notebook you can <code>await</code> at the top level; in a <code>.py</code> file wrap it in <code>async def</code>, as before.</p>
-<p class="zh" style="margin:0 0 8px">工具不一定是你自己写的 Python 函数。<b>MCP</b> 是一种标准插头，让智能体使用别人写好的工具（后面有专门的主题）。用 <code>langchain-mcp-adapters</code> 就能载入某个 MCP 服务提供的工具。Playwright 服务给你的智能体一个真正的浏览器，需要 Node 和 <code>npx</code>。这些工具是<b>异步</b>的，所以调用要从 <code>invoke</code> 改成 <code>await ainvoke</code>。笔记本里可以在最外层直接 <code>await</code>；在 <code>.py</code> 文件里则要像之前那样包进 <code>async def</code>。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Tools do not have to be your own Python functions. <b>MCP</b> is a standard plug that lets an agent use tools someone else wrote (it gets its own topic later). With <code>langchain-mcp-adapters</code> you load the tools an MCP server offers. The Playwright server gives your agent a real browser, and needs Node and <code>npx</code>. These tools are <b>async</b>, so the call changes from <code>invoke</code> to <code>await ainvoke</code>. In a notebook you can <code>await</code> at the top level; in a <code>.py</code> file wrap it in an <code>async def</code> function and run it with <code>asyncio.run(...)</code>.</p>
+<p class="zh" style="margin:0 0 8px">工具不一定是你自己写的 Python 函数。<b>MCP</b> 是一种标准插头，让智能体使用别人写好的工具（后面有专门的主题）。用 <code>langchain-mcp-adapters</code> 就能载入某个 MCP 服务提供的工具。Playwright 服务给你的智能体一个真正的浏览器，需要 Node 和 <code>npx</code>。这些工具是<b>异步</b>的，所以调用要从 <code>invoke</code> 改成 <code>await ainvoke</code>。笔记本里可以在最外层直接 <code>await</code>；在 <code>.py</code> 文件里则要把它包进一个 <code>async def</code> 函数，再用 <code>asyncio.run(...)</code> 运行。</p></div>
 <div class="codebox"><span class="dim">from langchain_mcp_adapters.client import MultiServerMCPClient
 
 client = MultiServerMCPClient({
@@ -79,11 +80,12 @@ client = MultiServerMCPClient({
 surfer = create_agent(model="openai:gpt-5.4-mini", tools=browser_tools,
                       system_prompt="Browse to answer. Report briefly.")
 </span><span class="chg">res = await surfer.ainvoke(</span><span class="dim">{"messages": [{"role": "user",
-      "content": "Open a food delivery site and list three breakfast places in Kajang."}]})</span></div>
+      "content": "Open a food delivery site and list three breakfast places in Kajang."}]})
+print(res["messages"][-1].content)</span></div>
 <div class="try" id="p4"></div>
 
 <h2><span class="en">Step 5 · The big job: a deep agent</span><span class="zh">第 5 步 · 大任务：深度智能体</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Hui's full briefing needs planning, lots of searching, a file to write and helpers. A <b>deep agent</b> is <code>create_agent</code> with a harness added: a todo list for planning, file tools (<code>write_file</code>, <code>read_file</code>) and a <code>task</code> tool to delegate to <b>sub-agents</b>. Each sub-agent starts with a <b>fresh context</b>, so the lead's context stays small. <code>virtual_mode=True</code> keeps every file inside one folder.</p>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Hui's full briefing needs planning, lots of searching, a file to write and helpers. A <b>deep agent</b> is <code>create_agent</code> with a <b>harness</b> added (a shell of extra parts around it): a todo list for planning, file tools (<code>write_file</code>, <code>read_file</code>) and a <code>task</code> tool to delegate to <b>sub-agents</b>. Each sub-agent starts with a <b>fresh context</b>, so the lead's context stays small. <code>virtual_mode=True</code> keeps every file inside one folder.</p>
 <p class="zh" style="margin:0 0 8px">惠的完整报告需要做计划、大量搜索、写文件，还要有帮手。<b>深度智能体</b>就是在 <code>create_agent</code> 外面加一层外壳：用来做计划的待办清单、文件工具（<code>write_file</code>、<code>read_file</code>），以及把工作交给<b>子智能体</b>的 <code>task</code> 工具。每个子智能体都从<b>全新的上下文</b>开始，所以主智能体的上下文不会变大。<code>virtual_mode=True</code> 让所有文件都留在同一个文件夹里。</p></div>
 <div class="codebox"><span class="dim">import os
 from langchain_openai import ChatOpenAI
@@ -99,6 +101,7 @@ search = GoogleSerperRun(api_wrapper=GoogleSerperAPIWrapper())
     "name": "competitor-scout",
     "description": "Looks up one nearby breakfast competitor and returns three facts: menu, prices, hours.",
     "system_prompt": "Research the single shop you are given with the search tool. Return three short facts.",
+    "tools": [search],   # the helper gets the search tool too
 }</span><span class="dim">
 
 lead = create_deep_agent(
