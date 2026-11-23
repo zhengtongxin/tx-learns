@@ -141,6 +141,8 @@ jobs:
           claude -p "$(cat /tmp/writer-prompt.md)" --max-turns 80 \
             --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(node scripts/check-counts.mjs:*),Bash(node scripts/check-pages.mjs:*),Bash(ls:*)" \
             --output-format text | tail -40
+          # Drop scratch files the writer made outside the site (e.g. a .gen/ page generator), so they never deploy.
+          git ls-files --others --exclude-standard | grep -v -E '^(agentic-ai|assets)/|^\.writer-summary\.md$|^inbox/' | while read -r f; do echo "Removing scratch file $f"; rm -f -- "$f"; done
       - name: Copy check
         if: steps.notes.outputs.dirs != ''
         run: node scripts/check-copy.mjs | tee /tmp/copy-check.txt; exit ${PIPESTATUS[0]}
