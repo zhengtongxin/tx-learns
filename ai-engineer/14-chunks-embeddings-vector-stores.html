@@ -1,0 +1,104 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chunks, embeddings and vector stores | TX Learns</title>
+<meta name="description" content="Split documents into overlapping chunks, turn them into vectors, store them, and see meaning become location."><meta property="og:title" content="Chunks, embeddings and vector stores | TX Learns"><meta property="og:description" content="Split documents into overlapping chunks, turn them into vectors, store them, and see meaning become location."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-engineer/14-chunks-embeddings-vector-stores.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-23">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Retrieval (RAG) · Lesson 2</span><span class="zh">检索增强（RAG） · 第 2 课</span></span><h1><span class="en">Chunks, embeddings and vector stores</span><span class="zh">分块、向量与向量库</span></h1><p class="meta"><span class="en">You will turn a folder of files into a searchable store where similar meaning sits close together · ~20 min · concept</span><span class="zh">你会把一个文件夹变成可搜索的库，意思相近的内容会挨在一起 · 约 20 分钟 · 概念课</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0"><b>Wei Jie</b> now has <b>Auntie Lim</b>'s files as markdown, sorted into folders such as staff, services and notices. He wants a question about lifts to find the lift page without anyone typing the exact word. So he prepares the files: cut them up, turn the pieces into numbers, and keep them somewhere searchable.</p>
+<p class="zh" style="margin:0"><b>Wei Jie</b> 现在有了 <b>Lim 阿姨</b>的档案，都是 markdown，按文件夹分成职员、服务、通告等。他希望问到电梯的问题能找到电梯那一页，不用谁去打出完全一样的词。于是他先处理这些文件：切开、把碎片变成数字，再放进一个能搜索的地方。</p></div>
+
+<h2><span class="en">Step 1 · Measure first, then cut into chunks</span><span class="zh">第 1 步 · 先量一量，再切成块</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">First count what you have: files, characters and tokens. If everything fits in the context window, ask whether you need RAG at all. If not, cut each file into chunks of about 1000 characters with a 200-character overlap. The overlap means a sentence cut at the edge still appears whole in the neighbour. The recursive splitter tries paragraph breaks first, then sentences, then single characters. Each chunk keeps metadata, such as the folder it came from.</p>
+<p class="zh" style="margin:0 0 8px">先数一数手上有什么：多少个文件、多少字符、多少 token。如果全部放得进上下文窗口，就先问问自己到底要不要 RAG。放不下，就把每个文件切成约 1000 字符的块，前后重叠 200 字符。重叠的意思是：在边缘被切断的句子，会在相邻的那块里完整出现。递归切分器先试段落分隔，再试句子，最后才按单个字符切。每个块都保留元数据，比如它来自哪个文件夹。</p></div>
+<div class="codebox"><span class="dim">from pathlib import Path
+import tiktoken
+from langchain_core.documents import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+</span><span class="chg">docs = []
+for path in Path("council_files").glob("**/*.md"):
+    docs.append(Document(page_content=path.read_text(encoding="utf-8"),
+                         metadata={"source": path.name, "kind": path.parent.name}))
+
+enc = tiktoken.get_encoding("cl100k_base")
+print(len(docs), "files,", sum(len(enc.encode(d.page_content)) for d in docs), "tokens")
+
+splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+chunks = splitter.split_documents(docs)     # metadata is copied to every chunk
+print(len(chunks), "chunks")</span></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Embeddings: meaning as numbers</span><span class="zh">第 2 步 · 向量：把意思变成数字</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">An embedding model turns a piece of text into a vector: a list of numbers, often 384 to 3072 long. Texts with similar meaning get vectors that land near each other. "Lift stuck" and "elevator broken" end up neighbours, even with no shared word. Wei Jie tried a free small open model that runs on his laptop, and a paid hosted one. Both work. The hosted one is usually better and costs a little.</p>
+<p class="zh" style="margin:0 0 8px">向量模型（embedding model）把一段文字变成一个向量：一串数字，通常有 384 到 3072 个。意思相近的文字，向量会落在彼此附近。“电梯卡住了”和“电梯坏了”会成为邻居，哪怕没有一个相同的词。Wei Jie 试了在笔记本上就能跑的免费小型开源模型，也试了付费的托管模型。两种都行，托管的通常更好，花一点点钱。</p></div>
+<div class="codebox"><span class="dim"># free and local, or paid and hosted: pick one
+</span><span class="chg">from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_openai import OpenAIEmbeddings
+
+embedder = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+# embedder = OpenAIEmbeddings(model="text-embedding-3-small")
+
+vector = embedder.embed_query("The lift is stuck")
+print(len(vector))      # 384 numbers for the small local model</span></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · The vector store</span><span class="zh">第 3 步 · 向量库</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A vector store is a database built to answer "which stored vectors are closest to this one?". Wei Jie used Chroma and saved it to a folder, so he does not pay to embed everything on each start. To rebuild, delete the folder. He prints the count and the number of dimensions, just to see what he has. The same embedder must be used for the chunks and for every question later.</p>
+<p class="zh" style="margin:0 0 8px">向量库是专门回答“哪些存着的向量离这一个最近？”的数据库。Wei Jie 用了 Chroma，并存到一个文件夹，这样每次启动都不用重新花钱做向量。想重建，就删掉那个文件夹。他会打印数量和维度，看看手上到底有什么。之后，块和每个问题必须用同一个向量模型。</p></div>
+<div class="codebox"><span class="dim">from langchain_chroma import Chroma
+
+</span><span class="chg">store = Chroma.from_documents(documents=chunks, embedding=embedder,
+                              persist_directory="council_db")   # saved on disk
+
+print(store._collection.count(), "chunks stored")
+sample = store._collection.get(limit=1, include=["embeddings"])["embeddings"][0]
+print(len(sample), "dimensions")
+
+for hit in store.similarity_search("Who fixes a stuck lift?", k=3):
+    print(hit.metadata["source"])</span></div>
+<div class="try" id="p3"></div>
+
+<h2><span class="en">Step 4 · Seeing meaning as location</span><span class="zh">第 4 步 · 看见“意思就是位置”</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A vector with hundreds of numbers cannot be drawn. t-SNE squashes them into 2D (or 3D) while trying to keep neighbours together. Wei Jie coloured each point by folder. Chunks about the same topic formed clusters, with fuzzy overlaps between related folders. That picture made "meaning is location" click for him.</p>
+<p class="zh" style="margin:0 0 8px">几百个数字的向量没法直接画出来。t-SNE 会把它们压成 2D（或 3D），同时尽量让邻居还是邻居。Wei Jie 按文件夹给每个点上色。同一话题的块聚成一团，相关的文件夹之间有模糊的重叠。这张图让他一下子懂了“意思就是位置”。</p></div>
+<div class="codebox"><span class="dim">import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.manifold import TSNE
+
+</span><span class="chg">data = store._collection.get(include=["embeddings", "metadatas"])
+flat = TSNE(n_components=2, random_state=0).fit_transform(np.array(data["embeddings"]))
+
+kinds = [m["kind"] for m in data["metadatas"]]
+for kind in sorted(set(kinds)):
+    pick = [i for i, k in enumerate(kinds) if k == kind]
+    plt.scatter(flat[pick, 0], flat[pick, 1], label=kind)
+plt.legend(); plt.show()</span></div>
+<p class="en">Sort each statement: is it about chunks, embeddings or the store?</p>
+<p class="zh">给每句话分类：它说的是分块、向量，还是向量库？</p><div class="sc" id="g4"></div>
+
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I changed the embedding model but kept the old store. The questions were in one number space and the chunks in another, so the results were rubbish. One embedding model for both sides, always. If I change it, I delete the store folder and rebuild.</span><span class="zh">我换了向量模型，却保留了旧的库。问题在一个数字空间，块在另一个，结果全是垃圾。两边永远用同一个向量模型。要换的话，就删掉库的文件夹，重新建。</span></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Re-chunk</b> at 300 and at 3000 characters, then compare what the same question retrieves.</span><span class="zh"><b>重新分块</b>，分别用 300 和 3000 字符，比较同一个问题检索到的内容。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Plot your own documents</b> in 2D, coloured by folder.</span><span class="zh"><b>把你自己的文档画成 2D 图</b>，按文件夹上色。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Embed a question</b> and print the three closest chunk sources.</span><span class="zh"><b>给一个问题做向量</b>，打印最近的三个块来自哪个文件。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">Back at the void deck</span><span class="zh">回到组屋底层</span></b><span class="en">Auntie Lim files by topic, not by exact wording: lifts next to lifts, noticeboard next to noticeboard. A vector store files by meaning, and the t-SNE plot is the floor plan of her cabinet.</span><span class="zh">Lim 阿姨按主题归档，而不是按一模一样的措辞：电梯的放在电梯旁，告示板的放在告示板旁。向量库是按意思归档，而 t-SNE 图就是她那个档案柜的平面图。</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Measure your files first. If it all fits in the context window, RAG may not be needed.<br>• Chunk about 1000 characters with a 200 overlap, so cut sentences survive.<br>• Each chunk keeps metadata, such as where it came from.<br>• An embedding turns text into a vector; similar meaning means nearby vectors.<br>• A vector store finds the closest vectors; save it to disk to avoid re-embedding.<br>• Use the same embedding model on both sides.</p><p class="zh" style="margin:0">• 先量一量文件有多大。全部放得进上下文窗口的话，也许根本不需要 RAG。<br>• 每块约 1000 字符、重叠 200，被切断的句子才不会丢。<br>• 每个块都带着元数据，比如来自哪里。<br>• 向量模型把文字变成向量；意思相近，向量就相近。<br>• 向量库负责找最近的向量；存到磁盘，就不用重复做向量。<br>• 两边必须用同一个向量模型。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('p1'),{q:{en:'Why is there a 200-character overlap between neighbouring chunks?',zh:'为什么相邻的块之间要重叠 200 字符？'},opts:[{k:'a',en:'So a sentence cut at a boundary still appears whole in one chunk',zh:'这样在边界被切断的句子，仍会完整出现在某一块里'},{k:'b',en:'To make the store bigger on purpose',zh:'故意让库变大'}],a:'a',ex:{en:'A cut can land mid-sentence. The overlap gives that sentence a second, complete home.',zh:'切刀可能落在句子中间。重叠让这个句子在另一块里有个完整的家。'},hint:{en:'Think about what a cut in the middle of a sentence loses.',zh:'想想把句子拦腰切断会丢掉什么。'}});
+ predict($('p2'),{q:{en:'"The lift is stuck" and "the elevator is broken" share no important word. Where do their vectors land?',zh:'“电梯卡住了”和“电梯坏了”没有共同的关键词。它们的向量会落在哪里？'},opts:[{k:'a',en:'Close together, because the meaning is similar',zh:'挨得很近，因为意思相近'},{k:'b',en:'Far apart, because the words differ',zh:'离得很远，因为用词不同'}],a:'a',ex:{en:'Embeddings capture meaning, not spelling. That is what word matching could not do.',zh:'向量抓的是意思，不是拼写。这正是词语匹配做不到的。'},hint:{en:'Embeddings are about meaning.',zh:'向量看的是意思。'}});
+ predict($('p3'),{q:{en:'Wei Jie switches to a different embedding model but keeps the old store. Questions now return rubbish. Why?',zh:'Wei Jie 换了另一个向量模型，却保留旧的库。现在查出来的全是垃圾。为什么？'},opts:[{k:'a',en:'Questions and chunks now live in different number spaces',zh:'问题和块现在处在不同的数字空间里'},{k:'b',en:'The store forgot how to search',zh:'向量库忘了怎么搜索'}],a:'a',ex:{en:'Distances only mean something inside one embedding space. Use one model for both sides, and re-embed if you change it.',zh:'距离只在同一个向量空间里才有意义。两边用同一个模型，换了就要重新做向量。'},hint:{en:'Would a ruler in centimetres and one in inches agree?',zh:'用厘米的尺和用英寸的尺，量出来的数能比吗？'}});
+ game($('g4'),[
+  {en:'Keeps a 200-character overlap.',zh:'保留 200 字符的重叠。',a:'c',ex:{en:'Overlap is a chunking setting.',zh:'重叠是分块的设置。'},hint:{en:'Which part cuts the text up?',zh:'哪一部分负责切文字？'}},
+  {en:'A list of 384 numbers that stands for meaning.',zh:'代表意思的 384 个数字。',a:'e',ex:{en:'That is the vector the embedding model returns.',zh:'这就是向量模型返回的向量。'},hint:{en:'Which part makes numbers?',zh:'哪一部分负责产生数字？'}},
+  {en:'Saved to a folder so it is not rebuilt each start.',zh:'存到文件夹，这样每次启动不用重建。',a:'s',ex:{en:'The store is the thing that persists.',zh:'需要持久保存的是向量库。'},hint:{en:'Which part holds things for later?',zh:'哪一部分负责存起来备用？'}},
+  {en:'Answers "which vectors are closest to this one?".',zh:'回答“哪些向量离这个最近？”',a:'s',ex:{en:'Nearest-neighbour search is the store\'s job.',zh:'找最近的邻居是向量库的工作。'},hint:{en:'Which part searches?',zh:'哪一部分负责搜索？'}}],[{k:'c',en:'Chunks',zh:'分块'},{k:'e',en:'Embeddings',zh:'向量'},{k:'s',en:'Store',zh:'向量库'}],{en:'Item',zh:'项目'});
+});
+</script></body></html>

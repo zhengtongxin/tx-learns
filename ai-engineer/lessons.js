@@ -17,11 +17,11 @@ window.TRACK={id:'ai-engineer',title:{en:'AI Engineer',zh:'AI 工程师'},topics
   {k:'c',file:'11-benchmarks-leaderboards-limits.html',title:{en:'Benchmarks, leaderboards and their limits',zh:'基准、排行榜与它们的局限'}},
   {k:'p',file:'12-code-translator.html',title:{en:'Project: a code translator',zh:'项目：代码翻译器'}}]},
  {n:5,title:{en:'Retrieval (RAG)',zh:'检索增强（RAG）'},items:[
-  {k:'f',title:{en:'Why a model needs your documents',zh:'为什么模型需要你的文档'}},
-  {k:'c',title:{en:'Chunks, embeddings and vector stores',zh:'分块、向量与向量库'}},
-  {k:'c',title:{en:'A retrieval chain end to end',zh:'端到端的检索链'}},
-  {k:'c',title:{en:'Measuring whether retrieval works',zh:'怎么衡量检索好不好'}},
-  {k:'p',title:{en:'Project: a company knowledge helper',zh:'项目：公司知识助手'}}]},
+  {k:'f',file:'13-why-model-needs-documents.html',title:{en:'Why a model needs your documents',zh:'为什么模型需要你的文档'}},
+  {k:'c',file:'14-chunks-embeddings-vector-stores.html',title:{en:'Chunks, embeddings and vector stores',zh:'分块、向量与向量库'}},
+  {k:'c',file:'15-retrieval-chain-end-to-end.html',title:{en:'A retrieval chain end to end',zh:'端到端的检索链'}},
+  {k:'c',file:'16-measuring-retrieval.html',title:{en:'Measuring whether retrieval works',zh:'怎么衡量检索好不好'}},
+  {k:'p',file:'17-company-knowledge-helper.html',title:{en:'Project: a company knowledge helper',zh:'项目：公司知识助手'}}]},
  {n:6,title:{en:'Predicting with data',zh:'用数据做预测'},items:[
   {k:'c',title:{en:'Curating and cleaning a dataset',zh:'整理并清洗数据集'}},
   {k:'c',title:{en:'Baselines: average, linear, forest',zh:'基线：平均值、线性、随机森林'}},

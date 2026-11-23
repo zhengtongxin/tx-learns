@@ -1,0 +1,102 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Measuring whether retrieval works | TX Learns</title>
+<meta name="description" content="Build a small test set, score retrieval and answers separately, and change one thing at a time so a number tells you what helped."><meta property="og:title" content="Measuring whether retrieval works | TX Learns"><meta property="og:description" content="Build a small test set, score retrieval and answers separately, and change one thing at a time so a number tells you what helped."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-engineer/16-measuring-retrieval.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-23">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Retrieval (RAG) · Lesson 4</span><span class="zh">检索增强（RAG） · 第 4 课</span></span><h1><span class="en">Measuring whether retrieval works</span><span class="zh">怎么衡量检索好不好</span></h1><p class="meta"><span class="en">You will replace "looks good in the chat" with numbers that move when you improve things · ~20 min · concept</span><span class="zh">你会用会随改进而变化的数字，取代“聊天里看起来不错” · 约 20 分钟 · 概念课</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0"><b>Wei Jie</b> asks the chatbot three questions, gets three good answers, and feels proud. <b>Priya</b>, who checks answers for a living, asks him one thing: "How would you know if it got worse?" He had no answer. So he builds a small test set, the way Priya marks a class.</p>
+<p class="zh" style="margin:0"><b>Wei Jie</b> 问聊天机器人三个问题，得到三个好答案，很得意。以批改答案为生的 <b>Priya</b> 只问了他一句：“如果它变差了，你怎么知道？”他答不上来。于是他像 Priya 批改全班那样，做了一份小小的测试集。</p></div>
+
+<h2><span class="en">Step 1 · A test set of questions with known answers</span><span class="zh">第 1 步 · 带标准答案的测试集</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">"Looks good in the chat" is a feeling, not evidence. You want a number that moves when you improve things. For that you need a test set: one JSON object per line, in a file. Each has a question, a few keywords that must appear in the right chunks, a reference answer and a category: a direct fact, a relationship, a comparison, or a holistic question that spans many documents. A few dozen questions across the categories is enough to start.</p>
+<p class="zh" style="margin:0 0 8px">“聊天里看起来不错”只是感觉，不是证据。你需要一个会随改进而变化的数字。为此要有测试集：一个文件，每行一个 JSON 对象。每条有问题、几个必须出现在正确块里的关键词、标准答案，以及类别：直接事实、关系、比较，或是跨很多文档的整体性问题。每个类别有几十道题，就足够起步了。</p></div>
+<div class="codebox"><span class="dim"># tests.jsonl  (one question per line, made-up examples)
+</span><span class="chg">{"question": "Who is in charge of lift repairs?", "keywords": ["lift", "Hafiz"], "reference": "Hafiz Rahman handles lift repairs.", "category": "direct"}
+{"question": "Which officer reports to the estate manager?", "keywords": ["estate manager", "reports"], "reference": "The lift officer reports to her.", "category": "relationship"}
+{"question": "Which services have a fee?", "keywords": ["fee", "bulky waste", "hall booking"], "reference": "Bulky waste pickup and hall booking.", "category": "holistic"}</span></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Score retrieval: did the right chunks come back?</span><span class="zh">第 2 步 · 给检索打分：对的块回来了吗？</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Score the search on its own, before the model writes anything. For each keyword, find the rank of the first retrieved chunk that contains it. MRR (mean reciprocal rank) is 1 divided by that rank, averaged: top hit scores 1, third scores 0.33, missing scores 0. Keyword coverage is the fraction of keywords found in the top k. nDCG is a third score that rewards putting relevant chunks near the top.</p>
+<p class="zh" style="margin:0 0 8px">先单独给搜索打分，这时模型还没写任何东西。对每个关键词，找出第一块含有它的检索结果的名次。MRR（平均倒数名次）就是这个名次的倒数再取平均：排第一得 1，排第三得 0.33，没找到得 0。关键词覆盖率是前 k 块里找到的关键词所占的比例。nDCG 是第三种分数，奖励把相关的块排在靠前的位置。</p></div>
+<div class="codebox"><span class="dim">import json
+</span><span class="chg">tests = [json.loads(line) for line in open("tests.jsonl", encoding="utf-8")]
+
+def first_rank(keyword, chunks):
+    for rank, c in enumerate(chunks, start=1):
+        if keyword.lower() in c.page_content.lower():
+            return rank
+    return None                                   # not found
+
+def score_retrieval(test, k=10):
+    chunks = store.similarity_search(test["question"], k=k)
+    ranks = [first_rank(w, chunks) for w in test["keywords"]]
+    mrr = sum(1 / r for r in ranks if r) / len(ranks)
+    coverage = sum(1 for r in ranks if r) / len(ranks)
+    return mrr, coverage</span></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Score the answer with a judge model</span><span class="zh">第 3 步 · 用裁判模型给回答打分</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Good chunks do not guarantee a good answer, so score the answer separately. Another model acts as judge. Give it the question, the reference answer and the chatbot's answer. It returns accuracy, completeness and relevance, each from 1 to 5, with a line of feedback. One rule Wei Jie likes: any wrong answer must score 1.</p>
+<p class="zh" style="margin:0 0 8px">块好不等于回答好，所以回答要单独打分。让另一个模型当裁判。把问题、标准答案和聊天机器人的回答给它，它返回准确度、完整度、相关度，各 1 到 5 分，再加一句反馈。Wei Jie 喜欢的一条规则：只要答错，就必须给 1 分。</p></div>
+<div class="codebox"><span class="dim">from pydantic import BaseModel
+from langchain_openai import ChatOpenAI
+
+</span><span class="chg">class Verdict(BaseModel):
+    accuracy: int        # 1-5, and any wrong answer must be 1
+    completeness: int    # 1-5
+    relevance: int       # 1-5
+    feedback: str
+
+judge = ChatOpenAI(model="gpt-4.1-mini", temperature=0).with_structured_output(Verdict)
+
+def score_answer(test):
+    got = answer(test["question"], [])           # the chain from the last lesson
+    return judge.invoke(
+        f"Question: {test['question']}\nReference: {test['reference']}\nAnswer: {got}\n"
+        "Score accuracy, completeness and relevance from 1 to 5. A wrong answer scores 1.")</span></div>
+<p class="en">Which score would catch each problem?</p>
+<p class="zh">每个问题该由哪种分数发现？</p><div class="sc" id="g3"></div>
+
+<h2><span class="en">Step 4 · Change one thing at a time</span><span class="zh">第 4 步 · 一次只改一样</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Now improving becomes a loop. Change one setting only: chunk size, overlap, k or the embedding model. Re-run the whole test set. Compare the average per category. A weak category tells you what to fix. Holistic questions usually need more or better chunks. Relationship questions need related documents fetched together. Change two things at once and you cannot tell which one helped.</p>
+<p class="zh" style="margin:0 0 8px">现在改进变成一个循环。每次只改一个设置：块大小、重叠、k 或向量模型。把整个测试集重跑一遍，按类别比较平均分。哪一类弱，就告诉你该修哪里。整体性问题通常需要更多或更好的块；关系类问题需要把相关的文档一起取出来。同时改两样，你就分不清是哪样起了作用。</p></div>
+<div class="codebox"><span class="dim">from collections import defaultdict
+
+</span><span class="chg">def report(k):
+    by_cat = defaultdict(list)
+    for t in tests:
+        by_cat[t["category"]].append(score_retrieval(t, k))
+    for cat, rows in by_cat.items():
+        print(cat, "MRR %.2f" % (sum(r[0] for r in rows) / len(rows)),
+                   "coverage %.2f" % (sum(r[1] for r in rows) / len(rows)))
+
+for k in (3, 5, 10):          # change one thing: k
+    print("k =", k); report(k)</span></div>
+<div class="try" id="p4"></div>
+
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I judged by feel after one lucky question and felt done. A single good answer proves nothing. And the judge model is not perfect either, so I now spot-check some of its scores by hand.</span><span class="zh">我问了一个运气好的问题就凭感觉下结论，以为完成了。一个好答案什么也证明不了。裁判模型也不是完美的，所以我现在会手动抽查它给的一部分分数。</span></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Write 15 questions</b> for your own documents, each with keywords and a reference answer.</span><span class="zh"><b>为你自己的文档写 15 道题</b>，每道都有关键词和标准答案。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Compute keyword coverage</b> for k = 3, 5 and 10, and see where it stops improving.</span><span class="zh"><b>算出 k = 3、5、10 时的关键词覆盖率</b>，看它在哪里不再提高。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">Back at the void deck</span><span class="zh">回到组屋底层</span></b><span class="en">Priya does not call a class "good" because one pupil answered well. She marks all the papers, then looks at which question most pupils missed. A test set does that for retrieval.</span><span class="zh">Priya 不会因为一个学生答得好，就说整个班都不错。她把所有试卷批完，再看哪道题大多数学生都错了。测试集对检索做的就是这件事。</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Build the test set first, so there is a number to move.<br>• Each test has a question, keywords, a reference answer and a category.<br>• Score retrieval and answers separately.<br>• MRR rewards a high rank; coverage counts how many keywords were found.<br>• A judge model scales checking, but spot-check its scores by hand.<br>• Change one thing at a time and compare per category.</p><p class="zh" style="margin:0">• 先做测试集，这样才有数字可以推动。<br>• 每条测试包括问题、关键词、标准答案和类别。<br>• 检索和回答要分开打分。<br>• MRR 奖励靠前的名次；覆盖率数找到了多少个关键词。<br>• 裁判模型能让检查规模化，但要手动抽查它的分数。<br>• 一次只改一样，并按类别比较。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('p1'),{q:{en:'Why does each test line carry a category?',zh:'为什么每条测试都要有类别？'},opts:[{k:'a',en:'So you can see which kind of question is weak, not just one average',zh:'这样你能看出哪一类问题弱，而不只是一个平均数'},{k:'b',en:'The retriever needs the category to search',zh:'检索器需要类别才能搜索'}],a:'a',ex:{en:'An average can hide that holistic questions fail while direct facts shine.',zh:'平均数可能掩盖“整体性问题全错、直接事实全对”这件事。'},hint:{en:'Think about what you do with the numbers afterwards.',zh:'想想拿到数字之后你要做什么。'}});
+ predict($('p2'),{q:{en:'A keyword first appears in the third retrieved chunk. What does it add to MRR?',zh:'某个关键词第一次出现在检索到的第三块里。它给 MRR 贡献多少？'},opts:[{k:'a',en:'1/3, about 0.33',zh:'1/3，约 0.33'},{k:'b',en:'3',zh:'3'}],a:'a',ex:{en:'Reciprocal rank is 1 divided by the rank. Rank 1 gives 1, rank 3 gives about 0.33, missing gives 0.',zh:'倒数名次就是 1 除以名次。第 1 名得 1，第 3 名约得 0.33，没找到得 0。'},hint:{en:'"Reciprocal" means one over the number.',zh:'“倒数”就是用 1 去除。'}});
+ game($('g3'),[
+  {en:'The page about lift repairs never shows up in the top 10.',zh:'电梯维修那一页从没出现在前 10 名里。',a:'r',ex:{en:'Missing chunks lower MRR and coverage.',zh:'缺少块会拉低 MRR 和覆盖率。'},hint:{en:'Is the problem in the search or the writing?',zh:'问题出在搜索还是写作？'}},
+  {en:'The right chunk came back, but the reply names the wrong officer.',zh:'对的块回来了，回答却点错了职员的名字。',a:'a',ex:{en:'The search was fine. The judge sees the wrong answer.',zh:'搜索没问题。裁判会发现回答是错的。'},hint:{en:'Is the problem in the search or the writing?',zh:'问题出在搜索还是写作？'}},
+  {en:'The right chunk sits at rank 9 instead of rank 1.',zh:'对的块排在第 9 名，而不是第 1 名。',a:'r',ex:{en:'Rank is exactly what MRR and nDCG measure.',zh:'名次正是 MRR 和 nDCG 衡量的东西。'},hint:{en:'Which score looks at ranks?',zh:'哪种分数看名次？'}}],[{k:'r',en:'Retrieval score',zh:'检索分数'},{k:'a',en:'Answer score',zh:'回答分数'}],{en:'Item',zh:'项目'});
+ predict($('p4'),{q:{en:'You raise k from 5 to 10 and also switch the embedding model. Scores go up. What do you know?',zh:'你把 k 从 5 提高到 10，同时换了向量模型。分数上升了。你能确定什么？'},opts:[{k:'a',en:'Only that something helped; you cannot tell which change',zh:'只知道有东西起了作用，分不清是哪个改动'},{k:'b',en:'That the new embedding model is better',zh:'新的向量模型更好'}],a:'a',ex:{en:'Two changes at once blur the cause. Change one thing per run.',zh:'同时改两样，原因就糊了。每次只改一样。'},hint:{en:'Which of the two changes caused the rise?',zh:'这两个改动里，是哪个让分数上升的？'}});
+});
+</script></body></html>

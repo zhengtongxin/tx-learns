@@ -1,0 +1,100 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Why a model needs your documents | TX Learns</title>
+<meta name="description" content="A model knows nothing about your private files. See the simplest fix, why it breaks, and the four-part recipe called RAG."><meta property="og:title" content="Why a model needs your documents | TX Learns"><meta property="og:description" content="A model knows nothing about your private files. See the simplest fix, why it breaks, and the four-part recipe called RAG."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-engineer/13-why-model-needs-documents.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-23">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Retrieval (RAG) · Lesson 1</span><span class="zh">检索增强（RAG） · 第 1 课</span></span><h1><span class="en">Why a model needs your documents</span><span class="zh">为什么模型需要你的文档</span></h1><p class="meta"><span class="en">You will see why a model makes things up about your files, and how handing it the right pages fixes that · ~15 min · concept</span><span class="zh">你会明白为什么模型会对你的文件胡编，以及把对的那几页递给它为什么能解决问题 · 约 15 分钟 · 概念课</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0"><b>Auntie Lim</b>, the town council clerk, keeps a thick file on every officer and every service. Residents keep asking her the same things. <b>Wei Jie</b> offers to build a helper that answers for her. First he asks a plain model who handles lift complaints, and it replies with a confident name that does not exist.</p>
+<p class="zh" style="margin:0">市镇理事会的文员 <b>Lim 阿姨</b>手上有一厚叠档案，记着每位职员和每项服务。居民总是问她同样的问题。<b>Wei Jie</b> 说他可以做个助手替她回答。他先问一个普通模型：谁负责处理电梯投诉？它自信地答了一个根本不存在的名字。</p></div>
+
+<h2><span class="en">Step 1 · The model has never seen your files</span><span class="zh">第 1 步 · 模型没见过你的文件</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A model learnt from public text up to a cutoff date. It has never read Auntie Lim's files, last week's notice or your company's staff list. When it does not know, it does not stay quiet. It writes something that sounds right. Think of a stranger at the void deck who answers every question with total confidence.</p>
+<p class="zh" style="margin:0 0 8px">模型学的是截至某个日期的公开文字。它从没读过 Lim 阿姨的档案、上周的通告，或你公司的员工名单。不知道的时候，它不会沉默，而是写出一段听起来很对的话。就像组屋底层来了个陌生人，不管问什么都说得信心十足。</p></div>
+<div class="codebox"><span class="dim">from openai import OpenAI
+client = OpenAI()
+
+</span><span class="chg">def ask_plain(question):
+    reply = client.chat.completions.create(model="gpt-5-mini", messages=[
+        {"role": "user", "content": question}])
+    return reply.choices[0].message.content
+
+print(ask_plain("Who handles lift complaints at Block 12 town council?"))</span>
+<span class="dim"># a smooth answer with a made-up officer name</span></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · The simplest fix: paste the facts</span><span class="zh">第 2 步 · 最简单的办法：把事实贴进去</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">If the model lacks the facts, give them to it in the prompt. Wei Jie loads a small folder of markdown files into a dictionary, one file per key, with the key in lowercase. A small function looks at each word of the question. If a word matches a key, that file's text goes into the system message for this turn only.</p>
+<p class="zh" style="margin:0 0 8px">模型缺事实，就在提示词里给它。Wei Jie 把一小个文件夹的 markdown 文件读进一个字典，一个文件对应一个键，键用小写。一个小函数逐个看问题里的词：只要某个词对上了键，这个文件的内容就加进这一轮的 system 消息里。</p></div>
+<div class="codebox"><span class="dim">from pathlib import Path
+
+</span><span class="chg">files = {}
+for path in Path("council_files").glob("*.md"):
+    files[path.stem.lower()] = path.read_text()      # "hafiz" -> his page
+
+def add_facts(question):
+    words = question.lower().replace("?", "").split()
+    return "\n\n".join(files[w] for w in words if w in files)
+
+def ask(question):
+    system = ("Answer about our town council using only the facts below. "
+              "If they do not cover it, say you do not know.\n\n" + add_facts(question))
+    reply = client.chat.completions.create(model="gpt-5-mini", messages=[
+        {"role": "system", "content": system},
+        {"role": "user", "content": question}])
+    return reply.choices[0].message.content</span></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Why the simple version breaks</span><span class="zh">第 3 步 · 简单版本为什么会坏</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">This is already RAG: Retrieval first, then Augmented Generation. But it only works on exact words. "Who started the council?" matches no key, so nothing is added. Pasting every file instead is costly and may not fit the context window. Even when it fits, a pile of extra text can bury the one useful sentence.</p>
+<p class="zh" style="margin:0 0 8px">这其实已经是 RAG：先检索（Retrieval），再增强生成（Augmented Generation）。但它只认完全相同的词。“谁创办了理事会？”对不上任何键，所以什么也没加。反过来把所有文件都贴进去，既贵又可能超出上下文窗口。就算放得下，一大堆多余的文字也会把那句有用的话淹没。</p></div>
+<div class="codebox"><span class="dim">add_facts("Who is Hafiz?")              # finds hafiz.md
+add_facts("Who looks after the lifts?")  # words: who, looks, after, the, lifts
+                                         # no key is called "lifts" -> empty
+add_facts("Who runs the estate office?") # no matching word -> empty</span></div>
+<p class="en">Which of these are problems of the word-matching version, and which are problems of pasting everything?</p>
+<p class="zh">下面哪些是词语匹配版本的问题，哪些是把所有东西都贴进去的问题？</p><div class="sc" id="g3"></div>
+
+<h2><span class="en">Step 4 · The RAG recipe, and what else you could try</span><span class="zh">第 4 步 · RAG 的做法，以及其他选择</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Real RAG replaces word matching with search by meaning. Prepare once: split the documents into chunks, turn each chunk into a vector (a list of numbers that stands for its meaning), and store them. At question time: turn the question into a vector, fetch the closest chunks, put them in the prompt with the rule "say you do not know if the answer is not here", and let the model answer. The next lessons build each part.</p>
+<p class="zh" style="margin:0 0 8px">真正的 RAG 用“按意思搜索”取代词语匹配。先准备一次：把文档切成块，把每块变成向量（一串代表它意思的数字），存起来。提问时：把问题也变成向量，取出最接近的几块，放进提示词，并加一条规则“答案不在这里就说不知道”，然后让模型回答。后面几课会逐个造出这些部分。</p></div>
+<div class="codebox"><span class="dim">PREPARE (once)         documents  -> chunks -> vectors -> store
+ASK (every question)  question   -> vector -> closest chunks
+                      chunks + rule "say I do not know" -> prompt -> answer
+
+Other options:
+  fine-tuning    teaches a style or skill, poor for facts that change
+  long context   holds a lot, but slow and costly on every question
+  RAG            cheap, updatable (swap one file), can point to its source</span></div>
+<p class="en">Sort each step: does it happen once beforehand, or on every question?</p>
+<p class="zh">给每一步分类：是事先做一次，还是每个问题都要做？</p><div class="sc" id="g4"></div>
+
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I thought RAG was a database query. It is not. It is a search by meaning, followed by a normal prompt with the found text pasted in. The model still just writes text. We only gave it better pages to read.</span><span class="zh">我以为 RAG 就是查数据库。其实不是。它是按意思去搜，然后把找到的文字贴进一个普通的提示词里。模型照样只是在写文字，只不过我们给了它更好的资料来读。</span></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Make five small text files</b> about something you know well, and build the word lookup.</span><span class="zh"><b>做五个小文本文件</b>，写你熟悉的东西，再做出词语查找。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Find a question it fails on,</b> and write down why the words did not match.</span><span class="zh"><b>找一个它答不好的问题，</b>写下为什么词对不上。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">Back at the void deck</span><span class="zh">回到组屋底层</span></b><span class="en">Auntie Lim never recites the whole file to a resident. She finds the right page, reads it and answers. RAG is the same habit, with a model doing the talking.</span><span class="zh">Lim 阿姨从不把整叠档案念给居民听。她找到对的那一页，读一读，再回答。RAG 就是同一个习惯，只是开口说话的换成了模型。</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A model does not know your private files, and it will guess.<br>• Put the right facts in the prompt and it answers from them.<br>• Word lookup is RAG in miniature, but it breaks on different wording.<br>• Pasting everything is costly, may not fit, and can bury the answer.<br>• The recipe: chunk, vector, store; then fetch, prompt, answer.<br>• Fine-tuning suits skills, long context is costly, RAG is cheap and updatable.<br>• RAG is a search by meaning plus a normal prompt, not a database query.</p><p class="zh" style="margin:0">• 模型不认识你的私人文件，而且它会瞎猜。<br>• 把对的事实放进提示词，它就会照着回答。<br>• 词语查找是迷你版 RAG，但换个说法就会失灵。<br>• 全部贴进去很贵、可能放不下，还会淹没答案。<br>• 做法：切块、变向量、存起来；然后检索、拼提示词、回答。<br>• 微调适合技能，长上下文太贵，RAG 便宜又好更新。<br>• RAG 是“按意思搜索”加一个普通提示词，不是数据库查询。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('p1'),{q:{en:'The model replies with a confident officer name that is not in any real file. What happened?',zh:'模型自信地给出一个任何真实档案里都没有的职员名字。这是怎么回事？'},opts:[{k:'a',en:'It had no facts, so it wrote a likely-sounding answer',zh:'它没有事实依据，于是写了个听起来合理的答案'},{k:'b',en:'It looked the name up in a hidden database',zh:'它在一个隐藏的数据库里查到了这个名字'}],a:'a',ex:{en:'A model predicts likely text. With no real facts to lean on, "likely" is not the same as "true".',zh:'模型预测的是“可能的文字”。没有真实事实可依靠时，“可能”并不等于“真实”。'},hint:{en:'Where could the model have read a private council file?',zh:'模型在哪里可能读到私人的理事会档案？'}});
+ predict($('p2'),{q:{en:'A resident asks "Who is Hafiz?" and there is a file called hafiz.md. What goes into the system message?',zh:'居民问“Hafiz 是谁？”，而且有个文件叫 hafiz.md。system 消息里会放进什么？'},opts:[{k:'a',en:'The text of hafiz.md',zh:'hafiz.md 的内容'},{k:'b',en:'Every file in the folder',zh:'文件夹里的所有文件'}],a:'a',ex:{en:'The word "hafiz" matches a key, so only that one file is added for this turn.',zh:'“hafiz”对上了一个键，所以这一轮只加入那一个文件。'},hint:{en:'The function adds only files whose key appears in the question.',zh:'这个函数只加入键出现在问题里的文件。'}});
+ game($('g3'),[
+  {en:'A question uses different words from the file name.',zh:'问题用的词和文件名不一样。',a:'m',ex:{en:'Matching only sees exact words, not meaning.',zh:'匹配只认完全相同的词，不看意思。'},hint:{en:'Which version depends on exact words?',zh:'哪个版本依赖完全相同的词？'}},
+  {en:'The cost per question grows with the size of the folder.',zh:'每个问题的费用随文件夹变大而变高。',a:'a',ex:{en:'Every file is paid for as tokens on every call.',zh:'每次调用都要为所有文件的 token 付费。'},hint:{en:'Which version sends the whole folder?',zh:'哪个版本会把整个文件夹发出去？'}},
+  {en:'The folder is bigger than the context window.',zh:'文件夹比上下文窗口还大。',a:'a',ex:{en:'It simply does not fit in one prompt.',zh:'一个提示词根本装不下。'},hint:{en:'Which version sends the whole folder?',zh:'哪个版本会把整个文件夹发出去？'}},
+  {en:'"Who started the council?" adds no facts at all.',zh:'“谁创办了理事会？”一条事实都没加进去。',a:'m',ex:{en:'No word matched a key, so nothing was retrieved.',zh:'没有词对上键，所以什么也没检索到。'},hint:{en:'Think about which version searches by words.',zh:'想想哪个版本是按词来搜的。'}}],[{k:'m',en:'Word matching',zh:'词语匹配'},{k:'a',en:'Paste everything',zh:'全部贴进去'}],{en:'Item',zh:'项目'});
+ game($('g4'),[
+  {en:'Split the files into chunks.',zh:'把文件切成块。',a:'p',ex:{en:'Chunks are made ahead and reused.',zh:'块是事先做好、反复使用的。'},hint:{en:'Does the question change the chunks?',zh:'问题会改变这些块吗？'}},
+  {en:'Turn the resident\'s question into a vector.',zh:'把居民的问题变成向量。',a:'q',ex:{en:'A new question needs a new vector.',zh:'新问题就需要新的向量。'},hint:{en:'Can this be done before the question exists?',zh:'问题还没出现时能做这一步吗？'}},
+  {en:'Store the chunk vectors.',zh:'把块的向量存起来。',a:'p',ex:{en:'Stored once, searched many times.',zh:'存一次，搜很多次。'},hint:{en:'Is this repeated for each question?',zh:'每个问题都要重做吗？'}},
+  {en:'Put the closest chunks in the prompt.',zh:'把最接近的几块放进提示词。',a:'q',ex:{en:'The chunks depend on what was asked.',zh:'放哪几块取决于问了什么。'},hint:{en:'Does it depend on the question?',zh:'它取决于问题吗？'}}],[{k:'p',en:'Prepare once',zh:'事先做一次'},{k:'q',en:'Every question',zh:'每个问题都做'}],{en:'Item',zh:'项目'});
+});
+</script></body></html>
