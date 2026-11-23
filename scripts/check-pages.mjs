@@ -2,12 +2,17 @@
 // Page check: every page a reader can open has what it needs to be found, shared and read in both languages.
 // Fails (exit 1) on: no <html lang>, no title, no description or link-preview tags, an image without alt text,
 // headings that skip a level, or English text without its 中文 twin (and the other way round).
-// Usage: node scripts/check-pages.mjs [page.html ...]   (no args = every page)
-import { readFileSync, readdirSync } from 'node:fs';
+// It also keeps the files that list lessons in step with lessons.js: sitemap.xml, the no-JavaScript lesson list on
+// the track page, and the "start here" links (data-start) that point at the first published lesson.
+// Usage: node scripts/check-pages.mjs [--fix] [page.html ...]   (no pages = every page; --fix rewrites those lists)
+import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { loadTrack } from './lib.mjs';
 
 const root = new URL('..', import.meta.url);
-const all = ['index.html', 'ecosystem.html', ...readdirSync(new URL('agentic-ai/', root)).filter(f => f.endsWith('.html')).map(f => 'agentic-ai/' + f)];
-const pages = process.argv.slice(2).length ? process.argv.slice(2) : all;
+const FIX = process.argv.includes('--fix');
+const all = ['index.html', 'ecosystem.html', '404.html', ...readdirSync(new URL('agentic-ai/', root)).filter(f => f.endsWith('.html')).map(f => 'agentic-ai/' + f)];
+const named = process.argv.slice(2).filter(a => a !== '--fix');
+const pages = named.length ? named : all;
 const problems = [];
 const bad = (p, m) => problems.push(`${p}: ${m}`);
 const count = (s, re) => (s.match(re) || []).length;
@@ -24,6 +29,7 @@ for (const p of pages) {
     ['og:title', /<meta property="og:title" content="[^"]+"/], ['og:description', /<meta property="og:description" content="[^"]+"/],
     ['og:image', /<meta property="og:image" content="https:\/\/[^"]+"/]]) if (!re.test(html)) bad(p, `no ${tag}`);
 
+  if (!/<link rel="icon" href="[^"]+"/.test(html)) bad(p, 'no favicon (<link rel="icon">)');
   for (const img of markup.match(/<img\b[^>]*>/gi) || []) if (!/\balt="/i.test(img)) bad(p, `image without alt text: ${img.slice(0, 80)}`);
 
   // Headings in order: a page may go down one level at a time (h1 → h2 → h3), never skip one (h2 → h4).
@@ -41,5 +47,31 @@ for (const p of pages) {
   if (sen !== szh) bad(p, `scripts have ${sen} English strings but ${szh} 中文 strings`);
 }
 
+// Lists that come from lessons.js. --fix rewrites them; otherwise a stale list fails the check.
+const SITE = 'https://tx-learns.vercel.app/';
+const T = loadTrack(readFileSync(new URL('agentic-ai/lessons.js', root), 'utf8'));
+const live = T.topics.flatMap(w => w.items).filter(x => x.file);
+const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const want = {
+  'sitemap.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<!-- Made by node scripts/check-pages.mjs --fix from lessons.js. Do not edit by hand. -->\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+    ['', 'ecosystem.html', 'agentic-ai/index.html', ...live.map(x => 'agentic-ai/' + x.file)].map(u => `<url><loc>${SITE}${u}</loc></url>`).join('\n') + '\n</urlset>\n',
+};
+const lists = {
+  'agentic-ai/index.html': [/<!-- lessons:start -->[\s\S]*?<!-- lessons:end -->/, '<!-- lessons:start --><noscript><ol>' +
+    live.map(x => `<li><a href="${x.file}">${esc(x.title.en)} · ${esc(x.title.zh)}</a></li>`).join('') + '</ol></noscript><!-- lessons:end -->'],
+};
+const first = live[0] && live[0].file;
+for (const [f, text] of Object.entries(want)) {
+  let cur = ''; try { cur = readFileSync(new URL(f, root), 'utf8'); } catch {}
+  if (cur !== text) { if (FIX) writeFileSync(new URL(f, root), text); else bad(f, 'out of date with lessons.js (run node scripts/check-pages.mjs --fix)'); }
+}
+for (const f of ['index.html', 'agentic-ai/index.html']) {
+  const cur = readFileSync(new URL(f, root), 'utf8');
+  let next = cur;
+  if (lists[f]) { const [re, block] = lists[f]; if (!re.test(cur)) bad(f, 'missing <!-- lessons:start --><!-- lessons:end --> markers'); else next = next.replace(re, block); }
+  if (first) next = next.replace(/(<a [^>]*data-start[^>]*href=")[^"]*(")/g, (m, a, b) => a + (f === 'index.html' ? 'agentic-ai/' : '') + first + b);
+  if (next !== cur) { if (FIX) writeFileSync(new URL(f, root), next); else bad(f, 'lesson list or start link out of date with lessons.js (run node scripts/check-pages.mjs --fix)'); }
+}
+
 if (problems.length) { console.log(`✗ Page check failed (${problems.length}):\n` + problems.map(x => '  - ' + x).join('\n')); process.exit(1); }
-console.log(`✓ Page check passed: ${pages.length} pages have lang, title, description, link previews, alt text, heading order and EN/中文 twins.`);
+console.log(`✓ Page check passed: ${pages.length} pages have lang, title, description, link previews, favicon, alt text, heading order and EN/中文 twins; sitemap, lesson list and start links match lessons.js.`);
