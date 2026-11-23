@@ -30,7 +30,7 @@ window.TRACK={id:'ai-fde',title:{en:'AI FDE',zh:'AI FDE'},topics:[
   {k:'c',file:'21-hidden-instructions-and-guardrails.html',title:{en:'Hidden instructions and guardrails',zh:'藏起来的指令与护栏'}},
   {k:'c',file:'22-gateway-keys-and-policy.html',title:{en:'Gateway, keys and policy',zh:'网关、密钥与策略'}}]},
  {n:8,title:{en:'Handing it over',zh:'交付上线'},items:[
-  {k:'c',title:{en:'The context layer as its own service',zh:'把上下文层做成独立服务'}},
-  {k:'c',title:{en:'An agent on a managed runtime',zh:'托管运行时上的智能体'}},
-  {k:'p',title:{en:'Project: the handover copilot',zh:'项目：交接用的助手'}}]}
+  {k:'c',file:'23-the-context-layer-as-its-own-service.html',title:{en:'The context layer as its own service',zh:'把上下文层做成独立服务'}},
+  {k:'c',file:'24-an-agent-on-a-managed-runtime.html',title:{en:'An agent on a managed runtime',zh:'托管运行时上的智能体'}},
+  {k:'p',file:'25-the-handover-copilot.html',title:{en:'Project: the handover copilot',zh:'项目：交接用的助手'}}]}
 ]};
