@@ -1,9 +1,9 @@
 /* Lessons grouped by concept. Titles are our own; never copy a source's outline, project names or numbering. */
 window.TRACK={id:'ai-fde',title:{en:'AI FDE',zh:'AI FDE'},topics:[
  {n:1,title:{en:'The FDE’s job',zh:'FDE 是做什么的'},items:[
-  {k:'f',title:{en:'What a forward-deployed engineer does',zh:'前线部署工程师到底做什么'}},
-  {k:'c',title:{en:'Plan first, then build with a coding agent',zh:'先做计划，再让编程智能体来建'}},
-  {k:'p',title:{en:'Project: a claims desk pilot',zh:'项目：理赔台试点'}}]},
+  {k:'f',file:'01-what-a-forward-deployed-engineer-does.html',title:{en:'What a forward-deployed engineer does',zh:'前线部署工程师到底做什么'}},
+  {k:'c',file:'02-plan-then-build-with-a-coding-agent.html',title:{en:'Plan first, then build with a coding agent',zh:'先做计划，再让编程智能体来建'}},
+  {k:'p',file:'03-claims-desk-pilot.html',title:{en:'Project: a claims desk pilot',zh:'项目：理赔台试点'}}]},
  {n:2,title:{en:'Picking the model for the job',zh:'为任务挑模型'},items:[
   {k:'c',title:{en:'Frontier models on real claims',zh:'云端大模型处理真实理赔'}},
   {k:'c',title:{en:'Open models, local models and token cost',zh:'开源模型、本地模型与 token 成本'}},
