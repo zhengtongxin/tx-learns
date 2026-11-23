@@ -21,9 +21,11 @@ try {
 const scrub = t => banned.reduce((acc, re) => acc.replace(re, '[source]'), t);
 
 const RUN = process.env.GITHUB_RUN_ID || '';
+// An unknown STATE (say, a newer workflow on an older script) is never recorded as passed.
+if (!['ok', 'flag', 'fail', 'skip', 'run', 'idle'].includes(process.env.STATE)) { console.log(`::warning::record-status: unknown STATE "${process.env.STATE || ''}", nothing recorded`); process.exit(0); }
 const mode = ['run', 'idle'].includes(process.env.STATE) ? process.env.STATE : 'done';
 const entry = {
-  state: ['ok', 'flag', 'fail', 'skip'].includes(process.env.STATE) ? process.env.STATE : 'ok',
+  state: process.env.STATE,
   summary: scrub(process.env.SUMMARY || '').replace(/\s+/g, ' ').trim().slice(0, 400),
   link: process.env.LINK || `${process.env.GITHUB_SERVER_URL || 'https://github.com'}/${repo}/actions/runs/${process.env.GITHUB_RUN_ID || ''}`,
   at: new Date().toISOString(),

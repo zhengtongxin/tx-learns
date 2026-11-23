@@ -127,8 +127,8 @@ html[data-theme=light] .spot::after{background:radial-gradient(380px circle at v
 .stepper .step{display:none;animation:fade .4s}.stepper .step.on{display:block}
 .stepper .bar{display:flex;gap:12px;align-items:center;margin-top:16px}
 .stepper .dots{flex:1;display:flex;gap:6px;justify-content:center}
-.stepper .dots i{height:4px;flex:1;max-width:44px;border-radius:99px;background:var(--line);cursor:pointer;transition:.3s}
-.stepper .dots i.on{background:var(--grad)}
+.stepper .dots button{all:unset;box-sizing:border-box;height:20px;flex:1;max-width:44px;cursor:pointer;background:linear-gradient(var(--line),var(--line)) center/100% 4px no-repeat;border-radius:99px;transition:.3s}
+.stepper .dots button.on{background:var(--grad) center/100% 4px no-repeat}
 @keyframes fade{from{opacity:0;transform:translateY(8px)}}
 .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:1.2em 0}
 .flow .n{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:8px 14px;font-size:14px}.flow .a{color:var(--mut)}
@@ -194,7 +194,7 @@ details{background:var(--glass);border:1px solid var(--line);border-radius:16px;
 .wfsvg .ic{font-size:22px}
 .wfgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
 .panel{padding:14px 16px;min-height:160px;font-size:14px;border-radius:18px;background:color-mix(in srgb,var(--bg) 60%,transparent)}
-.panel h5{margin:0 0 8px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut)}
+.panel h5,.panel .ph{margin:0 0 8px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut)}
 .bub{padding:9px 14px;border-radius:16px;margin:6px 0;max-width:92%;animation:fade .3s}
 .bub.u{background:var(--grad);color:#fff;margin-left:auto;border-bottom-right-radius:4px}
 .bub.a{background:var(--glass);border:1px solid var(--line);border-bottom-left-radius:4px}
@@ -208,3 +208,14 @@ details{background:var(--glass);border:1px solid var(--line);border-radius:16px;
 .brand,.icon-btn,.seg button{white-space:nowrap}
 .menu-btn{margin-left:6px}
 @media(max-width:560px){.top{padding:0 12px;gap:6px}.seg button,.icon-btn{padding:5px 9px;font-size:12px}.brand{font-size:14px;gap:6px}.brand b{width:18px;height:18px}.menu-btn{margin-left:0}.eco-btn .lbl{display:none}}
+
+/* Keyboard users always see where they are. */
+:focus-visible{outline:2px solid var(--acc2);outline-offset:3px;border-radius:6px}
+.stepper .dots button:focus-visible{outline-offset:1px}
+/* Calm mode for people who ask their device for less motion. */
+@media (prefers-reduced-motion:reduce){
+html{scroll-behavior:auto}
+*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+.orb,body::before{animation:none!important}
+}
+.dk.off,.dk.ring{cursor:default}

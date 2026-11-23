@@ -4,11 +4,14 @@
   function set(k,v){try{localStorage.setItem(k,v)}catch(e){}}
   function t(o){return '<span class="en">'+o.en+'</span><span class="zh">'+o.zh+'</span>'}
   function done(){try{return JSON.parse(get(DONE,'{}'))}catch(e){return {}}}
-  var L0=get(KEY,(navigator.language||'').toLowerCase().indexOf('zh')===0?'zh':'en');if(L0!=='zh')L0='en';root.setAttribute('data-lang',L0);
+  var L0=get(KEY,(navigator.language||'').toLowerCase().indexOf('zh')===0?'zh':'en');if(L0!=='zh')L0='en';
+  /* The page language follows EN/中文, so screen readers and search engines read it right. */
+  function setLang(l){root.setAttribute('data-lang',l);root.lang=l==='zh'?'zh-Hans':'en'}setLang(L0);
+  var calm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
   root.setAttribute('data-theme',get(TH,'dark'));
   var f=document.createElement('link');f.rel='stylesheet';f.href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap';document.head.appendChild(f);
 
-  function burst(x,y){var e=['✨','⭐','💠','🎉','💫'];for(var i=0;i<14;i++){var s=document.createElement('span');s.className='pc';s.textContent=e[i%e.length];
+  function burst(x,y){if(calm)return;var e=['✨','⭐','💠','🎉','💫'];for(var i=0;i<14;i++){var s=document.createElement('span');s.className='pc';s.textContent=e[i%e.length];
     s.style.left=x+'px';s.style.top=y+'px';s.style.setProperty('--dx',(Math.random()*260-130)+'px');s.style.setProperty('--dy',(Math.random()*-220-20)+'px');s.style.setProperty('--r',(Math.random()*360)+'deg');
     document.body.appendChild(s);setTimeout(function(a){a.remove()},1000,s)}}
   window.TX={t:t,burst:burst};
@@ -18,20 +21,20 @@
   document.addEventListener('DOMContentLoaded',function(){
     var C=window.TRACK,here=location.pathname.split('/').pop()||'index.html',d=done();
     if(C){C.all=[];C.topics.forEach(function(w){w.items.forEach(function(it,i){it.w=w.n;it.i=i+1;it.g=C.all.length+1;C.all.push(it)})});C.lessons=C.all.filter(function(x){return x.file});C.total=C.all.length}
-    function countUp(el){var to=+el.dataset.count,s=performance.now();(function tick(n){var k=Math.min(1,(n-s)/1200);el.textContent=Math.round(to*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(tick)})(s)}
+    function countUp(el){var to=+el.dataset.count,s=performance.now();if(calm){el.textContent=to;return}(function tick(n){var k=Math.min(1,(n-s)/1200);el.textContent=Math.round(to*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(tick)})(s)}
     function count(c){var n=0;for(var k in d)if(k.indexOf(c+'/')===0)n++;return n}
 
     var bar=document.createElement('div');bar.className='prog';document.body.prepend(bar);
     var top=document.createElement('div');top.className='top';
-    top.innerHTML='<a class="brand" href="'+(C?'../index.html':'index.html')+'"><b></b>TX Learns</a>'+(C?'<button class="icon-btn menu-btn" aria-expanded="false">☰ <span class="en">Topics</span><span class="zh">主题</span></button>':'')+'<span class="sp"></span>'+'<a class="icon-btn eco-btn" href="'+(C?'../':'')+'ecosystem.html" title="How it works · 运作方式" aria-label="How it works · 运作方式">🌐<span class="lbl"> <span class="en">How it works</span><span class="zh">运作方式</span></span></a>'+
-      '<div class="seg"><button data-l="en">EN</button><button data-l="zh">中文</button></div><button class="icon-btn th" aria-label="theme"></button>';
+    top.innerHTML='<a class="brand" href="'+(C?'../index.html':'index.html')+'"><b></b>TX Learns</a>'+(C?'<button class="icon-btn menu-btn" aria-expanded="false" aria-controls="topics-nav">☰ <span class="en">Topics</span><span class="zh">主题</span></button>':'')+'<span class="sp"></span>'+'<a class="icon-btn eco-btn" href="'+(C?'../':'')+'ecosystem.html" title="How it works · 运作方式" aria-label="How it works · 运作方式">🌐<span class="lbl"> <span class="en">How it works</span><span class="zh">运作方式</span></span></a>'+
+      '<div class="seg" role="group" aria-label="Language · 语言"><button data-l="en" lang="en">EN</button><button data-l="zh" lang="zh-Hans">中文</button></div><button class="icon-btn th" aria-label="theme"></button>';
     document.body.insertBefore(top,bar.nextSibling);
-    function mark(){top.querySelectorAll('[data-l]').forEach(function(b){b.classList.toggle('on',b.dataset.l===root.getAttribute('data-lang'))});top.querySelector('.th').textContent=root.getAttribute('data-theme')==='dark'?'☀︎':'☾'}
-    top.querySelectorAll('[data-l]').forEach(function(b){b.onclick=function(){root.setAttribute('data-lang',b.dataset.l);set(KEY,b.dataset.l);mark()}});
+    function mark(){top.querySelectorAll('[data-l]').forEach(function(b){var on=b.dataset.l===root.getAttribute('data-lang');b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});var dk=root.getAttribute('data-theme')==='dark',th=top.querySelector('.th');th.textContent=dk?'☀︎':'☾';th.setAttribute('aria-label',dk?'Switch to light theme · 切换到浅色':'Switch to dark theme · 切换到深色')}
+    top.querySelectorAll('[data-l]').forEach(function(b){b.onclick=function(){setLang(b.dataset.l);set(KEY,b.dataset.l);mark()}});
     top.querySelector('.th').onclick=function(){var n=root.getAttribute('data-theme')==='dark'?'light':'dark';root.setAttribute('data-theme',n);set(TH,n);mark()};
     mark();
 
-    var side=document.querySelector('.side'),scrim;
+    var side=document.querySelector('.side'),scrim;if(side){side.id='topics-nav';side.setAttribute('aria-label','Topics · 主题')}
     if(C&&side){
       var NK='learn-nav',ns={};try{ns=JSON.parse(localStorage.getItem(NK)||'{}')}catch(e){}
       var list=(window.TRACKS&&window.TRACKS.length)?window.TRACKS:[{id:C.id,icon:'',title:C.title,href:'agentic-ai/index.html'}];
@@ -43,11 +46,12 @@
         else body='<a href="../'+c.href+'">⌂ '+t({en:'Overview',zh:'总览'})+'</a>';
         return '<div class="cg'+(open?' open':'')+(cur?' cur':'')+'" data-c="'+c.id+'"><button class="cg-h" aria-expanded="'+open+'"><span class="ic">'+(c.icon||'')+'</span><span class="tt">'+t(c.title)+'</span><span class="pg">'+count(c.id)+'/'+(cur?C.total:c.total||'')+'</span><i class="chev"></i></button><div class="cg-b"><div>'+body+'</div></div></div>'}).join('');
       side.querySelectorAll('.cg-h').forEach(function(h){h.onclick=function(){var g=h.parentNode,o=!g.classList.contains('open');g.classList.toggle('open',o);h.setAttribute('aria-expanded',o);ns[g.dataset.c]=o;try{localStorage.setItem(NK,JSON.stringify(ns))}catch(e){}}});
-      scrim=document.createElement('div');scrim.className='scrim';document.body.appendChild(scrim);
+      scrim=document.createElement('div');scrim.className='scrim';scrim.setAttribute('aria-hidden','true');document.body.appendChild(scrim);
       document.body.appendChild(side);
-      var tg=function(on){var o=on===undefined?!side.classList.contains('open'):on;side.classList.toggle('open',o);scrim.classList.toggle('on',o);top.querySelector('.menu-btn').setAttribute('aria-expanded',o)};
+      var tg=function(on){var o=on===undefined?!side.classList.contains('open'):on;side.classList.toggle('open',o);scrim.classList.toggle('on',o);var mb=top.querySelector('.menu-btn');mb.setAttribute('aria-expanded',o);
+        if(o){var fa=side.querySelector('a,button');if(fa)fa.focus()}else if(side.contains(document.activeElement))mb.focus()};
       top.querySelector('.menu-btn').onclick=function(){tg()};scrim.onclick=function(){tg(false)};
-      document.addEventListener('keydown',function(e){if(e.key==='Escape')tg(false)});
+      document.addEventListener('keydown',function(e){if(e.key==='Escape'&&side.classList.contains('open'))tg(false)});
       window.TX.menu=tg;
     }
 
@@ -102,12 +106,12 @@
         var lbl=function(){db.className='btn big mark-done'+(done()[key]?'':' pri');db.innerHTML=done()[key]?t({en:'✓ Completed — click to undo',zh:'✓ 已完成（点击撤销）'}):t({en:'Mark lesson as completed',zh:'标记本课已完成'})};
         db.onclick=function(e){var x=done();if(x[key])delete x[key];else{x[key]=1;burst(e.clientX,e.clientY)}set(DONE,JSON.stringify(x));lbl()};lbl()}
       var dock=document.createElement('div');dock.className='dock';var RR=18,LL=2*Math.PI*RR;
-      dock.innerHTML='<button class="dk" data-a="m" title="Menu">☰</button>'+(p?'<a class="dk" href="'+p.file+'" title="Previous">‹</a>':'<span class="dk off">‹</span>')+
+      dock.innerHTML='<button class="dk" data-a="m" title="Menu" aria-label="Open topics menu · 打开主题菜单">☰</button>'+(p?'<a class="dk" href="'+p.file+'" title="Previous" aria-label="Previous lesson · 上一课">‹</a>':'<span class="dk off" aria-hidden="true">‹</span>')+
         '<div class="dk ring"><svg width="44" height="44" viewBox="0 0 44 44"><circle class="bg" cx="22" cy="22" r="'+RR+'"/><circle class="fg" cx="22" cy="22" r="'+RR+'" stroke-dasharray="'+LL+'" stroke-dashoffset="'+LL+'"/></svg><b>0</b></div>'+
-        (n?'<a class="dk" href="'+n.file+'" title="Next">›</a>':'<span class="dk off">›</span>')+'<button class="dk" data-a="t" title="Top">↑</button>';
+        (n?'<a class="dk" href="'+n.file+'" title="Next" aria-label="Next lesson · 下一课">›</a>':'<span class="dk off" aria-hidden="true">›</span>')+'<button class="dk" data-a="t" title="Top" aria-label="Back to top · 回到顶部">↑</button>';
       document.body.appendChild(dock);
       dock.querySelector('[data-a=m]').onclick=function(){window.TX.menu()};
-      dock.querySelector('[data-a=t]').onclick=function(){window.scrollTo({top:0,behavior:'smooth'})};
+      dock.querySelector('[data-a=t]').onclick=function(){window.scrollTo({top:0,behavior:calm?'auto':'smooth'})};
     }
     var fg=document.querySelector('.dock .fg'),rn=document.querySelector('.dock .ring b');
     function onScroll(){var h=document.documentElement,pr=h.scrollTop/(h.scrollHeight-h.clientHeight||1);bar.style.width=(pr*100)+'%';
@@ -115,9 +119,13 @@
     window.addEventListener('scroll',onScroll,{passive:true});onScroll();
 
     /* components */
-    document.querySelectorAll('.flip').forEach(function(f){var w=document.createElement('div');w.className='flip-in';while(f.firstChild)w.appendChild(f.firstChild);f.appendChild(w);f.onclick=function(){f.classList.toggle('on')}});
+    document.querySelectorAll('.flip').forEach(function(f){var w=document.createElement('div');w.className='flip-in';while(f.firstChild)w.appendChild(f.firstChild);f.appendChild(w);
+      /* A flashcard is a toggle button: Tab to it, Enter or Space flips it. */
+      f.setAttribute('role','button');f.tabIndex=0;f.setAttribute('aria-pressed','false');
+      var flip=function(){var o=f.classList.toggle('on');f.setAttribute('aria-pressed',o)};
+      f.onclick=flip;f.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();flip()}}});
     var qs=document.querySelectorAll('.quiz'),right=0,answered=0,sc;
-    if(qs.length){sc=document.createElement('div');sc.className='score';qs[qs.length-1].after(sc)}
+    if(qs.length){sc=document.createElement('div');sc.className='score';sc.setAttribute('aria-live','polite');qs[qs.length-1].after(sc)}
     qs.forEach(function(q){q.classList.add('spot');q.querySelectorAll('.opt').forEach(function(o){o.onclick=function(e){
       if(q.classList.contains('done'))return;q.classList.add('done');answered++;
       var ok=o.dataset.k===q.dataset.answer;if(ok){right++;burst(e.clientX,e.clientY)}
@@ -125,12 +133,26 @@
       if(answered===qs.length)sc.innerHTML=t({en:'Score: '+right+' / '+qs.length+(right===qs.length?' 🏆':''),zh:'得分：'+right+' / '+qs.length+(right===qs.length?' 🏆':'')})}})});
     document.querySelectorAll('.stepper').forEach(function(s){
       var st=s.querySelectorAll('.step'),i=0,b=document.createElement('div');b.className='bar';
-      b.innerHTML='<button class="btn prev">←</button><div class="dots">'+[].map.call(st,function(){return '<i></i>'}).join('')+'</div><button class="btn pri nxt">→</button>';s.appendChild(b);
-      var dots=b.querySelectorAll('i');
-      function show(){st.forEach(function(x,k){x.classList.toggle('on',k===i);dots[k].classList.toggle('on',k<=i)});b.querySelector('.prev').disabled=i===0;b.querySelector('.nxt').disabled=i===st.length-1}
+      b.innerHTML='<button class="btn prev">←</button><div class="dots">'+[].map.call(st,function(x,k){return '<button type="button" aria-label="Step '+(k+1)+' · 第 '+(k+1)+' 步"></button>'}).join('')+'</div><button class="btn pri nxt">→</button>';s.appendChild(b);
+      var dots=b.querySelectorAll('.dots button');b.querySelector('.prev').setAttribute('aria-label','Previous step · 上一步');b.querySelector('.nxt').setAttribute('aria-label','Next step · 下一步');
+      function show(){st.forEach(function(x,k){x.classList.toggle('on',k===i);dots[k].classList.toggle('on',k<=i)});dots.forEach(function(x,k){if(k===i)x.setAttribute('aria-current','step');else x.removeAttribute('aria-current')});b.querySelector('.prev').disabled=i===0;b.querySelector('.nxt').disabled=i===st.length-1}
       b.querySelector('.prev').onclick=function(){i--;show()};b.querySelector('.nxt').onclick=function(){i++;show()};
       dots.forEach(function(x,k){x.onclick=function(){i=k;show()}});show()});
     document.querySelectorAll('.card,.callout,.stepper,.wfwrap').forEach(function(e){e.classList.add('spot')});
+
+    /* keyboard: lesson widgets often make a <div> or an SVG node clickable. Give each one a Tab stop and let
+       Enter or Space click it, so nothing is mouse-only (the UI check agent flags anything still missed). */
+    var FOC='a[href],button,input,select,textarea,summary,[tabindex]';
+    function kb(){[].forEach.call(document.querySelectorAll('main *,.side *'),function(el){
+      if(el.hasAttribute('data-kb')||el.closest(FOC))return;
+      var cs=getComputedStyle(el),pc=el.parentElement&&getComputedStyle(el.parentElement).cursor;
+      if(typeof el.onclick!=='function'&&!(cs.cursor==='pointer'&&pc!=='pointer'))return;
+      el.setAttribute('data-kb','');el.setAttribute('tabindex','0');if(!el.getAttribute('role'))el.setAttribute('role','button')})}
+    document.addEventListener('keydown',function(e){var el=e.target;
+      if((e.key==='Enter'||e.key===' ')&&el&&el.hasAttribute&&el.hasAttribute('data-kb')){e.preventDefault();el.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true}))}});
+    var kbt;function kbLater(){clearTimeout(kbt);kbt=setTimeout(kb,150)}
+    if(window.MutationObserver)new MutationObserver(kbLater).observe(document.body,{childList:true,subtree:true});
+    window.addEventListener('load',kb);kbLater();
 
     /* effects: spotlight, tilt, count-up, reveal */
     document.addEventListener('mousemove',function(e){var s=e.target.closest&&e.target.closest('.spot');if(s){var r=s.getBoundingClientRect();s.style.setProperty('--mx',(e.clientX-r.left)+'px');s.style.setProperty('--my',(e.clientY-r.top)+'px')}
