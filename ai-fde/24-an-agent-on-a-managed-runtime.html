@@ -49,8 +49,8 @@ print(client.post("/invocations", json={}).status_code)                         
 <div class="try" id="p2"></div>
 
 <h2><span class="en">Step 3 · Deploy, then watch cold and warm starts</span><span class="zh">第 3 步 · 部署，然后观察冷启动和热启动</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Package the app (usually as a container image) and deploy it with your runtime’s own command. Those commands differ, so follow its guide. The agent code does not change. Then time it. A <b>cold start</b> is the first call, when the runtime must start a fresh copy. A <b>warm</b> call reaches a copy that is already running, and it is much faster. Like the shophouse in the morning: the first customer waits while the ceiling fans spin up.</p>
-<p class="zh" style="margin:0 0 8px">把应用打包（通常是一个容器镜像），用运行时自己的命令部署。这些命令各家不同，照它的指南来。智能体的代码不用变。然后给它计时。<b>冷启动</b>是第一次调用，运行时得先启动一份新的副本。<b>热</b>调用则打到已经在跑的副本上，快得多。就像早上的店屋：第一位客人要等吊扇转起来。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Package the app (usually as a container image, a sealed bundle of your app and everything it needs) and deploy it with your runtime’s own command. Those commands differ, so follow its guide. The agent code does not change. Then time it. A <b>cold start</b> is the first call, when the runtime must start a fresh copy. A <b>warm</b> call reaches a copy that is already running, and it is much faster. Like the shophouse in the morning: the first customer waits while the ceiling fans spin up.</p>
+<p class="zh" style="margin:0 0 8px">把应用打包（通常做成一个容器镜像，也就是把应用和它需要的一切装进一个密封的包里），用运行时自己的命令部署。这些命令各家不同，照它的指南来。智能体的代码不用变。然后给它计时。<b>冷启动</b>是第一次调用，运行时得先启动一份新的副本。<b>热</b>调用则打到已经在跑的副本上，快得多。就像早上的店屋：第一位客人要等吊扇转起来。</p></div>
 <div class="codebox"><span class="chg"># timing.py: set AGENT_URL to the deployed address, or leave it for your laptop
 import os, time, requests
 
@@ -67,8 +67,8 @@ print("second call:", timed())</span></div>
 <div class="try" id="p3"></div>
 
 <h2><span class="en">Step 4 · Every run gets its own session, and sessions end</span><span class="zh">第 4 步 · 每次运行有自己的会话，会话会结束</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The runtime gives each dispatch and each evaluation its own <b>session</b>: a separate little computer with its own memory. Two claims never share variables. A session ends when it has been <b>idle</b> for about a minute, meaning no request is in flight. It ends even if a background thread of yours is still going, because the runtime cannot see inside. Anything kept in the session’s memory or disk goes with it. Only things stored outside survive. Your runtime tells you the session id in a request header. The name differs, so check it.</p>
-<p class="zh" style="margin:0 0 8px">运行时给每一次派发、每一次评测一个自己的<b>会话</b>：一台独立的小电脑，有自己的内存。两份理赔永远不共用变量。会话在<b>空闲</b>大约一分钟后结束，空闲的意思是没有任何请求在处理。哪怕你有后台线程还在跑，它也照样结束，因为运行时看不到里面。会话内存或磁盘里放的东西，会随它一起消失。只有存在外面的才活得下来。运行时会在请求头里告诉你会话编号，名字各家不同，要去核对。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The runtime gives each dispatch (one request that runs the agent) and each evaluation (one test run) its own <b>session</b>: a separate little computer with its own memory. Two claims never share variables. A session ends when it has been <b>idle</b> for about a minute, meaning no request is in flight. It ends even if a background thread of yours is still going, because the runtime cannot see inside. Anything kept in the session’s memory or disk goes with it. Only things stored outside survive. Your runtime tells you the session id in a request header. The name differs, so check it.</p>
+<p class="zh" style="margin:0 0 8px">运行时给每一次派发（一次运行智能体的请求）和每一次评测（一次测试运行）一个自己的<b>会话</b>：一台独立的小电脑，有自己的内存。两份理赔永远不共用变量。会话在<b>空闲</b>大约一分钟后结束，空闲的意思是没有任何请求在处理。哪怕你有后台线程还在跑，它也照样结束，因为运行时看不到里面。会话内存或磁盘里放的东西，会随它一起消失。只有存在外面的才活得下来。运行时会在请求头里告诉你会话编号，名字各家不同，要去核对。</p></div>
 <div class="codebox"><span class="dim"># agent_app.py, changed
 </span><span class="chg">SESSIONS = {}                                        # lives in this session’s memory only
 
@@ -88,8 +88,8 @@ def invocations():
 <p class="zh">会话结束后，什么还在？来分一分。</p><div class="sc" id="g1"></div>
 
 <h2><span class="en">Step 5 · Keep long work visibly alive</span><span class="zh">第 5 步 · 让长任务清清楚楚地“活着”</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A long job, such as reading a thick claim file, may run for minutes in a background thread. To the runtime, nothing is happening, so it ends the session mid-job. The fix is to show the work. Count the jobs that are running, and let <code>/ping</code> say “busy” while the count is above zero. Also record each step, so a person can see progress. Keep the flag honest: set it only while real work runs. A stuck flag keeps a session, and your bill, alive. The word for “busy” varies, so use your runtime’s.</p>
-<p class="zh" style="margin:0 0 8px">长任务，比如读一份很厚的理赔文件，可能在后台线程里跑几分钟。对运行时来说，什么都没发生，于是它在任务中途结束了会话。解法是把工作亮出来。数一数正在跑的任务，只要数字大于零，就让 <code>/ping</code> 回答“忙”。再把每一步记下来，让人看得到进度。标志要诚实：只在真有工作时才设置。标志卡住不放，会话和你的账单就一直活着。“忙”这个词各家不同，用你的运行时规定的。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A long job, such as reading a thick claim file, may run for minutes in a background thread. To the runtime, nothing is happening, so it ends the session mid-job. The fix is to show the work. Count the jobs that are running, and let <code>/ping</code> say “busy” while the count is above zero. Also record each step, so a person can see progress. Keep the flag honest: set it only while real work runs. The helper <code>busy()</code> does this for you, inside a <code>with</code> block: it adds one when the work starts and takes it away when the work ends, even after a crash. A stuck flag keeps a session, and your bill, alive. The word for “busy” varies, so use your runtime’s.</p>
+<p class="zh" style="margin:0 0 8px">长任务，比如读一份很厚的理赔文件，可能在后台线程里跑几分钟。对运行时来说，什么都没发生，于是它在任务中途结束了会话。解法是把工作亮出来。数一数正在跑的任务，只要数字大于零，就让 <code>/ping</code> 回答“忙”。再把每一步记下来，让人看得到进度。标志要诚实：只在真有工作时才设置。<code>busy()</code> 在 <code>with</code> 代码块里替你做这件事：工作开始时加一，工作结束时减一，即使中途崩溃也会减回去。标志卡住不放，会话和你的账单就一直活着。“忙”这个词各家不同，用你的运行时规定的。</p></div>
 <div class="codebox"><span class="dim"># agent_app.py, added (import threading, time and from contextlib import contextmanager at the top)
 </span><span class="chg">BUSY, LOCK, JOBS = 0, threading.Lock(), {}
 
@@ -175,7 +175,7 @@ def settle(claim, decision):
         payout = min(payout, SIGNOFF_LIMIT)
     return {"action": "approve", "payout": payout}</span><span class="dim">
 
-# in the resume branch of invocations(), after "claim, decision = found":
+# in the resume branch of invocations(): right after "claim, decision = found", and above the line that returns paid:
 </span><span class="chg">        if resume.get("send_back"):
             return settle(claim, decide_claim(claim, note=resume["send_back"]))</span><span class="dim">
 
@@ -187,7 +187,7 @@ def settle(claim, decision):
 # print(client.post("/invocations", json=back).json)                              # paid: 800.0</span></div>
 <div class="try" id="p7"></div>
 
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我当时想错了</span></b><span class="en">A long job simply stopped halfway. Nothing in my logs said why. The runtime had decided the session was idle, because the job ran in a background thread and nothing was reporting. I first blamed my code. The fix was to report progress while it works: the busy ping and a step the job writes down at each stage. Keeping long work alive and visible is the harness’s job, not the runtime’s.</span><span class="zh">一个长任务在半路就停了。我的日志里什么原因都没写。运行时认定这个会话空闲了，因为任务跑在后台线程里，没有任何东西在汇报。我一开始怪自己的代码。解决办法是边干边汇报：忙碌的 ping，加上任务在每个阶段写下的一步记录。让长任务活着、看得见，是 harness 的工作，不是运行时的工作。</span></div>
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我当时想错了</span></b><span class="en">A long job simply stopped halfway. Nothing in my logs said why. The runtime had decided the session was idle, because the job ran in a background thread and nothing was reporting. I first blamed my code. The fix was to report progress while it works: the busy ping and a step the job writes down at each stage. Keeping long work alive and visible is the harness’s job (the code you wrap around the agent to run it and report on it), not the runtime’s.</span><span class="zh">一个长任务在半路就停了。我的日志里什么原因都没写。运行时认定这个会话空闲了，因为任务跑在后台线程里，没有任何东西在汇报。我一开始怪自己的代码。解决办法是边干边汇报：忙碌的 ping，加上任务在每个阶段写下的一步记录。让长任务活着、看得见，是 harness 的工作（也就是你围绕智能体写的、负责运行和汇报的那层代码），不是运行时的工作。</span></div>
 
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Send a claim back with a note</b> and watch the second decision come from a new session.</span><span class="zh"><b>带着一句话退回一份理赔</b>，看第二次判定从一个新会话里出来。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Compare cold and warm start times</b> with <code>timing.py</code>, once straight after a deploy and once after a long wait.</span><span class="zh"><b>用 <code>timing.py</code> 比较冷启动和热启动的时间</b>，一次在刚部署之后，一次在等了很久之后。</span></span></label><label><input type="checkbox"><span><span class="en"><b>List what could end a session early</b>: idle time, a crash, a redeploy, a limit on total run time. Write which of them your agent can survive.</span><span class="zh"><b>列出可能让会话提前结束的事</b>：空闲时间、崩溃、重新部署、总运行时长的上限。写下你的智能体能扛住其中哪几种。</span></span></label></div>

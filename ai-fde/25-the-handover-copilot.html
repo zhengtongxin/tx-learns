@@ -5,12 +5,12 @@
 <link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Handing it over · Project</span><span class="zh">交付上线 · 项目</span></span><h1><span class="en">Project: the handover copilot</span><span class="zh">项目：交接用的助手</span></h1><p class="meta"><span class="en">Build a copilot that handlers ask in plain English, then check the pilot’s goals and tear it all down · ~30 min · hands-on</span><span class="zh">做一个理赔员可以用大白话提问的助手，然后核对试点的目标，再把一切拆干净 · 约 30 分钟 · 动手实践</span></p></div>
-<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">The pilot is ending. Mei Ling will soon be back at her own desk, and Aisha will be the one asking things like “what needs me today?”. So Mei Ling builds a <b>copilot</b>: a chat box in the dashboard’s sidebar that can look things up, start the agent’s work and send decisions back. It only works because everything before it is solid: records, permissions, policy and traces. The last job is the handover itself, and a teardown, so the pilot leaves nothing running. You need Flask, requests and the Agents SDK (<code>pip install flask requests openai-agents</code>), and the gateway from the earlier lessons.</p>
-<p class="zh" style="margin:0">试点快结束了。Mei Ling 很快就要回到自己的座位，而 Aisha 会成为那个问“今天有什么要我处理的？”的人。所以 Mei Ling 做了一个<b>助手</b>：看板侧边栏里的一个聊天框，能查资料、启动智能体的工作、把决定退回去。它能用，全靠前面的一切都扎实：记录、权限、策略和追踪。最后一件事是交接本身，还有拆除，让试点不留下任何还在跑的东西。你需要 Flask、requests 和 Agents SDK（<code>pip install flask requests openai-agents</code>），以及前面几课的网关。</p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">The pilot is ending. Mei Ling will soon be back at her own desk, and Aisha will be the one asking things like “what needs me today?”. So Mei Ling builds a <b>copilot</b>: a chat box in the dashboard’s sidebar that can look things up, start the agent’s work and send decisions back. It only works because everything before it is solid: records, permissions, policy and traces. The last job is the handover itself, and a teardown, so the pilot leaves nothing running. You need Flask, requests and the Agents SDK (<code>pip install flask requests openai-agents</code>), and the gateway from the earlier lessons. Set <code>OPENAI_API_KEY</code> as well: the Agents SDK sends each question to a model by default, and that model needs a key.</p>
+<p class="zh" style="margin:0">试点快结束了。Mei Ling 很快就要回到自己的座位，而 Aisha 会成为那个问“今天有什么要我处理的？”的人。所以 Mei Ling 做了一个<b>助手</b>：看板侧边栏里的一个聊天框，能查资料、启动智能体的工作、把决定退回去。它能用，全靠前面的一切都扎实：记录、权限、策略和追踪。最后一件事是交接本身，还有拆除，让试点不留下任何还在跑的东西。你需要 Flask、requests 和 Agents SDK（<code>pip install flask requests openai-agents</code>），以及前面几课的网关。另外设置 <code>OPENAI_API_KEY</code>：Agents SDK 默认会把每个提问发给一个模型，这个模型需要密钥。</p></div>
 
 <h2><span class="en">Step 1 · A sidebar on every page that remembers if it is open</span><span class="zh">第 1 步 · 每个页面都有的侧边栏，记得它开着还是关着</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Handlers will not open a separate tool, so put the copilot where they already work: a sidebar on every dashboard page. It can collapse to a thin tab, so it never blocks the claim table. The browser remembers the choice in <code>localStorage</code>, a small store that keeps its values after the page closes. Add one script tag to every page and you are done. It sends the handler’s sign-in token with each question. The dashboard keeps that token in <code>sessionStorage</code> as <code>token</code>.</p>
-<p class="zh" style="margin:0 0 8px">理赔员不会特地去打开另一个工具，所以把助手放在他们本来就在干活的地方：每个看板页面的侧边栏。它可以收成一条窄窄的标签，所以不会挡住理赔表格。浏览器用 <code>localStorage</code> 记住这个选择，它是页面关掉之后也还保留数据的小仓库。给每个页面加一行 script 标签就行。它每次提问都带上理赔员的登录令牌。看板把令牌以 <code>token</code> 为名放在 <code>sessionStorage</code> 里。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Handlers will not open a separate tool, so put the copilot where they already work: a sidebar on every dashboard page. It can collapse to a thin tab, so you can get back to the claim table. When it is open, it sits over the right edge of the page. The browser remembers the choice in <code>localStorage</code>, a small store that keeps its values after the page closes. Add one script tag to every page and you are done. It sends the handler’s sign-in token with each question. The dashboard keeps that token in <code>sessionStorage</code> as <code>token</code>.</p>
+<p class="zh" style="margin:0 0 8px">理赔员不会特地去打开另一个工具，所以把助手放在他们本来就在干活的地方：每个看板页面的侧边栏。它可以收成一条窄窄的标签，好让你回到理赔表格。打开时，它会盖在页面右边。浏览器用 <code>localStorage</code> 记住这个选择，它是页面关掉之后也还保留数据的小仓库。给每个页面加一行 script 标签就行。它每次提问都带上理赔员的登录令牌。看板把令牌以 <code>token</code> 为名放在 <code>sessionStorage</code> 里。</p></div>
 <div class="codebox"><span class="chg">/* copilot.js, loaded on every dashboard page */
 (function () {
   var side = document.createElement("aside");
@@ -41,6 +41,17 @@
     var li = document.createElement("li");
     li.textContent = data.answer || data.error;               // textContent, never innerHTML
     document.getElementById("cp-log").appendChild(li);
+    (data.pending || []).forEach(function (p) {                  // one Confirm button per payment the copilot asked about
+      var b = document.createElement("button");
+      b.textContent = "Confirm: pay S$" + p.amount + " on " + p.claim_id;
+      b.onclick = function () {
+        fetch("/copilot/confirm", {method: "POST",
+          headers: {"Authorization": "Bearer " + sessionStorage.getItem("token"), "Content-Type": "application/json"},
+          body: JSON.stringify(p)}).then(function (r) { return r.json(); })
+          .then(function (out) { b.textContent = JSON.stringify(out); });
+      };
+      li.appendChild(b);
+    });
   };
 })();</span></div>
 <div class="try" id="p1"></div>
@@ -75,8 +86,8 @@ def allowed(user, tool, args):
 <div class="try" id="p2"></div>
 
 <h2><span class="en">Step 3 · Tools: look up, start work, send back, and ask before paying</span><span class="zh">第 3 步 · 工具：查询、启动、退回，付款前先问</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The copilot gets five tools. Looking things up in the records or the context layer is safe, so it just runs. Starting the agent’s work or sending a decision back also runs, but it leaves a trace. <b>Paying</b> asks first: the tool returns a question, and only the handler’s own click on a Confirm button runs it. The click goes to a separate route. If the model could pass <code>confirmed=True</code> itself, the question would mean nothing. Each call is forwarded to the gateway with the handler’s token. The gateway needs a matching route for each tool, in the pattern of <code>pay_claim</code>.</p>
-<p class="zh" style="margin:0 0 8px">助手有五个工具。在记录或上下文层里查资料是安全的，直接执行。启动智能体的工作、把决定退回去也直接执行，但会留下痕迹。<b>付款</b>要先问：工具返回一个问题，只有理赔员自己点下“确认”按钮才会真正执行。这一下点击走的是另一条路由。如果模型自己能传 <code>confirmed=True</code>，这个询问就一文不值。每个调用都带着理赔员的令牌转给网关。网关要为每个工具准备对应的路由，写法照 <code>pay_claim</code> 的样子。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The copilot gets five tools. Looking things up in the records or the context layer is safe, so it just runs. Starting the agent’s work or sending a decision back also runs, but it leaves a trace. <b>Paying</b> asks first: the tool returns a question, and only the handler’s own click on a Confirm button runs it. The click goes to a separate route. If the model could pass <code>confirmed=True</code> itself, the question would mean nothing. Each call is forwarded to the gateway with the handler’s token. The gateway needs a matching route for each tool, in the pattern of <code>pay_claim</code>. Each line of <code>TOOLS</code> is a <code>lambda</code>, a tiny unnamed function that makes that one call.</p>
+<p class="zh" style="margin:0 0 8px">助手有五个工具。在记录或上下文层里查资料是安全的，直接执行。启动智能体的工作、把决定退回去也直接执行，但会留下痕迹。<b>付款</b>要先问：工具返回一个问题，只有理赔员自己点下“确认”按钮才会真正执行。这一下点击走的是另一条路由。如果模型自己能传 <code>confirmed=True</code>，这个询问就一文不值。每个调用都带着理赔员的令牌转给网关。网关要为每个工具准备对应的路由，写法照 <code>pay_claim</code> 的样子。<code>TOOLS</code> 的每一行都是一个 <code>lambda</code>：一个不起名字的小函数，只做那一次调用。</p></div>
 <div class="codebox"><span class="chg"># copilot_tools.py
 import os, requests
 from urllib.parse import quote
@@ -263,8 +274,8 @@ if __name__ == "__main__":
 <div class="try" id="p5"></div>
 
 <h2><span class="en">Step 6 · The handover conversation, then the teardown</span><span class="zh">第 6 步 · 交接对话，然后拆除</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Give the copilot one more tool that reads <code>pilot_notes.md</code> (what was built, what was decided, what is still open) and the criteria results. Now the owner can simply ask it what the pilot learnt. Then comes the teardown, which is a person’s job. Handlers do not have permission to delete cloud resources, so the copilot cannot either. Run your infrastructure tool’s destroy command, then <b>check what is left</b> and what it cost. Tag everything <code>project=kaya-pilot</code> from the first day, so the leftover search can find it. The script below uses the AWS command line. Swap in your cloud’s equivalent.</p>
-<p class="zh" style="margin:0 0 8px">再给助手加一个工具，读 <code>pilot_notes.md</code>（造了什么、定了什么、还有什么没解决）和标准的核对结果。这样接手的人只要问它，就知道试点学到了什么。然后是拆除，这是人的活。理赔员没有删除云资源的权限，所以助手也没有。运行你的基础设施工具的销毁命令，然后<b>检查还剩下什么</b>、花了多少钱。从第一天起就给所有东西打上 <code>project=kaya-pilot</code> 标签，这样查剩余时才找得到。下面的脚本用的是 AWS 命令行，换成你那家云的对应命令。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Give the copilot one more tool that reads <code>pilot_notes.md</code> (what was built, what was decided, what is still open) and the criteria results. Now the owner can simply ask it what the pilot learnt. Then comes the teardown, which is a person’s job. Handlers do not have permission to delete cloud resources, so the copilot cannot either. Run your infrastructure tool’s destroy command (for example <code>terraform destroy</code>), then <b>check what is left</b> and what it cost. Tag everything <code>project=kaya-pilot</code> from the first day, so the leftover search can find it. The script below uses the AWS command line. Swap in your cloud’s equivalent.</p>
+<p class="zh" style="margin:0 0 8px">再给助手加一个工具，读 <code>pilot_notes.md</code>（造了什么、定了什么、还有什么没解决）和标准的核对结果。这样接手的人只要问它，就知道试点学到了什么。然后是拆除，这是人的活。理赔员没有删除云资源的权限，所以助手也没有。运行你的基础设施工具的销毁命令（比如 <code>terraform destroy</code>），然后<b>检查还剩下什么</b>、花了多少钱。从第一天起就给所有东西打上 <code>project=kaya-pilot</code> 标签，这样查剩余时才找得到。下面的脚本用的是 AWS 命令行，换成你那家云的对应命令。</p></div>
 <div class="codebox"><span class="chg"># handover.py
 import datetime, json, subprocess
 from criteria import check
