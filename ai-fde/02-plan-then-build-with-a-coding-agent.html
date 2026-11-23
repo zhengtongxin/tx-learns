@@ -1,0 +1,102 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Plan first, then build with a coding agent | TX Learns</title>
+<meta name="description" content="Give a coding agent good documents, ask for a plan, review it, then let it build: ten minutes of reading saves an hour of unpicking."><meta property="og:title" content="Plan first, then build with a coding agent | TX Learns"><meta property="og:description" content="Give a coding agent good documents, ask for a plan, review it, then let it build: ten minutes of reading saves an hour of unpicking."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-fde/02-plan-then-build-with-a-coding-agent.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-23">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">The FDE’s job · Lesson 2</span><span class="zh">FDE 是做什么的 · 第 2 课</span></span><h1><span class="en">Plan first, then build with a coding agent</span><span class="zh">先做计划，再让编程智能体来建</span></h1><p class="meta"><span class="en">Give a coding agent good documents, ask for a plan, review it, then let it build: ten minutes of reading saves an hour of unpicking · ~20 min · concept with one runnable idea</span><span class="zh">给编程智能体好文档，先要计划，审过再让它动手：花十分钟读计划，能省一小时拆烂摊子 · 约 20 分钟 · 概念课，附一个可动手的做法</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">Mei Ling, the forward-deployed engineer at Kaya Travel Cover, has watched Aisha work the claims queue and written down the job. Now she wants a first pilot, fast. She will not type it all herself: a <b>coding agent</b> (an AI tool that reads and writes code files for you) will build it. But a coding agent is only as good as what it reads first. So she starts with documents, not code.</p>
+<p class="zh" style="margin:0">Kaya Travel Cover 的前线部署工程师 Mei Ling 已经看过 Aisha 处理理赔队列，也写下了这份工作。现在她想尽快做出第一个试点。她不打算全靠自己敲：让一个<b>编程智能体</b>（能替你读写代码文件的 AI 工具）来建。可编程智能体的水平取决于它先读到什么，所以她先从文档下手，而不是代码。</p></div>
+
+<h2><span class="en">Step 1 · Put the brief in plain documents</span><span class="zh">第 1 步 · 把需求写成朴素的文档</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A chat message gets forgotten. A folder of files does not. Mei Ling puts everything the agent needs into one folder, one file per question: what the business needs, what to build with, how code should look, how to work, how it should feel, and where things stand. Think of handing a new colleague a binder instead of talking at them in the corridor.</p>
+<p class="zh" style="margin:0 0 8px">聊天消息会被忘掉，文件夹里的文件不会。Mei Ling 把智能体需要的一切放进一个文件夹，一个问题一个文件：业务要什么、用什么技术做、代码长什么样、怎么协作、整体观感、现在做到哪了。就像给新同事一本活页夹，而不是在走廊里对着他说一通。</p></div>
+<div class="codebox"><span class="dim">docs/
+</span><span class="chg">  spec.md        </span><span class="dim"># what the business needs, in the customer's words
+</span><span class="chg">  tech.md        </span><span class="dim"># which language, which libraries, where it runs
+</span><span class="chg">  standards.md   </span><span class="dim"># how the code should be written and named
+</span><span class="chg">  process.md     </span><span class="dim"># how we work: plan, build, check, record
+</span><span class="chg">  brand.md       </span><span class="dim"># tone and look, so screens feel like Kaya
+</span><span class="chg">  status.md      </span><span class="dim"># what is built so far and how to run it</span></div>
+<p class="en">Match each question to the file that should answer it.</p>
+<p class="zh">把每个问题配给应该回答它的文件。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Step 2 · One standing instruction: read these first</span><span class="zh">第 2 步 · 一份长期指令：先读这些</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Most coding agents read one instruction file at the start of every session (some call it <code>CLAUDE.md</code>). Use it as a doorbell, not a novel. It lists the documents, in order, and sets one rule: <b>read first, touch nothing until you have</b>. Otherwise the agent starts from guesses.</p>
+<p class="zh" style="margin:0 0 8px">多数编程智能体每次开工都会先读一份指令文件（有的叫 <code>CLAUDE.md</code>）。把它当门铃，不要写成长篇小说：按顺序列出文档，再立一条规矩：<b>先读完，读完之前什么都不要动</b>。否则智能体就是凭猜测开工。</p></div>
+<div class="codebox"><span class="chg">Before you change anything, read these in order:</span><span class="dim">
+1. docs/spec.md
+2. docs/tech.md
+3. docs/standards.md
+4. docs/process.md
+5. docs/brand.md
+6. docs/status.md
+
+</span><span class="chg">Never build anything the documents do not ask for.</span><span class="dim">
+When you finish a piece of work, update docs/status.md.</span></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Ask for a plan, not code</span><span class="zh">第 3 步 · 要计划，不要代码</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Code is expensive to read and expensive to undo. A plan is a page. So Mei Ling’s first request is only <b>“plan the pilot”</b>. The agent writes a plan document with phases and a reason for each. If it misunderstood the brief, the plan shows it while it is still cheap to fix, like checking a floor plan before the walls go up.</p>
+<p class="zh" style="margin:0 0 8px">代码读起来贵，推倒重来也贵；计划只有一页。所以 Mei Ling 的第一个请求只是<b>“为试点做计划”</b>。智能体写出一份分阶段、每阶段带理由的计划文档。如果它误解了需求，计划会在改动还很便宜的时候暴露出来，就像墙还没砌就先看户型图。</p></div>
+<div class="codebox"><span class="chg">Plan the pilot.</span><span class="dim"> Write docs/plan.md with phases.
+For each phase say what you will build and why.
+Do not write any code yet.
+
+</span><span class="dim"># what comes back (shortened):
+Phase 1  Sample claims and a policy wording     why: nothing else can be tested without them
+Phase 2  A queue that tracks each claim         why: handlers need to see what is waiting
+Phase 3  A first agent that decides a claim     why: this is the thing Aisha will react to</span></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 4 · Review the plan, push back, then build</span><span class="zh">第 4 步 · 审计划、提意见，再动手建</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Now Mei Ling reads the plan against the spec, line by line. She pushes back where it drifts: “Phase 3 decides payouts, but the spec says big ones need a handler.” Only when the plan matches the brief does she say <b>“implement the plan”</b>. After each phase she checks the result against the spec before the next one starts.</p>
+<p class="zh" style="margin:0 0 8px">接着 Mei Ling 对照需求，逐行读这份计划。哪里跑偏就提出来：“第 3 阶段会决定赔付，可需求里写了大额要由理赔员批准。”只有计划和需求对上了，她才说<b>“按计划实施”</b>。每个阶段完成后，她先对照需求检查，再开始下一个。</p></div>
+<p class="en">Which reply to the plan is right? Decide for each.</p>
+<p class="zh">对计划的哪种回应是对的？逐个判断。</p><div class="sc" id="g2"></div>
+
+<h2><span class="en">Step 5 · Keep a short status file</span><span class="zh">第 5 步 · 留一份简短的状态文件</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A coding agent forgets everything between sessions. A status file is its memory: what is built, how to run it, what is next. Keep it short enough to read in a minute, and the next session starts informed instead of from zero.</p>
+<p class="zh" style="margin:0 0 8px">编程智能体每次会话之间什么都不记得。状态文件就是它的记忆：做了什么、怎么运行、下一步是什么。保持一分钟能读完的长度，下一次会话就是带着信息开始，而不是从零开始。</p></div>
+<div class="codebox"><span class="chg"># Status</span><span class="dim">
+Built: sample claims (phase 1), claim queue (phase 2)
+Not built yet: the agent (phase 3)
+</span><span class="chg">Run it:</span><span class="dim"> python backend.py
+Open question: does a refer count as waiting for sign-off?</span></div>
+<div class="try" id="p3"></div>
+
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我当时想错了</span></b><span class="en">I asked for code straight away on a vague brief and got a tidy dashboard that answered the wrong question. Writing the brief better took ten minutes. Unpicking the build took an hour. With good documents a coding agent can build a working pilot in one sitting; with vague ones it builds something confident and wrong.</span><span class="zh">我在需求含糊的情况下，一上来就让它写代码，结果得到一个漂亮的看板，却在回答错误的问题。把需求写好只花了十分钟，拆掉重来却花了一小时。文档好的话，编程智能体一次就能做出能用的试点；文档含糊，它做出来的东西自信满满却是错的。</span></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Write a one-page spec</b> for a small tool you want.</span><span class="zh">为你想要的一个小工具<b>写一页需求</b>。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Ask a coding agent for a plan only.</b> Edit the plan before any code is written.</span><span class="zh"><b>只让编程智能体出计划。</b>在写任何代码之前先改计划。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a rule to the standing instructions:</b> never build ahead of the documents.</span><span class="zh">在长期指令里<b>加一条规矩：</b>绝不超出文档去建东西。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">Back at the shophouse</span><span class="zh">回到店屋</span></b><span class="en">The grey filing cabinet is the folder of documents. Kumar knows that when a new hire opens the right drawer first, they stamp the right form. A coding agent is a new hire who starts fresh every morning, so the cabinet, and the note on top of it saying where things stand, matter more than any speech.</span><span class="zh">那个灰色的档案柜就是这个文档文件夹。Kumar 知道，新人先打开对的抽屉，就会盖对的表格。编程智能体是每天早上都从头开始的新人，所以档案柜和放在最上面、写明进度的便条，比任何口头交代都重要。</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Documents are the real interface to a coding agent.<br>• One standing instruction file says what to read first, and in what order.<br>• Ask for a plan before code. A plan is cheap to change.<br>• Review the plan against the spec, not just the code afterwards.<br>• Never let it build ahead of the brief.<br>• Keep a short status file so the next session starts informed.</p><p class="zh" style="margin:0">• 文档才是你和编程智能体之间真正的接口。<br>• 一份长期指令文件，写明先读什么、按什么顺序读。<br>• 先要计划，再要代码；计划改起来很便宜。<br>• 对照需求审计划，而不是只在事后看代码。<br>• 绝不让它超出需求去建东西。<br>• 留一份简短的状态文件，让下一次会话带着信息开始。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI FDE</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+
+ game($('g1'),[
+  {en:'What does Kaya need the pilot to do for claims handlers?',zh:'Kaya 需要试点为理赔员做什么？',a:'s',ex:{en:'What the business needs lives in the spec.',zh:'业务需求写在 spec 里。'},hint:{en:'Which file holds the customer’s words?',zh:'哪个文件放着客户的原话？'}},
+  {en:'Should the backend be Python or something else?',zh:'后端用 Python 还是别的？',a:'t',ex:{en:'Technology choices belong in the tech file.',zh:'技术选择放在 tech 文件里。'},hint:{en:'Is this about what to build with?',zh:'这是关于用什么来做吗？'}},
+  {en:'Do function names use snake_case or camelCase?',zh:'函数名用 snake_case 还是 camelCase？',a:'c',ex:{en:'Naming rules are code standards.',zh:'命名规则属于代码规范。'},hint:{en:'This is about how code is written.',zh:'这是关于代码怎么写。'}},
+  {en:'Which phases are already finished?',zh:'哪些阶段已经完成？',a:'u',ex:{en:'Progress belongs in the status file.',zh:'进度放在状态文件里。'},hint:{en:'Which file says where things stand?',zh:'哪个文件说明现在做到哪？'}}],[{k:'s',en:'spec.md',zh:'spec.md'},{k:'t',en:'tech.md',zh:'tech.md'},{k:'c',en:'standards.md',zh:'standards.md'},{k:'u',en:'status.md',zh:'status.md'}],{en:'Question',zh:'问题'});
+
+ predict($('p1'),{q:{en:'Why does the standing instruction say “never build anything the documents do not ask for”?',zh:'为什么长期指令里要写“文档没要求的东西一律不建”？'},opts:[{k:'a',en:'Agents are eager and will happily add features nobody asked for',zh:'智能体很积极，会乐呵呵地加没人要的功能'},{k:'b',en:'Extra code always crashes',zh:'多余的代码一定会崩'},{k:'c',en:'So the agent writes less text',zh:'这样智能体少写点字'}],a:'a',ex:{en:'Unrequested features are things the customer must now review, trust and maintain.',zh:'没人要的功能，客户却得去审查、信任和维护。'},hint:{en:'Think about who has to check the extra work.',zh:'想想谁要来检查多出来的活。'}});
+
+ predict($('p2'),{q:{en:'Mei Ling asks for a plan and notices Phase 3 has the agent paying out claims on its own. What is the cheapest moment to fix that?',zh:'Mei Ling 要了计划，发现第 3 阶段让智能体自己赔付。什么时候改最便宜？'},opts:[{k:'a',en:'Now, while it is only a line in the plan',zh:'现在，它还只是计划里的一行字'},{k:'b',en:'After the dashboard is built on top of it',zh:'等看板建在它上面之后'},{k:'c',en:'After Aisha finds a wrong payout',zh:'等 Aisha 发现一笔错误赔付之后'}],a:'a',ex:{en:'Fixing a sentence costs seconds. Fixing built code costs an hour or more.',zh:'改一句话只要几秒，改已经建好的代码要一小时甚至更久。'},hint:{en:'When has the least been built?',zh:'什么时候建好的东西最少？'}});
+
+ game($('g2'),[
+  {en:'“Phase 3 lets the agent pay big claims; the spec says a handler signs those off. Change it.”',zh:'“第 3 阶段让智能体赔付大额理赔，但需求写明由理赔员签字。请改掉。”',a:'y',ex:{en:'A specific push-back tied to the spec.',zh:'这是针对需求的具体意见。'},hint:{en:'Does it point to the spec?',zh:'它有对照需求吗？'}},
+  {en:'“Looks fine, implement it.” (without reading it)',zh:'“看起来不错，开始吧。”（没读过）',a:'n',ex:{en:'An unread plan is no review at all.',zh:'没读过的计划等于没审。'},hint:{en:'Did anyone read it?',zh:'有人读过吗？'}},
+  {en:'Ask the agent to build phase 1, check it against the spec, then say go for phase 2.',zh:'让智能体先建第 1 阶段，对照需求检查，再说开始第 2 阶段。',a:'y',ex:{en:'Checking after each phase keeps mistakes small.',zh:'每个阶段后检查，错误就不会堆大。'},hint:{en:'Is there a check between phases?',zh:'阶段之间有检查吗？'}},
+  {en:'Let it build all phases and a few extra ideas it likes, then look at the end.',zh:'让它一口气建完所有阶段，再加几个它喜欢的点子，最后才看。',a:'n',ex:{en:'It builds ahead of the brief, and errors pile up unseen.',zh:'它超出了需求去建，错误也在暗处越堆越多。'},hint:{en:'Is anything being checked on the way?',zh:'中途有检查吗？'}}],[{k:'y',en:'Good review habit',zh:'好的审查习惯'},{k:'n',en:'Risky habit',zh:'有风险的习惯'}],{en:'Reply',zh:'回应'});
+
+ predict($('p3'),{q:{en:'Tomorrow a fresh session starts. What is the first thing it should do?',zh:'明天开一个新会话，它第一件事应该做什么？'},opts:[{k:'a',en:'Read the documents in order, ending with status.md',zh:'按顺序读文档，最后读 status.md'},{k:'b',en:'Start coding from what it remembers of today',zh:'凭对今天的记忆直接写代码'}],a:'a',ex:{en:'It remembers nothing. The documents and the status file are all it has.',zh:'它什么都不记得，文档和状态文件就是它的全部。'},hint:{en:'Does a new session remember yesterday?',zh:'新会话记得昨天吗？'}});
+});
+</script></body></html>
