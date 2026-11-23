@@ -62,7 +62,7 @@ lead:
 
 backend_dev:
   role: Python developer
-  goal: Implement the design exactly, as {module_name}, and save it to the sandbox.
+  goal: Implement the design exactly, as {module_name}.py, and save it to the sandbox.
   backstory: Careful, writes clean self-contained code.
   </span><span class="chg">llm: openai/gpt-4o-mini</span><span class="dim">
 # frontend_dev and tester look similar
@@ -75,7 +75,7 @@ design_task:
   output_file: sandbox/design.md
 
 code_task:
-  description: Implement the design and save it as {module_name}.
+  description: Implement the design and save it as {module_name}.py.
   expected_output: Confirmation the file was saved and runs.
   agent: backend_dev
   </span><span class="chg">context: [design_task]</span><span class="dim">
@@ -103,7 +103,7 @@ test_task:
 REQS = """
 A tab system for regular customers at a drinks stall.
 Open a tab, top up cash, record orders (item, qty) using get_price(item),
-which has fixed test prices for teh_tarik, kopi_o and roti_canai.
+with fixed test prices: teh_tarik 2.00, kopi_o 1.60, roti_canai 1.50 (RM).
 Block orders that would make the balance negative.
 Report balance, items ordered, and a full history.
 """
@@ -111,7 +111,7 @@ Report balance, items ordered, and a full history.
 def run():
     TabTeam().crew().</span><span class="chg">kickoff(inputs={
         "requirements": REQS,
-        "module_name": "tabs.py",
+        "module_name": "tabs",
     })</span></div>
 <div class="try" id="p4"></div>
 
