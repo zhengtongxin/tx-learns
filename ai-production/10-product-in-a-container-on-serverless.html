@@ -1,0 +1,109 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Project: the product in a container on serverless | TX Learns</title>
+<meta name="description" content="Move the signed-in, paid, streaming product onto your own cloud account: container, registry, serverless function, public address."><meta property="og:title" content="Project: the product in a container on serverless | TX Learns"><meta property="og:description" content="Move the signed-in, paid, streaming product onto your own cloud account: container, registry, serverless function, public address."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-production/10-product-in-a-container-on-serverless.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-24">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Containers and a safe cloud account · Project</span><span class="zh">容器与安全的云账号 · 项目</span></span><h1><span class="en">Project: the product in a container on serverless</span><span class="zh">项目：把产品装进容器放到无服务器上</span></h1><p class="meta"><span class="en">Move the signed-in, paid, streaming product onto your own cloud account: container, registry, serverless function, public address · ~50 min · project</span><span class="zh">把带登录、收费和流式输出的产品整个搬到你自己的云账号上：容器、镜像仓库、无服务器函数、公开地址 · 约 50 分钟 · 项目</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">The canteen helper has sign-in, a subscription and streaming answers, and so far it lives on a hosting service. <b>Mr Ong</b> wants it under the wharf's own cloud account, where he can see the bill. <b>Mei Ling</b> has a safe account, a container recipe and an idea of how serverless works. Now she moves the whole product in one go. <b>Auntie Siti</b>, the first customer, will test every screen.</p>
+<p class="zh" style="margin:0">食堂助手有登录、订阅和流式回答，到现在一直放在一个托管服务上。<b>Ong 主管</b>希望把它放到码头自己的云账号下，这样他能看到账单。<b>Mei Ling</b> 有了安全的账号、容器配方，也明白无服务器是怎么回事。现在她要一次性把整个产品搬过去。第一位顾客 <b>Siti 阿姨</b>会把每个界面都试一遍。</p></div>
+<h2><span class="en">Step 1 · Start from the working product</span><span class="zh">第 1 步 · 从能用的产品开始</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Do not change what the product does. Change how it is packed. Turn the front end into a static export (<code>output: "export"</code>, then copy the <code>out</code> folder to <code>static</code>), and make the API an ordinary web server that serves those files and listens on all addresses. The sign-in check and the plan check stay exactly as they were.</p>
+<p class="zh" style="margin:0 0 8px">不要改产品做什么，只改它怎么打包。把前端变成静态导出（<code>output: "export"</code>，再把 <code>out</code> 文件夹复制成 <code>static</code>），让 API 成为一个普通的网页服务器：它提供这些文件，并监听所有地址。登录检查和套餐检查原样保留。</p></div>
+<div class="codebox"><span class="dim">npm run build                  # static export → "out" folder
+rm -rf static && cp -r out static
+# API entry point: server.py with  app = FastAPI()  and, last:
+</span><span class="chg">app.mount("/", StaticFiles(directory="static", html=True), name="site")</span><span class="dim">
+# start command: uvicorn server:app --host 0.0.0.0 --port 8000</span></div>
+<div class="try" id="t0"></div>
+<h2><span class="en">Step 2 · Write the Dockerfile, run it locally first</span><span class="zh">第 2 步 · 写 Dockerfile，先在本地跑</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Use the recipe from the last two lessons: a slim Python base, your files, the adapter that lets a serverless function run a web app, and the streaming setting. Build it <b>for the platform you will deploy to</b>, then run it on your laptop. A bug is ten times cheaper to find here than in the cloud.</p>
+<p class="zh" style="margin:0 0 8px">用前两课的配方：精简的 Python 基础镜像、你的文件、让无服务器函数能运行网页应用的适配器，以及流式设置。<b>按要部署的平台</b>构建，然后先在笔记本上运行。在这里找 bug，比在云上便宜十倍。</p></div>
+<div class="codebox"><span class="dim">FROM python:3.12-slim
+COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.9.1 /lambda-adapter /opt/extensions/lambda-adapter
+ENV PORT=8000
+ENV AWS_LWA_INVOKE_MODE=response_stream
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000"]
+
+# then, in the terminal:
+</span><span class="chg">docker build --platform linux/amd64 -t canteen-helper .
+docker run --env-file .env -p 8000:8000 canteen-helper</span></div>
+<div class="try" id="t1"></div>
+<h2><span class="en">Step 3 · Create a repository and push the image</span><span class="zh">第 3 步 · 创建仓库并推送镜像</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Make a repository in the registry, one per app. Then log your container tool in using a <b>temporary token</b> that the cloud tool prints for your user (it expires, which is the point). <b>Tag</b> the image with the repository's full address, and push. This assumes the cloud command-line tool is installed and signed in as your daily user, with your default region set.</p>
+<p class="zh" style="margin:0 0 8px">在镜像仓库里建一个仓库，一个应用一个。然后用云的命令行工具为你的用户生成的<b>临时令牌</b>让容器工具登录（它会过期，这正是用意）。给镜像打上仓库完整地址的<b>标签（tag）</b>，再推送。这里假设云的命令行工具已安装，并用你的日常用户登录，默认区域也设好了。</p></div>
+<div class="codebox"><span class="dim">REGION=ap-southeast-1
+ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+REGISTRY=$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
+
+</span><span class="chg">aws ecr create-repository --repository-name canteen-helper --region $REGION
+aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $REGISTRY
+docker tag canteen-helper:latest $REGISTRY/canteen-helper:latest
+docker push $REGISTRY/canteen-helper:latest</span></div>
+<div class="try" id="t2"></div>
+<h2><span class="en">Step 4 · Create the function and turn on its URL</span><span class="zh">第 4 步 · 创建函数并打开它的地址</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">In the console, create a function from the container image you pushed. Set the memory and a generous timeout. Add the <b>environment variables</b>: the model key and the sign-in keys, the same names as in your local <code>.env</code>. Then turn on the <b>function URL</b> with the streaming setting. Copy the address it gives you.</p>
+<p class="zh" style="margin:0 0 8px">在控制台里，用你推送的容器镜像创建一个函数。设置内存和一个宽裕的超时时间。添加<b>环境变量</b>：模型密钥和登录密钥，名字和你本地 <code>.env</code> 里的一样。然后用流式设置打开<b>函数地址</b>，把它给出的地址复制下来。</p></div>
+<div class="codebox"><span class="dim">Function: canteen-helper   (from image canteen-helper:latest)
+  Memory 512 MB · Timeout 60 s
+  Environment variables:
+    </span><span class="chg">OPENAI_API_KEY, CLERK_SECRET_KEY, CLERK_JWKS_URL, ...</span><span class="dim">   (same names as .env)
+  Function URL: auth NONE · invoke mode </span><span class="chg">RESPONSE_STREAM</span><span class="dim">
+  → https://abc123.lambda-url.ap-southeast-1.on.aws/</span></div>
+<div class="try" id="t3"></div>
+<h2><span class="en">Step 5 · Tell the sign-in service about the new address</span><span class="zh">第 5 步 · 把新地址告诉登录服务</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The sign-in service only lets people come back to addresses it knows. It still lists the old host, so sign-in fails on the new one. Add the function URL to its allowed addresses in its dashboard (and, in the API's CORS settings, if the front end is hosted elsewhere). Then test in order: sign in, subscribe with the test card, ask a question and watch it stream.</p>
+<p class="zh" style="margin:0 0 8px">登录服务只允许人们回到它认识的地址。它的列表里还是旧主机，所以在新地址上登录会失败。到它的后台把函数地址加进允许的地址里（如果前端放在别处，也要加进 API 的 CORS 设置）。然后按顺序测试：登录、用测试卡订阅、提一个问题并看着它流式输出。</p></div>
+<div class="codebox"><span class="dim">Sign-in dashboard → allowed addresses
+  https://old-host.example.com         (old)
+  </span><span class="chg">https://abc123.lambda-url.ap-southeast-1.on.aws</span><span class="dim">   (new)
+
+Test in order:  1 sign in   2 subscribe (test card)   3 ask a question → streams?</span></div>
+<div class="try" id="t4"></div>
+<h2><span class="en">Step 6 · Read the logs, then know how to tear it all down</span><span class="zh">第 6 步 · 读日志，并知道怎么全部拆掉</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Something will fail, so find the function's log group first. Read the newest lines from the bottom: the error is usually in the last few. When you are done experimenting, delete what you made so nothing quietly keeps billing. Confirm the console is clean in each region you used.</p>
+<p class="zh" style="margin:0 0 8px">总会有东西失败，所以先找到函数的日志组。从最底下读最新的几行：错误通常就在最后几行里。实验结束后，把你建的东西删掉，免得有什么在悄悄计费。确认你用过的每个区域在控制台里都是干净的。</p></div>
+<div class="codebox"><span class="dim"># read the newest log lines
+</span><span class="chg">aws logs tail /aws/lambda/canteen-helper --since 10m --region $REGION</span><span class="dim">
+
+# tear down (this deletes things for good)
+</span><span class="chg">aws lambda delete-function --function-name canteen-helper --region $REGION
+aws ecr delete-repository --repository-name canteen-helper --force --region $REGION
+aws logs delete-log-group --log-group-name /aws/lambda/canteen-helper --region $REGION</span></div>
+<div class="sc" id="t5"></div>
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en"><b>Three slips.</b> I pushed an image built for the wrong chip type, and the function would not start. Sign-in kept failing because the sign-in service still pointed at the old host. And I left test resources running and found them when the budget alert fired.</span><span class="zh"><b>三个失误。</b>我推送了为错误芯片类型构建的镜像，函数起不来。登录一直失败，因为登录服务还指着旧主机。我还把测试资源留着没关，直到预算警报响了才发现。</span></div>
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Redeploy after a one-line change</b> and time the whole loop.</span><span class="zh"><b>改一行代码后重新部署</b>，给整个流程计时。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Delete everything you made</b> and check the console is clean.</span><span class="zh"><b>删掉你建的所有东西</b>，检查控制台是干净的。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Compare the cost line</b> with the previous host.</span><span class="zh"><b>把费用那一行</b>和之前的托管服务对比。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">At the wharf</span><span class="zh">在码头</span></b><span class="en">Moving the helper is like moving cargo to another berth. The cargo is the same. The paperwork is where it goes wrong: the new berth number, the new gate pass. Most of the pain here was addresses and settings, not code. And Mr Ong always asks the same last question: "How do we clear the berth when we are finished?"</span><span class="zh">搬助手就像把货物挪到另一个泊位。货还是那些货，出错的是手续：新的泊位号、新的通行证。这里的麻烦大多出在地址和设置，不是代码。而 Ong 主管总会问最后那个问题：“用完之后怎么把泊位清空？”</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Same product, new home: change how it is packed, not what it does.<br>• Build and run the container locally first, for the platform you deploy to.<br>• Create a repository, log in with the temporary token, tag, push.<br>• The function needs the same environment variables as your local file, plus a longer timeout and the streaming URL.<br>• Add the new address to the sign-in service, or sign-in fails.<br>• Read the logs from the bottom when it fails.<br>• Most of the pain is config and addresses. Always have a way to tear it all down.</p><p class="zh" style="margin:0">• 同一个产品，新的家：改的是怎么打包，不是它做什么。<br>• 先在本地构建并运行容器，并且按部署的平台来构建。<br>• 创建仓库，用临时令牌登录，打标签，推送。<br>• 函数需要和本地文件一样的环境变量，外加更长的超时时间和流式地址。<br>• 把新地址加进登录服务，否则登录会失败。<br>• 出错时从日志的最底下读起。<br>• 大部分麻烦出在配置和地址上。永远要有办法把一切拆掉。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Production</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('t0'),{q:{en:'Why is the static files mount placed last in the API file?',zh:'为什么在 API 文件里把静态文件的挂载放在最后？'},opts:[{k:'a',en:'So the API routes are matched first and the files only catch the rest',zh:'这样先匹配 API 路由，静态文件只接住剩下的'},{k:'b',en:'Because Python runs files from the bottom',zh:'因为 Python 从底部开始运行文件'},{k:'c',en:'It makes the page load faster',zh:'它让页面加载更快'}],a:'a',ex:{en:'A mount at "/" matches every path. If it came first, it would swallow your API routes.',zh:'挂在 “/” 上的目录会匹配所有路径。如果它在前面，就会把你的 API 路由吞掉。'},hint:{en:'What does a mount on "/" match?',zh:'挂在 “/” 上会匹配什么？'}});
+ predict($('t1'),{q:{en:'Why run the container on your laptop before pushing it?',zh:'为什么推送之前要先在笔记本上运行容器？'},opts:[{k:'a',en:'A bug is much quicker to find and fix locally than in the cloud',zh:'bug 在本地找和改，比在云上快得多'},{k:'b',en:'The cloud refuses images that were not run locally',zh:'云会拒绝没在本地运行过的镜像'},{k:'c',en:'It uploads the image for you',zh:'它会帮你上传镜像'}],a:'a',ex:{en:'A local run gives instant feedback. In the cloud every try means a push, a deploy and a log hunt.',zh:'本地运行能立刻得到反馈。在云上每试一次都要推送、部署，再去翻日志。'},hint:{en:'Which loop is shorter?',zh:'哪个循环更短？'}});
+ game($('t2'),[
+  {en:'<code>aws ecr create-repository</code>',zh:'<code>aws ecr create-repository</code>',a:'s',ex:{en:'It makes the shelf in the registry.',zh:'它在镜像仓库里建好货架。'},hint:{en:'Is it making a place, or moving the image?',zh:'它是在建地方，还是在搬镜像？'}},
+  {en:'<code>docker login</code> with the temporary token',zh:'用临时令牌执行 <code>docker login</code>',a:'a',ex:{en:'It proves who you are before the registry accepts anything.',zh:'它在仓库接收任何东西之前先证明你是谁。'},hint:{en:'Who is allowed to push?',zh:'谁被允许推送？'}},
+  {en:'<code>docker tag</code> to the registry address',zh:'用仓库地址执行 <code>docker tag</code>',a:'n',ex:{en:'The tag names where the image should go.',zh:'标签写明了镜像该去哪里。'},hint:{en:'It labels the image with its destination.',zh:'它给镜像贴上目的地的标签。'}},
+  {en:'<code>docker push</code>',zh:'<code>docker push</code>',a:'m',ex:{en:'It actually moves the image onto the shelf.',zh:'它才是真正把镜像搬上货架。'},hint:{en:'Which step moves the bytes?',zh:'哪一步在搬数据？'}}],
+  [{k:'s',en:'Make the shelf',zh:'建货架'},{k:'a',en:'Prove who you are',zh:'证明身份'},{k:'n',en:'Name the destination',zh:'写明目的地'},{k:'m',en:'Move the image',zh:'搬镜像'}],{en:'Command',zh:'命令'});
+ predict($('t3'),{q:{en:'The function URL works, but the app says the model key is missing. What did you forget?',zh:'函数地址能打开，但应用说缺少模型密钥。你忘了什么？'},opts:[{k:'a',en:'The environment variables on the function: the container does not see your local .env',zh:'函数上的环境变量：容器看不到你本地的 .env'},{k:'b',en:'To restart the laptop',zh:'重启笔记本'},{k:'c',en:'To rename the repository',zh:'给仓库改名'}],a:'a',ex:{en:'Secrets are set on the function itself. The image never contains your .env.',zh:'密钥要设置在函数本身上，镜像里从来不含你的 .env。'},hint:{en:'Where does the running function get its settings?',zh:'运行中的函数从哪里拿到它的设置？'}});
+ predict($('t4'),{q:{en:'The page opens on the new address, but sign-in fails. What is the likeliest cause?',zh:'页面在新地址上能打开，但登录失败。最可能的原因？'},opts:[{k:'a',en:'The sign-in service still only allows the old host',zh:'登录服务仍然只允许旧主机'},{k:'b',en:'The image is too small',zh:'镜像太小'},{k:'c',en:'The function has too much memory',zh:'函数内存太多'}],a:'a',ex:{en:'This was my own bug. The sign-in service checks where people come back to, and it did not know the new address.',zh:'这是我自己踩过的坑。登录服务会检查人们回到哪里，而它不认识新地址。'},hint:{en:'Who must know about the new address besides the function?',zh:'除了函数，还有谁必须知道新地址？'}});
+ game($('t5'),[
+  {en:'The function you created for the experiment',zh:'你为实验创建的函数',a:'d',ex:{en:'Delete it when you are done, or it keeps sitting in the account.',zh:'做完就删掉，否则它会一直留在账号里。'},hint:{en:'Will you still need it after the experiment?',zh:'实验结束后你还需要它吗？'}},
+  {en:'The repository holding test images',zh:'存放测试镜像的仓库',a:'d',ex:{en:'Stored images can cost money. Remove the test ones.',zh:'存着的镜像可能要花钱，把测试用的删掉。'},hint:{en:'Is it only for testing?',zh:'它只是用来测试的吗？'}},
+  {en:'The budget alarms from the first lesson',zh:'第一课里设的预算警报',a:'k',ex:{en:'Keep them. They are what catches the next leftover.',zh:'留着。下一次遗漏的东西就靠它们发现。'},hint:{en:'What warns you when you forget something?',zh:'你忘了什么东西时，谁来提醒你？'}},
+  {en:'The daily user and its group',zh:'日常用户和它的用户组',a:'k',ex:{en:'You will use them for the next project.',zh:'下一个项目你还要用。'},hint:{en:'Will you sign in again tomorrow?',zh:'你明天还要登录吗？'}}],
+  [{k:'d',en:'Delete when done',zh:'做完就删'},{k:'k',en:'Keep',zh:'保留'}],{en:'Item',zh:'项目'});
+});
+</script></body></html>

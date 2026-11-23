@@ -9,15 +9,15 @@ window.TRACK={id:'ai-production',title:{en:'AI Production',zh:'AI 上线实战'}
   {k:'c',file:'05-subscriptions-and-feature-gates.html',title:{en:"Subscriptions and gating a feature",zh:"订阅与功能开关"}},
   {k:'p',file:'06-consultation-notes-assistant.html',title:{en:"Project: a consultation notes assistant",zh:"项目：问诊记录助手"}}]},
  {n:3,title:{en:"Containers and a safe cloud account",zh:"容器与安全的云账号"},items:[
-  {k:'f',title:{en:"A safe cloud account: roots, users and budget alarms",zh:"安全的云账号：根用户、普通用户与预算警报"}},
-  {k:'c',title:{en:"Containers in plain words",zh:"容器的大白话"}},
-  {k:'c',title:{en:"Serverless: paying only when it runs",zh:"无服务器：用了才付钱"}},
-  {k:'p',title:{en:"Project: the product in a container on serverless",zh:"项目：把产品装进容器放到无服务器上"}}]},
+  {k:'f',file:'07-safe-cloud-account.html',title:{en:"A safe cloud account: roots, users and budget alarms",zh:"安全的云账号：根用户、普通用户与预算警报"}},
+  {k:'c',file:'08-containers-in-plain-words.html',title:{en:"Containers in plain words",zh:"容器的大白话"}},
+  {k:'c',file:'09-serverless-pay-when-it-runs.html',title:{en:"Serverless: paying only when it runs",zh:"无服务器：用了才付钱"}},
+  {k:'p',file:'10-product-in-a-container-on-serverless.html',title:{en:"Project: the product in a container on serverless",zh:"项目：把产品装进容器放到无服务器上"}}]},
  {n:4,title:{en:"An AI twin with memory",zh:"有记忆的 AI 分身"},items:[
-  {k:'f',title:{en:"Models forget: why memory is your job",zh:"模型会忘：记忆得你来管"}},
-  {k:'c',title:{en:"Giving the twin a personality and facts",zh:"给分身性格和事实"}},
-  {k:'c',title:{en:"Where memory lives in the cloud",zh:"记忆在云里放哪"}},
-  {k:'p',title:{en:"Project: a digital twin live on the internet",zh:"项目：上线到互联网的数字分身"}}]},
+  {k:'f',file:'11-models-forget-memory-is-your-job.html',title:{en:"Models forget: why memory is your job",zh:"模型会忘：记忆得你来管"}},
+  {k:'c',file:'12-twin-personality-and-facts.html',title:{en:"Giving the twin a personality and facts",zh:"给分身性格和事实"}},
+  {k:'c',file:'13-where-memory-lives-in-the-cloud.html',title:{en:"Where memory lives in the cloud",zh:"记忆在云里放哪"}},
+  {k:'p',file:'14-digital-twin-live.html',title:{en:"Project: a digital twin live on the internet",zh:"项目：上线到互联网的数字分身"}}]},
  {n:5,title:{en:"Managed models in the cloud",zh:"云上的托管模型"},items:[
   {k:'c',title:{en:"A managed model service versus a vendor API",zh:"托管模型服务 vs 厂商 API"}},
   {k:'c',title:{en:"Picking a model by cost and speed, then watching it",zh:"按成本和速度选模型，然后盯着它"}}]},
