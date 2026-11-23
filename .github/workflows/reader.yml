@@ -194,7 +194,7 @@ jobs:
         run: |
           test -s /tmp/out/reader.json || { echo "The reader wrote no result."; exit 1; }
           low=$(node -e 'const r=require("/tmp/out/reader.json");console.log(Math.floor(Math.min(10,...r.lessons.map(l=>+l.score||0))))')
-          node -e 'const r=require("/tmp/out/reader.json");console.log(r.lessons.map(l=>String(l.file).split("/").pop()+" "+l.score+"/10").join(", ")+". "+r.summary)' > /tmp/reader-line.txt
+          node -e 'const r=require("/tmp/out/reader.json");console.log(r.lessons.map(l=>String(l.file).split("/").pop()+" "+l.score+"/10").join(", ")+". "+(r.summary||""))' > /tmp/reader-line.txt
           echo "low=$low" >> "$GITHUB_OUTPUT"
           url=; pushed=
           cp /tmp/out/reader-comment.md /tmp/c.md

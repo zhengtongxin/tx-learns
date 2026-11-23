@@ -1,8 +1,8 @@
 /* Lessons grouped by concept. Titles are our own; never copy a source's outline, project names or numbering. */
 window.TRACK={id:'ai-engineer',title:{en:'AI Engineer',zh:'AI 工程师'},topics:[
  {n:1,title:{en:'Talking to models',zh:'和模型对话'},items:[
-  {k:'f',title:{en:'What an LLM call really is',zh:'一次大模型调用到底是什么'}},
-  {k:'c',title:{en:'Tokens, context and the illusion of memory',zh:'token、上下文与“记忆”的错觉'}},
+  {k:'f',file:'01-what-an-llm-call-is.html',title:{en:'What an LLM call really is',zh:'一次大模型调用到底是什么'}},
+  {k:'c',file:'02-tokens-context-memory.html',title:{en:'Tokens, context and the illusion of memory',zh:'token、上下文与“记忆”的错觉'}},
   {k:'p',title:{en:'Project: a stall brochure maker',zh:'项目：摊位宣传册生成器'}}]},
  {n:2,title:{en:'Many models, one app',zh:'多个模型，一个应用'},items:[
   {k:'c',title:{en:'Comparing frontier and local models',zh:'对比云端模型与本地模型'}},
