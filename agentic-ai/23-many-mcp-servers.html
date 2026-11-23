@@ -1,0 +1,121 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Many MCP servers, local and remote | TX Learns</title>
+<meta name="description" content="Give one agent four kinds of context from several MCP servers, and keep its tool list under control."><meta property="og:title" content="Many MCP servers, local and remote | TX Learns"><meta property="og:description" content="Give one agent four kinds of context from several MCP servers, and keep its tool list under control."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/agentic-ai/23-many-mcp-servers.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#0b1020">
+<meta name="updated" content="2026-11-23">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">MCP · Lesson 3</span><span class="zh">MCP · 第 3 课</span></span><h1><span class="en">Many MCP servers, local and remote</span><span class="zh">多个本地与远程 MCP 服务</span></h1><p class="meta"><span class="en">Give one agent memory, fresh news, its own notes and live systems · ~35 min · hands-on</span><span class="zh">让一个智能体同时拥有记忆、最新消息、自己的笔记和实时系统 · 约 35 分钟 · 动手实践</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">A good kopitiam auntie is great at her job because of <b>context</b>, not because she is clever. <b>Auntie Suria</b> remembers that Uncle Lim takes kopi-C kurang manis and sits by the fan. She hears this morning that the road outside is closed for a marathon. She keeps a little book of supplier prices, and she checks the e-wallet terminal to see if today's payments went through. Today you give an agent the same four kinds of context, each from its own MCP server.</p>
+<p class="zh" style="margin:0">一位好的咖啡店阿姨做得好，靠的是<b>背景信息</b>，而不是聪明。<b>Suria 阿姨</b>记得 Lim 叔喝少糖的 kopi-C、爱坐风扇旁。她今早听说门外的路因为马拉松封路了。她有一本记供货价格的小册子，还会去看电子钱包机，确认今天的付款有没有到账。今天你要给一个智能体同样的四种背景信息，每一种都来自它自己的 MCP 服务端。</p></div>
+<h2><span class="en">Step 1 · Four kinds of context</span><span class="zh">第 1 步 · 四种背景信息</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><b>Context engineering</b> means choosing what the model gets to see. Auntie's four kinds: <b>memory</b> (facts about people), <b>fresh news</b> (the web), <b>her own notes</b> (a knowledge base she builds) and <b>live systems</b> (payments, stock, prices).</p><p class="zh" style="margin:0 0 8px"><b>背景信息工程</b>就是决定让模型看到什么。阿姨的四种：<b>记忆</b>（关于人的事实）、<b>最新消息</b>（网络）、<b>自己的笔记</b>（她自己建的知识库）和<b>实时系统</b>（付款、库存、价格）。</p><p class="en" style="margin:0 0 8px">Each kind can be its own MCP server, and one agent can use several at once. Steps 2 to 5 below take them one at a time.</p><p class="zh" style="margin:0 0 8px">每一种都可以是单独的 MCP 服务端，一个智能体也可以同时用好几个。下面的第 2 到 5 步会一个一个来。</p></div>
+<div class="codebox"><span class="dim">Auntie Suria                      The agent
+remembers Uncle Lim          -&gt;    memory server        (knowledge graph, a JSON file)
+hears about the marathon     -&gt;    search server        (the live web)
+flips through her price book -&gt;    vector server        (notes the agent writes itself)
+checks the e-wallet terminal -&gt;    live integration     (a company's own MCP server)</span></div>
+<p class="en">Which kind of context is each case?</p>
+<p class="zh">下面每个情景是哪一种背景信息？</p>
+<div class="sc" id="g1"></div>
+<h2><span class="en">Step 2 · Long-term memory</span><span class="zh">第 2 步 · 长期记忆</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Without memory, a new run knows nothing about Uncle Lim. The official <b>memory server</b> stores <b>entities</b> (people), <b>observations</b> about them and <b>relations</b> between them in a JSON file that survives between runs.</p><p class="zh" style="margin:0 0 8px">没有记忆，新的一次运行对 Lim 叔一无所知。官方的<b>记忆服务端</b>把<b>实体</b>（人）、关于他们的<b>观察</b>和它们之间的<b>关系</b>存在一个 JSON 文件里，下次运行还在。</p><p class="en" style="margin:0 0 8px">Settings for a server go in its <code>env</code>, here the file path. The agent only needs a sentence telling it to use those tools as memory.</p><p class="zh" style="margin:0 0 8px">服务端的设置放在它的 <code>env</code> 里，这里是文件路径。智能体只需要一句话，告诉它把这些工具当记忆来用。</p></div>
+<div class="codebox"><span class="dim">pip install openai-agents python-dotenv      # plus Node + npx, uv/uvx
+# keys in .env: OPENAI_API_KEY (and TAVILY_API_KEY in Step 3)
+
+import os
+from agents import Agent, Runner, trace
+from agents.mcp import MCPServerStdio
+from dotenv import load_dotenv
+load_dotenv()                       # reads the keys in .env into os.environ
+
+</span><span class="chg">memory = {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-memory"],
+          "env": {"MEMORY_FILE_PATH": os.path.abspath("memory/regulars.json")}}</span><span class="dim">
+
+RULES = "Use your entity tools as long-term memory: store facts about people and recall them later."
+
+async with MCPServerStdio(params=memory, client_session_timeout_seconds=60) as mem:
+    a = Agent(name="auntie", instructions=RULES, model="gpt-4o-mini", mcp_servers=[mem])
+    await Runner.run(a, "I'm Lim. Kopi-C kurang manis, and I like the table by the fan.")
+
+# ...later, a brand new run...
+async with MCPServerStdio(params=memory, client_session_timeout_seconds=60) as mem:
+    a = Agent(name="auntie", instructions=RULES, model="gpt-4o-mini", mcp_servers=[mem])
+    print((await Runner.run(a, "I'm Lim. The usual?")).final_output)</span></div>
+<div class="try" id="p2"></div>
+<h2><span class="en">Step 3 · Fresh news, with one tool allowed</span><span class="zh">第 3 步 · 最新消息，只放行一个工具</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A search server keeps the agent current. But many servers offer lots of tools (search, extract, crawl...), and more tools mean more confusion and more tokens. The SDK lets you <b>filter</b> them down to the ones you want.</p><p class="zh" style="margin:0 0 8px">搜索服务端能让智能体与时俱进。但很多服务端提供一大堆工具（搜索、提取、爬取……），工具越多越容易混乱，也越费 token。SDK 可以让你把工具<b>过滤</b>成你想要的那几个。</p><p class="en" style="margin:0 0 8px">Note that the API key goes to the <b>server</b> through its <code>env</code>, not to the agent.</p><p class="zh" style="margin:0 0 8px">注意 API 密钥是通过 <code>env</code> 交给<b>服务端</b>的，不是交给智能体。</p></div>
+<div class="codebox"><span class="dim">from datetime import date
+from agents.mcp import create_static_tool_filter
+
+</span><span class="chg">search = {"command": "npx", "args": ["-y", "tavily-mcp@latest"],
+          "env": {"TAVILY_API_KEY": os.getenv("TAVILY_API_KEY")}}
+only_search = create_static_tool_filter(allowed_tool_names=["tavily_search"])
+
+async with MCPServerStdio(params=search, client_session_timeout_seconds=60, tool_filter=only_search) as s:</span><span class="dim">
+    a = Agent(name="news", instructions="Search the web and summarise briefly.", model="gpt-4o-mini", mcp_servers=[s])
+    print((await Runner.run(a, f"Any road closures in Petaling Jaya this weekend? Today is {date.today()}.")).final_output)</span></div>
+<div class="try" id="p3"></div>
+<h2><span class="en">Step 4 · Agentic RAG: the agent builds its own notebook</span><span class="zh">第 4 步 · 智能体式 RAG：智能体自己建笔记本</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Normal <b>RAG</b> (retrieval-augmented generation: look things up, then answer) loads documents into a vector store up front. In <b>agentic RAG</b> the agent itself decides what to store and when to search. A vector store finds notes by meaning, not by exact words. It turns each note into an <b>embedding</b>: a list of numbers that stands for what the note means, so a question can find a note that uses different words.</p><p class="zh" style="margin:0 0 8px">普通的 <b>RAG</b>（检索增强生成：先查资料，再回答）会提前把文档装进向量库。在<b>智能体式 RAG</b> 里，存什么、什么时候搜都由智能体自己决定。向量库按意思找笔记，而不是按字面一模一样。它把每条笔记变成一个<b>嵌入</b>（embedding）：一串代表笔记意思的数字，所以问题即使用词不同，也能找到对应的笔记。</p><p class="en" style="margin:0 0 8px">Run 1 searches the web and stores what it finds. Run 2 has no internet, only the notebook. Anything it answers must have come from run 1.</p><p class="zh" style="margin:0 0 8px">第 1 次运行上网搜索，并把找到的存起来。第 2 次运行没有网络，只有笔记本。它回答的任何内容，都一定来自第 1 次。</p></div>
+<div class="codebox"><span class="dim">from pathlib import Path
+
+</span><span class="chg">vectors = {"command": "uvx", "args": ["mcp-server-qdrant"],
+           "env": {"QDRANT_LOCAL_PATH": str(Path("memory/qdrant")), "COLLECTION_NAME": "suppliers"}}</span><span class="dim">
+
+NOTES = """You research suppliers on the web and keep a knowledge base.
+Store anything worth keeping. When asked what you know, search the knowledge base and answer from it."""
+
+# Run 1: search + store
+async with MCPServerStdio(params=search, tool_filter=only_search, client_session_timeout_seconds=60) as s, \
+           MCPServerStdio(params=vectors, client_session_timeout_seconds=120) as v:
+    a = Agent(name="buyer", instructions=NOTES, model="gpt-4o-mini", mcp_servers=[s, v])
+    await Runner.run(a, "Find current wholesale prices for condensed milk in the Klang Valley and remember them.")
+
+</span><span class="chg"># Run 2: no web, only the knowledge base
+async with MCPServerStdio(params=vectors, client_session_timeout_seconds=120) as v:
+    a = Agent(name="buyer", instructions=NOTES, model="gpt-4o-mini", mcp_servers=[v])
+    print((await Runner.run(a, "From your notes: what does condensed milk cost wholesale?")).final_output)</span></div>
+<div class="try" id="p4"></div>
+<h2><span class="en">Step 5 · Live systems: local or remote, and optional</span><span class="zh">第 5 步 · 实时系统：本地或远程，而且可有可无</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The fourth kind is a live system: payments, inventory, market data. Many companies now publish an official MCP server. You can run their package <b>locally</b> over stdio, with your API key in <code>env</code>, and you control the version. Or you can use a <b>remote</b> URL: nothing to install, and you trust their uptime and sign-in.</p><p class="zh" style="margin:0 0 8px">第四种是实时系统：付款、库存、行情数据。现在很多公司都发布了官方 MCP 服务端。你可以用 stdio 在<b>本地</b>运行他们的包，把 API 密钥放进 <code>env</code>，版本由你控制；也可以用<b>远程</b>网址：什么都不用装，但要信任对方的稳定性和登录方式。</p><p class="en" style="margin:0 0 8px">Make the code degrade gracefully: if the key is not set, skip that server so the rest of the agent still works. <code>AsyncExitStack</code> opens a list of servers in a loop and closes them all at the end, even if a run fails.</p><p class="zh" style="margin:0 0 8px">让代码能优雅降级：没有设置密钥就跳过这个服务端，智能体的其他部分照常工作。<code>AsyncExitStack</code> 可以用循环打开一批服务端，结束时全部关掉，即使运行失败也一样。</p></div>
+<div class="codebox"><span class="dim">from contextlib import AsyncExitStack
+from agents.mcp import MCPServerStreamableHttp
+
+# a made-up payments provider, reached by URL
+</span><span class="chg">payments = MCPServerStreamableHttp(name="payments", params={
+    "url": "https://mcp.example-pay.test/mcp",
+    "headers": {"Authorization": f"Bearer {os.getenv('PAYMENTS_API_KEY')}"}})</span><span class="dim">
+
+async with AsyncExitStack() as stack:
+    servers = [await stack.enter_async_context(MCPServerStdio(params=memory, client_session_timeout_seconds=60)),
+               await stack.enter_async_context(MCPServerStdio(params=search, tool_filter=only_search,
+                                                              client_session_timeout_seconds=60))]
+</span><span class="chg">    if os.getenv("PAYMENTS_API_KEY"):            # no key, no payments server
+        servers.append(await stack.enter_async_context(payments))</span><span class="dim">
+    a = Agent(name="auntie", instructions=RULES, model="gpt-4o-mini", mcp_servers=servers)
+    print((await Runner.run(a, "Did today's e-wallet payments go through?")).final_output)</span></div>
+<div class="try" id="p5"></div>
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我踩过的坑</span></b><span class="en">Connecting four servers gave the model 30+ tools, and it started picking odd ones (crawl instead of search). <code>create_static_tool_filter</code> plus a sentence in the instructions about <i>when</i> to use each source fixed most of it. Then a market-data server (the live-system kind from Step 5) broke on a fresh <code>uvx</code> run: it used an API that the mcp 2.0 release removed and did not cap its dependency. Pinning with <code>uvx --with "mcp&lt;2"</code> and a git tag (<code>@v0.10.0</code>) made it repeatable. Last, the vector server downloads an embedding model on first start, so it got a 120-second timeout. Memory and vectors are plain files (<code>memory/*.json</code>, <code>memory/qdrant</code>), so deleting the folder is a full reset.</span><span class="zh">连上四个服务端后，模型一下子有了 30 多个工具，开始选些奇怪的（用爬取代替搜索）。用 <code>create_static_tool_filter</code>，再在指令里写一句每个来源<i>什么时候</i>用，就解决了大半。后来有个行情数据服务端（就是第 5 步说的那类实时系统）在新的 <code>uvx</code> 运行里崩了：它用的接口被 mcp 2.0 删掉了，又没有限制依赖版本。用 <code>uvx --with "mcp&lt;2"</code> 再加上 git 标签（<code>@v0.10.0</code>）固定版本后，就能稳定复现。最后，向量服务端第一次启动要下载嵌入模型，所以给它设了 120 秒超时。记忆和向量都是普通文件（<code>memory/*.json</code>、<code>memory/qdrant</code>），删掉文件夹就是彻底重置。</span></div>
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Prove the memory.</b> Run the two memory runs, then open <code>memory/regulars.json</code> and find what was stored.</span><span class="zh"><b>验证记忆。</b>跑那两次记忆运行，然后打开 <code>memory/regulars.json</code>，找到存下来的内容。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Count the tools.</b> Print the tool names with and without the filter. How many did you remove?</span><span class="zh"><b>数一数工具。</b>分别打印有过滤和没过滤时的工具名字，看看去掉了几个。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Unplug the key.</b> Remove the payments key and check the agent still runs with the other servers.</span><span class="zh"><b>拔掉密钥。</b>去掉付款的密钥，确认智能体仍能用其他服务端正常运行。</span></span></label></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Context engineering is choosing what the model sees. Memory, fresh news, own notes and live systems can each be an MCP server.<br>• The memory server keeps entities, observations and relations in a file that survives between runs.<br>• Filter a server's tools down to the ones you need: fewer tools, fewer wrong picks, fewer tokens.<br>• API keys go to the <b>server</b> through <code>env</code>, not to the agent.<br>• In agentic RAG the agent decides what to store and when to search.<br>• Live systems: run the package locally (you control the version) or use a remote URL (nothing to install).<br>• Skip a server when its key is missing, pin versions (<code>mcp&lt;2</code> and a git tag), and give slow starts a long timeout.</p><p class="zh" style="margin:0">• 背景信息工程就是选择模型能看到什么。记忆、最新消息、自己的笔记和实时系统都可以各自成为一个 MCP 服务端。<br>• 记忆服务端把实体、观察和关系存在文件里，下次运行还在。<br>• 把服务端的工具过滤到只剩你需要的：工具少，选错少，token 也少。<br>• API 密钥通过 <code>env</code> 交给<b>服务端</b>，不是交给智能体。<br>• 智能体式 RAG 里，存什么、什么时候搜都由智能体决定。<br>• 实时系统：在本地运行它的包（版本由你控制），或者用远程网址（什么都不用装）。<br>• 缺密钥就跳过那个服务端，固定版本（<code>mcp&lt;2</code> 加 git 标签），启动慢的给足超时时间。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Agentic AI</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ game($('g1'),[
+  {en:'Uncle Lim takes kopi-C kurang manis and sits by the fan.',zh:'Lim 叔喝少糖的 kopi-C，爱坐风扇旁。',a:'m',ex:{en:'Facts about a person that must survive until tomorrow: memory.',zh:'关于一个人的事实，明天还要记得：记忆。'},hint:{en:'Is it about a person, to be remembered?',zh:'它是关于某个人、需要被记住的吗？'}},
+  {en:'This morning the road outside is closed for a marathon.',zh:'今早门外的路因为马拉松封路了。',a:'n',ex:{en:'It changes day to day and lives on the web: fresh news.',zh:'它每天都在变，而且在网上：最新消息。'},hint:{en:'Could the agent have known this last month?',zh:'智能体上个月就可能知道这个吗？'}},
+  {en:'Condensed milk prices the agent collected over months.',zh:'智能体几个月来收集的炼乳价格。',a:'k',ex:{en:'A notebook the agent builds and searches itself: own notes.',zh:'智能体自己建、自己搜的笔记本：自己的笔记。'},hint:{en:'Who wrote these down?',zh:'这些是谁记下来的？'}},
+  {en:'Did today\'s e-wallet payments go through?',zh:'今天的电子钱包付款到账了吗？',a:'l',ex:{en:'The answer sits in someone else\'s running system: a live system.',zh:'答案在别人正在运行的系统里：实时系统。'},hint:{en:'Where does the up-to-the-minute answer live?',zh:'这一分钟的答案在哪里？'}}],[{k:'m',en:'Memory',zh:'记忆'},{k:'n',en:'Fresh news',zh:'最新消息'},{k:'k',en:'Own notes',zh:'自己的笔记'},{k:'l',en:'Live system',zh:'实时系统'}],{en:'Case',zh:'情景'});
+ predict($('p2'),{q:{en:'In the second memory run, the agent says "Kopi-C kurang manis, by the fan?". Where did it learn that?',zh:'第二次记忆运行里，智能体说“少糖 kopi-C，坐风扇旁？”。它是从哪里知道的？'},opts:[{k:'a',en:'From the memory file the server saved in the first run',zh:'从服务端在第一次运行时保存的记忆文件里'},{k:'b',en:'The model remembers every chat on its own',zh:'模型自己记得每一次聊天'}],a:'a',ex:{en:'A model starts each run blank. The JSON file is the memory.',zh:'模型每次运行都是一张白纸，JSON 文件才是记忆。'},hint:{en:'What did <code>MEMORY_FILE_PATH</code> point at?',zh:'<code>MEMORY_FILE_PATH</code> 指向的是什么？'}});
+ predict($('p3'),{q:{en:'Why allow only <code>tavily_search</code> from the search server?',zh:'为什么只放行搜索服务端的 <code>tavily_search</code>？'},opts:[{k:'a',en:'Fewer tools means fewer odd choices and fewer tokens',zh:'工具少，奇怪的选择就少，token 也少'},{k:'b',en:'The other tools do not work over stdio',zh:'其他工具走 stdio 用不了'},{k:'c',en:'The key only unlocks one tool',zh:'密钥只能解锁一个工具'}],a:'a',ex:{en:'Every tool\'s description is sent to the model, so unused ones cost tokens and invite mistakes.',zh:'每个工具的描述都会发给模型，没用的工具既费 token，又容易引起选错。'},hint:{en:'Think about what the model has to read and choose from.',zh:'想想模型要读什么、从什么里面选。'}});
+ predict($('p4'),{q:{en:'Run 2 has no internet. It still answers the condensed milk price. Why?',zh:'第 2 次运行没有网络，却仍能回答炼乳价格。为什么？'},opts:[{k:'a',en:'It searched the knowledge base that run 1 filled',zh:'它搜了第 1 次填好的知识库'},{k:'b',en:'It guessed',zh:'它猜的'},{k:'c',en:'The vector server has a hidden web search',zh:'向量服务端里藏着网络搜索'}],a:'a',ex:{en:'That makes the retrieval half easy to see: the answer can only come from stored notes.',zh:'这样就很容易看清“检索”这一半：答案只能来自存下的笔记。'},hint:{en:'Which servers are in the <code>mcp_servers</code> list of run 2?',zh:'第 2 次运行的 <code>mcp_servers</code> 里有哪些服务端？'}});
+ predict($('p5'),{q:{en:'<code>PAYMENTS_API_KEY</code> is not set. What should the agent do?',zh:'<code>PAYMENTS_API_KEY</code> 没设置。智能体应该怎么办？'},opts:[{k:'a',en:'Crash, so you notice',zh:'直接崩掉，让你注意到'},{k:'b',en:'Skip the payments server and carry on with the others',zh:'跳过付款服务端，用其他服务端继续'}],a:'b',ex:{en:'The <code>if</code> keeps the rest of the agent working without that one live system.',zh:'这个 <code>if</code> 让智能体在缺少这一个实时系统时，其他部分仍能工作。'},hint:{en:'Look at the line that starts with <code>if os.getenv</code>.',zh:'看看以 <code>if os.getenv</code> 开头的那一行。'}});
+});
+</script></body></html>

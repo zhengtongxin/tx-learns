@@ -27,8 +27,8 @@ window.TRACK={id:'agentic-ai',title:{en:'Agentic AI',zh:'智能体 AI'},topics:[
   {k:'c',file:'19-python-vs-ts-frameworks.html',title:{en:'Comparing Python and JS/TS frameworks',zh:'对比 Python 与 JS/TS 框架'}},
   {k:'p',file:'20-own-agent-loop.html',title:{en:'Project: write your own agent loop',zh:'项目：自己写一个智能体循环'}}]},
  {n:7,title:{en:'MCP',zh:'MCP'},items:[
-  {k:'f',title:{en:'Why MCP exists',zh:'为什么需要 MCP'}},
-  {k:'c',title:{en:'Build an MCP server and client',zh:'构建 MCP 服务端与客户端'}},
-  {k:'c',title:{en:'Many MCP servers, local and remote',zh:'多个本地与远程 MCP 服务'}},
-  {k:'p',title:{en:'Project: a paper-trading simulation',zh:'项目：模拟交易实验'}}]}
+  {k:'f',file:'21-why-mcp.html',title:{en:'Why MCP exists',zh:'为什么需要 MCP'}},
+  {k:'c',file:'22-mcp-server-and-client.html',title:{en:'Build an MCP server and client',zh:'构建 MCP 服务端与客户端'}},
+  {k:'c',file:'23-many-mcp-servers.html',title:{en:'Many MCP servers, local and remote',zh:'多个本地与远程 MCP 服务'}},
+  {k:'p',file:'24-paper-trading.html',title:{en:'Project: a paper-trading simulation',zh:'项目：模拟交易实验'}}]}
 ]};
