@@ -177,12 +177,18 @@ def check(tool, args):
             return False, rule
     return True, None</span><span class="dim">
 
-# action_gateway.py, in pay_claim, after the claim id check
+# action_gateway.py: add the import at the top, and pay_claim becomes
 </span><span class="chg">from policy import check
-# ...
+
+@app.post("/tools/pay_claim")
+def pay_claim():
+    body = request.get_json(silent=True) or {}
+    if claim_id_of(body) is None:
+        return jsonify(error="bad claim id"), 400
     ok, rule = check("pay_claim", body)
     if not ok:
-        return jsonify(error=rule["say"], rule=rule["id"]), 403</span></div>
+        return jsonify(error=rule["say"], rule=rule["id"]), 403
+    return forward("/claims/" + body["claim_id"] + "/pay", {"amount": body.get("amount")})</span></div>
 <div class="try" id="p5"></div>
 
 <h2><span class="en">Step 6 · Find out which layer says no</span><span class="zh">第 6 步 · 查出是哪一层说了不</span></h2>
