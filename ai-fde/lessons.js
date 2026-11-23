@@ -9,17 +9,17 @@ window.TRACK={id:'ai-fde',title:{en:'AI FDE',zh:'AI FDE'},topics:[
   {k:'c',file:'05-open-models-local-and-token-cost.html',title:{en:'Open models, local models and token cost',zh:'开源模型、本地模型与 token 成本'}},
   {k:'p',file:'06-cheapest-model-good-enough.html',title:{en:'Project: the cheapest model that is good enough',zh:'项目：够用的最便宜模型'}}]},
  {n:3,title:{en:'Harness engineering',zh:'Harness 工程'},items:[
-  {k:'f',title:{en:'What a harness is',zh:'什么是 harness'}},
-  {k:'c',title:{en:'Two ways to build a harness',zh:'搭 harness 的两种路线'}},
-  {k:'p',title:{en:'Project: an agent that works the queue',zh:'项目：自己处理队列的智能体'}}]},
+  {k:'f',file:'07-what-a-harness-is.html',title:{en:'What a harness is',zh:'什么是 harness'}},
+  {k:'c',file:'08-two-ways-to-build-a-harness.html',title:{en:'Two ways to build a harness',zh:'搭 harness 的两种路线'}},
+  {k:'p',file:'09-agent-that-works-the-queue.html',title:{en:'Project: an agent that works the queue',zh:'项目：自己处理队列的智能体'}}]},
  {n:4,title:{en:'Measuring an agent',zh:'衡量智能体'},items:[
-  {k:'c',title:{en:'Right and wrong answers that cost differently',zh:'对与错，代价各不相同'}},
-  {k:'c',title:{en:'Tracing and experiments',zh:'追踪与实验'}},
-  {k:'p',title:{en:'Project: a scoreboard for the agent',zh:'项目：智能体计分板'}}]},
+  {k:'c',file:'10-right-and-wrong-answers-that-cost-differently.html',title:{en:'Right and wrong answers that cost differently',zh:'对与错，代价各不相同'}},
+  {k:'c',file:'11-tracing-and-experiments.html',title:{en:'Tracing and experiments',zh:'追踪与实验'}},
+  {k:'p',file:'12-scoreboard-for-the-agent.html',title:{en:'Project: a scoreboard for the agent',zh:'项目：智能体计分板'}}]},
  {n:5,title:{en:'Knowledge and memory',zh:'知识与记忆'},items:[
-  {k:'c',title:{en:'Agentic RAG over a manual',zh:'在手册上做智能体式检索'}},
-  {k:'c',title:{en:'A memory over MCP',zh:'通过 MCP 给智能体记忆'}},
-  {k:'p',title:{en:'Project: an agent that remembers customers',zh:'项目：记得客户的智能体'}}]},
+  {k:'c',file:'13-agentic-rag-over-a-manual.html',title:{en:'Agentic RAG over a manual',zh:'在手册上做智能体式检索'}},
+  {k:'c',file:'14-a-memory-over-mcp.html',title:{en:'A memory over MCP',zh:'通过 MCP 给智能体记忆'}},
+  {k:'p',file:'15-agent-that-remembers-customers.html',title:{en:'Project: an agent that remembers customers',zh:'项目：记得客户的智能体'}}]},
  {n:6,title:{en:'Pausing and working in parallel',zh:'暂停与并行'},items:[
   {k:'c',file:'16-pause-for-approval-and-resume.html',title:{en:'Pause for approval, resume after a crash',zh:'等人批准再继续，崩溃后接着干'}},
   {k:'c',file:'17-swarms-of-agents-in-parallel.html',title:{en:'Swarms of agents in parallel',zh:'多个智能体并行'}},
