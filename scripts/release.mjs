@@ -1,25 +1,29 @@
 #!/usr/bin/env node
-// Release agent: moves test to main once a day, but only when everything is green. No AI here.
-//   prepare  (8 PM Malaysia time) opens or updates the release pull request test → main, asks the reviewer
-//            agent and the copy check to look at it, and says in the daily digest what will go live and when.
-//   ship     (10 PM) merges that pull request when every gate below passes; otherwise it holds the release,
-//            tells TX why, and tries again the next day.
-//   digest   one Telegram message about the last 24 hours: what ran, what is waiting for TX, tonight's release.
-// Gates for ship: no "hold" label · the PR's head is the tip of test · the copy check and every other check
-// on that commit passed · the "UI check" status passed · no open pull request into test changes a page in the
-// release · every change was reviewed once: each file in the release came only from pull requests that got a
-// reviewer agent ✅ on their own. Anything else (a workflow or script change, or a lesson merged on ⚠️) makes the
-// reviewer agent read the release, and then its verdict for exactly that commit must be ✅.
-// Usage: node scripts/release.mjs prepare|ship|digest
+// Release agent: moves test to main every hour, but only when everything is green. No AI here.
+//   run      (every hour) opens or updates the release pull request test → main, asks the copy check (and, for
+//            changes never reviewed, the reviewer agent) to look at it, and merges it when every gate below passes.
+//            While checks are still running it waits quietly for the next hour. When something is wrong it holds
+//            the release and tells TX why, once per new reason, not every hour.
+//   digest   (8 PM, its own run) one Telegram message about the last 24 hours: what was released, what ran, what waits for TX.
+// Gates: no "hold" label · the PR's head is the tip of test · that commit has been in the release PR for at least
+// an hour (time to add "hold") · the copy check and every other check on that commit passed · the "UI check" status
+// passed · no open pull request into test changes a page in the release · every change was reviewed once: each
+// file in the release came only from pull requests that got a reviewer agent ✅ on their own. Anything else (a
+// workflow or script change, or a lesson merged on ⚠️) makes the reviewer agent read the release, and then its
+// verdict for exactly that commit must be ✅.
+// The release PR body keeps a small hidden note (<!-- tx-release {...} -->) so hourly runs do not ask twice or
+// repeat the same Telegram message.
+// Usage: node scripts/release.mjs run | digest [--status]   (prepare and ship are old names for run;
+//        --status makes the digest the run's recorded result)
 // Env: GITHUB_TOKEN (contents, pull-requests, actions: write; checks, statuses: read), GITHUB_REPOSITORY,
-//      TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, SHIP_AT (shown to TX, e.g. "10 PM"), SITE (live URL),
+//      TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, SITE (live URL), WAIT_MIN (minutes a commit waits, default 60),
 //      DRY_RUN=1 reads everything but writes nothing (prints what it would do).
 import { appendFileSync } from 'node:fs';
 import { gh, telegram, loadTrack, scrub, REPO } from './lib.mjs';
 
 const MODE = process.argv[2];
 const DRY = !!process.env.DRY_RUN;
-const SHIP_AT = process.env.SHIP_AT || '10 PM';
+const WAIT_MIN = +(process.env.WAIT_MIN || 60);
 const SITE = (process.env.SITE || 'https://tx-learns.vercel.app/').replace(/\/?$/, '/');
 const HOLD = 'hold';
 const out = (k, v) => process.env.GITHUB_OUTPUT && appendFileSync(process.env.GITHUB_OUTPUT, `${k}<<EOF\n${v}\nEOF\n`);
@@ -85,12 +89,14 @@ function verdictFor(comments, sha) {
 }
 
 // Every gate, as a list of reasons the release cannot go out (problems) and things still running (waiting).
-async function gate(pr) {
+async function gate(pr, cmp, rs = {}) {
   const problems = [], waiting = [];
   const sha = pr.head.sha;
   const tip = (await gh('GET', '/branches/test')).commit.sha;
   if (tip !== sha) waiting.push('test moved after the release PR was updated; the checks have to run on the new tip');
   if ((pr.labels || []).some(l => l.name === HOLD)) problems.push(`you added the "${HOLD}" label`);
+  const age = rs.sha === sha && rs.since ? (Date.now() - new Date(rs.since)) / 60e3 : 0;
+  if (age < WAIT_MIN - 5) waiting.push(`this commit has been in the release PR for ${Math.round(age)} of ${WAIT_MIN} minutes, the time you have to add "${HOLD}"`);
 
   const runs = (await gh('GET', `/commits/${sha}/check-runs?per_page=100`)).check_runs || [];
   const latest = {};
@@ -108,7 +114,7 @@ async function gate(pr) {
     else if (s.state !== 'success') problems.push(`"${s.context}" ${s.state === 'failure' ? 'failed' : s.state}: ${s.description || ''}`.trim());
   }
 
-  const cmp = await gh('GET', '/compare/main...test');
+  cmp = cmp || await gh('GET', '/compare/main...test');
   const files = (cmp.files || []).map(f => f.filename);
   const cov = await coverage(cmp);
   let v = null, needReview = false;
@@ -127,97 +133,114 @@ async function askReviewer(pr, cov) {
   return write(`ask the reviewer agent to read #${pr.number} (${focus})`, () => gh('POST', '/actions/workflows/review.yml/dispatches', { ref: 'main', inputs: { pr: String(pr.number), focus } }));
 }
 
-async function prepare() {
+const STATE_RE = /\n*<!-- tx-release (\{.*?\}) -->/;
+const readState = pr => { try { return JSON.parse(((pr && pr.body) || '').match(STATE_RE)[1]); } catch { return {}; } };
+const withState = (body, st) => `${body.replace(STATE_RE, '')}\n\n<!-- tx-release ${JSON.stringify(st)} -->`;
+const key = list => list.join('|').slice(0, 300);
+
+// One hourly run: open or update the release PR, start what has to look at it, then merge it if every gate passes.
+async function run() {
   const cmp = await gh('GET', '/compare/main...test');
   const files = (cmp.files || []).map(f => f.filename);
   let pr = await releasePR();
   if (!cmp.ahead_by || !files.length) {
-    console.log('test has nothing that main does not have. No release today.');
+    console.log('test has nothing that main does not have. Nothing to release.');
     out('state', 'skip'); out('summary', 'Nothing new on test to release.');
-    return { pr: null };
+    return;
   }
   const lessons = await lessonsIn(files);
+  const what = lessons.length ? lessons.join(', ') : 'site updates';
   const cov = await coverage(cmp);
   const body = [
-    `Daily release from \`test\` to \`main\`, opened by the release agent.`, '',
+    `Release from \`test\` to \`main\`, opened by the release agent.`, '',
     lessons.length ? `**Lessons in this release:**\n${lessons.map(l => `- ${l}`).join('\n')}` : '**No lesson pages change.**',
     `${files.length} file${files.length > 1 ? 's' : ''} change in total, over ${cmp.ahead_by} commit${cmp.ahead_by > 1 ? 's' : ''}.`, '',
     cov.reviewed.length ? `**Already reviewed on their own PR (reviewer agent ✅):** ${cov.reviewed.map(n => `#${n}`).join(', ')}` : '',
     cov.uncovered.length ? `**Not reviewed yet, so the reviewer agent reads this release:** ${cov.uncovered.map(f => `\`${f}\``).join(', ')}` : '**Every change was reviewed on its own PR, so there is no second review.**', '',
-    `It goes live by itself at ${SHIP_AT} Malaysia time if the copy check and the UI check are green, every change has a reviewer agent ✅, and no fix for these pages is still open.`,
-    `To stop it, add the label \`${HOLD}\`. To release earlier, merge it yourself once it is green.`, '',
+    `The release agent checks it every hour and merges it once the copy check and the UI check are green, every change has a reviewer agent ✅, no fix for these pages is still open, and the newest change has waited ${WAIT_MIN} minutes.`,
+    `To stop it, add the label \`${HOLD}\`. You never need to merge it yourself.`, '',
     '_Opened by the TX Learns release agent._',
   ].join('\n');
-  const title = `Release: ${lessons.length ? lessons.slice(0, 3).join(', ') : 'site updates'}`.slice(0, 120);
+  const title = `Release: ${what}`.slice(0, 120);
+  const before = pr ? pr.body || '' : '';
+  const st = readState(pr);
   if (!pr) {
     pr = await write(`open a release PR "${title}"`, () => gh('POST', '/pulls', { title, head: 'test', base: 'main', body }));
-    if (pr) await write('assign TX', () => gh('POST', `/issues/${pr.number}/assignees`, { assignees: [REPO.split('/')[0]] }).catch(() => null));
-  } else {
-    await write(`update release PR #${pr.number}`, () => gh('PATCH', `/pulls/${pr.number}`, { title, body }));
+    if (!pr) { out('state', 'skip'); out('summary', `Dry run: would open a release PR for ${what}.`); return; }
+    await write('assign TX', () => gh('POST', `/issues/${pr.number}/assignees`, { assignees: [REPO.split('/')[0]] }).catch(() => null));
   }
-  if (!pr) return { pr: null, lessons, files };
-  // A PR opened with the workflow token does not start other workflows, so ask for the checks directly.
-  // Second review only for what was not reviewed on its own PR.
-  if (cov.uncovered.length) {
-    const comments = await gh('GET', `/issues/${pr.number}/comments?per_page=100`);
-    if (!verdictFor(comments, pr.head.sha)) await askReviewer(pr, cov);
-  }
-  const runs = (await gh('GET', `/commits/${pr.head.sha}/check-runs?per_page=100`)).check_runs || [];
-  if (!runs.some(r => r.name === 'Release waits for open fixes'))
-    await write(`run the copy check on test for #${pr.number}`, () => gh('POST', '/actions/workflows/copy-check.yml/dispatches', { ref: 'test', inputs: { pr: String(pr.number) } }));
-  out('state', 'ok'); out('summary', `Release PR #${pr.number} ready: ${lessons.join(', ') || 'site updates'}. Goes live at ${SHIP_AT} if green.`);
-  out('link', pr.html_url || prUrl(pr.number));
-  return { pr, lessons, files };
-}
+  const sha = pr.head.sha;
+  // A new commit on test starts its own wait, its own checks and its own Telegram note.
+  if (st.sha !== sha) Object.assign(st, { sha, since: new Date().toISOString(), cc: '', review: '', told: '' });
 
-async function ship() {
-  const pr = await releasePR();
-  if (!pr) { console.log('No release PR open. Nothing to ship.'); out('state', 'skip'); out('summary', 'Nothing to release today.'); return; }
-  let g = await gate(pr);
-  // test moved after 8 PM and brought something unreviewed: ask the reviewer agent now and wait for it (≤25 min).
-  if (g.needReview && !g.problems.length) {
-    await askReviewer(pr, g.cov);
-    for (let i = 0; i < 25 && !DRY && g.needReview && !g.problems.length; i++) { await new Promise(r => setTimeout(r, 60e3)); g = await gate(pr); }
+  // The workflow token starts no workflows, so ask for the release copy check directly (once per commit).
+  const runs = (await gh('GET', `/commits/${sha}/check-runs?per_page=100`)).check_runs || [];
+  if (!runs.some(r => r.name === 'Release waits for open fixes') && st.cc !== sha) {
+    await write(`run the copy check on test for #${pr.number}`, () => gh('POST', '/actions/workflows/copy-check.yml/dispatches', { ref: 'test', inputs: { pr: String(pr.number) } }));
+    st.cc = sha;
   }
-  const lessons = await lessonsIn(g.files);
-  const what = lessons.length ? lessons.join(', ') : 'site updates';
-  if (g.problems.length || g.waiting.length) {
-    const why = [...g.problems, ...g.waiting];
-    console.log(`Holding release #${pr.number}:\n- ${why.join('\n- ')}`);
-    out('state', 'flag'); out('summary', `Held release #${pr.number} (${what}): ${why[0]}.`); out('link', pr.html_url);
-    await telegram([`⏸️ Release held: ${what}`, pr.html_url, '', 'It did not go live because:', ...why.map(w => `• ${w}`), '',
-      g.problems.length ? `Sort those out and it goes out tomorrow at ${SHIP_AT}${(pr.labels || []).some(l => l.name === HOLD) ? ' (remove the "hold" label first)' : ''}, or merge it yourself once it is green.`
-        : `It tries again tomorrow at ${SHIP_AT}, or merge it yourself once it is green.`].join('\n'));
+  const g = await gate(pr, cmp, st);
+  // Second review only for what was not reviewed on its own PR, and only once per commit.
+  if (g.needReview && !g.problems.length && st.review !== sha) { await askReviewer(pr, g.cov); st.review = sha; }
+  out('link', pr.html_url || prUrl(pr.number));
+
+  if (!g.problems.length && !g.waiting.length) {
+    const merged = await write(`merge release #${pr.number}`, () => gh('PUT', `/pulls/${pr.number}/merge`, {
+      sha: g.sha, merge_method: 'merge', commit_title: `${pr.title} (#${pr.number})`,
+      commit_message: `Released by the release agent: every check green, every change reviewed once (${g.cov.uncovered.length ? 'release review ✅' : 'on its own PR'}), no open fixes.`,
+    }));
+    console.log(DRY ? 'Dry run: would release now.' : `Released #${pr.number}: ${merged && merged.message}`);
+    out('state', 'ok'); out('summary', `Released #${pr.number}: ${what}. The live check agent looks at the site next.`);
+    if (merged && merged.sha) { out('released', 'true'); out('sha', merged.sha); }
     return;
   }
-  const merged = await write(`merge release #${pr.number}`, () => gh('PUT', `/pulls/${pr.number}/merge`, {
-    sha: g.sha, merge_method: 'merge', commit_title: `${pr.title} (#${pr.number})`,
-    commit_message: `Released by the release agent: every check green, every change reviewed once (${g.cov.uncovered.length ? 'release review ✅' : 'on its own PR'}), no open fixes.`,
-  }));
-  console.log(DRY ? 'Dry run: would release now.' : `Released #${pr.number}: ${merged && merged.message}`);
-  out('state', 'ok'); out('summary', `Released #${pr.number}: ${what}. The live check agent looks at the site next.`); out('link', pr.html_url);
+
+  const why = [...g.problems, ...g.waiting];
+  console.log(`Not releasing #${pr.number} yet:\n- ${why.join('\n- ')}`);
+  const hours = (Date.now() - new Date(st.since)) / 3600e3;
+  if (g.problems.length) {
+    out('summary', `Held release #${pr.number} (${what}): ${g.problems[0]}.`);
+    // Tell TX (and record a held run) once per set of reasons, not every hour.
+    out('state', st.told === key(g.problems) ? 'wait' : 'flag');
+    if (st.told !== key(g.problems)) {
+      await telegram([`⏸️ Release held: ${what}`, pr.html_url, '', 'It is not going live because:', ...why.map(w => `• ${w}`), '',
+        `Sort those out${(pr.labels || []).some(l => l.name === HOLD) ? ' (and remove the "hold" label)' : ''} and it goes out within the hour. I will not repeat this message unless the reasons change.`].join('\n'));
+      st.told = key(g.problems);
+    }
+  } else {
+    out('state', 'wait'); out('summary', `Release #${pr.number} (${what}) waits: ${g.waiting[0]}.`);
+    // Checks normally finish within the hour. Only a wait of 6 hours on the same commit is worth a message.
+    if (hours >= 6 && st.told !== 'wait') {
+      await telegram([`⏳ Release still waiting after ${Math.floor(hours)} hours: ${what}`, pr.html_url, '', ...g.waiting.map(w => `• ${w}`)].join('\n'));
+      st.told = 'wait';
+    }
+  }
+  const next = withState(body, st);
+  if (next !== before || pr.title !== title) await write(`update release PR #${pr.number}`, () => gh('PATCH', `/pulls/${pr.number}`, { title, body: next }));
 }
 
 // ---------- the daily digest ----------
 const AG = { writer: '✍️ Writer', reader: '📖 Reader', reviewer: '🔎 Reviewer', 'ui-check': '🖱️ UI check', 'copy-check': '🚫 Copy check',
   release: '🚀 Release', 'live-check': '🌐 Live check', recall: '🧠 Recall' };
 
-async function digest(prep) {
+async function digest() {
   const since = Date.now() - 24 * 3600e3;
   let S = {};
   try { S = JSON.parse(await gh('GET', '/contents/status/all.json?ref=agent-status', null, { raw: true })).agents || {}; } catch {}
   const lines = [`📬 Daily digest · ${today()}`, ''];
 
-  // Tonight's release
-  const pr = prep && prep.pr !== undefined ? prep.pr : await releasePR();
+  // What went live in the last 24 hours, and what is on its way
+  const done = ((S.release && S.release.history) || []).filter(x => x.state === 'ok' && +new Date(x.at) >= since && /^Released/.test(x.summary || ''));
+  if (done.length) lines.push(`🚀 Went live (${done.length}):`, ...done.map(x => `• ${scrub(x.summary).replace(/ The live check agent.*$/, '').slice(0, 160)}`));
+  else lines.push('🚀 Nothing went live in the last 24 hours.');
+  const pr = await releasePR();
   if (pr) {
-    const g = await gate(pr);
+    const g = await gate(pr, null, readState(pr));
     const lessons = await lessonsIn(g.files);
-    lines.push(`🚀 Tonight at ${SHIP_AT}: ${lessons.length ? lessons.join(', ') : 'site updates (no lesson pages)'}`, pr.html_url || prUrl(pr.number));
-    if (g.problems.length) lines.push('Will be held unless fixed:', ...g.problems.map(p => `• ${p}`));
-    else if (g.waiting.length) lines.push(`Still running: ${g.waiting.length} check${g.waiting.length > 1 ? 's' : ''}. It goes out if they pass.`);
-    else lines.push('All green. Add the "hold" label to stop it.');
-  } else lines.push('🚀 Nothing new to release tonight.');
+    lines.push(`Next: ${lessons.length ? lessons.join(', ') : 'site updates (no lesson pages)'}`, pr.html_url || prUrl(pr.number));
+    if (g.problems.length) lines.push('Held until fixed:', ...g.problems.map(p => `• ${p}`));
+    else lines.push('Goes live within the hour once its checks pass. Add the "hold" label to stop it.');
+  }
   lines.push('');
 
   // Waiting for TX: open pull requests into test
@@ -242,15 +265,14 @@ async function digest(prep) {
   lines.push('', `Site: ${SITE}`);
   const text = lines.join('\n');
   await telegram(text);
-  if (MODE === 'digest') { out('state', 'ok'); out('summary', `Sent the daily digest: ${act.length} agents ran, ${open.length} PRs waiting for TX.`); }
+  if (process.argv.includes('--status')) { out('state', 'ok'); out('summary', `Sent the daily digest: ${act.length} agents ran, ${open.length} PRs waiting for TX.`); }
   return text;
 }
 
 try {
-  if (MODE === 'prepare') { const p = await prepare(); if (process.argv.includes('--digest')) await digest(p); }
-  else if (MODE === 'ship') await ship();
-  else if (MODE === 'digest') await digest(null);
-  else { console.log('Usage: node scripts/release.mjs prepare [--digest] | ship | digest'); process.exit(2); }
+  if (['run', 'prepare', 'ship'].includes(MODE)) await run();
+  else if (MODE === 'digest') await digest();
+  else { console.log('Usage: node scripts/release.mjs run | digest'); process.exit(2); }
 } catch (e) {
   console.log(`::error::release agent: ${e.message}`);
   out('state', 'fail'); out('summary', `The release agent could not finish (${MODE}).`);

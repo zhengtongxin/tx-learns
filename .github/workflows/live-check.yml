@@ -1,14 +1,17 @@
-# Live check agent: twice a day (12 PM and 12 AM Malaysia time) a script opens every page, lesson, link and file
-# on the live site, renders each page in a headless browser and checks the topic and lesson counts against lessons.js.
+# Live check agent: right after the release agent puts a release live (it is a step of that run), a script waits
+# for Vercel to finish the production deploy, then opens every page, lesson, link and file on the live site, renders each page in a headless browser and checks the topic and lesson counts against lessons.js.
 # It tells TX on Telegram only when something is off; a pass shows on the How it works page and in the digest.
 # No AI, read-only token, never pushes. Only trusted scripts from main run.
 name: Live check
 on:
-  # A schedule, not Vercel's deployment events: one deploy sends several of those, and each one cancelled the last.
-  # 04:00 and 16:00 UTC = 12 PM and 12 AM Malaysia time; midnight follows the 10 PM release.
-  schedule:
-    - cron: '0 4 * * *'
-    - cron: '0 16 * * *'
+  # Started by release.yml after each real release, not by Vercel's deployment events (one deploy sends several,
+  # and each one cancelled the last) and not on a timer. No release, no live check.
+  workflow_call:
+    inputs:
+      sha:
+        description: The merge commit the release agent just put on main
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       url:
@@ -16,6 +19,7 @@ on:
         required: false
 permissions:
   contents: read
+  deployments: read
 concurrency:
   # A second run waits for the first instead of cancelling it.
   group: live-check
@@ -23,7 +27,7 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 40
     outputs:
       state: ${{ steps.run.outputs.state }}
       summary: ${{ steps.run.outputs.summary }}
@@ -33,12 +37,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # main is what should be live, so its lessons.js is the list the live site must match.
-          ref: ${{ github.event.repository.default_branch }}
+          # The released commit (or main on a manual run): its lessons.js is the list the live site must match.
+          ref: ${{ inputs.sha || github.event.repository.default_branch || 'main' }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Wait for Vercel to finish the production deploy
+        if: ${{ inputs.sha }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SHA: ${{ inputs.sha }}
+        run: |
+          # Up to 15 minutes. If Vercel never reports, the check still runs and compares the live lesson list.
+          for i in $(seq 1 30); do
+            id=$(gh api "repos/$GITHUB_REPOSITORY/deployments?sha=$SHA&environment=Production" --jq '.[0].id // empty' || true)
+            if [ -n "$id" ]; then
+              st=$(gh api "repos/$GITHUB_REPOSITORY/deployments/$id/statuses" --jq '.[0].state // empty' || true)
+              echo "Vercel deploy $id: ${st:-no status yet}"
+              case "$st" in success) exit 0;; failure|error) echo "::warning::Vercel says the deploy $st"; exit 0;; esac
+            else echo "No production deploy for $SHA yet"; fi
+            sleep 30
+          done
+          echo "::warning::Vercel did not report a finished deploy within 15 minutes; checking anyway"
       - name: Install a headless browser
         run: |
           npm install --no-save --no-audit --no-fund --prefix "$RUNNER_TEMP/pw" playwright@1.49.1
@@ -78,7 +99,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.repository.default_branch }}
+          ref: ${{ github.event.repository.default_branch || 'main' }}
           sparse-checkout: |
             scripts
             banned-words.txt

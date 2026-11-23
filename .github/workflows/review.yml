@@ -216,7 +216,7 @@ jobs:
               [ -n "$reader" ] && echo "Reader agent: $reader"
               [ -n "$PUSHED" ] && echo "The reviewer agent added its fixes to the PR."
               echo; head -c 1200 /tmp/out/review-summary.txt 2>/dev/null
-              echo; echo "Merge it into test and it goes live with tonight's release."; } | node $T/notify-telegram.mjs
+              echo; echo "Merge it into test and it goes live with the next release, usually within two hours."; } | node $T/notify-telegram.mjs
           elif [ "$STATE" = flag ]; then
             { echo "⚠️ The reviewer agent wants changes before the release goes live"; echo "$URL"; echo; head -c 1500 /tmp/out/review-summary.txt; } | node $T/notify-telegram.mjs
           else
