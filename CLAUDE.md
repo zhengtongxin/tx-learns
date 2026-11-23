@@ -12,7 +12,8 @@ Bilingual (EN/中文) interactive learning site. Static HTML/CSS/JS, no build st
 - `assets/site.css|js` shared layout, nav, progress; `assets/teach.css|js` lesson widgets (`TX2.game`, `TX2.predict`, ...).
 - `scripts/check-copy.mjs` + `banned-words.txt` the copyright scrubber.
 - `scripts/check-counts.mjs` the count check. `lessons.js` is the only source of truth for topic and lesson counts: pages compute them (`assets/site.js`), and the check fails on any count typed by hand, a lesson file missing from or doubled in `lessons.js`, or a tag that does not match its place.
-- `scripts/check-pages.mjs` the page check: every page has `<html lang>`, a title, a meta description and `og:` link-preview tags, alt text on images, headings that never skip a level, and as many `.en` as `.zh` (in markup and in `{en,zh}` script strings). Runs in the copy check.
+- `scripts/check-pages.mjs` the page check: every page has `<html lang>`, a title, a meta description and `og:` link-preview tags, alt text on images, headings that never skip a level, and as many `.en` as `.zh` (in markup and in `{en,zh}` script strings). It also keeps `sitemap.xml`, the no-JavaScript lesson list on the track page (between `<!-- lessons:start -->` markers) and the `data-start` links in step with `lessons.js`: `--fix` rewrites them, never by hand. Runs in the copy check.
+- `404.html` (uses `<base href="/">`), `robots.txt`, `favicon.ico`, `assets/icon.svg`, `assets/apple-touch-icon.png`, `assets/og.png` (link previews).
 - `scripts/record-status.mjs <agent>` records an agent's last run (`STATE=run` marks it working, `idle` clears that mark; each workflow's `working` job sets it, and cancelled runs record nothing) in `status/all.json` on the data-only `agent-status` branch (never deployed, never merged).
 - `scripts/ui-check.mjs` the UI check agent's browser test. Run `node scripts/ui-check.mjs --pages <page.html>` after changing anything people hover, click or open (needs Playwright).
 - `scripts/notify-telegram.mjs` sends TX a Telegram message (secrets `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`; without the chat id it only sends a one-time setup tip).
@@ -56,5 +57,5 @@ Easiest: drop notes in `inbox/<concept>/` on the `notes` branch and let the writ
 
 1. Copy `agentic-ai/_template.html` to `agentic-ai/NN-slug.html` (next free number).
 2. Write it to `STYLE.md`, with the tag `<Topic> · Lesson N`.
-3. Add `file:'NN-slug.html'` to its item in `agentic-ai/lessons.js` (or add the item under the right topic).
+3. Add `file:'NN-slug.html'` to its item in `agentic-ai/lessons.js` (or add the item under the right topic), then run `node scripts/check-pages.mjs --fix`.
 4. Fill in the `<title>`, description and `og:` tags, run `node scripts/check-copy.mjs`, `node scripts/check-counts.mjs` and `node scripts/check-pages.mjs`, then open the page in a browser and click every widget.

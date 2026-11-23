@@ -89,11 +89,11 @@
       return '<a class="cc spot" href="'+c.href+'"><div class="orbi">'+c.icon+'</div><div><h3>'+t(c.title)+'</h3><div class="meta" style="margin-top:4px">'+t(c.desc)+'</div><div class="chips">'+(ok?'<span class="chip">'+t({en:c.topics+' topics',zh:c.topics+' 个主题'})+'</span><span class="chip">'+t({en:c.total+' lessons',zh:c.total+' 课'})+'</span>':'')+'<span class="chip">'+t({en:'Bilingual',zh:'双语'})+'</span></div><div class="mini"><i style="width:'+(ok?n/c.total*100:0)+'%"></i></div></div><div class="go">→</div></a>'}).join('')}
     if(window.TRACKS&&(hub||sums.length)){var q=window.TRACKS.slice();
       (function next(){var c=q.shift();
-        if(!c){var tot={topics:0,lessons:0};window.TRACKS.forEach(function(x){tot.topics+=x.topics||0;tot.lessons+=x.total||0});
+        if(!c){var tot={topics:0,lessons:0,published:0};window.TRACKS.forEach(function(x){tot.topics+=x.topics||0;tot.lessons+=x.total||0;tot.published+=x.published||0});
           sums.forEach(function(el){el.dataset.count=tot[el.dataset.sum];countUp(el)});drawHub();return}
         var sc=document.createElement('script');sc.src=c.href.replace(/[^\/]*$/,'')+'lessons.js';
         sc.onload=sc.onerror=function(){var T=window.TRACK;try{delete window.TRACK}catch(e){window.TRACK=undefined}
-          if(T&&T.topics){c.topics=T.topics.length;c.total=0;T.topics.forEach(function(w){c.total+=w.items.length})}
+          if(T&&T.topics){c.topics=T.topics.length;c.total=0;c.published=0;T.topics.forEach(function(w){c.total+=w.items.length;w.items.forEach(function(x){if(x.file)c.published++})})}
           next()};
         document.body.appendChild(sc)})()}
 
@@ -142,7 +142,7 @@
 
     /* keyboard: lesson widgets often make a <div> or an SVG node clickable. Give each one a Tab stop and let
        Enter or Space click it, so nothing is mouse-only (the UI check agent flags anything still missed). */
-    var FOC='a[href],button,input,select,textarea,summary,[tabindex]';
+    var FOC='a[href],button,input,select,textarea,summary,[tabindex]:not([tabindex="-1"])';
     function kb(){[].forEach.call(document.querySelectorAll('main *,.side *'),function(el){
       if(el.hasAttribute('data-kb')||el.closest(FOC))return;
       var cs=getComputedStyle(el),pc=el.parentElement&&getComputedStyle(el.parentElement).cursor;
