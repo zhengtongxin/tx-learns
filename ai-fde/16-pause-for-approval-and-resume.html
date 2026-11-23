@@ -61,8 +61,8 @@ claim = {"id": "C-1042", "amount": 600}
 <div class="try" id="p2"></div>
 
 <h2><span class="en">Step 3 · Stop and wait for a person</span><span class="zh">第 3 步 · 停下来等人</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Now the agent can stop. Add a node that calls <code>interrupt()</code>: the graph saves everything it worked out, hands a question to whoever is watching, and ends the run. Nothing waits in memory; the process can even exit. A conditional edge sends only payouts over the limit down this path. Like a clerk who clips a note to the folder, “needs the stamp”, and moves on to the next customer.</p>
-<p class="zh" style="margin:0 0 8px">现在智能体可以停下来了。加一个调用 <code>interrupt()</code> 的节点：图会把已经算出来的一切存好，把问题交给在看的人，然后结束这次运行。没有任何东西在内存里干等，进程甚至可以退出。再用一条条件边，只让超过限额的赔付走这条路。就像柜员在文件夹上夹一张“需要盖章”的便条，然后去招呼下一位客人。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Now the agent can stop. Add a node that calls <code>interrupt()</code>: the graph saves everything it worked out, hands a question to whoever is watching, and ends the run. Nothing waits in memory; the process can even exit. A conditional edge sends only payouts over the limit down this path. Like a clerk who clips a note to the folder, “needs the stamp”, and moves on to the next customer. Compile the builder again inside Step 2’s <code>with</code> block, so <code>graph</code> still has its checkpointer.</p>
+<p class="zh" style="margin:0 0 8px">现在智能体可以停下来了。加一个调用 <code>interrupt()</code> 的节点：图会把已经算出来的一切存好，把问题交给在看的人，然后结束这次运行。没有任何东西在内存里干等，进程甚至可以退出。再用一条条件边，只让超过限额的赔付走这条路。就像柜员在文件夹上夹一张“需要盖章”的便条，然后去招呼下一位客人。再在第 2 步的 <code>with</code> 块里把 builder 重新编译一次，让 <code>graph</code> 仍然带着存档器。</p></div>
 <div class="codebox"><span class="dim">from langgraph.types import interrupt, Command
 
 class ClaimState(TypedDict, total=False):
@@ -93,6 +93,7 @@ builder.add_conditional_edges("decide", after_decide, ["approve", "pay"])
 builder.add_conditional_edges("approve", after_approve, ["pay", END])
 builder.add_edge("pay", END)</span><span class="dim">
 
+# graph = builder.compile(checkpointer=checkpointer)   # compile again inside Step 2's with block
 # claim = {"id": "C-1200", "amount": 1200}  -> the run now stops at "approve".
 # result = graph.invoke({"claim": claim}, config)
 # result["__interrupt__"][0].value  -> {"claim": "C-1200", "payout": 1200}</span></div>
@@ -121,8 +122,8 @@ if snapshot.next:
 <div class="try" id="p5"></div>
 
 <h2><span class="en">Step 6 · Make every step safe to repeat</span><span class="zh">第 6 步 · 让每一步都能安全重复</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Saving is the easy half. If the process dies <em>after</em> the payment went out but <em>before</em> the checkpoint was saved, the restart runs <code>pay</code> again. The fix is an <b>idempotency key</b>: a unique label sent with each payment, like a receipt number. The payment backend remembers the keys it has seen and ignores a repeat. It also checks the sign-off rule itself, so it never trusts the agent’s say-so alone.</p>
-<p class="zh" style="margin:0 0 8px">存档是容易的那一半。如果进程在付款发出<em>之后</em>、存档<em>之前</em>挂了，重启就会把 <code>pay</code> 再跑一遍。解法是<b>幂等键</b>：每笔付款都带一个唯一标签，像收据编号。付款后端记住见过的键，遇到重复就忽略。它还自己检查签字规则，不会只听智能体一面之词。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Saving is the easy half. If the process dies <em>after</em> the payment went out but <em>before</em> the checkpoint was saved, the restart runs <code>pay</code> again. A step is <b>idempotent</b> when doing it twice gives the same result as doing it once. The fix is an <b>idempotency key</b>: a unique label sent with each payment, like a receipt number. The payment backend remembers the keys it has seen and ignores a repeat. It also checks the sign-off rule itself, so it never trusts the agent’s say-so alone.</p>
+<p class="zh" style="margin:0 0 8px">存档是容易的那一半。如果进程在付款发出<em>之后</em>、存档<em>之前</em>挂了，重启就会把 <code>pay</code> 再跑一遍。做两次和做一次的结果一样，就叫<b>幂等</b>。解法是<b>幂等键</b>：每笔付款都带一个唯一标签，像收据编号。付款后端记住见过的键，遇到重复就忽略。它还自己检查签字规则，不会只听智能体一面之词。</p></div>
 <div class="codebox"><span class="dim">paid_keys = {}   # in real life: a table where the key column must be unique
 
 </span><span class="chg">def send_payment(claim_id, amount, key, signed_off=False):
