@@ -108,7 +108,9 @@ try {
     merged = n; log.push(`${n} ${scrub(p.title).slice(0, 80)}`);
     console.log(`${n}: merged as ${r.sha}`);
     await gh('POST', `/issues/${p.number}/comments`, { body: `🚀 Merged by itself: ${REQUIRED.join(', ')} were all green on ${p.head.sha.slice(0, 7)}. The product engineer agent now checks the live site and rolls this back if it broke it.` }).catch(() => {});
-    // The merge was made with the workflow token, which starts no workflow: start the live check on it by hand.
+    // A merge made with the workflow token starts no workflow, and one made with MERGE_TOKEN starts a plain push run
+    // that cannot roll back (it queues behind this one: live-check has a concurrency group). Either way, start the
+    // live check by hand with merge/before so that this merge can be rolled back.
     if (touchesWorkflows) console.log(`${n}: changes workflows, merged with MERGE_TOKEN`);
     await gh('POST', '/actions/workflows/live-check.yml/dispatches', { ref: 'main', inputs: { merge: r.sha, before } })
       .catch(e => console.log(`::warning::could not start the live check: ${e.message}`));
