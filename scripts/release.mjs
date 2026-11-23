@@ -51,7 +51,7 @@ async function openFixes(files) {
   const rel = new Set(files), hits = [];
   const open = await gh('GET', '/pulls?state=open&base=test&per_page=50');
   for (const p of open) {
-    const pf = (await gh('GET', `/pulls/${p.number}/files?per_page=100`)).map(f => f.filename);
+    const pf = await prFiles(p.number);
     const same = pf.filter(f => rel.has(f));
     if (same.length) hits.push({ number: p.number, title: p.title, same });
   }
@@ -62,6 +62,34 @@ const verdictOk = body => { const first = body.split('\n').map(s => s.trim()).fi
 
 // Single review: which files in the release were already reviewed (reviewer agent ✅) on the pull request that
 // brought them into test? A file touched by any pull request without that ✅, or by no pull request, is "uncovered".
+// Every file a pull request changed (all pages, not just the first 100).
+async function prFiles(n) {
+  const all = [];
+  for (let page = 1; page <= 30; page++) {
+    const got = await gh('GET', `/pulls/${n}/files?per_page=100&page=${page}`);
+    all.push(...got.map(f => f.filename));
+    if (got.length < 100) break;
+  }
+  return all;
+}
+
+// A ✅ counts only for what the reviewer actually read: the commit in its <!-- tx-review sha=... --> marker. Commits
+// after it are fine only if they are the agents' own fix commits ("Reviewer:" or "Reader:"); a hand edit after the
+// ✅ makes the pull request unreviewed, so the release gets a second look at its files.
+async function reviewedAtHead(p) {
+  const comments = await gh('GET', `/issues/${p.number}/comments?per_page=100`);
+  const okShas = comments.filter(c => c.body && verdictOk(c.body)).map(c => (c.body.match(/<!-- tx-review sha=([0-9a-f]{7,40})/) || [])[1]).filter(Boolean);
+  if (!okShas.length) return false;
+  let commits = [];
+  try { commits = await gh('GET', `/pulls/${p.number}/commits?per_page=100`); } catch { return false; }
+  // Walk back from the last commit: agent fix commits are allowed until we reach a commit a ✅ covers.
+  for (let i = commits.length - 1; i >= 0; i--) {
+    if (okShas.some(s => commits[i].sha.startsWith(s) || s.startsWith(commits[i].sha))) return true;
+    if (!/^(Reviewer|Reader):/.test((commits[i].commit && commits[i].commit.message) || '')) return false;
+  }
+  return false;
+}
+
 async function coverage(cmp) {
   const prs = new Map();
   for (const c of cmp.commits || []) {
@@ -71,9 +99,8 @@ async function coverage(cmp) {
   }
   const ok = new Set(), notOk = new Set(), reviewed = [], unreviewed = [];
   for (const p of prs.values()) {
-    const comments = await gh('GET', `/issues/${p.number}/comments?per_page=100`);
-    const good = comments.some(c => c.body && c.body.includes('<!-- tx-review sha=') && verdictOk(c.body));
-    for (const f of (await gh('GET', `/pulls/${p.number}/files?per_page=100`)).map(f => f.filename)) (good ? ok : notOk).add(f);
+    const good = await reviewedAtHead(p);
+    for (const f of await prFiles(p.number)) (good ? ok : notOk).add(f);
     (good ? reviewed : unreviewed).push(p.number);
   }
   const uncovered = (cmp.files || []).map(f => f.filename).filter(f => notOk.has(f) || !ok.has(f));
