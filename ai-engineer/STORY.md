@@ -1,15 +1,15 @@
 # Story for the AI Engineer track
 
-Setting: Pasar Malam Lorong Cahaya, a night market in Kuala Lumpur. (The Agentic AI track uses the Penang kopitiam; do not mix them.)
+Setting: Block 12, a heartland HDB estate in Singapore, with its void deck, heartland mall and bus interchange. (The Agentic AI track uses the Penang kopitiam; do not mix them.)
 
 Cast:
-- Hafiz: the builder. A phone-repair stall owner who teaches himself AI engineering so the market can use it.
-- Mak Cik Normah: sambal and kuih stall; asks practical, price-and-quality questions.
-- Ah Meng: roast chicken wings; impatient, wants things fast and cheap (cost and speed trade-offs).
-- Raju: cendol; keeps a thick ledger (documents, retrieval).
-- Siti: phone cases and accessories; has the best product data (datasets, prices).
-- Pak Mat: the market's keeper; announces deals on the loudspeaker (notifications).
+- Wei Jie: the builder. Runs a small phone-repair and IT counter at the heartland mall and teaches himself AI engineering so the estate can use it.
+- Mdm Tan: runs the provision shop; practical, asks about price, quality and "will it break?".
+- Uncle Raj: a retired bus captain who runs the void-deck noticeboard and announcements (notifications).
+- Priya: tuition teacher; patient, loves examples and checking answers (evaluation).
+- Ah Boy: reseller of second-hand gadgets online; knows prices by heart (datasets, price prediction).
+- Auntie Lim: the town council clerk; keeps the thick files (documents, retrieval).
 
-Props: the loudspeaker, the stall ledger, the lucky-draw drum, hand-written price tags, the generator that hums when busy (compute).
+Props: the void-deck noticeboard, the bus PA announcement, the lift that stops at every floor, the EZ-Link tap-in gate, the thick town-council file, hand-written price tags, the aircon compressor that hums when busy (compute).
 
-Rule: each lesson ends with one short "Back at the pasar malam" callout (.callout tip, EN and 中文) just before the takeaways, tying its idea to the market.
+Rule: each lesson ends with one short "Back at the void deck" callout (.callout tip, EN and 中文) just before the takeaways, tying its idea to the estate.
