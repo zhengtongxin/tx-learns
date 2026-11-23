@@ -1,6 +1,10 @@
-# Live check agent: after every merge into main (the live site), it waits for Vercel to finish the production deploy,
-# then a script opens every page, lesson, link and file on the live site, renders each page in a headless browser
-# and checks the topic and lesson counts against lessons.js. No AI.
+# Product engineer agent (the live check): after every merge into main (the live site), it waits for Vercel to finish
+# the production deploy, then a script opens every page, lesson, link and file on the live site, renders each page
+# in a headless browser on a desktop and a phone, switches it to 中文 and checks the topic and lesson counts against
+# lessons.js. No AI. Only real breakage counts; product notes (slow pages, a phone layout wider than the screen,
+# missing 中文) are reported but never roll anything back.
+# Merges are made by the auto-merge workflow with the workflow token, which starts no push run, so auto-merge starts
+# this check by hand with `merge` (the merge commit) and `before` (main before it): that run may roll back.
 # If the site is broken after a merge that was fine before it, the rollback job undoes that merge: it opens a
 # "Rollback" pull request that reverts it, marks it, and merges it as soon as the required checks allow, then
 # checks the site again. TX gets one Telegram message about it. If the site was already off before the merge,
@@ -17,6 +21,12 @@ on:
         required: false
       sha:
         description: Wait for Vercel's production deploy of this commit first (the rollback's re-check sets it)
+        required: false
+      merge:
+        description: The merge commit auto-merge just made. Set by auto-merge only; this run may roll it back.
+        required: false
+      before:
+        description: Main before that merge (set by auto-merge with merge)
         required: false
 permissions:
   contents: read
@@ -54,13 +64,13 @@ jobs:
     env:
       # The production domain, not the per-deploy URL (that one may sit behind Vercel's login).
       SITE: ${{ inputs.url || vars.LIVE_URL || 'https://tx-learns.vercel.app/' }}
-      SHA: ${{ inputs.sha || github.sha }}
+      SHA: ${{ inputs.merge || inputs.sha || github.sha }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
           # The merged commit on main: its lessons.js is the list the live site must match.
-          ref: ${{ github.sha }}
+          ref: ${{ inputs.merge || github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -72,7 +82,7 @@ jobs:
           echo "Last live check: ${st:-none}"; echo "state=$st" >> "$GITHUB_OUTPUT"
       - name: Wait for Vercel to finish the production deploy
         id: deploy
-        if: github.event_name == 'push' || inputs.sha != ''
+        if: github.event_name == 'push' || inputs.sha != '' || inputs.merge != ''
         run: |
           # Up to 15 minutes. If Vercel never reports, the check still runs and compares the live lesson list.
           for i in $(seq 1 30); do
@@ -109,7 +119,7 @@ jobs:
         # Not when the rollback job takes over (it sends the one message), and not on a cancelled run.
         if: >-
           ${{ !cancelled() && steps.run.outputs.state != 'ok' &&
-              !(github.event_name == 'push' && steps.run.outputs.state == 'flag' && steps.prev.outputs.state == 'ok' && steps.deploy.outputs.state == 'success') }}
+              !((github.event_name == 'push' || inputs.merge != '') && steps.run.outputs.state == 'flag' && steps.prev.outputs.state == 'ok' && steps.deploy.outputs.state == 'success') }}
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -117,21 +127,22 @@ jobs:
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           if [ -s /tmp/live-check.json ]; then
-            { echo "🌐 Live site check: something is off"; echo "$SITE"; echo;
+            { echo "🌐 Product engineer agent: something is off on the live site"; echo "$SITE"; echo;
               case "$DEPLOY" in failure|error) echo "Vercel says the deploy of the last merge failed, so the site still shows the version before it."; echo;; esac
               node -e 'const r=require("/tmp/live-check.json");console.log(r.issues.slice(0,10).map(i=>"• "+i.page+": "+i.what).join("\n"))';
               echo; echo "Nothing was rolled back: the site was already off before this merge, or the deploy did not finish."
               echo "Details: $RUN"; } | node scripts/notify-telegram.mjs
           else
-            node scripts/notify-telegram.mjs "⚠️ The live check agent could not finish. Logs: $RUN"
+            node scripts/notify-telegram.mjs "⚠️ The product engineer agent could not finish the live check. Logs: $RUN"
           fi
 
-  # Undo the merge that broke a site that was fine before it. Only after a real merge (a push to main), never on a
-  # manual run, and never for the rollback itself (its merge is made with the workflow token, which starts no run).
+  # Undo the merge that broke a site that was fine before it. Only after a real merge (a push to main, or a merge by
+  # auto-merge, which passes `merge`), never on a plain manual run, and never for the rollback itself (its re-check
+  # passes `sha`, not `merge`).
   rollback:
     needs: check
     if: >-
-      ${{ !cancelled() && github.event_name == 'push' && needs.check.outputs.state == 'flag' &&
+      ${{ !cancelled() && (github.event_name == 'push' || inputs.merge != '') && needs.check.outputs.state == 'flag' &&
           needs.check.outputs.prev == 'ok' && needs.check.outputs.deploy == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -145,8 +156,8 @@ jobs:
       merged: ${{ steps.merge.outputs.merged }}
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      SHA: ${{ github.sha }}
-      BEFORE: ${{ github.event.before }}
+      SHA: ${{ inputs.merge || github.sha }}
+      BEFORE: ${{ inputs.before || github.event.before }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -167,7 +178,10 @@ jobs:
           title=$(git log -1 --format=%s "$SHA")
           pr=$(echo "$title" | grep -oE '#[0-9]+' | head -1)
           branch="rollback/${SHA:0:7}"
-          git config user.name "TX Learns live check"
+          # A merge that is not on main's history is never reverted blindly.
+          git cat-file -e "$SHA^{commit}" 2>/dev/null || git fetch -q origin "$SHA"
+          git merge-base --is-ancestor "$SHA" HEAD || { echo "::error::$SHA is not on main"; exit 1; }
+          git config user.name "TX Learns product engineer"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
           # Undo everything the push changed (main before it -> after it), so a merge, squash or rebase of several
@@ -177,7 +191,7 @@ jobs:
           git commit -q -m "Revert \"$title\"" -m "Puts main back as it was before ${SHA:0:7}, which broke the live site."
           auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
           git -c "http.https://github.com/.extraheader=$auth" push origin "HEAD:refs/heads/$branch"
-          { echo "The live site broke after ${pr:-commit ${SHA:0:7}} (\"$title\"), and it was fine before, so the live check agent undoes it."; echo;
+          { echo "The live site broke after ${pr:-commit ${SHA:0:7}} (\"$title\"), and it was fine before, so the product engineer agent undoes it."; echo;
             echo "What it found:"; node -e 'try{const r=require("/tmp/live-check.json");console.log(r.issues.slice(0,15).map(i=>"- "+i.page+": "+i.what).join("\n"))}catch{console.log("- see the run")}';
             echo; echo "This puts main back exactly as it was before that merge, which was already reviewed and live."
             echo "Fix the change and open it again as a new pull request."; } > /tmp/body.md
@@ -236,6 +250,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -251,3 +266,9 @@ jobs:
           SUMMARY: "${{ needs.rollback.outputs.merged == '1' && format('Rolled back the last merge. {0}', needs.check.outputs.summary) || needs.check.outputs.summary || 'The live check could not finish.' }}"
           LINK: ${{ needs.rollback.outputs.url }}
         run: node scripts/record-status.mjs live-check
+      - name: Let auto-merge take the next pull request
+        # One merge at a time: auto-merge waits while a live check runs, so start it again now.
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # This run is still going, so it tells auto-merge to ignore it.
+        run: gh workflow run auto-merge.yml --ref main -R "$GITHUB_REPOSITORY" -f done_run="$GITHUB_RUN_ID" || echo "Could not start auto-merge; its 30-minute run picks it up."

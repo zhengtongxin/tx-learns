@@ -88,6 +88,7 @@ jobs:
           node scripts/check-copy.mjs > /tmp/copy-check.txt 2>&1 || true
           [ -f scripts/check-counts.mjs ] && node scripts/check-counts.mjs >> /tmp/copy-check.txt 2>&1 || true
           [ -f scripts/check-pages.mjs ] && node scripts/check-pages.mjs >> /tmp/copy-check.txt 2>&1 || true
+          [ -f scripts/check-security.mjs ] && node scripts/check-security.mjs >> /tmp/copy-check.txt 2>&1 || true
       - name: Install Claude Code
         run: npm install -g @anthropic-ai/claude-code
       - name: Review with Claude
@@ -266,3 +267,8 @@ jobs:
           SUMMARY: "${{ steps.share.outputs.summary || format('PR #{0}: could not finish the review.', github.event.pull_request.number || inputs.pr) }}"
           LINK: ${{ github.server_url }}/${{ github.repository }}/pull/${{ github.event.pull_request.number || inputs.pr }}
         run: node $T/record-status.mjs reviewer
+      - name: Let auto-merge look at it
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run auto-merge.yml --ref main -R "$GITHUB_REPOSITORY" || echo "Auto-merge picks it up on its 30-minute run."
