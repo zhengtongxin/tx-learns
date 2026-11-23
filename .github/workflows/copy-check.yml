@@ -5,8 +5,8 @@
 # that changes one of the released pages is still open, so fixes land before the release does.
 # It also runs the count check: topic and lesson counts, the lesson list and lesson tags must agree with lessons.js.
 # Agents that open or push to a pull request with the workflow token start it by hand (workflow_dispatch on that
-# branch, and with `pr` for a release), because such pushes do not start workflows on their own. Its job names
-# "copy-check" and "Release waits for open fixes" are the required checks in .github/rulesets/.
+# branch, and with `pr` for a release), because such pushes do not start workflows on their own. Its job name
+# "copy-check" is a required check in .github/rulesets/; the release agent also checks for open fixes itself.
 name: Copy check
 on:
   pull_request:
