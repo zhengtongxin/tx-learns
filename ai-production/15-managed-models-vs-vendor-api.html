@@ -32,7 +32,7 @@
 import boto3
 
 </span><span class="chg">client = boto3.client("bedrock-runtime", region_name=os.environ.get("AWS_REGION", "ap-southeast-1"))
-MODEL_ID = os.environ.get("MODEL_ID", "us.amazon.nova-lite-v1:0")
+MODEL_ID = os.environ.get("MODEL_ID", "apac.amazon.nova-lite-v1:0")
 
 def ask_managed(system_prompt: str, history: list, user_text: str) -> str:
     messages = history + [{"role": "user", "content": [{"text": user_text}]}]
@@ -49,8 +49,8 @@ def ask_managed(system_prompt: str, history: list, user_text: str) -> str:
 #   return resp.choices[0].message.content</span></div>
 <div class="try" id="t2"></div>
 <h2><span class="en">Step 4 · Give the function's own role permission</span><span class="zh">第 4 步 · 给函数自己的角色权限</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Your user can call models, so a test from your laptop works. But the deployed function runs as its own <b>role</b>, a separate identity with its own permissions. Add a policy to that role, then redeploy and test. Keep it narrow: only the model family you chose. A model id with a regional prefix (like <code>us.</code>) is an <b>inference profile</b>, so its permission needs the profile address too.</p>
-<p class="zh" style="margin:0">你的用户能调用模型，所以在笔记本上测试没问题。但部署后的函数是以它自己的<b>角色</b>运行的，这是一个单独的身份，有自己的权限。给这个角色加一条策略，然后重新部署并测试。范围要窄：只放你选的那个模型家族。带区域前缀的模型 id（比如 <code>us.</code>）是<b>推理配置文件（inference profile）</b>，所以权限里也要写上这个配置文件的地址。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Your user can call models, so a test from your laptop works. But the deployed function runs as its own <b>role</b>, a separate identity with its own permissions. Add a policy to that role, then redeploy and test. Keep it narrow: only the model family you chose. A model id with a regional prefix (like <code>apac.</code>) is an <b>inference profile</b>, so its permission needs the profile address too.</p>
+<p class="zh" style="margin:0">你的用户能调用模型，所以在笔记本上测试没问题。但部署后的函数是以它自己的<b>角色</b>运行的，这是一个单独的身份，有自己的权限。给这个角色加一条策略，然后重新部署并测试。范围要窄：只放你选的那个模型家族。带区域前缀的模型 id（比如 <code>apac.</code>）是<b>推理配置文件（inference profile）</b>，所以权限里也要写上这个配置文件的地址。</p></div>
 <div class="codebox"><span class="dim">{"Effect": "Allow",
  "Action": "bedrock:InvokeModel",
  "Resource": [
@@ -58,8 +58,8 @@ def ask_managed(system_prompt: str, history: list, user_text: str) -> str:
    "arn:aws:bedrock:*:*:inference-profile/*.amazon.nova-*"</span><span class="dim">]}</span></div>
 <div class="try" id="t3"></div>
 <h2><span class="en">Step 5 · Two traps: the id and the messages</span><span class="zh">第 5 步 · 两个陷阱：模型 id 和消息</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0"><b>Model id and region must match.</b> Some models exist only in some regions, or need a regional prefix on the id; otherwise you get "model not found". The code below uses a <code>us.</code> id with an ap-southeast-1 client, so check the console's model list for your region, not just the prefix. <b>Messages must alternate</b> between user and assistant, and the system prompt must not be a message at all: it goes in the <code>system</code> field. The small helper below rebuilds the history safely.</p>
-<p class="zh" style="margin:0"><b>模型 id 和区域必须对得上。</b>有些模型只在部分区域有，或者 id 前面要加区域前缀，否则会得到“找不到模型”。下面的代码在 ap-southeast-1 的客户端里用了 <code>us.</code> 开头的 id，所以要以控制台的模型列表为准，别只看前缀。<b>消息必须在用户和助手之间交替</b>，而系统提示根本不能是一条消息：它要放进 <code>system</code> 字段。下面的小函数会安全地重建历史记录。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0"><b>Model id and region must match.</b> Some models exist only in some regions, or need a regional prefix on the id; otherwise you get "model not found". The code below uses an <code>apac.</code> id with an ap-southeast-1 client. If you use another region, the prefix changes (for example <code>us.</code> for US regions), so check the console's model list for your region. <b>Messages must alternate</b> between user and assistant, and the system prompt must not be a message at all: it goes in the <code>system</code> field. The small helper below rebuilds the history safely.</p>
+<p class="zh" style="margin:0"><b>模型 id 和区域必须对得上。</b>有些模型只在部分区域有，或者 id 前面要加区域前缀，否则会得到“找不到模型”。下面的代码在 ap-southeast-1 的客户端里用了 <code>apac.</code> 开头的 id。换到别的区域，前缀也要跟着变（比如美国区域用 <code>us.</code>），所以要以控制台的模型列表为准。<b>消息必须在用户和助手之间交替</b>，而系统提示根本不能是一条消息：它要放进 <code>system</code> 字段。下面的小函数会安全地重建历史记录。</p></div>
 <div class="codebox"><span class="dim">def to_messages(saved: list) -> list:
     """saved: [{"role": ..., "text": ...}] read from the memory bucket."""
     </span><span class="chg">messages = []

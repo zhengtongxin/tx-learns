@@ -17,7 +17,7 @@
 
 # switch the size without touching the code (list EVERY variable the function needs):
 aws lambda update-function-configuration --function-name wharf-twin \
-  --environment "Variables={</span><span class="chg">MODEL_ID=us.amazon.nova-micro-v1:0</span><span class="dim">,MEMORY_BUCKET=wharf-twin-memory}"</span></div>
+  --environment "Variables={</span><span class="chg">MODEL_ID=apac.amazon.nova-micro-v1:0</span><span class="dim">,MEMORY_BUCKET=wharf-twin-memory}"</span></div>
 <div class="try" id="t0"></div>
 <h2><span class="en">Step 2 · What a month costs</span><span class="zh">第 2 步 · 一个月要花多少钱</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">A model is priced per thousand <b>tokens</b> (small pieces of text, roughly three-quarters of a word), with one price for the text going in and a higher one for the text coming out. So a chat costs: input tokens × input price + output tokens × output price. Multiply by how many chats you expect. The prices below are made-up round numbers for practice; always read the provider's current price page.</p>
@@ -50,9 +50,9 @@ import boto3
 client = boto3.client("bedrock-runtime", region_name=os.environ.get("AWS_REGION", "ap-southeast-1"))
 SYSTEM = ("You are Mei Ling's twin. Facts: she works in the wharf IT office, "
           "she studies on weekends, her favourite lunch is Auntie Siti's laksa.")
-</span><span class="chg">SIZES = {"micro": "us.amazon.nova-micro-v1:0",
-         "lite":  "us.amazon.nova-lite-v1:0",
-         "pro":   "us.amazon.nova-pro-v1:0"}
+</span><span class="chg">SIZES = {"micro": "apac.amazon.nova-micro-v1:0",
+         "lite":  "apac.amazon.nova-lite-v1:0",
+         "pro":   "apac.amazon.nova-pro-v1:0"}
 QUESTIONS = [("What is Mei Ling's favourite lunch?", "laksa"),     # grow this list to ten
              ("Where does Mei Ling work?", "wharf"),
              ("When does Mei Ling study?", "weekend"),
