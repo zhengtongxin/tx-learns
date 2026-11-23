@@ -106,7 +106,7 @@ try {
           if (!got.h1) errs.push('no title shows');
         }
         const txt = await page.evaluate(() => document.body.innerText);
-        if (/\bundefined\b|\bNaN\b|\{\{/.test(txt)) errs.push('the page shows "undefined", "NaN" or "{{" somewhere');
+        if (/\bundefined\b|\bNaN\b|\{\{/.test(txt)) errs.push('the page shows a broken placeholder (a missing value or an unfilled template) somewhere');
       } catch (e) { errs.push(`did not load: ${e.message.split('\n')[0]}`); }
       [...new Set(errs)].slice(0, 4).forEach(e => bad(p, e));
       await page.close();
