@@ -1,4 +1,4 @@
-# UI check agent: after Vercel finishes a preview deploy, a headless browser uses every page the way a person
+# Frontend engineer agent (the UI check): after Vercel finishes a preview deploy, a headless browser uses every page the way a person
 # does. It hovers, clicks and Tabs through each interactive element on a desktop and a phone screen and flags
 # popups that stay open and overlap, popups off the screen, content wider than the screen, script errors and
 # missing files. That part is a plain script, so the pass/fail result is the same every time. Claude then looks
@@ -6,7 +6,7 @@
 # text, cut-off words, unreadable colours); those notes never fail the check on their own.
 # It posts one comment on the pull request (updated on each run), sets a "UI check" status and tells TX on
 # Telegram when something needs a look. It never pushes or edits files.
-name: UI check
+name: Frontend engineer (UI check)
 on:
   deployment_status:
   workflow_dispatch:
@@ -118,7 +118,8 @@ jobs:
           if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then unset ANTHROPIC_API_KEY; echo "Auth: Claude subscription"; else unset CLAUDE_CODE_OAUTH_TOKEN; echo "Auth: API key (no CLAUDE_CODE_OAUTH_TOKEN secret)"; fi
           ls /tmp/out/shots/*-[0-9].png > /tmp/out/tiles.txt || { echo 'No screenshot tiles to look at.'; exit 0; }
           cat > /tmp/ui-prompt.md <<'PROMPT'
-          You are the UI checker for TX Learns, a bilingual (EN/中文) learning site. The pages that changed were
+          You are the frontend engineer for TX Learns, a bilingual (EN/中文) learning site. You care that every page
+          looks finished and readable on a laptop and a phone. The pages that changed were
           screenshotted on a 1280px desktop and a 390px phone, cut into tiles from the top of the page down.
           Tiles are listed in /tmp/out/tiles.txt, named <page>-<desktop|phone>-<n>.png.
           A script has already hovered, clicked and Tabbed through every page; its findings are in /tmp/out/ui-check.json.
@@ -127,7 +128,8 @@ jobs:
           Look at every tile with the Read tool and report only clear visual bugs a visitor would notice:
           text running into or over other text, words or buttons cut off, boxes spilling out of their container,
           text you cannot read against its background, a widget or diagram that looks broken or empty,
-          a phone layout squeezed into unreadable columns. Ignore taste, wording, and the decorative glow.
+          a phone layout squeezed into unreadable columns, a button too small to tap on the phone, a popup or
+          diagram cut off at the edge, two elements stacked on top of each other. Ignore taste, wording, and the decorative glow.
           The 中文 text is hidden on purpose when the page is in English.
 
           A short subtitle that ends in "…" on purpose is a design choice, not a bug.
@@ -211,7 +213,7 @@ jobs:
             md += '\n👀 **Visual pass (Claude)** on the pages that changed. These are notes, they do not fail the check:\n\n';
             md += vis.map(i => `- \`${cell(i.page)}\` (${cell(i.screen)}), ${cell(i.where)}: ${cell(i.what)}`).join('\n') + '\n';
           }
-          md += `\nScreenshots and logs: [this run](${process.env.RUN}). _Checked by the TX Learns UI check agent._\n`;
+          md += `\nScreenshots and logs: [this run](${process.env.RUN}). _Checked by the TX Learns frontend engineer agent._\n`;
           fs.writeFileSync('/tmp/comment.md', md);
           const state = r.issues ? 'flag' : vis.length ? 'flag' : 'ok';
           const line = r.summary + (vis.length ? ` Claude also noted ${vis.length} visual thing${vis.length > 1 ? 's' : ''} to look at.` : '');
@@ -231,8 +233,9 @@ jobs:
           gh api "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state=$st -f context="$CONTEXT" -f description="$desc" -f target_url="${url:-$RUN}" >/dev/null
           echo "url=${url:-$RUN}" >> "$GITHUB_OUTPUT"
       - name: Tell TX on Telegram
-        # Quiet when everything passes: the green status on the PR and the Ecosystem page say so.
-        if: always() && steps.share.outputs.state != 'ok' && steps.share.outputs.state != 'skip'
+        # Only when the check itself broke. A red UI check reaches TX through auto-merge (one "needs you" message);
+        # visual notes alone never message TX.
+        if: always() && steps.share.outputs.state == 'fail'
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -242,7 +245,7 @@ jobs:
           if [ "$STATE" = flag ]; then
             { echo "🖱️ UI check on ${PR:+PR #$PR}${PR:-$(echo "$SHA" | cut -c1-7)}: $(cat /tmp/line.txt)"; echo "$URL"; } | node $T/notify-telegram.mjs
           else
-            node $T/notify-telegram.mjs "⚠️ The UI check agent could not finish. Logs: $RUN"
+            node $T/notify-telegram.mjs "⚠️ The frontend engineer agent could not finish the UI check. Logs: $RUN"
           fi
       - name: Record status for the Ecosystem page
         if: always()

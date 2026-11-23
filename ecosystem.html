@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>How TX Learns works</title>
-<meta name="description" content="This is the whole pipeline. Small AI agents watch every step, and no lesson goes live until I say yes."><meta property="og:title" content="How TX Learns works"><meta property="og:description" content="This is the whole pipeline. Small AI agents watch every step, and no lesson goes live until I say yes."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ecosystem.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="description" content="This is the whole pipeline. A small team of AI agents works every step, and nothing goes live until every one of them says yes."><meta property="og:title" content="How TX Learns works"><meta property="og:description" content="This is the whole pipeline. A small team of AI agents works every step, and nothing goes live until every one of them says yes."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ecosystem.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><link rel="stylesheet" href="assets/site.css">
 <style>
 :root{--mono:ui-monospace,"SF Mono",SFMono-Regular,"JetBrains Mono",Menlo,Consolas,monospace}
@@ -130,7 +130,7 @@
 <header class="stage compact eco-hero"><div class="orb"></div>
 <span class="eyebrow"><span class="en">Behind the scenes · system view</span><span class="zh">幕后 · 系统视图</span></span>
 <h1 class="mega"><span class="en">From something I learn<br>to a page you can read.</span><span class="zh">从我学到的东西，<br>到你能读的一页。</span></h1>
-<p class="sub"><span class="en">This is the whole pipeline. Small AI agents watch every step, and no lesson goes live until I say yes.</span><span class="zh">这是整条流水线。每一步都有小 AI agent 在看着，我点头之前，没有一课会上线。</span></p>
+<p class="sub"><span class="en">This is the whole pipeline. A small team of AI agents works every step, and nothing goes live until every one of them says yes.</span><span class="zh">这是整条流水线。一支小小的 AI agent 团队负责每一步，只有每个 agent 都点头，东西才会上线。</span></p>
 <div class="statusbar" id="sbar"></div>
 </header>
 
@@ -143,7 +143,7 @@
 <div class="key" id="key"></div>
 <p class="kb" id="kb"></p>
 <div class="gh" id="hood"><h3><span class="en">Guardrails</span><span class="zh">护栏</span></h3>
-<p class="worst"><span class="en">If an agent gets something wrong, the worst it can do is <b>open a pull request I close</b>.</span><span class="zh">就算 agent 出错，它最多也只能<b>开一个被我关掉的 pull request</b>。</span></p></div>
+<p class="worst"><span class="en">If an agent gets something wrong, the worst it can do is <b>a merge the product engineer agent rolls back</b>.</span><span class="zh">就算 agent 出错，最坏也只是<b>一次被产品工程师 agent 回滚的合并</b>。</span></p></div>
 <div class="guards" id="guards"></div>
 <p class="plumb"><b>record-status.mjs</b> → <b>agent-status</b> branch → <b>/api/status</b> <span class="en">(read-only token)</span><span class="zh">（只读令牌）</span> → <span class="en">this page, every 60 s</span><span class="zh">这一页，每 60 秒</span></p>
 </section>
@@ -151,7 +151,7 @@
 <section>
 <h2><span class="no">02</span><span class="en">Recent activity</span><span class="zh">最近动态</span></h2>
 <ul class="feed" id="feed"></ul>
-<p class="rule-line"><span class="en"><b>Agents suggest. I decide.</b> Every change is one pull request that only I merge, and only when everything is green. If a merge breaks the site, it is undone by itself.</span><span class="zh"><b>Agent 提建议，我来决定。</b>每个改动是一个只有我能合并的 pull request，而且只在全部通过时。如果某次合并弄坏了网站，它会被自动撤销。</span></p>
+<p class="rule-line"><span class="en"><b>The agents check, the checks decide.</b> Every change is one pull request that merges by itself only when every check is green. If a merge breaks the site, it is undone by itself; if something gets stuck, I hear about it once.</span><span class="zh"><b>Agent 负责检查，检查结果说了算。</b>每个改动是一个 pull request，只有全部检查通过才会自动合并。如果某次合并弄坏了网站，它会被自动撤销；如果卡住了，我会收到一次通知。</span></p>
 </section>
 </main>
 <div class="tip" id="tip" role="tooltip"></div>
@@ -163,24 +163,24 @@
   function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
   // Keep these specs true to .github/workflows/.
   var AGENTS=[
-    {id:'writer',hue:'#8b7cff',on:['on push · inbox/**','推送 inbox/** 时'],ev:'push · notes branch · inbox/** → runs on main',mdl:'Claude · ≤80 turns',rd:['notes, style guide, a model lesson','笔记、写作指南、一篇范例课'],tl:'Read Write Edit Glob Grep · ls · check-copy · check-counts · check-pages',wr:['draft lesson → one PR into main, the only PR for that lesson','课的草稿 → 一个提交到 main 的 PR，这一课只有这一个 PR'],tk:'contents · pull-requests · actions: write',gt:['I merge the lesson PR, once, and it goes live','我合并课的 PR，只一次，然后它就上线'],tg:['only on a problem; the reviewer agent tells me when the lesson is ready','只在出问题时；课准备好后由审稿人 agent 通知我'],g:'github',ic:'WR',en:'Writer agent',zh:'写手 agent',
-     den:'Turns my raw notes into a lesson draft that follows the style guide, then opens the one pull request for that lesson.',
-     dzh:'把我的原始笔记写成一篇符合写作指南的课的草稿，然后为这一课开唯一的一个 pull request。'},
-    {id:'copy-check',hue:'#4f9dff',on:['on every PR · script','每个 PR · 脚本'],ev:'pull_request → main · started by agents after they push',mdl:['script, no AI','脚本，不用 AI'],rd:['every page, banned word list, lessons.js','每一页、禁用词表、lessons.js'],tl:'node scripts/check-copy.mjs · check-counts.mjs · check-pages.mjs',wr:['pass / fail checks: wording, counts, tags, stray build files, page language, titles, link previews, alt text, headings, EN/中文 twins','通过 / 失败检查：用词、数量、标签、多余的编译文件、页面语言、标题、链接预览、图片说明、标题层级、中英对应'],tk:['check job: contents:read · status job: write','检查任务：contents:read · 状态任务：可写'],gt:['red blocks the merge','红色就不能合并'],tg:['only when a check fails','只在检查失败时'],g:'github',ic:'CC',en:'Copy check agent',zh:'原创检查 agent',
-     den:'Scans every page for source names and numbering, so each lesson stays in my own words, and checks every lesson count and tag against the lesson list. It also blocks stray build files.',
-     dzh:'扫描每一页，找出来源名称和编号，让每一课都用我自己的话，并按课的清单核对每个数量和标签。它也会拦下多余的编译文件。'},
-    {id:'reviewer',hue:'#f472b6',on:['every PR, once','每个 PR，一次'],ev:'started by the reader agent on a lesson PR · pull_request → main for every other PR',mdl:'Claude · ≤40 turns',rd:['the diff, style guide, copy check result','改动、写作指南、原创检查结果'],tl:'Read Write Edit Glob Grep · check-copy · check-counts · check-pages',wr:['one comment with a verdict ✅ / ⚠️ and a Reviewer status; on a lesson PR, its fixes as one commit there','一条带结论 ✅ / ⚠️ 的评论和一个 Reviewer 状态；在课的 PR 上，把修改作为一个提交加进去'],tk:['review job: contents:read · share job: write','审阅任务：contents:read · 分享任务：可写'],gt:['no ✅, no merge','没有 ✅ 就不能合并'],tg:['every lesson: "ready to approve"; other PRs only on ⚠️','每一课：“可以批准了”；其他 PR 只在 ⚠️ 时'],tga:1,g:'github',ic:'RV',en:'Reviewer agent',zh:'审稿人 agent',
-     den:'Reads each lesson PR like an editor (the story, the facts, the code, EN and 中文), fixes what it can on that same PR, then tells me it is ready. Every other change, like a script or workflow change, gets the same one review. Nothing merges without its ✅.',
-     dzh:'像编辑一样读每个课的 PR（故事、事实、代码、中英文），能修的就在同一个 PR 上修好，然后告诉我可以批准了。其他改动（比如脚本或工作流的修改）也同样审一次。没有它的 ✅ 就不能合并。'},
-    {id:'reader',hue:'#22d3ee',on:['on each preview','每次预览后'],ev:'deployment_status · preview ready',mdl:'Claude · ≤50 turns',rd:['the lessons that changed','改动过的课'],tl:'Read Write Edit Glob Grep · check-copy · check-counts · check-pages',wr:['clarity score, a handful of lessons per run; below 8/10 its fixes as one commit on the lesson PR','清晰度评分，每次只读少数几课；低于 8/10 时把修改作为一个提交加到课的 PR'],tk:['read job: contents:read · share job: write','读取任务：contents:read · 分享任务：可写'],gt:['I merge the lesson PR once','课的 PR 我只合并一次'],tg:['only on a problem; scores go in the daily digest','只在出问题时；评分写进每日汇总'],g:'vercel',ic:'RD',en:'Reader agent',zh:'试读员 agent',
-     den:'Reads each new lesson as someone new to AI would and scores how clear it is. Below 8/10 it adds clearer wording to the lesson\'s own PR, once, then hands over to the reviewer agent.',
-     dzh:'像刚接触 AI 的人那样读每篇新课，给清晰度打分。低于 8/10 时，它把更清楚的写法加到这一课自己的 PR 上（只一次），然后交给审稿人 agent。'},
-    {id:'ui-check',hue:'#fb923c',on:['clicks each preview','点遍每个预览'],ev:'deployment_status · preview ready',mdl:['script + Claude · ≤30 turns','脚本 + Claude · ≤30 轮'],rd:['every page in a desktop and a phone browser','桌面和手机浏览器里的每一页'],tl:'headless browser · Claude: Read + one result file',wr:['pass / fail status + one PR comment','通过 / 失败状态 + 一条 PR 评论'],tk:['check job: contents:read · share job: write','检查任务：contents:read · 分享任务：可写'],gt:['red blocks the merge','红色就不能合并'],tg:['only when something is flagged','只在发现问题时'],g:'vercel',ic:'UI',en:'UI check agent',zh:'界面检查 agent',
-     den:'Uses each preview the way a person does: hovers, clicks and Tabs through every page on a desktop and a phone, and flags popups that overlap, anything you can click but not reach with Tab, pages wider than the screen and script errors. Claude then looks at screenshots of what changed.',
-     dzh:'像真人一样使用每个预览：在桌面和手机上把每一页都悬停、点击、按 Tab 走一遍，标出重叠的弹窗、能点却按 Tab 到不了的东西、比屏幕还宽的页面和脚本错误。然后 Claude 再看一遍改动页面的截图。'},
-    {id:'live-check',hue:'#a3e635',on:['after each merge','每次合并后'],ev:'push → main (waits for Vercel) · or by hand',mdl:['script, no AI','脚本，不用 AI'],rd:['the live site: every page, lesson, link and file','线上网站：每一页、每一课、每个链接和文件'],tl:'node scripts/live-check.mjs · headless browser',wr:['a pass / fail line on this page; if a merge broke the site, a rollback PR that it merges','这一页上的一行通过 / 失败；如果某次合并弄坏了网站，就开一个回滚 PR 并合并'],tk:['check job: contents:read · rollback and status jobs: write','检查任务：contents:read · 回滚和状态任务：可写'],gt:['it undoes only a merge that broke a site that was fine before','只撤销把原本正常的网站弄坏的那次合并'],tg:['only when something is off or rolled back','只在有问题或回滚时'],g:'vercel',ic:'LC',en:'Live check agent',zh:'线上检查 agent',
-     den:'After every merge into main it waits for Vercel to finish deploying, then opens every page and lesson on the real site, follows every link, and checks that the counts match the lesson list. If that merge broke a site that was fine before, it undoes the merge with a rollback pull request and tells me once.',
-     dzh:'每次合并进 main 后，它等 Vercel 部署完，然后打开真实网站上的每一页和每一课，点遍每个链接，并核对数量和课的清单是否一致。如果这次合并把原本正常的网站弄坏了，它就用一个回滚 pull request 撤销这次合并，并通知我一次。'},
+    {id:'writer',hue:'#8b7cff',on:['on push · inbox/**','推送 inbox/** 时'],ev:'push · notes branch · inbox/** → runs on main',mdl:'Claude · ≤80 turns',rd:['notes, style guide, a model lesson','笔记、写作指南、一篇范例课'],tl:'Read Write Edit Glob Grep · ls · check-copy · check-counts · check-pages',wr:['draft lesson → one PR into main, the only PR for that lesson','课的草稿 → 一个提交到 main 的 PR，这一课只有这一个 PR'],tk:'contents · pull-requests · actions: write',gt:['the PR merges by itself once every check is green','所有检查都通过后，PR 自动合并'],tg:['only on a problem','只在出问题时'],g:'github',ic:'CC',en:'Content creator agent',zh:'内容创作者 agent',
+     den:'Turns my raw notes into a lesson for a newcomer to AI, in my voice and to the style guide, checks it once as that newcomer, then opens the one pull request for that lesson.',
+     dzh:'把我的原始笔记写成一篇给 AI 新手的课，用我的语气、按写作指南来写，再以新手的眼光自查一遍，然后为这一课开唯一的一个 pull request。'},
+    {id:'copy-check',hue:'#4f9dff',on:['on every PR · script','每个 PR · 脚本'],ev:'pull_request → main · started by agents after they push',mdl:['script, no AI','脚本，不用 AI'],rd:['every page, banned word list, lessons.js','每一页、禁用词表、lessons.js'],tl:'node scripts/check-copy.mjs · check-security.mjs · check-counts.mjs · check-pages.mjs',wr:['pass / fail checks: leaked keys, unsafe links and scripts, unsafe workflow lines, source names, counts, tags, stray build files, page language, titles, link previews, alt text, headings, EN/中文 twins','通过 / 失败检查：泄露的密钥、不安全的链接和脚本、不安全的工作流写法、来源名称、数量、标签、多余的编译文件、页面语言、标题、链接预览、图片说明、标题层级、中英对应'],tk:['check job: contents:read · status job: write','检查任务：contents:read · 状态任务：可写'],gt:['red blocks the merge','红色就不能合并'],tg:['only when a check fails','只在检查失败时'],g:'github',ic:'SE',en:'Cybersecurity engineer agent',zh:'网络安全工程师 agent',
+     den:'Guards the repo: it blocks leaked API keys and tokens, unsafe links, scripts from unknown sites and workflow lines a stranger could abuse. It also keeps every page free of source names, checks every lesson count and tag against the lesson list, and blocks stray build files.',
+     dzh:'守住仓库：拦下泄露的 API 密钥和令牌、不安全的链接、来自陌生网站的脚本，以及陌生人可能利用的工作流写法。它也让每一页不出现来源名称，按课的清单核对每个数量和标签，并拦下多余的编译文件。'},
+    {id:'reviewer',hue:'#f472b6',on:['every PR, once','每个 PR，一次'],ev:'started by the intern agent on a lesson PR · pull_request → main for every other PR',mdl:'Claude · ≤40 turns',rd:['the diff, style guide, the security and code checks','改动、写作指南、安全检查和代码检查结果'],tl:'Read Write Edit Glob Grep · check-copy · check-counts · check-pages',wr:['one comment with a verdict ✅ / ⚠️ and a Reviewer status; on a lesson PR, its fixes as one commit there','一条带结论 ✅ / ⚠️ 的评论和一个 Reviewer 状态；在课的 PR 上，把修改作为一个提交加进去'],tk:['review job: contents:read · share job: write','审阅任务：contents:read · 分享任务：可写'],gt:['no ✅, no merge; with ✅ and green checks it merges by itself','没有 ✅ 就不能合并；有 ✅ 且检查全绿就自动合并'],tg:['only when it cannot finish; a ⚠️ it cannot fix reaches me once as "needs you"','只在无法完成时；修不好的 ⚠️ 会以“需要你”通知我一次'],g:'github',ic:'BE',en:'Backend engineer agent',zh:'后端工程师 agent',
+     den:'Checks that every code sample would really run (imports, package names, the library\'s real functions, await, model names) and that every fact is true, plus the story and EN/中文. It fixes what it can on that same PR. Every other change, like a script change, gets the same one review. Nothing merges without its ✅.',
+     dzh:'检查每段示例代码是否真的能运行（导入、包名、库里真实的函数、await、模型名），每个事实是否属实，还有故事和中英文。能修的就在同一个 PR 上修好。其他改动（比如脚本的修改）也同样审一次。没有它的 ✅ 就不能合并。'},
+    {id:'reader',hue:'#22d3ee',on:['on each preview','每次预览后'],ev:'deployment_status · preview ready',mdl:'Claude · ≤50 turns',rd:['the lessons that changed','改动过的课'],tl:'Read Write Edit Glob Grep · check-copy · check-counts · check-pages',wr:['clarity score, a handful of lessons per run; below 8/10 its fixes as one commit on the lesson PR','清晰度评分，每次只读少数几课；低于 8/10 时把修改作为一个提交加到课的 PR'],tk:['read job: contents:read · share job: write','读取任务：contents:read · 分享任务：可写'],gt:['its fixes go onto the same lesson PR','它的修改加到同一个课的 PR'],tg:['only on a problem; scores go in the daily digest','只在出问题时；评分写进每日汇总'],g:'vercel',ic:'IN',en:'Intern agent',zh:'实习生 agent',
+     den:'An intern who is learning AI. It reads each new lesson to learn from it, says honestly where it got lost and scores how clear it is. Below 8/10 it adds clearer wording to the lesson\'s own PR, once, then hands over to the backend engineer agent.',
+     dzh:'一个正在学 AI 的实习生。它读每篇新课来学习，老实说出哪里看不懂，并给清晰度打分。低于 8/10 时，它把更清楚的写法加到这一课自己的 PR 上（只一次），然后交给后端工程师 agent。'},
+    {id:'ui-check',hue:'#fb923c',on:['clicks each preview','点遍每个预览'],ev:'deployment_status · preview ready',mdl:['script + Claude · ≤30 turns','脚本 + Claude · ≤30 轮'],rd:['every page in a desktop and a phone browser','桌面和手机浏览器里的每一页'],tl:'headless browser · Claude: Read + one result file',wr:['pass / fail status + one PR comment','通过 / 失败状态 + 一条 PR 评论'],tk:['check job: contents:read · share job: write','检查任务：contents:read · 分享任务：可写'],gt:['red blocks the merge','红色就不能合并'],tg:['only when it cannot finish; a red check reaches me once as "needs you"','只在无法完成时；红色检查会以“需要你”通知我一次'],g:'vercel',ic:'FE',en:'Frontend engineer agent',zh:'前端工程师 agent',
+     den:'Uses each preview the way a person does, and cares that every page looks finished on a laptop and a phone: hovers, clicks and Tabs through every page on a desktop and a phone, and flags popups that overlap, anything you can click but not reach with Tab, pages wider than the screen and script errors. Claude then looks at screenshots of what changed.',
+     dzh:'像真人一样使用每个预览，在意每一页在电脑和手机上都像做完的样子：在桌面和手机上把每一页都悬停、点击、按 Tab 走一遍，标出重叠的弹窗、能点却按 Tab 到不了的东西、比屏幕还宽的页面和脚本错误。然后 Claude 再看一遍改动页面的截图。'},
+    {id:'live-check',hue:'#a3e635',on:['after each merge','每次合并后'],ev:'each merge into main, from auto-merge or a push (waits for Vercel) · or by hand',mdl:['script, no AI','脚本，不用 AI'],rd:['the live site: every page, lesson, link and file, on a desktop and a phone, in EN and 中文','线上网站：每一页、每一课、每个链接和文件，桌面和手机，英文和中文'],tl:'node scripts/live-check.mjs · headless browser',wr:['a pass / fail line on this page; if a merge broke the site, a rollback PR that it merges','这一页上的一行通过 / 失败；如果某次合并弄坏了网站，就开一个回滚 PR 并合并'],tk:['check job: contents:read · rollback and status jobs: write','检查任务：contents:read · 回滚和状态任务：可写'],gt:['it undoes only a merge that broke a site that was fine before','只撤销把原本正常的网站弄坏的那次合并'],tg:['only when something is off or rolled back','只在有问题或回滚时'],g:'vercel',ic:'PE',en:'Product engineer agent',zh:'产品工程师 agent',
+     den:'After every merge into main it waits for Vercel to finish deploying, then uses the real site like a reader: every page and lesson, every link, the counts against the lesson list, 中文, a phone screen and load times. Only real breakage counts, and it looks twice. If that merge broke a site that was fine before, it undoes the merge with a rollback pull request and tells me once.',
+     dzh:'每次合并进 main 后，它等 Vercel 部署完，然后像读者一样使用真实网站：每一页、每一课、每个链接，核对数量和课的清单，还看中文、手机屏幕和加载时间。只有真的坏了才算，而且会看两遍。如果这次合并把原本正常的网站弄坏了，它就用一个回滚 pull request 撤销这次合并，并通知我一次。'},
     {id:'recall',hue:'#facc15',on:['Sundays · 9 AM','每周日 · 早 9 点'],ev:'schedule · Sunday 01:00 UTC · first Sunday: model check',mdl:'Claude · ≤20 turns (+15 monthly)',rd:['the lessons due for review, the lesson list; monthly: model names in lessons','到期该复习的课、课的清单；每月：课里用到的模型名'],tl:'Read · monthly: WebSearch',wr:['no files: one Telegram message','不写文件：只发一条 Telegram'],tk:['think job: contents:read · send job: write','思考任务：contents:read · 发送任务：可写'],gt:['I answer on my phone','我在手机上作答'],tg:['every week: what to review, with questions; monthly: outdated model names','每周：该复习什么，附带问题；每月：过时的模型名'],tga:1,g:'github',ic:'SR',en:'Recall agent',zh:'回顾 agent',
      den:'Brings old lessons back right before I would forget them (1, 3, 7, 14, 30 days and on), with two quick questions each, and points out the gaps: topics I have not written yet and what to learn next. Once a month it also looks up which AI model names in the lessons are outdated.',
      dzh:'在我快忘记之前把旧课翻出来（1、3、7、14、30 天……），每课附两道小问题，并指出缺口：还没写的主题和下一步该学什么。每月还会查一次课里哪些模型名已经过时。'}];
@@ -217,7 +217,7 @@
     writer:{c:2,y:RA,agent:'writer',seq:3},
     test:{c:3,y:RA,en:'Pull request',zh:'Pull request',m:['one per change → main','每个改动一个 → main'],seq:4,lock:1},
     prev:{c:4,y:RA,en:'Preview',zh:'预览',m:['the PR\'s own build','PR 自己的版本'],seq:5},
-    main:{c:3,y:RB,en:'Merge into main',zh:'合并进 main',m:['by me · all green + ✅','由我 · 全绿 + ✅'],seq:6},
+    main:{c:3,y:RB,en:'Merge into main',zh:'合并进 main',m:['by itself · all green + ✅','自动 · 全绿 + ✅'],seq:6},
     live:{c:4,y:RB,en:'Live site',zh:'线上网站',m:['production','正式环境'],seq:7},
     readers:{c:5,y:RB,en:'Readers',zh:'读者',m:['me · newcomers to AI','我 · AI 新手'],seq:8},
     reader:{c:2,y:RT,agent:'reader'},
@@ -302,7 +302,7 @@
       if(n.tg){var nm=function(L){return L.map(function(a){return a.en.replace(/ agent$/,'')}).join(', ')},nz=function(L){return L.map(function(a){return a.zh.replace(/ agent$/,'')}).join('、')},al=TG().filter(function(a){return a.tga}),pr=TG().filter(function(a){return !a.tga});
         return '<li class="it">'+t('Telegram → me','Telegram → 我')+'<small>'+t('every run: '+nm(al),'每次运行：'+nz(al))+'</small><small>'+t('only on a problem: '+nm(pr),'只在出问题时：'+nz(pr))+'</small></li>'}
       if(a)return '<li class="it ag'+(OPEN===a.id?' open':'')+'" style="--h:'+a.hue+'" data-agent="'+a.id+'"'+(n.seq?' data-n="'+n.seq+'"':'')+'><button class="ob" aria-expanded="'+(OPEN===a.id)+'"><span class="st '+st+'"></span>'+t(a.en,a.zh)+'</button><small class="hx">'+t(a.on[0],a.on[1])+'</small><small>'+(s?(PILL[st]||'')+' · '+ago(atOf(s))+runsOf(s):LIVE?t('no runs yet','还没运行'):t('status offline','状态离线'))+'</small>'+(a.tg?'<small class="tgl">✈ '+t('Telegram: '+a.tg[0],'Telegram：'+a.tg[1])+'</small>':'')+'<div class="more"><p>'+t(a.den,a.dzh)+'</p>'+specOf(a)+lastOf(s)+'</div></li>';
-      return '<li class="it"'+(n.seq?' data-n="'+n.seq+'"':'')+'>'+t(esc(n.en),esc(n.zh))+(n.lock?'<span class="lk">'+t('TX APPROVES','TX 批准')+'</span>':'')+'<small>'+t(esc(n.m[0]),esc(n.m[1]))+'</small></li>'}
+      return '<li class="it"'+(n.seq?' data-n="'+n.seq+'"':'')+'>'+t(esc(n.en),esc(n.zh))+(n.lock?'<span class="lk">'+t('ALL GREEN','全绿')+'</span>':'')+'<small>'+t(esc(n.m[0]),esc(n.m[1]))+'</small></li>'}
     document.getElementById('ov-list').innerHTML=L.map(function(l){return '<li class="h">0'+(l[0]+1)+' · '+t(COLS[l[0]][0],COLS[l[0]][1])+'</li>'+l[1].map(li).join('')}).join('');
     // Phone: tapping an agent opens its details in place and closes any other.
     document.querySelectorAll('#ov-list .ob').forEach(function(b){b.onclick=function(){var it=b.parentNode,was=it.classList.contains('open');
@@ -342,42 +342,42 @@
   var ALL=AGENTS.filter(function(a){return !a.later}).map(function(a){return a.id});
   var AI=['writer','reader','reviewer','ui-check','recall'];
   var G=[
-    {t:['I approve every change','每个改动都由我批准'],ag:ALL,n:'1',u:['merge by me per change','次合并／每个改动，由我来做'],
-     r:['An agent publishes something I never saw.','agent 发布了我没看过的东西。'],
-     i:['Nothing reaches the live site without my merge. Agents draft, read, review and check; I decide.','没有我的合并，什么都上不了线。agent 负责起草、试读、审阅和检查；由我来决定。']},
-    {t:['Merges wait for green','合并要等全绿'],ag:['copy-check','ui-check','reviewer'],n:'3',u:['checks that must pass on the exact commit: copy check, UI check, reviewer ✅','项检查必须在那次提交上通过：原创检查、界面检查、审稿人 ✅'],
+    {t:['Every agent must say yes','每个 agent 都要点头'],ag:ALL,n:'1',u:['merge per change, by itself, only when every check is green','次合并／每个改动，自动进行，只在全部通过时'],
+     r:['A change goes live that one of the agents would have stopped.','某个 agent 本该拦下的改动上线了。'],
+     i:['Auto-merge merges one pull request at a time, only when every required check is green, and never while the last merge is still being checked. Changes to the agents\' own workflows still wait for me.','自动合并一次只合并一个 pull request，只在所有必需检查都通过时，而且上一次合并还在检查时不会动。改动 agent 自己的工作流仍然要等我。']},
+    {t:['Merges wait for green','合并要等全绿'],ag:['copy-check','ui-check','reviewer'],n:'3',u:['checks that must pass on the exact commit: cybersecurity, frontend and backend engineer ✅','项检查必须在那次提交上通过：网络安全、前端和后端工程师 ✅'],
      r:['A change goes live with a broken page, a source name, or no review.','改动带着坏掉的页面、来源名称或没经过审阅就上线了。'],
      i:['Each change is reviewed once, on its own PR, and the review only counts for the commit it read. A later edit needs a new ✅.','每个改动在自己的 PR 上审一次，而且审阅只对它读过的那次提交有效。之后再改就需要新的 ✅。']},
     {t:['A broken merge is undone','弄坏网站的合并会被撤销'],ag:['live-check'],n:'1',u:['rollback pull request when a merge breaks a site that was fine before','个回滚 pull request：某次合并把原本正常的网站弄坏时'],
      r:['A merge breaks the live site and it stays broken until I notice.','某次合并弄坏了线上网站，一直坏到我发现为止。'],
-     i:['The live check agent reverts that one merge, merges the rollback and checks the site again, then tells me once.','线上检查 agent 撤销那一次合并，合并回滚，再检查一次网站，然后通知我一次。']},
+     i:['The product engineer agent reverts that one merge, merges the rollback and checks the site again, then tells me once. A lesson that teaches words like undefined or NaN never counts as broken.','产品工程师 agent 撤销那一次合并，合并回滚，再检查一次网站，然后通知我一次。教 undefined、NaN 这类词的课不会被当成坏掉。']},
     {t:['The AI can look, not touch','AI 只能看，不能动'],ag:['reader','reviewer','ui-check','recall'],n:'0',u:['write access while the AI is thinking','AI 思考时的写权限'],
      r:['A lesson with tricky text talks the AI into changing the repo.','一篇课里的刁钻文字诱导 AI 去改仓库。'],
      i:['The thinking job can only read. A separate job, running trusted scripts from main, does the writing.','思考的任务只能读，另一个运行 main 上可信脚本的任务负责写入。']},
     {t:['A short list of tools','工具清单很短'],ag:AI,n:'1–8',u:['tools each, and no free command line','个工具，没有随意的命令行'],
      r:['An agent runs any command it likes.','agent 想跑什么命令就跑什么。'],
-     i:['Agents can read and edit files and run the two checks. The UI check and recall agents can only read.','agent 只能读写文件、跑两个检查；界面检查和回顾 agent 只能读。']},
+     i:['Agents can read and edit files and run the checks. The frontend engineer and recall agents can only read.','agent 只能读写文件、跑检查；前端工程师和回顾 agent 只能读。']},
     {t:['Every run has a limit','每次运行都有上限'],ag:AI,n:'20–80',u:['steps at most, then it stops','步封顶，到了就停'],
      r:['A confused agent loops and burns my plan usage.','一个糊涂的 agent 原地打转，耗光我的额度。'],
      i:['Every run has a hard stop, so a bad run costs minutes, not hours.','每次运行都有硬上限，一次失败只浪费几分钟，而不是几小时。']},
     {t:['Fixes only touch lessons','修改只碰课文件'],ag:['reader','reviewer'],n:'1',u:['kind of file a fix may change: lesson pages','种文件可以被修改：课页面'],
      r:['A "fix" quietly edits scripts or workflows.','一个“修改”悄悄动了脚本或工作流。'],
-     i:['Fixes from the reader and reviewer agents can only change lesson files. Anything else is dropped.','试读员和审稿人 agent 的修改只能改课文件，其他改动会被丢掉。']},
+     i:['Fixes from the intern and backend engineer agents can only change lesson files. Anything else is dropped.','实习生和后端工程师 agent 的修改只能改课文件，其他改动会被丢掉。']},
     {t:['One PR, one round of fixes','一个 PR，只修一轮'],ag:['reader','reviewer'],n:'1',u:['round of fixes per agent, on the lesson\'s own PR','轮修改／每个 agent，就在课自己的 PR 上'],
      r:['Fix PRs pile up and I merge three times for one lesson.','修改 PR 越堆越多，一课要合并三次。'],
-     i:['The reader agent fixes only below 8/10, the reviewer agent once, both as commits on the same PR. They skip each other\'s fixes.','试读员 agent 只在低于 8/10 时修，审稿人 agent 只修一次，都作为提交加到同一个 PR。它们跳过彼此的修改。']},
-    {t:['No source names, no junk files','没有来源名称，也没有杂文件'],ag:['copy-check'],n:'100%',u:['of pages and files scanned on every pull request','的页面和文件，在每个 pull request 上都会扫描'],
-     r:['A source or platform name, a stray build file, or a lesson count that no longer matches, slips into the site.','来源或平台的名字、多余的编译文件，或者对不上的课数，混进网站。'],
-     i:['The PR turns red before I merge, and status shown on this page is scrubbed too.','合并前 PR 就会变红；这一页显示的状态也会被清洗。']},
+     i:['The intern agent fixes only below 8/10, the backend engineer agent once, both as commits on the same PR. They skip each other\'s fixes.','实习生 agent 只在低于 8/10 时修，后端工程师 agent 只修一次，都作为提交加到同一个 PR。它们跳过彼此的修改。']},
+    {t:['No leaked keys, no source names','没有泄露的密钥，也没有来源名称'],ag:['copy-check'],n:'100%',u:['of pages and files scanned on every pull request','的页面和文件，在每个 pull request 上都会扫描'],
+     r:['An API key, an unsafe link, a source or platform name, a stray build file, or a lesson count that no longer matches, slips into the site.','API 密钥、不安全的链接、来源或平台的名字、多余的编译文件，或者对不上的课数，混进网站。'],
+     i:['The PR turns red and cannot merge, and status shown on this page is scrubbed too.','PR 会变红，不能合并；这一页显示的状态也会被清洗。']},
     {t:['The live site is checked','线上网站会被检查'],ag:['live-check'],n:'1',u:['check of every live page and link after each merge','次检查：每次合并后检查线上每一页和每个链接'],
      r:['A merge breaks a link or a lesson and nobody notices.','某次合并弄坏了一个链接或一课，却没人发现。'],
      i:['It runs after each merge into main, once Vercel has finished deploying. A stopped run never sends an alarm.','每次合并进 main、Vercel 部署完就运行。被停掉的运行从不报警。']},
     {t:['Agents never push to the site','agent 从不直接推送到网站'],ag:ALL,n:'0',u:['direct pushes to main: everything goes through a pull request','次直接推送到 main：一切都走 pull request'],
      r:['An agent pushes straight to the live site.','agent 直接推送到线上网站。'],
-     i:['Agents push only run logs to agent-status and fixes onto a lesson\'s own draft branch. Even a rollback is a pull request.','agent 只把运行日志推到 agent-status，把修改推到课自己的草稿分支。就连回滚也是一个 pull request。']},
-    {t:['No silent failures, no noise','不会悄悄失败，也不吵'],ag:ALL,n:'1',u:['digest a day, plus a message right away when a run fails or needs me','条每日汇总；运行失败或需要我时另外马上通知'],
+     i:['Agents push only run logs to agent-status and fixes onto a lesson\'s own draft branch. Merges go through auto-merge; even a rollback is a pull request.','agent 只把运行日志推到 agent-status，把修改推到课自己的草稿分支。合并都走自动合并；就连回滚也是一个 pull request。']},
+    {t:['No silent failures, no noise','不会悄悄失败，也不吵'],ag:ALL,n:'1',u:['digest a day, plus a message right away when a run fails, a PR is stuck or a merge is rolled back','条每日汇总；运行失败、PR 卡住或合并被回滚时另外马上通知'],
      r:['An agent breaks quietly, or my phone buzzes all day.','agent 悄悄坏掉，或者手机响个不停。'],
-     i:['Every agent messages me when it fails, and the live check agent when it rolls back. Everything else waits for the 8 PM digest.','每个 agent 失败时都会通知我，线上检查 agent 回滚时也会。其他的都等晚 8 点的汇总。']}];
+     i:['Every agent messages me when it fails, auto-merge once when a PR is stuck, and the product engineer agent when it rolls back. Everything else waits for the 8 PM digest.','每个 agent 失败时都会通知我，PR 卡住时自动合并会通知一次，产品工程师 agent 回滚时也会。其他的都等晚 8 点的汇总。']}];
   function who(ids){if(ids.length===ALL.length)return '<i class="all">'+t('All '+ALL.length+' agents','全部 '+ALL.length+' 个 agent')+'</i>';
     return ids.map(function(id){var a=NAME[id];return '<i style="--h:'+a.hue+'">'+t(a.en.replace(/ agent$/,''),a.zh.replace(/ agent$/,''))+'</i>'}).join('')}
   document.getElementById('guards').innerHTML=G.map(function(g,k){
@@ -389,7 +389,7 @@
   document.getElementById('key').innerHTML=
     AGENTS.filter(function(a){return a.hue}).map(function(a){return '<span><i class="sw" style="--h:'+a.hue+'"></i>'+t(a.en,a.zh)+'</span>'}).join('')+
     '<span><i class="sq">1</i>'+t('lesson path','一课的路径')+'</span><span><i class="ln lp"></i>'+t('feedback loop','反馈回路')+'</span><span><i class="ln ck"></i>'+t('check','检查')+'</span>'+
-    '<span><svg viewBox="-6 -8 12 16" aria-hidden="true"><g class="lock" style="fill:var(--fg);stroke:var(--fg)">'+LOCK.replace('<path','<path fill="none" stroke-width="1.6"')+'</g></svg>'+t('TX approves','TX 批准')+'</span>'+
+    '<span><svg viewBox="-6 -8 12 16" aria-hidden="true"><g class="lock" style="fill:var(--fg);stroke:var(--fg)">'+LOCK.replace('<path','<path fill="none" stroke-width="1.6"')+'</g></svg>'+t('all green to merge','全绿才合并')+'</span>'+
     '<span><svg viewBox="-7 -7 14 14" aria-hidden="true" class="kpl">'+PLANE+'</svg>'+t('pings me on Telegram every run','每次运行都发 Telegram 给我')+'</span>'+
     '<span><svg viewBox="-7 -7 14 14" aria-hidden="true" class="kpl ho">'+PLANE+'</svg>'+t('only on a problem','只在出问题时')+'</span>'+
     '<span><i class="dt" style="background:var(--run)"></i>'+t('working','运行中')+'</span><span><i class="dt" style="background:var(--ok)"></i>'+t('passed','通过')+'</span><span><i class="dt" style="background:var(--warn)"></i>'+t('flagged','有问题')+'</span><span><i class="dt" style="background:var(--bad)"></i>'+t('failed','失败')+'</span><span><i class="dt"></i>'+t('no runs yet','还没运行')+'</span>';
@@ -406,7 +406,7 @@
     ran.forEach(function(a){var x=+new Date(S[a.id].at);if(x>last)last=x});
     var runs=ran.reduce(function(n,a){return n+(S[a.id].runs||0)},0);
     document.getElementById('sbar').innerHTML='<span>status: <b class="'+(live?'on':'off')+'">'+(live?'● live':'○ offline')+'</b></span><span>agents: <b>'+act.length+'</b> '+t('active','在线')+(AGENTS.length>act.length?' · <b>'+(AGENTS.length-act.length)+'</b> '+t('planned','计划中'):'')+'</span>'+
-      '<span>runs: <b>'+runs+'</b></span>'+(last?'<span>'+t('last run','上次运行')+': <b>'+ago(new Date(last).toISOString())+'</b></span>':'')+'<span>gate: <b>TX</b></span>'}
+      '<span>runs: <b>'+runs+'</b></span>'+(last?'<span>'+t('last run','上次运行')+': <b>'+ago(new Date(last).toISOString())+'</b></span>':'')+'<span>gate: <b>all green</b></span>'}
 
   function draw(data){
     var live=!!(data&&data.connected),S=(data&&data.agents)||{};

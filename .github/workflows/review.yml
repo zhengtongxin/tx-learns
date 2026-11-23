@@ -1,4 +1,4 @@
-# Reviewer agent: Claude reviews a pull request into main against STYLE.md and CLAUDE.md and posts one comment.
+# Backend engineer agent (the reviewer): Claude reviews the facts and the code (does every code sample run?) of a pull request into main against STYLE.md and CLAUDE.md and posts one comment.
 # Every change gets this one review before it can be merged: its verdict is the "Reviewer" status on the exact
 # commit it read, and that status is a required check (.github/rulesets/main.json).
 #   On a lesson's own pull request (a writer/ branch; started by the reader agent once it is done) it also fixes
@@ -7,7 +7,7 @@
 #   On any other pull request (scripts, workflows, pages) it runs when the PR opens or gets a new commit, and only
 #   comments. Telegram for those only on ⚠️ or a failed run.
 # Claude runs in a read-only job; a separate job with trusted scripts from main does the writing.
-name: Claude review
+name: Backend engineer (review)
 on:
   pull_request:
     branches: [main]
@@ -50,7 +50,7 @@ jobs:
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           [ -n "$SHA" ] || SHA=$(gh pr view "$PR" -R "$GITHUB_REPOSITORY" --json headRefOid --jq .headRefOid)
-          gh api -X POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state=pending -f context=Reviewer -f description="Reviewer agent is reading…" -f target_url="$RUN" > /dev/null || true
+          gh api -X POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state=pending -f context=Reviewer -f description="Backend engineer agent is reading…" -f target_url="$RUN" > /dev/null || true
 
   review:
     runs-on: ubuntu-latest
@@ -89,6 +89,9 @@ jobs:
           [ -f scripts/check-counts.mjs ] && node scripts/check-counts.mjs >> /tmp/copy-check.txt 2>&1 || true
           [ -f scripts/check-pages.mjs ] && node scripts/check-pages.mjs >> /tmp/copy-check.txt 2>&1 || true
           [ -f scripts/check-security.mjs ] && node scripts/check-security.mjs >> /tmp/copy-check.txt 2>&1 || true
+          # Syntax check of every code box in the lessons this PR changes (nothing is run).
+          lessons=$(grep -oE '^\+\+\+ b/[^ ]+/[0-9][0-9]-[^ ]+\.html' /tmp/pr.diff | sed 's|^+++ b/||' | tr '\n' ' ')
+          if [ -n "$lessons" ] && [ -f scripts/check-code.mjs ]; then node scripts/check-code.mjs $lessons > /tmp/code-check.txt 2>&1 || true; else echo "No lesson code to check." > /tmp/code-check.txt; fi
       - name: Install Claude Code
         run: npm install -g @anthropic-ai/claude-code
       - name: Review with Claude
@@ -113,19 +116,27 @@ jobs:
              bugs, for CLAUDE.md staying true to the workflows, and for the How it works page staying true to them."
           fi
           cat > /tmp/review-prompt.md <<PROMPT
-          You are the reviewer for TX Learns, a bilingual (EN/中文) learning site. Review pull request #$PR.
+          You are the backend engineer for TX Learns, a bilingual (EN/中文) learning site. Review pull request #$PR.
+          Your focus is correctness: every code sample would really run for a reader who copies it, and every fact
+          about a tool, library or model is true. Nothing merges without your ✅, and with your ✅ (and green checks)
+          it merges by itself, with no person reading it first. Be strict about real errors, relaxed about taste.
           $MODE
 
           1. Read CLAUDE.md and STYLE.md first. They are the rules.
           2. Read the diff in /tmp/pr.diff and open each changed lesson in full.
           3. Read /tmp/copy-check.txt (the copyright scrubber's and the count check's output for this branch).
-             Any ✗ in it is a blocker.
+             Any ✗ in it is a blocker. Read /tmp/code-check.txt too: code boxes in the changed lessons that would not
+             parse. A box may be a fragment of an earlier step ("..." as an elided argument is fine); a real syntax
+             error is a blocker.
           4. Check each changed lesson for:
              - Copyright: any platform, program or instructor name, "course"/课程, week/day/"Project N" numbering,
                or examples, prompts and code comments that look copied from a source rather than written in our own words.
              - Human touch per STYLE.md: one running story, Learn / Show / Test in every step, plain short sentences,
                an analogy where it helps, takeaways. Would a newcomer to AI follow it without the source?
-             - Correctness: code that would actually run (package names, imports, await placement), facts about tools.
+             - Correctness, like a backend engineer: would each code box run as shown once the earlier steps are in place?
+               Check package names and install lines, imports, function and argument names of the library version used,
+               await only inside async code (or at the top of a notebook), return types, model names that exist, and
+               that printed output matches what the code does. Facts about tools must be true.
              - Build before use: no step's code calls a function, agent or variable that only a later step creates.
              - The lesson's <meta name="updated"> date is today's date when its text changed (node scripts/check-pages.mjs --fix sets it).
              - EN and 中文 say the same thing; every .en has a .zh.
@@ -133,7 +144,7 @@ jobs:
           5. Write ONE comment to /tmp/review-comment.md. Start it with a verdict line:
              "✅ Ready to merge" or "⚠️ Fix before merging". Then a short list of findings, most important first,
              each with file, the exact text and a suggested rewrite. Keep it under 400 words, plain and friendly.
-             End with: "_Reviewed by the TX Learns reviewer agent (Claude)._"
+             End with: "_Reviewed by the TX Learns backend engineer agent (Claude)._"
           6. Write a 3 to 5 line plain-text summary to /tmp/review-summary.txt. Its first line must start with the same
              verdict, then the top issues. It is shown publicly: never quote a banned term or source name in it;
              name the file and step instead.
@@ -211,11 +222,11 @@ jobs:
           if [ "$FIX" = 1 ] && [ -s /tmp/out/fix.patch ]; then
             cd work
             git apply --include='*/[0-9]*.html' /tmp/out/fix.patch
-            git config user.name "TX Learns reviewer"
+            git config user.name "TX Learns backend engineer"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add -- '*/[0-9]*.html'
             if ! git diff --cached --quiet; then
-              git commit -m "Reviewer: fixes from the review" -m "Made by the reviewer agent (Claude) on the lesson's own pull request."
+              git commit -m "Reviewer: fixes from the review" -m "Made by the backend engineer agent (Claude) on the lesson's own pull request."
               auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
               git -c "http.https://github.com/.extraheader=$auth" push origin "HEAD:refs/heads/$HEAD"
               pushed=$(git rev-parse HEAD)
@@ -228,7 +239,7 @@ jobs:
           echo "<!-- tx-review sha=$SHA -->" >> /tmp/c.md
           gh pr comment "$PR" -R "$GITHUB_REPOSITORY" --body-file /tmp/c.md
           # The required "Reviewer" status: green only for ✅, on the reviewed commit and on the fix commit it pushed.
-          case "$state" in ok) st=success; d="Reviewer agent: ready to merge";; flag) st=failure; d="Reviewer agent: fix before merging";; *) st=error; d="Reviewer agent could not finish";; esac
+          case "$state" in ok) st=success; d="Backend engineer agent: ready to merge";; flag) st=failure; d="Backend engineer agent: fix before merging";; *) st=error; d="Backend engineer agent could not finish";; esac
           for c in "$SHA" $pushed; do
             gh api -X POST "repos/$GITHUB_REPOSITORY/statuses/$c" -f state=$st -f context=Reviewer -f description="$d" -f target_url="$URL" > /dev/null || echo "::warning::Could not set the Reviewer status on $c"
           done
@@ -243,21 +254,12 @@ jobs:
           PUSHED: ${{ steps.share.outputs.pushed }}
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
+          # Only when the review could not finish. A ✅ merges by itself (it shows in the daily digest); a ⚠️ that the
+          # agent could not fix reaches TX through auto-merge's one "needs you" message.
           if [ "$STATE" = fail ]; then
-            node $T/notify-telegram.mjs "⚠️ The reviewer agent could not finish on PR #$PR. Logs: $RUN"
-          elif [ -n "$HEAD" ] && [ "${HEAD#writer/}" != "$HEAD" ]; then
-            # The one message per lesson: read, reviewed and fixed, waiting for TX to approve.
-            reader=$(gh pr view "$PR" -R "$GITHUB_REPOSITORY" --json comments --jq '[.comments[].body|select(startswith("📖 Reader check"))]|last // ""' | grep -oE '[0-9]+/10' | head -3 | tr '\n' ' ')
-            { if [ "$STATE" = ok ]; then echo "✅ Lesson ready for you to approve: $TITLE"; else echo "⚠️ Lesson needs you before it can go in: $TITLE"; fi
-              echo "$URL"; echo
-              [ -n "$reader" ] && echo "Reader agent: $reader"
-              [ -n "$PUSHED" ] && echo "The reviewer agent added its fixes to the PR."
-              echo; head -c 1200 /tmp/out/review-summary.txt 2>/dev/null
-              echo; echo "Merge it and it goes live within minutes. The live check agent then checks the site."; } | node $T/notify-telegram.mjs
-          elif [ "$STATE" = flag ]; then
-            { echo "⚠️ The reviewer agent wants changes before this can be merged: $TITLE"; echo "$URL"; echo; head -c 1500 /tmp/out/review-summary.txt; } | node $T/notify-telegram.mjs
+            node $T/notify-telegram.mjs "⚠️ The backend engineer agent could not finish the review on PR #$PR. Logs: $RUN"
           else
-            echo "Review is ✅: no message, it shows in the daily digest."
+            echo "Review is $STATE: no message; auto-merge takes it from here."
           fi
       - name: Record status for the Ecosystem page
         if: always()

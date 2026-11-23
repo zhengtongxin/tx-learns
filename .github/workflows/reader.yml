@@ -1,10 +1,10 @@
-# Reader agent: after Vercel finishes a preview deploy, Claude reads the lessons that changed as a newcomer
+# Intern agent (the reader): an intern who is learning AI. After Vercel finishes a preview deploy, Claude reads the lessons that changed as a newcomer
 # to AI would, scores how clear each one is and flags the confusing parts.
 # On a lesson's own pull request (a writer/ branch into main) it adds its fixes to that pull request as one
 # commit when a lesson scores under 8/10, comments with the scores, and then asks the reviewer agent to review.
 # Anywhere else it only comments. It never opens a separate fix PR and never pushes to main.
 # One round of fixes: it skips its own and the reviewer's fix commits, and fixes a branch at most once.
-name: Claude reader
+name: Intern (reader)
 on:
   deployment_status:
   workflow_dispatch:
@@ -112,16 +112,17 @@ jobs:
             EDIT="7. Do not edit any file except /tmp/reader.json and /tmp/reader-comment.md."
           fi
           cat > /tmp/reader-prompt.md <<PROMPT
-          You are the reader for TX Learns, a bilingual (EN/中文) interactive learning site about agentic AI.
-          A new version was just deployed. Read these lessons the way a real visitor would: someone smart and curious
-          who is new to AI and has never seen the source material. Lessons: $FILES
+          You are the intern at TX Learns, a bilingual (EN/中文) interactive learning site about AI. You are learning AI
+          yourself: smart and curious, you can read a little Python, but you are new to AI and have never seen the
+          source material. A new version was just deployed. Read these lessons to learn from them, and be honest about
+          every place you got lost, the way you would tell your mentor. Lessons: $FILES
 
           1. Read STYLE.md so you know what a good lesson here looks like.
           2. Read each lesson top to bottom in English, then skim the 中文. Look at assets/teach.js only if you need
              to know what a widget does. Imagine clicking every quiz and widget.
           3. Note every place you would get stuck: a term used before it is explained, a jump in steps, code you
              could not follow, a quiz whose answer was never taught, an analogy that does not fit, 中文 that reads
-             like a word-for-word translation.
+             like a word-for-word translation. Also note the one question you would still ask your mentor.
           4. Score each lesson for clarity from 1 to 10 (8 or more = a newcomer gets it on the first read).
           5. Write /tmp/reader.json exactly like:
              {"lessons":[{"file":"...","score":8,"confusing":[{"where":"Step 2","quote":"exact text","why":"...","fix":"..."}]}],
@@ -130,7 +131,7 @@ jobs:
              The summary is shown publicly: never quote a banned term or source name in it.
           6. Write /tmp/reader-comment.md: start with "📖 Reader check", then for each lesson its score and the
              confusing parts as a short list (where, quote, why, suggested fix). Under 350 words, friendly and plain.
-             End with "_Read by the TX Learns reader agent (Claude)._"
+             End with "_Read by the TX Learns intern agent (Claude), who is learning AI too._"
           $EDIT
           Do not run git.
           PROMPT
@@ -202,10 +203,10 @@ jobs:
             # The fix lands on the lesson's own pull request, so TX still merges once per lesson.
             cd work
             git apply --include='*/[0-9]*.html' /tmp/out/fix.patch
-            git config user.name "TX Learns reader"
+            git config user.name "TX Learns intern"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add -- '*/[0-9]*.html'
-            git commit -m "Reader: clearer wording for newcomers" -m "Suggested by the reader agent (Claude) after reading the preview."
+            git commit -m "Reader: clearer wording for newcomers" -m "Suggested by the intern agent (Claude) after reading the preview."
             auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
             git -c "http.https://github.com/.extraheader=$auth" push origin "HEAD:refs/heads/$HEAD"
             cd ..
@@ -222,10 +223,10 @@ jobs:
           fi
           echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "pushed=$pushed" >> "$GITHUB_OUTPUT"
-      - name: Ask the reviewer agent to review the lesson pull request
+      - name: Ask the backend engineer agent to review the lesson pull request
         # After the reader (with or without fixes), so the reviewer sees the final wording. Runs even if the reader failed.
         if: always() && startsWith(needs.read.outputs.head, 'writer/') && needs.read.outputs.pr != ''
-        run: gh workflow run review.yml -R "$GITHUB_REPOSITORY" -f pr="$PR" || echo "::warning::Could not start the reviewer agent."
+        run: gh workflow run review.yml -R "$GITHUB_REPOSITORY" -f pr="$PR" || echo "::warning::Could not start the backend engineer agent."
       - name: Tell TX on Telegram
         # Quiet when it works: scores go into the daily digest, and the reviewer agent pings when the lesson is ready.
         if: failure()
@@ -233,7 +234,7 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: node $T/notify-telegram.mjs "⚠️ The reader agent could not finish${PR:+ on PR #$PR}. Logs: $RUN"
+        run: node $T/notify-telegram.mjs "⚠️ The intern agent could not finish${PR:+ on PR #$PR}. Logs: $RUN"
       - name: Record status for the Ecosystem page
         if: always()
         env:

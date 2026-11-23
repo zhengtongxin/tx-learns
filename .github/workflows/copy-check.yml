@@ -1,10 +1,11 @@
-# Copyright scrubber: blocks a pull request into main when a page names a source, a course, an instructor or a
+# Cybersecurity engineer agent (the copy check): blocks a pull request that leaks a secret, adds an unsafe link or an unsafe
+# workflow line (scripts/check-security.mjs), and the copyright scrubber blocks a pull request into main when a page names a source, a course, an instructor or a
 # source's week/day structure, or when a stray build file (.pyc, __pycache__, .DS_Store, node_modules) is committed.
 # It also runs the count check: topic and lesson counts, the lesson list and lesson tags must agree with lessons.js.
 # Agents that open or push to a pull request with the workflow token start it by hand (workflow_dispatch on that
 # branch), because such pushes do not start workflows on their own. Its job name "copy-check" is a required check
 # in .github/rulesets/.
-name: Copy check
+name: Cybersecurity engineer (copy check)
 on:
   pull_request:
     branches: [main]
@@ -56,7 +57,7 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           WHERE: ${{ github.event.pull_request.html_url || format('{0}/{1}/commit/{2}', github.server_url, github.repository, github.sha) }}
         run: |
-          { echo "🚫 Copy check failed on ${GITHUB_REF_NAME}"; echo "$WHERE"; echo; cat copy-check.txt security.txt counts.txt pages.txt 2>/dev/null | head -c 3000; } \
+          { echo "🛡️ Cybersecurity engineer agent: the copy and security check failed on ${GITHUB_REF_NAME}"; echo "$WHERE"; echo; cat copy-check.txt security.txt counts.txt pages.txt 2>/dev/null | head -c 3000; } \
             | node scripts/notify-telegram.mjs
       - name: Pass the result to the status job
         id: result

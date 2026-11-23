@@ -146,7 +146,7 @@
     document.querySelectorAll('.card,.callout,.stepper,.wfwrap').forEach(function(e){e.classList.add('spot')});
 
     /* keyboard: lesson widgets often make a <div> or an SVG node clickable. Give each one a Tab stop and let
-       Enter or Space click it, so nothing is mouse-only (the UI check agent flags anything still missed). */
+       Enter or Space click it, so nothing is mouse-only (the frontend engineer agent flags anything still missed). */
     var FOC='a[href],button,input,select,textarea,summary,[tabindex]:not([tabindex="-1"])';
     function kb(){[].forEach.call(document.querySelectorAll('main *,.side *'),function(el){
       if(el.hasAttribute('data-kb')||el.closest(FOC))return;

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// UI check agent: opens pages in a headless browser and uses them the way a person does. It hovers, clicks
+// Frontend engineer agent (the UI check): opens pages in a headless browser and uses them the way a person does. It hovers, clicks
 // and Tabs through every interactive element, on a desktop and a phone screen, and flags:
 //   popup-overlap   two popups open at once and covering each other (one should close when the other opens)
 //   popup-offscreen a popup that runs off the side of the screen

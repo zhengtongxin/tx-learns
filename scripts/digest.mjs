@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Daily digest (8 PM Malaysia time): one Telegram message about the last 24 hours. No AI here.
-//   What went live (pull requests merged into main), anything the live check agent rolled back, what is waiting
-//   for TX (open pull requests into main, with the reviewer agent's verdict), what every agent did, and the latest
+//   What went live (pull requests merged into main, mostly by auto-merge), anything the product engineer agent rolled
+//   back, what is still open (pull requests into main, with the backend engineer agent's verdict), what every agent did, and the latest
 //   problems. Instant messages (failures, rollbacks, a lesson ready to approve, the weekly recall) are sent by the
 //   agents themselves; everything else waits for this.
 // Usage: node scripts/digest.mjs
@@ -13,8 +13,8 @@ import { gh, telegram, scrub } from './lib.mjs';
 const SITE = (process.env.SITE || 'https://tx-learns.vercel.app/').replace(/\/?$/, '/');
 const out = (k, v) => process.env.GITHUB_OUTPUT && appendFileSync(process.env.GITHUB_OUTPUT, `${k}<<EOF\n${v}\nEOF\n`);
 const today = () => new Date().toLocaleDateString('en-GB', { timeZone: 'Asia/Kuala_Lumpur', weekday: 'short', day: 'numeric', month: 'short' });
-const AG = { writer: '✍️ Writer', reader: '📖 Reader', reviewer: '🔎 Reviewer', 'ui-check': '🖱️ UI check', 'copy-check': '🚫 Copy check',
-  'live-check': '🌐 Live check', recall: '🧠 Recall' };
+const AG = { writer: '✍️ Content creator', reader: '📖 Intern', reviewer: '🔧 Backend engineer', 'ui-check': '🖱️ Frontend engineer',
+  'copy-check': '🛡️ Cybersecurity engineer', 'live-check': '🌐 Product engineer', recall: '🧠 Recall' };
 
 // The reviewer agent's latest verdict on a pull request, from its marked comment.
 async function verdict(n) {
@@ -22,7 +22,7 @@ async function verdict(n) {
     const c = (await gh('GET', `/issues/${n}/comments?per_page=100`)).filter(c => c.body && c.body.includes('<!-- tx-review sha='));
     if (!c.length) return 'not reviewed yet';
     const first = c[c.length - 1].body.split('\n').map(s => s.trim()).find(Boolean) || '';
-    return /⚠️/.test(first) ? 'reviewer ⚠️' : /✅|Ready to merge/.test(first) ? 'reviewer ✅' : 'reviewed';
+    return /⚠️/.test(first) ? 'backend ⚠️' : /✅|Ready to merge/.test(first) ? 'backend ✅' : 'reviewed';
   } catch { return ''; }
 }
 
@@ -41,10 +41,10 @@ async function digest() {
   if (back.length) lines.push('', `↩️ Rolled back (${back.length}):`, ...back.map(p => `• ${scrub(p.title).slice(0, 100)}`));
   lines.push('');
 
-  // Waiting for TX: open pull requests into main
+  // Still open: pull requests into main. Green ones merge by themselves; a stuck one has a "needs you" comment.
   const open = await gh('GET', '/pulls?state=open&base=main&per_page=20');
   if (open.length) {
-    lines.push(`👀 Waiting for you (${open.length}):`);
+    lines.push(`⏳ Still open (${open.length}); green ones merge by themselves:`);
     for (const p of open.slice(0, 8)) { const v = await verdict(p.number); lines.push(`• #${p.number} ${scrub(p.title).slice(0, 80)}${v ? ` (${v})` : ''}`, `  ${p.html_url}`); }
     lines.push('');
   }
@@ -63,7 +63,7 @@ async function digest() {
   if (probs.length) lines.push('', '⚠️ Latest problems:', ...probs.map(p => `• ${p}`));
   lines.push('', `Site: ${SITE}`);
   await telegram(lines.join('\n'));
-  out('state', 'ok'); out('summary', `Sent the daily digest: ${live.length} went live, ${open.length} PRs waiting for TX.`);
+  out('state', 'ok'); out('summary', `Sent the daily digest: ${live.length} went live, ${open.length} PRs still open.`);
 }
 
 try { await digest(); }
