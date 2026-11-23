@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 // Records what an agent just did, for the live Ecosystem page.
-// Usage: node scripts/record-status.mjs <agent>   (agent = an id in the AGENTS list on ecosystem.html, e.g. writer, release)
+// Usage: node scripts/record-status.mjs <agent>   (agent = an id in the AGENTS list on ecosystem.html, e.g. writer, live-check)
 // Env: STATE = ok | flag | fail | skip, SUMMARY = one or two plain sentences, LINK = where to see more,
 //      GITHUB_TOKEN with contents: write, GITHUB_REPOSITORY.
 // It writes status/all.json on the `agent-status` branch, a data-only branch that is never deployed and
-// holds no site content (so agents still never push to main or test). Never fails the workflow.
+// holds no site content (so agents still never push to main). Never fails the workflow.
 const agent = process.argv[2];
 const { GITHUB_TOKEN: token, GITHUB_REPOSITORY: repo } = process.env;
 const BRANCH = 'agent-status', PATH = 'status/all.json', KEEP = 12;

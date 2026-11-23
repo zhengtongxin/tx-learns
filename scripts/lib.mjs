@@ -1,4 +1,4 @@
-// Small helpers shared by the release, live check and recall agents. No dependencies.
+// Small helpers shared by the digest, live check and recall scripts. No dependencies.
 //   gh(method, path, body)  GitHub REST call for this repo (GITHUB_TOKEN, GITHUB_REPOSITORY; GITHUB_API to point at a test server)
 //   telegram(text, {html})  message TX; never throws, never fails a workflow
 //   loadTrack(source)       window.TRACK from lessons.js text

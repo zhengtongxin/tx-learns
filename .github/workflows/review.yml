@@ -1,22 +1,22 @@
-# Reviewer agent: Claude reviews a pull request against STYLE.md and CLAUDE.md and posts one comment.
-#   On a lesson's own pull request (a writer/ branch into test; started by the reader agent once it is done) it also
-#   fixes what it flagged, in lesson files only, as one commit on that pull request, then tells TX on Telegram that
-#   the lesson is ready to approve. One round: if the branch already has a reviewer fix, it only comments.
-#   On a release (a pull request into main) it only comments, and only runs when the release agent asks: when the
-#   release holds changes that were not reviewed on their own PR (a workflow or script change, or a lesson merged
-#   on ⚠️). Then `focus` names those files. Its verdict for the exact commit is a release gate.
-#   Each change is reviewed once. Telegram only when the release needs TX (⚠️) or the run failed.
+# Reviewer agent: Claude reviews a pull request into main against STYLE.md and CLAUDE.md and posts one comment.
+# Every change gets this one review before it can be merged: its verdict is the "Reviewer" status on the exact
+# commit it read, and that status is a required check (.github/rulesets/main.json).
+#   On a lesson's own pull request (a writer/ branch; started by the reader agent once it is done) it also fixes
+#   what it flagged, in lesson files only, as one commit on that pull request, marks that commit too, and tells TX on
+#   Telegram that the lesson is ready to approve. One round: if the branch already has a reviewer fix, it only comments.
+#   On any other pull request (scripts, workflows, pages) it runs when the PR opens or gets a new commit, and only
+#   comments. Telegram for those only on ⚠️ or a failed run.
 # Claude runs in a read-only job; a separate job with trusted scripts from main does the writing.
 name: Claude review
 on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
     inputs:
       pr:
         description: Pull request number to review
         required: true
-      focus:
-        description: On a release, the files that were not reviewed on their own PR (space separated)
-        required: false
 permissions:
   contents: read
   pull-requests: read
@@ -51,7 +51,7 @@ jobs:
           gh pr view "$PR" -R "$GITHUB_REPOSITORY" --json baseRefName,headRefName,title > /tmp/pr.json
           base=$(node -p 'require("/tmp/pr.json").baseRefName'); head=$(node -p 'require("/tmp/pr.json").headRefName')
           sha=$(git rev-parse HEAD); fix=
-          case "$base:$head" in test:writer/*) git log --format=%s "origin/$base..HEAD" | grep -q '^Reviewer:' || fix=1;; esac
+          case "$base:$head" in main:writer/*) git log --format=%s "origin/$base..HEAD" | grep -q '^Reviewer:' || fix=1;; esac
           gh pr diff "$PR" -R "$GITHUB_REPOSITORY" > /tmp/pr.diff
           echo "base=$base head=$head sha=$sha fix=$fix"
           { echo "base=$base"; echo "head=$head"; echo "sha=$sha"; echo "fix=$fix"; echo "title=$(node -p 'require("/tmp/pr.json").title.slice(0,100)')"; } >> "$GITHUB_OUTPUT"
@@ -67,7 +67,6 @@ jobs:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           FIX: ${{ steps.info.outputs.fix }}
-          FOCUS: ${{ inputs.focus }}
         run: |
           set -o pipefail
           if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then unset ANTHROPIC_API_KEY; echo "Auth: Claude subscription"; else unset CLAUDE_CODE_OAUTH_TOKEN; echo "Auth: API key (no CLAUDE_CODE_OAUTH_TOKEN secret)"; fi
@@ -79,10 +78,9 @@ jobs:
              "✅ Ready to merge" when nothing is left for TX, else "⚠️ Fix before merging" with only what is left.
              In the comment, list what you fixed under "Fixed" and anything left under "Still for you"."
           else
-            MODE="Only review. Do not edit any file except /tmp/review-comment.md and /tmp/review-summary.txt."
-            if [ -n "$FOCUS" ]; then MODE="$MODE
-             This is a release. Everything else in it was already reviewed on its own pull request. Review only these
-             files, which were not: $FOCUS"; fi
+            MODE="Only review. Do not edit any file except /tmp/review-comment.md and /tmp/review-summary.txt.
+             If the pull request changes no lesson, check what it does change (scripts, workflows, pages, docs) for
+             bugs, for CLAUDE.md staying true to the workflows, and for the How it works page staying true to them."
           fi
           cat > /tmp/review-prompt.md <<PROMPT
           You are the reviewer for TX Learns, a bilingual (EN/中文) learning site. Review pull request #$PR.
@@ -135,6 +133,7 @@ jobs:
       pull-requests: write
       issues: write
       actions: write
+      statuses: write
     env:
       PR: ${{ github.event.pull_request.number || inputs.pr }}
       BASE: ${{ needs.review.outputs.base }}
@@ -186,15 +185,20 @@ jobs:
               git commit -m "Reviewer: fixes from the review" -m "Made by the reviewer agent (Claude) on the lesson's own pull request."
               auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
               git -c "http.https://github.com/.extraheader=$auth" push origin "HEAD:refs/heads/$HEAD"
-              pushed=1
+              pushed=$(git rev-parse HEAD)
               { echo; echo "I added these fixes to this pull request as one commit (\"Reviewer: fixes from the review\"). Revert it if you disagree."; } >> /tmp/c.md
               gh workflow run copy-check.yml --ref "$HEAD" -R "$GITHUB_REPOSITORY" || echo "::warning::Could not start the copy check."
             fi
             cd ..
           fi
-          # The release agent reads this marker: a verdict only counts for the exact commit that was reviewed.
+          # A verdict only counts for the exact commit that was reviewed (plus the reviewer's own fix commit).
           echo "<!-- tx-review sha=$SHA -->" >> /tmp/c.md
           gh pr comment "$PR" -R "$GITHUB_REPOSITORY" --body-file /tmp/c.md
+          # The required "Reviewer" status: green only for ✅, on the reviewed commit and on the fix commit it pushed.
+          case "$state" in ok) st=success; d="Reviewer agent: ready to merge";; flag) st=failure; d="Reviewer agent: fix before merging";; *) st=error; d="Reviewer agent could not finish";; esac
+          for c in "$SHA" $pushed; do
+            gh api -X POST "repos/$GITHUB_REPOSITORY/statuses/$c" -f state=$st -f context=Reviewer -f description="$d" -f target_url="$URL" > /dev/null || echo "::warning::Could not set the Reviewer status on $c"
+          done
           summary="PR #$PR: $(head -c 300 /tmp/out/review-summary.txt 2>/dev/null | tr '\n' ' ')"
           { echo "state=$state"; echo "pushed=$pushed"; echo "summary<<EOF"; echo "$summary"; echo "EOF"; } >> "$GITHUB_OUTPUT"
       - name: Tell TX on Telegram
@@ -208,7 +212,7 @@ jobs:
         run: |
           if [ "$STATE" = fail ]; then
             node $T/notify-telegram.mjs "⚠️ The reviewer agent could not finish on PR #$PR. Logs: $RUN"
-          elif [ "$BASE" = test ]; then
+          elif [ -n "$HEAD" ] && [ "${HEAD#writer/}" != "$HEAD" ]; then
             # The one message per lesson: read, reviewed and fixed, waiting for TX to approve.
             reader=$(gh pr view "$PR" -R "$GITHUB_REPOSITORY" --json comments --jq '[.comments[].body|select(startswith("📖 Reader check"))]|last // ""' | grep -oE '[0-9]+/10' | head -3 | tr '\n' ' ')
             { if [ "$STATE" = ok ]; then echo "✅ Lesson ready for you to approve: $TITLE"; else echo "⚠️ Lesson needs you before it can go in: $TITLE"; fi
@@ -216,11 +220,11 @@ jobs:
               [ -n "$reader" ] && echo "Reader agent: $reader"
               [ -n "$PUSHED" ] && echo "The reviewer agent added its fixes to the PR."
               echo; head -c 1200 /tmp/out/review-summary.txt 2>/dev/null
-              echo; echo "Merge it into test and it goes live with the next release, usually within two hours."; } | node $T/notify-telegram.mjs
+              echo; echo "Merge it and it goes live within minutes. The live check agent then checks the site."; } | node $T/notify-telegram.mjs
           elif [ "$STATE" = flag ]; then
-            { echo "⚠️ The reviewer agent wants changes before the release goes live"; echo "$URL"; echo; head -c 1500 /tmp/out/review-summary.txt; } | node $T/notify-telegram.mjs
+            { echo "⚠️ The reviewer agent wants changes before this can be merged: $TITLE"; echo "$URL"; echo; head -c 1500 /tmp/out/review-summary.txt; } | node $T/notify-telegram.mjs
           else
-            echo "Release review is ✅: no message, it shows in the daily digest."
+            echo "Review is ✅: no message, it shows in the daily digest."
           fi
       - name: Record status for the Ecosystem page
         if: always()

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Live check agent: right after each real release (started by the release agent), confirm the live site looks right. No AI here.
+// Live check agent: after every merge into main (once Vercel has deployed it), confirm the live site looks right. No AI here.
 //   1. The live lesson list is the released one (waits up to --wait seconds for the new deploy to show).
 //   2. Every page and every published lesson opens (HTTP 200), and every link and file they point to exists.
 //   3. In a headless browser (when Playwright is available): home, How it works, the track page and every
