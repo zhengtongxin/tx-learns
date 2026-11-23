@@ -111,11 +111,11 @@ jobs:
         if: steps.find.outputs.shots != '' && steps.run.outputs.ran == '1'
         continue-on-error: true
         env:
-          # Prefer TX's Claude subscription (CLAUDE_CODE_OAUTH_TOKEN from `claude setup-token`); the API key is only a fallback.
+          # Prefer TX's API credits (ANTHROPIC_API_KEY); the Claude subscription (CLAUDE_CODE_OAUTH_TOKEN) is only a fallback.
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then unset ANTHROPIC_API_KEY; echo "Auth: Claude subscription"; else unset CLAUDE_CODE_OAUTH_TOKEN; echo "Auth: API key (no CLAUDE_CODE_OAUTH_TOKEN secret)"; fi
+          if [ -n "$ANTHROPIC_API_KEY" ]; then unset CLAUDE_CODE_OAUTH_TOKEN; echo "Auth: API key (credits)"; else unset ANTHROPIC_API_KEY; echo "Auth: Claude subscription (no ANTHROPIC_API_KEY secret)"; fi
           ls /tmp/out/shots/*-[0-9].png > /tmp/out/tiles.txt || { echo 'No screenshot tiles to look at.'; exit 0; }
           cat > /tmp/ui-prompt.md <<'PROMPT'
           You are the UI checker for TX Learns, a bilingual (EN/中文) learning site. The pages that changed were
