@@ -1,0 +1,94 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Containers in plain words | TX Learns</title>
+<meta name="description" content="See what a container really is, and why packing the app into one makes deploying calmer."><meta property="og:title" content="Containers in plain words | TX Learns"><meta property="og:description" content="See what a container really is, and why packing the app into one makes deploying calmer."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-production/08-containers-in-plain-words.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-24">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Containers and a safe cloud account · Lesson 2</span><span class="zh">容器与安全的云账号 · 第 2 课</span></span><h1><span class="en">Containers in plain words</span><span class="zh">容器的大白话</span></h1><p class="meta"><span class="en">See what a container really is, and why packing the app into one makes deploying calmer · ~25 min · hands-on</span><span class="zh">看懂容器到底是什么，以及为什么把应用装进容器能让部署更省心 · 约 25 分钟 · 动手实践</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">The canteen helper runs perfectly on <b>Mei Ling</b>'s laptop. Then <b>Kumar</b> tries it on the office PC and it crashes: wrong Python version, a missing library. Everyone has heard "but it works on my machine". Mei Ling remembers what the wharf does with cargo: put it in a standard steel box that any crane, ship or truck can handle. She wants the same for her app.</p>
+<p class="zh" style="margin:0">食堂助手在 <b>Mei Ling</b> 的笔记本上运行得好好的。可是 <b>Kumar</b> 在办公室电脑上一跑就崩了：Python 版本不对，还缺一个库。大家都听过那句“可我这儿是好的啊”。Mei Ling 想起码头是怎么处理货物的：装进标准的钢箱子，任何吊机、货船、卡车都能搬。她想让自己的应用也这样。</p></div>
+<h2><span class="en">Step 1 · A container is a sealed box</span><span class="zh">第 1 步 · 容器就是一个封好的箱子</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>container</b> holds your app plus everything it needs to run: the language, the libraries, the settings. Because all of that travels inside the box, it runs the same on your laptop, on Kumar's PC and on the cloud. The cloud only has to know how to run boxes, not how your app wants its Python.</p>
+<p class="zh" style="margin:0 0 8px"><b>容器</b>里装着你的应用，加上它运行所需的一切：语言环境、库、配置。因为这些都装在箱子里一起走，所以它在你的笔记本、Kumar 的电脑和云上跑起来都是一样的。云只需要知道怎么运行箱子，不用管你的应用想要什么样的 Python。</p></div>
+<div class="codebox"><span class="dim">without a container:   your code + (hope the machine has the right Python and libraries)
+</span><span class="chg">with a container:      [ your code + Python + libraries + start command ]  ← one sealed box</span></div>
+<div class="try" id="t0"></div>
+<h2><span class="en">Step 2 · The Dockerfile is the recipe</span><span class="zh">第 2 步 · Dockerfile 就是配方</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">You describe the box in a plain text file called a <b>Dockerfile</b>. It is a recipe: start from a <b>base image</b> (someone else's ready-made box that already has Python), copy in your files, install the libraries, and say how to start the app. Because it is a text file, it can be reviewed and rebuilt like any other code. This one assumes a <code>requirements.txt</code> and a <code>server.py</code> that defines <code>app</code>.</p>
+<p class="zh" style="margin:0 0 8px">你用一个叫 <b>Dockerfile</b> 的纯文本文件来描述这个箱子。它就是配方：从一个<b>基础镜像（base image）</b>开始（别人做好的、已经带 Python 的箱子），复制你的文件，安装库，再写明怎么启动应用。因为它是文本文件，所以可以像其他代码一样被审查、重新构建。这个例子假设你有 <code>requirements.txt</code>，以及一个定义了 <code>app</code> 的 <code>server.py</code>。</p></div>
+<div class="codebox"><span class="chg">FROM python:3.12-slim</span><span class="dim">
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+</span><span class="chg">CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000"]</span></div>
+<div class="try" id="t1"></div>
+<h2><span class="en">Step 3 · Build, run, and the registry</span><span class="zh">第 3 步 · 构建、运行与镜像仓库</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Install Docker Desktop (the desktop app that gives you the <code>docker</code> command), then check it works with the tiny <code>hello-world</code> image. <b>Build</b> turns your recipe into an <b>image</b>: the finished, sealed box sitting on a shelf. <b>Run</b> starts a <b>container</b> from that image: the box opened and working. One image can run as many containers as you like. A <b>registry</b> is the shelf in the cloud where images are stored, so the cloud can pull them. In the commands below, <code>-t canteen-helper</code> gives the image a name, the last <code>.</code> means "this folder", and <code>-p 8000:8000</code> connects port 8000 on your laptop to port 8000 inside the box. (A port is a numbered door for network traffic.)</p>
+<p class="zh" style="margin:0 0 8px">先安装 Docker Desktop（一个提供 <code>docker</code> 命令的桌面应用），再用很小的 <code>hello-world</code> 镜像检查它能不能用。<b>构建（build）</b>把配方变成<b>镜像（image）</b>：做好封好、放在货架上的箱子。<b>运行（run）</b>则从镜像启动一个<b>容器（container）</b>：打开并开始工作的箱子。一个镜像可以同时跑任意多个容器。<b>镜像仓库（registry）</b>就是云上存放镜像的货架，云可以从那里取走镜像。下面的命令里，<code>-t canteen-helper</code> 给镜像起个名字，结尾的 <code>.</code> 表示“当前这个文件夹”，<code>-p 8000:8000</code> 把你笔记本的 8000 端口接到箱子里的 8000 端口上。（端口就是网络流量的一扇编号门。）</p></div>
+<div class="codebox"><span class="dim">docker run hello-world                          # is the tool working?
+</span><span class="chg">docker build -t canteen-helper .                # recipe → image
+docker run -p 8000:8000 canteen-helper          # image → running container</span><span class="dim">
+# now open http://localhost:8000 in the browser</span></div>
+<div class="sc" id="t2"></div>
+<h2><span class="en">Step 4 · Keep the box small and correct</span><span class="zh">第 4 步 · 让箱子又小又对</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Three habits save pain. First, an ignore file keeps junk out of the box (<code>COPY . .</code> copies everything it can see). Second, build for the <b>platform</b> you deploy to: a Mac with an Apple chip builds for a different chip type than most cloud servers. Third, a container does not see your <code>.env</code> file unless you hand its values in when you run it.</p>
+<p class="zh" style="margin:0 0 8px">三个习惯能省很多麻烦。第一，用忽略文件把杂物挡在箱子外面（<code>COPY . .</code> 会复制它看得到的所有东西）。第二，按你要部署的<b>平台</b>来构建：用苹果芯片的 Mac 构建出的镜像，和大多数云服务器的芯片类型不同。第三，容器看不到你的 <code>.env</code> 文件，除非运行时把里面的值传给它。</p></div>
+<div class="codebox"><span class="dim"># .dockerignore  (one name per line)
+</span><span class="chg">node_modules
+.git
+.env
+__pycache__</span><span class="dim">
+
+# build for the chip type of the cloud server, then run with your settings
+</span><span class="chg">docker build --platform linux/amd64 -t canteen-helper .
+docker run --env-file .env -p 8000:8000 canteen-helper</span><span class="dim">
+docker images        # check the size, then shrink it once</span></div>
+<div class="try" id="t3"></div>
+<h2><span class="en">Step 5 · Make the front end plain files</span><span class="zh">第 5 步 · 把前端变成普通文件</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Next.js is a popular tool for building web pages in JavaScript. Until now its front end ran its own server. For one small box we want less: turn it into <b>static files</b> (a <b>static export</b>: ready-made HTML, CSS and JavaScript) and let the Python API serve them. Then the page and the API share one address, so the page can call the API with a <b>relative path</b> like <code>/api/health</code>, no host name. Add CORS too (the browser's rule about which sites may call your API) so a front end hosted elsewhere keeps working. In <code>next.config.js</code>, set <code>output: "export"</code>, build, and copy the <code>out</code> folder to <code>static</code>. The sign-in service also needs to know the new address; the project lesson at the end of this topic covers that.</p>
+<p class="zh" style="margin:0 0 8px">Next.js 是一个用 JavaScript 做网页的流行工具。到现在为止，它的前端一直在跑自己的服务器。对一个小箱子来说，我们想要更简单：把它变成<b>静态文件</b>（<b>静态导出</b>：现成的 HTML、CSS 和 JavaScript），让 Python API 来提供它们。这样页面和 API 共用一个地址，页面就能用像 <code>/api/health</code> 这样的<b>相对路径</b>调用 API，不用写主机名。再加上 CORS（浏览器关于“哪些网站可以调用你的 API”的规则），这样放在别处的前端也能继续用。在 <code>next.config.js</code> 里设置 <code>output: "export"</code>，构建，再把 <code>out</code> 文件夹复制成 <code>static</code>。登录服务也要知道新地址，本主题最后的项目课会讲。</p></div>
+<div class="codebox"><span class="dim"># next.config.js:   module.exports = { output: "export" };
+# then:  npm run build   and   copy the "out" folder to "static"
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+
+app = FastAPI()
+</span><span class="chg">app.add_middleware(CORSMiddleware, allow_origins=["https://helper.example.com"],
+                   allow_methods=["*"], allow_headers=["*"])</span><span class="dim">
+
+@app.get("/api/health")
+def health():
+    return {"ok": True}
+
+# last, so the API routes above win
+</span><span class="chg">app.mount("/", StaticFiles(directory="static", html=True), name="site")</span></div>
+<div class="try" id="t4"></div>
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en"><b>Three slips.</b> My first image was huge because I copied everything, so now I use an ignore file and a small base image. I built on a Mac and ran the image on a different chip type, so build for the platform you deploy to. And I forgot that the container cannot see my env file unless I pass it in.</span><span class="zh"><b>三个失误。</b>我的第一个镜像特别大，因为我把所有东西都复制进去了，现在我会用忽略文件和小的基础镜像。我在 Mac 上构建，却在另一种芯片类型上运行，所以要按部署的平台来构建。我还忘了容器看不到我的 env 文件，除非我把值传进去。</span></div>
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Build the image, run it locally</b> and hit it in the browser.</span><span class="zh"><b>构建镜像，在本地运行</b>，然后在浏览器里访问它。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Look at the image size and shrink it once.</b></span><span class="zh"><b>看一下镜像大小，并把它缩小一次。</b></span></span></label><label><input type="checkbox"><span><span class="en"><b>Explain "image" versus "container" to a friend</b> using the shelf and the running box as your examples.</span><span class="zh"><b>向朋友解释“镜像”和“容器”的区别</b>，用货架和正在运行的箱子来举例。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">At the wharf</span><span class="zh">在码头</span></b><span class="en">A shipping container is the same steel box whether it sits on a truck, a crane or a ship, and nobody opens it to check what is inside. Your app in a container is the same. And just as the wharf has a loading plan for every box, your Dockerfile is the written plan.</span><span class="zh">一个集装箱不管放在卡车、吊机还是货轮上，都是同一个钢箱子，也没人需要打开它看里面是什么。你装进容器的应用也是这样。而码头给每个箱子都有装载计划，你的 Dockerfile 就是那份书面计划。</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A container is the app plus everything it needs, sealed in one box that runs the same everywhere.<br>• A Dockerfile is the recipe: base image, copy files, install, start command.<br>• Build makes an image; run starts a container; a registry stores images.<br>• Use an ignore file, a small base image, and build for your deploy platform.<br>• A container does not see your env file unless you pass the values in.<br>• Serve a static front end from the API so both share one address.<br>• The recipe is code too, so it can be reviewed and rebuilt.</p><p class="zh" style="margin:0">• 容器就是应用加上它所需的一切，封在一个箱子里，到哪儿运行都一样。<br>• Dockerfile 是配方：基础镜像、复制文件、安装、启动命令。<br>• 构建得到镜像，运行启动容器，镜像仓库存放镜像。<br>• 用忽略文件、小的基础镜像，并按部署平台来构建。<br>• 容器看不到你的 env 文件，除非你把值传进去。<br>• 让 API 提供静态前端，两者共用一个地址。<br>• 配方本身也是代码，所以可以被审查、重新构建。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Production</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('t0'),{q:{en:'Why does an app in a container behave the same on Kumar\'s PC as on Mei Ling\'s laptop?',zh:'为什么容器里的应用在 Kumar 的电脑上和在 Mei Ling 的笔记本上表现一样？'},opts:[{k:'a',en:'The libraries and settings it needs travel inside the box',zh:'它需要的库和配置都装在箱子里一起走'},{k:'b',en:'Both machines happen to have the same Python',zh:'两台机器碰巧装了同一个 Python'},{k:'c',en:'Containers make the code run faster',zh:'容器让代码跑得更快'}],a:'a',ex:{en:'The box carries its own language and libraries, so it does not depend on what the machine has.',zh:'箱子自带语言环境和库，所以不依赖机器上装了什么。'},hint:{en:'What is inside the sealed box besides your code?',zh:'除了你的代码，封好的箱子里还有什么？'}});
+ predict($('t1'),{q:{en:'You change one line in your code. Where do you make the change so the container runs the new version?',zh:'你改了代码里的一行。要怎样才能让容器跑上新版本？'},opts:[{k:'a',en:'Nowhere, the running container updates itself',zh:'不用管，运行中的容器会自己更新'},{k:'b',en:'Rebuild the image, then start a new container from it',zh:'重新构建镜像，再从它启动新的容器'},{k:'c',en:'Reinstall the desktop app',zh:'重装桌面应用'}],a:'b',ex:{en:'An image is sealed when built. A change needs a new build, then a new container.',zh:'镜像在构建时就封好了。有改动就要重新构建，再启动新的容器。'},hint:{en:'Is the box still open after it is sealed?',zh:'箱子封好之后还能再打开改吗？'}});
+ game($('t2'),[
+  {en:'The finished, sealed package sitting on the shelf',zh:'放在货架上、已经封好的成品包',a:'i',ex:{en:'That is an image: built once, not running.',zh:'这就是镜像：构建一次，不在运行。'},hint:{en:'Is it doing anything right now?',zh:'它现在在干活吗？'}},
+  {en:'The app answering requests on port 8000',zh:'在 8000 端口回应请求的应用',a:'c',ex:{en:'A running copy started from an image is a container.',zh:'从镜像启动的、正在运行的副本就是容器。'},hint:{en:'Is it running?',zh:'它在运行吗？'}},
+  {en:'Three copies of the same app running side by side',zh:'三个同样的应用并排运行',a:'c',ex:{en:'One image can start many containers.',zh:'一个镜像可以启动很多个容器。'},hint:{en:'Running copies are which one?',zh:'正在运行的副本是哪一个？'}},
+  {en:'What <code>docker build</code> produces',zh:'<code>docker build</code> 的产物',a:'i',ex:{en:'Build makes the image. Run makes the container.',zh:'构建出的是镜像，运行出的才是容器。'},hint:{en:'Build comes before run.',zh:'构建在运行之前。'}}],
+  [{k:'i',en:'Image',zh:'镜像'},{k:'c',en:'Container',zh:'容器'}],{en:'Thing',zh:'东西'});
+ predict($('t3'),{q:{en:'Your image is 2 GB and holds your <code>.git</code> history and <code>node_modules</code>. What is the quickest fix?',zh:'你的镜像有 2 GB，里面装着 <code>.git</code> 历史和 <code>node_modules</code>。最快的修法是什么？'},opts:[{k:'a',en:'Add those names to <code>.dockerignore</code> and rebuild',zh:'把这些名字加进 <code>.dockerignore</code> 然后重新构建'},{k:'b',en:'Buy more disk',zh:'买更大的硬盘'},{k:'c',en:'Run the container twice',zh:'把容器运行两次'}],a:'a',ex:{en:'<code>COPY . .</code> copies whatever it can see. The ignore file hides what should stay outside.',zh:'<code>COPY . .</code> 会复制它看得到的一切，忽略文件把该留在外面的东西藏起来。'},hint:{en:'What controls which files get copied in?',zh:'什么决定了哪些文件会被复制进去？'}});
+ predict($('t4'),{q:{en:'Why serve the static front end from the same API box?',zh:'为什么要让同一个 API 箱子来提供静态前端？'},opts:[{k:'a',en:'The page and the API share one address, so relative paths just work',zh:'页面和 API 共用一个地址，相对路径直接就能用'},{k:'b',en:'Static files cannot be served any other way',zh:'静态文件没有别的提供方式'},{k:'c',en:'It makes the model smarter',zh:'它让模型更聪明'}],a:'a',ex:{en:'One box, one address: fewer settings to get wrong. CORS is the backup when the front end lives elsewhere.',zh:'一个箱子、一个地址：能出错的设置更少。前端放在别处时，CORS 就是后备方案。'},hint:{en:'What does a relative path like /api/health depend on?',zh:'像 /api/health 这样的相对路径依赖什么？'}});
+});
+</script></body></html>

@@ -1,0 +1,84 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A safe cloud account: roots, users and budget alarms | TX Learns</title>
+<meta name="description" content="Open a cloud account the safe way, before you deploy anything."><meta property="og:title" content="A safe cloud account: roots, users and budget alarms | TX Learns"><meta property="og:description" content="Open a cloud account the safe way, before you deploy anything."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-production/07-safe-cloud-account.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-24">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Containers and a safe cloud account · Lesson 1</span><span class="zh">容器与安全的云账号 · 第 1 课</span></span><h1><span class="en">A safe cloud account: roots, users and budget alarms</span><span class="zh">安全的云账号：根用户、普通用户与预算警报</span></h1><p class="meta"><span class="en">Open a cloud account the safe way, before you deploy anything · ~20 min · hands-on</span><span class="zh">在部署任何东西之前，先用安全的方式开好云账号 · 约 20 分钟 · 动手实践</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">The canteen helper works, and <b>Mei Ling</b> wants it on a real cloud, not just on her laptop. <b>Mr Ong</b> has one question before she touches anything: "Who pays if this goes wrong?" So she sets up the account properly first: a locked-away master login, a limited daily login, and an alarm that rings when money starts to leak. (The examples use AWS names, but every big cloud has the same pieces.)</p>
+<p class="zh" style="margin:0">食堂助手已经能用了，<b>Mei Ling</b> 想把它放到真正的云上，而不只是留在笔记本里。在她动手之前，<b>Ong 主管</b>先问了一句：“出了岔子，谁来付钱？”所以她先把账号设置妥当：一个锁起来的总登录、一个权限有限的日常登录，再加一个钱开始漏出去时会响的警报。（例子用的是 AWS 的名字，但每家大云厂商都有同样的零件。）</p></div>
+<h2><span class="en">Step 1 · Lock the root login away</span><span class="zh">第 1 步 · 把根用户锁起来</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">When you sign up, you get a <b>root user</b>: the login that can do everything, including closing the account and changing the bill. Protect it at once with <b>multi-factor authentication</b> (MFA): a password plus a one-time code from an app on your phone. Then stop using it. Root is for rare emergencies only, like the master key kept in Mr Ong's safe.</p>
+<p class="zh" style="margin:0 0 8px">注册时你会得到一个<b>根用户（root）</b>：它什么都能做，包括关闭账号和修改账单。马上用<b>多因素认证（MFA）</b>保护它：密码加上手机应用里的一次性验证码。然后就不要再用它了。根用户只用于罕见的紧急情况，就像锁在 Ong 主管保险柜里的那把总钥匙。</p></div>
+<div class="codebox"><span class="dim">1. Sign up with an email you control
+2. </span><span class="chg">Turn on MFA for the root user (authenticator app)</span><span class="dim">
+3. Log out of root
+4. Keep the root password and recovery codes somewhere offline</span></div>
+<div class="try" id="t0"></div>
+<h2><span class="en">Step 2 · Set budget alarms before any resource</span><span class="zh">第 2 步 · 先设预算警报，再建任何资源</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>budget alert</b> sends you an email when your spending reaches a number you chose. Set it <i>before</i> you create anything, because the alarm is the whole point: it tells you the day a nearly free project stops being free. An alert only sends email. It does not stop the spending, so you still have to turn things off yourself. Use several levels, so the first is a nudge and the last is a shout.</p>
+<p class="zh" style="margin:0 0 8px"><b>预算警报</b>会在花费达到你设定的数字时给你发邮件。要在创建任何东西<i>之前</i>设好，因为警报才是重点：它会告诉你，一个几乎免费的项目是哪一天不再免费的。警报只会发邮件，不会停止花费，所以你还得自己把东西关掉。多设几档，第一档是提醒，最后一档是大喊。</p></div>
+<div class="codebox"><span class="dim">Budget name   Amount (USD)   Email when spend reaches
+</span><span class="chg">wharf-nudge    1              50% of the amount
+wharf-warn     5              80% of the amount
+wharf-shout    10             100% of the amount</span><span class="dim">
+
+(pick numbers you could not ignore)</span></div>
+<div class="try" id="t1"></div>
+<h2><span class="en">Step 3 · A limited user, and a group that holds the permissions</span><span class="zh">第 3 步 · 权限有限的用户，和存放权限的用户组</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Now create a daily user for yourself. Do not attach permissions to the person. Make a <b>user group</b>, give the group the permissions, and let people join the group. When a new teammate arrives, you add one name to the group instead of ticking twenty boxes. Think of a gate pass: Sergeant Lee issues the pass type "builder", not a custom pass for each person.</p>
+<p class="zh" style="margin:0 0 8px">现在给自己建一个日常用户。不要把权限直接挂在人身上，而是建一个<b>用户组</b>，把权限给用户组，让人加入用户组。新同事来了，你只需往组里加一个名字，而不用再勾二十个选项。就像通行证：Lee 警官发的是“建设者”这一类通行证，而不是给每个人单做一张。</p></div>
+<div class="codebox"><span class="dim">Group: wharf-builders
+  permissions:
+</span><span class="chg">    container registry   (store images)
+    serverless functions (run code)
+    storage buckets      (keep files)
+    CDN                  (serve pages fast)
+    API gateway          (public front door)
+    logs                 (read what happened)</span><span class="dim">
+
+User: mei-ling  →  member of wharf-builders</span></div>
+<div class="sc" id="t2"></div>
+<h2><span class="en">Step 4 · Sign in as the daily user and pick a region</span><span class="zh">第 4 步 · 用日常用户登录，并选好区域</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Sign in as your new user from now on. The <b>console</b> is the cloud's web page where you click through everything. Choose a default <b>region</b>: the part of the world where your resources physically live. Pick one close to your users and keep it the same. Many services exist per region, so something you created in one region is invisible in another. If you cannot find something you made, check the region first.</p>
+<p class="zh" style="margin:0 0 8px">从现在起用新用户登录。<b>控制台（console）</b>是云的网页，所有操作都在那里点选。再选一个默认<b>区域（region）</b>：你的资源实际所在的地理位置。选离用户近的，并保持不变。很多服务是按区域分开的，在一个区域里创建的东西，在另一个区域里是看不见的。找不到自己建的东西时，先看区域。</p></div>
+<div class="codebox"><span class="dim">Console sign-in:  account id + user "mei-ling" + password + MFA code
+Default region:   </span><span class="chg">Asia Pacific (Singapore)</span><span class="dim">   (top-right corner of the console)
+
+The region must match in the console, in your commands and in your config.</span></div>
+<div class="try" id="t3"></div>
+<h2><span class="en">Step 5 · Four words you will see everywhere</span><span class="zh">第 5 步 · 随处可见的四个词</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><b>Serverless compute</b> runs your code only when someone calls it. A <b>container registry</b> is like GitHub, but for packaged apps called images. The <b>identity service</b> decides who can do what. The <b>logging service</b> is a diary for your servers: everything they print is written there, so you can read it later. (In AWS they are Lambda, ECR, IAM and CloudWatch.)</p>
+<p class="zh" style="margin:0 0 8px"><b>无服务器计算</b>只在有人调用时才运行你的代码。<b>容器镜像仓库（registry）</b>就像 GitHub，只不过存的是打包好的应用，叫镜像。<b>身份服务</b>决定谁能做什么。<b>日志服务</b>是服务器的“日记本”：服务器打印的内容都会记在那里，之后可以翻看。（在 AWS 里它们分别是 Lambda、ECR、IAM 和 CloudWatch。）</p></div>
+<div class="sc" id="t4"></div>
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en"><b>Three slips.</b> I skipped the budget step "for later", but the alarm is the whole point. I also did everything as root because it was easier. And my default region did not offer the service I wanted, so it simply was not there. Pick the region on purpose.</span><span class="zh"><b>三个失误。</b>我把预算这一步“留到以后”，但警报才是重点。我还图省事，什么都用根用户来做。而且默认区域没有我想用的服务，于是它就是不出现。区域要有意识地选。</span></div>
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Create the user and group</b>, then try something the group does not allow and read the denial message.</span><span class="zh"><b>创建用户和用户组</b>，然后试一个用户组不允许的操作，读一读被拒绝的提示。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Set one alert at an amount you could not ignore.</b></span><span class="zh"><b>设一个你无法忽视的金额的警报。</b></span></span></label><label><input type="checkbox"><span><span class="en"><b>Write down how you would rotate a leaked access key:</b> make a new one, switch your tools to it, then delete the old one.</span><span class="zh"><b>写下泄露的访问密钥该怎么轮换：</b>先建新的，把工具切换过去，再删除旧的。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">At the wharf</span><span class="zh">在码头</span></b><span class="en">Before a ship ever docks, Mr Ong sets the berth budget and Sergeant Lee issues passes by role. The master key stays in the safe. Your cloud account works the same way: money and permissions first, resources second.</span><span class="zh">船还没靠岸，Ong 主管就先定好泊位预算，Lee 警官按角色发通行证。总钥匙留在保险柜里。你的云账号也一样：先管钱和权限，再谈资源。</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Protect the root login with MFA, then leave it alone.<br>• Set budget alerts before creating any resource.<br>• Give permissions to a group, and put people in the group.<br>• Do daily work as the limited user.<br>• Choose a region on purpose: resources are invisible across regions.<br>• A typical learning project stays almost free, and the alarm tells you the day it does not.</p><p class="zh" style="margin:0">• 用 MFA 保护根用户，然后别去动它。<br>• 在创建任何资源之前先设预算警报。<br>• 把权限给用户组，再把人放进用户组。<br>• 日常工作用权限有限的用户。<br>• 有意识地选区域：资源跨区域是看不见的。<br>• 一个典型的学习项目几乎免费，而警报会告诉你它不再免费的那一天。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Production</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('t0'),{q:{en:'It is a quiet Tuesday and you want to create a storage bucket. Which login do you use?',zh:'平静的周二，你想创建一个存储桶。用哪个登录？'},opts:[{k:'a',en:'Root, because it can do everything',zh:'根用户，因为它什么都能做'},{k:'b',en:'The limited daily user you will create in step 3',zh:'你在第 3 步创建的权限有限的日常用户'},{k:'c',en:'Whoever\'s laptop is closest',zh:'谁的笔记本离得最近就用谁的'}],a:'b',ex:{en:'Root is for emergencies. A daily user can only do the damage its permissions allow.',zh:'根用户只用于紧急情况。日常用户最多只能造成它的权限所允许的破坏。'},hint:{en:'Which login does the least harm if its password leaks?',zh:'密码泄露时，哪个登录造成的伤害最小？'}});
+ predict($('t1'),{q:{en:'Mei Ling plans to "set the budget alert later, once something is running". What is wrong with that?',zh:'Mei Ling 打算“等东西跑起来再设预算警报”。这有什么问题？'},opts:[{k:'a',en:'Nothing, alerts are optional decoration',zh:'没问题，警报只是可有可无的装饰'},{k:'b',en:'Spending can start before the alarm exists, so the first warning comes too late',zh:'花费可能在警报存在之前就开始了，第一次警告来得太晚'},{k:'c',en:'Alerts only work on the first day',zh:'警报只在第一天有效'}],a:'b',ex:{en:'An alarm cannot warn you about spending that happened before it was set. Create it first.',zh:'警报没法提醒你在它设置之前就发生的花费。所以要先建警报。'},hint:{en:'What does an alarm that does not exist yet tell you?',zh:'一个还不存在的警报能告诉你什么？'}});
+ game($('t2'),[
+  {en:'Close the whole account',zh:'关闭整个账号',a:'r',ex:{en:'Only root can do this, so it stays locked away.',zh:'这只有根用户能做，所以它要锁起来。'},hint:{en:'Could a daily builder ever need this?',zh:'日常的建设者会需要这个吗？'}},
+  {en:'Push a new container image',zh:'推送新的容器镜像',a:'u',ex:{en:'A normal builder task, covered by the group.',zh:'这是普通的建设者任务，用户组的权限已涵盖。'},hint:{en:'Is this everyday work?',zh:'这是日常工作吗？'}},
+  {en:'Read the function\'s logs',zh:'查看函数的日志',a:'u',ex:{en:'Day-to-day debugging belongs to the daily user.',zh:'日常排错归日常用户。'},hint:{en:'Is this everyday work?',zh:'这是日常工作吗？'}},
+  {en:'Change the account\'s payment method',zh:'更改账号的付款方式',a:'r',ex:{en:'Billing ownership sits with root.',zh:'账单的所有权在根用户手里。'},hint:{en:'Who owns the bill?',zh:'谁是账单的所有者？'}}],
+  [{k:'r',en:'Root only',zh:'只用根用户'},{k:'u',en:'Daily user',zh:'日常用户'}],{en:'Action',zh:'操作'});
+ predict($('t3'),{q:{en:'You created a registry yesterday, but today the console shows an empty list. Nothing was deleted. What do you check first?',zh:'你昨天创建了一个镜像仓库，今天控制台里列表却是空的，而且没有被删。先查什么？'},opts:[{k:'a',en:'The region selector in the corner',zh:'右上角的区域选择器'},{k:'b',en:'Whether the internet is working',zh:'网络是否正常'},{k:'c',en:'Whether root is logged in',zh:'根用户有没有登录'}],a:'a',ex:{en:'The console only lists what lives in the region it is showing. Switch back to the one you used.',zh:'控制台只列出它当前显示的区域里的东西。切回你之前用的区域就行。'},hint:{en:'Where do your resources physically live?',zh:'你的资源实际放在哪里？'}});
+ game($('t4'),[
+  {en:'Serverless compute',zh:'无服务器计算',a:'c',ex:{en:'It runs your code when called.',zh:'它在被调用时运行你的代码。'},hint:{en:'Which one actually executes your program?',zh:'哪一个真正在执行你的程序？'}},
+  {en:'Container registry',zh:'容器镜像仓库',a:'s',ex:{en:'Like GitHub for packaged apps.',zh:'就像存放打包应用的 GitHub。'},hint:{en:'Think of a shelf for packaged apps.',zh:'想想存放打包应用的货架。'}},
+  {en:'Identity service',zh:'身份服务',a:'i',ex:{en:'Users, groups and permissions live here.',zh:'用户、用户组和权限都在这里。'},hint:{en:'Which one is Sergeant Lee at the gate?',zh:'哪一个相当于闸口的 Lee 警官？'}},
+  {en:'Logging service',zh:'日志服务',a:'l',ex:{en:'It collects what your code prints.',zh:'它收集你的代码打印出来的内容。'},hint:{en:'Where would you look when something broke?',zh:'出问题时你会去哪里看？'}}],
+  [{k:'c',en:'Runs code',zh:'运行代码'},{k:'s',en:'Stores images',zh:'存放镜像'},{k:'i',en:'Who can do what',zh:'谁能做什么'},{k:'l',en:'Shows output',zh:'显示输出'}],{en:'Service',zh:'服务'});
+});
+</script></body></html>
