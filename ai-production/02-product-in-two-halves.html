@@ -1,0 +1,103 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A product in two halves: front end and API | TX Learns</title>
+<meta name="description" content="See how a page and a Python API deploy together under one web address."><meta property="og:title" content="A product in two halves: front end and API | TX Learns"><meta property="og:description" content="See how a page and a Python API deploy together under one web address."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-production/02-product-in-two-halves.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-23">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">From laptop to live · Lesson 2</span><span class="zh">从笔记本到上线 · 第 2 课</span></span><h1><span class="en">A product in two halves: front end and API</span><span class="zh">产品的两半：前端和 API</span></h1><p class="meta"><span class="en">See how a page and a Python API deploy together under one web address · ~25 min · hands-on</span><span class="zh">看懂一个页面和一个 Python API 如何在同一个网址下一起上线 · 约 25 分钟 · 动手实践</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">Last time <b>Mei Ling</b> shipped a service that answers with JSON. Nobody wants to read raw JSON. <b>Auntie Siti</b> wants a real page with her canteen's name on it. So Mei Ling adds a face: a React page in the browser, backed by the same Python API. Two halves, one address.</p>
+<p class="zh" style="margin:0">上次 <b>Mei Ling</b> 上线了一个返回 JSON 的服务。没人想看原始 JSON。<b>Siti 阿姨</b>想要一个写着食堂名字的真正页面。于是 Mei Ling 给它加了一张“脸”：浏览器里的 React 页面，背后还是那个 Python API。两半，一个地址。</p></div>
+<h2><span class="en">Step 1 · Two halves, one address</span><span class="zh">第 1 步 · 两半，一个地址</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The <b>front end</b> is the part people see. It is just files that your browser downloads and runs, so it can never keep a secret. The <b>API</b> is the part that runs on the host. It holds the model key and does the real work. Picture a restaurant: the dining room is the front end, the kitchen is the API, and the doorway between them is one address.</p>
+<p class="zh" style="margin:0 0 8px"><b>前端</b>是人们看到的部分。它只是浏览器下载并运行的文件，所以永远保不住秘密。<b>API</b> 则运行在托管平台上，持有模型密钥，做真正的工作。想象一家餐厅：餐厅大堂是前端，厨房是 API，两者之间的传菜口就是同一个地址。</p></div>
+<div class="codebox"><span class="dim">browser  ──►  yourproduct.app/      ──►  Next.js page  (front end)
+browser  ──►  yourproduct.app/api   ──►  Python API    (holds the key)
+                                              │
+                                              ▼
+                                          the model</span></div>
+<div class="sc" id="t0"></div>
+<h2><span class="en">Step 2 · Start the front end</span><span class="zh">第 2 步 · 搭起前端</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><b>Next.js</b> is a toolkit for React pages, and one command makes a project. Choose TypeScript, Tailwind and the older "pages" layout, then empty the sample page. <b>Tailwind</b> is just short class names for styling: <code>p-8</code> means "padding", <code>text-xl</code> means "big text". Its <b>typography plugin</b> later makes rendered markdown look decent.</p>
+<p class="zh" style="margin:0 0 8px"><b>Next.js</b> 是做 React 页面的工具包，一条命令就能建好项目。选 TypeScript、Tailwind 和较旧的 “pages” 目录结构，然后清空示例页面。<b>Tailwind</b> 就是一堆简短的样式类名：<code>p-8</code> 表示“内边距”，<code>text-xl</code> 表示“大字”。它的<b>排版插件（typography plugin）</b>之后能让渲染出的 markdown 好看一些。</p></div>
+<div class="codebox"><span class="chg">npx create-next-app@latest wharf-helper --typescript --tailwind --no-app</span><span class="dim">
+cd wharf-helper
+# delete the sample content in pages/index.tsx</span></div>
+<div class="try" id="t1"></div>
+<h2><span class="en">Step 3 · Add the Python half</span><span class="zh">第 3 步 · 加上 Python 那一半</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Put a Python file in a folder named <code>api</code>, next to your Next.js files. It is the same FastAPI route as before. It needs its own <b>requirements file</b>, because the Python half installs its own packages. Skip it and the page will look fine while the API quietly fails.</p>
+<p class="zh" style="margin:0 0 8px">在 Next.js 文件旁边建一个叫 <code>api</code> 的文件夹，里面放一个 Python 文件，和之前一样是 FastAPI 路由。它需要自己的 <b>requirements 文件</b>，因为 Python 这一半要安装自己的包。漏了它，页面看起来一切正常，API 却悄悄失败。</p></div>
+<div class="codebox"><span class="dim"># api/index.py
+</span><span class="chg">from fastapi import FastAPI
+from openai import OpenAI</span><span class="dim">
+
+app = FastAPI()
+client = OpenAI()
+
+@app.get("/api")
+def hello():
+    reply = client.chat.completions.create(
+        model="gpt-5.4-mini",
+        messages=[{"role": "user", "content": "Write a one-line welcome for the wharf canteen."}],
+    )
+    return {"message": reply.choices[0].message.content}
+
+# requirements.txt
+</span><span class="chg">fastapi
+uvicorn
+openai</span></div>
+<div class="try" id="t2"></div>
+<h2><span class="en">Step 4 · Join them with one address</span><span class="zh">第 4 步 · 用同一个地址把它们连起来</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Two things connect the halves. First, a host config that sends <code>/api/...</code> to Python and everything else to Next.js. The browser sees one site, so the browser's cross-site safety rules (CORS) never get in the way. Second, the page calls a <b>relative</b> path, <code>/api</code>, not a full address. A relative path means "same site as this page", so it works on your laptop and in production.</p>
+<p class="zh" style="margin:0 0 8px">有两样东西把两半连起来。第一，一个托管平台配置：把 <code>/api/...</code> 交给 Python，其余交给 Next.js。浏览器看到的是同一个网站，所以浏览器的跨站安全规则（CORS）不会来捣乱。第二，页面调用的是<b>相对</b>路径 <code>/api</code>，而不是完整地址。相对路径的意思是“和当前页面同一个网站”，所以在你的笔记本和线上都能用。</p></div>
+<div class="codebox"><span class="dim">// vercel.json
+{ "rewrites": [{ "source": </span><span class="chg">"/api/:path*"</span><span class="dim">, "destination": </span><span class="chg">"/api/index.py"</span><span class="dim"> }] }
+
+// pages/index.tsx
+import { useEffect, useState } from "react";
+
+export default function Home() {
+  const [message, setMessage] = useState("Loading...");
+  useEffect(() => {
+    </span><span class="chg">fetch("/api")</span><span class="dim">
+      .then((r) => r.json())
+      .then((data) => setMessage(data.message));
+  }, []);
+  return &lt;main className="p-8 text-xl"&gt;{message}&lt;/main&gt;;
+}</span></div>
+<p class="en"><code>useEffect</code> runs only in the browser, after the page appears. That is where a call to the API belongs.</p>
+<p class="zh"><code>useEffect</code> 只在浏览器里、页面出现之后运行，调用 API 就该放在这里。</p>
+<div class="try" id="t3"></div>
+<h2><span class="en">Step 5 · Deploy: preview, then production</span><span class="zh">第 5 步 · 部署：先预览，再上线</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Link the folder to a host project once, then set the model key as an environment variable, exactly as before. A plain deploy makes a <b>preview</b>. <code>--prod</code> promotes it to <b>production</b>. These are two separate deployments with two addresses, so check the preview first and only then go live.</p>
+<p class="zh" style="margin:0 0 8px">先把文件夹关联到托管平台的一个项目，再像之前一样把模型密钥设为环境变量。普通的部署会得到一个<b>预览</b>版；加上 <code>--prod</code> 才升级为<b>生产</b>版。它们是两个独立的部署、两个地址，所以先在预览里检查，再正式上线。</p></div>
+<div class="codebox"><span class="chg">vercel link</span><span class="dim">
+</span><span class="chg">vercel env add OPENAI_API_KEY</span><span class="dim">
+vercel          # preview: open the printed address and test
+</span><span class="chg">vercel --prod</span><span class="dim">   # production</span></div>
+<div class="try" id="t4"></div>
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en"><b>I called the API with a full address locally, and it broke in production.</b> A relative <code>/api</code> path works in both places. I also <b>forgot the Python requirements file</b>, so the API half failed while the page looked perfectly fine. The page is only the shell: when something is missing, look at the API's build log.</span><span class="zh"><b>我在本地用完整地址调用 API，上线后就坏了。</b>相对路径 <code>/api</code> 在两个地方都能用。我还<b>忘了 Python 的 requirements 文件</b>，结果页面看起来完全正常，API 那一半却失败了。页面只是外壳：缺了什么，就去看 API 的构建日志。</span></div>
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Add a second route <code>/api/hello</code></b> that returns a different message, and show it on the page.</span><span class="zh"><b>再加一个路由 <code>/api/hello</code></b>，返回另一条消息，并显示在页面上。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Open the preview address and the production address.</b> Notice they are separate deployments.</span><span class="zh"><b>分别打开预览地址和生产地址。</b>留意它们是两个独立的部署。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Draw the request path on paper</b>, from the browser to the model and back.</span><span class="zh"><b>在纸上画出请求路径</b>，从浏览器到模型再回来。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">At the wharf</span><span class="zh">在码头</span></b><span class="en">The wharf has a public gate and a back office. Trucks and visitors only ever see the one gate (one address). Inside, the office holds the keys and the paperwork (the API). Mei Ling never hangs the office keys on the gate.</span><span class="zh">码头有对外的大门，也有后台办公室。卡车和访客只会看到同一个大门（同一个地址）。里面的办公室保管着钥匙和文件（API）。Mei Ling 绝不会把办公室的钥匙挂在大门上。</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A product has two halves: a front end in the browser and an API on the host.<br>• The front end is just files the visitor downloads, so it cannot keep secrets. The API holds them.<br>• A host rule sends <code>/api/...</code> to Python and the rest to Next.js. One address, no CORS trouble.<br>• Call <code>/api</code>, not a full address, so it works locally and live.<br>• The Python half needs its own requirements file.<br>• Preview and production are two deployments. Test the first, then promote.</p><p class="zh" style="margin:0">• 一个产品有两半：浏览器里的前端，和托管平台上的 API。<br>• 前端只是访问者下载的文件，保不住秘密；秘密由 API 保管。<br>• 平台规则把 <code>/api/...</code> 交给 Python，其余交给 Next.js。一个地址，没有 CORS 麻烦。<br>• 调用 <code>/api</code> 而不是完整地址，本地和线上才都能用。<br>• Python 那一半需要自己的 requirements 文件。<br>• 预览和生产是两个部署：先测前者，再升级。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Production</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ game($('t0'),[
+  {en:'Draw the buttons and the text box',zh:'画出按钮和输入框',a:'f',ex:{en:'What people see is the front end.',zh:'人们看到的就是前端。'},hint:{en:'Is it something you look at?',zh:'这是你“看到”的东西吗？'}},
+  {en:'Hold the model key and call the model',zh:'持有模型密钥并调用模型',a:'a',ex:{en:'Only the API half is safe for secrets.',zh:'只有 API 这一半能安全地放秘密。'},hint:{en:'Which half can a visitor not download?',zh:'访问者下载不到的是哪一半？'}},
+  {en:'Show the reply on the screen',zh:'把回复显示在屏幕上',a:'f',ex:{en:'The API sends data back. The page turns it into something you read.',zh:'API 把数据送回来，页面把它变成可读的内容。'},hint:{en:'Who draws things on the screen?',zh:'谁负责在屏幕上画东西？'}},
+  {en:'Keep a secret from the visitor',zh:'对访问者保守秘密',a:'a',ex:{en:'Anything in the front end can be read by the visitor.',zh:'前端里的任何东西访问者都读得到。'},hint:{en:'Could a visitor open the page source?',zh:'访问者能打开页面源码吗？'}}],
+  [{k:'f',en:'Front end',zh:'前端'},{k:'a',en:'API',zh:'API'}],{en:'Job',zh:'工作'});
+ predict($('t1'),{q:{en:'What does <code>className="p-8 text-xl"</code> do?',zh:'<code>className="p-8 text-xl"</code> 起什么作用？'},opts:[{k:'a',en:'Installs a Python package',zh:'安装一个 Python 包'},{k:'b',en:'Styles the element: some padding and big text',zh:'给元素加样式：一些内边距和大字'},{k:'c',en:'Sends a request to the API',zh:'向 API 发送请求'}],a:'b',ex:{en:'Tailwind classes are styling shortcuts and nothing more.',zh:'Tailwind 的类名只是样式的简写，没有别的作用。'},hint:{en:'"className" is about looks.',zh:'“className” 管的是外观。'}});
+ predict($('t2'),{q:{en:'The page loads perfectly, but the greeting never appears. Which half do you check first?',zh:'页面加载得好好的，问候语却一直不出现。你先查哪一半？'},opts:[{k:'a',en:'The API half: its requirements and its log',zh:'API 这一半：它的 requirements 和日志'},{k:'b',en:'The page\'s colours',zh:'页面的颜色'},{k:'c',en:'Nothing, it will fix itself',zh:'不用管，它自己会好'}],a:'a',ex:{en:'The page is only the shell. The missing text comes from the API, so look at what it installed and what it logged.',zh:'页面只是外壳。缺失的文字来自 API，所以查它装了什么、日志里写了什么。'},hint:{en:'Where does the greeting come from?',zh:'问候语是从哪来的？'}});
+ predict($('t3'),{q:{en:'The page calls <code>fetch("http://localhost:8000/api")</code>. It works on your laptop. What happens once it is live?',zh:'页面调用 <code>fetch("http://localhost:8000/api")</code>，在你的笔记本上能用。上线后会怎样？'},opts:[{k:'a',en:'It works the same',zh:'照样能用'},{k:'b',en:'It breaks: every visitor\'s browser looks for a server on its own computer',zh:'会坏：每个访问者的浏览器都去找自己电脑上的服务器'},{k:'c',en:'It becomes faster',zh:'会变快'}],a:'b',ex:{en:'"localhost" means "this very computer", so for a visitor it points at their own machine. Use <code>fetch("/api")</code>.',zh:'“localhost” 指“这台电脑本身”，对访问者来说就是他们自己的电脑。要用 <code>fetch("/api")</code>。'},hint:{en:'Whose computer is "localhost" for a visitor?',zh:'对访问者来说，“localhost” 是谁的电脑？'}});
+ predict($('t4'),{q:{en:'You fix a bug and run a plain <code>vercel</code>. Do your real users see the fix?',zh:'你修了一个 bug，运行了普通的 <code>vercel</code>。真实用户能看到修复吗？'},opts:[{k:'a',en:'Yes, instantly',zh:'能，立刻就能'},{k:'b',en:'No, only the preview address has it until you deploy with <code>--prod</code>',zh:'不能，在你用 <code>--prod</code> 部署之前只有预览地址有'},{k:'c',en:'Only on Tuesdays',zh:'只在周二能'}],a:'b',ex:{en:'Preview and production are separate. That separation is the safety net.',zh:'预览和生产是分开的，这种分开就是你的安全网。'},hint:{en:'Which address do real users use?',zh:'真实用户用的是哪个地址？'}});
+});
+</script></body></html>

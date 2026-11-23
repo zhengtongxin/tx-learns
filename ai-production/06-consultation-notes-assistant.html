@@ -1,0 +1,149 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Project: a consultation notes assistant | TX Learns</title>
+<meta name="description" content="Turn the product into something a professional would use: one form, three tidy outputs."><meta property="og:title" content="Project: a consultation notes assistant | TX Learns"><meta property="og:description" content="Turn the product into something a professional would use: one form, three tidy outputs."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-production/06-consultation-notes-assistant.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-23">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Users, sign-in and money · Project</span><span class="zh">用户、登录与收费 · 项目</span></span><h1><span class="en">Project: a consultation notes assistant</span><span class="zh">项目：问诊记录助手</span></h1><p class="meta"><span class="en">Turn the product into something a professional would use: one form, three tidy outputs · ~40 min · project</span><span class="zh">把产品变成专业人士会用的东西：一张表单，三份整齐的输出 · 约 40 分钟 · 项目</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">The wharf has a tiny first-aid clinic, and its nurse spends every evening typing up visit notes. <b>Mei Ling</b> has sign-in, a paid plan and streaming. Now she gives them a job to do: the nurse types messy notes into a form and gets back three things, a summary for the records, next steps for the nurse and a plain email for the patient. <b>Sergeant Lee</b> adds one rule before she starts: this is a <b>demo</b>, and no real patient data goes in.</p>
+<p class="zh" style="margin:0">码头有一间小小的急救诊所，护士每天晚上都要花时间打问诊记录。<b>Mei Ling</b> 已经有了登录、付费套餐和流式输出，现在要让它们干点正事：护士把凌乱的笔记填进表单，拿回三样东西：给档案的摘要、给护士自己的后续步骤，以及给病人的通俗邮件。开工前 <b>Lee 警官</b>先立了一条规矩：这是个<b>演示</b>，不能放任何真实的病人数据。</p></div>
+<h2><span class="en">Step 1 · A form with three fields</span><span class="zh">第 1 步 · 一张三个字段的表单</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Structured input gives you predictable output. The form has a patient name, a visit date and free-text notes. For the date, use a real <b>date picker</b> (<code>type="date"</code>). It always produces the format <code>2026-11-23</code>, called <b>ISO format</b> (year, month, day), which every system understands. Mark all three fields <code>required</code>.</p>
+<p class="zh" style="margin:0 0 8px">结构化的输入才有可预测的输出。表单有病人姓名、就诊日期和自由文本的笔记。日期要用真正的<b>日期选择器</b>（<code>type="date"</code>），它总是给出 <code>2026-11-23</code> 这样的格式，叫 <b>ISO 格式</b>（年-月-日），所有系统都认识。三个字段都标上 <code>required</code>。</p></div>
+<div class="codebox"><span class="dim">const [patientName, setPatientName] = useState("");
+const [visitDate, setVisitDate] = useState("");
+const [notes, setNotes] = useState("");
+
+</span><span class="chg">&lt;input required value={patientName} onChange={(e) =&gt; setPatientName(e.target.value)} /&gt;
+&lt;input required type="date" value={visitDate} onChange={(e) =&gt; setVisitDate(e.target.value)} /&gt;
+&lt;textarea required value={notes} onChange={(e) =&gt; setNotes(e.target.value)} /&gt;</span></div>
+<div class="try" id="t0"></div>
+<h2><span class="en">Step 2 · A checked request: Pydantic and POST</span><span class="zh">第 2 步 · 带检查的请求：Pydantic 与 POST</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>Pydantic model</b> describes the data you expect, and FastAPI rejects anything that does not fit before your code runs. Declare <code>visit_date</code> as a <code>date</code> and a bad one gets refused automatically. Use <b>POST</b>, not GET: the notes travel in the request body, not in the address, where they would end up in logs and histories. A route only answers the method it was written for.</p>
+<p class="zh" style="margin:0 0 8px"><b>Pydantic 模型</b>描述你期望的数据，FastAPI 会在你的代码运行之前就拒绝不合格的数据。把 <code>visit_date</code> 声明成 <code>date</code>，格式不对就会被自动拒绝。要用 <b>POST</b> 而不是 GET：笔记放在请求体里传输，而不是放在地址里，否则会留在日志和浏览历史里。一个路由只回应它被写成的那种请求方法。</p></div>
+<div class="codebox"><span class="dim">from datetime import date
+</span><span class="chg">from pydantic import BaseModel, Field</span><span class="dim">
+
+</span><span class="chg">class Visit(BaseModel):
+    patient_name: str = Field(min_length=1)
+    visit_date: date
+    notes: str = Field(min_length=1)</span><span class="dim">
+
+</span><span class="chg">@app.post("/api/consultation")</span><span class="dim">
+def consultation(visit: Visit):
+    ...   # the next steps fill this in</span></div>
+<div class="try" id="t1"></div>
+<h2><span class="en">Step 3 · One prompt, three outputs</span><span class="zh">第 3 步 · 一个提示词，三份输出</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A model gives dependable output when you tell it the exact shape. The system prompt asks for the same three sections every time, written for three different readers. Using headings means the page can show them neatly later, and the nurse always knows where to look.</p>
+<p class="zh" style="margin:0 0 8px">你把确切的格式告诉模型，它的输出才可靠。系统提示词每次都要求同样的三个部分，分别写给三类不同的读者。用标题来分隔，页面之后就能整齐地显示，护士也总知道该看哪里。</p></div>
+<div class="codebox"><span class="chg">SYSTEM_PROMPT = """You help a clinic nurse write up a visit.
+Use only facts that are in the notes. If something is missing, say so.
+Answer in markdown with exactly these three sections:
+
+## Summary for the records
+Short, factual, for the file.
+
+## Next steps for the nurse
+A checklist of follow-ups.
+
+## Email to the patient
+Friendly, plain language, no jargon."""</span></div>
+<div class="sc" id="t2"></div>
+<h2><span class="en">Step 4 · Stream it, gate it, keep the sign-in</span><span class="zh">第 4 步 · 流式输出，加上门，保留登录</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Now join everything from before. The API verifies the sign-in token, checks the plan, then streams the model's reply. This route is a POST, and the browser's <code>EventSource</code> only does GET and cannot send headers. So the page uses <code>fetch</code> and reads the body piece by piece, and the server sends plain text, with no <code>data:</code> lines. Show the result with the markdown renderer from the streaming lesson.</p>
+<p class="zh" style="margin:0 0 8px">现在把之前学的全部接起来。API 先验证登录令牌，再检查套餐，然后流式输出模型的回复。这个路由是 POST，而浏览器的 <code>EventSource</code> 只能发 GET、也不能带请求头。所以页面改用 <code>fetch</code>，一块一块地读响应体，服务器发的就是纯文本，不需要 <code>data:</code> 行。结果用流式输出那一课里的 markdown 渲染器来显示。</p></div>
+<div class="codebox"><span class="dim"># api/index.py
+import os
+from datetime import date
+from fastapi import Depends, FastAPI, HTTPException
+from fastapi.responses import StreamingResponse
+from fastapi_clerk_auth import ClerkConfig, ClerkHTTPBearer, HTTPAuthorizationCredentials
+from openai import OpenAI
+from pydantic import BaseModel, Field
+
+app = FastAPI()
+client = OpenAI()
+guard = ClerkHTTPBearer(ClerkConfig(jwks_url=os.environ["CLERK_JWKS_URL"]))
+# SYSTEM_PROMPT and class Visit from the last two steps go here
+
+@app.post("/api/consultation")
+def consultation(visit: Visit, creds: HTTPAuthorizationCredentials = Depends(guard)):
+    </span><span class="chg">if "wharf_pro" not in creds.decoded.get("pla", ""):
+        raise HTTPException(status_code=402, detail="Subscription needed")</span><span class="dim">
+    user_note = f"Patient: {visit.patient_name}\nDate: {visit.visit_date}\nNotes: {visit.notes}"
+
+    def generate():
+        stream = client.chat.completions.create(
+            model="gpt-5.4-mini", stream=True,
+            messages=[{"role": "system", "content": SYSTEM_PROMPT},
+                      {"role": "user", "content": user_note}])
+        for chunk in stream:
+            piece = chunk.choices[0].delta.content
+            if piece:
+                yield piece
+
+    return </span><span class="chg">StreamingResponse(generate(), media_type="text/plain")</span><span class="dim">
+
+// page: send, then read the stream
+const token = await getToken();
+const res = await fetch("/api/consultation", {
+  </span><span class="chg">method: "POST",</span><span class="dim">
+  headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+  body: JSON.stringify({ patient_name: patientName, visit_date: visitDate, notes }),
+});
+</span><span class="chg">const reader = res.body.getReader();
+const decoder = new TextDecoder();
+let text = "";
+while (true) {
+  const { done, value } = await reader.read();
+  if (done) break;
+  text += decoder.decode(value, { stream: true });
+  setOutput(text);
+}</span></div>
+<div class="try" id="t3"></div>
+<h2><span class="en">Step 5 · Deploy and walk the whole path</span><span class="zh">第 5 步 · 部署，并把整条路走一遍</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Deploy to a preview first, then walk it like the nurse would: sign in, subscribe with the test card, submit a form, read the three sections. Each step uses a different piece you built, so any break points straight at one lesson. Try the failures too: submit while signed out, and while on the free plan.</p>
+<p class="zh" style="margin:0 0 8px">先部署到预览环境，再像护士那样走一遍：登录、用测试卡订阅、提交表单、读三个部分。每一步用到你造的不同部件，所以哪里断了都能直接指向某一课。也要试试失败的情况：未登录时提交，以及在免费套餐上提交。</p></div>
+<div class="codebox"><span class="dim">1. sign in                  → sign-in lesson
+2. subscribe (test card)    → plan gate lesson
+3. submit the form          → validation + POST
+4. text appears bit by bit  → streaming
+5. three sections shown     → system prompt</span></div>
+<div class="try" id="t4"></div>
+<h2><span class="en">Step 6 · What a demo must not hold</span><span class="zh">第 6 步 · 演示不能装什么</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">This works, and it is tempting to call it safe. It is not. It was built to learn, so real patient data must not go into it. Real use needs <b>privacy-law compliance</b>, <b>encryption</b>, <b>audit logs</b> (a record of who looked at what), <b>access roles</b> (who may see which records) and <b>consent</b>. Saying clearly what a demo is not allowed to hold is part of the job.</p>
+<p class="zh" style="margin:0 0 8px">它能跑，所以很容易觉得它安全。其实不然：它是为了学习而做的，所以绝不能放真实的病人数据。真实使用需要<b>符合隐私法规</b>、<b>加密</b>、<b>审计日志</b>（记录谁看过什么）、<b>访问角色</b>（谁能看哪些记录）和<b>知情同意</b>。把“演示不能装什么”说清楚，本身就是工作的一部分。</p></div>
+<div class="sc" id="t5"></div>
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en"><b>Three mistakes.</b> "Method not allowed": the route was still GET. The date went in the wrong format, so now I send ISO dates. And I treated the demo as safe for real patient data. It is not: real use needs privacy-law compliance, encryption, audit logs, access roles and consent.</span><span class="zh"><b>三个错误。</b>“Method not allowed”：路由还是 GET。日期格式发错了，所以现在我发 ISO 日期。还有，我曾把这个演示当成可以放真实病人数据的东西。其实不行：真实使用需要隐私法规合规、加密、审计日志、访问角色和知情同意。</span></div>
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Change the three outputs for another job</b>, such as a teacher (lesson summary, homework, note to parents) or a mechanic.</span><span class="zh"><b>把三份输出换成另一种工作</b>，比如老师（课堂摘要、作业、给家长的便条）或修理工。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a field</b> (a visit type, say) and make it required on both the form and the API.</span><span class="zh"><b>加一个字段</b>（比如就诊类型），并在表单和 API 两边都设为必填。</span></span></label><label><input type="checkbox"><span><span class="en"><b>List five things a real deployment would need</b> before it touched private data.</span><span class="zh"><b>列出五样</b>真实部署在接触私密数据之前必须具备的东西。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">At the wharf</span><span class="zh">在码头</span></b><span class="en">Every container that enters the terminal comes with a manifest in a fixed format, and the crane crew trusts it because the format never changes. The form and the three-section prompt are your manifest. And as Sergeant Lee says, a training yard is not the live berth: nothing dangerous goes in until the proper checks are in place.</span><span class="zh">每个进入码头的集装箱都带着格式固定的清单，吊机班组之所以信任它，是因为格式从不改变。表单和三段式提示词就是你的清单。正如 Lee 警官所说，训练场不是真正的泊位：在正式的检查到位之前，危险的东西一样都不能放进去。</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Structured input plus a structured prompt gives dependable output.<br>• A Pydantic model rejects bad requests before your code runs. Send ISO dates.<br>• Data in the body means POST, not GET.<br>• For a POST stream with a token, use <code>fetch</code> and read the body, not <code>EventSource</code>.<br>• The server keeps the sign-in check and the plan check, whatever the page hides.<br>• Walk the full path in a preview: sign in, subscribe, submit, read.<br>• Say clearly what a demo is not allowed to hold. Real patient data needs real safeguards.</p><p class="zh" style="margin:0">• 结构化的输入加结构化的提示词，输出才可靠。<br>• Pydantic 模型在你的代码运行前就拒绝坏请求。日期要发 ISO 格式。<br>• 数据在请求体里，就用 POST，不用 GET。<br>• 要带令牌的 POST 流，用 <code>fetch</code> 读响应体，而不是 <code>EventSource</code>。<br>• 不管页面藏了什么，服务器都要保留登录检查和套餐检查。<br>• 在预览环境里把整条路走一遍：登录、订阅、提交、阅读。<br>• 说清楚演示不能装什么。真实病人数据需要真正的保障措施。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Production</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('t0'),{q:{en:'Which date string should the form send to the API?',zh:'表单应该把哪种日期字符串发给 API？'},opts:[{k:'a',en:'<code>23/11/26</code>',zh:'<code>23/11/26</code>'},{k:'b',en:'<code>2026-11-23</code>',zh:'<code>2026-11-23</code>'},{k:'c',en:'<code>Monday, the twenty-third</code>',zh:'<code>Monday, the twenty-third</code>'}],a:'b',ex:{en:'ISO dates are unambiguous. I once sent the wrong format and the API refused it.',zh:'ISO 日期没有歧义。我曾经发错格式，被 API 拒绝了。'},hint:{en:'Year first, then month, then day.',zh:'先年，再月，再日。'}});
+ predict($('t1'),{q:{en:'The page sends a POST, but the API answers "Method Not Allowed". Likeliest cause?',zh:'页面发的是 POST，API 却回答 “Method Not Allowed”。最可能的原因？'},opts:[{k:'a',en:'The route is still written with <code>@app.get</code>',zh:'路由还是用 <code>@app.get</code> 写的'},{k:'b',en:'The notes are too long',zh:'笔记太长'},{k:'c',en:'The date is a Tuesday',zh:'日期是星期二'}],a:'a',ex:{en:'My own mistake. A GET route does not answer POST. Change the decorator.',zh:'我自己犯的错。GET 路由不会回应 POST，把装饰器改了就行。'},hint:{en:'Look at which method the route was written for.',zh:'看看这个路由是为哪种方法写的。'}});
+ game($('t2'),[
+  {en:'"Patient reports a sore throat for 3 days; temperature 38.2."',zh:'“病人诉咽痛 3 天；体温 38.2。”',a:'r',ex:{en:'Factual and short: this belongs in the records.',zh:'客观简短，属于档案。'},hint:{en:'Is it a plain fact for the file?',zh:'它是给档案的客观事实吗？'}},
+  {en:'"Book a follow-up call on Friday and check the lab result."',zh:'“周五安排回访电话，并查看化验结果。”',a:'n',ex:{en:'A to-do list for the nurse.',zh:'这是给护士的待办清单。'},hint:{en:'Is it something someone must do?',zh:'它是需要有人去做的事吗？'}},
+  {en:'"Hello, your throat should feel better in a few days. Please rest and drink water."',zh:'“您好，几天后喉咙应该会好些。请多休息、多喝水。”',a:'e',ex:{en:'Plain, warm language written for the patient.',zh:'写给病人的通俗、温和的话。'},hint:{en:'Who would read this sentence?',zh:'这句话是写给谁看的？'}},
+  {en:'"Continue to monitor, review in 48h if no improvement."',zh:'“继续观察，如无好转 48 小时后复查。”',a:'n',ex:{en:'An instruction for the professional.',zh:'这是对专业人员的指示。'},hint:{en:'Is it an action to take?',zh:'它是要采取的行动吗？'}}],
+  [{k:'r',en:'Summary',zh:'摘要'},{k:'n',en:'Next steps',zh:'后续步骤'},{k:'e',en:'Email',zh:'邮件'}],{en:'Sentence',zh:'句子'});
+ predict($('t3'),{q:{en:'Why does this POST route not use <code>EventSource</code>?',zh:'这个 POST 路由为什么不用 <code>EventSource</code>？'},opts:[{k:'a',en:'EventSource is too slow',zh:'EventSource 太慢'},{k:'b',en:'EventSource can only send GET requests and cannot add the Authorization header',zh:'EventSource 只能发 GET 请求，也不能加 Authorization 头'},{k:'c',en:'Streaming does not work with markdown',zh:'流式输出不能配合 markdown'}],a:'b',ex:{en:'We need a POST body and a sign-in token, so <code>fetch</code> with a reader fits.',zh:'我们需要 POST 请求体和登录令牌，所以用 <code>fetch</code> 加读取器才合适。'},hint:{en:'What two things does this request need to carry?',zh:'这个请求需要带上哪两样东西？'}});
+ predict($('t4'),{q:{en:'A signed-in user on the free plan calls the API directly with their token. What should come back?',zh:'免费套餐的已登录用户带着令牌直接调用 API，应该返回什么？'},opts:[{k:'a',en:'The three sections, they are signed in',zh:'三个部分，他已经登录了'},{k:'b',en:'A 402 "Subscription needed", from the server\'s own plan check',zh:'402 “Subscription needed”，由服务器自己的套餐检查返回'},{k:'c',en:'Nothing happens and the page spins',zh:'什么都没发生，页面一直转'}],a:'b',ex:{en:'The server checks the plan itself, whatever the page hides.',zh:'不管页面藏了什么，服务器都会自己检查套餐。'},hint:{en:'Which check does not depend on the browser?',zh:'哪个检查不依赖浏览器？'}});
+ game($('t5'),[
+  {en:'Encrypt records when stored and when sent',zh:'存储和传输时对记录加密',a:'y',ex:{en:'A basic need for private data.',zh:'私密数据的基本要求。'},hint:{en:'Does it protect the data itself?',zh:'它保护的是数据本身吗？'}},
+  {en:'Keep an audit log of who opened which record',zh:'记录谁打开了哪份记录的审计日志',a:'y',ex:{en:'You must be able to answer "who saw this?".',zh:'你必须能回答“谁看过这个”。'},hint:{en:'Could you tell who looked?',zh:'你能说出是谁看过吗？'}},
+  {en:'Get the patient\'s consent and follow the privacy law',zh:'取得病人的同意并遵守隐私法规',a:'y',ex:{en:'The legal basis for holding the data at all.',zh:'持有这些数据的法律依据。'},hint:{en:'Is it about permission?',zh:'它关乎许可吗？'}},
+  {en:'Put "DEMO" in the page title',zh:'在页面标题里写上 “DEMO”',a:'n',ex:{en:'A label protects no data.',zh:'一个标签保护不了任何数据。'},hint:{en:'Does it change where the data goes?',zh:'它改变了数据的去向吗？'}},
+  {en:'Switch to a bigger model',zh:'换一个更大的模型',a:'n',ex:{en:'Model size has nothing to do with privacy.',zh:'模型大小与隐私无关。'},hint:{en:'Does it change who can see the data?',zh:'它改变谁能看到数据了吗？'}}],
+  [{k:'y',en:'Needed before real data',zh:'用真实数据前必须有'},{k:'n',en:'Does not help',zh:'没有帮助'}],{en:'Measure',zh:'措施'});
+});
+</script></body></html>
