@@ -1,0 +1,216 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Project: an agent that works the queue | TX Learns</title>
+<meta name="description" content="Make one run work the whole claims queue on its own: a to-do list on the dashboard, a fresh helper per claim, manual lookups by section and failures that fix themselves."><meta property="og:title" content="Project: an agent that works the queue | TX Learns"><meta property="og:description" content="Make one run work the whole claims queue on its own: a to-do list on the dashboard, a fresh helper per claim, manual lookups by section and failures that fix themselves."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-fde/09-agent-that-works-the-queue.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-24">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Harness engineering · Project</span><span class="zh">Harness 工程 · 项目</span></span><h1><span class="en">Project: an agent that works the queue</span><span class="zh">项目：自己处理队列的智能体</span></h1><p class="meta"><span class="en">Turn the pilot into one run that works the whole queue, with a to-do list to watch and failures that fix themselves · ~30 min · hands-on</span><span class="zh">把试点变成一次运行就处理整条队列，有张能看的待办清单，失败也能自己修好 · 约 30 分钟 · 动手实践</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">Mei Ling now knows the idea of a harness. At Kaya Travel Cover she turns it into a working run. One command should start it. The agent picks the order itself and ends with a short summary for the handlers. While it runs, the queue page shows a to-do list. Each claim goes to a fresh helper, the manual is read by section, and a failure never leaves a claim stuck. She builds it in six steps on top of the pilot (<code>queue</code>, <code>add_claim</code>, <code>record_decision</code>, <code>decide</code> and <code>client</code> from the claims desk project).</p>
+<p class="zh" style="margin:0">Mei Ling 现在懂了 harness 的思路。在 Kaya Travel Cover，她要把它变成能跑的东西。一条命令就能启动；智能体自己挑顺序，最后给理赔员一段简短总结。运行时，队列页面显示一张待办清单。每份理赔交给一个新帮手，手册按章节读取，失败也不会让理赔卡住。她分六步，在试点的基础上搭起来（用到理赔台项目里的 <code>queue</code>、<code>add_claim</code>、<code>record_decision</code>、<code>decide</code> 和 <code>client</code>）。</p></div>
+
+<h2><span class="en">Step 1 · One command, the agent picks the order</span><span class="zh">第 1 步 · 一条命令，顺序由智能体挑</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The pilot walked the queue in the order it was stored. A handler would start with the big or urgent ones. So ask the model to order the claims first, then work through them, then write a short summary. Always check the model’s order: drop ids it invented and add any it forgot.</p>
+<p class="zh" style="margin:0 0 8px">试点是按存放的顺序走队列的。理赔员会先处理金额大或紧急的。所以先让模型给理赔排序，再逐份处理，最后写一段简短总结。模型给的顺序一定要检查：去掉它编出来的 id，补上它漏掉的。</p></div>
+<div class="codebox"><span class="dim">import json
+
+def pick_order(ids):
+    brief = [{"id": i, "amount": queue[i]["claim"]["amount"]} for i in ids]</span><span class="chg">
+    reply = client.chat.completions.create(
+        model="gpt-5.4-mini",
+        messages=[{"role": "user", "content":
+            "Order these insurance claims the way a careful handler would tackle them. "
+            'Reply with JSON only: {"order": [claim ids]}\n' + json.dumps(brief)}],
+        response_format={"type": "json_object"})
+    order = json.loads(reply.choices[0].message.content)["order"]
+    return [i for i in order if i in ids] + [i for i in ids if i not in order]
+
+def summarise(lines):
+    reply = client.chat.completions.create(
+        model="gpt-5.4-mini",
+        messages=[{"role": "user", "content":
+            "Write three short sentences for the claims handlers about this run:\n" + "\n".join(lines)}])
+    return reply.choices[0].message.content</span><span class="dim">
+
+def run(ids):
+    lines = []
+    for claim_id in pick_order(ids):
+        start(claim_id)
+        decision = decide(queue[claim_id]["claim"])
+        record_decision(claim_id, decision)
+        lines.append(f"{claim_id}: {decision['action']} S${decision['payout']}")
+    print(summarise(lines))</span></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Options: cap the run, or run one claim</span><span class="zh">第 2 步 · 选项：限制数量，或只跑一份</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">While you are building, you do not want to pay for 25 claims every trial. Add a cap that runs only the first five. Also add a way to run one named claim, which is how you debug a single odd case. Both options are plain command-line flags.</p>
+<p class="zh" style="margin:0 0 8px">搭建的时候，不想每次试跑都为 25 份理赔付钱。加一个上限，只跑前五份。再加一个只跑指定理赔的方式，用来调试某个古怪的个案。两个选项都是普通的命令行参数。</p></div>
+<div class="codebox"><span class="dim">import argparse, json
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()</span><span class="chg">
+    parser.add_argument("--limit", type=int, help="run only the first N claims")
+    parser.add_argument("--claim", help="run one named claim, e.g. C007")
+    args = parser.parse_args()</span><span class="dim">
+    for claim in json.load(open("data/claims.json")):
+        add_claim(claim)
+    ids = list(queue)</span><span class="chg">
+    if args.claim:
+        ids = [args.claim]
+    elif args.limit:
+        ids = ids[:args.limit]</span><span class="dim">
+    run(ids)
+
+# python run_queue.py --limit 5     (put this code at the end of the file with run)</span></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · A to-do list on the queue page</span><span class="zh">第 3 步 · 队列页面上的待办清单</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Handlers should see the run as it happens. Keep a to-do list with four states: <b>to do</b>, <b>in progress</b>, <b>done</b> and <b>for handler</b>. Save it to a file every time something changes. The queue page just reads that file, like the board behind Auntie Siew’s counter.</p>
+<p class="zh" style="margin:0 0 8px">理赔员应该能看到运行过程。维护一张有四种状态的待办清单：<b>待办</b>、<b>处理中</b>、<b>已完成</b>、<b>留给理赔员</b>。每次有变化就存进文件。队列页面只要读这个文件，就像 Auntie Siew 柜台后面的那块板。</p></div>
+<div class="codebox"><span class="chg">TODO_FILE = "todo.json"
+todo = {}   # claim id -> {"state", "tries", "line", "read"}
+
+def save_todo():
+    json.dump(todo, open(TODO_FILE, "w"), indent=1)
+
+def plan(ids):
+    for claim_id in ids:
+        todo[claim_id] = {"state": "to_do", "tries": 0, "line": "", "read": []}
+    save_todo()
+
+def show_todo():
+    for state in ["to_do", "in_progress", "done", "for_handler"]:
+        names = [i for i, item in todo.items() if item["state"] == state]
+        print(f"{state:12} {', '.join(names)}")</span><span class="dim">
+
+# in run(ids): call plan(ids) first, then inside the loop
+#   todo[claim_id]["state"] = "in_progress"; save_todo()
+#   ...after record_decision:  todo[claim_id]["state"] = "done"; save_todo()</span></div>
+<p class="en">Which of these states can a claim be in?</p>
+<p class="zh">下面这些，哪些是理赔可以处于的状态？</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Step 4 · A fresh helper for every claim</span><span class="zh">第 4 步 · 每份理赔一个新帮手</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A helper is a fresh model call that sees only one claim. The main run never reads its working. It receives one line: the decision and payout, or what went wrong. Nothing piles up between claims, so the 25th claim costs about the same as the first.</p>
+<p class="zh" style="margin:0 0 8px">帮手就是一次只看一份理赔的全新模型调用。主流程从不读它的思考过程，只收到一行话：决定和赔付金额，或者哪里出了问题。理赔之间什么都不会堆积，所以第 25 份的成本和第 1 份差不多。</p></div>
+<div class="codebox"><span class="chg">def run_helper(claim_id):
+    """A fresh call: it sees this claim and nothing else."""
+    decision = decide(queue[claim_id]["claim"])
+    record_decision(claim_id, decision)
+    return f"{claim_id}: {decision['action']} S${decision['payout']}"</span><span class="dim">
+
+# in run(): the loop body becomes
+#   todo[claim_id]["state"] = "in_progress"; save_todo()
+#   todo[claim_id]["line"] = run_helper(claim_id)
+#   todo[claim_id]["state"] = "done"; save_todo()</span></div>
+<div class="try" id="p3"></div>
+
+<h2><span class="en">Step 5 · Read the manual by section, and show what was read</span><span class="zh">第 5 步 · 按章节读手册，并显示读了什么</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Give the helper the list of section titles and one tool that reads a section. It looks up only what it needs and calls the tool as many times as it likes, up to a limit. Log every title it reads. The claim page then shows what the decision was based on, which is what Aisha asks first. Put the claims manual and the wording into <code>data/manual.json</code>, one entry per section.</p>
+<p class="zh" style="margin:0 0 8px">给帮手一张章节标题清单和一个读取某一节的工具。它只查需要的，想调用几次都行，但有上限。把它读过的每个标题都记下来。理赔页面就能显示决定依据了什么，这正是 Aisha 最先会问的。把理赔手册和条款放进 <code>data/manual.json</code>，每个章节一条。</p></div>
+<div class="codebox"><span class="chg">SECTIONS = json.load(open("data/manual.json"))   # section title -> text
+TOOLS = [{"type": "function", "function": {
+    "name": "read_manual",
+    "description": "Read one section of the claims manual or policy wording by its exact title.",
+    "parameters": {"type": "object",
+                   "properties": {"title": {"type": "string"}},
+                   "required": ["title"]}}}]
+
+def decide_with_manual(claim, read_log):
+    policy = POLICIES[claim["policy_id"]]
+    messages = [{"role": "user", "content":
+        f"You help a travel insurer's claims desk. Section titles: {list(SECTIONS)}\n"
+        f"Read only what you need with read_manual. Policy: {json.dumps(policy)}\n"
+        f"Claim: {json.dumps(claim)}\n"
+        'Then reply with JSON only, no code fences: {"action": "approve" or "decline" or "refer", '
+        '"payout": a number in S$, "reason": two or three short sentences}'}]
+    for _ in range(6):
+        message = client.chat.completions.create(
+            model="gpt-5.4-mini", messages=messages, tools=TOOLS).choices[0].message
+        if not message.tool_calls:
+            return json.loads(message.content)
+        messages.append(message)
+        for call in message.tool_calls:
+            title = json.loads(call.function.arguments)["title"]
+            read_log.append(title)
+            messages.append({"role": "tool", "tool_call_id": call.id,
+                             "content": SECTIONS.get(title, "No such section.")})
+    raise RuntimeError("helper read too many sections without answering")</span><span class="dim">
+
+def run_helper(claim_id):
+    read_log = []</span><span class="chg">
+    decision = decide_with_manual(queue[claim_id]["claim"], read_log)
+    todo[claim_id]["read"] = read_log</span><span class="dim">
+    record_decision(claim_id, decision)
+    return f"{claim_id}: {decision['action']} S${decision['payout']}"</span></div>
+<div class="try" id="p4"></div>
+
+<h2><span class="en">Step 6 · Failures that fix themselves</span><span class="zh">第 6 步 · 会自己修好的失败</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Three rules, all in code. A claim that fails before it is decided goes back to the queue. If it fails twice, it is left for a handler. And no claim is ever decided twice, so before any work the code checks whether a decision already exists. One more rule closes the gap from a killed run: on start, anything still “in progress” goes back to “to do”.</p>
+<p class="zh" style="margin:0 0 8px">三条规矩，全在代码里。还没决定就失败的理赔，回到队列。失败两次，就留给理赔员。任何理赔都不会被决定两次，所以动手之前，代码先检查是否已经有决定。再加一条，补上运行被杀掉留下的漏洞：启动时，任何还停在“处理中”的理赔，都回到“待办”。</p></div>
+<div class="codebox"><span class="chg">MAX_TRIES = 2
+
+def recover():
+    """After a killed run, nothing may stay in_progress."""
+    for item in todo.values():
+        if item["state"] == "in_progress":
+            item["state"] = "to_do"
+    save_todo()
+
+def work_one(claim_id):
+    item = todo[claim_id]
+    if item["state"] != "to_do":
+        return
+    if queue[claim_id]["decision"] is not None:   # never decide twice
+        item["state"] = "done"
+        save_todo()
+        return
+    item["state"] = "in_progress"
+    item["tries"] += 1
+    save_todo()
+    try:
+        item["line"] = run_helper(claim_id)
+        item["state"] = "done"
+    except Exception as err:
+        if item["tries"] &lt; MAX_TRIES:
+            item["state"] = "to_do"
+        else:
+            item["state"] = "for_handler"
+            item["line"] = f"{claim_id}: failed twice ({type(err).__name__})"
+    save_todo()</span><span class="dim">
+
+# run(): call recover(), plan(ids), then for each id in pick_order(ids) call work_one(id) until
+# no claim is "to_do". Then print the summary of todo[...]["line"] for every claim.</span></div>
+<div class="try" id="p5"></div>
+
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我当时想错了</span></b><span class="en">A claim failed partway and stayed “in progress” for ever. Worse, it silently blocked a later run, because the new run thought someone was still working on it. The fix was one rule: every claim must always end in a clear state. That is the <code>recover()</code> step and the two-tries rule.</span><span class="zh">有一份理赔做到一半失败，从此一直停在“处理中”。更糟的是，它悄悄挡住了之后的运行，因为新的运行以为还有人在处理它。解决办法就一条规矩：每份理赔最后都必须处于明确的状态。这就是 <code>recover()</code> 和“两次机会”的规则。</span></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Kill the run halfway</b> and look at what state the queue is in. Then start it again.</span><span class="zh"><b>运行到一半把它杀掉，</b>看看队列处于什么状态，然后再启动一次。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a claim the agent cannot handle,</b> for example one that names a manual section that does not exist, and watch it end up with a handler.</span><span class="zh"><b>加一份智能体处理不了的理赔，</b>比如提到一个不存在的手册章节，看它最后落到理赔员手里。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Compare cost per claim</b> at 5 claims and at 25. It should stay flat.</span><span class="zh"><b>比较 5 份和 25 份时每份理赔的成本。</b>它应该保持平稳。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">Back at the shophouse</span><span class="zh">回到店屋</span></b><span class="en">Mr Goh watches the to-do board while the rain comes down on the five-foot way. A ticket that jams in the queue-number machine does not stay jammed: it goes back in the tray once, and the second time it goes to Aisha’s desk. By Friday evening every ticket is somewhere clear, and the red stamp still waits for the big ones.</span><span class="zh">雨落在五脚基上，Mr Goh 看着待办板。卡在取号机里的号码不会一直卡着：它先放回托盘一次，第二次就送到 Aisha 的桌上。到星期五傍晚，每一张号码都在一个明确的地方，而红色图章仍等着盖大额的那几张。</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Let the agent organise its own work: order the queue and write the summary.<br>• Add a cap and a one-claim option so trials cost little.<br>• Show a visible to-do list: to do, in progress, done, for handler.<br>• Use one fresh helper per claim, and take back only one line.<br>• Look things up by section, and record what was read.<br>• Retry once, then leave it for a human, and never decide twice.<br>• Every item must always end in a clear state.</p><p class="zh" style="margin:0">• 让智能体自己组织工作：给队列排序，写出总结。<br>• 加上数量上限和单份理赔选项，试跑就花不了多少钱。<br>• 显示一张看得见的待办清单：待办、处理中、已完成、留给理赔员。<br>• 每份理赔一个新帮手，只收回一行话。<br>• 按章节查资料，并记录读了什么。<br>• 重试一次，再不行就留给人，而且绝不决定两次。<br>• 每个事项最终都必须处于明确的状态。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI FDE</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+
+ predict($('p1'),{q:{en:'The model returns an order that includes an id <code>C999</code> that is not in the queue, and leaves out <code>C004</code>. What does <code>pick_order</code> return?',zh:'模型返回的顺序里有个队列里没有的 id <code>C999</code>，还漏掉了 <code>C004</code>。<code>pick_order</code> 会返回什么？'},opts:[{k:'a',en:'The model’s order unchanged, so it crashes on C999',zh:'原封不动的模型顺序，所以在 C999 上崩溃'},{k:'b',en:'Its order without C999, with C004 added at the end',zh:'去掉 C999 的顺序，把 C004 加在最后'},{k:'c',en:'An empty list',zh:'空列表'}],a:'b',ex:{en:'The first part keeps only real ids. The second adds any the model forgot, so every claim is still worked.',zh:'前半段只保留真实的 id，后半段补上模型漏掉的，所以每份理赔仍会被处理。'},hint:{en:'Read the two halves of the return line.',zh:'读一读 return 那行的两半。'}});
+
+ predict($('p2'),{q:{en:'You run <code>python run_queue.py --claim C007 --limit 5</code>. How many claims run?',zh:'你运行 <code>python run_queue.py --claim C007 --limit 5</code>。会跑多少份理赔？'},opts:[{k:'a',en:'One: C007',zh:'一份：C007'},{k:'b',en:'Five',zh:'五份'},{k:'c',en:'Six',zh:'六份'}],a:'a',out:{en:'args.claim is set → ids = ["C007"] (the elif is skipped)',zh:'args.claim 有值 → ids = ["C007"]（elif 被跳过）'},ex:{en:'The named claim wins; the cap is only used when no claim is named.',zh:'指定的理赔优先；只有没指定理赔时，上限才起作用。'},hint:{en:'Look at if and elif.',zh:'看看 if 和 elif。'}});
+
+ game($('g1'),[
+  {en:'to_do: waiting for a helper',zh:'to_do：等着帮手来处理',a:'y',ex:{en:'The starting state of every planned claim.',zh:'每份计划中的理赔的起始状态。'},hint:{en:'Check the list in plan().',zh:'看看 plan() 里设的值。'}},
+  {en:'for_handler: failed twice, a person takes over',zh:'for_handler：失败两次，由人接手',a:'y',ex:{en:'The safe place for a claim the agent cannot finish.',zh:'智能体做不完的理赔的安全去处。'},hint:{en:'Who takes over when it fails twice?',zh:'失败两次后谁接手？'}},
+  {en:'half_done: stopped in the middle, nobody knows',zh:'half_done：停在中间，没人知道',a:'n',ex:{en:'This is exactly the stuck state we must never allow.',zh:'这正是我们决不能允许的卡住状态。'},hint:{en:'Is it a clear state?',zh:'它是明确的状态吗？'}},
+  {en:'done: decided and recorded',zh:'done：已决定并记录',a:'y',ex:{en:'The goal state for most claims.',zh:'大多数理赔的目标状态。'},hint:{en:'It is the happy ending.',zh:'它是好结局。'}}],[{k:'y',en:'A real state',zh:'真实的状态'},{k:'n',en:'Not allowed',zh:'不允许'}],{en:'State',zh:'状态'});
+
+ predict($('p3'),{q:{en:'Run A uses one long chat for all claims. Run B uses a fresh helper per claim. Cost per claim at 5 claims versus 25 claims?',zh:'运行 A 用一个长对话处理所有理赔，运行 B 每份理赔一个新帮手。5 份和 25 份时，每份理赔的成本如何？'},opts:[{k:'a',en:'A stays flat, B grows',zh:'A 平稳，B 增长'},{k:'b',en:'A grows, B stays flat',zh:'A 增长，B 平稳'},{k:'c',en:'Both grow the same',zh:'两者增长一样'}],a:'b',ex:{en:'The long chat re-sends every earlier claim each time. The fresh helper only ever sees its own.',zh:'长对话每次都要重新发送之前所有的理赔，新帮手只看得到自己那份。'},hint:{en:'What does each call have to carry?',zh:'每次调用要带着什么？'}});
+
+ predict($('p4'),{q:{en:'A helper keeps calling <code>read_manual</code> and never answers. What happens?',zh:'一个帮手一直调用 <code>read_manual</code> 却不给答案。会怎样？'},opts:[{k:'a',en:'It loops for ever and the bill grows',zh:'它永远循环，账单越滚越大'},{k:'b',en:'After 6 rounds it raises an error, and Step 6 handles it',zh:'6 轮之后它抛出错误，由第 6 步处理'},{k:'c',en:'It approves the claim to be safe',zh:'为保险起见它批准理赔'}],a:'b',ex:{en:'The <code>for _ in range(6)</code> loop is the cap. The error then goes to the retry rule.',zh:'<code>for _ in range(6)</code> 这个循环就是上限，错误随后交给重试规则处理。'},hint:{en:'Look at the loop and the last line.',zh:'看看循环和最后一行。'}});
+
+ predict($('p5'),{q:{en:'The run was killed while C012 was “in progress”. You start it again. What does <code>recover()</code> do to C012?',zh:'运行被杀掉时 C012 正处于“处理中”。你重新启动。<code>recover()</code> 会怎么处理 C012？'},opts:[{k:'a',en:'Leaves it in progress',zh:'留在处理中'},{k:'b',en:'Sets it to to_do, and work_one skips it if a decision exists',zh:'设成 to_do；如果已有决定，work_one 会跳过它'},{k:'c',en:'Deletes it',zh:'把它删掉'}],a:'b',ex:{en:'It goes back to the queue. If the helper had already recorded a decision, work_one marks it done instead of deciding twice.',zh:'它回到队列。如果帮手已经记录了决定，work_one 会把它标为完成，而不是再决定一次。'},hint:{en:'Nothing may stay in progress after a restart.',zh:'重启之后，不能有任何理赔停在处理中。'}});
+});
+</script></body></html>
