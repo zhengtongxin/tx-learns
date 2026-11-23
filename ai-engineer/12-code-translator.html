@@ -16,8 +16,8 @@ RUN = ["./main"]</span></div>
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 2 · The prompt, and cleaning the reply</span><span class="zh">第 2 步 · 提示词，以及清理回复</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The system message asks for fast C++, code only, same output. The user message carries the Python and one warning that is easy to miss: Python integers never overflow, but C++ ones do, so use 64-bit or wider types. Models like to wrap code in markdown fences, so strip them before saving, or the compiler chokes on the backticks.</p>
-<p class="zh" style="margin:0 0 8px">system 消息要求：快速 C++，只要代码，输出相同。user 消息带上 Python 代码，还有一条容易漏掉的提醒：Python 的整数不会溢出，C++ 的会，所以要用 64 位或更宽的类型。模型喜欢把代码包在 markdown 围栏里，保存前要去掉，否则编译器会被反引号噎住。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The system message asks for fast C++, code only, same output. The user message carries the Python and one warning that is easy to miss: Python integers never overflow, but C++ ones do: a number too big for its box wraps around to a wrong value, with no error. So use 64-bit or wider types (bigger boxes). Models like to wrap code in markdown fences (the lines that start with three backticks), so strip them before saving, or the compiler chokes on the backticks.</p>
+<p class="zh" style="margin:0 0 8px">system 消息要求：快速 C++，只要代码，输出相同。user 消息带上 Python 代码，还有一条容易漏掉的提醒：Python 的整数不会溢出，C++ 的会：数字超出它的“盒子”就会绕回一个错误的值，而且不报错。所以要用 64 位或更宽的类型（更大的盒子）。模型喜欢把代码包在 markdown 围栏里（以三个反引号开头的那几行），保存前要去掉，否则编译器会被反引号噎住。</p></div>
 <div class="codebox"><span class="chg">SYSTEM = """Convert the given Python into fast C++.
 Reply with code only. It must print exactly the same output.
 Add comments only where they really help."""
@@ -58,8 +58,8 @@ def run_python(path):
 <div class="try" id="p3"></div>
 
 <h2><span class="en">Step 4 · Verify the output, then rank the models</span><span class="zh">第 4 步 · 核对输出，再给模型排名</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Fast is worthless if it is wrong, so compare the printed output with Python's, line for line. Wei Jie first trusted the output and two models silently printed a wrong number. Use a harder program too, such as a random-number generator feeding a search with big numbers, because sloppy translations break there. Then rank by speedup divided by cost, not by speed alone.</p>
-<p class="zh" style="margin:0 0 8px">快但错了毫无价值，所以要把打印的输出和 Python 的逐行对比。Wei Jie 起初相信了输出，结果有两个模型悄悄打印了错误的数字。再加一个更难的程序，比如用随机数生成器喂给一个涉及大数的搜索，因为马虎的翻译会在这里露馅。然后按加速倍数除以成本来排名，不要只看速度。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Fast is worthless if it is wrong, so compare the printed output with Python's, line for line. Wei Jie first trusted the output and two models silently printed a wrong number. Use a harder program too: save one as hard_program.py. It could be a random-number generator feeding a search with big numbers, because sloppy translations break there. Then rank by speedup divided by cost, not by speed alone.</p>
+<p class="zh" style="margin:0 0 8px">快但错了毫无价值，所以要把打印的输出和 Python 的逐行对比。Wei Jie 起初相信了输出，结果有两个模型悄悄打印了错误的数字。再加一个更难的程序：存成 hard_program.py，可以是用随机数生成器喂给一个涉及大数的搜索，因为马虎的翻译会在这里露馅。然后按加速倍数除以成本来排名，不要只看速度。</p></div>
 <div class="codebox"><span class="dim">py_out, py_time = run_python("hard_program.py")
 hard_code = open("hard_program.py").read()
 

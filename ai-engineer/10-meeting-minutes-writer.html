@@ -25,7 +25,7 @@ print(transcript[:300])</span></div>
 <div class="codebox"><span class="chg">import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 
-CHAT_MODEL = "your-org/your-open-chat-model"
+CHAT_MODEL = "your-org/your-open-chat-model"   # pick any open chat model name from the hub
 tok = AutoTokenizer.from_pretrained(CHAT_MODEL)
 small = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_compute_dtype=torch.bfloat16)
 brain = AutoModelForCausalLM.from_pretrained(CHAT_MODEL, device_map="auto", quantization_config=small)
@@ -51,8 +51,8 @@ write_minutes(inputs)</span></div>
 <div class="try" id="p3"></div>
 
 <h2><span class="en">Step 4 · Long meetings and misspelled names</span><span class="zh">第 4 步 · 长会议和写错的名字</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A two-hour meeting will not fit in the context window. Split the transcript into chunks, summarise each chunk, then summarise the summaries. Speech models also misspell names, so list the real names in the prompt. Both fixes go into one helper that reuses the pieces above.</p>
-<p class="zh" style="margin:0 0 8px">两小时的会议塞不进上下文窗口。把文字稿切成块，每块先做摘要，再把这些摘要总结一遍。语音模型也常把名字写错，所以把真实名字列在提示词里。两个办法都放进一个复用上面各部分的函数里。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A two-hour meeting will not fit in the context window (the most text a model can read in one go). Split the transcript into chunks, summarise each chunk, then summarise the summaries. Speech models also misspell names, so list the real names in the prompt. Both fixes go into one helper that reuses the pieces above.</p>
+<p class="zh" style="margin:0 0 8px">两小时的会议塞不进上下文窗口（模型一次能读的文字上限）。把文字稿切成块，每块先做摘要，再把这些摘要总结一遍。语音模型也常把名字写错，所以把真实名字列在提示词里。两个办法都放进一个复用上面各部分的函数里。</p></div>
 <div class="codebox"><span class="dim">NAMES = "Names that may appear: Mdm Tan, Uncle Raj, Priya, Wei Jie, Auntie Lim."
 
 def ask(system, text):

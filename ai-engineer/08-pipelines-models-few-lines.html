@@ -9,8 +9,8 @@
 <p class="zh" style="margin:0"><b>Priya</b> 手上有一叠学生家长写的反馈条。她想知道哪些是表扬、哪些是投诉、哪些是关于学费的，又不想把每张条子都发给付费 API。<b>Wei Jie</b> 给她看：开源模型几行代码就能做这些小任务，在带 GPU 的免费云 notebook 上就行。</p></div>
 
 <h2><span class="en">Step 1 · Name the job, get a tool</span><span class="zh">第 1 步 · 说出任务名，拿到工具</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Hugging Face is the hub where open models live. Its <code>transformers</code> library has two levels. The high level is <code>pipeline("task")</code>: you say the job, it hands back a ready tool. The low level, tokenizer plus model, comes next lesson. Think of ordering at a hawker stall: you say “chicken rice” and do not explain how to cook it.</p>
-<p class="zh" style="margin:0 0 8px">Hugging Face 是开源模型聚集的地方。它的 <code>transformers</code> 库分两层。高层是 <code>pipeline("任务名")</code>：你说出任务，它递给你一个现成的工具。低层是分词器加模型，下一课再讲。就像在小贩中心点餐：你说“鸡饭”，不用解释怎么煮。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Hugging Face is the hub where open models live (models anyone can download and run themselves). Its <code>transformers</code> library has two levels. The high level is <code>pipeline("task")</code>: you say the job, it hands back a ready tool. The low level, tokenizer plus model, comes next lesson. Think of ordering at a hawker stall: you say “chicken rice” and do not explain how to cook it.</p>
+<p class="zh" style="margin:0 0 8px">Hugging Face 是开源模型聚集的地方（任何人都能下载、自己运行的模型）。它的 <code>transformers</code> 库分两层。高层是 <code>pipeline("任务名")</code>：你说出任务，它递给你一个现成的工具。低层是分词器加模型，下一课再讲。就像在小贩中心点餐：你说“鸡饭”，不用解释怎么煮。</p></div>
 <div class="codebox"><span class="chg">from transformers import pipeline
 
 feel = pipeline("sentiment-analysis")
@@ -34,6 +34,7 @@ print(result["labels"][0], result["scores"][0])</span><span class="dim">
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The first call to a pipeline downloads a default model, which can be gigabytes. After that it is cached. Then comes the device: on a CPU a big model crawls, so switch the notebook runtime to a GPU and pass <code>device="cuda"</code>. Think of the aircon compressor at the void deck: the GPU is the loud machine that does the heavy lifting. You can also choose a different model from the hub for the same task, by name.</p>
 <p class="zh" style="margin:0 0 8px">第一次调用 pipeline 会下载一个默认模型，可能有好几个 GB，之后就有缓存了。然后是设备：CPU 跑大模型慢得像爬，所以把 notebook 的运行环境切到 GPU，并传 <code>device="cuda"</code>。想想组屋底层嗡嗡响的冷气压缩机：GPU 就是干重活的那台响机器。你也可以按名字从 hub 里换一个别的模型来做同一个任务。</p></div>
 <div class="codebox"><span class="dim">from transformers import pipeline
+long_letter = open("parent_letter.txt").read()
 
 </span><span class="chg">shorten = pipeline("summarization", device="cuda")
 # or pick the model yourself:
