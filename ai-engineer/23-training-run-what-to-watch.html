@@ -56,7 +56,9 @@ hours x hourly price over budget ...... stop and shrink the run</span></div>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Loss is a proxy. The real question is whether the guesses are good. Load the base model and the saved adapter, then run the same evaluation function on the same held-out test set as the earlier lessons, so the numbers compare fairly. Name every run with a timestamp and save the revision id on the hub, so you can reproduce it.</p>
 <p class="zh" style="margin:0 0 8px">损失只是替身，真正的问题是估价准不准。加载底座和保存好的附加件，用和前面几课同一个评估函数、同一批留出的测试集来跑，数字才能公平比较。每次训练都用时间戳命名，并记下 hub 上的修订号，才能复现。</p></div>
 <div class="codebox"><span class="dim"># compare checkpoints by test error, not by loss alone
-</span><span class="chg">for rev in ["step-400", "step-600", "step-800"]:
+</span><span class="chg"># load_with_adapter: a small helper of yours that loads the 4-bit base, then the saved adapter
+# revisions: the commit ids or branches your checkpoints were pushed under
+for rev in ["step-400", "step-600", "step-800"]:
     guesser = load_with_adapter("your-hub-name/price-run-01", revision=rev)
     print(rev, evaluate(guesser, test_set))   # the same function as before</span></div>
 <div class="try" id="p4"></div>

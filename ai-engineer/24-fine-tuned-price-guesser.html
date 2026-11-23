@@ -11,13 +11,15 @@
 <h2><span class="en">Step 1 · Prepare the data, split it once</span><span class="zh">第 1 步 · 准备数据，只切分一次</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Each example becomes a prompt that ends with "Price is $" and a completion that is just the number. Cut long descriptions at a token limit so every prompt fits. Then split into train, validation and test <b>once</b>, save the three sets to the hub, and never touch the test set again. Everything later depends on this wall staying up.</p>
 <p class="zh" style="margin:0 0 8px">每个例子变成一个以 “Price is $” 结尾的提示，加上只有数字的回答。长描述按 token 上限截断，让每条提示都装得下。然后把数据切成训练、验证、测试三份，<b>只切一次</b>，把三份都存到 hub，之后再也不碰测试集。后面的一切都靠这堵墙不倒。</p></div>
-<div class="codebox"><span class="dim">from datasets import Dataset, DatasetDict
+<div class="codebox"><span class="dim">import random
+from datasets import Dataset, DatasetDict
 
 </span><span class="chg">def to_example(tag):
     text = shorten(tag["description"], max_tokens=160)
     return {"prompt": f"{text}\nPrice is $", "completion": str(round(tag["price"]))}
 
 rows = [to_example(t) for t in all_tags]
+random.Random(42).shuffle(rows)       # shuffle once with a fixed seed, so the split is repeatable
 sets = DatasetDict({
     "train": Dataset.from_list(rows[:20000]),
     "validation": Dataset.from_list(rows[20000:21000]),
