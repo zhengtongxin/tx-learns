@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Many models, one API | TX Learns</title>
 <meta name="description" content="Choose the right model, call any provider with the same code, let a model judge the rest."><meta property="og:title" content="Many models, one API | TX Learns"><meta property="og:description" content="Choose the right model, call any provider with the same code, let a model judge the rest."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/agentic-ai/04-many-models.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#0b1020">
-<meta name="updated" content="2026-11-21">
+<meta name="updated" content="2026-11-23">
 <link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css">
 <style>
 .r3{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:12px 0}
@@ -81,8 +81,8 @@
 <div class="sc" id="game"></div>
 
 <h2><span class="en">One code shape, three swaps</span><span class="zh">同一种代码，只换三样</span></h2>
-<p class="en">Almost every provider offers an endpoint that speaks the same language as OpenAI. So you reuse the same <code>OpenAI</code> client and only change where it points. Click a provider.</p>
-<p class="zh">几乎每家厂商都提供与 OpenAI 说同一种“语言”的接口。所以你可以复用同一个 <code>OpenAI</code> 客户端，只改它指向的地址。点一个厂商看看。</p>
+<p class="en">Almost every provider offers an <b>endpoint</b> (the web address your code sends its requests to) that speaks the same language as OpenAI. So you reuse the same <code>OpenAI</code> client and only change where it points. Click a provider.</p>
+<p class="zh">几乎每家厂商都提供与 OpenAI 说同一种“语言”的<b>接口</b>（endpoint，也就是你的代码发送请求的网址）。所以你可以复用同一个 <code>OpenAI</code> 客户端，只改它指向的地址。点一个厂商看看。</p>
 <div class="pills" id="prov"></div>
 <div class="codebox" id="code"></div>
 <p class="meta" id="pnote" style="margin-top:8px"></p>
@@ -141,8 +141,8 @@ ollama.chat.completions.create(model="llama3.2", messages=messages)</code></pre>
 <div class="io-wrap" id="jres" style="display:none"></div>
 
 <h3><span class="en">Read the judge's verdict</span><span class="zh">读懂裁判的结论</span></h3>
-<p class="en">A judge model must reply in strict JSON so code can read it. Then the code maps numbers back to names.</p>
-<p class="zh">裁判模型必须返回严格的 JSON，代码才能读取。然后代码把编号映射回模型名称。</p>
+<p class="en">A judge model must reply in strict <b>JSON</b> (a plain-text format of labels and values, like <code>{"best": 2}</code>) so code can read it. Then the code maps numbers back to names.</p>
+<p class="zh">裁判模型必须返回严格的 <b>JSON</b>（一种由标签和值组成的纯文本格式，比如 <code>{"best": 2}</code>），代码才能读取。然后代码把编号映射回模型名称。</p>
 <div class="codebox">competitors = ["model-A", "model-B", "model-C"]
 results = ["3", "1", "2"]          <span class="dim"># judge's reply, best first</span>
 competitor = competitors[int(results[0]) - 1]</div>

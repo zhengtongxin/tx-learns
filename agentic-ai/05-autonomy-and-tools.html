@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Autonomy and tools | TX Learns</title>
 <meta name="description" content="How a model that can only talk ends up doing things."><meta property="og:title" content="Autonomy and tools | TX Learns"><meta property="og:description" content="How a model that can only talk ends up doing things."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/agentic-ai/05-autonomy-and-tools.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#0b1020">
-<meta name="updated" content="2026-11-21">
+<meta name="updated" content="2026-11-23">
 <link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Tools and memory · Lesson 1</span><span class="zh">工具与记忆 · 第 1 课</span></span><h1><span class="en">Autonomy and tools</span><span class="zh">自主性与工具</span></h1><p class="meta"><span class="en">How a model that can only talk ends up doing things · ~18 min · hands-on</span><span class="zh">只会说话的模型，是怎样开始做事的 · 约 18 分钟 · 动手实践</span></p></div>
@@ -33,7 +33,7 @@ with open("twin/summary.txt") as f: summary = f.read()
     messages = [{"role": "system", "content": system_prompt}] + </span><span class="chg">history</span><span class="dim"> + [{"role": "user", "content": message}]
     response = client.chat.completions.create(model="gpt-5.4-mini", messages=messages)
     return response.choices[0].message.content</span></div>
-<p class="meta"><span class="en">A chat window such as Gradio's ChatInterface passes <code>history</code> to your function on every turn.</span><span class="zh">Gradio 的 ChatInterface 这类聊天窗口，会在每一轮把 <code>history</code> 传给你的函数。</span></p>
+<p class="meta"><span class="en">A chat window such as Gradio's ChatInterface (Gradio is a Python library that turns a function into a small web page) passes <code>history</code> to your function on every turn.</span><span class="zh">Gradio 的 ChatInterface 这类聊天窗口（Gradio 是一个 Python 库，能把一个函数变成一个小网页），会在每一轮把 <code>history</code> 传给你的函数。</span></p>
 <div class="try" id="p2"></div>
 <h2><span class="en">③ Tool: let the model ask your code to act</span><span class="zh">③ 工具：让模型请求你的代码去执行</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Back to Mei's email. The fix is to let the model <b>ask</b>. A tool has three parts: <b>1)</b> a plain Python function you write, <b>2)</b> a description the model can read, and <b>3)</b> your code that runs the function when the model asks. Part 1 saves an email:</p>
@@ -42,8 +42,8 @@ with open("twin/summary.txt") as f: summary = f.read()
     with open("emails.txt", "a") as f:
         f.write(email + "\n")
     return "Email recorded"</span></div>
-<p class="en">The model cannot see your Python. So part 2 describes the tool in JSON: a name, what it is for, and the inputs it needs.</p>
-<p class="zh">模型看不到你的 Python 代码。所以第 2 部分用 JSON 描述这个工具：名字、用途和需要的输入。</p><div class="codebox"><span class="dim">record_email_tool_json = {
+<p class="en">The model cannot see your Python. So part 2 describes the tool in <b>JSON</b> (a plain-text format of labels and values that code and models can both read): a name, what it is for, and the inputs it needs.</p>
+<p class="zh">模型看不到你的 Python 代码。所以第 2 部分用 <b>JSON</b>（一种由标签和值组成、代码和模型都能读的纯文本格式）描述这个工具：名字、用途和需要的输入。</p><div class="codebox"><span class="dim">record_email_tool_json = {
     "name": "record_email_tool",
     "description": </span><span class="chg">"???"</span><span class="dim">,
     "parameters": {"type": "object", "properties": {"email": {"type": "string", "description": "The email address of this user"}}, "required": ["email"]}
