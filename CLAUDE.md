@@ -40,7 +40,7 @@ Bilingual (EN/中文) interactive learning site. Static HTML/CSS/JS, no build st
 Telegram: one digest a day at 8 PM. Instant messages only for failures, a rollback, a lesson ready to approve, a ⚠️ review, and the weekly review.
 Pushes and PRs made with the workflow token start no workflows, so an agent that pushes starts `copy-check.yml` on that branch itself (`gh workflow run`), the reader starts the reviewer, and the writer hands notes over with `gh workflow run writer.yml --ref main`.
 
-Claude auth: the writer, reviewer, reader, UI check and recall agents use TX's Claude subscription through the `CLAUDE_CODE_OAUTH_TOKEN` secret (made with `claude setup-token`). `ANTHROPIC_API_KEY` is only a fallback when that secret is missing. Subscription runs share TX's plan usage limits.
+Claude auth: the writer, reviewer, reader, UI check and recall agents use TX's Claude subscription through the `CLAUDE_CODE_OAUTH_TOKEN` secret (made with `claude setup-token`). `ANTHROPIC_API_KEY` is only a fallback when that secret is missing. Subscription runs share TX's plan usage limits. Models are pinned to keep usage low: the writer and reviewer use `sonnet`, the reader, UI check and recall use `haiku` (`--model` on each `claude -p`). Interactive Claude sessions use the same plan.
 
 ## Rules
 

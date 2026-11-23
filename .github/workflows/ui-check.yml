@@ -137,7 +137,7 @@ jobs:
           At most 6 issues, most visible first. Answer {"issues":[]} if you see none.
           PROMPT
           # Claude can only read. Its answer is captured from the output instead of giving it a write tool.
-          claude -p "$(cat /tmp/ui-prompt.md)" --max-turns 30 --add-dir /tmp/out --allowedTools "Read" --output-format text > /tmp/out/visual.txt || true
+          claude --model haiku -p "$(cat /tmp/ui-prompt.md)" --max-turns 30 --add-dir /tmp/out --allowedTools "Read" --output-format text > /tmp/out/visual.txt || true
           tail -20 /tmp/out/visual.txt
           node -e 'const fs=require("fs"),t=fs.readFileSync("/tmp/out/visual.txt","utf8"),v=JSON.parse(t.slice(t.indexOf("{"),t.lastIndexOf("}")+1));if(!Array.isArray(v.issues))throw new Error("no issues list");fs.writeFileSync("/tmp/out/visual.json",JSON.stringify({issues:v.issues.slice(0,6)}))' \
             && echo "Visual notes saved." || echo "::warning::The visual pass gave no readable result."
