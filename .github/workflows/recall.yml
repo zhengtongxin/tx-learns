@@ -69,7 +69,7 @@ jobs:
           Your final answer must be only one JSON object, nothing before or after it, exactly like:
           {"lessons":[{"file":"agentic-ai/01-example.html","qs":[{"q":"...","a":"..."},{"q":"...","a":"..."}]}]}
           PROMPT
-          claude -p "$(cat /tmp/recall-prompt.md)" --max-turns 20 --allowedTools "Read" --output-format text > /tmp/out/claude.txt || true
+          claude --model haiku -p "$(cat /tmp/recall-prompt.md)" --max-turns 20 --allowedTools "Read" --output-format text > /tmp/out/claude.txt || true
           tail -5 /tmp/out/claude.txt
           node -e 'const fs=require("fs"),t=fs.readFileSync("/tmp/out/claude.txt","utf8"),v=JSON.parse(t.slice(t.indexOf("{"),t.lastIndexOf("}")+1));if(!Array.isArray(v.lessons))throw 0;fs.writeFileSync("/tmp/out/questions.json",JSON.stringify(v))' \
             && echo "Questions saved." || echo "::warning::No readable questions; the message goes out without them."
@@ -92,7 +92,7 @@ jobs:
           Your final answer must be only one JSON object, nothing before or after it, exactly like:
           {"stale":[{"model":"old-id","use":"new-id","why":"one short plain sentence","files":["agentic-ai/03-example.html"]}]}
           PROMPT
-          claude -p "$(cat /tmp/models-prompt.md)" --max-turns 15 --allowedTools "WebSearch" --output-format text > /tmp/out/models-claude.txt || true
+          claude --model haiku -p "$(cat /tmp/models-prompt.md)" --max-turns 15 --allowedTools "WebSearch" --output-format text > /tmp/out/models-claude.txt || true
           tail -5 /tmp/out/models-claude.txt
           node -e 'const fs=require("fs"),t=fs.readFileSync("/tmp/out/models-claude.txt","utf8"),v=JSON.parse(t.slice(t.indexOf("{"),t.lastIndexOf("}")+1));if(!Array.isArray(v.stale))throw 0;fs.writeFileSync("/tmp/out/stale.json",JSON.stringify(v))' \
             && echo "Model check saved." || echo "::warning::No readable model check this month."
