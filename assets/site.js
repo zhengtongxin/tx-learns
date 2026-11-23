@@ -65,6 +65,11 @@
     var sb=document.querySelector('.startbtn');
     if(C&&sb&&C.lessons.length){sb.href=C.lessons[0].file;sb.innerHTML=t({en:'Start learning →',zh:'开始学习 →'})}
 
+    /* lesson: "Updated" date from <meta name="updated"> (set by node scripts/check-pages.mjs --fix, never typed) */
+    var um=document.querySelector('meta[name="updated"]'),hm=document.querySelector('main .meta');
+    if(um&&hm&&/^\d{4}-\d\d-\d\d$/.test(um.content)){var ud=um.content.split('-'),MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var us=document.createElement('span');us.className='updated';us.innerHTML=' · '+t({en:'Updated '+(+ud[2])+' '+MO[ud[1]-1]+' '+ud[0],zh:'更新于 '+ud[0]+' 年 '+(+ud[1])+' 月 '+(+ud[2])+' 日'});hm.appendChild(us)}
+
     /* journey: topic tabs + lesson cards */
     var jr=document.querySelector('.journey');
     if(C&&jr){

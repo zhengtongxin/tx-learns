@@ -28,6 +28,7 @@ Assume they are smart, busy and have never seen this topic. If a sentence needs 
 - Short sentences, one idea each. Paragraphs of three sentences or fewer.
 - Say why before how. Open each step with the problem it solves.
 - Use "you". Write like you are explaining to a friend next to you, not like documentation.
+- Build before you use. Code in a step never calls a function, agent or variable that a later step creates. If the story needs it, build that piece in an earlier step.
 - No walls of code. Show the few lines that matter; the rest is dimmed or left out.
 - English and 中文 must say the same thing. Every `.en` block has a matching `.zh` block. Chinese should read naturally, not as a word-for-word translation.
 - Every interactive piece works without a server and gives feedback on both right and wrong answers.
@@ -51,5 +52,6 @@ The site records what TX learnt, in TX's own words. It never reproduces where it
 - [ ] A newcomer could follow it without the source
 - [ ] EN and 中文 match
 - [ ] Code runs as written (correct package names, imports, `await` placement)
+- [ ] Nothing in the code is used before the step that builds it
 - [ ] Added to `agentic-ai/lessons.js` with a `file`
-- [ ] `node scripts/check-copy.mjs` passes
+- [ ] `node scripts/check-copy.mjs`, `node scripts/check-counts.mjs` and `node scripts/check-pages.mjs --fix` pass (the last one also stamps the lesson's "updated" date)

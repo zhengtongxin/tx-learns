@@ -103,7 +103,7 @@ jobs:
             MODE="This is a lesson's own pull request. After reviewing, fix every finding you can in the lesson files
              (agentic-ai/NN-*.html) only: wording, EN/中文 matching, broken code lines, facts you are sure about.
              Keep TX's voice, the story and the structure. Then run node scripts/check-copy.mjs,
-             node scripts/check-counts.mjs and node scripts/check-pages.mjs until all pass. Your verdict describes the lesson AFTER your fixes:
+             node scripts/check-counts.mjs and node scripts/check-pages.mjs --fix until all pass. Your verdict describes the lesson AFTER your fixes:
              "✅ Ready to merge" when nothing is left for TX, else "⚠️ Fix before merging" with only what is left.
              In the comment, list what you fixed under "Fixed" and anything left under "Still for you"."
           else
@@ -125,6 +125,8 @@ jobs:
              - Human touch per STYLE.md: one running story, Learn / Show / Test in every step, plain short sentences,
                an analogy where it helps, takeaways. Would a newcomer to AI follow it without the source?
              - Correctness: code that would actually run (package names, imports, await placement), facts about tools.
+             - Build before use: no step's code calls a function, agent or variable that only a later step creates.
+             - The lesson's <meta name="updated"> date is today's date when its text changed (node scripts/check-pages.mjs --fix sets it).
              - EN and 中文 say the same thing; every .en has a .zh.
              - lessons.js lists the lesson with its file; links and the pager work; no broken HTML.
           5. Write ONE comment to /tmp/review-comment.md. Start it with a verdict line:
