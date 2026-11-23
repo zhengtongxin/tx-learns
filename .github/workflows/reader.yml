@@ -84,6 +84,8 @@ jobs:
           elif echo "$msg" | grep -qE '^Merge pull request #[0-9]+ from [^ ]+/(writer|reader)/'; then echo "This lesson was already read on its own pull request."; files=
           elif echo "$msg" | grep -qE "^Merge (remote-tracking )?branch '(origin/)?main'"; then echo "This deploy only brings main up to date; those lessons were read on their own pull requests."; files=
           else files=$(git diff --name-only --diff-filter=AM "$SHA^1" "$SHA" -- 'agentic-ai/[0-9]*.html' | tr '\n' ' '); fi
+          # Cap one run at 6 lessons: a sweep that touches every lesson (a theme or wording change) must not make Claude read them all.
+          files=$(echo $files | tr ' ' '\n' | head -6 | tr '\n' ' ')
           files=$(echo $files)
           echo "pr=$pr head=$head fix=$fix files=$files"
           { echo "pr=$pr"; echo "head=$head"; echo "fix=$fix"; echo "files=$files"; } >> "$GITHUB_OUTPUT"
@@ -132,7 +134,7 @@ jobs:
           $EDIT
           Do not run git.
           PROMPT
-          claude --model haiku -p "$(cat /tmp/reader-prompt.md)" --max-turns 50 \
+          claude --model haiku --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/reader-prompt.md)" --max-turns 50 \
             --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(node scripts/check-counts.mjs:*),Bash(node scripts/check-pages.mjs:*)" \
             --output-format text | tail -30
       - name: Package the result for the share job

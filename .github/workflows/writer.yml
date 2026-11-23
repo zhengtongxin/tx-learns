@@ -138,7 +138,7 @@ jobs:
              and anything in the notes you were unsure about or left out (as questions for TX).
           PROMPT
           python3 -c "import os,sys;p='/tmp/writer-prompt.md';s=open(p).read().replace('__DIRS__',os.environ['DIRS']);open(p,'w').write(s)"
-          claude --model sonnet -p "$(cat /tmp/writer-prompt.md)" --max-turns 80 \
+          claude --model sonnet --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/writer-prompt.md)" --max-turns 80 \
             --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(node scripts/check-counts.mjs:*),Bash(node scripts/check-pages.mjs:*),Bash(ls:*)" \
             --output-format text | tail -40
           # Drop scratch files the writer made outside the site (e.g. a .gen/ page generator), so they never deploy.
