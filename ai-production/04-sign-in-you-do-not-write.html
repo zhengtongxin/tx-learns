@@ -1,0 +1,120 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sign-in you do not write yourself | TX Learns</title>
+<meta name="description" content="Let only signed-in people use your product, without writing a login system."><meta property="og:title" content="Sign-in you do not write yourself | TX Learns"><meta property="og:description" content="Let only signed-in people use your product, without writing a login system."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-production/04-sign-in-you-do-not-write.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-23">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Users, sign-in and money · Lesson 1</span><span class="zh">用户、登录与收费 · 第 1 课</span></span><h1><span class="en">Sign-in you do not write yourself</span><span class="zh">不用自己写的登录</span></h1><p class="meta"><span class="en">Let only signed-in people use your product, without writing a login system · ~30 min · hands-on</span><span class="zh">让只有登录的人才能使用你的产品，而且不用自己写登录系统 · 约 30 分钟 · 动手实践</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">The canteen helper is live, and <b>Mr Ong</b> frowns: every call to the model costs money, and anyone with the address can run up the bill. <b>Sergeant Lee</b> says what any gate officer would say: "Show me your pass." <b>Mei Ling</b> needs a gate for her product. She does not want to build a password system herself, because that is where people get hurt. She hires a hosted one.</p>
+<p class="zh" style="margin:0">食堂助手已经上线，<b>Ong 主管</b>皱起了眉头：每次调用模型都要花钱，拿到地址的人都能把账单刷高。<b>Lee 警官</b>说了任何闸口警官都会说的话：“请出示通行证。”<b>Mei Ling</b> 需要给产品装一道闸。她不想自己做密码系统，因为那是最容易出事的地方。于是她用了托管的登录服务。</p></div>
+<h2><span class="en">Step 1 · Who does what</span><span class="zh">第 1 步 · 谁来做什么</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>hosted sign-in service</b> is a company that handles logins for you. You create an app in its dashboard and pick the sign-in methods: email, Google, GitHub. It stores the passwords, sends reset emails and shows the sign-in screens. Your product only needs to know one thing: <b>who is this request from?</b> Think of the gate pass office: someone else prints the passes, you only check them.</p>
+<p class="zh" style="margin:0 0 8px"><b>托管登录服务</b>是替你处理登录的公司。你在它的后台创建一个应用，选好登录方式：邮箱、Google、GitHub。密码由它保存，重置邮件由它发送，登录界面由它展示。你的产品只需要知道一件事：<b>这个请求是谁发的？</b>就像通行证办公室：证由别人印，你只负责查验。</p></div>
+<div class="sc" id="t0"></div>
+<h2><span class="en">Step 2 · Two keys, and where they live</span><span class="zh">第 2 步 · 两把密钥，各放在哪</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The service gives you two keys. The <b>public</b> (publishable) key identifies your app and is safe in the browser. The <b>secret</b> key can act as your server, so it must stay on the server. Put both in a local env file, and add that file to <code>.gitignore</code> first so it can never be committed. In Next.js, a name that starts with <code>NEXT_PUBLIC_</code> is sent to the browser. Anything else is not.</p>
+<p class="zh" style="margin:0 0 8px">服务会给你两把密钥。<b>公开</b>（publishable）密钥用来标识你的应用，放在浏览器里是安全的。<b>秘密</b>密钥能代表你的服务器行事，必须留在服务器上。两者都放进本地的环境文件，并且要先把这个文件加进 <code>.gitignore</code>，保证它永远不会被提交。在 Next.js 里，以 <code>NEXT_PUBLIC_</code> 开头的名字会被发到浏览器，其他的不会。</p></div>
+<div class="codebox"><span class="dim"># .gitignore  (do this first)
+</span><span class="chg">.env.local</span><span class="dim">
+
+# .env.local
+</span><span class="chg">NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY</span><span class="dim">=pk_test_...
+</span><span class="chg">CLERK_SECRET_KEY</span><span class="dim">=sk_test_...
+CLERK_JWKS_URL=https://...  # shown in the dashboard</span></div>
+<div class="try" id="t1"></div>
+<h2><span class="en">Step 3 · Wrap the app and show the right thing</span><span class="zh">第 3 步 · 把应用包起来，并显示对的内容</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Install the service's React package and wrap the whole app in its <b>provider</b>: a component that quietly shares "who is signed in" with every page. Then show different things to different visitors. Signed-out people get a sign-in button that opens a <b>modal</b> (a pop-up). Signed-in people get the product and a <b>user button</b> (their avatar and sign-out).</p>
+<p class="zh" style="margin:0 0 8px">安装服务的 React 包，把整个应用包进它的<b>提供者（provider）</b>：一个悄悄把“谁已登录”共享给每个页面的组件。然后给不同的访问者显示不同内容：没登录的人看到一个会弹出<b>模态窗（modal）</b>的登录按钮，已登录的人看到产品和一个<b>用户按钮</b>（头像与退出登录）。</p></div>
+<div class="codebox"><span class="dim">npm install @clerk/nextjs
+
+// pages/_app.tsx
+import type { AppProps } from "next/app";
+import { ClerkProvider } from "@clerk/nextjs";
+
+export default function App({ Component, pageProps }: AppProps) {
+  return (
+    </span><span class="chg">&lt;ClerkProvider {...pageProps}&gt;</span><span class="dim">
+      &lt;Component {...pageProps} /&gt;
+    </span><span class="chg">&lt;/ClerkProvider&gt;</span><span class="dim">
+  );
+}
+
+// pages/index.tsx (inside the page)
+</span><span class="chg">&lt;SignedOut&gt;&lt;SignInButton mode="modal" /&gt;&lt;/SignedOut&gt;
+&lt;SignedIn&gt;&lt;UserButton /&gt; ...the product...&lt;/SignedIn&gt;</span></div>
+<p class="en">All of them come from <code>@clerk/nextjs</code> (<code>SignedIn</code>, <code>SignedOut</code>, <code>SignInButton</code>, <code>UserButton</code>); import the ones you use at the top of the page.</p>
+<p class="zh">这几个组件都来自 <code>@clerk/nextjs</code>（<code>SignedIn</code>、<code>SignedOut</code>、<code>SignInButton</code>、<code>UserButton</code>），用到哪个就在页面顶部导入哪个。</p>
+<div class="try" id="t2"></div>
+<h2><span class="en">Step 4 · Carry the pass to the API</span><span class="zh">第 4 步 · 把通行证带给 API</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Once signed in, the browser holds a <b>session token</b>, a signed text called a <b>JWT</b>. It says "this is user X". The page sends it with every API request in an <code>Authorization</code> header. Tokens are short-lived, about a minute, so a stored old one fails like a random glitch. Ask for a fresh token right before each request.</p>
+<p class="zh" style="margin:0 0 8px">登录后，浏览器里有一个<b>会话令牌（session token）</b>，是一段带签名的文本，叫 <b>JWT</b>，内容是“这是用户 X”。页面在每次 API 请求里，用 <code>Authorization</code> 头把它带上。令牌有效期很短，大约一分钟，所以存着的旧令牌会像随机故障一样失败。每次请求前都要取一个新的。</p></div>
+<div class="codebox"><span class="dim">import { useAuth } from "@clerk/nextjs";
+
+// inside your page component
+const { getToken } = useAuth();
+
+async function ask() {
+  </span><span class="chg">const token = await getToken();   // fresh, every time</span><span class="dim">
+  const res = await fetch("/api", {
+    </span><span class="chg">headers: { Authorization: "Bearer " + token },</span><span class="dim">
+  });
+  return res.json();
+}</span></div>
+<div class="try" id="t3"></div>
+<h2><span class="en">Step 5 · Check the pass on the server</span><span class="zh">第 5 步 · 在服务器上验通行证</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Anyone can send an <code>Authorization</code> header, so the API must check it. The service publishes its <b>public keys</b> at a web address called <b>JWKS</b>. These are a different thing from the publishable key in step 2: they only check signatures, and they do not identify your app. A token is stamped with a signature that only the service could make, and the public keys let your server verify the stamp without phoning the service every time. If it checks out, the user id is inside, under the name <code>sub</code> (short for "subject"). A bad token gets a <b>401</b>, the web's code for "unauthorized", the same way a missing page gets a 404. The browser-side check from step 3 is only for looks.</p>
+<p class="zh" style="margin:0 0 8px">任何人都能发 <code>Authorization</code> 头，所以 API 必须验证。服务会在一个叫 <b>JWKS</b> 的网址公开它的<b>公钥</b>。这些公钥和第 2 步的公开密钥不是一回事：它们只用来验签名，不用来标识你的应用。令牌上盖着只有服务才能盖出的签名，有了公钥，你的服务器就能验这个章，不用每次都打电话问服务。验过了，用户 id 就在令牌里，字段名叫 <code>sub</code>（subject 的缩写，意思是“主体”）。令牌不合格就会得到 <b>401</b>，这是网页里“未授权”的状态码，就像找不到页面时的 404。第 3 步里浏览器上的检查只是为了好看。</p></div>
+<div class="codebox"><span class="dim">import os
+from fastapi import Depends, FastAPI
+</span><span class="chg">from fastapi_clerk_auth import ClerkConfig, ClerkHTTPBearer, HTTPAuthorizationCredentials</span><span class="dim">
+
+app = FastAPI()
+</span><span class="chg">guard = ClerkHTTPBearer(ClerkConfig(jwks_url=os.environ["CLERK_JWKS_URL"]))</span><span class="dim">
+
+@app.get("/api")
+def hello(</span><span class="chg">creds: HTTPAuthorizationCredentials = Depends(guard)</span><span class="dim">):
+    </span><span class="chg">user_id = creds.decoded["sub"]</span><span class="dim">
+    return {"message": "Welcome aboard, " + user_id}
+
+# add fastapi-clerk-auth to requirements.txt</span></div>
+<div class="sc" id="t4"></div>
+<h2><span class="en">Step 6 · Deploy it with the same keys</span><span class="zh">第 6 步 · 用同样的密钥部署</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Your <code>.env.local</code> file stays on your laptop, so the host has never seen it. Add the same variables in the host's settings, then redeploy. Settings are read at deploy time, so adding them without redeploying changes nothing.</p>
+<p class="zh" style="margin:0 0 8px">你的 <code>.env.local</code> 只留在笔记本上，托管平台从没见过它。在平台的设置里加上同样的变量，然后重新部署。设置是在部署时读取的，只加不重新部署等于没改。</p></div>
+<div class="codebox"><span class="chg">vercel env add NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+vercel env add CLERK_SECRET_KEY
+vercel env add CLERK_JWKS_URL</span><span class="dim">
+vercel --prod</span></div>
+<div class="try" id="t5"></div>
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en"><b>I kept getting "unauthorized".</b> The key in the host settings was not the same as my local one. Then tokens, which last about a minute, made a stale one look like a random failure, so now I fetch a fresh one per request. And I almost committed the secret key: put the env file in <code>.gitignore</code> before you create it.</span><span class="zh"><b>我一直收到“unauthorized”。</b>平台设置里的密钥和本地的不一样。后来又发现令牌只有大约一分钟的寿命，过期的令牌看上去像随机故障，所以现在我每次请求都取新的。我还差点把秘密密钥提交了：要在创建环境文件之前就把它加进 <code>.gitignore</code>。</span></div>
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Call the API from the command line without a token</b> (for example <code>curl</code>) and read the error.</span><span class="zh"><b>不带令牌，在命令行里调用 API</b>（比如用 <code>curl</code>），读一读报错。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Decode a token on a debugging site</b> and look at what is inside. Never paste a real one anywhere public.</span><span class="zh"><b>在调试网站上解码一个令牌</b>，看看里面有什么。真实令牌绝不要贴到公开的地方。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a second sign-in method</b> in the service's dashboard and try it.</span><span class="zh"><b>在服务后台加第二种登录方式</b>并试一试。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">At the wharf</span><span class="zh">在码头</span></b><span class="en">Sergeant Lee does not make gate passes, and he does not trust a driver who says "I work here". He checks the stamp on the pass, every time, even for the driver he saw ten minutes ago. Your API is the gate: check the token on every request.</span><span class="zh">Lee 警官不自己做通行证，也不会相信一个说“我在这里上班”的司机。他每一次都查证上的印章，哪怕是十分钟前刚见过的司机。你的 API 就是这道闸：每个请求都要验令牌。</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Do not write password handling. Let a hosted sign-in service do it.<br>• The public key may go to the browser. The secret key stays on the server and out of git.<br>• The browser holds a short-lived signed token (a JWT) and sends it with each API request.<br>• Fetch a fresh token per request. A stale one fails like a random glitch.<br>• The server verifies the signature with the service's public keys (JWKS) and reads the user id.<br>• A check in the browser is only for looks. Verify on the server for every request.<br>• The host needs the same environment variables as your laptop, then a redeploy.</p><p class="zh" style="margin:0">• 不要自己处理密码，交给托管的登录服务。<br>• 公开密钥可以给浏览器，秘密密钥留在服务器上，也不要进 git。<br>• 浏览器持有一个短寿命的签名令牌（JWT），每次 API 请求都带上它。<br>• 每次请求取新令牌，旧的会像随机故障一样失败。<br>• 服务器用服务的公钥（JWKS）验签，并读出用户 id。<br>• 浏览器里的检查只是为了好看，每个请求都要在服务器上验证。<br>• 平台需要和笔记本一样的环境变量，然后重新部署。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Production</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ game($('t0'),[
+  {en:'Store and protect passwords',zh:'保存并保护密码',a:'s',ex:{en:'This is the dangerous part, so the service owns it.',zh:'这是最危险的部分，所以交给服务。'},hint:{en:'Would you rather hold other people\'s passwords?',zh:'你愿意保管别人的密码吗？'}},
+  {en:'Show the "Continue with Google" button',zh:'显示“用 Google 继续”按钮',a:'s',ex:{en:'The service ships ready-made sign-in screens.',zh:'服务自带现成的登录界面。'},hint:{en:'Is it part of the login screen?',zh:'它属于登录界面吗？'}},
+  {en:'Check, on every API call, which user the request is from',zh:'每次 API 调用都检查请求来自哪个用户',a:'m',ex:{en:'Only your own server can protect your own API.',zh:'只有你自己的服务器能保护你自己的 API。'},hint:{en:'Your API belongs to you, not the service.',zh:'这个 API 是你的，不是服务的。'}},
+  {en:'Decide what a signed-in user is allowed to do',zh:'决定登录用户可以做什么',a:'m',ex:{en:'Rules about your product are yours to write.',zh:'关于你产品的规则只能由你来写。'},hint:{en:'Does the service know your product\'s rules?',zh:'服务知道你产品的规则吗？'}}],
+  [{k:'s',en:'The service does it',zh:'服务来做'},{k:'m',en:'I do it',zh:'我来做'}],{en:'Job',zh:'工作'});
+ predict($('t1'),{q:{en:'Which key may end up in the code that the browser downloads?',zh:'哪把密钥可以出现在浏览器下载的代码里？'},opts:[{k:'a',en:'The secret key, it is only a string',zh:'秘密密钥，反正只是一串字符'},{k:'b',en:'The public key, which only identifies the app',zh:'公开密钥，它只用来标识应用'},{k:'c',en:'Both, if the site is small',zh:'两把都行，只要网站小'}],a:'b',ex:{en:'The public key is designed to be seen. The secret key can act as your server, so it never leaves it. I almost committed mine once.',zh:'公开密钥本来就是给人看的。秘密密钥能代表你的服务器，所以绝不能离开服务器。我自己差点把它提交上去。'},hint:{en:'Which one has "secret" in its name?',zh:'哪一把名字里带“secret”？'}});
+ predict($('t2'),{q:{en:'A visitor who is not signed in opens the page. What do they see?',zh:'一位没登录的访问者打开页面，会看到什么？'},opts:[{k:'a',en:'The product, with a small warning',zh:'产品，外加一个小提示'},{k:'b',en:'The sign-in button only',zh:'只有登录按钮'},{k:'c',en:'The user button',zh:'用户按钮'}],a:'b',ex:{en:'<code>SignedOut</code> shows its content only to signed-out visitors. Remember: this decides what the page <i>looks like</i>. It is not yet protection.',zh:'<code>SignedOut</code> 的内容只显示给未登录的访问者。记住：这决定的是页面<i>长什么样</i>，还不算保护。'},hint:{en:'Which wrapper matches a signed-out visitor?',zh:'哪个包裹组件对应未登录的访问者？'}});
+ predict($('t3'),{q:{en:'It works for a minute, then the API starts saying "unauthorized" for no obvious reason. Likeliest cause?',zh:'用了一分钟之后，API 莫名其妙开始返回“unauthorized”。最可能的原因？'},opts:[{k:'a',en:'The token was saved and has expired',zh:'令牌被存下来，已经过期'},{k:'b',en:'The internet is slow',zh:'网速慢'},{k:'c',en:'Python forgot how to read',zh:'Python 忘了怎么读'}],a:'a',ex:{en:'Tokens expire quickly on purpose. Fetch a new one for each request.',zh:'令牌故意设计成很快过期。每次请求都取新的。'},hint:{en:'Think about "about a minute".',zh:'想想“大约一分钟”。'}});
+ game($('t4'),[
+  {en:'The token\'s signature checks out against the public keys and it has not expired',zh:'令牌的签名通过了公钥验证，而且没过期',a:'t',ex:{en:'Valid signature and in date: this user is who the token says.',zh:'签名有效且未过期：用户就是令牌所说的那个人。'},hint:{en:'Is anything wrong with it?',zh:'它有什么问题吗？'}},
+  {en:'Someone edited the user id inside the token, so the signature no longer matches',zh:'有人改了令牌里的用户 id，签名对不上了',a:'r',ex:{en:'Any edit breaks the signature. Reject.',zh:'任何改动都会让签名失效，拒绝。'},hint:{en:'Does the stamp still match the contents?',zh:'印章还和内容对得上吗？'}},
+  {en:'There is no Authorization header at all',zh:'根本没有 Authorization 头',a:'r',ex:{en:'No pass, no entry.',zh:'没有通行证就不能进。'},hint:{en:'Who is the request from?',zh:'这个请求是谁发的？'}},
+  {en:'The page says "I am signed in" in a JSON field',zh:'页面在 JSON 字段里写着“我已登录”',a:'r',ex:{en:'The visitor controls everything the browser sends. Only the signed token counts.',zh:'浏览器发出的东西访问者都能控制，只有签过名的令牌才算数。'},hint:{en:'Could anyone type that field?',zh:'谁都能填这个字段吗？'}}],
+  [{k:'t',en:'Trust it',zh:'信任'},{k:'r',en:'Reject (401)',zh:'拒绝（401）'}],{en:'Request',zh:'请求'});
+ predict($('t5'),{q:{en:'It works on your laptop, but the live site says "unauthorized". What do you check first?',zh:'笔记本上能用，线上却说“unauthorized”。你先查什么？'},opts:[{k:'a',en:'That the keys in the host settings are the same ones as your local file',zh:'平台设置里的密钥和本地文件里的是不是同一套'},{k:'b',en:'Whether the laptop is plugged in',zh:'笔记本有没有插电'},{k:'c',en:'Nothing, wait a day',zh:'什么都不用，等一天'}],a:'a',ex:{en:'My own mistake exactly: the key in the host settings was different from my local one.',zh:'我自己就栽在这：平台设置里的密钥和本地的不一样。'},hint:{en:'What differs between laptop and live?',zh:'笔记本和线上有什么不同？'}});
+});
+</script></body></html>

@@ -1,13 +1,13 @@
 /* Lessons grouped by concept. Titles are our own; never copy a source's outline, project names or numbering. */
 window.TRACK={id:'ai-production',title:{en:'AI Production',zh:'AI 上线实战'},topics:[
  {n:1,title:{en:"From laptop to live",zh:"从笔记本到上线"},items:[
-  {k:'f',title:{en:"What production means: ship something first",zh:"“生产环境”是什么：先上线一个东西"}},
-  {k:'c',title:{en:"A product in two halves: front end and API",zh:"产品的两半：前端和 API"}},
-  {k:'c',title:{en:"Streaming answers to the browser",zh:"把回答一点点流到浏览器"}}]},
+  {k:'f',file:'01-what-production-means-ship-first.html',title:{en:"What production means: ship something first",zh:"“生产环境”是什么：先上线一个东西"}},
+  {k:'c',file:'02-product-in-two-halves.html',title:{en:"A product in two halves: front end and API",zh:"产品的两半：前端和 API"}},
+  {k:'c',file:'03-streaming-answers-to-the-browser.html',title:{en:"Streaming answers to the browser",zh:"把回答一点点流到浏览器"}}]},
  {n:2,title:{en:"Users, sign-in and money",zh:"用户、登录与收费"},items:[
-  {k:'c',title:{en:"Sign-in you do not write yourself",zh:"不用自己写的登录"}},
-  {k:'c',title:{en:"Subscriptions and gating a feature",zh:"订阅与功能开关"}},
-  {k:'p',title:{en:"Project: a consultation notes assistant",zh:"项目：问诊记录助手"}}]},
+  {k:'c',file:'04-sign-in-you-do-not-write.html',title:{en:"Sign-in you do not write yourself",zh:"不用自己写的登录"}},
+  {k:'c',file:'05-subscriptions-and-feature-gates.html',title:{en:"Subscriptions and gating a feature",zh:"订阅与功能开关"}},
+  {k:'p',file:'06-consultation-notes-assistant.html',title:{en:"Project: a consultation notes assistant",zh:"项目：问诊记录助手"}}]},
  {n:3,title:{en:"Containers and a safe cloud account",zh:"容器与安全的云账号"},items:[
   {k:'f',title:{en:"A safe cloud account: roots, users and budget alarms",zh:"安全的云账号：根用户、普通用户与预算警报"}},
   {k:'c',title:{en:"Containers in plain words",zh:"容器的大白话"}},
