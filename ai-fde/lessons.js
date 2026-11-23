@@ -21,9 +21,9 @@ window.TRACK={id:'ai-fde',title:{en:'AI FDE',zh:'AI FDE'},topics:[
   {k:'c',file:'14-a-memory-over-mcp.html',title:{en:'A memory over MCP',zh:'通过 MCP 给智能体记忆'}},
   {k:'p',file:'15-agent-that-remembers-customers.html',title:{en:'Project: an agent that remembers customers',zh:'项目：记得客户的智能体'}}]},
  {n:6,title:{en:'Pausing and working in parallel',zh:'暂停与并行'},items:[
-  {k:'c',title:{en:'Pause for approval, resume after a crash',zh:'等人批准再继续，崩溃后接着干'}},
-  {k:'c',title:{en:'Swarms of agents in parallel',zh:'多个智能体并行'}},
-  {k:'p',title:{en:'Project: a swarm with a cap',zh:'项目：有上限的智能体群'}}]},
+  {k:'c',file:'16-pause-for-approval-and-resume.html',title:{en:'Pause for approval, resume after a crash',zh:'等人批准再继续，崩溃后接着干'}},
+  {k:'c',file:'17-swarms-of-agents-in-parallel.html',title:{en:'Swarms of agents in parallel',zh:'多个智能体并行'}},
+  {k:'p',file:'18-swarm-with-a-cap.html',title:{en:'Project: a swarm with a cap',zh:'项目：有上限的智能体群'}}]},
  {n:7,title:{en:'Improving and securing',zh:'改进与加固'},items:[
   {k:'c',title:{en:'A judge with a reference answer',zh:'带参考答案的评委'}},
   {k:'p',title:{en:'Project: an improver a human approves',zh:'项目：由人批准的改进者'}},
