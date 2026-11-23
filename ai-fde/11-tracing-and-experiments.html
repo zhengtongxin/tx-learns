@@ -98,8 +98,8 @@ show_trace()</span></div>
 <div class="try" id="p3"></div>
 
 <h2><span class="en">Step 5 · Experiment two: a payout tool</span><span class="zh">第 5 步 · 实验二：赔付工具</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The trace showed one model call and nothing else, so the model was doing sums from memory. Models are good at reading and weak at exact arithmetic. So give it a <b>tool</b>: a function it can ask your code to run. The company’s payout rule lives in code, where it is exact: the amount claimed, capped at the policy limit, minus the excess. The model only chooses to call it. The code below assumes your policy file lists limits by claim type and an excess. Change those two lines to match yours. The loop runs at most four rounds, so a confused model cannot go round forever.</p>
-<p class="zh" style="margin:0 0 8px">追踪里只有一次模型调用，别的什么都没有，说明模型是凭记忆在心算。模型擅长阅读，不擅长精确算术。所以给它一个<b>工具</b>：一个它可以请你的代码去运行的函数。公司的赔付规则写在代码里，这样才精确：申报金额，封顶到保单限额，再减去自负额。模型只负责决定去调用它。下面的代码假定你的保单文件按理赔类型列出限额并有一个自负额，请把那两行改成你自己的格式。循环最多跑四轮，所以迷糊的模型不会转个没完。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The trace showed one model call and nothing else, so the model was doing sums from memory. Models are good at reading and weak at exact arithmetic. So give it a <b>tool</b>: a function it can ask your code to run. The company’s payout rule lives in code, where it is exact: the amount claimed, capped at the policy limit, minus the excess. The model only chooses to call it. The code below assumes each claim has a <code>type</code> field, and your policy file lists limits by claim type and an excess. Change those lines to match your files. The loop runs at most four rounds, so a confused model cannot go round forever.</p>
+<p class="zh" style="margin:0 0 8px">追踪里只有一次模型调用，别的什么都没有，说明模型是凭记忆在心算。模型擅长阅读，不擅长精确算术。所以给它一个<b>工具</b>：一个它可以请你的代码去运行的函数。公司的赔付规则写在代码里，这样才精确：申报金额，封顶到保单限额，再减去自负额。模型只负责决定去调用它。下面的代码假定每份理赔都有一个 <code>type</code> 字段，并且你的保单文件按理赔类型列出限额、有一个自负额，请把这几行改成你自己文件的格式。循环最多跑四轮，所以迷糊的模型不会转个没完。</p></div>
 <div class="codebox"><span class="dim"># experiments.py, continued
 import json
 from bench import POLICIES
@@ -108,7 +108,7 @@ from bench import POLICIES
     """The company's rule: amount claimed, capped at the limit, minus the excess."""
     claim = next(c for c in claims if c["id"] == claim_id)
     policy = POLICIES[claim["policy_id"]]
-    limit = policy["limits"][claim["type"]]       # assumed shape of policies.json: adjust to yours
+    limit = policy["limits"][claim["type"]]       # assumed shapes of claims.json and policies.json: adjust
     return max(0, min(claim["amount"], limit) - policy["excess"])
 
 TOOLS = [{"type": "function", "function": {
