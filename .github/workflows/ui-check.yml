@@ -31,7 +31,18 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       statuses: write
+      contents: write
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: scripts
+          persist-credentials: false
+      - name: Show the agent as working on the How it works page
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATE: run
+        run: "[ -f scripts/record-status.mjs ] && node scripts/record-status.mjs ui-check || true"
       - env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -140,7 +151,7 @@ jobs:
   # Write job: only trusted scripts from the default branch run here, never files from the branch under test.
   share:
     needs: [start, check]
-    if: always() && needs.start.result == 'success'
+    if: ${{ !cancelled() && needs.start.result == 'success' && needs.check.result != 'cancelled' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write

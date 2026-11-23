@@ -10,6 +10,23 @@ on:
 permissions:
   contents: read
 jobs:
+  # Marks the recall agent as working (yellow) on the How it works page while this run goes. Trusted scripts from main only.
+  working:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: scripts
+          persist-credentials: false
+      - name: Show the agent as working
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATE: run
+        run: "[ -f scripts/record-status.mjs ] && node scripts/record-status.mjs recall || true"
+
   # Read-only job: Claude never shares a job with a write token or the Telegram secrets.
   think:
     runs-on: ubuntu-latest
@@ -55,8 +72,8 @@ jobs:
           path: /tmp/out/
   # Send job: only trusted scripts from main; the questions are passed as data and escaped.
   send:
-    needs: think
-    if: always()
+    needs: [think, working]
+    if: ${{ !cancelled() && needs.think.result != 'cancelled' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write

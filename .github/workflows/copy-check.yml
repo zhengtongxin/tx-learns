@@ -12,6 +12,23 @@ on:
 permissions:
   contents: read
 jobs:
+  # Marks the copy-check as working (yellow) on the How it works page while this run goes. Trusted scripts from main only.
+  working:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: scripts
+          persist-credentials: false
+      - name: Show the agent as working
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATE: run
+        run: "[ -f scripts/record-status.mjs ] && node scripts/record-status.mjs copy-check || true"
+
   copy-check:
     runs-on: ubuntu-latest
     outputs:
@@ -41,8 +58,9 @@ jobs:
         run: echo "line=$(tail -1 copy-check.txt 2>/dev/null) $(tail -1 counts.txt 2>/dev/null)" >> "$GITHUB_OUTPUT"
   # Separate job: the write token never runs alongside branch code.
   record:
-    needs: copy-check
-    if: always()
+    needs: [copy-check, working]
+    # A cancelled run records nothing; a newer run reports.
+    if: ${{ !cancelled() && needs.copy-check.result != 'cancelled' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write

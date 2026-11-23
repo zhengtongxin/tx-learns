@@ -26,6 +26,23 @@ concurrency:
   group: live-check
   cancel-in-progress: false
 jobs:
+  # Marks the live-check as working (yellow) on the How it works page while this run goes. Trusted scripts from main only.
+  working:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: scripts
+          persist-credentials: false
+      - name: Show the agent as working
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATE: run
+        run: "[ -f scripts/record-status.mjs ] && node scripts/record-status.mjs live-check || true"
+
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -213,7 +230,7 @@ jobs:
 
   # Separate job: the write token for the status log never shares a job with the checked-out commit.
   record:
-    needs: [check, rollback]
+    needs: [check, rollback, working]
     # A cancelled run records nothing, so it never shows as a failure on the How it works page.
     if: ${{ !cancelled() && needs.check.result != 'skipped' && needs.check.result != 'cancelled' }}
     runs-on: ubuntu-latest

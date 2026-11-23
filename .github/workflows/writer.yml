@@ -47,8 +47,27 @@ jobs:
           echo "Folders: $dirs"
           gh workflow run writer.yml --ref main -R "$GITHUB_REPOSITORY" -f folder="$dirs"
 
-  write:
+  # Marks the writer as working (yellow) on the How it works page while this run goes. Trusted scripts from main only.
+  working:
     if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: scripts
+          persist-credentials: false
+      - name: Show the agent as working
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATE: run
+        run: "[ -f scripts/record-status.mjs ] && node scripts/record-status.mjs writer || true"
+
+  write:
+    needs: working
+    if: ${{ !cancelled() && github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -163,12 +182,15 @@ jobs:
         run: |
           node scripts/notify-telegram.mjs "⚠️ The writer agent could not finish a draft from your notes.${URL:+ Draft: $URL} Logs: $RUN"
       - name: Record status for the Ecosystem page
-        if: always() && steps.notes.outputs.dirs != ''
+        if: ${{ !cancelled() }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DIRS: ${{ steps.notes.outputs.dirs }}
           URL: ${{ steps.pr.outputs.url }}
           SLUG: ${{ steps.notes.outputs.slug }}
         run: |
+          # No notes to draft: just clear this run's working mark.
+          [ -z "$DIRS" ] && { STATE=idle node scripts/record-status.mjs writer; exit 0; }
           if [ -n "$URL" ]; then STATE=ok; SUMMARY="Drafted a lesson from the $SLUG notes. The reader and reviewer agents look at it next."
           else STATE=fail; SUMMARY="Could not finish a draft from the $SLUG notes."; fi
           STATE=$STATE SUMMARY="$SUMMARY" LINK="$URL" node scripts/record-status.mjs writer
