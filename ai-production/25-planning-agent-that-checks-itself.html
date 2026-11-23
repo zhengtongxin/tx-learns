@@ -46,7 +46,8 @@ def run_python(code: str) -&gt; str:
         "If the check disagrees, fix the answer. Mark each step done, then reply."
     ),
     tools=[add_todo, mark_done, show_plan, run_python],</span><span class="dim">
-)</span></div>
+)
+# in handle(), call checker instead of the earlier agent</span></div>
 <div class="sc" id="t3"></div>
 <h2><span class="en">Step 4 · Colour the coding steps, relaunch and try a puzzle</span><span class="zh">第 4 步 · 给写代码的步骤上色，重新启动并出一道谜题</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Make the check easy to spot. In <code>show_plan</code>, wrap any line that starts with "Write Python code" in a colour code (terminals read <code>\033[96m</code> as "cyan" and <code>\033[0m</code> as "reset"). Then launch again and invoke with a puzzle. The right answer is 9 (the number of ways to reshuffle 4 people so that nobody keeps their own), so you can check the agent. Read three things: the plan, the answer, and the check.</p>

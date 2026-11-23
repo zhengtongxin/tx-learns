@@ -26,8 +26,9 @@ def square_root(number: float) -&gt; float:
     system_prompt="You are a short, friendly helper for the wharf IT desk.",
     </span><span class="chg">tools=[square_root],</span><span class="dim">
 )
-</span><span class="chg">
-agentcore launch
+# in agent.py, define square_root above this agent. handle() still calls helper</span></div>
+<div class="codebox"><span class="dim"># in your terminal, not in agent.py
+</span><span class="chg">agentcore launch
 agentcore invoke '{"prompt": "A square yard is about 0.836 square metres. How long is one side, in metres?"}'</span></div>
 <div class="sc" id="t2"></div>
 <h2><span class="en">Step 3 · Build a to-do list the agent can use</span><span class="zh">第 3 步 · 做一份智能体能用的待办清单</span></h2>
@@ -72,7 +73,8 @@ def mark_done(position: int) -&gt; str:
     ),
     tools=[add_todo, mark_done, show_plan, square_root],</span><span class="dim">
 )
-# launch again, then invoke with a task that has four steps</span></div>
+# in handle(), call planner instead of helper: reply = planner(...)
+# then launch again, and invoke with a task that has four steps</span></div>
 <div class="try" id="t4"></div>
 <h2><span class="en">Step 5 · Read the plan as it moves</span><span class="zh">第 5 步 · 看计划怎么动</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Read the printed list top to bottom. An agent you can see is easier to trust and easier to fix: if the answer is wrong, you can find the step where it went off. A good plan line is one clear action, such as <code>Take its square root</code>. A vague line like <code>figure it out</code> hides the real action, so you cannot check it.</p>
