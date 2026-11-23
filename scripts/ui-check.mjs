@@ -6,6 +6,7 @@
 //   popup-covered   other content paints over an open popup (it opens "behind" the page)
 //   popup-see-through a popup whose background lets the page show through, so its text is hard to read
 //   overflow        the page is wider than the screen (sideways scrolling on a phone)
+//   keyboard        something you can click (pointer cursor or click handler) that Tab never reaches, so keyboard users cannot use it
 //   js-error        an uncaught error, console.error, or a request for a file that is missing
 //   load            the page did not load
 // No AI here: the same page always gets the same result.
@@ -221,6 +222,21 @@ async function main() {
         let targets = await open();
         const ov = await page.evaluate(() => window.__uic.overflow());
         if (ov) add({ kind: 'overflow', msg: `Content is ${ov.by}px wider than the screen, so it is cut off or the page scrolls sideways. Sticking out: ${ov.culprits.join('; ') || 'unknown'}.` });
+        // Keyboard: everything a mouse can click must also be reachable with Tab.
+        (await page.evaluate(() => {
+          const ok = 'a[href],button,input,select,textarea,summary,[tabindex]:not([tabindex="-1"])';
+          const out = [];
+          for (const el of document.querySelectorAll('body *')) {
+            if (el.closest(ok) || el.closest('[aria-hidden="true"],[inert]')) continue;
+            const r = el.getBoundingClientRect();
+            if (!r.width || !r.height || getComputedStyle(el).visibility === 'hidden') continue;
+            const clicky = typeof el.onclick === 'function' || (getComputedStyle(el).cursor === 'pointer' && getComputedStyle(el.parentElement || el).cursor !== 'pointer');
+            if (!clicky) continue;
+            const label = (el.getAttribute('aria-label') || el.textContent || el.tagName).replace(/\s+/g, ' ').trim().slice(0, 40);
+            out.push(`${el.tagName.toLowerCase()}${el.className && typeof el.className === 'string' ? '.' + el.className.split(' ')[0] : ''} "${label}"`);
+          }
+          return [...new Set(out)].slice(0, 8);
+        })).forEach(d => add({ kind: 'keyboard', key: d, msg: `Clickable but not reachable with Tab: ${d}. Use a <button> or <a>, or add tabindex="0", a role and Enter/Space handling.` }));
         if (shots.has(path)) res.shots = await tiles(page, path, name);
         await page.screenshot({ path: join(OUT, 'shots', `${slug(path)}-${name}.png`) });
 

@@ -131,13 +131,14 @@ jobs:
              project names or numbering from the notes if they look like they came from a paid source.
              Code may use real library APIs, but rewrite comments, variable names and prompts.
           6. Every .en block needs a matching, natural .zh block.
-          7. Run `node scripts/check-copy.mjs` and `node scripts/check-counts.mjs` and fix everything they report until both pass.
+          7. Run `node scripts/check-copy.mjs`, `node scripts/check-counts.mjs` and `node scripts/check-pages.mjs` and fix everything they report until all pass.
+             Start from agentic-ai/_template.html: fill in its <title> and its description and og: tags with the lesson's own title and hero line.
           8. Write .writer-summary.md (repo root): the lesson title, file name, topic, a 3-line summary of the story,
              and anything in the notes you were unsure about or left out (as questions for TX).
           PROMPT
           python3 -c "import os,sys;p='/tmp/writer-prompt.md';s=open(p).read().replace('__DIRS__',os.environ['DIRS']);open(p,'w').write(s)"
           claude -p "$(cat /tmp/writer-prompt.md)" --max-turns 80 \
-            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(node scripts/check-counts.mjs:*),Bash(ls:*)" \
+            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(node scripts/check-counts.mjs:*),Bash(node scripts/check-pages.mjs:*),Bash(ls:*)" \
             --output-format text | tail -40
       - name: Copy check
         if: steps.notes.outputs.dirs != ''
@@ -145,7 +146,7 @@ jobs:
       # Writer PRs are opened with GITHUB_TOKEN, so the Copy check workflow does not run on them: check here.
       - name: Count check
         if: steps.notes.outputs.dirs != ''
-        run: node scripts/check-counts.mjs
+        run: node scripts/check-counts.mjs && { [ ! -f scripts/check-pages.mjs ] || node scripts/check-pages.mjs; }
       - name: Open a pull request into main
         id: pr
         if: steps.notes.outputs.dirs != ''
