@@ -15,9 +15,9 @@ window.TRACK={id:'agentic-ai',title:{en:'Agentic AI',zh:'智能体 AI'},topics:[
   {k:'c',file:'10-structured-outputs.html',title:{en:'Structured outputs and a checker agent',zh:'结构化输出与检查员智能体'}},
   {k:'p',file:'11-research-assistant.html',title:{en:'Project: a research assistant',zh:'项目：研究助手'}}]},
  {n:4,title:{en:'Multi-agent teams',zh:'多智能体团队'},items:[
-  {k:'c',title:{en:'Roles, tasks and crews',zh:'角色、任务与团队'}},
-  {k:'p',title:{en:'Project: a market research team',zh:'项目：市场调研团队'}},
-  {k:'p',title:{en:'Project: a team that writes code',zh:'项目：会写代码的团队'}}]},
+  {k:'c',file:'12-roles-tasks-crews.html',title:{en:'Roles, tasks and crews',zh:'角色、任务与团队'}},
+  {k:'p',file:'13-market-research-team.html',title:{en:'Project: a market research team',zh:'项目：市场调研团队'}},
+  {k:'p',file:'14-coding-team.html',title:{en:'Project: a team that writes code',zh:'项目：会写代码的团队'}}]},
  {n:5,title:{en:'Graphs and state',zh:'图与状态'},items:[
   {k:'c',title:{en:'Agents as graphs',zh:'把智能体画成图'}},
   {k:'c',title:{en:'Memory, tools and web search in a graph',zh:'图中的记忆、工具与联网搜索'}},
