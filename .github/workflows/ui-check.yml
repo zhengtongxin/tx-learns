@@ -158,6 +158,7 @@ jobs:
       statuses: write
       pull-requests: write
       issues: write
+      actions: write
     env:
       PR: ${{ needs.check.outputs.pr }}
       RAN: ${{ needs.check.outputs.ran }}
@@ -252,3 +253,8 @@ jobs:
         run: |
           [ -f $T/record-status.mjs ] || { echo "No record script on the default branch yet."; exit 0; }
           SUMMARY="$(cat /tmp/line.txt 2>/dev/null || echo 'Could not finish.')" node $T/record-status.mjs ui-check
+      - name: Let auto-merge look at it
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run auto-merge.yml --ref main -R "$GITHUB_REPOSITORY" || echo "Auto-merge picks it up on its 30-minute run."

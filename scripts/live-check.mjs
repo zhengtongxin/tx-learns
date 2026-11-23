@@ -1,11 +1,18 @@
 #!/usr/bin/env node
-// Live check agent: after every merge into main (once Vercel has deployed it), confirm the live site looks right. No AI here.
+// Product engineer agent (the live check): after every merge into main (once Vercel has deployed it), confirm the live
+// site works the way a reader uses it. No AI here.
 //   1. The live lesson list is the released one (waits up to --wait seconds for the new deploy to show).
 //   2. Every page and every published lesson opens (HTTP 200), and every link and file they point to exists.
 //   3. In a headless browser (when Playwright is available): home, How it works, the track page and every
 //      lesson load without script errors or missing files, the home page's topic and lesson counts match
 //      lessons.js, and every lesson shows its tag and title.
 //   4. api/status answers with JSON (live agent status for the How it works page).
+//   5. Product notes, which never count as broken and never roll anything back: a page that switched to 中文 still
+//      shows no 中文, a phone screen (390px) where the page is wider than the screen, a page slower than 8 s, an
+//      image that does not load.
+// Only real breakage counts as a problem. A word like "undefined" or "NaN" counts only when a script put it on the
+// page: a lesson that teaches those words has them in its own HTML too. Each broken page is opened a second time
+// before it counts, so one slow load never rolls back a merge.
 // Usage: node scripts/live-check.mjs --base https://tx-learns.vercel.app/ [--wait 300] [--out live-check.json]
 // Env: PLAYWRIGHT_DIR is a folder where `playwright` is installed, if it is not resolvable from here.
 // Exit code: 0 all good, 1 something is off (listed in the output), 2 the check itself broke.
@@ -19,7 +26,8 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const BASE = (arg('base', process.env.SITE || 'https://tx-learns.vercel.app/')).replace(/\/?$/, '/');
 const WAIT = +arg('wait', 300);
 const OUT = arg('out', 'live-check.json');
-const issues = [], notes = [];
+const issues = [], notes = [], product = [];
+const html = new Map(); // each page's own HTML, to tell a lesson's words from a script's broken output
 const bad = (page, what) => issues.push({ page, what });
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -58,6 +66,7 @@ try {
   for (const p of pages) {
     const r = await get(BASE + p);
     if (r.status !== 200) { bad(p, `does not open (HTTP ${r.status || r.err})`); continue; }
+    html.set(p, r.text);
     if (!/<title>/i.test(r.text)) bad(p, 'opens but has no <title>, so it may not be the real page');
     for (const m of r.text.matchAll(/\s(?:href|src)="([^"]+)"/g)) {
       const raw = m[1];
@@ -87,13 +96,21 @@ try {
   if (chromium) {
     const browser = await chromium.launch();
     const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
-    for (const p of pages) {
+    const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    const count = (t, re) => (t.match(re) || []).length;
+    const PLACEHOLDERS = [/\bundefined\b/g, /\bNaN\b/g, /\{\{/g, /\[object Object\]/g];
+    // Real breakage on one page: script errors, missing files, wrong counts, a missing tag or title, and placeholder
+    // words that a script put there (more of them on the screen than in the page's own HTML).
+    async function render(p) {
       const page = await ctx.newPage(), errs = [];
       page.on('pageerror', e => errs.push(`script error: ${e.message.split('\n')[0]}`));
       page.on('console', m => { if (m.type() === 'error' && !/favicon|api\/status|^Failed to load resource/.test(m.text())) errs.push(`console error: ${m.text().slice(0, 160)}`); });
       page.on('response', r => { const u = new URL(r.url()); if (r.status() >= 400 && u.origin === new URL(BASE).origin && !/favicon|^\/api\//.test(u.pathname)) errs.push(`missing file ${u.pathname} (${r.status()})`); });
       try {
+        const t0 = Date.now();
         await page.goto(BASE + p, { waitUntil: 'load', timeout: 30000 });
+        const took = Date.now() - t0;
+        if (took > 8000) product.push(`${p} took ${Math.round(took / 1000)} s to load`);
         await page.waitForTimeout(1800);
         if (p === 'index.html') {
           const got = await page.evaluate(() => ({ topics: document.querySelector('[data-sum="topics"]')?.textContent, lessons: document.querySelector('[data-sum="lessons"]')?.textContent }));
@@ -106,18 +123,46 @@ try {
           if (!got.h1) errs.push('no title shows');
         }
         const txt = await page.evaluate(() => document.body.innerText);
-        if (/\bundefined\b|\bNaN\b|\{\{/.test(txt)) errs.push('the page shows a broken placeholder (a missing value or an unfilled template) somewhere');
+        const src = html.get(p) || '';
+        if (PLACEHOLDERS.some(re => count(txt, re) > count(src, re))) errs.push('a script left a broken placeholder on the page (undefined, NaN or an unfilled template)');
+        const imgs = await page.evaluate(() => [...document.images].filter(i => i.complete && !i.naturalWidth).map(i => i.getAttribute('src')));
+        imgs.slice(0, 2).forEach(i => product.push(`${p}: image ${i} does not load`));
+        // 中文: switch the language the way a reader does and check that Chinese text shows.
+        const zh = await page.evaluate(() => {
+          const b = document.querySelector('[data-l="zh"]'); if (!b) return null;
+          b.click(); const shown = [...document.querySelectorAll('.zh')].some(e => e.offsetParent !== null && /[\u4e00-\u9fff]/.test(e.innerText));
+          document.querySelector('[data-l="en"]')?.click(); return shown;
+        });
+        if (zh === false) product.push(`${p}: switched to 中文 but no Chinese text shows`);
       } catch (e) { errs.push(`did not load: ${e.message.split('\n')[0]}`); }
-      [...new Set(errs)].slice(0, 4).forEach(e => bad(p, e));
+      await page.close();
+      return [...new Set(errs)];
+    }
+    for (const p of pages) {
+      let errs = await render(p);
+      // A second look before it counts: a slow CDN or one dropped request is not a broken site.
+      if (errs.length) { await sleep(10000); errs = await render(p); }
+      errs.slice(0, 4).forEach(e => bad(p, e));
+    }
+    // Phone: is any page wider than the screen? A product note, never a rollback.
+    for (const p of pages) {
+      const page = await phone.newPage();
+      try {
+        await page.goto(BASE + p, { waitUntil: 'load', timeout: 30000 });
+        await page.waitForTimeout(600);
+        const w = await page.evaluate(() => document.documentElement.scrollWidth);
+        if (w > 392) product.push(`${p} is ${w}px wide on a 390px phone`);
+      } catch {}
       await page.close();
     }
     await browser.close();
   }
+  if (product.length) notes.push(...product.slice(0, 12).map(x => `product note: ${x}`));
 
   const summary = issues.length
     ? `${issues.length} problem${issues.length > 1 ? 's' : ''} on the live site: ${issues.slice(0, 2).map(i => `${i.page} ${i.what}`).join('; ')}.`
-    : `Live site looks right: ${pages.length} pages, ${links.size} links and files, ${lessons.length} lessons, counts match.`;
-  writeFileSync(OUT, JSON.stringify({ base: BASE, issues, notes, summary }, null, 1));
+    : `Live site looks right: ${pages.length} pages, ${links.size} links and files, ${lessons.length} lessons, counts match, 中文 and phone checked.${product.length ? ` ${product.length} product note${product.length > 1 ? 's' : ''} (no rollback): ${product.slice(0, 2).join('; ')}.` : ''}`;
+  writeFileSync(OUT, JSON.stringify({ base: BASE, issues, notes, product, summary }, null, 1));
   console.log(summary);
   for (const i of issues) console.log(`✗ ${i.page}: ${i.what}`);
   for (const n of notes) console.log(`· ${n}`);

@@ -1,0 +1,51 @@
+# Auto-merge: TX no longer presses merge. scripts/auto-merge.mjs merges a pull request into main by itself once
+# copy-check, UI check and Reviewer (the required checks in .github/rulesets/main.json) are green on its newest
+# commit, one merge at a time, and then starts the live check (product engineer agent) on that merge, which rolls
+# it back if it broke the live site. A stuck pull request (a red check the agents could not fix, a merge conflict,
+# a change to these workflows, or a check silent for 3 hours) gets one PR comment and one Telegram message.
+# Started by the agents right after they set a check (copy check, UI check, reviewer) and after each live check;
+# every 30 minutes as a safety net. No AI, trusted scripts from main only. The label "hold" keeps a PR open.
+name: Auto-merge
+on:
+  schedule:
+    - cron: '7,37 * * * *'
+  workflow_dispatch:
+    inputs:
+      done_run:
+        description: A live check run that has finished its work (it starts auto-merge from its last step), so it does not count as busy
+        required: false
+permissions:
+  contents: read
+concurrency:
+  group: auto-merge
+  cancel-in-progress: false
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      statuses: read
+      checks: read
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          sparse-checkout: |
+            scripts
+            banned-words.txt
+            .github/rulesets
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Merge what is ready, flag what is stuck
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          DONE_RUN: ${{ inputs.done_run }}
+        run: node scripts/auto-merge.mjs
