@@ -52,7 +52,7 @@ jobs:
   check:
     needs: start
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
     permissions:
       contents: read
       pull-requests: read
@@ -87,7 +87,7 @@ jobs:
           "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium
       - name: Hover, click and Tab through every page
         id: run
-        timeout-minutes: 20
+        timeout-minutes: 12
         env:
           PLAYWRIGHT_DIR: ${{ runner.temp }}/pw
           PAGES: ${{ inputs.pages }}
