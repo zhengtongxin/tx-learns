@@ -9,8 +9,8 @@
 <p class="zh" style="margin:0"><b>Wei Jie</b> 给手机维修柜台做了个小聊天助手。顾客先说“你好，我是 Mei，屏幕裂了”，接着问“我刚才说哪里坏了？”助手完全不知道。Wei Jie 要弄清为什么，还要学会算清自己发出的每个字的成本。</p></div>
 
 <h2><span class="en">Step 1 · Tokens: what the model really reads</span><span class="zh">第 1 步 · token：模型真正读的东西</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Models do not read letters or words. They read <b>tokens</b>: chunks of text turned into numbers. A common word is often one token. A rare word or a name splits into several. You can look with <code>tiktoken</code>. Why care? Price is per token (in and out), and the context window is a limit counted in tokens.</p>
-<p class="zh" style="margin:0 0 8px">模型读的不是字母或单词，而是 <b>token</b>：被切成小块并变成数字的文本。常见的词往往是一个 token，生僻词或人名会被拆成几个。你可以用 <code>tiktoken</code> 看一看。为什么要在意？因为价格按 token 算（输入和输出都算），上下文窗口的上限也是按 token 数的。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Models do not read letters or words. They read <b>tokens</b>: chunks of text turned into numbers. A common word is often one token. A rare word or a name splits into several. You can look with <code>tiktoken</code>. Why care? Price is per token (what you send and what comes back), and the context window (the most text one call can hold) is a limit counted in tokens.</p>
+<p class="zh" style="margin:0 0 8px">模型读的不是字母或单词，而是 <b>token</b>：被切成小块并变成数字的文本。常见的词往往是一个 token，生僻词或人名会被拆成几个。你可以用 <code>tiktoken</code> 看一看。为什么要在意？因为价格按 token 算（你发出的和模型回复的都算），上下文窗口（一次调用最多能装下的文字）的上限也是按 token 数的。</p></div>
 <div class="codebox"><span class="dim">import tiktoken
 </span><span class="chg">enc = tiktoken.get_encoding("o200k_base")</span><span class="dim">
 ids = </span><span class="chg">enc.encode("Two teh peng, one chicken rice, less chilli please")</span><span class="dim">
@@ -19,8 +19,8 @@ for i in ids:
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 2 · A model has no memory</span><span class="zh">第 2 步 · 模型没有记忆</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Every call is <b>stateless</b>, like tapping into a gate: it does not know you tapped in yesterday. Wei Jie told the model a name in one call and asked for it in the next, and got nothing. The second call never contained the first. Try it below.</p>
-<p class="zh" style="margin:0 0 8px">每次调用都是<b>无状态</b>的，就像刷卡过闸机：它不知道你昨天刷过。Wei Jie 在一次调用里告诉模型名字，下一次调用再问，结果一无所知，因为第二次调用里根本没有第一次的内容。下面试试。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Every call is <b>stateless</b>, like tapping into a gate: it does not know you tapped in yesterday. Wei Jie sent Mei's message about her cracked screen in one call, then asked what was wrong in the next, and got nothing back. The second call never contained the first. Try it below.</p>
+<p class="zh" style="margin:0 0 8px">每次调用都是<b>无状态</b>的，就像刷卡过闸机：它不知道你昨天刷过。Wei Jie 在一次调用里发了 Mei 关于屏幕裂了的消息，下一次调用再问哪里坏了，结果一无所知，因为第二次调用里根本没有第一次的内容。下面试试。</p></div>
 <div class="chat" id="mem"></div>
 
 <h2><span class="en">Step 3 · Memory is the whole chat, sent again</span><span class="zh">第 3 步 · 记忆就是把整段对话再发一遍</span></h2>
