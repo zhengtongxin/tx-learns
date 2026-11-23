@@ -6,8 +6,10 @@
 //            tells TX why, and tries again the next day.
 //   digest   one Telegram message about the last 24 hours: what ran, what is waiting for TX, tonight's release.
 // Gates for ship: no "hold" label · the PR's head is the tip of test · the copy check and every other check
-// on that commit passed · the "UI check" status passed · the reviewer agent's verdict for exactly that commit
-// is ✅ · no open pull request into test changes a page in the release.
+// on that commit passed · the "UI check" status passed · no open pull request into test changes a page in the
+// release · every change was reviewed once: each file in the release came only from pull requests that got a
+// reviewer agent ✅ on their own. Anything else (a workflow or script change, or a lesson merged on ⚠️) makes the
+// reviewer agent read the release, and then its verdict for exactly that commit must be ✅.
 // Usage: node scripts/release.mjs prepare|ship|digest
 // Env: GITHUB_TOKEN (contents, pull-requests, actions: write; checks, statuses: read), GITHUB_REPOSITORY,
 //      TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, SHIP_AT (shown to TX, e.g. "10 PM"), SITE (live URL),
@@ -52,6 +54,28 @@ async function openFixes(files) {
   return hits;
 }
 
+const verdictOk = body => { const first = body.split('\n').map(s => s.trim()).find(Boolean) || ''; return /✅|Ready to merge/.test(first) && !/⚠️/.test(first); };
+
+// Single review: which files in the release were already reviewed (reviewer agent ✅) on the pull request that
+// brought them into test? A file touched by any pull request without that ✅, or by no pull request, is "uncovered".
+async function coverage(cmp) {
+  const prs = new Map();
+  for (const c of cmp.commits || []) {
+    let list = [];
+    try { list = await gh('GET', `/commits/${c.sha}/pulls`); } catch {}
+    for (const p of list || []) if (p.base && p.base.ref === 'test' && p.merged_at) prs.set(p.number, p);
+  }
+  const ok = new Set(), notOk = new Set(), reviewed = [], unreviewed = [];
+  for (const p of prs.values()) {
+    const comments = await gh('GET', `/issues/${p.number}/comments?per_page=100`);
+    const good = comments.some(c => c.body && c.body.includes('<!-- tx-review sha=') && verdictOk(c.body));
+    for (const f of (await gh('GET', `/pulls/${p.number}/files?per_page=100`)).map(f => f.filename)) (good ? ok : notOk).add(f);
+    (good ? reviewed : unreviewed).push(p.number);
+  }
+  const uncovered = (cmp.files || []).map(f => f.filename).filter(f => notOk.has(f) || !ok.has(f));
+  return { reviewed, unreviewed, uncovered };
+}
+
 function verdictFor(comments, sha) {
   const mine = comments.filter(c => c.body && c.body.includes(`<!-- tx-review sha=${sha}`));
   const last = mine[mine.length - 1];
@@ -84,15 +108,23 @@ async function gate(pr) {
     else if (s.state !== 'success') problems.push(`"${s.context}" ${s.state === 'failure' ? 'failed' : s.state}: ${s.description || ''}`.trim());
   }
 
-  const comments = await gh('GET', `/issues/${pr.number}/comments?per_page=100`);
-  const v = verdictFor(comments, sha);
-  if (!v) waiting.push('the reviewer agent has not read this exact version yet');
-  else if (!v.ok) problems.push(`the reviewer agent says: ${v.line}`);
-
   const cmp = await gh('GET', '/compare/main...test');
   const files = (cmp.files || []).map(f => f.filename);
+  const cov = await coverage(cmp);
+  let v = null, needReview = false;
+  if (cov.uncovered.length) {
+    const comments = await gh('GET', `/issues/${pr.number}/comments?per_page=100`);
+    v = verdictFor(comments, sha);
+    if (!v) { needReview = true; waiting.push(`the reviewer agent has not read the changes that were not reviewed on their own PR (${cov.uncovered.slice(0, 4).join(', ')}${cov.uncovered.length > 4 ? '…' : ''})`); }
+    else if (!v.ok) problems.push(`the reviewer agent says: ${v.line}`);
+  }
   for (const h of await openFixes(files)) problems.push(`#${h.number} "${h.title}" is still open and changes ${h.same.join(', ')}`);
-  return { sha, problems, waiting, verdict: v, files };
+  return { sha, problems, waiting, verdict: v, files, cov, needReview };
+}
+
+async function askReviewer(pr, cov) {
+  const focus = cov.uncovered.join(' ').slice(0, 900);
+  return write(`ask the reviewer agent to read #${pr.number} (${focus})`, () => gh('POST', '/actions/workflows/review.yml/dispatches', { ref: 'main', inputs: { pr: String(pr.number), focus } }));
 }
 
 async function prepare() {
@@ -105,11 +137,14 @@ async function prepare() {
     return { pr: null };
   }
   const lessons = await lessonsIn(files);
+  const cov = await coverage(cmp);
   const body = [
     `Daily release from \`test\` to \`main\`, opened by the release agent.`, '',
     lessons.length ? `**Lessons in this release:**\n${lessons.map(l => `- ${l}`).join('\n')}` : '**No lesson pages change.**',
     `${files.length} file${files.length > 1 ? 's' : ''} change in total, over ${cmp.ahead_by} commit${cmp.ahead_by > 1 ? 's' : ''}.`, '',
-    `It goes live by itself at ${SHIP_AT} Malaysia time if the copy check, the UI check and the reviewer agent are all green and no fix for these pages is still open.`,
+    cov.reviewed.length ? `**Already reviewed on their own PR (reviewer agent ✅):** ${cov.reviewed.map(n => `#${n}`).join(', ')}` : '',
+    cov.uncovered.length ? `**Not reviewed yet, so the reviewer agent reads this release:** ${cov.uncovered.map(f => `\`${f}\``).join(', ')}` : '**Every change was reviewed on its own PR, so there is no second review.**', '',
+    `It goes live by itself at ${SHIP_AT} Malaysia time if the copy check and the UI check are green, every change has a reviewer agent ✅, and no fix for these pages is still open.`,
     `To stop it, add the label \`${HOLD}\`. To release earlier, merge it yourself once it is green.`, '',
     '_Opened by the TX Learns release agent._',
   ].join('\n');
@@ -122,9 +157,11 @@ async function prepare() {
   }
   if (!pr) return { pr: null, lessons, files };
   // A PR opened with the workflow token does not start other workflows, so ask for the checks directly.
-  const comments = await gh('GET', `/issues/${pr.number}/comments?per_page=100`);
-  if (!verdictFor(comments, pr.head.sha))
-    await write(`ask the reviewer agent to read #${pr.number}`, () => gh('POST', '/actions/workflows/review.yml/dispatches', { ref: 'main', inputs: { pr: String(pr.number) } }));
+  // Second review only for what was not reviewed on its own PR.
+  if (cov.uncovered.length) {
+    const comments = await gh('GET', `/issues/${pr.number}/comments?per_page=100`);
+    if (!verdictFor(comments, pr.head.sha)) await askReviewer(pr, cov);
+  }
   const runs = (await gh('GET', `/commits/${pr.head.sha}/check-runs?per_page=100`)).check_runs || [];
   if (!runs.some(r => r.name === 'Release waits for open fixes'))
     await write(`run the copy check on test for #${pr.number}`, () => gh('POST', '/actions/workflows/copy-check.yml/dispatches', { ref: 'test', inputs: { pr: String(pr.number) } }));
@@ -136,7 +173,12 @@ async function prepare() {
 async function ship() {
   const pr = await releasePR();
   if (!pr) { console.log('No release PR open. Nothing to ship.'); out('state', 'skip'); out('summary', 'Nothing to release today.'); return; }
-  const g = await gate(pr);
+  let g = await gate(pr);
+  // test moved after 8 PM and brought something unreviewed: ask the reviewer agent now and wait for it (≤25 min).
+  if (g.needReview && !g.problems.length) {
+    await askReviewer(pr, g.cov);
+    for (let i = 0; i < 25 && !DRY && g.needReview && !g.problems.length; i++) { await new Promise(r => setTimeout(r, 60e3)); g = await gate(pr); }
+  }
   const lessons = await lessonsIn(g.files);
   const what = lessons.length ? lessons.join(', ') : 'site updates';
   if (g.problems.length || g.waiting.length) {
@@ -150,7 +192,7 @@ async function ship() {
   }
   const merged = await write(`merge release #${pr.number}`, () => gh('PUT', `/pulls/${pr.number}/merge`, {
     sha: g.sha, merge_method: 'merge', commit_title: `${pr.title} (#${pr.number})`,
-    commit_message: 'Released by the release agent: every check green, reviewer agent ✅, no open fixes.',
+    commit_message: `Released by the release agent: every check green, every change reviewed once (${g.cov.uncovered.length ? 'release review ✅' : 'on its own PR'}), no open fixes.`,
   }));
   console.log(DRY ? 'Dry run: would release now.' : `Released #${pr.number}: ${merged && merged.message}`);
   out('state', 'ok'); out('summary', `Released #${pr.number}: ${what}. The live check agent looks at the site next.`); out('link', pr.html_url);
