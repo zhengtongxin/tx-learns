@@ -41,3 +41,4 @@ fetch page text -> model call 1 (pick links) -> fetch those pages -> model call 
 
 ## Takeaways
 Two small calls beat one giant one. Let the model do the fuzzy decision (which links), code does the plumbing. Prompts set tone. Stream for feel. Cut the input.
+
