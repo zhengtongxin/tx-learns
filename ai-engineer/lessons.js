@@ -28,11 +28,11 @@ window.TRACK={id:'ai-engineer',title:{en:'AI Engineer',zh:'AI 工程师'},topics
   {k:'c',file:'20-neural-nets-and-frontier-as-predictors.html',title:{en:'Neural networks and frontier models as predictors',zh:'神经网络与云端大模型当预测器'}},
   {k:'p',file:'21-price-guesser.html',title:{en:'Project: a price guesser',zh:'项目：价格估算器'}}]},
  {n:7,title:{en:'Fine-tuning open models',zh:'微调开源模型'},items:[
-  {k:'c',file:'22-lora-and-quantisation-plain-words.html',title:{en:'LoRA and quantisation, in plain words',zh:'LoRA 与量化的大白话'}},
-  {k:'c',file:'23-training-run-what-to-watch.html',title:{en:'Training run: what to watch',zh:'一次训练：该盯哪些指标'}},
-  {k:'p',file:'24-fine-tuned-price-guesser.html',title:{en:'Project: a fine-tuned price guesser',zh:'项目：微调后的价格估算器'}}]},
+  {k:'c',title:{en:'LoRA and quantisation, in plain words',zh:'LoRA 与量化的大白话'}},
+  {k:'c',title:{en:'Training run: what to watch',zh:'一次训练：该盯哪些指标'}},
+  {k:'p',title:{en:'Project: a fine-tuned price guesser',zh:'项目：微调后的价格估算器'}}]},
  {n:8,title:{en:'A working agent system',zh:'一个能跑的智能体系统'},items:[
-  {k:'c',file:'25-putting-a-model-behind-an-api.html',title:{en:'Putting a model behind an API',zh:'把模型放到 API 后面'}},
-  {k:'c',file:'26-agents-that-scan-estimate-decide.html',title:{en:'Agents that scan, estimate and decide',zh:'会扫描、估算、判断的智能体'}},
-  {k:'p',file:'27-deal-hunting-system.html',title:{en:'Project: a deal-hunting system',zh:'项目：淘好价系统'}}]}
+  {k:'c',title:{en:'Putting a model behind an API',zh:'把模型放到 API 后面'}},
+  {k:'c',title:{en:'Agents that scan, estimate and decide',zh:'会扫描、估算、判断的智能体'}},
+  {k:'p',title:{en:'Project: a deal-hunting system',zh:'项目：淘好价系统'}}]}
 ]};
