@@ -5,8 +5,8 @@
 <link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">The FDE’s job · Project</span><span class="zh">FDE 是做什么的 · 项目</span></span><h1><span class="en">Project: a claims desk pilot</span><span class="zh">项目：理赔台试点</span></h1><p class="meta"><span class="en">Build the smallest thing the customer can react to: sample claims, a queue with a hard sign-off rule, and an agent that decides · ~30 min · hands-on</span><span class="zh">做出客户能有反应的最小东西：样本理赔、带硬性签字规则的队列，以及会做决定的智能体 · 约 30 分钟 · 动手实践</span></p></div>
-<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">Mei Ling has the brief and a plan. Now Kaya Travel Cover needs something to <i>react to</i>. In this project she builds a first pilot: a small backend holding 25 sample claims, a dashboard for the handlers, and an <b>agent</b> (a model that reads a claim, looks things up and returns a decision). For each claim it must say approve, decline or refer, a payout, and two or three sentences of reasons. Then she runs it on the whole queue and compares with what Aisha and the handlers actually decided.</p>
-<p class="zh" style="margin:0">Mei Ling 有了需求，也有了计划。现在 Kaya Travel Cover 需要一个能让他们<i>有反应</i>的东西。这个项目里她要做第一个试点：一个装着 25 份样本理赔的小后端、一个给理赔员看的看板，以及一个<b>智能体</b>（读理赔、查资料、给出决定的模型）。对每份理赔，它要给出批准、拒绝或转交，再加赔付金额和两三句理由。最后她把整条队列跑一遍，和 Aisha 与理赔员们真实的决定对比。</p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">Mei Ling has the brief and a plan. Now Kaya Travel Cover needs something to <i>react to</i>. In this project she builds a first pilot: a small backend holding 25 sample claims, a dashboard for the handlers, and an <b>agent</b> (a model that reads a claim, is handed the policy wording, and returns a decision). For each claim it must say approve, decline or refer, a payout, and two or three sentences of reasons. Then she runs it on the whole queue and compares with what Aisha and the handlers actually decided.</p>
+<p class="zh" style="margin:0">Mei Ling 有了需求，也有了计划。现在 Kaya Travel Cover 需要一个能让他们<i>有反应</i>的东西。这个项目里她要做第一个试点：一个装着 25 份样本理赔的小后端、一个给理赔员看的看板，以及一个<b>智能体</b>（读理赔、拿到条款与保单资料、给出决定的模型）。对每份理赔，它要给出批准、拒绝或转交，再加赔付金额和两三句理由。最后她把整条队列跑一遍，和 Aisha 与理赔员们真实的决定对比。</p></div>
 
 <h2><span class="en">Step 1 · Make the sample data, and hide the answer key</span><span class="zh">第 1 步 · 造样本数据，并把答案藏起来</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">You cannot test on real customers, so you invent 25 claims, their policies, their customers and a plain policy wording. Also write down what the handlers decided for each. That list is the <b>answer key</b>, and it must live in a folder the agent never reads. Like a teacher who keeps the marking sheet out of the exam hall.</p>
@@ -26,8 +26,8 @@
 <p class="zh">每个文件该放进哪个文件夹？</p><div class="sc" id="g1"></div>
 
 <h2><span class="en">Step 2 · The backend queue</span><span class="zh">第 2 步 · 后端的队列</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Every claim needs a state, so everyone knows where it is. Four are enough: <b>waiting</b>, <b>in progress</b>, <b>waiting for sign-off</b> and <b>decided</b>. It works like the queue-number ticket machine at the shophouse door: a claim is always in exactly one place.</p>
-<p class="zh" style="margin:0 0 8px">每份理赔都要有一个状态，让大家知道它在哪。四个就够：<b>等待中</b>、<b>处理中</b>、<b>等待签字</b>、<b>已决定</b>。就像店屋门口的取号机：一份理赔在任何时刻都只在一个地方。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Every claim needs a state, so everyone knows where it is. Four are enough: <b>waiting</b>, <b>in progress</b>, <b>waiting for sign-off</b> and <b>decided</b>. In the code they are the words <code>waiting</code>, <code>in_progress</code>, <code>waiting_signoff</code> and <code>decided</code>. It works like the queue-number ticket machine at the shophouse door: a claim is always in exactly one place.</p>
+<p class="zh" style="margin:0 0 8px">每份理赔都要有一个状态，让大家知道它在哪。四个就够：<b>等待中</b>、<b>处理中</b>、<b>等待签字</b>、<b>已决定</b>。代码里它们分别写作 <code>waiting</code>、<code>in_progress</code>、<code>waiting_signoff</code> 和 <code>decided</code>。就像店屋门口的取号机：一份理赔在任何时刻都只在一个地方。</p></div>
 <div class="codebox"><span class="dim">queue = {}   # claim id -> its record
 
 def add_claim(claim):
@@ -68,8 +68,8 @@ def sign_off(claim_id, handler):
 <div class="try" id="p2"></div>
 
 <h2><span class="en">Step 5 · The agent that reads one claim</span><span class="zh">第 5 步 · 读一份理赔的智能体</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Now the part everyone came to see. The agent gets one claim, looks up its policy and the wording, and returns a decision as JSON: <code>action</code>, <code>payout</code> and <code>reason</code>. It never touches the queue itself. It only returns an answer, and <code>record_decision</code> from Step 4 decides what happens to it. Install with <code>pip install openai</code> and set your <code>OPENAI_API_KEY</code>.</p>
-<p class="zh" style="margin:0 0 8px">现在是大家最想看的部分。智能体拿到一份理赔，查出对应的保单和条款，然后以 JSON 返回决定：<code>action</code>、<code>payout</code>、<code>reason</code>。它自己不碰队列，只返回答案，怎么处理由第 4 步的 <code>record_decision</code> 决定。用 <code>pip install openai</code> 安装，并设置好 <code>OPENAI_API_KEY</code>。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Now the part everyone came to see. The agent gets one claim, with its policy and the wording pasted into the prompt, and returns a decision as JSON: <code>action</code>, <code>payout</code> and <code>reason</code>. It never touches the queue itself. It only returns an answer, and <code>record_decision</code> from Step 4 decides what happens to it. This first agent has no tools: it is one model call, and the code gives it everything it needs. Install with <code>pip install openai</code> and set your <code>OPENAI_API_KEY</code>.</p>
+<p class="zh" style="margin:0 0 8px">现在是大家最想看的部分。智能体拿到一份理赔，保单和条款已经贴在提示词里，然后以 JSON 返回决定：<code>action</code>、<code>payout</code>、<code>reason</code>。它自己不碰队列，只返回答案，怎么处理由第 4 步的 <code>record_decision</code> 决定。这第一个智能体没有工具：它就是一次模型调用，代码把它需要的一切都给了它。用 <code>pip install openai</code> 安装，并设置好 <code>OPENAI_API_KEY</code>。</p></div>
 <div class="codebox"><span class="dim">import json
 from openai import OpenAI
 
@@ -95,8 +95,8 @@ Reply with JSON only: {{"action": "approve" or "decline" or "refer", "payout": a
 <div class="try" id="p3"></div>
 
 <h2><span class="en">Step 6 · Run it on the queue and compare</span><span class="zh">第 6 步 · 跑整条队列并对比</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Load the claims, run each through the agent and the backend, then show the queue. Scoring is a separate script, and it is the only place that opens the answer key. A pilot like this usually agrees with the handlers on most claims. It struggles on the ones that need the claims manual or the customer’s history. That gap is the plan for everything that follows.</p>
-<p class="zh" style="margin:0 0 8px">加载理赔，逐份交给智能体和后端，然后显示队列。打分是另一个脚本，也是唯一会打开答案的地方。这样的试点通常在大多数理赔上和理赔员一致，难的是那些需要理赔手册或客户历史才能判断的。这个差距，就是后面所有内容的计划。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Load the claims, run each through the agent and the backend, then show the queue. Scoring is a separate step that runs once the queue is built, and it is the only place that opens the answer key. A pilot like this usually agrees with the handlers on most claims. It struggles on the ones that need the claims manual or the customer’s history. That gap is the plan for everything that follows.</p>
+<p class="zh" style="margin:0 0 8px">加载理赔，逐份交给智能体和后端，然后显示队列。打分是队列跑完之后的另一步，也是唯一会打开答案的地方。这样的试点通常在大多数理赔上和理赔员一致，难的是那些需要理赔手册或客户历史才能判断的。这个差距，就是后面所有内容的计划。</p></div>
 <div class="codebox"><span class="dim"># run_pilot.py (uses add_claim, start, record_decision, show_queue and decide from above)
 for claim in json.load(open("data/claims.json")):
     add_claim(claim)
@@ -105,8 +105,9 @@ for claim_id in list(queue):
     </span><span class="chg">record_decision(claim_id, decide(queue[claim_id]["claim"]))</span><span class="dim">
 show_queue()
 
-# score.py: the ONLY file that opens the answer key
-key = json.load(open("answer_key/handler_decisions.json"))   # claim id -> action
+# score.py: add this to the end of run_pilot.py, so it can see queue.
+# It is the ONLY code that opens the answer key.
+key = json.load(open("answer_key/handler_decisions.json"))   # {claim id: handler's action}, e.g. {"C007": "approve"}
 agree = sum(1 for cid, item in queue.items() if item["decision"]["action"] == key[cid])
 </span><span class="chg">print(f"agrees with handlers on {agree} of {len(key)} claims")</span></div>
 <p class="en">Which claims will the pilot most likely get wrong? Sort them.</p>
