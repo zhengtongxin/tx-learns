@@ -2,19 +2,21 @@
 #   On a lesson's own pull request (a writer/ branch into test; started by the reader agent once it is done) it also
 #   fixes what it flagged, in lesson files only, as one commit on that pull request, then tells TX on Telegram that
 #   the lesson is ready to approve. One round: if the branch already has a reviewer fix, it only comments.
-#   On a release (a pull request into main) it only comments. Its verdict for the exact commit is one of the gates
-#   the release agent checks before releasing. Telegram only when the release needs TX (⚠️) or the run failed.
+#   On a release (a pull request into main) it only comments, and only runs when the release agent asks: when the
+#   release holds changes that were not reviewed on their own PR (a workflow or script change, or a lesson merged
+#   on ⚠️). Then `focus` names those files. Its verdict for the exact commit is a release gate.
+#   Each change is reviewed once. Telegram only when the release needs TX (⚠️) or the run failed.
 # Claude runs in a read-only job; a separate job with trusted scripts from main does the writing.
 name: Claude review
 on:
-  pull_request:
-    branches: [main]
-    types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
     inputs:
       pr:
         description: Pull request number to review
         required: true
+      focus:
+        description: On a release, the files that were not reviewed on their own PR (space separated)
+        required: false
 permissions:
   contents: read
   pull-requests: read
@@ -65,6 +67,7 @@ jobs:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           FIX: ${{ steps.info.outputs.fix }}
+          FOCUS: ${{ inputs.focus }}
         run: |
           set -o pipefail
           if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then unset ANTHROPIC_API_KEY; echo "Auth: Claude subscription"; else unset CLAUDE_CODE_OAUTH_TOKEN; echo "Auth: API key (no CLAUDE_CODE_OAUTH_TOKEN secret)"; fi
@@ -77,6 +80,9 @@ jobs:
              In the comment, list what you fixed under "Fixed" and anything left under "Still for you"."
           else
             MODE="Only review. Do not edit any file except /tmp/review-comment.md and /tmp/review-summary.txt."
+            if [ -n "$FOCUS" ]; then MODE="$MODE
+             This is a release. Everything else in it was already reviewed on its own pull request. Review only these
+             files, which were not: $FOCUS"; fi
           fi
           cat > /tmp/review-prompt.md <<PROMPT
           You are the reviewer for TX Learns, a bilingual (EN/中文) learning site. Review pull request #$PR.
@@ -210,7 +216,7 @@ jobs:
               [ -n "$reader" ] && echo "Reader agent: $reader"
               [ -n "$PUSHED" ] && echo "The reviewer agent added its fixes to the PR."
               echo; head -c 1200 /tmp/out/review-summary.txt 2>/dev/null
-              echo; echo "Merge it into test and it goes live with tonight's release."; } | node $T/notify-telegram.mjs
+              echo; echo "Merge it into test and it goes live with the next release, usually within two hours."; } | node $T/notify-telegram.mjs
           elif [ "$STATE" = flag ]; then
             { echo "⚠️ The reviewer agent wants changes before the release goes live"; echo "$URL"; echo; head -c 1500 /tmp/out/review-summary.txt; } | node $T/notify-telegram.mjs
           else

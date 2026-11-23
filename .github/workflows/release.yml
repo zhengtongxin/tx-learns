@@ -1,23 +1,30 @@
-# Release agent: test goes to main once a day, only when everything is green. TX approves lessons, not releases.
-#   8 PM Malaysia time (12:00 UTC): open or update the release PR test → main, ask the reviewer agent and the
-#        copy check to look at it, and send the one daily Telegram digest (what ran, what waits for TX, tonight's release).
-#   10 PM Malaysia time (14:00 UTC): merge the release PR if every gate passes (see scripts/release.mjs);
-#        otherwise hold it, tell TX why, and try again the next day.
-# TX can stop a release by adding the label "hold" to the release PR, or release earlier by merging it once green.
+# Release agent: test goes to main as soon as everything is green, checked every hour. TX approves lessons, not releases.
+#   Every hour (:00): open or update the release PR test → main, start the copy check (and the reviewer agent for
+#        changes never reviewed), and merge it if every gate passes (see scripts/release.mjs). A new commit waits
+#        an hour before it can go out, so TX always has time to add "hold". While checks run it waits quietly;
+#        a held release gets one Telegram message per new reason.
+#   After a real release: the live check agent runs right away (it waits for Vercel to finish deploying first).
+#   8 PM Malaysia time (12:00 UTC): the one daily Telegram digest (what went live, what ran, what waits for TX).
+# TX can stop a release by adding the label "hold" to the release PR.
 # No AI here, and only trusted scripts from main run (scheduled runs always use the default branch).
 name: Release
 on:
   schedule:
+    - cron: '0 * * * *'
+    # 8 PM Malaysia time: the daily digest, as its own run (it queues behind that hour's release run).
     - cron: '0 12 * * *'
-    - cron: '0 14 * * *'
   workflow_dispatch:
     inputs:
       step:
-        description: prepare (open the release PR and send the digest), ship (release now if green) or digest
+        description: run (release now if green) or digest (send the daily digest now)
         required: true
-        default: prepare
+        default: run
         type: choice
-        options: [prepare, ship, digest]
+        options: [run, digest]
+      dry:
+        description: Trial only - read everything, change nothing, send no Telegram (prints what it would do)
+        type: boolean
+        default: false
 permissions:
   contents: write
   pull-requests: write
@@ -25,16 +32,24 @@ permissions:
   actions: write
   checks: read
   statuses: read
+  deployments: read
 concurrency:
+  # Runs queue, never overlap, and never cancel each other.
   group: release
   cancel-in-progress: false
 jobs:
   release:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      released: ${{ steps.run.outputs.released }}
+      sha: ${{ steps.run.outputs.sha }}
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.repository.default_branch }}
+          # Scheduled runs use main's scripts. A manual run (only people with write access can start one) uses the
+          # branch it was started on, so a change can be tried before it reaches main.
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.ref_name || github.event.repository.default_branch || 'main' }}
           sparse-checkout: |
             scripts
             banned-words.txt
@@ -48,16 +63,26 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          SHIP_AT: 10 PM
-          STEP: ${{ inputs.step || (github.event.schedule == '0 14 * * *' && 'ship' || 'prepare') }}
+          STEP: ${{ inputs.step || (github.event.schedule == '0 12 * * *' && 'digest' || 'run') }}
+          DRY_RUN: ${{ inputs.dry && '1' || '' }}
         run: |
           echo "Step: $STEP"
-          if [ "$STEP" = prepare ]; then node scripts/release.mjs prepare --digest; else node scripts/release.mjs "$STEP"; fi
+          if [ "$STEP" = digest ]; then node scripts/release.mjs digest --status; else node scripts/release.mjs run; fi
       - name: Record status for the Ecosystem page
-        if: always()
+        # Quiet hours (nothing to release, or checks still running) are not recorded, so the page and the digest
+        # show what the release agent did, not every hourly look. A cancelled run records nothing.
+        if: ${{ !cancelled() && !inputs.dry && steps.run.outputs.state != 'skip' && steps.run.outputs.state != 'wait' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           STATE: ${{ steps.run.outputs.state || 'fail' }}
           SUMMARY: ${{ steps.run.outputs.summary || 'The release agent could not finish.' }}
           LINK: ${{ steps.run.outputs.link }}
         run: node scripts/record-status.mjs release
+  # Chained: the live check agent runs only after a real release, never on a timer.
+  live-check:
+    needs: release
+    if: ${{ needs.release.outputs.released == 'true' }}
+    uses: ./.github/workflows/live-check.yml
+    with:
+      sha: ${{ needs.release.outputs.sha }}
+    secrets: inherit
