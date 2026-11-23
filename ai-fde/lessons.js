@@ -9,9 +9,9 @@ window.TRACK={id:'ai-fde',title:{en:'AI FDE',zh:'AI FDE'},topics:[
   {k:'c',file:'05-open-models-local-and-token-cost.html',title:{en:'Open models, local models and token cost',zh:'开源模型、本地模型与 token 成本'}},
   {k:'p',file:'06-cheapest-model-good-enough.html',title:{en:'Project: the cheapest model that is good enough',zh:'项目：够用的最便宜模型'}}]},
  {n:3,title:{en:'Harness engineering',zh:'Harness 工程'},items:[
-  {k:'f',title:{en:'What a harness is',zh:'什么是 harness'}},
-  {k:'c',title:{en:'Two ways to build a harness',zh:'搭 harness 的两种路线'}},
-  {k:'p',title:{en:'Project: an agent that works the queue',zh:'项目：自己处理队列的智能体'}}]},
+  {k:'f',file:'07-what-a-harness-is.html',title:{en:'What a harness is',zh:'什么是 harness'}},
+  {k:'c',file:'08-two-ways-to-build-a-harness.html',title:{en:'Two ways to build a harness',zh:'搭 harness 的两种路线'}},
+  {k:'p',file:'09-agent-that-works-the-queue.html',title:{en:'Project: an agent that works the queue',zh:'项目：自己处理队列的智能体'}}]},
  {n:4,title:{en:'Measuring an agent',zh:'衡量智能体'},items:[
   {k:'c',file:'10-right-and-wrong-answers-that-cost-differently.html',title:{en:'Right and wrong answers that cost differently',zh:'对与错，代价各不相同'}},
   {k:'c',file:'11-tracing-and-experiments.html',title:{en:'Tracing and experiments',zh:'追踪与实验'}},
