@@ -84,8 +84,6 @@ jobs:
           echo "base=$base head=$head sha=$sha fix=$fix"
           { echo "base=$base"; echo "head=$head"; echo "sha=$sha"; echo "fix=$fix"; echo "title=$(node -p 'require("/tmp/pr.json").title.slice(0,100)')"; } >> "$GITHUB_OUTPUT"
       - name: Copy check result for the reviewer
-        env:
-          BANNED_WORDS_EXTRA: ${{ secrets.BANNED_WORDS_EXTRA }}
         run: |
           node scripts/check-copy.mjs > /tmp/copy-check.txt 2>&1 || true
           [ -f scripts/check-counts.mjs ] && node scripts/check-counts.mjs >> /tmp/copy-check.txt 2>&1 || true

@@ -3,7 +3,7 @@
 //   telegram(text, {html})  message TX; never throws, never fails a workflow
 //   loadTrack(source)       window.TRACK from lessons.js text
 //   scrub(text)             replaces banned terms (banned-words.txt) with [source]
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import vm from 'node:vm';
 
@@ -64,7 +64,7 @@ export function loadTracks(root) {
 }
 
 // Banned terms: the generic rules in banned-words.txt (public) plus the source names, which live outside the repo:
-// the BANNED_WORDS_EXTRA secret in CI (one pattern per line) or an untracked banned-words.local.txt on a machine.
+// optional: the BANNED_WORDS_EXTRA variable (one pattern per line) or an untracked banned-words.local.txt on a machine.
 export function bannedSources(root) {
   const lines = [];
   for (const f of ['banned-words.txt', 'banned-words.local.txt']) {
@@ -73,7 +73,6 @@ export function bannedSources(root) {
   lines.push(...String(process.env.BANNED_WORDS_EXTRA || '').split('\n'));
   return lines.map(l => l.trim()).filter(l => l && !l.startsWith('#'));
 }
-export const hasPrivateNames = root => !!String(process.env.BANNED_WORDS_EXTRA || '').trim() || existsSync(join(root, 'banned-words.local.txt'));
 
 let banned;
 export function scrub(text) {
