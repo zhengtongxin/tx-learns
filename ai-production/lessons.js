@@ -19,16 +19,16 @@ window.TRACK={id:'ai-production',title:{en:'AI Production',zh:'AI 上线实战'}
   {k:'c',file:'13-where-memory-lives-in-the-cloud.html',title:{en:"Where memory lives in the cloud",zh:"记忆在云里放哪"}},
   {k:'p',file:'14-digital-twin-live.html',title:{en:"Project: a digital twin live on the internet",zh:"项目：上线到互联网的数字分身"}}]},
  {n:5,title:{en:"Managed models in the cloud",zh:"云上的托管模型"},items:[
-  {k:'c',title:{en:"A managed model service versus a vendor API",zh:"托管模型服务 vs 厂商 API"}},
-  {k:'c',title:{en:"Picking a model by cost and speed, then watching it",zh:"按成本和速度选模型，然后盯着它"}}]},
+  {k:'c',file:'15-managed-models-vs-vendor-api.html',title:{en:"A managed model service versus a vendor API",zh:"托管模型服务 vs 厂商 API"}},
+  {k:'c',file:'16-picking-a-model-by-cost-and-speed.html',title:{en:"Picking a model by cost and speed, then watching it",zh:"按成本和速度选模型，然后盯着它"}}]},
  {n:6,title:{en:"Infrastructure as code",zh:"基础设施即代码"},items:[
-  {k:'f',title:{en:"Why clicking in a console does not scale",zh:"为什么在控制台点点点不够用"}},
-  {k:'c',title:{en:"State, workspaces and three environments",zh:"状态、工作区与三套环境"}},
-  {k:'c',title:{en:"Deploy scripts and a clean teardown",zh:"部署脚本与干净的拆除"}}]},
+  {k:'f',file:'17-why-console-clicking-does-not-scale.html',title:{en:"Why clicking in a console does not scale",zh:"为什么在控制台点点点不够用"}},
+  {k:'c',file:'18-state-workspaces-three-environments.html',title:{en:"State, workspaces and three environments",zh:"状态、工作区与三套环境"}},
+  {k:'c',file:'19-deploy-scripts-and-clean-teardown.html',title:{en:"Deploy scripts and a clean teardown",zh:"部署脚本与干净的拆除"}}]},
  {n:7,title:{en:"Automatic deploys",zh:"自动部署"},items:[
-  {k:'c',title:{en:"Shared state and stale locks",zh:"共享状态与过期的锁"}},
-  {k:'c',title:{en:"Push to deploy with GitHub Actions",zh:"用 GitHub Actions 一推就部署"}},
-  {k:'p',title:{en:"Project: dev, test and prod from one push",zh:"项目：一次推送，开发、测试、生产三套环境"}}]},
+  {k:'c',file:'20-shared-state-and-stale-locks.html',title:{en:"Shared state and stale locks",zh:"共享状态与过期的锁"}},
+  {k:'c',file:'21-push-to-deploy-github-actions.html',title:{en:"Push to deploy with GitHub Actions",zh:"用 GitHub Actions 一推就部署"}},
+  {k:'p',file:'22-dev-test-prod-from-one-push.html',title:{en:"Project: dev, test and prod from one push",zh:"项目：一次推送，开发、测试、生产三套环境"}}]},
  {n:8,title:{en:"Agents as a managed service",zh:"托管的智能体服务"},items:[
   {k:'c',title:{en:"An agent runtime in minutes",zh:"几分钟上线一个智能体运行时"}},
   {k:'c',title:{en:"Tools and a planning loop",zh:"工具与规划循环"}},
