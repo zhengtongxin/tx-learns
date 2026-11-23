@@ -1,0 +1,150 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Project: the cheapest model that is good enough | TX Learns</title>
+<meta name="description" content="Agree a bar with the customer first, test several models against it, pick the cheapest that clears it, and write the reason down in half a page."><meta property="og:title" content="Project: the cheapest model that is good enough | TX Learns"><meta property="og:description" content="Agree a bar with the customer first, test several models against it, pick the cheapest that clears it, and write the reason down in half a page."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-fde/06-cheapest-model-good-enough.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-23">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Picking the model for the job · Project</span><span class="zh">为任务挑模型 · 项目</span></span><h1><span class="en">Project: the cheapest model that is good enough</span><span class="zh">项目：够用的最便宜模型</span></h1><p class="meta"><span class="en">Choose the claims desk’s model with a written reason: the cheapest one that clears a bar the customer agreed to · ~30 min · hands-on</span><span class="zh">为理赔台选模型，并写下理由：客户同意的那条标准之上，最便宜的那个 · 约 30 分钟 · 动手实践</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">Mei Ling has numbers for many models, but a pile of numbers is not a decision. Mr Goh wants one model and one reason he can repeat to the owners. So she turns it into a contest with a rule written <i>before</i> anyone runs: a <b>bar</b>, the minimum a model must reach to be allowed on the claims desk. Then she runs the candidates, marks who clears the bar, and picks the cheapest of those.</p>
+<p class="zh" style="margin:0">Mei Ling 手上有很多模型的数字，但一堆数字不是决定。Goh 先生要的是一个模型、一条他能向老板们复述的理由。所以她把它变成一场比赛，规则在<i>开跑之前</i>就写好：一条<b>标准线</b>，也就是模型想上理赔台必须达到的最低要求。然后她跑完候选模型，标出谁过了线，再从中选最便宜的。</p></div>
+
+<h2><span class="en">Step 1 · Agree the bar first</span><span class="zh">第 1 步 · 先谈好标准线</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">If you choose the bar after you see the scores, you will pick a bar your favourite model passes. So sit with Mr Goh and Aisha first, and write it as numbers: how accurate on easy claims, what must never happen, and how fast. A <b>big payout</b> here means one over S$800, the sign-off limit from the pilot. Put it in code so it cannot drift. Like agreeing the pass mark before the exam.</p>
+<p class="zh" style="margin:0 0 8px">如果看了分数才定标准，你定出来的一定是你最爱的那个模型能过的线。所以先和 Goh 先生、Aisha 坐下来谈，并写成数字：简单理赔要多准、什么事绝不能发生、要多快。这里的<b>大额赔付</b>指超过 S$800 的赔付，也就是试点里的签字限额。把它写进代码里，就不会悄悄变。就像考试前先说好及格线。</p></div>
+<div class="codebox"><span class="chg">SIGNOFF_LIMIT = 800           # S$, the same limit as the pilot's queue
+
+BAR = {"easy": 0.90,          # matches the handlers on at least 90% of easy claims
+       "big_wrong": 0,        # never approves a big payout the handlers did not approve
+       "secs": 5.0}           # at most 5 seconds per claim, for a busy queue</span></div>
+<p class="en">Which of these belong in the bar? Sort them.</p>
+<p class="zh">下面哪些该写进标准线？来分一分。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Step 2 · Run the candidates, twice each</span><span class="zh">第 2 步 · 候选模型各跑两遍</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Pick three or four candidates: one small and cheap, one or two mid-priced, one strong. Give each the small prompt on all 25 claims, and do it twice, because one run can be luck. This uses the helpers you saved in <code>bench.py</code> over the last two lessons. Importing <code>bench</code> runs every top-level line in it, so keep the one-off experiments (the <code>runs = ...</code> loop, the local-model run and the prints) out of it, or put them under <code>if __name__ == "__main__":</code>. Otherwise this import would re-run them. The prices are invented, so copy your gateway’s real ones.</p>
+<p class="zh" style="margin:0 0 8px">挑三四个候选：一个小而便宜的，一两个中等价位的，一个强的。每个都用小提示词跑完 25 份理赔，并且跑两遍，因为一遍可能只是运气。这里用的是你前两课存进 <code>bench.py</code> 的那些函数。导入 <code>bench</code> 会把里面所有顶层代码都跑一遍，所以一次性的实验（<code>runs = ...</code> 那个循环、本地模型那次运行和各种打印）不要留在里面，或者放到 <code>if __name__ == "__main__":</code> 下面。否则这次导入会把它们重跑一遍。价格是编的，请换成你的网关上的真实价格。</p></div>
+<div class="codebox"><span class="dim">from collections import defaultdict
+from bench import claims, key, matches, small_prompt, ask, gateway
+
+# US$ per million tokens: (input, output). Invented: copy your gateway's real list.
+</span><span class="chg">CANDIDATES = {
+    "meta-llama/llama-3.3-70b-instruct": (0.10, 0.30),
+    "openai/gpt-5.4-mini": (0.40, 1.60),
+    "anthropic/claude-haiku-5-5": (1.00, 5.00),
+    "anthropic/claude-sonnet-5-5": (3.00, 15.00)}
+
+def run_twice(model):
+    return [[(c["id"], *ask(gateway, model, small_prompt(c))) for c in claims]
+            for _ in range(2)]</span></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · One table</span><span class="zh">第 3 步 · 一张表</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Turn each model’s two runs into one row: accuracy overall and by difficulty, cost per 1,000 claims, seconds per claim, and how many times it approved a big payout it should not have. The cost comes from the token counts and prices, as before. Cost and seconds are averaged over both runs. Wrong approvals are added up across both.</p>
+<p class="zh" style="margin:0 0 8px">把每个模型的两遍结果变成一行：总体和分难度的准确率、每 1,000 份理赔的成本、每份用几秒，以及它有多少次批准了不该批准的大额赔付。成本照旧由 token 数和价格算出。成本和秒数取两遍的平均；错批的次数则把两遍加起来。</p></div>
+<div class="codebox"><span class="dim">def row(model, runs):
+    price_in, price_out = CANDIDATES[model]
+    tally = defaultdict(lambda: [0, 0])      # difficulty -> [right, total]
+    cost = secs = 0
+    big_wrong = 0
+    for run in runs:
+        for cid, decision, tin, tout, seconds in run:
+            want = key[cid]
+            tally[want["difficulty"]][0] += matches(decision, want)
+            tally[want["difficulty"]][1] += 1
+            cost += (tin * price_in + tout * price_out) / 1_000_000
+            secs += seconds
+            </span><span class="chg">if (decision["action"] == "approve" and float(decision["payout"]) &gt; SIGNOFF_LIMIT
+                    and want["action"] != "approve"):
+                big_wrong += 1</span><span class="dim">
+    n = sum(total for _, total in tally.values())
+    return {"model": model,
+            "by_level": {level: right / total for level, (right, total) in tally.items()},
+            "cost_1000": cost / n * 1000, "secs": secs / n, "big_wrong": big_wrong}
+
+rows = [row(model, run_twice(model)) for model in CANDIDATES]</span></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 4 · Mark who clears the bar</span><span class="zh">第 4 步 · 标出谁过了线</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Now the bar does its job. A model must pass <i>every</i> line, not most of them. One failure is enough to be out, however good its other numbers. This is how the most accurate model can lose: too slow for a busy queue.</p>
+<p class="zh" style="margin:0 0 8px">现在标准线派上用场了。模型必须过<i>每一条</i>，不是过大多数。只要有一条没过就出局，别的数字再漂亮也没用。最准的模型也可能这样输掉：太慢，撑不住忙碌的队列。</p></div>
+<div class="codebox"><span class="dim">def clears(r):
+    </span><span class="chg">return (r["by_level"]["easy"] &gt;= BAR["easy"]
+            and r["big_wrong"] &lt;= BAR["big_wrong"]
+            and r["secs"] &lt;= BAR["secs"])</span><span class="dim">
+
+for r in rows:
+    print(r["model"], "clears the bar" if clears(r) else "does NOT clear the bar")</span></div>
+<p class="en">The bar: 90% on easy claims, no wrongly approved big payouts, at most 5 seconds. These five results are made up for practice, not from the run above. Sort them.</p>
+<p class="zh">标准线：简单理赔 90%，没有错批的大额赔付，每份最多 5 秒。这五组结果是为练习编的，不是上面那次运行的。给它们分一分。</p><div class="sc" id="g2"></div>
+
+<h2><span class="en">Step 5 · Pick the cheapest, and keep a fallback</span><span class="zh">第 5 步 · 选最便宜的，并留一个后备</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Among the models that cleared the bar, take the cheapest. Then keep a stronger model as a <b>fallback</b>: a <b>router</b> asks the cheap one first and only sends a claim to the strong one when the cheap one says “refer”, its way of saying it is unsure. The strong model costs money only on the few hard claims. The winner is often a mid-priced model. Spending more on the model rarely beats improving the prompt, the tools and the checks around it.</p>
+<p class="zh" style="margin:0 0 8px">在过线的模型里，取最便宜的。再留一个更强的模型做<b>后备</b>：<b>路由器</b>先问便宜的那个，只有它回答“转交”（它表示拿不准的方式）时，才把这份理赔交给强的那个。强模型只在少数难的理赔上花钱。赢家常常是中等价位的模型。在模型上多花钱，很少比得上把提示词、工具和周围的检查做好。</p></div>
+<div class="codebox"><span class="dim">passing = [r for r in rows if clears(r)]
+if not passing:
+    raise SystemExit("nobody clears the bar: change the prompt, or talk to Mr Goh about the bar")
+
+</span><span class="chg">pick = min(passing, key=lambda r: r["cost_1000"])["model"]
+STRONG = "anthropic/claude-sonnet-5-5"
+
+def decide_routed(claim):
+    decision = ask(gateway, pick, small_prompt(claim))[0]
+    if decision["action"] == "refer":          # the cheap model is unsure
+        decision = ask(gateway, STRONG, small_prompt(claim))[0]
+    return decision                            # a refer from the strong model still goes to a handler</span></div>
+<div class="try" id="p3"></div>
+
+<h2><span class="en">Step 6 · Write the decision in half a page</span><span class="zh">第 6 步 · 用半页纸写下决定</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The choice is only finished when Mr Goh can read it. Keep it to half a page: the bar, the pick, the numbers behind it, the fallback, and what would make you look again. That last part matters. Prices change and new models arrive every few months.</p>
+<p class="zh" style="margin:0 0 8px">Goh 先生读得懂，这个选择才算完成。控制在半页纸：标准线、选了谁、背后的数字、后备方案，以及什么情况下你会重新看一遍。最后这一条很重要，价格会变，新模型每隔几个月就来一批。</p></div>
+<div class="codebox"><span class="chg">Model choice for the claims desk (draft for Mr Goh)
+
+The bar we agreed: at least 90% right on easy claims, no wrongly
+approved big payouts, at most 5 seconds a claim.
+
+Our pick: Model B. Of the two models that cleared the bar, it is the
+cheaper: 92% on easy claims, 3 seconds, US$1.80 per 1,000 claims.
+Fallback: the strong model, Claude Sonnet 5.5, handles only the claims Model B refers.
+
+We will look again if: prices drop by half, a new model arrives, or
+more than 1 in 10 claims has to go to the fallback.</span></div>
+<div class="try" id="p4"></div>
+
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我当时想错了</span></b><span class="en">I picked on accuracy alone, and the winner was too slow for a busy queue. Speed was a requirement nobody had written down. Now speed goes into the bar before anything runs, and every other thing the customer cares about does too.</span><span class="zh">我只按准确率挑，结果赢家对忙碌的队列来说太慢了。速度是一条谁都没写下来的要求。现在速度和客户在乎的其他东西，都在跑之前先写进标准线。</span></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Change the bar</b> (say 95% on easy, or 2 seconds) and see the winner change.</span><span class="zh"><b>改一改标准线</b>（比如简单理赔 95%，或 2 秒），看赢家怎么变。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Run the router</b> over all the claims and count how many went to the strong model.</span><span class="zh"><b>把路由器跑一遍所有理赔</b>，数数有多少份交给了强模型。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Write what would make you revisit</b> the choice, in your own words.</span><span class="zh"><b>用自己的话写下</b>什么情况会让你重新看这个选择。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">Back at the shophouse</span><span class="zh">回到店屋</span></b><span class="en">Mr Goh reads the half page twice, taps the line about the fallback, and reaches for the red rubber stamp. Then he stops. “Keep this in the grey filing cabinet,” he says, “and when the prices change, we open it again.” A good choice at Kaya is one that can be explained at the front desk.</span><span class="zh">Goh 先生把半页纸读了两遍，点了点后备方案那一行，伸手去拿红色橡皮图章。然后他停住了。“把它收进灰色档案柜，”他说，“价格变了，我们再把它拿出来。”在 Kaya，好的选择就是在前台能讲得清楚的选择。</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Agree the bar with the customer before the contest, in numbers.<br>• Put speed and safety in the bar, not only accuracy.<br>• Run each candidate twice before you trust a row.<br>• A model must pass every line of the bar, not most of them.<br>• Pick the cheapest model that clears it, and name a stronger fallback for the claims it is unsure of.<br>• Better prompts, tools and checks often beat a pricier model.<br>• Write the reason in half a page, with what would make you revisit it.</p><p class="zh" style="margin:0">• 比赛前先和客户用数字谈好标准线。<br>• 标准线里要有速度和安全，不只是准确率。<br>• 每个候选跑两遍，再相信那一行。<br>• 模型必须过标准线的每一条，而不是大多数。<br>• 选过线里最便宜的，并为它拿不准的理赔指定一个更强的后备。<br>• 更好的提示词、工具和检查，往往胜过更贵的模型。<br>• 用半页纸写下理由，以及什么情况会让你重新考虑。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI FDE</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+
+ game($('g1'),[
+  {en:'Matches the handlers on at least 90% of easy claims',zh:'简单理赔上至少 90% 和理赔员一致',a:'b',ex:{en:'A clear accuracy line, on the claims that should be simple.',zh:'一条清楚的准确率线，针对本该简单的理赔。'},hint:{en:'Is it a number the customer can check?',zh:'这是客户能核对的数字吗？'}},
+  {en:'Never approves a big payout the handlers did not approve',zh:'绝不批准理赔员没批准的大额赔付',a:'b',ex:{en:'Some mistakes cost far more than others, so they get their own line.',zh:'有些错误的代价高得多，所以单独一条。'},hint:{en:'Would one such mistake hurt?',zh:'这样的错误出一次会疼吗？'}},
+  {en:'Answers within 5 seconds',zh:'5 秒内给出答案',a:'b',ex:{en:'Speed is a real need on a busy queue, so write it down.',zh:'队列忙的时候速度是真需求，要写下来。'},hint:{en:'Would a slow model hold up the desk?',zh:'慢的模型会拖住理赔台吗？'}},
+  {en:'The model has the most impressive name',zh:'模型的名字最响亮',a:'o',ex:{en:'A name is not a requirement.',zh:'名字不是需求。'},hint:{en:'Can you measure it?',zh:'能量出来吗？'}},
+  {en:'It is the newest release',zh:'它是最新发布的',a:'o',ex:{en:'New is not the same as good enough for this job.',zh:'新不等于够用。'},hint:{en:'Does newest mean it passes our claims?',zh:'最新就意味着能过我们的理赔吗？'}}],[{k:'b',en:'In the bar',zh:'写进标准线'},{k:'o',en:'Leave out',zh:'不用写'}],{en:'Item',zh:'内容'});
+
+ predict($('p1'),{q:{en:'A model gets 22 claims right in run 1 and 24 in run 2, out of 25 each. What accuracy do you report?',zh:'一个模型第一遍对 22 份，第二遍对 24 份（各 25 份）。你该汇报多少准确率？'},opts:[{k:'a',en:'88%, the lower run',zh:'88%，较差的那遍'},{k:'b',en:'92%, the average of both',zh:'92%，两遍的平均'},{k:'c',en:'96%, the best run',zh:'96%，最好的那遍'}],a:'b',out:{en:'(22 + 24) ÷ 50 = 46 ÷ 50 = 92%',zh:'(22 + 24) ÷ 50 = 46 ÷ 50 = 92%'},ex:{en:'The average of both runs is fairer than the best or the worst one. The gap between the runs also shows how much the model wobbles.',zh:'两遍的平均比最好或最差的一遍更公平。两遍之间的差距也能看出这个模型有多不稳。'},hint:{en:'Add the right answers from both runs, then divide by all the answers.',zh:'把两遍对的加起来，再除以全部答案数。'}});
+
+ predict($('p2'),{q:{en:'A model’s two runs cost US$0.05 in total for 25 claims each (50 claims). What is the cost per 1,000 claims?',zh:'一个模型两遍加起来共花 0.05 美元，每遍 25 份理赔（共 50 份）。每 1,000 份理赔的成本是多少？'},opts:[{k:'a',en:'US$1',zh:'1 美元'},{k:'b',en:'US$2.50',zh:'2.50 美元'},{k:'c',en:'US$50',zh:'50 美元'}],a:'a',out:{en:'0.05 ÷ 50 × 1,000 = US$1',zh:'0.05 ÷ 50 × 1,000 = 1 美元'},ex:{en:'The 0.05 covers 50 claims, so one claim is US$0.001 and 1,000 are US$1. That is why the code divides by n, the number of attempts across both runs.',zh:'0.05 对应 50 份，所以一份 0.001 美元，1,000 份就是 1 美元。这就是代码要除以 n（两遍的总次数）的原因。'},hint:{en:'Divide by 50, not 25.',zh:'要除以 50，不是 25。'}});
+
+ game($('g2'),[
+  {en:'Model A: 96% on easy, no big mistakes, 9 seconds, US$6 per 1,000',zh:'模型 A：简单理赔 96%，没有大错，9 秒，每 1,000 份 6 美元',a:'f',ex:{en:'Very accurate, but 9 seconds is over the 5-second limit.',zh:'很准，但 9 秒超过了 5 秒的上限。'},hint:{en:'Check the seconds line.',zh:'看看秒数那一条。'}},
+  {en:'Model B: 92% on easy, no big mistakes, 3 seconds, US$1.80 per 1,000',zh:'模型 B：简单理赔 92%，没有大错，3 秒，每 1,000 份 1.80 美元',a:'c',ex:{en:'It passes all three lines.',zh:'三条都过了。'},hint:{en:'Check each of the three lines.',zh:'三条逐一核对。'}},
+  {en:'Model C: 88% on easy, no big mistakes, 2 seconds, US$0.40 per 1,000',zh:'模型 C：简单理赔 88%，没有大错，2 秒，每 1,000 份 0.40 美元',a:'f',ex:{en:'Cheap and fast, but 88% is under the 90% line.',zh:'便宜又快，但 88% 低于 90% 的线。'},hint:{en:'Check the accuracy line.',zh:'看看准确率那一条。'}},
+  {en:'Model D: 94% on easy, 1 wrongly approved big payout, 4 seconds, US$0.90 per 1,000',zh:'模型 D：简单理赔 94%，错批 1 笔大额赔付，4 秒，每 1,000 份 0.90 美元',a:'f',ex:{en:'One wrongly approved big payout breaks a line that allows none.',zh:'错批一笔大额赔付，就违反了一笔都不许的那条线。'},hint:{en:'Check the “never” line.',zh:'看看“绝不”那一条。'}},
+  {en:'Model E: 91% on easy, no big mistakes, 4 seconds, US$3.50 per 1,000',zh:'模型 E：简单理赔 91%，没有大错，4 秒，每 1,000 份 3.50 美元',a:'c',ex:{en:'It passes all three lines, just at a higher price.',zh:'三条都过了，只是价格更高。'},hint:{en:'Price is not part of the bar.',zh:'价格不在标准线里。'}}],[{k:'c',en:'Clears the bar',zh:'过线'},{k:'f',en:'Does not clear',zh:'没过线'}],{en:'Model',zh:'模型'});
+
+ predict($('p3'),{q:{en:'The cheap model costs US$2 per 1,000 claims and the strong one US$12. Of 1,000 claims, the cheap model refers 100 to the strong one. What does the router cost for all 1,000?',zh:'便宜模型每 1,000 份理赔 2 美元，强模型 12 美元。1,000 份理赔里，便宜模型把 100 份转给了强模型。路由器处理这 1,000 份一共多少钱？'},opts:[{k:'a',en:'US$3.20',zh:'3.20 美元'},{k:'b',en:'US$12',zh:'12 美元'},{k:'c',en:'US$14',zh:'14 美元'}],a:'a',out:{en:'cheap: 1,000 claims = US$2. strong: 100 claims = 100 ÷ 1,000 × 12 = US$1.20. total US$3.20',zh:'便宜的：1,000 份 = 2 美元。强的：100 份 = 100 ÷ 1,000 × 12 = 1.20 美元。合计 3.20 美元'},ex:{en:'Every claim goes to the cheap model, but only a tenth also go to the strong one. That is far below US$12 for the strong model on everything.',zh:'每份都先交给便宜模型，只有十分之一再交给强模型。远低于全部交给强模型的 12 美元。'},hint:{en:'The cheap model sees all 1,000. The strong one sees only 100.',zh:'便宜模型看全部 1,000 份，强模型只看 100 份。'}});
+
+ predict($('p4'),{q:{en:'Which sentence is best for Mr Goh’s half page?',zh:'哪一句最适合写进 Goh 先生的半页纸？'},opts:[{k:'a',en:'We chose Model B because it is the newest and everyone says it is great.',zh:'我们选了模型 B，因为它最新，大家都说它很棒。'},{k:'b',en:'We chose Model B: the cheaper of the two that cleared the agreed bar, with Claude Sonnet 5.5 as fallback.',zh:'我们选了模型 B：在过了约定标准线的两个里更便宜，并以 Claude Sonnet 5.5 做后备。'},{k:'c',en:'Model B had the best score, so it wins.',zh:'模型 B 分数最高，所以它赢。'}],a:'b',ex:{en:'It names the agreed bar, the reason for the pick and the fallback, so Mr Goh can repeat it to the owners.',zh:'它写明了约定的标准线、选择的理由和后备方案，Goh 先生可以原样转述给老板们。'},hint:{en:'Which one points back to the bar?',zh:'哪一句回扣到了标准线？'}});
+});
+</script></body></html>

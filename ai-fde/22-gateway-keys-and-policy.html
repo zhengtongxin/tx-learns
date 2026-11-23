@@ -1,0 +1,279 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gateway, keys and policy | TX Learns</title>
+<meta name="description" content="Give every caller a key, put an action gateway with a written policy in front of the agent's tools, find out which layer says no, and roll the policy out in log-only mode first."><meta property="og:title" content="Gateway, keys and policy | TX Learns"><meta property="og:description" content="Give every caller a key, put an action gateway with a written policy in front of the agent's tools, find out which layer says no, and roll the policy out in log-only mode first."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-fde/22-gateway-keys-and-policy.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-24">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Improving and securing · Lesson 3</span><span class="zh">改进与加固 · 第 3 课</span></span><h1><span class="en">Gateway, keys and policy</span><span class="zh">网关、密钥与策略</span></h1><p class="meta"><span class="en">Make sure only known callers can act, and that every action passes a written rule first · ~30 min · concept with one runnable idea</span><span class="zh">确保只有认得的调用方才能动手，并且每个动作都先过一条写下来的规则 · 约 30 分钟 · 概念课，带一段能跑的代码</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">Kumar, the one-person IT team, reads the agent’s network calls and frowns. They carry no name tag. Anyone who can reach the backend can record a decision or pay a claim, and the backend would not ask who they are. Mei Ling fixes it in layers: a key for every caller, a gateway in front of the agent’s actions, and a written policy. You need Flask and requests (<code>pip install flask requests</code>), and the Agents SDK from the memory lesson (<code>pip install openai-agents</code>) for the agent’s tools.</p>
+<p class="zh" style="margin:0">IT 部门只有一个人的 Kumar 看了智能体的网络调用，皱起眉头。这些调用没有挂名牌。任何能连到后端的人，都能记录判定或给理赔付款，而后端也不会问对方是谁。Mei Ling 分层来补：每个调用方一把密钥，智能体的动作前面放一个网关，再加一份写下来的策略。你需要 Flask 和 requests（<code>pip install flask requests</code>），以及记忆那课用过的 Agents SDK（<code>pip install openai-agents</code>）来做智能体的工具。</p></div>
+
+<h2><span class="en">Step 1 · See the hole</span><span class="zh">第 1 步 · 先看清漏洞</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Here is a tiny backend with two routes the agent uses: record a decision, and pay a claim. It works, and that is the problem. It never asks who is calling. On your laptop that does not matter. Once other people can reach it, it matters a lot. Prove it to yourself with Flask’s test client, which calls the app without starting a server.</p>
+<p class="zh" style="margin:0 0 8px">这是一个很小的后端，有智能体用的两条路由：记录判定，和给理赔付款。它能用，而问题正在于此：它从不问是谁在调用。在你的笔记本上这无所谓，一旦别人能连到它，就很要紧了。用 Flask 的测试客户端自己验证一下，它不用启动服务器就能调用应用。</p></div>
+<div class="codebox"><span class="chg"># backend.py
+from flask import Flask, jsonify, request
+
+app = Flask(__name__)
+decisions, payments = {}, []
+
+@app.get("/health")
+def health():
+    return jsonify(ok=True)
+
+@app.post("/claims/&lt;claim_id&gt;/decision")
+def record_decision(claim_id):
+    decisions[claim_id] = request.get_json()
+    return jsonify(ok=True)
+
+@app.post("/claims/&lt;claim_id&gt;/pay")
+def pay(claim_id):
+    amount = request.get_json()["amount"]
+    payments.append((claim_id, amount))
+    return jsonify(paid=amount)</span><span class="dim">
+
+# try_it.py
+# from backend import app
+# client = app.test_client()
+# print(client.post("/claims/C007/pay", json={"amount": 5000}).status_code)    # 200: nobody asked who you are</span></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Every caller gets a key</span><span class="zh">第 2 步 · 每个调用方一把密钥</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">An <b>API key</b> is a long secret string that a caller sends in a header on every call, like showing your pass at the door. Give each caller its own: the agent, the dashboard. Then you can tell them apart in logs, and cancel one without breaking the other. The backend now refuses every route except <code>/health</code> unless the key matches. <code>hmac.compare_digest</code> compares without leaking, through timing, how much of a guess was right.</p>
+<p class="zh" style="margin:0 0 8px"><b>API 密钥</b>是一长串秘密字符，调用方每次调用都在请求头里带上，就像在门口出示通行证。每个调用方一把自己的：智能体一把，看板一把。这样你在日志里能分清它们，也能只作废一把而不影响另一把。现在后端除了 <code>/health</code>，所有路由都必须密钥对得上才放行。<code>hmac.compare_digest</code> 比较时，不会通过耗时泄露你猜对了多少。</p></div>
+<div class="codebox"><span class="dim"># backend.py, changed
+</span><span class="chg">import hmac, os
+from flask import Flask, g, jsonify, request</span><span class="dim">
+
+app = Flask(__name__)
+decisions, payments = {}, []
+
+</span><span class="chg">CALLERS = {os.environ["AGENT_KEY"]: "agent", os.environ["DASHBOARD_KEY"]: "dashboard"}
+
+def who(sent):
+    for secret, name in CALLERS.items():
+        if hmac.compare_digest(sent.encode(), secret.encode()):
+            return name
+    return None
+
+@app.before_request
+def need_key():
+    if request.path == "/health":
+        return None
+    g.caller = who(request.headers.get("X-API-Key", ""))
+    if g.caller is None:
+        return jsonify(error="missing or wrong key"), 401</span><span class="dim">
+
+# ...the three routes stay as they were
+
+# try_it.py
+# import os
+# os.environ["AGENT_KEY"] = "agent-" + "x" * 40        # demo values only; real keys never go in code
+# os.environ["DASHBOARD_KEY"] = "dash-" + "y" * 40
+# from backend import app
+# client, body = app.test_client(), {"amount": 300}
+# print(client.post("/claims/C007/pay", json=body).status_code)                                              # 401
+# print(client.post("/claims/C007/pay", json=body, headers={"X-API-Key": "wrong"}).status_code)             # 401
+# print(client.post("/claims/C007/pay", json=body, headers={"X-API-Key": os.environ["AGENT_KEY"]}).status_code)  # 200</span></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Go public only after that</span><span class="zh">第 3 步 · 做完这些才上公网</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The order matters. Put keys in first, then give the app a public address, never the other way round. Make the app refuse to start without good keys, so a forgotten setting cannot leave the door open. Make each key with Python’s <code>secrets</code> module and keep it in your host’s secret settings, never in the code or in git.</p>
+<p class="zh" style="margin:0 0 8px">顺序很重要。先装密钥，再给应用一个公网地址，千万别反过来。让应用在没有像样密钥时拒绝启动，这样忘了设置，也不会让门开着。用 Python 的 <code>secrets</code> 模块生成每把密钥，放进主机的秘密设置里，绝不写进代码或 git。</p></div>
+<div class="codebox"><span class="dim"># make one key per caller, once:
+# python -c "import secrets; print(secrets.token_urlsafe(32))"
+
+# backend.py, above the CALLERS line
+</span><span class="chg">for name in ("AGENT_KEY", "DASHBOARD_KEY"):
+    if len(os.environ.get(name, "")) &lt; 32:
+        raise SystemExit(name + " is missing or too short: refusing to start")</span></div>
+<div class="try" id="p3"></div>
+
+<h2><span class="en">Step 4 · A gateway in front of the agent’s actions</span><span class="zh">第 4 步 · 在智能体的动作前面放一个网关</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">This is a different gateway from the model gateway you have used since the scoreboard lesson, which sends model calls out. This <b>action gateway</b> sits in front of what the agent <em>does</em>. The agent no longer calls the backend. It calls the gateway, which checks the agent’s key and forwards allowed calls using a key only the gateway holds. To the agent, each route is a tool. The backend now trusts only the gateway and the dashboard. In the start-up check from step 3, replace <code>AGENT_KEY</code> with <code>GATEWAY_BACKEND_KEY</code>.</p>
+<p class="zh" style="margin:0 0 8px">这个网关和你从计分板那课起就一直用的模型网关不是一回事，那个负责把模型调用发出去。这个<b>动作网关</b>站在智能体要<em>做的事</em>前面。智能体不再直接调用后端，而是调用网关；网关核对智能体的密钥，再用只有网关才有的密钥转发被允许的调用。对智能体来说，每条路由就是一个工具。后端现在只信任网关和看板。所以第 3 步的启动检查里，要把 <code>AGENT_KEY</code> 换成 <code>GATEWAY_BACKEND_KEY</code>。</p></div>
+<div class="codebox"><span class="dim"># backend.py: the agent’s entry in CALLERS is replaced by the gateway’s (and in the start-up check)
+</span><span class="chg">CALLERS = {os.environ["GATEWAY_BACKEND_KEY"]: "gateway", os.environ["DASHBOARD_KEY"]: "dashboard"}</span><span class="dim">
+
+# action_gateway.py
+import hmac, os, re, requests
+from flask import Flask, g, jsonify, request
+
+app = Flask(__name__)
+BACKEND = os.environ.get("BACKEND_URL", "http://127.0.0.1:5000")
+BACKEND_KEY = os.environ["GATEWAY_BACKEND_KEY"]       # only the gateway holds this
+AGENT_KEY = os.environ["AGENT_KEY"]                    # the agent’s key for the gateway
+
+@app.before_request
+def need_key():
+    sent = request.headers.get("X-API-Key", "")
+    if not hmac.compare_digest(sent.encode(), AGENT_KEY.encode()):
+        return jsonify(error="missing or wrong key"), 401
+    g.caller = "agent"
+
+def forward(path, body):
+    reply = requests.post(BACKEND + path, json=body, headers={"X-API-Key": BACKEND_KEY}, timeout=10)
+    return jsonify(reply.json()), reply.status_code
+
+def claim_id_of(body):
+    cid = str(body.get("claim_id", ""))
+    return cid if re.fullmatch(r"C\d{3,6}", cid) else None
+
+@app.post("/tools/record_decision")
+def record_decision():
+    body = request.get_json(silent=True) or {}
+    if claim_id_of(body) is None:
+        return jsonify(error="bad claim id"), 400
+    fields = {k: body.get(k) for k in ("action", "payout", "reason")}
+    return forward("/claims/" + body["claim_id"] + "/decision", fields)
+
+@app.post("/tools/pay_claim")
+def pay_claim():
+    body = request.get_json(silent=True) or {}
+    if claim_id_of(body) is None:
+        return jsonify(error="bad claim id"), 400
+    return forward("/claims/" + body["claim_id"] + "/pay", {"amount": body.get("amount")})</span><span class="dim">
+
+# agent_tools.py: the agent sees the gateway’s routes as tools
+import os, requests
+from agents import function_tool
+
+GATEWAY_URL = os.environ.get("GATEWAY_URL", "http://127.0.0.1:5001")
+HEADERS = {"X-API-Key": os.environ["AGENT_KEY"]}      # a key for the gateway, not for the backend
+
+def call(tool, body):
+    reply = requests.post(GATEWAY_URL + "/tools/" + tool, json=body, headers=HEADERS, timeout=10)
+    return str(reply.status_code) + " " + reply.text    # a refusal comes back as text the agent can read
+
+@function_tool
+def record_decision(claim_id: str, action: str, payout: float, reason: str) -> str:
+    """Record the decision on a claim."""
+    return call("record_decision", {"claim_id": claim_id, "action": action, "payout": payout, "reason": reason})
+
+@function_tool
+def pay_claim(claim_id: str, amount: float) -> str:
+    """Pay an approved claim."""
+    return call("pay_claim", {"claim_id": claim_id, "amount": amount})</span></div>
+<div class="try" id="p4"></div>
+
+<h2><span class="en">Step 5 · Write the policy as rules</span><span class="zh">第 5 步 · 把策略写成规则</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>policy</b> is a short list of rules, kept apart from the code that runs the agent, so Mr Goh can read it. Real systems use rule languages made for this (Cedar and Rego are two). Ours is the same idea in a plain Python list. Each rule says which tool, and when to refuse. Our first rule: refuse any payment above the limit. If the amount is missing or not a number, refuse too. When unsure, say no.</p>
+<p class="zh" style="margin:0 0 8px"><b>策略</b>是一份简短的规则清单，和运行智能体的代码分开放，这样 Goh 先生也读得懂。真正的系统会用专门的规则语言（Cedar 和 Rego 是其中两种）。我们这里是同一个想法，写成一个普通的 Python 列表。每条规则写明是哪个工具、什么情况下拒绝。第一条规则：拒绝任何超过限额的付款。如果金额缺失或不是数字，也拒绝。拿不准，就说不。</p></div>
+<div class="codebox"><span class="chg"># policy.py
+RULES = [
+    {"id": "pay-limit", "tool": "pay_claim", "field": "amount", "above": 800,
+     "say": "Payments over S$800 need a handler’s signature."},
+]
+
+def check(tool, args):
+    for rule in RULES:
+        if rule["tool"] != tool:
+            continue
+        try:
+            too_big = float(args.get(rule["field"])) &gt; rule["above"]
+        except (TypeError, ValueError):
+            too_big = True                      # missing or not a number: refuse
+        if too_big:
+            return False, rule
+    return True, None</span><span class="dim">
+
+# action_gateway.py: add the import at the top, and pay_claim becomes
+</span><span class="chg">from policy import check
+
+@app.post("/tools/pay_claim")
+def pay_claim():
+    body = request.get_json(silent=True) or {}
+    if claim_id_of(body) is None:
+        return jsonify(error="bad claim id"), 400
+    ok, rule = check("pay_claim", body)
+    if not ok:
+        return jsonify(error=rule["say"], rule=rule["id"]), 403
+    return forward("/claims/" + body["claim_id"] + "/pay", {"amount": body.get("amount")})</span></div>
+<div class="try" id="p5"></div>
+
+<h2><span class="en">Step 6 · Find out which layer says no</span><span class="zh">第 6 步 · 查出是哪一层说了不</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">You now have four layers: the agent’s instructions (the prompt), the guardrail from the last lesson, the backend’s key check, and the policy. Test them one by one, so you know who answers when something is refused. Start the backend and the gateway in two terminals first: <code>flask --app backend run --port 5000</code> and <code>flask --app action_gateway run --port 5001</code>, with the keys set as environment variables. The script below checks the two layers that live in this lesson. The key point: a direct call to the backend with the agent’s key must fail. If it works, the agent can skip the gateway, and the policy will never see its calls.</p>
+<p class="zh" style="margin:0 0 8px">现在你有四层：智能体的指令（提示词）、上一课的护栏、后端的密钥检查，还有策略。一层一层地测，这样出现拒绝时你知道是谁回的话。先在两个终端里分别启动后端和网关：<code>flask --app backend run --port 5000</code>，<code>flask --app action_gateway run --port 5001</code>，启动前先把密钥设成环境变量。下面的脚本检查本课里的两层。关键一点：拿着智能体的密钥直接调用后端，必须失败。如果成功了，智能体就能绕过网关，策略永远看不到它的调用。</p></div>
+<div class="codebox"><span class="chg"># layers.py: run with the backend on port 5000 and the action gateway on port 5001
+import os, requests
+
+def post(url, key, body):
+    reply = requests.post(url, json=body, headers={"X-API-Key": key}, timeout=10)
+    return reply.status_code, reply.text
+
+key = os.environ["AGENT_KEY"]
+print("direct to backend:", post("http://127.0.0.1:5000/claims/C007/pay", key, {"amount": 300}))
+print("gateway, S$300:", post("http://127.0.0.1:5001/tools/pay_claim", key, {"claim_id": "C007", "amount": 300}))
+print("gateway, S$1,200:", post("http://127.0.0.1:5001/tools/pay_claim", key, {"claim_id": "C007", "amount": 1200}))
+# expected: 401 (backend: not a key it knows) / 200 / 403 (the policy)</span></div>
+<p class="en">Which layer says no in each case? Sort them.</p>
+<p class="zh">每种情况是哪一层说了不？来分一分。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Step 7 · Log first, then enforce</span><span class="zh">第 7 步 · 先记录，再执行</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A new rule can be wrong, and a wrong rule that refuses real payments hurts. So start in <b>log-only</b> mode: the gateway writes down what the policy <em>would</em> have done, and lets the call through. After a few days, read the log. If every “would refuse” is one you agree with, switch to <b>enforce</b>. A mistyped mode stops the app from starting, so a typo cannot quietly leave you in log-only.</p>
+<p class="zh" style="margin:0 0 8px">新规则可能是错的，而一条错误的规则拒绝了正常付款，代价不小。所以先从<b>只记录</b>模式开始：网关写下策略<em>本来会</em>怎么做，然后放行。几天之后读日志。如果每一条“本来会拒绝”你都认同，就切到<b>执行</b>模式。模式写错了会让应用启动不了，所以一个手误不会悄悄把你留在只记录模式。</p></div>
+<div class="codebox"><span class="dim"># action_gateway.py, changed
+</span><span class="chg">import json, time
+
+MODE = os.environ.get("POLICY_MODE", "log")            # start with "log"; later "enforce"
+if MODE not in ("log", "enforce"):
+    raise SystemExit("POLICY_MODE must be log or enforce")
+
+def apply_policy(tool, body):
+    ok, rule = check(tool, body)
+    with open("decisions.log", "a") as log:
+        log.write(json.dumps({"at": time.time(), "caller": g.caller, "tool": tool, "args": body,
+                              "allowed": ok, "rule": rule["id"] if rule else None, "mode": MODE}) + "\n")
+    if ok or MODE == "log":
+        return None
+    return jsonify(error=rule["say"], rule=rule["id"]), 403</span><span class="dim">
+
+# in pay_claim, replace the check(...) lines with:
+</span><span class="chg">    refused = apply_policy("pay_claim", body)
+    if refused:
+        return refused</span><span class="dim">
+
+# read_log.py
+</span><span class="chg">import json
+lines = [json.loads(line) for line in open("decisions.log")]
+would_refuse = [l for l in lines if not l["allowed"]]
+print(len(lines), "calls;", len(would_refuse), "would have been refused")
+for l in would_refuse:
+    print(l["caller"], l["tool"], l["args"], l["rule"])</span></div>
+<div class="try" id="p7"></div>
+
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我当时想错了</span></b><span class="en">I had the policy in place and felt safe, but the agent’s tools still called the backend directly with its own key, which the backend accepted. The policy protected nothing, because it never saw a single call. The fix was to give the agent only a gateway key and move it onto the gateway’s tools.</span><span class="zh">我把策略装好了，心里踏实，可智能体的工具还拿着它自己的密钥直接调用后端，后端照单全收。策略什么也没保护，因为它一次调用都没看到过。解决办法是只给智能体一把网关的密钥，并把它换到网关的工具上。</span></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try a call with no key, a wrong key and the right key</b>, and note each status code.</span><span class="zh"><b>分别试：没有密钥、错的密钥、对的密钥</b>，并记下每个状态码。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Try a payment above the limit through each layer</b> and write down which one answered.</span><span class="zh"><b>让超过限额的付款走过每一层</b>，写下是哪一层回的话。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Switch the policy from log-only to enforce</b> and repeat the S$1,200 payment.</span><span class="zh"><b>把策略从只记录切到执行</b>，再付一次 S$1,200。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">Back at the shophouse</span><span class="zh">回到店屋</span></b><span class="en">Kumar hands out three keys on three coloured tags: the dashboard, the gateway and one spare he keeps himself. Nobody gets the cabinet key. The payment desk has a house rule too: nothing over S$800 leaves without the red rubber stamp. For the first week the rule only writes in a notebook what it would have refused. On Friday Kumar and Aisha read the notebook together. Then they stamp it for real.</span><span class="zh">Kumar 把三把钥匙挂在三个不同颜色的牌子上：看板一把，网关一把，还有一把备用的他自己收着。没有人拿到档案柜的钥匙。付款柜台也有一条店规：超过 S$800 的，没有红色橡皮图章就不能出门。第一个星期，这条规矩只是把它本来会拒绝的事写在笔记本里。星期五，Kumar 和 Aisha 一起读那本笔记。然后才真的盖章执行。</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Every caller gets its own key, sent in a header on every call, and the backend refuses routes without it.<br>• Put keys in first, then a public address; refuse to start when keys are missing.<br>• An action gateway sits in front of what the agent does, and the agent sees its routes as tools.<br>• A policy is a short written list of rules, and it fails closed when unsure.<br>• A policy only protects what goes through it. If the agent can still reach the backend, it protects nothing.<br>• Start in log-only mode, read the decisions, then enforce.<br>• Keep several layers and test which one says no.</p><p class="zh" style="margin:0">• 每个调用方一把自己的密钥，每次调用都在请求头里带上，后端没有密钥就拒绝路由。<br>• 先装密钥，再上公网；缺了密钥就拒绝启动。<br>• 动作网关站在智能体要做的事前面，智能体把它的路由当成工具。<br>• 策略是一份简短的书面规则，拿不准时按“拒绝”处理。<br>• 策略只保护经过它的东西。智能体要是还能直接连到后端，它就什么也保护不了。<br>• 先用只记录模式，读完决定记录，再执行。<br>• 保留多层，并测出是哪一层说了不。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI FDE</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+
+ predict($('p1'),{q:{en:'The test prints 200 for a S$5,000 payment sent with no key at all. What does that mean?',zh:'测试里，一笔不带任何密钥的 S$5,000 付款，打印出了 200。这说明什么？'},opts:[{k:'a',en:'Anyone who can reach the backend can pay a claim',zh:'任何能连到后端的人，都能给理赔付款'},{k:'b',en:'The payment was checked and found fine',zh:'这笔付款被检查过，没问题'},{k:'c',en:'Only the agent knows the address, so it is safe',zh:'只有智能体知道地址，所以是安全的'}],a:'a',ex:{en:'The route never asks who is calling. A hidden address is not a lock.',zh:'这条路由从不问是谁在调用。藏起来的地址不是锁。'},hint:{en:'Did anything in the code look at the caller?',zh:'代码里有什么东西看过调用方吗？'}});
+
+ predict($('p2'),{q:{en:'A caller sends the header X-API-Key: wrong. What does the backend return?',zh:'调用方发来请求头 X-API-Key: wrong。后端返回什么？'},opts:[{k:'a',en:'401, the same as for no key at all',zh:'401，和完全没带密钥一样'},{k:'b',en:'200, but it records a warning',zh:'200，但记一条警告'},{k:'c',en:'500, because the key is not in the list',zh:'500，因为密钥不在清单里'}],a:'a',ex:{en:'Missing and wrong keys get the same refusal, so a guesser learns nothing from the difference.',zh:'没带密钥和密钥错误得到同样的拒绝，所以乱猜的人从差别里学不到东西。'},hint:{en:'Look at what who() returns for a key it does not know.',zh:'看看 who() 遇到不认识的密钥时返回什么。'}});
+
+ predict($('p3'),{q:{en:'Why make the app refuse to start when a key is missing or short?',zh:'为什么要让应用在密钥缺失或太短时拒绝启动？'},opts:[{k:'a',en:'So a forgotten setting fails loudly at start-up, instead of quietly running with a weak door',zh:'这样忘了设置时会在启动时大声失败，而不是悄悄带着一扇弱门运行'},{k:'b',en:'To make deployment slower on purpose',zh:'故意让部署变慢'},{k:'c',en:'Because Flask cannot start without keys',zh:'因为 Flask 没有密钥就启动不了'}],a:'a',ex:{en:'A loud failure on day one is much cheaper than a quiet hole in production.',zh:'第一天大声失败，比在线上留下一个悄悄的漏洞便宜得多。'},hint:{en:'Which is worse: an app that will not start, or an open one?',zh:'哪个更糟：启动不了的应用，还是开着门的应用？'}});
+
+ predict($('p4'),{q:{en:'Why does the agent hold only a gateway key, never a backend key?',zh:'为什么智能体只持有网关的密钥，从不持有后端的密钥？'},opts:[{k:'a',en:'With a backend key it could call the backend directly and skip the gateway',zh:'有了后端密钥，它就能直接调用后端，绕过网关'},{k:'b',en:'Backend keys are longer and harder to store',zh:'后端密钥更长，更难保存'},{k:'c',en:'The gateway needs the agent to have fewer keys to run faster',zh:'网关需要智能体少带密钥才跑得快'}],a:'a',ex:{en:'The gateway only protects calls that go through it, so the agent must have no other way in.',zh:'网关只保护经过它的调用，所以智能体不能有别的路可进。'},hint:{en:'What could the agent do with a backend key?',zh:'智能体拿着后端密钥能做什么？'}});
+
+ predict($('p5'),{q:{en:'The rule says refuse an amount above 800. A payment of exactly S$800 arrives. What happens?',zh:'规则写的是拒绝金额高于 800。一笔正好 S$800 的付款到了。会怎样？'},opts:[{k:'a',en:'It is allowed; 800 is not above 800',zh:'放行；800 不高于 800'},{k:'b',en:'It is refused, because it is at the limit',zh:'拒绝，因为正好到了限额'},{k:'c',en:'It is refused, because the amount is a number',zh:'拒绝，因为金额是个数字'}],a:'a',ex:{en:'The rule is “above”, so exactly S$800 passes. Say it clearly in the rule’s message, because people read “limit” both ways.',zh:'规则写的是“高于”，所以正好 S$800 能通过。要在规则的提示里写清楚，因为“限额”有两种读法。'},hint:{en:'Read the comparison in check(): is it above, or at least?',zh:'看 check() 里的比较：是高于，还是至少？'}});
+
+ game($('g1'),[
+  {en:'A call straight to the backend with no key',zh:'没带密钥、直接打到后端的调用',a:'k',ex:{en:'The backend checks the key before anything else.',zh:'后端先检查密钥，其他的都排在后面。'},hint:{en:'Who checks keys on the backend?',zh:'后端上谁来查密钥？'}},
+  {en:'A S$1,200 payment sent through the gateway with the right key',zh:'带着正确密钥、经过网关发出的 S$1,200 付款',a:'p',ex:{en:'The key is fine; the written policy refuses the amount.',zh:'密钥没问题；是写下来的策略拒绝了这个金额。'},hint:{en:'Which layer reads the amount?',zh:'哪一层看金额？'}},
+  {en:'A claim whose story says “ignore your rules”, held before the agent reads it',zh:'叙述里写着“忽略你的规则”、在智能体读到之前就被拦下的理赔',a:'g',ex:{en:'That is the guardrail from the last lesson, reading the customer’s words.',zh:'那是上一课的护栏，在读客户的话。'},hint:{en:'Which layer reads what the customer wrote?',zh:'哪一层读客户写的东西？'}},
+  {en:'The agent’s own instructions say “never pay over S$800”, and it obeys them',zh:'智能体自己的指令写着“绝不付超过 S$800 的款”，而它照办了',a:'i',ex:{en:'That is the prompt. It is the softest layer, because a model can be talked out of it.',zh:'那是提示词。它是最软的一层，因为模型可能被说服而不照办。'},hint:{en:'Which layer is just words the model reads?',zh:'哪一层只是模型读到的文字？'}}],[{k:'k',en:'The backend’s key check',zh:'后端的密钥检查'},{k:'p',en:'The policy',zh:'策略'},{k:'g',en:'The guardrail',zh:'护栏'},{k:'i',en:'The prompt',zh:'提示词'}],{en:'Case',zh:'情况'});
+
+ predict($('p7'),{q:{en:'The policy is in log-only mode and the agent tries a S$1,200 payment. What happens?',zh:'策略在只记录模式，智能体尝试付一笔 S$1,200。会怎样？'},opts:[{k:'a',en:'The payment goes through, and the log says it would have been refused',zh:'付款通过，日志里写着它本来会被拒绝'},{k:'b',en:'The payment is refused, and nothing is logged',zh:'付款被拒绝，什么都不记'},{k:'c',en:'The payment is refused, and also logged',zh:'付款被拒绝，同时也记下来'}],a:'a',ex:{en:'Log-only mode never blocks. That is the point: you learn what enforcing would do before it can hurt a real payment.',zh:'只记录模式从不拦截。这正是它的用处：在它能伤到真实付款之前，先知道执行起来会怎样。'},hint:{en:'Look at the last line of apply_policy for mode log.',zh:'看 apply_policy 在 log 模式下的最后几行。'}});
+});
+</script></body></html>
