@@ -21,7 +21,7 @@ permissions:
   pull-requests: write
   actions: write
 concurrency:
-  group: writer-${{ github.event_name }}
+  group: writer-${{ github.event_name }}-${{ inputs.folder || github.run_id }}
   cancel-in-progress: false
 jobs:
   # A push to the notes branch: find the note folders that changed and start the writer on main with them.
