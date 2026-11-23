@@ -150,7 +150,8 @@ jobs:
             --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(node scripts/check-counts.mjs:*),Bash(node scripts/check-pages.mjs:*),Bash(ls:*)" \
             --output-format text | tail -40
           # Drop scratch files the writer made outside the site (e.g. a .gen/ page generator), so they never deploy.
-          git -c core.quotePath=false ls-files --others --exclude-standard | { grep -v -E '^(agentic-ai|ai-engineer|assets)/|^\.writer-summary\.md$|^inbox/' || true; } | while read -r f; do echo "Removing scratch file $f"; rm -f -- "$f"; done
+          keep=$(node -e "global.window={};require('./tracks.js');console.log(window.TRACKS.map(t=>t.id).join('|'))")
+          git -c core.quotePath=false ls-files --others --exclude-standard | { grep -v -E "^(${keep}|assets)/|^\.writer-summary\.md$|^inbox/" || true; } | while read -r f; do echo "Removing scratch file $f"; rm -f -- "$f"; done
       - name: Copy check
         if: steps.notes.outputs.dirs != ''
         run: node scripts/check-copy.mjs | tee /tmp/copy-check.txt; exit ${PIPESTATUS[0]}
