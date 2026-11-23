@@ -17,8 +17,8 @@
   launched and invoked  </span><span class="chg">still plans? yes → continue</span></div>
 <div class="try" id="t1"></div>
 <h2><span class="en">Step 2 · Add a sandbox tool for running code</span><span class="zh">第 2 步 · 加一个跑代码的沙盒工具</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>code interpreter</b> is a managed sandbox: a sealed box in the cloud that runs Python and hands back the output. Your tool sends code to it and reads the streamed result. The code never touches your own machines. Create the sandbox in the same region as your agent, or the call fails.</p>
-<p class="zh" style="margin:0 0 8px"><b>代码解释器</b>是一个托管沙盒：云上一个封闭的盒子，运行 Python 并把输出交回来。你的工具把代码发给它，再读取流式返回的结果。代码绝不会碰到你自己的机器。沙盒要建在和智能体相同的区域，否则调用会失败。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>code interpreter</b> is a managed sandbox: a sealed box in the cloud that runs Python and hands back the output. Your tool sends code to it and reads the result. <b>Streamed</b> means the answer arrives in pieces, so the loop joins the pieces into one string. <code>with</code> opens the sandbox and closes it when the block ends. <code>clearContext: False</code> tells it not to wipe its earlier state first. The code never touches your own machines. A model wrote that code, so it could do anything; the sandbox keeps any damage inside the box. Create the sandbox in the same region as your agent, or the call fails.</p>
+<p class="zh" style="margin:0 0 8px"><b>代码解释器</b>是一个托管沙盒：云上一个封闭的盒子，运行 Python 并把输出交回来。你的工具把代码发给它，再读取返回的结果。“流式”的意思是结果分成小块陆续到达，所以循环要把这些小块拼成一个字符串。<code>with</code> 负责打开沙盒，块结束时自动关掉。<code>clearContext: False</code> 表示先不要清掉它之前的状态。代码绝不会碰到你自己的机器。模型写的代码可能做任何事，沙盒把损害关在盒子里。沙盒要建在和智能体相同的区域，否则调用会失败。</p></div>
 <div class="codebox"><span class="dim">from bedrock_agentcore.tools.code_interpreter_client import code_session
 
 @tool
@@ -49,8 +49,8 @@ def run_python(code: str) -&gt; str:
 )</span></div>
 <div class="sc" id="t3"></div>
 <h2><span class="en">Step 4 · Colour the coding steps, relaunch and try a puzzle</span><span class="zh">第 4 步 · 给写代码的步骤上色，重新启动并出一道谜题</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Make the check easy to spot. In <code>show_plan</code>, wrap any line that starts with "Write Python code" in a colour code (terminals read <code>\033[96m</code> as "cyan" and <code>\033[0m</code> as "reset"). Then launch again and invoke with a puzzle. Read three things: the plan, the answer, and the check.</p>
-<p class="zh" style="margin:0 0 8px">让验证步骤一眼就能看到。在 <code>show_plan</code> 里，把以“Write Python code”开头的行包上颜色代码（终端把 <code>\033[96m</code> 读作“青色”，<code>\033[0m</code> 读作“恢复”）。然后再启动，用一道谜题调用它。读三样东西：计划、答案和验证。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Make the check easy to spot. In <code>show_plan</code>, wrap any line that starts with "Write Python code" in a colour code (terminals read <code>\033[96m</code> as "cyan" and <code>\033[0m</code> as "reset"). Then launch again and invoke with a puzzle. The right answer is 9 (the number of ways to reshuffle 4 people so that nobody keeps their own), so you can check the agent. Read three things: the plan, the answer, and the check.</p>
+<p class="zh" style="margin:0 0 8px">让验证步骤一眼就能看到。在 <code>show_plan</code> 里，把以“Write Python code”开头的行包上颜色代码（终端把 <code>\033[96m</code> 读作“青色”，<code>\033[0m</code> 读作“恢复”）。然后再启动，用一道谜题调用它。这道题的正确答案是 9（4 个人互换班次、谁都不留回自己班次的方法数），你可以拿它来核对。读三样东西：计划、答案和验证。</p></div>
 <div class="codebox"><span class="dim">@tool
 def show_plan() -&gt; str:
     """Return the current plan, one line per step."""
@@ -66,8 +66,8 @@ def show_plan() -&gt; str:
 # agentcore invoke '{"prompt": "How many ways can 4 crane operators swap shifts so nobody keeps their own?"}'</span></div>
 <div class="try" id="t4"></div>
 <h2><span class="en">Step 5 · Turn on observability and read the trace</span><span class="zh">第 5 步 · 打开可观测性，读调用轨迹</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>trace</b> is a recording of one run: each tool call, how long it took and how many tokens it used. It stays empty until you switch observability on in the console first. After that, run the puzzle again and open the trace. Look for the slowest step and the longest wait.</p>
-<p class="zh" style="margin:0 0 8px"><b>轨迹</b>是一次运行的录像：每次工具调用、用了多久、花了多少 token。必须先在控制台里打开可观测性，否则它一直是空的。打开后，再跑一次谜题，然后打开轨迹。找出最慢的一步和等得最久的地方。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>trace</b> is a recording of one run: each tool call, how long it took and how many <b>tokens</b> it used (a token is a small piece of text, about a word or part of one, that the model reads and writes; you pay per token). It stays empty until you switch observability on in the console first. After that, run the puzzle again and open the trace. Look for the slowest step and the longest wait.</p>
+<p class="zh" style="margin:0 0 8px"><b>轨迹</b>是一次运行的录像：每次工具调用、用了多久、花了多少 token（一小段文字，大约一个词或一个词的一部分，模型读和写的都是它，按 token 计费）。必须先在控制台里打开可观测性，否则它一直是空的。打开后，再跑一次谜题，然后打开轨迹。找出最慢的一步和等得最久的地方。</p></div>
 <div class="codebox"><span class="dim">Trace of one run:
   add_todo x4              0.4 s
   (model: solve first)     3.1 s    1,900 tokens
@@ -76,13 +76,13 @@ def show_plan() -&gt; str:
   final answer             1.2 s</span></div>
 <div class="sc" id="t5"></div>
 <h2><span class="en">Step 6 · Delete the agent and its resources</span><span class="zh">第 6 步 · 删掉智能体和它的资源</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">When you are done, remove what you made: the deployed agent, its container image in the registry and its roles. A forgotten agent is a small bill that nobody remembers approving. Write the list of what to remove before you start deleting, and check the console afterwards to be sure it is empty.</p>
-<p class="zh" style="margin:0 0 8px">做完之后，把你建的东西清掉：已部署的智能体、仓库里的容器镜像和它的角色。被遗忘的智能体就是一笔没人记得批准过的小账单。动手删之前，先把要删的东西列成清单，删完再去控制台确认已经清空。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">When you are done, remove what you made: the deployed agent, its container image (the packed copy of your code) in the registry, and its roles. A forgotten agent is a small bill that nobody remembers approving. Write the list of what to remove before you start deleting, and check the console afterwards to be sure it is empty.</p>
+<p class="zh" style="margin:0 0 8px">做完之后，把你建的东西清掉：已部署的智能体、仓库里的容器镜像（打包好的代码副本）和它的角色。被遗忘的智能体就是一笔没人记得批准过的小账单。动手删之前，先把要删的东西列成清单，删完再去控制台确认已经清空。</p></div>
 <div class="codebox"><span class="dim">Clean-up list
   [ ] </span><span class="chg">the deployed agent</span><span class="dim">
   [ ] its image in the registry
   [ ] the roles made for it
-  [ ] the log groups (or set a short retention)
+  [ ] the log groups (the saved logs of each run; or set a short retention, meaning how long they are kept)
   [ ] open the console and check that nothing is left</span></div>
 <div class="try" id="t6"></div>
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en"><b>Three slips.</b> The sandbox was created in a different region from the agent, so the first check failed. The agent skipped the check when the prompt only said "you may use code"; making it a required to-do fixed that. And the trace stayed empty until I turned on observability in the console, which I had to do before the run, not after.</span><span class="zh"><b>三个失误。</b>沙盒建在了和智能体不同的区域，所以第一次验证失败了。提示词只写“你可以用代码”时，智能体跳过了验证；把它写成必做的待办之后就好了。轨迹一直是空的，直到我在控制台里打开可观测性，而且必须在运行之前打开，不是之后。</span></div>

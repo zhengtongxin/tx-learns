@@ -28,11 +28,11 @@ def square_root(number: float) -&gt; float:
 )
 </span><span class="chg">
 agentcore launch
-agentcore invoke '{"prompt": "A square yard is 1936 square metres. How long is one side?"}'</span></div>
+agentcore invoke '{"prompt": "A square yard is about 0.836 square metres. How long is one side, in metres?"}'</span></div>
 <div class="sc" id="t2"></div>
 <h2><span class="en">Step 3 · Build a to-do list the agent can use</span><span class="zh">第 3 步 · 做一份智能体能用的待办清单</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A plan is just a list the agent writes and updates. You need three things: a <b>typed item</b> (a description and a done flag), a <b>list kept in memory</b>, and <b>tools</b> to add an item, mark one done and print the list. Tell the model that positions start at 1, in the tool text itself. People count from 1, and a model will follow what you wrote there.</p>
-<p class="zh" style="margin:0 0 8px">计划其实就是智能体自己写、自己更新的一份清单。你需要三样东西：一个<b>有类型的条目</b>（描述加一个完成标记）、一份<b>放在内存里的清单</b>，以及<b>工具</b>：新增条目、把某条标为完成、打印清单。在工具说明里直接写明位置从 1 开始。人是从 1 数起的，而模型会照你写在那里的说法去做。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A plan is just a list the agent writes and updates. You need three things: a <b>typed item</b> (a small record with a description and a done flag; <code>BaseModel</code> from pydantic checks the type of each field), a <b>list kept in memory</b>, and <b>tools</b> to add an item, mark one done and print the list. Tell the model that positions start at 1, in the tool text itself. People count from 1, and a model will follow what you wrote there. Python lists count from 0, so the first item is <code>plan[0]</code>: the code subtracts 1 from the position to find it.</p>
+<p class="zh" style="margin:0 0 8px">计划其实就是智能体自己写、自己更新的一份清单。你需要三样东西：一个<b>有类型的条目</b>（一条小记录，有描述和完成标记；pydantic 的 <code>BaseModel</code> 会检查每个字段的类型）、一份<b>放在内存里的清单</b>，以及<b>工具</b>：新增条目、把某条标为完成、打印清单。在工具说明里直接写明位置从 1 开始。人是从 1 数起的，而模型会照你写在那里的说法去做。Python 的列表是从 0 数起的，所以第 1 项在代码里是 <code>plan[0]</code>：代码要把位置减 1 才能找到它。</p></div>
 <div class="codebox"><span class="dim">from pydantic import BaseModel
 
 class Todo(BaseModel):
@@ -75,8 +75,8 @@ def mark_done(position: int) -&gt; str:
 # launch again, then invoke with a task that has four steps</span></div>
 <div class="try" id="t4"></div>
 <h2><span class="en">Step 5 · Read the plan as it moves</span><span class="zh">第 5 步 · 看计划怎么动</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Read the printed list top to bottom. An agent you can see is easier to trust and easier to fix: if the answer is wrong, you can find the step where it went off. The list is also easy to sort into what it should and should not hold.</p>
-<p class="zh" style="margin:0 0 8px">从上到下读打印出来的清单。看得见的智能体更容易信任，也更容易修：答案不对，你能找到它从哪一步偏掉的。哪些内容该放进清单、哪些不该，也很容易分辨。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Read the printed list top to bottom. An agent you can see is easier to trust and easier to fix: if the answer is wrong, you can find the step where it went off. A good plan line is one clear action, such as <code>Take its square root</code>. A vague line like <code>figure it out</code> hides the real action, so you cannot check it.</p>
+<p class="zh" style="margin:0 0 8px">从上到下读打印出来的清单。看得见的智能体更容易信任，也更容易修：答案不对，你能找到它从哪一步偏掉的。好的计划条目是一个清楚的动作，比如“取它的平方根”。“想办法搞定”这样含糊的条目会把真正的动作藏起来，你就没法检查。</p></div>
 <div class="codebox"><span class="dim">1. [x] Find the area of the square yard
 2. [x] </span><span class="chg">Take its square root</span><span class="dim">
 3. [ ] Convert the length to feet
