@@ -21,8 +21,8 @@ for claim_id in list(queue):</span><span class="chg">        # my code picks the
 <p class="zh">下面这些事，哪些该让智能体自己做，哪些该留在代码里？</p><div class="sc" id="g1"></div>
 
 <h2><span class="en">Step 2 · Name the harness</span><span class="zh">第 2 步 · 给 harness 起个名</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">An agent is a <b>model</b> plus a <b>harness</b>. The model does the thinking. The harness is everything around it that lets the thinking turn into work. Think of the model as a very good clerk and the harness as the desk: the manual on the shelf, the to-do tray, the rule that big payouts wait for the red stamp, and someone to call when it goes wrong.</p>
-<p class="zh" style="margin:0 0 8px">智能体 = <b>模型</b> + <b>harness</b>。模型负责思考，harness 是围在它身边、让思考变成工作的一切。把模型想成一位很能干的职员，harness 就是他的办公桌：架子上的手册、待办托盘、“大额赔付要等红色图章”的规矩，还有出事时可以找的人。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">An agent is a <b>model</b> plus a <b>harness</b>. The model does the thinking. The harness is everything around it that lets the thinking turn into work. Think of the model as a very good clerk and the harness as the desk: the manual on the shelf, the to-do tray, the rule that big payouts wait for the red stamp, and someone to call when it goes wrong. A <b>tool</b> is a plain function your code offers the model, which the model can ask your code to run.</p>
+<p class="zh" style="margin:0 0 8px">智能体 = <b>模型</b> + <b>harness</b>。模型负责思考，harness 是围在它身边、让思考变成工作的一切。把模型想成一位很能干的职员，harness 就是他的办公桌：架子上的手册、待办托盘、“大额赔付要等红色图章”的规矩，还有出事时可以找的人。<b>工具</b>是你的代码提供给模型的普通函数，模型可以请你的代码去运行它。</p></div>
 <div class="codebox"><span class="dim">agent = model + harness
 
 harness for the claims desk:</span><span class="chg">
@@ -66,10 +66,10 @@ def run_one(claim_id):
         record_decision(claim_id, decide(queue[claim_id]["claim"]))
     except Exception:</span><span class="chg">
         again = tries[claim_id] &lt; MAX_TRIES
-        queue[claim_id]["state"] = "waiting" if again else "waiting_signoff"</span></div>
+        queue[claim_id]["state"] = "to_do" if again else "for_handler"</span></div>
 <div class="try" id="p3"></div>
 
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我当时想错了</span></b><span class="en">Every time something went wrong, I added another rule to the prompt: “if you fail, try again”, “never leave a claim half done”. It did not help, because a model that has crashed cannot read its prompt. What worked was giving the agent a tool and a to-do list, and letting plain code handle the retries.</span><span class="zh">每次出问题，我就往提示词里再加一条规矩：“失败了就重试”“不要让理赔做到一半”。没有用，因为已经崩溃的模型读不到提示词。真正管用的是：给智能体一个工具和一张待办清单，重试这类事交给普通代码。</span></div>
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我当时想错了</span></b><span class="en">Every time something went wrong, I added another rule to the prompt: “if you fail, try again”, “never leave a claim half done”. It did not help: when the call itself crashes, the model never gets to read the prompt, so nothing written there can run. What worked was giving the agent a tool and a to-do list, and letting plain code handle the retries.</span><span class="zh">每次出问题，我就往提示词里再加一条规矩：“失败了就重试”“不要让理赔做到一半”。没有用：调用本身一崩，模型就读不到提示词，写在里面的话也就没机会执行。真正管用的是：给智能体一个工具和一张待办清单，重试这类事交给普通代码。</span></div>
 
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Draw your pilot as model plus harness.</b> What does your code do that the agent should do?</span><span class="zh"><b>把你的试点画成“模型 + harness”。</b>你的代码里有哪些事，其实该让智能体来做？</span></span></label><label><input type="checkbox"><span><span class="en"><b>List three things that can fail in a long run,</b> and write the rule for each.</span><span class="zh"><b>列出长时间运行里可能出错的三件事，</b>并为每件写一条规则。</span></span></label></div>
@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded',function(){
  game($('g1'),[
   {en:'Choosing which claim to work on next',zh:'决定下一个处理哪份理赔',a:'a',ex:{en:'The agent can see the whole queue and weigh the claims, so let it plan.',zh:'智能体能看到整条队列并权衡，让它自己规划。'},hint:{en:'Who can see all the claims at once?',zh:'谁能同时看到所有理赔？'}},
   {en:'Finding the manual section a claim needs',zh:'找出一份理赔需要的手册章节',a:'a',ex:{en:'It is the one reading the claim, so it knows what to look up.',zh:'读理赔的是它，所以它最清楚该查什么。'},hint:{en:'Who knows what the claim is about?',zh:'谁知道这份理赔讲的是什么？'}},
-  {en:'Refusing to pay over S$800 without a handler',zh:'没有理赔员签字就拒绝赔超过 S$800 的款项',a:'c',ex:{en:'A hard limit is a locked door in code, not a request in a prompt.',zh:'硬性上限是代码里的锁，而不是提示词里的请求。'},hint:{en:'Must this hold even if the model slips?',zh:'模型出错时这条也必须成立吗？'}},
+  {en:'Refusing a big payout until a handler signs it off',zh:'没有理赔员签字，就拒绝大额赔付',a:'c',ex:{en:'A hard limit is a locked door in code, not a request in a prompt.',zh:'硬性上限是代码里的锁，而不是提示词里的请求。'},hint:{en:'Must this hold even if the model slips?',zh:'模型出错时这条也必须成立吗？'}},
   {en:'Putting a failed claim back in the queue',zh:'把失败的理赔放回队列',a:'c',ex:{en:'A crashed call cannot decide anything, so plain code has to catch it.',zh:'崩掉的调用什么也决定不了，必须由普通代码接住。'},hint:{en:'Can a model that crashed read its instructions?',zh:'崩掉的模型还读得到指令吗？'}}],[{k:'a',en:'Let the agent do it',zh:'让智能体做'},{k:'c',en:'Keep it in code',zh:'留在代码里'}],{en:'Job',zh:'工作'});
 
  game($('g2'),[
@@ -102,6 +102,6 @@ document.addEventListener('DOMContentLoaded',function(){
 
  predict($('p2'),{q:{en:'A claim is about a cancelled flight. The wording is forty pages. What should the agent be given?',zh:'一份理赔是关于航班取消。条款有四十页。该给智能体什么？'},opts:[{k:'a',en:'All forty pages, every time',zh:'每次都给全部四十页'},{k:'b',en:'The section titles, plus a tool to read one section',zh:'章节标题，加一个读取某一节的工具'},{k:'c',en:'Nothing; it should know insurance already',zh:'什么都不给，它本来就该懂保险'}],a:'b',ex:{en:'Titles are cheap, and the tool fetches only what the claim needs. Pasting everything costs more and buries the useful part.',zh:'标题很便宜，工具只取这份理赔需要的。全贴进去更费钱，还会把有用的部分埋掉。'},hint:{en:'Think of opening one drawer, not the whole cabinet.',zh:'想想只拉开一个抽屉，而不是整个柜子。'}});
 
- predict($('p3'),{q:{en:'A claim fails for the second time (<code>MAX_TRIES</code> is 2). What does <code>run_one</code> do with it?',zh:'一份理赔第二次失败（<code>MAX_TRIES</code> 是 2）。<code>run_one</code> 会怎么处理？'},opts:[{k:'a',en:'Puts it back to waiting again',zh:'再放回 waiting'},{k:'b',en:'Leaves it for a handler (waiting_signoff)',zh:'留给理赔员（waiting_signoff）'},{k:'c',en:'Marks it decided with an approve',zh:'标成已决定并批准'}],a:'b',out:{en:'tries = 2 → 2 < 2 is False → state: waiting_signoff',zh:'tries = 2 → 2 < 2 为 False → 状态：waiting_signoff'},ex:{en:'It has used both tries, so the harness hands it to a person instead of looping.',zh:'两次机会都用完了，harness 把它交给人，而不是继续循环。'},hint:{en:'Compare the tries with MAX_TRIES.',zh:'把 tries 和 MAX_TRIES 比一比。'}});
+ predict($('p3'),{q:{en:'A claim fails for the second time (<code>MAX_TRIES</code> is 2). What does <code>run_one</code> do with it?',zh:'一份理赔第二次失败（<code>MAX_TRIES</code> 是 2）。<code>run_one</code> 会怎么处理？'},opts:[{k:'a',en:'Puts it back to to_do again',zh:'再放回 to_do'},{k:'b',en:'Leaves it for a handler (for_handler)',zh:'留给理赔员（for_handler）'},{k:'c',en:'Marks it decided with an approve',zh:'标成已决定并批准'}],a:'b',out:{en:'tries = 2 → 2 < 2 is False → state: for_handler',zh:'tries = 2 → 2 < 2 为 False → 状态：for_handler'},ex:{en:'It has used both tries, so the harness hands it to a person instead of looping.',zh:'两次机会都用完了，harness 把它交给人，而不是继续循环。'},hint:{en:'Compare the tries with MAX_TRIES.',zh:'把 tries 和 MAX_TRIES 比一比。'}});
 });
 </script></body></html>

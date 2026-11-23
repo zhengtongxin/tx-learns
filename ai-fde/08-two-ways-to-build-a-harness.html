@@ -9,8 +9,8 @@
 <p class="zh" style="margin:0">Mei Ling 知道了什么是 harness。现在她要为 Kaya Travel Cover 的理赔台搭一个，而眼前有两条常见的路。一条是<b>智能体 SDK</b>：现成的工具包，文件、规划、子智能体的工具都已内置。另一条是<b>开放框架</b>：模型自己选，工具自己写。一人 IT 团队 Kumar 得把她选的那个一直维护下去。所以她把同一个智能体两种方式各搭一遍，再来比较。</p></div>
 
 <h2><span class="en">Step 1 · The same desk, the same task</span><span class="zh">第 1 步 · 同一个理赔台，同一项任务</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A fair comparison changes one thing at a time. So both builds get the same queue, the same manual and the same instruction. Only the harness differs. Keep the task in one small file that both builds import.</p>
-<p class="zh" style="margin:0 0 8px">公平的比较一次只改一样东西。所以两种搭法拿到同样的队列、同样的手册、同样的指令，只有 harness 不同。把任务写在一个小文件里，让两边都引用它。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A fair comparison changes one thing at a time. So both builds get the same queue, the same manual and the same instruction. Only the harness differs. Keep the task in one small file that both builds import. Both builds also use the same parts: a <b>tool</b> is a function the model can ask your code to run, and a <b>helper</b> is a smaller agent started for one job.</p>
+<p class="zh" style="margin:0 0 8px">公平的比较一次只改一样东西。所以两种搭法拿到同样的队列、同样的手册、同样的指令，只有 harness 不同。把任务写在一个小文件里，让两边都引用它。两种搭法用的是同样的部件：<b>工具</b>是模型可以请你的代码去运行的函数，<b>帮手</b>是为一项工作临时启动的小智能体。</p></div>
 <div class="codebox"><span class="dim"># shared.py: used by both builds
 # queue.json: the claims.   manual/: one text file per manual section.
 </span><span class="chg">TASK = """Work the claims queue in queue.json.
@@ -21,8 +21,8 @@ Keep a to-do list as you go. Save every decision in decisions.json."""</span></d
 <p class="zh">下面哪些在两种搭法里保持一样，哪些可以变？</p><div class="sc" id="g1"></div>
 
 <h2><span class="en">Step 2 · Way one: an agent SDK</span><span class="zh">第 2 步 · 路线一：智能体 SDK</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">With an SDK, the harness mostly comes in the box. Reading files, searching, a to-do tool and a way to start a helper are all built in. You only switch on the tools you want and describe your helper. It is like renting a fitted desk: the drawers are already there. Install with <code>pip install claude-agent-sdk</code> and set your <code>ANTHROPIC_API_KEY</code>. Here the manual is just files, so the built-in file tools can already read it.</p>
-<p class="zh" style="margin:0 0 8px">用 SDK 的话，harness 大部分是现成的。读文件、搜索、待办工具、启动帮手，全都内置。你只需打开想要的工具，再描述你的帮手。就像租了一张配好抽屉的办公桌。用 <code>pip install claude-agent-sdk</code> 安装，并设置好 <code>ANTHROPIC_API_KEY</code>。这里手册就是一堆文件，所以内置的文件工具已经能读。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">With an SDK, the harness mostly comes in the box. Reading files, searching, a to-do tool and a way to start a helper are all built in. In the list, <code>Read</code>, <code>Glob</code> and <code>Grep</code> read and search files, <code>TodoWrite</code> keeps the to-do list and <code>Task</code> starts a helper. You only switch on the tools you want and describe your helper. It is like renting a fitted desk: the drawers are already there. Install with <code>pip install claude-agent-sdk</code> and set your <code>ANTHROPIC_API_KEY</code>. Here the manual is just files, so the built-in file tools can already read it.</p>
+<p class="zh" style="margin:0 0 8px">用 SDK 的话，harness 大部分是现成的。读文件、搜索、待办工具、启动帮手，全都内置。下面清单里，<code>Read</code>、<code>Glob</code>、<code>Grep</code> 负责读取和搜索文件，<code>TodoWrite</code> 管待办清单，<code>Task</code> 负责启动帮手。你只需打开想要的工具，再描述你的帮手。就像租了一张配好抽屉的办公桌。用 <code>pip install claude-agent-sdk</code> 安装，并设置好 <code>ANTHROPIC_API_KEY</code>。这里手册就是一堆文件，所以内置的文件工具已经能读。</p></div>
 <div class="codebox"><span class="dim">import asyncio
 from claude_agent_sdk import query, ClaudeAgentOptions, AgentDefinition, ResultMessage
 from shared import TASK
@@ -46,8 +46,8 @@ asyncio.run(main())</span></div>
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 3 · Way two: an open framework</span><span class="zh">第 3 步 · 路线二：开放框架</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">An open framework gives you a similar agent with planning and helpers, but you choose the model and write your own tools. You can also add <b>middleware</b>: code that sits around the agent’s steps, for example to log them or to catch errors. More to write, more to control. This one needs <code>pip install deepagents</code> and a key for whichever model you pick.</p>
-<p class="zh" style="margin:0 0 8px">开放框架同样给你一个带规划和帮手的智能体，但模型你自己选，工具你自己写。你还可以加<b>中间件</b>：围在智能体每一步外面的代码，比如记录日志或接住错误。要写得更多，掌控也更多。这个需要 <code>pip install deepagents</code>，以及你所选模型的密钥。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">An open framework gives you a similar agent with planning and helpers, but you choose the model and write your own tools. You can also add <b>middleware</b>: code that sits around the agent’s steps, for example to log them or to catch errors. The model learns what a tool does from its name and its docstring (the text in triple quotes), so write both clearly. More to write, more to control. This one needs <code>pip install deepagents</code> and a key for whichever model you pick.</p>
+<p class="zh" style="margin:0 0 8px">开放框架同样给你一个带规划和帮手的智能体，但模型你自己选，工具你自己写。你还可以加<b>中间件</b>：围在智能体每一步外面的代码，比如记录日志或接住错误。模型靠工具的名字和它的文档字符串（三引号里的那段文字）来了解工具是做什么的，所以两者都要写清楚。要写得更多，掌控也更多。这个需要 <code>pip install deepagents</code>，以及你所选模型的密钥。</p></div>
 <div class="codebox"><span class="dim">import json
 from deepagents import create_deep_agent
 from shared import TASK
@@ -91,13 +91,13 @@ print(result["messages"][-1].content)</span></div>
 setup effort           </span><span class="chg">low: kit is built in  higher: write tools</span><span class="dim">
 control over model     </span><span class="chg">little               you choose it</span><span class="dim">
 cost                   </span><span class="chg">cost printed at end   depends on your model</span><span class="dim">
-visibility             to-do list + messages the messages and a trace</span></div>
+visibility             to-do list + messages the messages and a step-by-step log</span></div>
 <p class="en">Which way is stronger for each point?</p>
 <p class="zh">下面每一点，哪条路更占优势？</p><div class="sc" id="g2"></div>
 
 <h2><span class="en">Step 5 · Practise for free, then choose</span><span class="zh">第 5 步 · 免费练习，然后做选择</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">You do not have to spend money to practise. With the framework, point it at a local model running on your own machine. With the SDK, cap the run at five claims and use a small model, or check whether your tool can talk to a local server that speaks the same protocol. A free local model must support calling tools, or the agent cannot act. Then choose by who will live with it, not by who won the demo.</p>
-<p class="zh" style="margin:0 0 8px">练习不一定要花钱。用框架的话，让它指向你自己机器上跑的本地模型。用 SDK 的话，把运行限制在五份理赔、换用小模型，或者看看你的工具能不能连到说同一种协议的本地服务器。免费的本地模型必须支持调用工具，否则智能体没法行动。然后，按谁要长期维护来选，而不是按谁在演示里赢了来选。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">You do not have to spend money to practise. With the framework, point it at a local model running on your own machine (Ollama is a free program that runs models there). With the SDK, cap the run at five claims and use a small model, or check whether your tool can talk to a local server that answers in the same format. A free local model must support calling tools (asking your code to run a function), or the agent cannot act. Then choose by who will live with it, not by who won the demo.</p>
+<p class="zh" style="margin:0 0 8px">练习不一定要花钱。用框架的话，让它指向你自己机器上跑的本地模型（Ollama 是一个免费程序，能在你的电脑上跑模型）。用 SDK 的话，把运行限制在五份理赔、换用小模型，或者看看你的工具能不能连到用同样格式应答的本地服务器。免费的本地模型必须支持调用工具（即请你的代码运行某个函数），否则智能体没法行动。然后，按谁要长期维护来选，而不是按谁在演示里赢了来选。</p></div>
 <div class="codebox"><span class="dim"># first run: ollama pull qwen3:8b   (and pip install langchain-ollama)
 from langchain_ollama import ChatOllama
 </span><span class="chg">local_model = ChatOllama(model="qwen3:8b")</span><span class="dim">

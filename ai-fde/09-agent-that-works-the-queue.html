@@ -9,8 +9,8 @@
 <p class="zh" style="margin:0">Mei Ling 现在懂了 harness 的思路。在 Kaya Travel Cover，她要把它变成能跑的东西。一条命令就能启动；智能体自己挑顺序，最后给理赔员一段简短总结。运行时，队列页面显示一张待办清单。每份理赔交给一个新帮手，手册按章节读取，失败也不会让理赔卡住。她分六步，在试点的基础上搭起来（用到理赔台项目里的 <code>queue</code>、<code>add_claim</code>、<code>record_decision</code>、<code>decide</code> 和 <code>client</code>）。</p></div>
 
 <h2><span class="en">Step 1 · One command, the agent picks the order</span><span class="zh">第 1 步 · 一条命令，顺序由智能体挑</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The pilot walked the queue in the order it was stored. A handler would start with the big or urgent ones. So ask the model to order the claims first, then work through them, then write a short summary. Always check the model’s order: drop ids it invented and add any it forgot.</p>
-<p class="zh" style="margin:0 0 8px">试点是按存放的顺序走队列的。理赔员会先处理金额大或紧急的。所以先让模型给理赔排序，再逐份处理，最后写一段简短总结。模型给的顺序一定要检查：去掉它编出来的 id，补上它漏掉的。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The pilot walked the queue in the order it was stored. A handler would start with the big or urgent ones. So ask the model to order the claims first, then work through them, then write a short summary. Always check the model’s order: drop ids it invented and add any it forgot. Each <code>client.chat.completions.create(...)</code> call sends the model a list of messages and gets one reply back.</p>
+<p class="zh" style="margin:0 0 8px">试点是按存放的顺序走队列的。理赔员会先处理金额大或紧急的。所以先让模型给理赔排序，再逐份处理，最后写一段简短总结。模型给的顺序一定要检查：去掉它编出来的 id，补上它漏掉的。每次 <code>client.chat.completions.create(...)</code> 调用，都是把一组消息发给模型，再拿回一条回复。</p></div>
 <div class="codebox"><span class="dim">import json
 
 def pick_order(ids):
@@ -104,8 +104,8 @@ def show_todo():
 <div class="try" id="p3"></div>
 
 <h2><span class="en">Step 5 · Read the manual by section, and show what was read</span><span class="zh">第 5 步 · 按章节读手册，并显示读了什么</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Give the helper the list of section titles and one tool that reads a section. It looks up only what it needs and calls the tool as many times as it likes, up to a limit. Log every title it reads. The claim page then shows what the decision was based on, which is what Aisha asks first. Put the claims manual and the wording into <code>data/manual.json</code>, one entry per section.</p>
-<p class="zh" style="margin:0 0 8px">给帮手一张章节标题清单和一个读取某一节的工具。它只查需要的，想调用几次都行，但有上限。把它读过的每个标题都记下来。理赔页面就能显示决定依据了什么，这正是 Aisha 最先会问的。把理赔手册和条款放进 <code>data/manual.json</code>，每个章节一条。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Give the helper the list of section titles and one tool that reads a section. It looks up only what it needs and calls the tool as many times as it likes, up to a limit. Log every title it reads. The claim page then shows what the decision was based on, which is what Aisha asks first. The model cannot run code itself. When it wants a section, its reply says to call <code>read_manual</code> with a title. Our loop runs that function, sends the text back as a <code>tool</code> message, and asks again, until the model answers without asking for more. This version of <code>run_helper</code> replaces the one in Step 4. Put the claims manual and the wording into <code>data/manual.json</code>, one entry per section.</p>
+<p class="zh" style="margin:0 0 8px">给帮手一张章节标题清单和一个读取某一节的工具。它只查需要的，想调用几次都行，但有上限。把它读过的每个标题都记下来。理赔页面就能显示决定依据了什么，这正是 Aisha 最先会问的。模型自己不能运行代码。它想看某一节时，回复里会写明要用 <code>read_manual</code> 读哪个标题。我们的循环运行这个函数，把读到的文字作为 <code>tool</code> 消息送回去，再问一次，直到模型不再要求读取、直接给出答案。这一版 <code>run_helper</code> 会取代第 4 步的那一版。把理赔手册和条款放进 <code>data/manual.json</code>，每个章节一条。</p></div>
 <div class="codebox"><span class="chg">SECTIONS = json.load(open("data/manual.json"))   # section title -> text
 TOOLS = [{"type": "function", "function": {
     "name": "read_manual",
@@ -144,8 +144,8 @@ def run_helper(claim_id):
 <div class="try" id="p4"></div>
 
 <h2><span class="en">Step 6 · Failures that fix themselves</span><span class="zh">第 6 步 · 会自己修好的失败</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Three rules, all in code. A claim that fails before it is decided goes back to the queue. If it fails twice, it is left for a handler. And no claim is ever decided twice, so before any work the code checks whether a decision already exists. One more rule closes the gap from a killed run: on start, anything still “in progress” goes back to “to do”.</p>
-<p class="zh" style="margin:0 0 8px">三条规矩，全在代码里。还没决定就失败的理赔，回到队列。失败两次，就留给理赔员。任何理赔都不会被决定两次，所以动手之前，代码先检查是否已经有决定。再加一条，补上运行被杀掉留下的漏洞：启动时，任何还停在“处理中”的理赔，都回到“待办”。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Four rules, all in code. A claim that fails before it is decided goes back to the queue. If it fails twice, it is left for a handler. And no claim is ever decided twice, so before any work the code checks whether a decision already exists. The fourth closes the gap from a killed run: on start, anything still “in progress” goes back to “to do”.</p>
+<p class="zh" style="margin:0 0 8px">四条规矩，全在代码里。还没决定就失败的理赔，回到队列。失败两次，就留给理赔员。任何理赔都不会被决定两次，所以动手之前，代码先检查是否已经有决定。第四条，补上运行被杀掉留下的漏洞：启动时，任何还停在“处理中”的理赔，都回到“待办”。</p></div>
 <div class="codebox"><span class="chg">MAX_TRIES = 2
 
 def recover():
@@ -179,6 +179,8 @@ def work_one(claim_id):
 
 # run(): call recover(), plan(ids), then for each id in pick_order(ids) call work_one(id) until
 # no claim is "to_do". Then print the summary of todo[...]["line"] for every claim.</span></div>
+<p class="en">Put it together: <code>run()</code> now does four things in order. It calls <code>recover()</code>, then <code>plan(ids)</code>, then <code>work_one</code> for each id in <code>pick_order(ids)</code> until no claim is still to do, and finally it prints each claim’s line. Each earlier step only replaced part of the loop, so this is the final version.</p>
+<p class="zh">整合起来：<code>run()</code> 现在按顺序做四件事。先调用 <code>recover()</code>，再调用 <code>plan(ids)</code>，然后对 <code>pick_order(ids)</code> 里的每个 id 调用 <code>work_one</code>，直到没有理赔还是待办，最后打印每份理赔的那一行。前面每一步只是替换了循环的一部分，所以这就是最终版本。</p>
 <div class="try" id="p5"></div>
 
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我当时想错了</span></b><span class="en">A claim failed partway and stayed “in progress” for ever. Worse, it silently blocked a later run, because the new run thought someone was still working on it. The fix was one rule: every claim must always end in a clear state. That is the <code>recover()</code> step and the two-tries rule.</span><span class="zh">有一份理赔做到一半失败，从此一直停在“处理中”。更糟的是，它悄悄挡住了之后的运行，因为新的运行以为还有人在处理它。解决办法就一条规矩：每份理赔最后都必须处于明确的状态。这就是 <code>recover()</code> 和“两次机会”的规则。</span></div>
@@ -211,6 +213,6 @@ document.addEventListener('DOMContentLoaded',function(){
 
  predict($('p4'),{q:{en:'A helper keeps calling <code>read_manual</code> and never answers. What happens?',zh:'一个帮手一直调用 <code>read_manual</code> 却不给答案。会怎样？'},opts:[{k:'a',en:'It loops for ever and the bill grows',zh:'它永远循环，账单越滚越大'},{k:'b',en:'After 6 rounds it raises an error, and Step 6 handles it',zh:'6 轮之后它抛出错误，由第 6 步处理'},{k:'c',en:'It approves the claim to be safe',zh:'为保险起见它批准理赔'}],a:'b',ex:{en:'The <code>for _ in range(6)</code> loop is the cap. The error then goes to the retry rule.',zh:'<code>for _ in range(6)</code> 这个循环就是上限，错误随后交给重试规则处理。'},hint:{en:'Look at the loop and the last line.',zh:'看看循环和最后一行。'}});
 
- predict($('p5'),{q:{en:'The run was killed while C012 was “in progress”. You start it again. What does <code>recover()</code> do to C012?',zh:'运行被杀掉时 C012 正处于“处理中”。你重新启动。<code>recover()</code> 会怎么处理 C012？'},opts:[{k:'a',en:'Leaves it in progress',zh:'留在处理中'},{k:'b',en:'Sets it to to_do, and work_one skips it if a decision exists',zh:'设成 to_do；如果已有决定，work_one 会跳过它'},{k:'c',en:'Deletes it',zh:'把它删掉'}],a:'b',ex:{en:'It goes back to the queue. If the helper had already recorded a decision, work_one marks it done instead of deciding twice.',zh:'它回到队列。如果帮手已经记录了决定，work_one 会把它标为完成，而不是再决定一次。'},hint:{en:'Nothing may stay in progress after a restart.',zh:'重启之后，不能有任何理赔停在处理中。'}});
+ predict($('p5'),{q:{en:'The run was killed while C012 was “in progress”. You start it again. What does <code>recover()</code> do to C012?',zh:'运行被杀掉时 C012 正处于“处理中”。你重新启动。<code>recover()</code> 会怎么处理 C012？'},opts:[{k:'a',en:'Leaves it in progress',zh:'留在处理中'},{k:'b',en:'Sets it to to_do, and work_one marks it done if a decision exists',zh:'设成 to_do；如果已有决定，work_one 会直接标为完成'},{k:'c',en:'Deletes it',zh:'把它删掉'}],a:'b',ex:{en:'It goes back to the queue. If the helper had already recorded a decision, work_one marks it done instead of deciding twice.',zh:'它回到队列。如果帮手已经记录了决定，work_one 会把它标为完成，而不是再决定一次。'},hint:{en:'Nothing may stay in progress after a restart.',zh:'重启之后，不能有任何理赔停在处理中。'}});
 });
 </script></body></html>
