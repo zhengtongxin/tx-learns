@@ -20,8 +20,8 @@
 </span><span class="chg">&lt;PricingTable /&gt;</span></div>
 <div class="try" id="t1"></div>
 <h2><span class="en">Step 3 · Gate the product page</span><span class="zh">第 3 步 · 给产品页加一道门</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>protect</b> component wraps the product. It shows its content only to people on the plan. Everyone else sees the <b>fallback</b> you give it, here the pricing table. So signed-in free users land on a page that politely asks them to subscribe.</p>
-<p class="zh" style="margin:0 0 8px"><b>保护（protect）</b>组件把产品包起来，只对在这个套餐上的人显示内容，其他人看到你给它的<b>后备内容（fallback）</b>，这里就是定价表。于是已登录的免费用户会看到一个礼貌地请他们订阅的页面。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>protect</b> component wraps the product. It shows its content only to people on the plan. Everyone else sees the <b>fallback</b> you give it, here the pricing table. So signed-in free users land on a page that politely asks them to subscribe. In the code, <code>wharf_pro</code> is a placeholder: use the plan id you copied in step 1.</p>
+<p class="zh" style="margin:0 0 8px"><b>保护（protect）</b>组件把产品包起来，只对在这个套餐上的人显示内容，其他人看到你给它的<b>后备内容（fallback）</b>，这里就是定价表。于是已登录的免费用户会看到一个礼貌地请他们订阅的页面。代码里的 <code>wharf_pro</code> 只是占位，要换成你在第 1 步复制的套餐 id。</p></div>
 <div class="codebox"><span class="dim">import { Protect, PricingTable } from "@clerk/nextjs";
 
 </span><span class="chg">&lt;Protect plan="wharf_pro" fallback={&lt;PricingTable /&gt;}&gt;</span><span class="dim">
@@ -36,8 +36,8 @@
 3. manage / cancel    → find the button, try it</span></div>
 <div class="try" id="t3"></div>
 <h2><span class="en">Step 5 · The gate only hides the screen</span><span class="zh">第 5 步 · 这道门只是藏起了屏幕</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Here is the trap. The <code>Protect</code> component hides content in the <b>browser</b>. A free user can still call your API directly with their own valid sign-in token. If the feature must be paid-only, the server needs its own check. The verified token carries the user's plan, so read it there and refuse the call if the plan is missing. Hiding a button is not security.</p>
-<p class="zh" style="margin:0 0 8px">这里有个陷阱。<code>Protect</code> 组件只在<b>浏览器</b>里把内容藏起来。免费用户仍然可以带着自己有效的登录令牌，直接调用你的 API。如果功能必须只对付费用户开放，服务器就得有自己的检查。已验证的令牌里带着用户的套餐，在服务器上读出来，没有套餐就拒绝调用。藏起一个按钮不是安全措施。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Here is the trap. The <code>Protect</code> component hides content in the <b>browser</b>. A free user can still call your API directly with their own valid sign-in token. If the feature must be paid-only, the server needs its own check. The verified token carries the user's plan in a field named <code>pla</code>. If your token uses another name, check the service's token settings. So read it there, and refuse the call with status <code>402</code> (the web code for "payment needed") when the plan is missing. Hiding a button is not security.</p>
+<p class="zh" style="margin:0 0 8px">这里有个陷阱。<code>Protect</code> 组件只在<b>浏览器</b>里把内容藏起来。免费用户仍然可以带着自己有效的登录令牌，直接调用你的 API。如果功能必须只对付费用户开放，服务器就得有自己的检查。已验证的令牌里带着用户的套餐，字段名叫 <code>pla</code>。如果你的令牌用的是别的名字，就去服务的令牌设置里查。所以要在服务器上读出它，没有套餐时用状态码 <code>402</code>（网页里“需要付款”的代码）拒绝调用。藏起一个按钮不是安全措施。</p></div>
 <div class="codebox"><span class="dim">import os
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi_clerk_auth import ClerkConfig, ClerkHTTPBearer, HTTPAuthorizationCredentials
