@@ -25,7 +25,7 @@ Assume they are smart, busy and have never seen this topic. If a sentence needs 
 
 ## The running setting
 
-Each track has its own setting. Agentic AI uses the kopitiam below; the AI Engineer track uses a Singapore HDB estate (see `ai-engineer/STORY.md`, which has its own cast, props and "Back at the void deck" callout). Never mix the two.
+Each track has its own setting. Agentic AI uses the kopitiam below; the AI Engineer track uses a Singapore HDB estate (see `ai-engineer/STORY.md`, which has its own cast, props and "Back at the void deck" callout). The AI FDE track uses a Tanjong Pagar shophouse insurer (`ai-fde/STORY.md`, "Back at the shophouse"). Never mix settings.
 
 ### The kopitiam thread (Agentic AI)
 

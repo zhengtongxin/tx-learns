@@ -193,10 +193,12 @@ async function main() {
       ? r.continue({ headers: { ...r.request().headers(), 'x-vercel-protection-bypass': bypass, 'x-vercel-set-bypass-cookie': 'true' } })
       : r.continue());
     await ctx.addInitScript(`(${pageHelpers})(${JSON.stringify(SKIP)})`);
-    for (const path of pages) {
+    const testPage = async path => {
       const res = { page: path, viewport: name, issues: [], shots: [] }, seen = new Set();
       const add = i => { const k = i.kind + '|' + (i.key || i.msg); if (!seen.has(k)) { seen.add(k); res.issues.push(i); } };
       const page = await ctx.newPage();
+      // A page that hangs is closed after 2 minutes (it then shows up as "could not open or test the page"), so one stuck page cannot hold the whole run.
+      const hang = setTimeout(() => page.close().catch(() => {}), 120000);
       page.on('dialog', d => d.dismiss().catch(() => {}));
       page.on('pageerror', e => add({ kind: 'js-error', msg: `Script error: ${String(e.message || e).split('\n')[0].slice(0, 200)}` }));
       page.on('console', m => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) add({ kind: 'js-error', msg: `Console error: ${m.text().slice(0, 200)}` }); });
@@ -263,10 +265,14 @@ async function main() {
       } catch (e) {
         add({ kind: 'load', msg: `Could not open or test the page: ${String(e.message).split('\n')[0].slice(0, 200)}` });
       }
-      await page.close();
+      clearTimeout(hang);
+      await page.close().catch(() => {});
       results.push(res);
       console.log(`${res.issues.length ? '✗' : '✓'} ${path} (${name})${res.issues.map(i => '\n    ' + i.kind + ': ' + i.msg + (i.step ? ` [after: ${i.step}]` : '')).join('')}`);
-    }
+    };
+    // Several pages at once per screen size (UI_CHECK_JOBS, default 4) keeps a full run short.
+    const queue = [...pages];
+    await Promise.all(Array.from({ length: Math.min(+process.env.UI_CHECK_JOBS || 4, pages.length) }, async () => { while (queue.length) await testPage(queue.shift()); }));
     await ctx.close();
   }));
   await browser.close();
