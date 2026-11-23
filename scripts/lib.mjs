@@ -1,0 +1,67 @@
+// Small helpers shared by the release, live check and recall agents. No dependencies.
+//   gh(method, path, body)  GitHub REST call for this repo (GITHUB_TOKEN, GITHUB_REPOSITORY; GITHUB_API to point at a test server)
+//   telegram(text, {html})  message TX; never throws, never fails a workflow
+//   loadTrack(source)       window.TRACK from lessons.js text
+//   scrub(text)             replaces banned terms (banned-words.txt) with [source]
+import { readFileSync } from 'node:fs';
+import vm from 'node:vm';
+
+export const REPO = process.env.GITHUB_REPOSITORY || 'zhengtongxin/tx-learns';
+const API = (process.env.GITHUB_API || 'https://api.github.com').replace(/\/$/, '');
+
+export async function gh(method, path, body, { raw = false, ok404 = false } = {}) {
+  const url = /^https?:/.test(path) ? path : `${API}/repos/${REPO}${path}`;
+  const r = await fetch(url, {
+    method,
+    headers: {
+      authorization: `Bearer ${process.env.GITHUB_TOKEN || ''}`,
+      accept: raw ? 'application/vnd.github.raw+json' : 'application/vnd.github+json',
+      'content-type': 'application/json', 'user-agent': 'tx-learns-agents',
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (r.status === 404 && ok404) return null;
+  if (r.status === 204) return {};
+  const text = await r.text();
+  if (!r.ok) throw new Error(`GitHub ${method} ${path}: ${r.status} ${text.slice(0, 200)}`);
+  if (raw) return text;
+  try { return JSON.parse(text); } catch { return text; }
+}
+
+export async function telegram(text, { html = false } = {}) {
+  const token = process.env.TELEGRAM_BOT_TOKEN, chat = process.env.TELEGRAM_CHAT_ID;
+  text = String(text || '').trim().slice(0, 3900);
+  if (!text) return;
+  if (process.env.DRY_RUN || !token || !chat) {
+    console.log(`--- Telegram${token && chat ? ' (dry run)' : ' (not sent: no TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID)'} ---\n${text}\n---`);
+    return;
+  }
+  try {
+    const r = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ chat_id: chat, text, disable_web_page_preview: true, ...(html ? { parse_mode: 'HTML' } : {}) }),
+    }).then(x => x.json());
+    console.log(r.ok ? 'Telegram message sent.' : `::warning::Telegram error: ${r.description}`);
+  } catch (e) { console.log(`::warning::Telegram error: ${e.message}`); }
+}
+
+export const escHtml = s => String(s ?? '').replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+
+export function loadTrack(source) {
+  const ctx = { window: {} };
+  vm.runInNewContext(source, ctx, { filename: 'lessons.js' });
+  return ctx.window.TRACK;
+}
+
+let banned;
+export function scrub(text) {
+  if (!banned) {
+    try {
+      banned = readFileSync(new URL('../banned-words.txt', import.meta.url), 'utf8').split('\n')
+        .map(l => l.trim()).filter(l => l && !l.startsWith('#')).map(l => new RegExp(l, 'giu'));
+    } catch { banned = []; }
+  }
+  return banned.reduce((acc, re) => acc.replace(re, '[source]'), String(text || ''));
+}
+
+export const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };

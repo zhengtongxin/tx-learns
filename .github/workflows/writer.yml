@@ -1,5 +1,7 @@
 # Writer agent: when TX pushes raw notes into inbox/<concept>/ on test, Claude writes a lesson draft
 # to STYLE.md and opens a pull request into test. It never pushes to test or main itself.
+# That pull request is the only one for the lesson: the reader and reviewer agents add their fixes to it as
+# commits, and the reviewer agent tells TX on Telegram when it is ready to approve. TX merges once.
 name: Claude writer
 on:
   push:
@@ -15,6 +17,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: write
 concurrency:
   group: writer
   cancel-in-progress: false
@@ -114,23 +117,23 @@ jobs:
           git push -u origin "$branch"
           { echo "Draft lesson from \`${DIRS//$'\n'/\`, \`}\`, written by the writer agent to STYLE.md."; echo;
             cat .writer-summary.md 2>/dev/null; echo; echo "Copy check: $(tail -1 /tmp/copy-check.txt)"; echo;
-            echo "Read the Vercel preview below, comment with changes, then merge into test."; } > /tmp/pr-body.md
+            echo "Next, by themselves: the reader agent reads the preview and adds clearer wording here as a commit if the lesson scores under 8/10,";
+            echo "then the reviewer agent reviews it and adds its fixes here too. You get one Telegram message when it is ready to approve."; } > /tmp/pr-body.md
           url=$(gh pr create --base test --head "$branch" --title "Draft lesson: ${SLUG:-new notes}" --body-file /tmp/pr-body.md)
           gh pr edit "$url" --add-assignee "${{ github.repository_owner }}" || true
           echo "url=$url" >> "$GITHUB_OUTPUT"
+          # A push with the workflow token starts no workflows, so start the required copy check on this branch.
+          gh workflow run copy-check.yml --ref "$branch" -R "$GITHUB_REPOSITORY" || echo "::warning::Could not start the copy check."
+      # Quiet on success: the reviewer agent messages TX once the lesson is read, reviewed and ready to approve.
       - name: Tell TX on Telegram
-        if: always() && steps.notes.outputs.dirs != ''
+        if: failure() && steps.notes.outputs.dirs != ''
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           URL: ${{ steps.pr.outputs.url }}
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          if [ -n "$URL" ]; then
-            { echo "✍️ New lesson draft is ready for you"; echo "$URL"; echo; head -c 1500 .writer-summary.md 2>/dev/null; } | node scripts/notify-telegram.mjs
-          else
-            node scripts/notify-telegram.mjs "⚠️ The writer agent could not finish a draft from your notes. Logs: $RUN"
-          fi
+          node scripts/notify-telegram.mjs "⚠️ The writer agent could not finish a draft from your notes.${URL:+ Draft: $URL} Logs: $RUN"
       - name: Record status for the Ecosystem page
         if: always() && steps.notes.outputs.dirs != ''
         env:
@@ -138,6 +141,6 @@ jobs:
           URL: ${{ steps.pr.outputs.url }}
           SLUG: ${{ steps.notes.outputs.slug }}
         run: |
-          if [ -n "$URL" ]; then STATE=ok; SUMMARY="Drafted a lesson from the $SLUG notes. Waiting for TX to read and merge."
+          if [ -n "$URL" ]; then STATE=ok; SUMMARY="Drafted a lesson from the $SLUG notes. The reader and reviewer agents look at it next."
           else STATE=fail; SUMMARY="Could not finish a draft from the $SLUG notes."; fi
           STATE=$STATE SUMMARY="$SUMMARY" LINK="$URL" node scripts/record-status.mjs writer

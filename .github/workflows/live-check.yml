@@ -1,0 +1,87 @@
+# Live check agent: after every release reaches the live site, a script opens every page, lesson, link and file
+# there, renders each page in a headless browser and checks the topic and lesson counts against lessons.js.
+# It tells TX on Telegram only when something is off; a pass shows on the How it works page and in the digest.
+# No AI, read-only token, never pushes. Only trusted scripts from main run.
+name: Live check
+on:
+  deployment_status:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: Site to check (empty = the live site)
+        required: false
+permissions:
+  contents: read
+concurrency:
+  group: live-check
+  cancel-in-progress: true
+jobs:
+  check:
+    # Only finished production deploys (a release). Previews are covered by the UI check and reader agents.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production')
+    runs-on: ubuntu-latest
+    outputs:
+      state: ${{ steps.run.outputs.state }}
+      summary: ${{ steps.run.outputs.summary }}
+    env:
+      # The production domain, not the per-deploy URL (that one may sit behind Vercel's login).
+      SITE: ${{ inputs.url || vars.LIVE_URL || 'https://tx-learns.vercel.app/' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The released commit, so the check knows which lesson list should be live.
+          ref: ${{ github.event.deployment.sha || github.event.repository.default_branch }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install a headless browser
+        run: |
+          npm install --no-save --no-audit --no-fund --prefix "$RUNNER_TEMP/pw" playwright@1.49.1
+          "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Check the live site
+        id: run
+        env:
+          PLAYWRIGHT_DIR: ${{ runner.temp }}/pw
+        run: |
+          set +e; node scripts/live-check.mjs --base "$SITE" --wait 300 --out /tmp/live-check.json; code=$?; set -e
+          node -e 'const r=require("/tmp/live-check.json");console.log("summary="+r.summary.replace(/\n/g," "))' >> "$GITHUB_OUTPUT" || echo "summary=The live check could not finish." >> "$GITHUB_OUTPUT"
+          if [ "$code" = 0 ]; then echo "state=ok" >> "$GITHUB_OUTPUT"; elif [ "$code" = 1 ]; then echo "state=flag" >> "$GITHUB_OUTPUT"; else echo "state=fail" >> "$GITHUB_OUTPUT"; fi
+          [ "$code" -le 1 ]
+      - name: Tell TX on Telegram
+        if: always() && steps.run.outputs.state != 'ok'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -s /tmp/live-check.json ]; then
+            { echo "🌐 Live site check: something is off"; echo "$SITE"; echo;
+              node -e 'const r=require("/tmp/live-check.json");console.log(r.issues.slice(0,10).map(i=>"• "+i.page+": "+i.what).join("\n"))';
+              echo; echo "Details: $RUN"; } | node scripts/notify-telegram.mjs
+          else
+            node scripts/notify-telegram.mjs "⚠️ The live check agent could not finish. Logs: $RUN"
+          fi
+  # Separate job: the write token for the status log never shares a job with the checked-out release.
+  record:
+    needs: check
+    if: always() && needs.check.result != 'skipped'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: |
+            scripts
+            banned-words.txt
+          persist-credentials: false
+      - name: Record status for the Ecosystem page
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATE: ${{ needs.check.outputs.state || 'fail' }}
+          SUMMARY: ${{ needs.check.outputs.summary || 'The live check could not finish.' }}
+        run: node scripts/record-status.mjs live-check

@@ -128,14 +128,14 @@
 <header class="stage compact eco-hero"><div class="orb"></div>
 <span class="eyebrow"><span class="en">Behind the scenes · system view</span><span class="zh">幕后 · 系统视图</span></span>
 <h1 class="mega"><span class="en">From something I learn<br>to a page you can read.</span><span class="zh">从我学到的东西，<br>到你能读的一页。</span></h1>
-<p class="sub"><span class="en">This is the whole pipeline. Small AI agents watch every step, and nothing goes live until I say yes.</span><span class="zh">这是整条流水线。每一步都有小 AI agent 在看着，我点头之前，什么都不会上线。</span></p>
+<p class="sub"><span class="en">This is the whole pipeline. Small AI agents watch every step, and no lesson goes live until I say yes.</span><span class="zh">这是整条流水线。每一步都有小 AI agent 在看着，我点头之前，没有一课会上线。</span></p>
 <div class="statusbar" id="sbar"></div>
 </header>
 
 <section id="system">
 <h2><span class="no">01</span><span class="en">The system</span><span class="zh">系统全貌</span></h2>
 <p><span class="en">Read it left to right. The numbers follow one lesson from the moment I learn something to the moment you read it. The coloured boxes are the agents working for me, each with its live status; the grey boxes are the plumbing they work on. Hover or tap an agent for its tools, token and last run; click it to keep the details open.</span><span class="zh">从左往右读。数字跟着一课走：从我学到东西的那一刻，到你读到它的那一刻。彩色的方框是替我干活的 agent，带着实时状态；灰色的方框是它们干活用的管道。把鼠标移到 agent 上或点一下，可以看到它的工具、令牌和上次运行；点击可以让详情保持打开。</span></p>
-<div class="panel" id="ov-panel"><svg id="ov" viewBox="0 0 1100 540" role="img" aria-label="System diagram: input, notes, AI agents, GitHub, Vercel, readers"></svg></div>
+<div class="panel" id="ov-panel"><svg id="ov" viewBox="0 0 1100 600" role="img" aria-label="System diagram: input, notes, AI agents, GitHub, Vercel, readers"></svg></div>
 <ol class="olist" id="ov-list"></ol>
 <p class="conn" id="conn"></p>
 <div class="key" id="key"></div>
@@ -149,7 +149,7 @@
 <section>
 <h2><span class="no">02</span><span class="en">Recent activity</span><span class="zh">最近动态</span></h2>
 <ul class="feed" id="feed"></ul>
-<p class="rule-line"><span class="en"><b>Agents suggest. I decide.</b> Every change is a pull request, and only I merge.</span><span class="zh"><b>Agent 提建议，我来决定。</b>每个改动都是一个 pull request，只有我能合并。</span></p>
+<p class="rule-line"><span class="en"><b>Agents suggest. I decide.</b> Every lesson is one pull request that only I merge. Releases go out by themselves, only when everything is green.</span><span class="zh"><b>Agent 提建议，我来决定。</b>每一课是一个只有我能合并的 pull request。发布会自动进行，但只在全部通过时。</span></p>
 </section>
 </main>
 <div class="tip" id="tip" role="tooltip"></div>
@@ -161,30 +161,30 @@
   function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
   // Keep these specs true to .github/workflows/.
   var AGENTS=[
-    {id:'writer',hue:'#8b7cff',on:['on push · inbox/**','推送 inbox/** 时'],ev:'push · test · inbox/**',mdl:'Claude · ≤80 turns',rd:['notes, style guide, a model lesson','笔记、写作指南、一篇范例课'],tl:'Read Write Edit Glob Grep · ls · check-copy',wr:['draft lesson → PR into test','课的草稿 → 提交到 test 的 PR'],tk:'contents:write · pull-requests:write',gt:['I merge it into test','我把它合并进 test'],tg:['every run: the draft link, or why it failed','每次运行：草稿链接，或失败原因'],tga:1,g:'github',ic:'WR',en:'Writer agent',zh:'写手 agent',
-     den:'Turns my raw notes into a lesson draft that follows the style guide, then opens a pull request for me.',
-     dzh:'把我的原始笔记写成一篇符合写作指南的课的草稿，然后给我开一个 pull request。',
-     ten:'Runs when notes land in the inbox',tzh:'笔记放进 inbox 时运行'},
-    {id:'copy-check',hue:'#4f9dff',on:['on every PR · script','每个 PR · 脚本'],ev:'pull_request → main|test · push → test',mdl:['script, no AI','脚本，不用 AI'],rd:['every page, banned word list, lessons.js','每一页、禁用词表、lessons.js'],tl:'node scripts/check-copy.mjs · check-counts.mjs',wr:['pass / fail checks: wording, counts, tags, stray build files, and on a release, fixes still open','通过 / 失败检查：用词、数量、标签、多余的编译文件；发布时还查未合并的修改'],tk:['check job: contents:read · status job: write','检查任务：contents:read · 状态任务：可写'],gt:['I see red before I merge','我合并前就能看到红色'],tg:['only when a check fails','只在检查失败时'],g:'github',ic:'CC',en:'Copy check agent',zh:'原创检查 agent',
+    {id:'writer',hue:'#8b7cff',on:['on push · inbox/**','推送 inbox/** 时'],ev:'push · test · inbox/**',mdl:'Claude · ≤80 turns',rd:['notes, style guide, a model lesson','笔记、写作指南、一篇范例课'],tl:'Read Write Edit Glob Grep · ls · check-copy · check-counts',wr:['draft lesson → one PR into test, the only PR for that lesson','课的草稿 → 一个提交到 test 的 PR，这一课只有这一个 PR'],tk:'contents · pull-requests · actions: write',gt:['I merge the lesson PR into test, once','我把课的 PR 合并进 test，只一次'],tg:['only on a problem; the reviewer agent tells me when the lesson is ready','只在出问题时；课准备好后由审稿人 agent 通知我'],g:'github',ic:'WR',en:'Writer agent',zh:'写手 agent',
+     den:'Turns my raw notes into a lesson draft that follows the style guide, then opens the one pull request for that lesson.',
+     dzh:'把我的原始笔记写成一篇符合写作指南的课的草稿，然后为这一课开唯一的一个 pull request。'},
+    {id:'copy-check',hue:'#4f9dff',on:['on every PR · script','每个 PR · 脚本'],ev:'pull_request → main|test · push → test · started by agents after they push',mdl:['script, no AI','脚本，不用 AI'],rd:['every page, banned word list, lessons.js','每一页、禁用词表、lessons.js'],tl:'node scripts/check-copy.mjs · check-counts.mjs',wr:['pass / fail checks: wording, counts, tags, stray build files, and on a release, fixes still open','通过 / 失败检查：用词、数量、标签、多余的编译文件；发布时还查未合并的修改'],tk:['check job: contents:read · status job: write','检查任务：contents:read · 状态任务：可写'],gt:['red blocks the merge','红色就不能合并'],tg:['only when a check fails','只在检查失败时'],g:'github',ic:'CC',en:'Copy check agent',zh:'原创检查 agent',
      den:'Scans every page for source names and numbering, so each lesson stays in my own words, and checks every lesson count and tag against the lesson list. It also blocks stray build files, and turns a release red while a fix for one of its pages is still open.',
-     dzh:'扫描每一页，找出来源名称和编号，让每一课都用我自己的话，并按课的清单核对每个数量和标签。它也会拦下多余的编译文件；如果要发布的页面还有没合并的修改，发布 PR 会变红。',
-     ten:'Runs on every pull request and every push to test',tzh:'每个 pull request 和每次推送到 test 时运行'},
-    {id:'reviewer',hue:'#f472b6',on:['on release PR → main','发布 PR → main 时'],ev:'pull_request → main',mdl:'Claude · ≤40 turns',rd:['the diff, style guide, copy check result','改动、写作指南、原创检查结果'],tl:'Read Write Glob Grep · gh pr diff/view/comment · git diff/log · check-copy',wr:['one comment with a verdict ✅ / ⚠️','一条带结论的评论 ✅ / ⚠️'],tk:'contents:read · pull-requests:write · issues:write',gt:['I merge to the live site','我合并到线上网站'],tg:['every run: the verdict and a short summary','每次运行：结论和简短摘要'],tga:1,g:'github',ic:'RV',en:'Reviewer agent',zh:'审稿人 agent',
-     den:'Reads each release like an editor: the story, the facts, the code, and whether EN and 中文 match.',
-     dzh:'像编辑一样读每次发布：故事、事实、代码，还有中英文是否一致。',
-     ten:'Runs before anything goes live',tzh:'上线之前运行'},
-    {id:'reader',hue:'#22d3ee',on:['on each preview','每次预览后'],ev:'deployment_status · preview ready',mdl:'Claude · ≤50 turns',rd:['the lessons that changed','改动过的课'],tl:'Read Write Edit Glob Grep · check-copy',wr:['clarity score; below 8/10 a fix PR into test (lesson files only, one open per lesson)','清晰度评分；低于 8/10 时提交修改 PR 到 test（只改课文件，每课最多一个未合并）'],tk:['read job: contents:read · share job: write','读取任务：contents:read · 分享任务：可写'],gt:['I merge the fix','我合并修改'],tg:['every run: the scores and the fix PR link','每次运行：评分和修改 PR 链接'],tga:1,g:'vercel',ic:'RD',en:'Reader agent',zh:'试读员 agent',
-     den:'Reads new lessons as someone new to AI would and scores how clear they are. Below 8/10 it drafts fixes; while one fix is open it adds to that one instead of opening another.',
-     dzh:'像刚接触 AI 的人那样读新课，给清晰度打分。低于 8/10 才起草修改；已有修改没合并时，它会补充到那个 PR，而不是再开一个。',
-     ten:'Runs after every preview deploy',tzh:'每次预览部署后运行'},
-    {id:'ui-check',hue:'#fb923c',on:['clicks each preview','点遍每个预览'],ev:'deployment_status · preview ready',mdl:['script + Claude · ≤30 turns','脚本 + Claude · ≤30 轮'],rd:['every page in a desktop and a phone browser','桌面和手机浏览器里的每一页'],tl:'headless browser · Claude: Read + one result file',wr:['pass / fail status + one PR comment','通过 / 失败状态 + 一条 PR 评论'],tk:['check job: contents:read · share job: write','检查任务：contents:read · 分享任务：可写'],gt:['I see red before I merge','我合并前就能看到红色'],tg:['only when something is flagged','只在发现问题时'],g:'vercel',ic:'UI',en:'UI check agent',zh:'界面检查 agent',
+     dzh:'扫描每一页，找出来源名称和编号，让每一课都用我自己的话，并按课的清单核对每个数量和标签。它也会拦下多余的编译文件；如果要发布的页面还有没合并的修改，发布 PR 会变红。'},
+    {id:'reviewer',hue:'#f472b6',on:['lesson PRs + releases','课 PR 和发布时'],ev:'started by the reader agent on a lesson PR · pull_request → main',mdl:'Claude · ≤40 turns',rd:['the diff, style guide, copy check result','改动、写作指南、原创检查结果'],tl:'Read Write Edit Glob Grep · check-copy · check-counts',wr:['one comment with a verdict ✅ / ⚠️; on a lesson PR, its fixes as one commit there','一条带结论的评论 ✅ / ⚠️；在课的 PR 上，把修改作为一个提交加进去'],tk:['review job: contents:read · share job: write','审阅任务：contents:read · 分享任务：可写'],gt:['its ✅ lets the release agent release','它的 ✅ 让发布 agent 可以发布'],tg:['every lesson: "ready to approve"; a release only on ⚠️','每一课：“可以批准了”；发布只在 ⚠️ 时'],tga:1,g:'github',ic:'RV',en:'Reviewer agent',zh:'审稿人 agent',
+     den:'Reads each lesson PR like an editor (the story, the facts, the code, EN and 中文), fixes what it can on that same PR, then tells me it is ready. It reads each release once more before it goes live.',
+     dzh:'像编辑一样读每个课的 PR（故事、事实、代码、中英文），能修的就在同一个 PR 上修好，然后告诉我可以批准了。每次发布上线前它还会再读一遍。'},
+    {id:'reader',hue:'#22d3ee',on:['on each preview','每次预览后'],ev:'deployment_status · preview ready',mdl:'Claude · ≤50 turns',rd:['the lessons that changed','改动过的课'],tl:'Read Write Edit Glob Grep · check-copy · check-counts',wr:['clarity score; below 8/10 its fixes as one commit on the lesson PR','清晰度评分；低于 8/10 时把修改作为一个提交加到课的 PR'],tk:['read job: contents:read · share job: write','读取任务：contents:read · 分享任务：可写'],gt:['I merge the lesson PR once','课的 PR 我只合并一次'],tg:['only on a problem; scores go in the daily digest','只在出问题时；评分写进每日汇总'],g:'vercel',ic:'RD',en:'Reader agent',zh:'试读员 agent',
+     den:'Reads each new lesson as someone new to AI would and scores how clear it is. Below 8/10 it adds clearer wording to the lesson\'s own PR, once, then hands over to the reviewer agent.',
+     dzh:'像刚接触 AI 的人那样读每篇新课，给清晰度打分。低于 8/10 时，它把更清楚的写法加到这一课自己的 PR 上（只一次），然后交给审稿人 agent。'},
+    {id:'ui-check',hue:'#fb923c',on:['clicks each preview','点遍每个预览'],ev:'deployment_status · preview ready',mdl:['script + Claude · ≤30 turns','脚本 + Claude · ≤30 轮'],rd:['every page in a desktop and a phone browser','桌面和手机浏览器里的每一页'],tl:'headless browser · Claude: Read + one result file',wr:['pass / fail status + one PR comment','通过 / 失败状态 + 一条 PR 评论'],tk:['check job: contents:read · share job: write','检查任务：contents:read · 分享任务：可写'],gt:['red blocks the merge','红色就不能合并'],tg:['only when something is flagged','只在发现问题时'],g:'vercel',ic:'UI',en:'UI check agent',zh:'界面检查 agent',
      den:'Uses each preview the way a person does: hovers, clicks and Tabs through every page on a desktop and a phone, and flags popups that overlap, pages wider than the screen and script errors. Claude then looks at screenshots of what changed.',
-     dzh:'像真人一样使用每个预览：在桌面和手机上把每一页都悬停、点击、按 Tab 走一遍，标出重叠的弹窗、比屏幕还宽的页面和脚本错误。然后 Claude 再看一遍改动页面的截图。',
-     ten:'Runs after every preview deploy',tzh:'每次预览部署后运行'},
-    {id:'recall',g:'later',ic:'SR',en:'Spaced recall agent',zh:'间隔回顾 agent',
-     den:'Brings back an old lesson right before I would forget it.',dzh:'在我快忘记之前，把旧课翻出来让我复习。',ten:'Planned',tzh:'计划中',later:1},
-    {id:'gaps',g:'later',ic:'GF',en:'Gap finder agent',zh:'缺口查找 agent',
-     den:'Spots topics I skipped or only half covered.',dzh:'找出我跳过或只学了一半的主题。',ten:'Planned',tzh:'计划中',later:1}];
+     dzh:'像真人一样使用每个预览：在桌面和手机上把每一页都悬停、点击、按 Tab 走一遍，标出重叠的弹窗、比屏幕还宽的页面和脚本错误。然后 Claude 再看一遍改动页面的截图。'},
+    {id:'release',hue:'#34d399',on:['daily · 8 PM and 10 PM','每天 · 晚 8 点和 10 点'],ev:'schedule · 12:00 and 14:00 UTC',mdl:['script, no AI','脚本，不用 AI'],rd:['test vs main, every check, the reviewer verdict, open PRs, agent status','test 与 main 的差别、每项检查、审稿结论、未合并的 PR、agent 状态'],tl:'node scripts/release.mjs',wr:['8 PM: the release PR + one daily digest · 10 PM: merge when all green, or hold','晚 8 点：发布 PR + 每日汇总 · 晚 10 点：全绿就合并，否则暂停'],tk:'contents · pull-requests · actions: write',gt:['a "hold" label stops it','加上 hold 标签就会停'],tg:['every day: the digest at 8 PM; at 10 PM only if it holds the release','每天：晚 8 点的汇总；晚 10 点只在暂停发布时'],tga:1,g:'github',ic:'RL',en:'Release agent',zh:'发布 agent',
+     den:'Moves test to the live site once a day, only when every check is green, the reviewer agent said ✅ and no fix is still open. At 8 PM it opens the release and sends me one digest of the day; at 10 PM it releases, or tells me why not.',
+     dzh:'每天把 test 发布到线上一次，但只在每项检查都通过、审稿人 agent 给了 ✅、也没有未合并的修改时。晚上 8 点它开好发布并给我发一条当天的汇总；10 点发布，或者告诉我为什么没发。'},
+    {id:'live-check',hue:'#a3e635',on:['after each release','每次发布后'],ev:'deployment_status · production ready',mdl:['script, no AI','脚本，不用 AI'],rd:['the live site: every page, lesson, link and file','线上网站：每一页、每一课、每个链接和文件'],tl:'node scripts/live-check.mjs · headless browser',wr:['a pass / fail line on this page','这一页上的一行通过 / 失败'],tk:['check job: contents:read · status job: write','检查任务：contents:read · 状态任务：可写'],gt:['I fix what it flags','我修它标出的问题'],tg:['only when something is off','只在有问题时'],g:'vercel',ic:'LC',en:'Live check agent',zh:'线上检查 agent',
+     den:'After each release goes live it opens every page and lesson on the real site, follows every link, and checks that the counts match the lesson list.',
+     dzh:'每次发布上线后，它打开真实网站上的每一页和每一课，点遍每个链接，并核对数量和课的清单是否一致。'},
+    {id:'recall',hue:'#facc15',on:['Sundays · 9 AM','每周日 · 早 9 点'],ev:'schedule · Sunday 01:00 UTC',mdl:'Claude · ≤20 turns',rd:['the lessons due for review, the lesson list','到期该复习的课、课的清单'],tl:'Read',wr:['no files: one Telegram message','不写文件：只发一条 Telegram'],tk:['think job: contents:read · send job: write','思考任务：contents:read · 发送任务：可写'],gt:['I answer on my phone','我在手机上作答'],tg:['every week: what to review, with questions','每周：该复习什么，附带问题'],tga:1,g:'github',ic:'SR',en:'Recall agent',zh:'回顾 agent',
+     den:'Brings old lessons back right before I would forget them (1, 3, 7, 14, 30 days and on), with two quick questions each, and points out the gaps: topics I have not written yet and what to learn next.',
+     dzh:'在我快忘记之前把旧课翻出来（1、3、7、14、30 天……），每课附两道小问题，并指出缺口：还没写的主题和下一步该学什么。'}];
   var NAME={};AGENTS.forEach(function(a){NAME[a.id]=a});
 
   function agoP(iso){var s=(Date.now()-new Date(iso))/1000;if(!(s>=0))return ['',''];
@@ -207,15 +207,15 @@
 
   // 01 The system: six layers, left to right. Grey boxes are the lesson path (numbered); coloured boxes are the agents.
   var CW=1100/6,X=function(c){return CW/2+c*CW},NW=144,NH=46,AW=168,AH=70;
-  var RT=108,RA=212,RM=320,RB=428,RP=504;
+  var RT=108,RA=212,RM=320,RB=428,RP=536;
   var COLS=[['INPUT','输入'],['NOTES','笔记'],['AI AGENTS','AI AGENT'],['GITHUB','GITHUB'],['VERCEL','VERCEL'],['ME & READERS','我和读者']];
   var N={
     src:{c:0,y:RA,en:'Learning sources',zh:'学习来源',m:['videos · docs · books','视频 · 文档 · 书'],seq:1},
     notes:{c:1,y:RA,en:'My notes',zh:'我的笔记',m:['inbox/<topic>','inbox/<主题>'],seq:2},
     writer:{c:2,y:RA,agent:'writer',seq:3},
-    test:{c:3,y:RA,en:'Pull request',zh:'Pull request',m:['into branch test','合并进 test'],seq:4,lock:1},
+    test:{c:3,y:RA,en:'Pull request',zh:'Pull request',m:['one per lesson → test','每课一个 → test'],seq:4,lock:1},
     prev:{c:4,y:RA,en:'Preview',zh:'预览',m:['test build','test 版本'],seq:5},
-    main:{c:3,y:RB,en:'Release',zh:'发布',m:['test → main','test → main'],seq:6,lock:1},
+    main:{c:3,y:RB,en:'Release',zh:'发布',m:['daily · when all green','每天 · 全绿才发布'],seq:6},
     live:{c:4,y:RB,en:'Live site',zh:'线上网站',m:['production','正式环境'],seq:7},
     readers:{c:5,y:RB,en:'Readers',zh:'读者',m:['me · newcomers to AI','我 · AI 新手'],seq:8},
     reader:{c:2,y:RT,agent:'reader'},
@@ -223,8 +223,9 @@
     reviewer:{c:2,y:RB,agent:'reviewer'},
     ui:{c:5,y:RA,agent:'ui-check'},
     tg:{c:5,y:RT,tg:1},
-    recall:{c:2,y:RP,dx:-38,w:70,h:28,agent:'recall',short:['recall','回顾']},
-    gaps:{c:2,y:RP,dx:38,w:70,h:28,agent:'gaps',short:['gaps','缺口']}};
+    release:{c:2,y:RP,agent:'release'},
+    livecheck:{c:4,y:RP,agent:'live-check'},
+    recall:{c:5,y:RP,agent:'recall'}};
   function geo(n){var a=(n.agent&&!n.short)||n.tg,w=n.w||(a?AW:NW),h=n.h||(a?AH:NH),x=X(n.c)+(n.dx||0);return {x:x,y:n.y,w:w,h:h,l:x-w/2,r:x+w/2,t:n.y-h/2,b:n.y+h/2}}
   var TG=function(){return AGENTS.filter(function(a){return a.tg})};
   function box(id,S){var n=N[id],g=geo(n),a=n.agent&&NAME[n.agent],s=a&&S[n.agent],st=s&&PP[s.state]?s.state:'',o;
@@ -255,7 +256,7 @@
   function drawOverview(S){
     var o=DEFS;
     COLS.forEach(function(c,i){var x0=i*CW;
-      if(i%2===0)o+='<rect class="band" x="'+f(x0+3)+'" y="6" width="'+f(CW-6)+'" height="528" rx="6"/>';
+      if(i%2===0)o+='<rect class="band" x="'+f(x0+3)+'" y="6" width="'+f(CW-6)+'" height="588" rx="6"/>';
       o+='<text class="col" x="'+f(x0+16)+'" y="32"><tspan class="n">0'+(i+1)+'</tspan>  '+ts(c[0],c[1])+'</text>'+
         '<line class="rule" x1="'+f(x0+16)+'" y1="44" x2="'+f(x0+CW-16)+'" y2="44"/>'});
     var T=geo(N.test),C=geo(N.cc),M=geo(N.main),P=geo(N.prev),R=geo(N.reader),RV=geo(N.reviewer);
@@ -269,15 +270,23 @@
     var fx=T.l+30;
     o+=e('lp','M'+P.x+','+P.t+' V'+(R.y-8)+' H'+f(R.r+2),'reader');
     o+=e('lp','M'+f(R.r)+','+(R.y+8)+' H'+f(fx-10)+' Q'+f(fx)+','+(R.y+8)+' '+f(fx)+','+(R.y+18)+' V'+(T.t-11),'reader');
-    o+=lab((R.r+P.x)/2+50,R.y-15,'reads each preview','读每个预览','middle','reader')+lab(fx+8,(R.y+T.t)/2+14,'fix PR · lesson files only','修改 PR · 只改课文件','start','reader');
+    o+=lab((R.r+P.x)/2+50,R.y-15,'reads each preview','读每个预览','middle','reader')+lab(fx+8,(R.y+T.t)/2+14,'fixes onto the same PR','修改加到同一个 PR','start','reader');
     o+=e('ck','M'+f(RV.r)+','+RV.y+' H'+f(M.l-2),'reviewer');
+    // the reviewer agent also reviews each lesson PR and adds its fixes there
+    var vx=f((RV.r+C.l)/2);o+=e('lp','M'+f(RV.r)+','+(RV.y-14)+' H'+vx+' V'+(T.y+14)+' H'+f(T.l-2),'reviewer');
+    o+=lab(vx-6,RM+4,'reviews + fixes the lesson PR','审阅并修改课的 PR','end','reviewer');
+    // the release agent merges test into main once a day, only when everything is green
+    var RL=geo(N.release);o+=e('','M'+f(RL.r)+','+RL.y+' H'+f(M.x)+' V'+(M.b+2),'release')+lab(RL.r+8,RL.y+16,'merges at 10 PM if all green','全绿才在晚 10 点合并','start','release');
+    // after a release: the live check agent opens the real site; the recall agent quizzes me every Sunday
+    var LV=geo(N.live),LC=geo(N.livecheck),RC=geo(N.recall),RD=geo(N.readers);
+    o+=e('ck','M'+LC.x+','+LC.t+' V'+(LV.b+2),'live-check')+lab(LC.x-8,(LV.b+LC.t)/2+4,'checks every page','检查每一页','end','live-check');
+    o+=e('ck','M'+RC.x+','+RC.t+' V'+(RD.b+2),'recall')+lab(RC.x-8,(RD.b+RC.t)/2+4,'weekly: what to review','每周：该复习什么','end','recall');
     // the UI check agent clicks through each preview and reports back on the PR
     var U=geo(N.ui);o+=e('ck','M'+f(P.r)+','+P.y+' H'+f(U.l-2),'ui-check')+lab(U.x,U.b+16,'status + comment on the PR','状态 + PR 上的评论','middle','ui-check');
-    o+=lab(X(2),RP-22,'coming next','即将加入');
     // Telegram: the UI check agent sits right under my phone; every other agent's plane says when it pings me
     var TGN=geo(N.tg);o+=e('ck','M'+U.x+','+U.t+' V'+(TGN.b+2),'ui-check');
     Object.keys(N).forEach(function(k){o+=box(k,S)});
-    o+='<text class="foot" x="1084" y="530" text-anchor="end">'+ts('every run → this page','每次运行 → 这一页')+'</text>';
+    o+='<text class="foot" x="1084" y="592" text-anchor="end">'+ts('every run → this page','每次运行 → 这一页')+'</text>';
     var svg=document.getElementById('ov');svg.innerHTML=o;
     // One popup for the whole page. Hover or focus shows it, click pins it, Escape or a click elsewhere closes it.
     svg.querySelectorAll('[data-agent]').forEach(function(el){
@@ -287,14 +296,13 @@
       el.onclick=function(ev){ev.stopPropagation();go()};el.onkeydown=function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();go()}}});
     if(PIN){var pe=svg.querySelector('[data-agent="'+PIN+'"]');if(pe)showTip(pe,S,true);else hideTip()}
     // phone version: the same layers as an ordered list
-    var L=[[0,['src']],[1,['notes']],[2,['writer','reader','reviewer']],[3,['test','cc','main']],[4,['prev','live']],[5,['ui','tg','readers']]];
+    var L=[[0,['src']],[1,['notes']],[2,['writer','reader','reviewer','release']],[3,['test','cc','main']],[4,['prev','live','livecheck']],[5,['ui','tg','readers','recall']]];
     function li(id){var n=N[id],a=n.agent&&NAME[n.agent],s=a&&S[a.id],st=s&&PP[s.state]?s.state:'';
       if(n.tg){var nm=function(L){return L.map(function(a){return a.en.replace(/ agent$/,'')}).join(', ')},nz=function(L){return L.map(function(a){return a.zh.replace(/ agent$/,'')}).join('、')},al=TG().filter(function(a){return a.tga}),pr=TG().filter(function(a){return !a.tga});
         return '<li class="it">'+t('Telegram → me','Telegram → 我')+'<small>'+t('every run: '+nm(al),'每次运行：'+nz(al))+'</small><small>'+t('only on a problem: '+nm(pr),'只在出问题时：'+nz(pr))+'</small></li>'}
       if(a)return '<li class="it ag'+(OPEN===a.id?' open':'')+'" style="--h:'+a.hue+'" data-agent="'+a.id+'"'+(n.seq?' data-n="'+n.seq+'"':'')+'><button class="ob" aria-expanded="'+(OPEN===a.id)+'"><span class="st '+st+'"></span>'+t(a.en,a.zh)+'</button><small class="hx">'+t(a.on[0],a.on[1])+'</small><small>'+(s?(PILL[st]||'')+' · '+ago(s.at)+runsOf(s):LIVE?t('no runs yet','还没运行'):t('status offline','状态离线'))+'</small>'+(a.tg?'<small class="tgl">✈ '+t('Telegram: '+a.tg[0],'Telegram：'+a.tg[1])+'</small>':'')+'<div class="more"><p>'+t(a.den,a.dzh)+'</p>'+specOf(a)+lastOf(s)+'</div></li>';
       return '<li class="it"'+(n.seq?' data-n="'+n.seq+'"':'')+'>'+t(esc(n.en),esc(n.zh))+(n.lock?'<span class="lk">'+t('TX APPROVES','TX 批准')+'</span>':'')+'<small>'+t(esc(n.m[0]),esc(n.m[1]))+'</small></li>'}
-    document.getElementById('ov-list').innerHTML=L.map(function(l){return '<li class="h">0'+(l[0]+1)+' · '+t(COLS[l[0]][0],COLS[l[0]][1])+'</li>'+l[1].map(li).join('')}).join('')+
-      '<li class="h">'+t('Coming next','即将加入')+'</li><li class="it lp">'+t('Spaced recall · Gap finder','间隔回顾 · 缺口查找')+'</li>';
+    document.getElementById('ov-list').innerHTML=L.map(function(l){return '<li class="h">0'+(l[0]+1)+' · '+t(COLS[l[0]][0],COLS[l[0]][1])+'</li>'+l[1].map(li).join('')}).join('');
     // Phone: tapping an agent opens its details in place and closes any other.
     document.querySelectorAll('#ov-list .ob').forEach(function(b){b.onclick=function(){var it=b.parentNode,was=it.classList.contains('open');
       document.querySelectorAll('#ov-list .it.open').forEach(function(x){x.classList.remove('open');x.querySelector('.ob').setAttribute('aria-expanded','false')});
@@ -324,39 +332,46 @@
 
   // Guardrails: a plain title, one number with its unit, what it stops, what that means, and the agents it covers.
   // Numbers are true to .github/workflows/.
-  var ALL=['writer','copy-check','reviewer','reader','ui-check'];
+  var ALL=AGENTS.filter(function(a){return !a.later}).map(function(a){return a.id});
+  var AI=['writer','reader','reviewer','ui-check','recall'];
   var G=[
-    {t:['I approve every change','每个改动都由我批准'],ag:ALL,n:'2',u:['merges by me before anything is live: into test, then into main','次由我合并，才会上线：先进 test，再进 main'],
-     r:['An agent publishes a mistake to the live site.','agent 把错误直接发布到线上网站。'],
-     i:['Every change waits for my merge, into test and again into main.','每个改动都要等我合并：进 test 一次，进 main 再一次。']},
-    {t:['The AI can look, not touch','AI 只能看，不能动'],ag:['reader','reviewer','ui-check'],n:'0',u:['write access while the AI is thinking','AI 思考时的写权限'],
+    {t:['I approve every lesson','每一课都由我批准'],ag:ALL,n:'1',u:['merge by me per lesson','次合并／每课，由我来做'],
+     r:['An agent publishes a lesson I never saw.','agent 发布了一篇我没看过的课。'],
+     i:['Nothing reaches test without my merge. Releases then go out by themselves, only with what is already on test and only when all green.','没有我的合并，什么都进不了 test。之后发布会自动进行，只发布 test 上已有的内容，而且只在全绿时。']},
+    {t:['Releases wait for green','发布要等全绿'],ag:['copy-check','ui-check','release'],n:'0',u:['red checks or open fixes allowed in a release','个红色检查或未合并修改，允许出现在发布里'],
+     r:['A release goes live with a broken page, a source name, or a fix still waiting.','发布带着坏掉的页面、来源名称，或还在等的修改上线了。'],
+     i:['The copy check and the UI check must pass before any merge. The release agent also waits for every check on the exact commit, and for any open fix to its pages.','原创检查和界面检查通过后才能合并。发布 agent 还会等那次提交上的每项检查，以及它要发布的页面上所有未合并的修改。']},
+    {t:['Two hours to say stop','两小时可以叫停'],ag:['release'],n:'2',u:['hours between the 8 PM notice and the 10 PM release','小时：从晚 8 点通知到晚 10 点发布'],
+     r:['A release goes out before I can stop it.','发布在我来得及叫停之前就上线了。'],
+     i:['The 8 PM digest says what goes live. A "hold" label on the release PR stops it.','晚 8 点的汇总会说明要上线什么。在发布 PR 上加 hold 标签就能停下。']},
+    {t:['The AI can look, not touch','AI 只能看，不能动'],ag:['reader','reviewer','ui-check','recall'],n:'0',u:['write access while the AI is thinking','AI 思考时的写权限'],
      r:['A lesson with tricky text talks the AI into changing the repo.','一篇课里的刁钻文字诱导 AI 去改仓库。'],
-     i:['The thinking job can only read. A separate job, running trusted scripts from main, does the writing. The reviewer agent can only comment.','思考的任务只能读，另一个运行 main 上可信脚本的任务负责写入。审稿人 agent 只能评论。']},
-    {t:['A short list of tools','工具清单很短'],ag:['writer','reader','reviewer'],n:'6–10',u:['tools each, and no free command line','个工具，没有随意的命令行'],
+     i:['The thinking job can only read. A separate job, running trusted scripts from main, does the writing.','思考的任务只能读，另一个运行 main 上可信脚本的任务负责写入。']},
+    {t:['A short list of tools','工具清单很短'],ag:AI,n:'1–8',u:['tools each, and no free command line','个工具，没有随意的命令行'],
      r:['An agent runs any command it likes.','agent 想跑什么命令就跑什么。'],
-     i:['Each agent can read and edit files and run the copy check. Only the reviewer agent can read and comment on a PR.','每个 agent 只能读写文件、跑原创检查；只有审稿人 agent 能读 PR 和评论。']},
-    {t:['Every run has a limit','每次运行都有上限'],ag:['writer','reader','reviewer','ui-check'],n:'30–80',u:['steps at most, then it stops','步封顶，到了就停'],
+     i:['Agents can read and edit files and run the two checks. The UI check and recall agents can only read.','agent 只能读写文件、跑两个检查；界面检查和回顾 agent 只能读。']},
+    {t:['Every run has a limit','每次运行都有上限'],ag:AI,n:'20–80',u:['steps at most, then it stops','步封顶，到了就停'],
      r:['A confused agent loops and burns my plan usage.','一个糊涂的 agent 原地打转，耗光我的额度。'],
      i:['Every run has a hard stop, so a bad run costs minutes, not hours.','每次运行都有硬上限，一次失败只浪费几分钟，而不是几小时。']},
-    {t:['Fixes only touch lessons','修改只碰课文件'],ag:['reader'],n:'1',u:['kind of file a fix may change: lesson pages','种文件可以被修改：课页面'],
+    {t:['Fixes only touch lessons','修改只碰课文件'],ag:['reader','reviewer'],n:'1',u:['kind of file a fix may change: lesson pages','种文件可以被修改：课页面'],
      r:['A "fix" quietly edits scripts or workflows.','一个“修改”悄悄动了脚本或工作流。'],
-     i:['The reader agent\'s fix PR can only touch lesson files. Anything else is dropped.','试读员 agent 的修改 PR 只能碰课文件，其他改动会被丢掉。']},
-    {t:['One round of fixes','只修一轮'],ag:['reader'],n:'1',u:['open fix per lesson, and only below 8/10','个未合并的修改／每课，且只在低于 8/10 时'],
-     r:['The reader agent always finds something more, and fix PRs pile up.','试读员 agent 总能再找到点什么，修改 PR 越堆越多。'],
-     i:['It skips its own fixes and leaves a lesson that passes alone. While a fix is open, a new read goes onto that PR instead of a new one.','它跳过自己的修改，及格的课不再动。已有修改没合并时，新的意见写进那个 PR，而不是再开一个。']},
+     i:['Fixes from the reader and reviewer agents can only change lesson files. Anything else is dropped.','试读员和审稿人 agent 的修改只能改课文件，其他改动会被丢掉。']},
+    {t:['One PR, one round of fixes','一个 PR，只修一轮'],ag:['reader','reviewer'],n:'1',u:['round of fixes per agent, on the lesson\'s own PR','轮修改／每个 agent，就在课自己的 PR 上'],
+     r:['Fix PRs pile up and I merge three times for one lesson.','修改 PR 越堆越多，一课要合并三次。'],
+     i:['The reader agent fixes only below 8/10, the reviewer agent once, both as commits on the same PR. They skip each other\'s fixes.','试读员 agent 只在低于 8/10 时修，审稿人 agent 只修一次，都作为提交加到同一个 PR。它们跳过彼此的修改。']},
     {t:['No source names, no junk files','没有来源名称，也没有杂文件'],ag:['copy-check'],n:'100%',u:['of pages and files scanned on every pull request','的页面和文件，在每个 pull request 上都会扫描'],
      r:['A source or platform name, a stray build file, or a lesson count that no longer matches, slips into the site.','来源或平台的名字、多余的编译文件，或者对不上的课数，混进网站。'],
      i:['The PR turns red before I merge, and status shown on this page is scrubbed too.','合并前 PR 就会变红；这一页显示的状态也会被清洗。']},
-    {t:['Releases wait for fixes','发布要等修改'],ag:['copy-check'],n:'0',u:['open fixes allowed on pages being released','个未合并修改，允许留在要发布的页面上'],
-     r:['A release goes live while a fix for the same lesson is still waiting.','同一课的修改还在等着，发布就先上线了。'],
-     i:['The release PR turns red and names the open fix, so I merge or close it first.','发布 PR 会变红，并列出那个修改，我先合并或关掉它。']},
-    {t:['Agents never push to the site','agent 从不直接推送到网站'],ag:ALL,n:'1',u:['branch agents push to directly: the run log','个分支 agent 可以直接推送：运行日志'],
+    {t:['The live site is checked','线上网站会被检查'],ag:['live-check'],n:'1',u:['check of every live page and link after each release','次检查：每次发布后检查线上每一页和每个链接'],
+     r:['A release breaks a link or a lesson and nobody notices.','发布弄坏了一个链接或一课，却没人发现。'],
+     i:['If anything is off, my phone hears about it within minutes.','有问题的话，几分钟内我手机就会收到。']},
+    {t:['Agents never push to the site','agent 从不直接推送到网站'],ag:ALL,n:'0',u:['direct pushes to main or test: everything goes through a pull request','次直接推送到 main 或 test：一切都走 pull request'],
      r:['An agent pushes straight to the live site.','agent 直接推送到线上网站。'],
-     i:['Agents only push run logs to agent-status. Everything else is a pull request.','agent 只把运行日志推到 agent-status，其他一律走 pull request。']},
-    {t:['No silent failures','不会悄悄失败'],ag:ALL,n:'5',u:['of 5 agents message my phone when a run fails or flags something','个 agent（共 5 个）在失败或发现问题时发消息到我手机'],
-     r:['An agent breaks quietly and nobody notices for days.','agent 悄悄坏掉，好几天都没人发现。'],
-     i:['A failed or flagged run sends me a Telegram message with a link. The writer, reviewer and reader agents message me on every run.','失败或有问题的运行都会给我发一条带链接的 Telegram 消息。写手、审稿人和试读员 agent 每次运行都会发。']}];
-  function who(ids){if(ids.length===ALL.length)return '<i class="all">'+t('All 5 agents','全部 5 个 agent')+'</i>';
+     i:['Agents push only run logs to agent-status and fixes onto a lesson\'s own draft branch. The release agent merges a pull request; it never pushes.','agent 只把运行日志推到 agent-status，把修改推到课自己的草稿分支。发布 agent 合并 pull request，从不直接推送。']},
+    {t:['No silent failures, no noise','不会悄悄失败，也不吵'],ag:ALL,n:'1',u:['digest a day, plus a message right away when a run fails or needs me','条每日汇总；运行失败或需要我时另外马上通知'],
+     r:['An agent breaks quietly, or my phone buzzes all day.','agent 悄悄坏掉，或者手机响个不停。'],
+     i:['Every agent messages me when it fails. Everything else waits for the 8 PM digest.','每个 agent 失败时都会通知我，其他的都等晚 8 点的汇总。']}];
+  function who(ids){if(ids.length===ALL.length)return '<i class="all">'+t('All '+ALL.length+' agents','全部 '+ALL.length+' 个 agent')+'</i>';
     return ids.map(function(id){var a=NAME[id];return '<i style="--h:'+a.hue+'">'+t(a.en.replace(/ agent$/,''),a.zh.replace(/ agent$/,''))+'</i>'}).join('')}
   document.getElementById('guards').innerHTML=G.map(function(g,k){
     return '<article class="card guard"><h4>'+t(g.t[0],g.t[1])+'</h4>'+
@@ -383,7 +398,7 @@
   function drawBar(S,live){var act=AGENTS.filter(function(a){return !a.later}),ran=act.filter(function(a){return S[a.id]}),last=0;
     ran.forEach(function(a){var x=+new Date(S[a.id].at);if(x>last)last=x});
     var runs=ran.reduce(function(n,a){return n+(S[a.id].runs||0)},0);
-    document.getElementById('sbar').innerHTML='<span>status: <b class="'+(live?'on':'off')+'">'+(live?'● live':'○ offline')+'</b></span><span>agents: <b>'+act.length+'</b> '+t('active','在线')+' · <b>'+(AGENTS.length-act.length)+'</b> '+t('planned','计划中')+'</span>'+
+    document.getElementById('sbar').innerHTML='<span>status: <b class="'+(live?'on':'off')+'">'+(live?'● live':'○ offline')+'</b></span><span>agents: <b>'+act.length+'</b> '+t('active','在线')+(AGENTS.length>act.length?' · <b>'+(AGENTS.length-act.length)+'</b> '+t('planned','计划中'):'')+'</span>'+
       '<span>runs: <b>'+runs+'</b></span>'+(last?'<span>'+t('last run','上次运行')+': <b>'+ago(new Date(last).toISOString())+'</b></span>':'')+'<span>gate: <b>TX</b></span>'}
 
   function draw(data){
