@@ -9,8 +9,8 @@
 <p class="zh" style="margin:0"><b>Wei Jie</b> 问聊天机器人三个问题，得到三个好答案，很得意。以批改答案为生的 <b>Priya</b> 只问了他一句：“如果它变差了，你怎么知道？”他答不上来。于是他像 Priya 批改全班那样，做了一份小小的测试集。</p></div>
 
 <h2><span class="en">Step 1 · A test set of questions with known answers</span><span class="zh">第 1 步 · 带标准答案的测试集</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">"Looks good in the chat" is a feeling, not evidence. You want a number that moves when you improve things. For that you need a test set: one JSON object per line, in a file. Each has a question, a few keywords that must appear in the right chunks, a reference answer and a category: a direct fact, a relationship, a comparison, or a holistic question that spans many documents. A few dozen questions across the categories is enough to start.</p>
-<p class="zh" style="margin:0 0 8px">“聊天里看起来不错”只是感觉，不是证据。你需要一个会随改进而变化的数字。为此要有测试集：一个文件，每行一个 JSON 对象。每条有问题、几个必须出现在正确块里的关键词、标准答案，以及类别：直接事实、关系、比较，或是跨很多文档的整体性问题。每个类别有几十道题，就足够起步了。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">"Looks good in the chat" is a feeling, not evidence. You want a number that moves when you improve things. For that you need a test set: one JSON object per line, in a file (JSON is plain text that writes a record as named fields, like the lines below). Each has a question, a few keywords that must appear in the right chunks, a reference answer and a category: a direct fact, a relationship, a comparison, or a holistic question that spans many documents. A few dozen questions across the categories is enough to start.</p>
+<p class="zh" style="margin:0 0 8px">“聊天里看起来不错”只是感觉，不是证据。你需要一个会随改进而变化的数字。为此要有测试集：一个文件，每行一个 JSON 对象（JSON 是一种纯文本格式，用带名字的字段来写一条记录，就像下面的几行）。每条有问题、几个必须出现在正确块里的关键词、标准答案，以及类别：直接事实、关系、比较，或是跨很多文档的整体性问题。每个类别有几十道题，就足够起步了。</p></div>
 <div class="codebox"><span class="dim"># tests.jsonl  (one question per line, made-up examples)
 </span><span class="chg">{"question": "Who is in charge of lift repairs?", "keywords": ["lift", "Hafiz"], "reference": "Hafiz Rahman handles lift repairs.", "category": "direct"}
 {"question": "Which officer reports to the estate manager?", "keywords": ["estate manager", "reports"], "reference": "The lift officer reports to her.", "category": "relationship"}
@@ -18,8 +18,8 @@
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 2 · Score retrieval: did the right chunks come back?</span><span class="zh">第 2 步 · 给检索打分：对的块回来了吗？</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Score the search on its own, before the model writes anything. For each keyword, find the rank of the first retrieved chunk that contains it. MRR (mean reciprocal rank) is 1 divided by that rank, averaged: top hit scores 1, third scores 0.33, missing scores 0. Keyword coverage is the fraction of keywords found in the top k. nDCG is a third score that rewards putting relevant chunks near the top.</p>
-<p class="zh" style="margin:0 0 8px">先单独给搜索打分，这时模型还没写任何东西。对每个关键词，找出第一块含有它的检索结果的名次。MRR（平均倒数名次）就是这个名次的倒数再取平均：排第一得 1，排第三得 0.33，没找到得 0。关键词覆盖率是前 k 块里找到的关键词所占的比例。nDCG 是第三种分数，奖励把相关的块排在靠前的位置。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Score the search on its own, before the model writes anything. For each keyword, find the rank of the first retrieved chunk that contains it. MRR (mean reciprocal rank) is 1 divided by that rank, averaged: top hit scores 1, third scores 0.33, missing scores 0. Keyword coverage is the fraction of keywords found in the top k.</p>
+<p class="zh" style="margin:0 0 8px">先单独给搜索打分，这时模型还没写任何东西。对每个关键词，找出第一块含有它的检索结果的名次。MRR（平均倒数名次）就是这个名次的倒数再取平均：排第一得 1，排第三得 0.33，没找到得 0。关键词覆盖率是前 k 块里找到的关键词所占的比例。</p></div>
 <div class="codebox"><span class="dim">import json
 </span><span class="chg">tests = [json.loads(line) for line in open("tests.jsonl", encoding="utf-8")]
 
@@ -38,8 +38,8 @@ def score_retrieval(test, k=10):
 <div class="try" id="p2"></div>
 
 <h2><span class="en">Step 3 · Score the answer with a judge model</span><span class="zh">第 3 步 · 用裁判模型给回答打分</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Good chunks do not guarantee a good answer, so score the answer separately. Another model acts as judge. Give it the question, the reference answer and the chatbot's answer. It returns accuracy, completeness and relevance, each from 1 to 5, with a line of feedback. One rule Wei Jie likes: any wrong answer must score 1.</p>
-<p class="zh" style="margin:0 0 8px">块好不等于回答好，所以回答要单独打分。让另一个模型当裁判。把问题、标准答案和聊天机器人的回答给它，它返回准确度、完整度、相关度，各 1 到 5 分，再加一句反馈。Wei Jie 喜欢的一条规则：只要答错，就必须给 1 分。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Good chunks do not guarantee a good answer, so score the answer separately. Another model acts as judge. Give it the question, the reference answer and the chatbot's answer. It returns accuracy, completeness and relevance, each from 1 to 5, with a line of feedback, in a fixed shape (the Verdict class below) so your code can read each number by name. One rule Wei Jie likes: any wrong answer must score 1.</p>
+<p class="zh" style="margin:0 0 8px">块好不等于回答好，所以回答要单独打分。让另一个模型当裁判。把问题、标准答案和聊天机器人的回答给它，它返回准确度、完整度、相关度，各 1 到 5 分，再加一句反馈，并且格式固定（下面的 Verdict 类），你的代码可以按名字读出每个数字。Wei Jie 喜欢的一条规则：只要答错，就必须给 1 分。</p></div>
 <div class="codebox"><span class="dim">from pydantic import BaseModel
 from langchain_openai import ChatOpenAI
 
@@ -92,7 +92,7 @@ for k in (3, 5, 10):          # change one thing: k
 document.addEventListener('DOMContentLoaded',function(){
  var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
  predict($('p1'),{q:{en:'Why does each test line carry a category?',zh:'为什么每条测试都要有类别？'},opts:[{k:'a',en:'So you can see which kind of question is weak, not just one average',zh:'这样你能看出哪一类问题弱，而不只是一个平均数'},{k:'b',en:'The retriever needs the category to search',zh:'检索器需要类别才能搜索'}],a:'a',ex:{en:'An average can hide that holistic questions fail while direct facts shine.',zh:'平均数可能掩盖“整体性问题全错、直接事实全对”这件事。'},hint:{en:'Think about what you do with the numbers afterwards.',zh:'想想拿到数字之后你要做什么。'}});
- predict($('p2'),{q:{en:'A keyword first appears in the third retrieved chunk. What does it add to MRR?',zh:'某个关键词第一次出现在检索到的第三块里。它给 MRR 贡献多少？'},opts:[{k:'a',en:'1/3, about 0.33',zh:'1/3，约 0.33'},{k:'b',en:'3',zh:'3'}],a:'a',ex:{en:'Reciprocal rank is 1 divided by the rank. Rank 1 gives 1, rank 3 gives about 0.33, missing gives 0.',zh:'倒数名次就是 1 除以名次。第 1 名得 1，第 3 名约得 0.33，没找到得 0。'},hint:{en:'"Reciprocal" means one over the number.',zh:'“倒数”就是用 1 去除。'}});
+ predict($('p2'),{q:{en:'A keyword first appears in the third retrieved chunk. What is its reciprocal rank?',zh:'某个关键词第一次出现在检索到的第三块里。它的倒数名次是多少？'},opts:[{k:'a',en:'1/3, about 0.33',zh:'1/3，约 0.33'},{k:'b',en:'3',zh:'3'}],a:'a',ex:{en:'Reciprocal rank is 1 divided by the rank. Rank 1 gives 1, rank 3 gives about 0.33, missing gives 0.',zh:'倒数名次就是 1 除以名次。第 1 名得 1，第 3 名约得 0.33，没找到得 0。'},hint:{en:'"Reciprocal" means one over the number.',zh:'“倒数”就是用 1 去除。'}});
  game($('g3'),[
   {en:'The page about lift repairs never shows up in the top 10.',zh:'电梯维修那一页从没出现在前 10 名里。',a:'r',ex:{en:'Missing chunks lower MRR and coverage.',zh:'缺少块会拉低 MRR 和覆盖率。'},hint:{en:'Is the problem in the search or the writing?',zh:'问题出在搜索还是写作？'}},
   {en:'The right chunk came back, but the reply names the wrong officer.',zh:'对的块回来了，回答却点错了职员的名字。',a:'a',ex:{en:'The search was fine. The judge sees the wrong answer.',zh:'搜索没问题。裁判会发现回答是错的。'},hint:{en:'Is the problem in the search or the writing?',zh:'问题出在搜索还是写作？'}},

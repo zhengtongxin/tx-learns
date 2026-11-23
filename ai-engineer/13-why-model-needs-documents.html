@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Why a model needs your documents | TX Learns</title>
-<meta name="description" content="A model knows nothing about your private files. See the simplest fix, why it breaks, and the four-part recipe called RAG."><meta property="og:title" content="Why a model needs your documents | TX Learns"><meta property="og:description" content="A model knows nothing about your private files. See the simplest fix, why it breaks, and the four-part recipe called RAG."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-engineer/13-why-model-needs-documents.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="description" content="A model knows nothing about your private files. See the simplest fix, why it breaks, and the recipe called RAG."><meta property="og:title" content="Why a model needs your documents | TX Learns"><meta property="og:description" content="A model knows nothing about your private files. See the simplest fix, why it breaks, and the recipe called RAG."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-engineer/13-why-model-needs-documents.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
 <meta name="updated" content="2026-11-23">
 <link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
 <div class="wrap"><nav class="side"></nav><main>
@@ -24,8 +24,8 @@ print(ask_plain("Who handles lift complaints at Block 12 town council?"))</span>
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 2 · The simplest fix: paste the facts</span><span class="zh">第 2 步 · 最简单的办法：把事实贴进去</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">If the model lacks the facts, give them to it in the prompt. Wei Jie loads a small folder of markdown files into a dictionary, one file per key, with the key in lowercase. A small function looks at each word of the question. If a word matches a key, that file's text goes into the system message for this turn only.</p>
-<p class="zh" style="margin:0 0 8px">模型缺事实，就在提示词里给它。Wei Jie 把一小个文件夹的 markdown 文件读进一个字典，一个文件对应一个键，键用小写。一个小函数逐个看问题里的词：只要某个词对上了键，这个文件的内容就加进这一轮的 system 消息里。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">If the model lacks the facts, give them to it in the prompt. Wei Jie loads a small folder of markdown files into a dictionary, one file per key, with the key in lowercase. A small function looks at each word of the question. If a word matches a key, that file's text goes into the system message (the hidden note the model reads before your question) for this turn only.</p>
+<p class="zh" style="margin:0 0 8px">模型缺事实，就在提示词里给它。Wei Jie 把一小个文件夹的 markdown 文件读进一个字典，一个文件对应一个键，键用小写。一个小函数逐个看问题里的词：只要某个词对上了键，这个文件的内容就加进这一轮的 system 消息（模型在读你的问题之前先读的隐藏说明）里。</p></div>
 <div class="codebox"><span class="dim">from pathlib import Path
 
 </span><span class="chg">files = {}
@@ -46,8 +46,8 @@ def ask(question):
 <div class="try" id="p2"></div>
 
 <h2><span class="en">Step 3 · Why the simple version breaks</span><span class="zh">第 3 步 · 简单版本为什么会坏</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">This is already RAG: Retrieval first, then Augmented Generation. But it only works on exact words. "Who started the council?" matches no key, so nothing is added. Pasting every file instead is costly and may not fit the context window. Even when it fits, a pile of extra text can bury the one useful sentence.</p>
-<p class="zh" style="margin:0 0 8px">这其实已经是 RAG：先检索（Retrieval），再增强生成（Augmented Generation）。但它只认完全相同的词。“谁创办了理事会？”对不上任何键，所以什么也没加。反过来把所有文件都贴进去，既贵又可能超出上下文窗口。就算放得下，一大堆多余的文字也会把那句有用的话淹没。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">This is already RAG: Retrieval first, then Augmented Generation. But it only works on exact words. "Who started the council?" matches no key, so nothing is added. Pasting every file instead is costly and may not fit in the context window (the most text a model can read at once). Even when it fits, a pile of extra text can bury the one useful sentence.</p>
+<p class="zh" style="margin:0 0 8px">这其实已经是 RAG：先检索（Retrieval），再增强生成（Augmented Generation）。但它只认完全相同的词。“谁创办了理事会？”对不上任何键，所以什么也没加。反过来把所有文件都贴进去，既贵又可能超出上下文窗口（模型一次能读的最多文字）。就算放得下，一大堆多余的文字也会把那句有用的话淹没。</p></div>
 <div class="codebox"><span class="dim">add_facts("Who is Hafiz?")              # finds hafiz.md
 add_facts("Who looks after the lifts?")  # words: who, looks, after, the, lifts
                                          # no key is called "lifts" -> empty
@@ -63,8 +63,8 @@ ASK (every question)  question   -> vector -> closest chunks
                       chunks + rule "say I do not know" -> prompt -> answer
 
 Other options:
-  fine-tuning    teaches a style or skill, poor for facts that change
-  long context   holds a lot, but slow and costly on every question
+  fine-tuning    retrains on examples: teaches a style or skill, poor for facts that change
+  long context   one huge prompt holding many files: slow and costly on every question
   RAG            cheap, updatable (swap one file), can point to its source</span></div>
 <p class="en">Sort each step: does it happen once beforehand, or on every question?</p>
 <p class="zh">给每一步分类：是事先做一次，还是每个问题都要做？</p><div class="sc" id="g4"></div>
