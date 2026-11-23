@@ -124,9 +124,10 @@ jobs:
           if-no-files-found: ignore
 
   # Write job: only trusted scripts from the default branch run here, never files Claude could have touched.
+  # A review cancelled by a newer run of the same PR stays quiet: the newer run reports.
   share:
     needs: review
-    if: always()
+    if: ${{ !cancelled() && needs.review.result != 'cancelled' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
