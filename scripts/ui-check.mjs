@@ -182,6 +182,7 @@ async function main() {
   const origin = new URL(base).origin, bypass = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
   console.log(`UI check: ${pages.length} pages on ${local ? 'a local copy of this commit' : base}`);
 
+  const deadline = Date.now() + (+process.env.UI_CHECK_BUDGET || 15) * 60000;
   const browser = await chromium.launch();
   const results = [];
   // Desktop and phone run side by side to keep the job short.
@@ -272,7 +273,8 @@ async function main() {
     };
     // Several pages at once per screen size (UI_CHECK_JOBS, default 4) keeps a full run short.
     const queue = [...pages];
-    await Promise.all(Array.from({ length: Math.min(+process.env.UI_CHECK_JOBS || 4, pages.length) }, async () => { while (queue.length) await testPage(queue.shift()); }));
+    // Time budget (UI_CHECK_BUDGET minutes, default 15): when it runs out no new page is started, and the report says how many were tested.
+    await Promise.all(Array.from({ length: Math.min(+process.env.UI_CHECK_JOBS || 4, pages.length) }, async () => { while (queue.length && Date.now() < deadline) await testPage(queue.shift()); }));
     await ctx.close();
   }));
   await browser.close();
@@ -281,9 +283,10 @@ async function main() {
 
   const issues = results.reduce((n, r) => n + r.issues.length, 0);
   const bad = results.filter(r => r.issues.length);
+  const tested = new Set(results.map(r => r.page)).size, cut = tested < pages.length ? ` Time ran out after ${tested} of ${pages.length} pages; the rest were not tested.` : '';
   const summary = issues
-    ? `${issues} UI problem${issues > 1 ? 's' : ''} on ${new Set(bad.map(r => r.page)).size} of ${pages.length} pages: ${[...new Set(bad.flatMap(r => r.issues.map(i => i.kind)))].join(', ')}.`
-    : `All ${pages.length} pages passed on desktop and phone: no overlapping, covered or see-through popups, content wider than the screen or script errors.`;
+    ? `${issues} UI problem${issues > 1 ? 's' : ''} on ${new Set(bad.map(r => r.page)).size} of ${tested} pages tested: ${[...new Set(bad.flatMap(r => r.issues.map(i => i.kind)))].join(', ')}.${cut}`
+    : `All ${tested} pages tested passed on desktop and phone: no overlapping, covered or see-through popups, content wider than the screen or script errors.${cut}`;
   writeFileSync(join(OUT, 'ui-check.json'), JSON.stringify({ base: local ? 'local' : base, pages, issues, summary, results }, null, 1));
   writeFileSync(join(OUT, 'ui-check.md'), report(results, summary, issues));
   console.log('\n' + summary);
