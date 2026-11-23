@@ -50,6 +50,7 @@ export default function App({ Component, pageProps }: AppProps) {
 <p class="zh" style="margin:0 0 8px">登录后，浏览器里有一个<b>会话令牌（session token）</b>，是一段带签名的文本，叫 <b>JWT</b>，内容是“这是用户 X”。页面在每次 API 请求里，用 <code>Authorization</code> 头把它带上。令牌有效期很短，大约一分钟，所以存着的旧令牌会像随机故障一样失败。每次请求前都要取一个新的。</p></div>
 <div class="codebox"><span class="dim">import { useAuth } from "@clerk/nextjs";
 
+// inside your page component
 const { getToken } = useAuth();
 
 async function ask() {
