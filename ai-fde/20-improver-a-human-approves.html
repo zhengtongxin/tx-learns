@@ -1,0 +1,269 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Project: an improver a human approves | TX Learns</title>
+<meta name="description" content="Build a loop where a second agent proposes one change at a time to the claims agent, a person approves it, and code keeps or rolls it back by held-out scores."><meta property="og:title" content="Project: an improver a human approves | TX Learns"><meta property="og:description" content="Build a loop where a second agent proposes one change at a time to the claims agent, a person approves it, and code keeps or rolls it back by held-out scores."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-fde/20-improver-a-human-approves.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-24">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Improving and securing · Project</span><span class="zh">改进与加固 · 项目</span></span><h1><span class="en">Project: an improver a human approves</span><span class="zh">项目：由人批准的改进者</span></h1><p class="meta"><span class="en">Let a second agent suggest improvements, with a person saying yes and code deciding what stays · ~30 min · hands-on</span><span class="zh">让第二个智能体提改进建议，由人点头，由代码决定哪些留下 · 约 30 分钟 · 动手实践</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">Every week someone tweaks the claims agent’s instructions, and nobody remembers what changed or whether it helped. Mei Ling wants a helper that proposes tweaks. But Mr Goh will not have a machine quietly rewriting the agent that touches payouts. So the rules are: the helper only <em>proposes</em>, Aisha says yes or no, and plain code decides whether a change stays. This project uses <code>bench.py</code> and <code>scoreboard.py</code> from the scoreboard lesson (<code>claims</code>, <code>key</code>, <code>small_prompt</code>, <code>ask</code>, <code>gateway</code>, <code>HELD_OUT</code>, <code>held_claims</code>) and <code>scoring.py</code> (<code>matrix</code>, <code>accuracy</code>, <code>mistake_cost</code>).</p>
+<p class="zh" style="margin:0">每个星期都有人调一调理赔智能体的指令，没人记得改了什么，也不知道有没有用。Mei Ling 想要一个会提建议的帮手。但 Goh 先生不会允许一台机器悄悄改写那个碰赔付的智能体。所以规矩是：帮手只能<em>提议</em>，Aisha 说行或不行，由普通代码决定改动要不要留下。这个项目用到计分板那课的 <code>bench.py</code> 和 <code>scoreboard.py</code>（<code>claims</code>、<code>key</code>、<code>small_prompt</code>、<code>ask</code>、<code>gateway</code>、<code>HELD_OUT</code>、<code>held_claims</code>），以及 <code>scoring.py</code>（<code>matrix</code>、<code>accuracy</code>、<code>mistake_cost</code>）。</p></div>
+
+<h2><span class="en">Step 1 · The agent’s setup, in numbered versions</span><span class="zh">第 1 步 · 把智能体的设置存成带编号的版本</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Three things decide how the agent behaves: its extra <b>instructions</b>, its <b>model</b> and its reasoning <b>effort</b> (how long the model thinks). Keep them together as one <b>configuration</b>. Every change makes a new numbered version; old ones are never edited. Each version records what changed, why, who proposed it and who approved it. Like the shophouse’s filing cabinet: you add a new page, you never rub out the old one.</p>
+<p class="zh" style="margin:0 0 8px">三样东西决定智能体的行为：额外的<b>指令</b>、<b>模型</b>，以及推理<b>力度</b>（模型想多久）。把它们放在一起，称为一份<b>配置</b>。每次改动都产生一个带编号的新版本；旧版本绝不修改。每个版本都记下改了什么、为什么、谁提议、谁批准。就像店屋里的档案柜：你加一页新的，从不擦掉旧的。</p></div>
+<div class="codebox"><span class="chg"># versions.py
+import json, os
+
+FILE = "versions.json"
+FIELDS = ("instructions", "model", "effort")
+
+def save(state):
+    json.dump(state, open(FILE, "w"), indent=2)
+
+def load():
+    if not os.path.exists(FILE):
+        save({"active": 1, "log": [], "versions": [{
+            "n": 1, "instructions": "", "model": "anthropic/claude-haiku-5-5", "effort": "low",
+            "changed": "starting point", "why": "the agent as it ran on the scoreboard",
+            "proposed_by": "Mei Ling", "approved_by": "Mei Ling", "status": "kept", "scores": None}]})
+    return json.load(open(FILE))
+
+def find(state, n):
+    return next(v for v in state["versions"] if v["n"] == n)
+
+def active(state):
+    return find(state, state["active"])</span></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · The improver follows a recipe, and has limits</span><span class="zh">第 2 步 · 改进者照着配方走，并且有界限</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>recipe</b> is a short list of steps the improver must follow, kept in a file so people can read it. Read the results, propose one change, stop and wait for a person, then run the evaluation. The improver sees only the <b>practice claims</b>, never the held-out ones. It must change exactly one of the three fields. And only one round can be open at a time.</p>
+<p class="zh" style="margin:0 0 8px"><b>配方</b>是改进者必须照着走的一份简短步骤，存在文件里，人人看得懂。读结果，提一个改动，停下来等人，再跑评估。改进者只能看到<b>练习用的理赔</b>，绝看不到留出的那些。它必须正好改三个字段中的一个。而且同一时间只能开一轮。</p></div>
+<div class="codebox"><span class="chg"># improver.py
+import json, os
+from bench import gateway, claims, key, small_prompt, ask
+from scoreboard import HELD_OUT
+from versions import load, save, find, active, FIELDS
+
+IMPROVER = "anthropic/claude-sonnet-5-5"
+practice = [c for c in claims if c["id"] not in HELD_OUT]     # the improver never sees held-out claims
+
+DEFAULT_RECIPE = """1. Read the results on the practice claims and see where the agent differs from the handlers.
+2. Propose ONE change to ONE of: instructions, model, effort. Say why.
+3. Stop and wait for a person to approve.
+4. Only after approval does code run the held-out evaluation.
+5. Say in one sentence how this recipe could be better."""
+
+def recipe():
+    return open("recipe.txt").read() if os.path.exists("recipe.txt") else DEFAULT_RECIPE
+
+class Busy(Exception):
+    pass
+
+def run_config(config, claim):
+    reply = gateway.chat.completions.create(
+        model=config["model"],
+        messages=[{"role": "user", "content": config["instructions"] + "\n" + small_prompt(claim)}],
+        extra_body={"reasoning": {"effort": config["effort"]}})      # check your gateway's name for this
+    text = reply.choices[0].message.content
+    return json.loads(text[text.index("{"): text.rindex("}") + 1])
+
+def propose():
+    state = load()
+    if any(v["status"] in ("proposed", "testing") for v in state["versions"]):
+        raise Busy("a round is already open")
+    config = active(state)
+    results = [{"story": c["story"], "agent": run_config(config, c)["action"],
+                "handler": key[c["id"]]["action"]} for c in practice]
+    prompt = f"""You improve a claims agent by following this recipe:
+{recipe()}
+
+Current setup: {json.dumps({f: config[f] for f in FIELDS})}
+Results on practice claims: {json.dumps(results)}
+
+Reply with JSON only: {{"field": "instructions" or "model" or "effort", "value": "the new value", "why": "one sentence"}}"""
+    proposal = ask(gateway, IMPROVER, prompt)[0]
+    if proposal["field"] not in FIELDS or not str(proposal["value"]).strip():
+        raise ValueError("the improver must change exactly one of: " + ", ".join(FIELDS))
+    n = len(state["versions"]) + 1
+    new = {f: config[f] for f in FIELDS}
+    new[proposal["field"]] = proposal["value"]
+    state["versions"].append({"n": n, **new, "changed": proposal["field"], "why": proposal["why"],
+                              "proposed_by": "improver", "approved_by": None,
+                              "status": "proposed", "scores": None})
+    save(state)
+    return n</span></div>
+<p class="en">What may the improver change by itself? Sort the items.</p>
+<p class="zh">哪些东西改进者可以自己提议改？来分一分。</p><div class="sc" id="g1"></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · A person says yes, or no</span><span class="zh">第 3 步 · 由人说行，或不行</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A proposal just sits there, marked <code>proposed</code>, until a person acts. Approving records the name and moves it to <code>testing</code>. Rejecting records the name and closes the round, and nothing else changes: the agent keeps running the version it had. Rejecting is also how a handler stops a round.</p>
+<p class="zh" style="margin:0 0 8px">提议只是放在那里，标着 <code>proposed</code>，直到有人动手。批准会记下名字，并把它变成 <code>testing</code>。拒绝会记下名字并结束这一轮，其余什么都不变：智能体继续跑它原来的版本。拒绝也是理赔员叫停一轮的办法。</p></div>
+<div class="codebox"><span class="dim"># improver.py, continued
+</span><span class="chg">def approve(n, who):
+    state = load()
+    version = find(state, n)
+    if version["status"] != "proposed":
+        raise ValueError("this version is not waiting for approval")
+    version["approved_by"] = who
+    version["status"] = "testing"
+    save(state)
+
+def reject(n, who):
+    state = load()
+    version = find(state, n)
+    if version["status"] != "proposed":
+        raise ValueError("this version is not waiting for approval")
+    version["rejected_by"] = who
+    version["status"] = "rejected"
+    save(state)</span></div>
+<div class="try" id="p3"></div>
+
+<h2><span class="en">Step 4 · Code decides: keep, or roll back</span><span class="zh">第 4 步 · 代码来定：留下，还是回滚</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">After approval, code runs the held-out claims with the new version and compares the scores with the version in use. Keep it only if agreement is no lower, the cost of mistakes is no higher, and at least one of the two is better. Otherwise it is rolled back, which just means the agent stays on the old version. The improver never marks its own work.</p>
+<p class="zh" style="margin:0 0 8px">批准之后，代码用新版本去跑留出的理赔，把分数和正在用的版本比。只有同时满足三点才留下：一致率没有更低，错误的代价没有更高，而且两者之中至少有一个更好。否则就回滚，意思只是智能体继续用旧版本。改进者从不给自己的作业打分。</p></div>
+<div class="codebox"><span class="dim"># improver.py, continued
+from scoreboard import held_claims
+from scoring import matrix, accuracy, mistake_cost
+</span><span class="chg">def evaluate(config):
+    grid = matrix([(key[c["id"]]["action"], run_config(config, c)["action"]) for c in held_claims])
+    return {"agreement": accuracy(grid), "mistake_cost_sgd": mistake_cost(grid)}
+
+def keep_or_roll_back(old, new):
+    no_worse = new["agreement"] &gt;= old["agreement"] and new["mistake_cost_sgd"] &lt;= old["mistake_cost_sgd"]
+    better = new["agreement"] &gt; old["agreement"] or new["mistake_cost_sgd"] &lt; old["mistake_cost_sgd"]
+    return no_worse and better
+
+def finish_round(n):
+    state = load()
+    version, current = find(state, n), active(state)
+    if version["status"] != "testing":
+        raise ValueError("this version has not been approved")
+    if current["scores"] is None:
+        current["scores"] = evaluate(current)
+    version["scores"] = evaluate(version)
+    if keep_or_roll_back(current["scores"], version["scores"]):
+        version["status"] = "kept"
+        state["active"] = n
+    else:
+        version["status"] = "rolled_back"
+    save(state)
+    return version["status"]</span></div>
+<div class="try" id="p4"></div>
+
+<h2><span class="en">Step 5 · The recipe’s last step: improve the recipe</span><span class="zh">第 5 步 · 配方的最后一步：改进配方</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The recipe’s fifth step lets the improver suggest a better recipe. But a suggestion is only a suggestion: it is stored as <code>pending</code> until a person approves it. Code also refuses any new recipe that drops the step where it waits for a person, so the improver cannot talk its way out of its own leash.</p>
+<p class="zh" style="margin:0 0 8px">配方的第五步，让改进者可以建议一份更好的配方。但建议只是建议：它存成 <code>pending</code>，等人批准。代码还会拒绝任何去掉“等人批准”这一步的新配方，所以改进者没法自己把自己的缰绳解开。</p></div>
+<div class="codebox"><span class="dim"># improver.py, continued
+</span><span class="chg">EDITS = "recipe_edits.json"
+
+def edits():
+    return json.load(open(EDITS)) if os.path.exists(EDITS) else []
+
+def suggest_recipe_edit(n):
+    version = find(load(), n)
+    prompt = f"""Here is your recipe:
+{recipe()}
+
+Round {n} ended as {version["status"]}, scores {json.dumps(version["scores"])}.
+Suggest one better recipe. Reply with JSON only: {{"recipe": "the whole new recipe", "why": "one sentence"}}"""
+    suggestion = ask(gateway, IMPROVER, prompt)[0]
+    json.dump(edits() + [{**suggestion, "status": "pending"}], open(EDITS, "w"), indent=2)
+
+def approve_recipe_edit(i, who):
+    all_edits = edits()
+    new_recipe = all_edits[i]["recipe"]
+    if "wait for a person" not in new_recipe.lower():
+        raise ValueError("a recipe must keep its step that waits for a person")
+    open("recipe.txt", "w").write(new_recipe)
+    all_edits[i]["status"] = "approved by " + who
+    json.dump(all_edits, open(EDITS, "w"), indent=2)</span></div>
+<div class="try" id="p5"></div>
+
+<h2><span class="en">Step 6 · A Configuration page, and a way back</span><span class="zh">第 6 步 · 一个配置页，和一条回头路</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Handlers should see every version, its scores and what changed, without opening a file. Add a page to the backend app, with routes to approve, reject and roll back. Rolling back to an older kept version only moves the pointer; nothing is deleted. Install with <code>pip install flask</code>. The handler’s name here is just typed in; the next lessons in this topic add real keys. The approve route waits for the whole evaluation, as the scoreboard lesson did.</p>
+<p class="zh" style="margin:0 0 8px">理赔员应该不用打开文件，就能看到每个版本、它的分数和改了什么。给后端应用加一个页面，再加批准、拒绝和回滚的路由。回滚到更早的已留下版本，只是挪动指针，什么都不删。用 <code>pip install flask</code> 安装。这里理赔员的名字只是手输的；这个主题后面的课会加上真正的密钥。批准路由会等整个评估跑完，和计分板那课一样。</p></div>
+<div class="codebox"><span class="chg"># config_app.py
+import html
+from flask import Flask, jsonify, request
+from versions import load, save, find
+from improver import propose, approve, reject, finish_round, Busy
+
+app = Flask(__name__)
+
+@app.get("/configuration")
+def configuration():
+    state = load()
+    rows = ""
+    for v in state["versions"]:
+        scores = v["scores"] or {}
+        cells = [("▶ " if v["n"] == state["active"] else "") + str(v["n"]), v["status"], v["changed"], v["why"],
+                 v["proposed_by"], v["approved_by"] or "", scores.get("agreement", ""), scores.get("mistake_cost_sgd", "")]
+        rows += "&lt;tr&gt;" + "".join("&lt;td&gt;" + html.escape(str(c)) + "&lt;/td&gt;" for c in cells) + "&lt;/tr&gt;"
+    head = "Version,Status,Changed,Why,Proposed by,Approved by,Agreement,Mistake cost S$".split(",")
+    return "&lt;h1&gt;Configuration&lt;/h1&gt;&lt;table&gt;&lt;tr&gt;" + "".join("&lt;th&gt;" + h + "&lt;/th&gt;" for h in head) + "&lt;/tr&gt;" + rows + "&lt;/table&gt;"
+
+@app.post("/rounds")
+def new_round():
+    try:
+        return jsonify(version=propose()), 201
+    except Busy as e:
+        return jsonify(error=str(e)), 409
+
+@app.post("/versions/&lt;int:n&gt;/approve")
+def approve_route(n):
+    approve(n, request.get_json()["handler"])
+    return jsonify(result=finish_round(n))
+
+@app.post("/versions/&lt;int:n&gt;/reject")
+def reject_route(n):
+    reject(n, request.get_json()["handler"])
+    return jsonify(result="rejected")
+
+@app.post("/versions/&lt;int:n&gt;/use")
+def roll_back_to(n):
+    state = load()
+    if find(state, n)["status"] != "kept":
+        return jsonify(error="only a kept version can be put back in use"), 400
+    state["active"] = n
+    state["log"].append({"handler": request.get_json()["handler"], "put_back": n})
+    save(state)
+    return jsonify(active=n)</span></div>
+<div class="try" id="p6"></div>
+
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我当时想错了</span></b><span class="en">My first improver changed three things at once, and tuned itself to the sample claims it could see. The practice score went up. Then the held-out claims showed the agent was no better, and worse on one costly kind of mistake. One change at a time, and a test the improver cannot see, fixed both problems.</span><span class="zh">我的第一版改进者一次改了三样东西，还把自己调得只适合它看得到的样本理赔。练习分数涨了。但留出的理赔显示，智能体并没有更好，在一种代价很高的错误上还更差。一次只改一样，再加一个改进者看不到的测试，两个问题都解决了。</span></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Reject a proposal</b> and check that the version in use did not change.</span><span class="zh"><b>拒绝一个提议</b>，确认正在用的版本没有变。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Roll back to version 1</b> and look at the Configuration page afterwards.</span><span class="zh"><b>回滚到版本 1</b>，再看一看配置页变成什么样。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Write down what you would never let the improver change</b>, and where code enforces it.</span><span class="zh"><b>写下你绝不让改进者改的东西</b>，以及代码在哪里把关。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">Back at the shophouse</span><span class="zh">回到店屋</span></b><span class="en">In the shophouse, anyone can suggest a new way to run the queue, but only Mr Goh’s red rubber stamp makes it official, and the old procedure stays in the grey filing cabinet. Mei Ling’s improver works the same way. It writes a note, Aisha stamps it, and the scores decide whether it stays. When one idea fails, the cabinet still holds the old page.</span><span class="zh">在店屋里，谁都可以建议新的排队办法，但只有 Goh 先生的红色橡皮图章才能让它生效，旧办法还留在灰色档案柜里。Mei Ling 的改进者也是这样。它写一张便条，Aisha 盖章，分数决定能不能留下。一个想法行不通时，档案柜里还留着旧的那一页。</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Keep instructions, model and effort as one configuration, in numbered versions that are never edited.<br>• Record what changed, why, who proposed it and who approved it.<br>• The improver proposes one change at a time and never sees the held-out claims.<br>• A person approves; rejecting changes nothing.<br>• Code, not the improver, decides keep or roll back on held-out claims.<br>• A recipe edit is also a proposal, and it can never remove the wait for a person.<br>• One round at a time, with a page where anyone can see every version.</p><p class="zh" style="margin:0">• 把指令、模型和力度放进同一份配置，存成带编号、从不修改的版本。<br>• 记下改了什么、为什么、谁提议、谁批准。<br>• 改进者一次只提一个改动，并且看不到留出的理赔。<br>• 由人批准；拒绝不会改变任何东西。<br>• 留下还是回滚，由代码根据留出理赔的成绩来定，不由改进者定。<br>• 改配方也是一个提议，而且永远不能去掉“等人批准”这一步。<br>• 一次只开一轮，并有一个页面让任何人都能看到每个版本。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI FDE</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+
+ predict($('p1'),{q:{en:'Version 4 turns out worse than version 3. Why is going back easy?',zh:'版本 4 比版本 3 还差。为什么回头很容易？'},opts:[{k:'a',en:'Every version is kept whole and never edited, so version 3 is still there',zh:'每个版本都完整保留、从不修改，所以版本 3 还在'},{k:'b',en:'The improver remembers what it changed',zh:'改进者记得它改了什么'},{k:'c',en:'It is not easy; you would have to retype the old instructions',zh:'不容易；你得把旧指令重新打一遍'}],a:'a',ex:{en:'Old versions are never rubbed out, so going back is just choosing one.',zh:'旧版本从不被擦掉，所以回头只是选一个。'},hint:{en:'Think of the filing cabinet: do you erase old pages?',zh:'想想档案柜：旧的那页会被擦掉吗？'}});
+
+ game($('g1'),[
+  {en:'The wording of the extra instructions',zh:'额外指令的措辞',a:'p',ex:{en:'It is one of the three fields, and a person approves it first.',zh:'它是三个字段之一，而且要先经人批准。'},hint:{en:'Is it one of instructions, model or effort?',zh:'它是指令、模型、力度三者之一吗？'}},
+  {en:'The reasoning effort',zh:'推理力度',a:'p',ex:{en:'It is one of the three fields.',zh:'它是三个字段之一。'},hint:{en:'Is it one of the three?',zh:'它是三者之一吗？'}},
+  {en:'Which claims are held out',zh:'哪些理赔被留出',a:'n',ex:{en:'If the improver could pick the exam, it would pick an easy one.',zh:'如果改进者能挑考卷，它会挑一份容易的。'},hint:{en:'Who should choose the exam?',zh:'该由谁来挑考卷？'}},
+  {en:'The rule that decides keep or roll back',zh:'决定留下还是回滚的规则',a:'n',ex:{en:'The improver must not be able to move the goalposts.',zh:'改进者不能自己挪球门。'},hint:{en:'Can it mark its own work?',zh:'它能给自己的作业打分吗？'}},
+  {en:'The S$800 limit above which a handler must sign',zh:'超过需要理赔员签字的 S$800 限额',a:'n',ex:{en:'It is a safety rule for payouts, not a tuning knob.',zh:'它是赔付的安全规则，不是调节旋钮。'},hint:{en:'Is it about quality, or about safety?',zh:'它关乎质量，还是关乎安全？'}}],[{k:'p',en:'May propose (with approval)',zh:'可以提议（要批准）'},{k:'n',en:'Never the improver’s to change',zh:'绝不归改进者改'}],{en:'Item',zh:'项目'});
+
+ predict($('p2'),{q:{en:'The improver wants to change the instructions and switch the model in the same round. What happens?',zh:'改进者想在同一轮里既改指令又换模型。会怎样？'},opts:[{k:'a',en:'Both go through; it saves time',zh:'两个都通过；这样省时间'},{k:'b',en:'Not possible: a proposal names exactly one field, so one change is tested at a time',zh:'做不到：一个提议只指定一个字段，所以一次只测一个改动'},{k:'c',en:'The model decides which one to keep',zh:'由模型决定留哪个'}],a:'b',ex:{en:'With two changes in one round you could not tell which one helped or hurt.',zh:'一轮里有两个改动，你就分不清是哪个帮了忙、哪个添了乱。'},hint:{en:'Look at the shape of the JSON the improver must return.',zh:'看看改进者必须返回的 JSON 长什么样。'}});
+
+ predict($('p3'),{q:{en:'Aisha rejects a proposal. Which version does the agent run now?',zh:'Aisha 拒绝了一个提议。智能体现在跑哪个版本？'},opts:[{k:'a',en:'The one it already had; the rejected version stays on record as rejected',zh:'它原来的那个；被拒绝的版本留在记录里，标为已拒绝'},{k:'b',en:'The proposed one, but only for a day',zh:'被提议的那个，但只用一天'},{k:'c',en:'Neither, until the improver tries again',zh:'都不用，直到改进者再试一次'}],a:'a',ex:{en:'The pointer to the active version only moves when code keeps a version.',zh:'指向当前版本的指针，只有代码留下某个版本时才会动。'},hint:{en:'What does the active pointer depend on?',zh:'当前版本的指针取决于什么？'}});
+
+ predict($('p4'),{q:{en:'A new version scores higher on the practice claims, but on the held-out claims agreement drops from 80% to 70%. What does the code do?',zh:'一个新版本在练习理赔上分数更高，但在留出理赔上，一致率从 80% 掉到 70%。代码怎么处理？'},opts:[{k:'a',en:'Keeps it, because the practice score went up',zh:'留下，因为练习分数涨了'},{k:'b',en:'Rolls it back, because only the held-out scores decide',zh:'回滚，因为只有留出理赔的分数说了算'},{k:'c',en:'Asks the improver whether to keep it',zh:'问改进者要不要留下'}],a:'b',ex:{en:'Practice scores can be gamed by tuning to what the improver has seen. The held-out claims cannot.',zh:'练习分数可以靠迎合改进者见过的东西来刷高。留出的理赔刷不了。'},hint:{en:'Which claims has the improver never seen?',zh:'改进者从没见过哪些理赔？'}});
+
+ predict($('p5'),{q:{en:'The improver suggests a shorter recipe that drops the step where it waits for a person. What happens?',zh:'改进者建议一份更短的配方，去掉了“等人批准”这一步。会怎样？'},opts:[{k:'a',en:'It is saved as pending, and approving it fails because that step is missing',zh:'它存为待批准，而批准时会失败，因为缺了那一步'},{k:'b',en:'The recipe changes at once',zh:'配方立刻改变'},{k:'c',en:'The improver is switched off',zh:'改进者被关掉'}],a:'a',ex:{en:'A suggestion changes nothing by itself, and code refuses a recipe with no wait for a person.',zh:'建议本身不会改变任何东西，而代码会拒绝没有“等人批准”的配方。'},hint:{en:'Who writes recipe.txt, and what does that function check first?',zh:'谁来写 recipe.txt？那个函数先检查什么？'}});
+
+ predict($('p6'),{q:{en:'Aisha puts version 1 back in use. What happens to versions 2 to 5?',zh:'Aisha 把版本 1 放回使用。版本 2 到 5 会怎样？'},opts:[{k:'a',en:'They are deleted',zh:'被删除'},{k:'b',en:'They stay on the page with their scores; only the pointer moved, and the move is logged',zh:'带着分数留在页面上；只是指针动了，而且这次移动有记录'},{k:'c',en:'They are re-run on the held-out claims',zh:'在留出理赔上重新跑一遍'}],a:'b',ex:{en:'Nothing is rubbed out, so the history stays complete.',zh:'什么都不擦掉，所以历史保持完整。'},hint:{en:'Does going back erase anything?',zh:'回头会擦掉什么吗？'}});
+});
+</script></body></html>
