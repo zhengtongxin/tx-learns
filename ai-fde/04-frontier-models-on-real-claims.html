@@ -9,8 +9,8 @@
 <p class="zh" style="margin:0">Kaya Travel Cover 的试点跑通了，Goh 先生问了 Mei Ling 早就料到的问题：“为什么是<i>这个</i>模型？”她还答不上来。<b>前沿模型</b>就是主流实验室出的最大、最强的那批模型，通过网络租用。有好几个，而她只试过一个。于是她把它们排成一排，给每个同样的 25 份理赔、同样的提示词、同样的评分，再记下各自对在哪、花了多少钱。</p></div>
 
 <h2><span class="en">Step 1 · Same claims, same prompt, same marking</span><span class="zh">第 1 步 · 同样的理赔、提示词和评分</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A comparison is only fair if one thing changes: the model. Everything else is fixed, like a taste test where every cup comes from the same pot of water. So write the prompt once, as a function of the claim, and give every model exactly that. Put this in a file called <code>bench.py</code>. The next lessons add to it.</p>
-<p class="zh" style="margin:0 0 8px">只有一样东西在变，比较才公平：模型。其余都固定，就像盲测咖啡，每一杯都用同一壶水。所以把提示词写成一个以理赔为输入的函数，每个模型拿到的都一模一样。把它放进一个叫 <code>bench.py</code> 的文件，后面几课会往里加东西。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A comparison is only fair if one thing changes: the model. Everything else is fixed, like a taste test where every cup comes from the same pot of water. So write the prompt once, as a function of the claim, and give every model exactly that. Put this in a file called <code>bench.py</code>, next to the data files from the pilot. The next lessons add to it.</p>
+<p class="zh" style="margin:0 0 8px">只有一样东西在变，比较才公平：模型。其余都固定，就像盲测咖啡，每一杯都用同一壶水。所以把提示词写成一个以理赔为输入的函数，每个模型拿到的都一模一样。把它放进一个叫 <code>bench.py</code> 的文件，和试点里的数据文件放在一起。后面几课会往里加东西。</p></div>
 <div class="codebox"><span class="dim"># bench.py
 import json
 
@@ -32,8 +32,8 @@ Reply with JSON only: {{"action": "approve" or "decline" or "refer", "payout": a
 <p class="zh">在这次比较里，哪些东西对每个模型都不变，哪些允许不同？</p><div class="sc" id="g1"></div>
 
 <h2><span class="en">Step 2 · One gateway, many models</span><span class="zh">第 2 步 · 一个网关，多个模型</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Every lab has its own sign-up, key and bill. A <b>gateway</b> is one service that sits in front of many labs: one key, one bill, and one way to call them all. Many gateways copy the OpenAI library’s shape, so the code barely changes. Here the gateway is OpenRouter (others exist). Run <code>pip install openai</code> and set <code>GATEWAY_API_KEY</code>. The function also hands back the token counts, which Step 4 needs.</p>
-<p class="zh" style="margin:0 0 8px">每家实验室都有自己的注册、密钥和账单。<b>网关</b>是站在许多实验室前面的一个服务：一把密钥、一张账单、一种调用方式。很多网关都照搬 OpenAI 库的样子，所以代码几乎不用改。这里的网关是 OpenRouter（也有别的）。运行 <code>pip install openai</code>，并设置 <code>GATEWAY_API_KEY</code>。这个函数还会把 token 数一起返回，第 4 步要用。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Every lab has its own sign-up, key and bill. A <b>gateway</b> is one service that sits in front of many labs: one key, one bill, and one way to call them all. Many gateways copy how OpenAI’s Python library is called (<code>openai</code>), so the code barely changes. Here the gateway is OpenRouter (others exist). Run <code>pip install openai</code> and set <code>GATEWAY_API_KEY</code> to the secret key the gateway gives you when you sign up. The function also hands back the token counts, which Step 4 needs.</p>
+<p class="zh" style="margin:0 0 8px">每家实验室都有自己的注册、密钥和账单。<b>网关</b>是站在许多实验室前面的一个服务：一把密钥、一张账单、一种调用方式。很多网关照搬 OpenAI 的 Python 库的调用方式，所以代码几乎不用改。这里的网关是 OpenRouter（也有别的）。运行 <code>pip install openai</code>，并把 <code>GATEWAY_API_KEY</code> 设为注册网关时拿到的密钥。这个函数还会把 token 数一起返回，第 4 步要用。</p></div>
 <div class="codebox"><span class="dim"># bench.py, continued
 import os
 from openai import OpenAI
@@ -83,8 +83,8 @@ def score(run):
 <div class="try" id="p2"></div>
 
 <h2><span class="en">Step 4 · Put the cost beside the score</span><span class="zh">第 4 步 · 把成本放在分数旁边</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Models read and write in <b>tokens</b>, small pieces of text of about four letters. You pay per million tokens, with one price for what goes in and a higher one for what comes out. Multiply the token counts by the prices and you get the cost of the run. Work it out per 1,000 claims, because that is a number Mr Goh can picture. Prices are in US dollars, since that is how the labs bill.</p>
-<p class="zh" style="margin:0 0 8px">模型读写的单位是 <b>token</b>，一小段文字，大约四个字母。按每百万 token 收费，输入一个价，输出一个更高的价。把 token 数乘上价格，就得到这一轮的成本。算成每 1,000 份理赔，因为这个数 Goh 先生想象得出来。价格用美元，因为各家实验室按美元收费。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Models read and write in <b>tokens</b>, small pieces of text of about four letters. You pay per million tokens, with one price for what goes in and a higher one for what comes out. Multiply the token counts by the prices and you get the cost of the run. Work it out per 1,000 claims, because that is a number Mr Goh can picture. Prices are in US dollars, since that is how the labs bill. Payouts stay in S$, since that is what the insurer pays.</p>
+<p class="zh" style="margin:0 0 8px">模型读写的单位是 <b>token</b>，一小段文字，大约四个字母。按每百万 token 收费，输入一个价，输出一个更高的价。把 token 数乘上价格，就得到这一轮的成本。算成每 1,000 份理赔，因为这个数 Goh 先生想象得出来。价格用美元，因为各家实验室按美元收费；赔付仍用新元，因为保险公司付的是新元。</p></div>
 <div class="codebox"><span class="dim"># bench.py, continued
 # US$ per million tokens: (input, output). Invented numbers: copy your gateway's real list.
 PRICE = {
@@ -99,7 +99,7 @@ def cost_per_1000(model, run):
 <div class="try" id="p3"></div>
 
 <h2><span class="en">Step 5 · Run twice before you believe a gap</span><span class="zh">第 5 步 · 先跑两遍，再信差距</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Ask a model the same question twice and the answers can differ a little. So a one-claim gap between two models can be luck, like two runners who tie when you time them twice. Run every model at least twice. Only trust a gap that is bigger than how much one model moves against itself.</p>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Ask a model the same question twice and the answers can differ a little. So a one-claim gap between two models can be luck, like two runners whose order flips when you time them twice. Run every model at least twice. Only trust a gap that is bigger than how much one model moves against itself.</p>
 <p class="zh" style="margin:0 0 8px">同一个问题问模型两遍，答案可能略有不同。所以两个模型差一份理赔，可能只是运气，就像两个跑者，计时两次结果会互换。每个模型至少跑两遍，只信比“自己和自己的波动”更大的差距。</p></div>
 <div class="codebox"><span class="chg">runs = {m: [run_model(m), run_model(m)] for m in MODELS}</span><span class="dim">
 
@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
  predict($('p2'),{q:{en:'The handler approved S$420. A model returns approve with S$380. Does <code>matches</code> count it as right?',zh:'理赔员批准了 S$420。模型返回批准、S$380。<code>matches</code> 算对吗？'},opts:[{k:'a',en:'Yes, the action is the same',zh:'算对，动作一样'},{k:'b',en:'No, the payout is more than S$1 off',zh:'不算，赔付金额差了超过 S$1'},{k:'c',en:'Yes, it is close enough',zh:'算对，差不多就行'}],a:'b',out:{en:'abs(380 - 420) = 40, which is more than 1 → False',zh:'abs(380 - 420) = 40，大于 1 → False'},ex:{en:'Both the action and the payout must match. A customer paid S$40 short would complain.',zh:'动作和金额都要一致。少赔 S$40 的客户是会投诉的。'},hint:{en:'Compare the gap (40) with the allowed S$1.',zh:'把差距（40）和允许的 S$1 比一比。'}});
 
- predict($('p3'),{q:{en:'One claim uses 1,500 input tokens and 100 output tokens. The prices are US$2 per million in and US$10 per million out. What do 1,000 such claims cost?',zh:'一份理赔用 1,500 个输入 token 和 100 个输出 token。价格是输入每百万 2 美元、输出每百万 10 美元。1,000 份这样的理赔要多少钱？'},opts:[{k:'a',en:'US$0.40',zh:'0.40 美元'},{k:'b',en:'US$4',zh:'4 美元'},{k:'c',en:'US$40',zh:'40 美元'}],a:'b',out:{en:'1,500 × 2 + 100 × 10 = 4,000 per million → US$0.004 a claim → US$4 per 1,000',zh:'1,500 × 2 + 100 × 10 = 每百万 4,000 → 每份 0.004 美元 → 每 1,000 份 4 美元'},ex:{en:'One claim costs US$0.004. A thousand cost US$4.',zh:'一份 0.004 美元，一千份 4 美元。'},hint:{en:'Work out one claim first, then multiply by 1,000.',zh:'先算一份，再乘以 1,000。'}});
+ predict($('p3'),{q:{en:'One claim uses 1,500 input tokens and 100 output tokens. The prices are US$2 per million in and US$10 per million out. What do 1,000 such claims cost?',zh:'一份理赔用 1,500 个输入 token 和 100 个输出 token。价格是输入每百万 2 美元、输出每百万 10 美元。1,000 份这样的理赔要多少钱？'},opts:[{k:'a',en:'US$0.40',zh:'0.40 美元'},{k:'b',en:'US$4',zh:'4 美元'},{k:'c',en:'US$40',zh:'40 美元'}],a:'b',out:{en:'Input: 1,500 × US$2 ÷ 1,000,000 = US$0.003. Output: 100 × US$10 ÷ 1,000,000 = US$0.001. Together US$0.004 a claim, so US$4 per 1,000',zh:'输入：1,500 × 2 美元 ÷ 1,000,000 = 0.003 美元；输出：100 × 10 美元 ÷ 1,000,000 = 0.001 美元。合计每份 0.004 美元，即每 1,000 份 4 美元'},ex:{en:'One claim costs US$0.004. A thousand cost US$4.',zh:'一份 0.004 美元，一千份 4 美元。'},hint:{en:'Work out one claim first, then multiply by 1,000.',zh:'先算一份，再乘以 1,000。'}});
 
  game($('g2'),[
   {en:'Model A scored 21 then 22 of 25. Model B scored 22 then 21.',zh:'模型 A 得 21 分和 22 分（满分 25），模型 B 得 22 分和 21 分。',a:'n',ex:{en:'They swap places between runs. That is noise.',zh:'两遍之间互换了位置，这是噪声。'},hint:{en:'Does the order stay the same?',zh:'顺序有没有保持不变？'}},
