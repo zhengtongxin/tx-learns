@@ -1,0 +1,163 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Project: an agent that remembers customers | TX Learns</title>
+<meta name="description" content="Build a returning-customer flow: the agent keeps notes per customer, reads them on the next claim, shows the handler what it used, and never writes to read-only data."><meta property="og:title" content="Project: an agent that remembers customers | TX Learns"><meta property="og:description" content="Build a returning-customer flow: the agent keeps notes per customer, reads them on the next claim, shows the handler what it used, and never writes to read-only data."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-fde/15-agent-that-remembers-customers.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-24">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Knowledge and memory · Project</span><span class="zh">知识与记忆 · 项目</span></span><h1><span class="en">Project: an agent that remembers customers</span><span class="zh">项目：记得客户的智能体</span></h1><p class="meta"><span class="en">Build a returning-customer flow with three data sources, each with its own owner and its own rule · ~30 min · hands-on</span><span class="zh">做一个回头客流程，用三个数据源，每个有各自的主人和各自的规则 · 约 30 分钟 · 动手实践</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">Mr Tan files a claim for a lost bag. A month later he files another. Auntie Siew greets him by name, but the agent treats him like a stranger. Mei Ling wants the second claim to go faster and be better explained. The tricky part is not the notes. It is deciding <b>who owns what</b>: the claims records, the agent’s own notes, and the policy data that nobody on the desk should change by accident.</p>
+<p class="zh" style="margin:0">Tan 先生提交了一份丢行李的理赔。一个月后，他又提交了一份。Siew 阿姨叫得出他的名字，但智能体把他当陌生人。Mei Ling 希望第二份理赔更快、解释得更清楚。难点不在笔记本身，而在<b>谁拥有什么</b>：理赔记录、智能体自己的笔记，以及柜台上谁都不该不小心改动的保单数据。</p></div>
+
+<h2><span class="en">Step 1 · Three stores, kept apart</span><span class="zh">第 1 步 · 三个存储，分开放</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Keep three separate stores. <b>Records</b> (<code>claims.db</code>) are the system of record: what was decided and paid. <b>Memory</b> (<code>memory.db</code>) is the agent’s own notes, keyed by customer. <b>Reference</b> (<code>reference.db</code>) holds policy data, which the agent may only read. If the memory is lost or wrong, the records are untouched. Each store is a SQLite file: a small database kept in one file, with no server to run. Run <code>make_reference.py</code> once first, because the read-only connection needs the file to exist already. Install with <code>pip install openai</code>.</p>
+<p class="zh" style="margin:0 0 8px">把三个存储分开。<b>记录</b>（<code>claims.db</code>）是权威记录：决定了什么、赔了多少。<b>记忆</b>（<code>memory.db</code>）是智能体自己的笔记，按客户编号存放。<b>参考数据</b>（<code>reference.db</code>）放保单资料，智能体只能读。记忆丢了或错了，记录也不受影响。每个存储都是一个 SQLite 文件：装在一个文件里的小型数据库，不需要单独运行服务器。先运行一次 <code>make_reference.py</code>，因为只读连接要求文件已经存在。用 <code>pip install openai</code> 安装。</p></div>
+<div class="codebox"><span class="dim"># make_reference.py: run once by a person (Kumar), never by the agent
+import sqlite3
+setup = sqlite3.connect("reference.db")
+setup.execute("CREATE TABLE IF NOT EXISTS policies (id TEXT PRIMARY KEY, cover TEXT, limit_amt REAL)")
+setup.execute("INSERT OR REPLACE INTO policies VALUES ('P003', 'trip cancellation and lost baggage', 2000)")
+setup.commit()
+
+# desk.py: the agent's side
+import json, datetime, sqlite3
+from openai import OpenAI
+
+client = OpenAI()
+</span><span class="chg">db  = sqlite3.connect("claims.db")      # records: owned by the handlers
+mem = sqlite3.connect("memory.db")      # notes: owned by the agent
+ref = sqlite3.connect("file:reference.db?mode=ro", uri=True)   # reference: read only
+
+db.execute("""CREATE TABLE IF NOT EXISTS claims (id TEXT PRIMARY KEY, customer_id TEXT, story TEXT,
+              amount REAL, action TEXT, payout REAL, reason TEXT, notes_used TEXT)""")
+mem.execute("CREATE TABLE IF NOT EXISTS notes (customer_id TEXT, note TEXT, claim_id TEXT, saved TEXT)")</span></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · After each claim, write a short note</span><span class="zh">第 2 步 · 每份理赔之后，写一条短笔记</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">When a claim is decided, ask the model what the memory should keep. Give it clear limits: at most two notes, facts only, nothing private. Each note is stored with the claim it came from and the date, so a handler can trace it later.</p>
+<p class="zh" style="margin:0 0 8px">理赔决定之后，问模型记忆该留下什么。给它明确的限制：最多两条，只要事实，不要私密信息。每条笔记都连同出处理赔和日期存下来，理赔员以后能追溯。</p></div>
+<div class="codebox"><span class="chg">def write_notes(claim, decision):
+    prompt = f"""A claim was just decided. Write at most two short notes that the claims desk
+may want the next time this customer files. Facts only, taken from the claim and decision below.
+No guesses, no card or passport numbers.
+Reply with JSON only: {{"notes": ["...", "..."]}} (an empty list is fine)
+
+Claim: {json.dumps(claim)}
+Decision: {json.dumps(decision)}"""
+    reply = client.chat.completions.create(
+        model="gpt-5.4-mini", messages=[{"role": "user", "content": prompt}],
+        response_format={"type": "json_object"})
+    return json.loads(reply.choices[0].message.content)["notes"]
+
+def remember(claim, decision):
+    for note in write_notes(claim, decision):
+        mem.execute("INSERT INTO notes VALUES (?, ?, ?, ?)",
+                    (claim["customer_id"], note, claim["id"], datetime.date.today().isoformat()))
+    mem.commit()</span></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Before a claim, read that customer’s notes</span><span class="zh">第 3 步 · 理赔之前，读这位客户的笔记</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Reading is a lookup by customer id. Then the notes go into the prompt, marked as leads to check, not as proof. The policy cover and limit come from the read-only reference store. The agent only returns an answer; the code decides what to save.</p>
+<p class="zh" style="margin:0 0 8px">读取就是按客户编号查一下。然后把笔记放进提示词，并标明它们是待核实的线索，不是证据。保单的赔付范围和上限来自只读的参考数据。智能体只返回答案，存什么由代码决定。</p></div>
+<div class="codebox"><span class="chg">def recall(customer_id):
+    rows = mem.execute("SELECT note, claim_id, saved FROM notes WHERE customer_id = ? ORDER BY saved",
+                       (customer_id,)).fetchall()
+    return [f"{note} (claim {cid}, saved {saved})" for note, cid, saved in rows]
+
+def decide(claim, notes):
+    cover, limit_amt = ref.execute("SELECT cover, limit_amt FROM policies WHERE id = ?",
+                                   (claim["policy_id"],)).fetchone()
+    prompt = f"""You decide travel insurance claims for Kaya Travel Cover.
+Policy cover: {cover}. Limit: S${limit_amt}.
+Notes from this customer's earlier claims (leads to check against today's claim, not proof): {json.dumps(notes)}
+The claim: {json.dumps(claim)}
+If a note helped you, say so in the reason.
+Reply with JSON only: {{"action": "approve" or "decline" or "refer", "payout": a number in S$, "reason": two or three short sentences}}"""
+    reply = client.chat.completions.create(
+        model="gpt-5.4-mini", messages=[{"role": "user", "content": prompt}],
+        response_format={"type": "json_object"})
+    return json.loads(reply.choices[0].message.content)</span></div>
+<div class="try" id="p3"></div>
+
+<h2><span class="en">Step 4 · A fresh queue: first claim, then the second</span><span class="zh">第 4 步 · 全新的队列：先第一份，再第二份</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">One function ties it together: read the notes, decide, save the claim to the records, then write new notes. We also save the notes the agent read next to the decision. Step 5 uses that to show the handler. Delete <code>memory.db</code> and <code>claims.db</code> first so the queue is fresh.</p>
+<p class="zh" style="margin:0 0 8px">用一个函数把它们串起来：读笔记、做决定、把理赔存进记录、再写新笔记。我们还把智能体读过的笔记和决定存在一起，第 5 步用它给理赔员看。先删掉 <code>memory.db</code> 和 <code>claims.db</code>，让队列是全新的。</p></div>
+<div class="codebox"><span class="chg">def process(claim):
+    notes = recall(claim["customer_id"])
+    decision = decide(claim, notes)
+    db.execute("INSERT OR REPLACE INTO claims VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+               (claim["id"], claim["customer_id"], claim["story"], claim["amount"],
+                decision["action"], decision["payout"], decision["reason"], json.dumps(notes)))
+    db.commit()
+    remember(claim, decision)
+    return decision
+
+c1 = {"id": "C041", "customer_id": "K-0412", "policy_id": "P003",
+      "story": "My checked bag never arrived. Receipts for everything inside are attached.", "amount": 420}
+c2 = {"id": "C042", "customer_id": "K-0412", "policy_id": "P003",
+      "story": "My bag was lost again on the flight home. Receipts attached.", "amount": 380}
+print(process(c1))
+print(process(c2))</span></div>
+<div class="try" id="p4"></div>
+
+<h2><span class="en">Step 5 · Show the handler what the agent used</span><span class="zh">第 5 步 · 让理赔员看到智能体用了什么</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A decision that rests on invisible notes is hard to trust. Aisha should see, on the claim page, which notes the agent read. If a note is wrong, she can see it and fix it. For the pilot, a printout is enough.</p>
+<p class="zh" style="margin:0 0 8px">一个靠看不见的笔记做出的决定，很难让人信任。Aisha 应该能在理赔页面上看到智能体读了哪些笔记。如果某条笔记错了，她看得到，也能改。试点阶段，打印出来就够了。</p></div>
+<div class="codebox"><span class="chg">def show_claim(claim_id):
+    action, payout, reason, used = db.execute(
+        "SELECT action, payout, reason, notes_used FROM claims WHERE id = ?", (claim_id,)).fetchone()
+    print(f"{claim_id}  {action}  S${payout}")
+    print("  why:", reason)
+    print("  notes the agent read:")
+    for note in json.loads(used) or ["(none)"]:
+        print("   -", note)
+
+show_claim("C042")</span></div>
+<div class="try" id="p5"></div>
+
+<h2><span class="en">Step 6 · Three sources, three owners</span><span class="zh">第 6 步 · 三个数据源，三个主人</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Now name the owners. <b>Records</b> belong to the handlers: they are the truth. <b>Memory</b> belongs to the agent: it is a helpful guess that can be deleted. <b>Reference data</b> belongs to the people who maintain it, and the agent only reads it. “Read only” must be enforced by <b>permissions</b>, not by an instruction. In Step 1 the reference store was opened with <code>mode=ro</code>, so even a bug cannot write to it.</p>
+<p class="zh" style="margin:0 0 8px">现在给它们定主人。<b>记录</b>属于理赔员：它是事实。<b>记忆</b>属于智能体：它是有用的参考，可以删掉。<b>参考数据</b>属于维护它的人，智能体只读。“只读”必须靠<b>权限</b>来保证，而不是靠一句指令。第 1 步里参考数据是用 <code>mode=ro</code> 打开的，所以哪怕有 bug 也写不进去。</p></div>
+<div class="codebox"><span class="chg">try:
+    ref.execute("UPDATE policies SET limit_amt = 99999 WHERE id = 'P003'")
+except sqlite3.OperationalError as e:
+    print("blocked:", e)          # attempt to write a readonly database</span></div>
+<p class="en">Who owns each of these?</p>
+<p class="zh">下面这些各归谁？</p><div class="sc" id="g1"></div>
+<div class="try" id="p6"></div>
+
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我当时想错了</span></b><span class="en">I let the agent write to reference data once. I had only told it in the instructions not to. Read-only really means read-only: enforce it with permissions.</span><span class="zh">我曾经让智能体写进了参考数据一次，我只是在指令里叫它别写。只读就是真正的只读：要用权限来保证。</span></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Add a note about a preference</b> (such as “prefers email”) and test that it gets used.</span><span class="zh"><b>加一条偏好笔记</b>（比如“喜欢用邮件”），测试它会不会被用上。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Show the handler which notes were read</b> on a page, not only a printout.</span><span class="zh"><b>让理赔员看到读了哪些笔记</b>，做在页面上，而不只是打印。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a “forget this customer” action</b> that clears their notes but not their claim records.</span><span class="zh"><b>加一个“忘掉这位客户”的操作</b>，清掉他的笔记，但不动他的理赔记录。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">Back at the shophouse</span><span class="zh">回到店屋</span></b><span class="en">At the front desk, Auntie Siew keeps her own little notebook of regulars, and Mr Goh keeps the claims in the grey filing cabinet. Nobody mixes the two. When Kumar locks the policy binder in the cabinet, everyone knows it is for reading. That is the same arrangement the agent now follows.</span><span class="zh">前台的 Siew 阿姨有她自己那本记着熟客的小笔记本，Goh 先生把理赔放在灰色档案柜里，两样从不混在一起。Kumar 把保单册锁进柜子，大家就知道那是只能看的。智能体现在遵守的就是同样的安排。</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Keep three sources apart: records, memory, reference data.<br>• The database stays the system of record. Memory is the agent’s own notes and can be deleted.<br>• Write short, factual notes after a claim and read them before the next one.<br>• Key notes by customer, so one customer never sees another’s notes.<br>• Show the handler which notes the agent used.<br>• Three sources have three owners and three rules.<br>• Enforce read-only with permissions, not with instructions.</p><p class="zh" style="margin:0">• 把三个数据源分开：记录、记忆、参考数据。<br>• 数据库仍然是权威记录。记忆是智能体自己的笔记，可以删掉。<br>• 理赔之后写简短的事实笔记，下一次理赔前先读。<br>• 笔记按客户存放，这样一位客户不会看到另一位的笔记。<br>• 让理赔员看到智能体用了哪些笔记。<br>• 三个数据源，三个主人，三条规则。<br>• 用权限来保证只读，而不是靠指令。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI FDE</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+
+ predict($('p1'),{q:{en:'Someone deletes memory.db by mistake. What is lost?',zh:'有人不小心删掉了 memory.db。会丢什么？'},opts:[{k:'a',en:'Only the agent’s notes. The claim records are safe',zh:'只丢智能体的笔记。理赔记录安全'},{k:'b',en:'Every claim ever decided',zh:'所有做过决定的理赔'},{k:'c',en:'The policy data',zh:'保单数据'}],a:'a',ex:{en:'That is why the stores are kept apart: memory can be rebuilt, the system of record cannot.',zh:'这就是要分开存放的原因：记忆可以重建，权威记录不能。'},hint:{en:'Which file holds the notes?',zh:'笔记在哪个文件里？'}});
+
+ predict($('p2'),{q:{en:'Which is the best note to keep after Mr Tan’s first claim?',zh:'Tan 先生第一份理赔之后，哪条笔记最值得留？'},opts:[{k:'a',en:'Customer seemed upset on the phone',zh:'客户在电话里似乎很不高兴'},{k:'b',en:'Lost-bag claim C041, S$420, receipts complete',zh:'丢行李理赔 C041，S$420，收据齐全'},{k:'c',en:'A full copy of the claim story',zh:'整份理赔故事的完整副本'}],a:'b',ex:{en:'It is a short fact with a source. A feeling is a guess, and a copy repeats what the records already hold.',zh:'这是一条带出处的简短事实。感觉只是猜测，完整副本只是重复记录里已有的内容。'},hint:{en:'Short, factual, useful next time.',zh:'简短、是事实、下次有用。'}});
+
+ predict($('p3'),{q:{en:'Suppose recall() lost the WHERE customer_id = ? part and no longer passes the customer id. What would happen?',zh:'假如 recall() 漏了 WHERE customer_id = ? 这一句，也不再传入客户编号，会怎样？'},opts:[{k:'a',en:'Nothing: it still returns the right notes',zh:'没事：它仍然返回对的笔记'},{k:'b',en:'The agent would read every customer’s notes, a privacy leak',zh:'智能体会读到所有客户的笔记，这是隐私泄露'},{k:'c',en:'It would return no notes',zh:'它不会返回任何笔记'}],a:'b',ex:{en:'Without the filter, one customer’s claim would be decided with other people’s notes. Keying by customer is a safety feature.',zh:'没有这个过滤，一位客户的理赔会用别人的笔记来决定。按客户存放是一项安全措施。'},hint:{en:'What does WHERE do to the rows?',zh:'WHERE 对这些行做了什么？'}});
+
+ predict($('p4'),{q:{en:'You run process(c1) then process(c2). What does the second run do differently?',zh:'你先跑 process(c1)，再跑 process(c2)。第二次有什么不同？'},opts:[{k:'a',en:'Nothing: each run is the same',zh:'没有不同：每次都一样'},{k:'b',en:'The prompt now holds the notes from C041, so the reason can refer to the earlier claim',zh:'提示词里现在有了 C041 的笔记，所以理由可以提到之前那份理赔'},{k:'c',en:'The first claim’s record is rewritten',zh:'第一份理赔的记录被改写'}],a:'b',ex:{en:'The notes are read before deciding. The first claim’s record is only added to, never rewritten.',zh:'决定之前先读了笔记。第一份理赔的记录只是被保留，不会被改写。'},hint:{en:'What did recall() find this time?',zh:'这一次 recall() 找到了什么？'}});
+
+ predict($('p5'),{q:{en:'Aisha disagrees with a payout on C042. What lets her find out why?',zh:'Aisha 不同意 C042 的赔付。什么能让她查清原因？'},opts:[{k:'a',en:'Asking the agent to try again',zh:'叫智能体再试一次'},{k:'b',en:'The saved notes_used next to the decision, which show what the agent read',zh:'和决定存在一起的 notes_used，它显示了智能体读过什么'},{k:'c',en:'Nothing: decisions cannot be traced',zh:'没办法：决定查不到来源'}],a:'b',ex:{en:'The record keeps what was read and the reason given. She can see a wrong or stale note and correct it.',zh:'记录里保留了读过的内容和给出的理由。她能看到错的或过时的笔记，并去纠正。'},hint:{en:'What did Step 4 save beside each decision?',zh:'第 4 步在每个决定旁边存了什么？'}});
+
+ game($('g1'),[
+  {en:'Claim C041, paid S$420',zh:'理赔 C041，赔了 S$420',a:'r',ex:{en:'What was decided and paid is the system of record.',zh:'决定了什么、赔了多少，属于权威记录。'},hint:{en:'Is it the truth of what happened?',zh:'它是事情真相的记录吗？'}},
+  {en:'“Receipts complete” (claim C041, saved 2 June)',zh:'“收据齐全”（理赔 C041，6 月 2 日存入）',a:'m',ex:{en:'The agent’s own note: helpful, but deletable.',zh:'智能体自己的笔记：有用，但可以删。'},hint:{en:'Is it a helpful lead the agent wrote?',zh:'它是智能体写的有用线索吗？'}},
+  {en:'Policy P003: limit S$2,000',zh:'保单 P003：上限 S$2,000',a:'f',ex:{en:'Policy data is reference data, maintained by people and read only for the agent.',zh:'保单数据是参考数据，由人维护，智能体只读。'},hint:{en:'Who should be able to change it?',zh:'该由谁来改它？'}},
+  {en:'Aisha’s sign-off on a big payout',zh:'Aisha 对大额赔付的签字',a:'r',ex:{en:'A human decision is a record.',zh:'人做的决定是记录。'},hint:{en:'Is it a fact about what happened?',zh:'它是关于已发生事情的事实吗？'}},
+  {en:'“Prefers email, not phone”',zh:'“喜欢用邮件，不喜欢电话”',a:'m',ex:{en:'A preference the agent noted. It can change, so it belongs in memory.',zh:'智能体记下的偏好。它会变，所以属于记忆。'},hint:{en:'Could it change next month?',zh:'下个月它会变吗？'}}],[{k:'r',en:'Records',zh:'记录'},{k:'m',en:'Memory',zh:'记忆'},{k:'f',en:'Reference',zh:'参考数据'}],{en:'Item',zh:'内容'});
+
+ predict($('p6'),{q:{en:'How do you make sure the agent never changes policy limits?',zh:'怎样确保智能体永远改不了保单上限？'},opts:[{k:'a',en:'Write “never edit policies” in the instructions',zh:'在指令里写“不要改保单”'},{k:'b',en:'Open the reference data with a read-only connection, so a write fails',zh:'用只读连接打开参考数据，写入就会失败'},{k:'c',en:'Hope the model behaves',zh:'指望模型听话'}],a:'b',ex:{en:'An instruction is a request. A read-only connection is a locked door: the write raises an error.',zh:'指令只是请求。只读连接是一扇锁住的门：写入会报错。'},hint:{en:'Which one cannot be ignored?',zh:'哪一种是无法被忽视的？'}});
+});
+</script></body></html>
