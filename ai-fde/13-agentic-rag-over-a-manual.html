@@ -26,8 +26,8 @@
 <p class="zh">下面哪些该放进知识库？</p><div class="sc" id="g1"></div>
 
 <h2><span class="en">Step 2 · A search tool</span><span class="zh">第 2 步 · 一个搜索工具</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A search tool takes a short question and returns the best-matching sections. This one is the simplest kind: it counts how many words the question shares with each section, and drops sections that share none. A real system would match by meaning (embeddings, as in the AI Engineer track), but the idea is the same.</p>
-<p class="zh" style="margin:0 0 8px">搜索工具接收一个简短的问题，返回匹配度最高的段落。这个是最简单的那种：数一数问题和每段共有多少个词，一个词都不共有的就丢掉。真正的系统会按意思匹配（用嵌入向量，AI 工程师那条线讲过），但道理是一样的。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A search tool takes a short question and returns the best-matching sections. This one is the simplest kind: it counts how many words the question shares with each section, and drops sections that share none. A real system would match by meaning, using embeddings (a list of numbers for each section, where similar meanings get similar numbers). The idea is the same.</p>
+<p class="zh" style="margin:0 0 8px">搜索工具接收一个简短的问题，返回匹配度最高的段落。这个是最简单的那种：数一数问题和每段共有多少个词，一个词都不共有的就丢掉。真正的系统会按意思匹配：用嵌入向量（每段话变成一串数字，意思相近的，数字也相近），但道理是一样的。</p></div>
 <div class="codebox"><span class="chg">import re
 
 def words(text):
@@ -42,8 +42,8 @@ def search(query, top=2):
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 3 · The agent chooses its own searches</span><span class="zh">第 3 步 · 智能体自己决定怎么搜</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Now hand the search to the agent as a tool, as in the pilot. It reads the claim, decides what it is missing, searches, reads the result, and can search again. That loop is the “agentic” part. <code>max_searches</code> is a safety cap so it cannot loop forever; once it is reached, the tool is taken away and the agent must answer. Install with <code>pip install openai</code>.</p>
-<p class="zh" style="margin:0 0 8px">现在把搜索当成工具交给智能体，和试点里一样。它读理赔，判断自己缺什么，去搜，读结果，还可以再搜。这个循环就是“智能体式”的部分。<code>max_searches</code> 是一道安全上限，防止它无限循环；到了上限，工具就被收走，智能体必须作答。用 <code>pip install openai</code> 安装。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Now hand the search to the agent as a tool, as in the pilot. It reads the claim, decides what it is missing, searches, reads the result, and can search again. That loop is the “agentic” part. A <b>tool</b> is a function you write: the model asks for it, you run it, and the result goes back into the chat. <code>max_searches</code> is a safety cap so it cannot loop forever; once it is reached, the tool is taken away and the agent must answer. Install with <code>pip install openai</code>.</p>
+<p class="zh" style="margin:0 0 8px">现在把搜索当成工具交给智能体，和试点里一样。它读理赔，判断自己缺什么，去搜，读结果，还可以再搜。这个循环就是“智能体式”的部分。<b>工具</b>就是你自己写的函数：模型来请求，你来运行，结果再送回对话里。<code>max_searches</code> 是一道安全上限，防止它无限循环；到了上限，工具就被收走，智能体必须作答。用 <code>pip install openai</code> 安装。</p></div>
 <div class="codebox"><span class="dim">import json
 from openai import OpenAI
 
@@ -67,7 +67,7 @@ def decide(claim, max_searches=4):
                 {"role": "user", "content": json.dumps(claim)}]
     searches = 0
     while True:
-        tools = {"tools": TOOLS} if searches &lt; max_searches else {}
+        tools = {"tools": TOOLS} if searches &lt; max_searches else {}   # no tools once the cap is reached
         reply = client.chat.completions.create(
             model="gpt-5.4-mini", messages=messages, **tools)
         message = reply.choices[0].message
@@ -123,7 +123,7 @@ print(decide_oneshot(claim))  # one try; it may miss a fact</span></div>
     </span><span class="chg">read = []                                   # every section id the agent saw</span><span class="dim">
     searches = 0
     while True:
-        tools = {"tools": TOOLS} if searches &lt; max_searches else {}
+        tools = {"tools": TOOLS} if searches &lt; max_searches else {}   # no tools once the cap is reached
         reply = client.chat.completions.create(
             model="gpt-5.4-mini", messages=messages, **tools)
         message = reply.choices[0].message
