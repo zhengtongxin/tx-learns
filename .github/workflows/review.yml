@@ -24,6 +24,34 @@ concurrency:
   group: review-${{ github.event.pull_request.number || inputs.pr }}
   cancel-in-progress: true
 jobs:
+  # Marks the reviewer as working (yellow) on the How it works page while this run goes. Trusted scripts from main only.
+  working:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      statuses: write
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: scripts
+          persist-credentials: false
+      - name: Show the agent as working
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATE: run
+        run: "[ -f scripts/record-status.mjs ] && node scripts/record-status.mjs reviewer || true"
+      - name: Show the Reviewer status as pending on the pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number || inputs.pr }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          [ -n "$SHA" ] || SHA=$(gh pr view "$PR" -R "$GITHUB_REPOSITORY" --json headRefOid --jq .headRefOid)
+          gh api -X POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state=pending -f context=Reviewer -f description="Reviewer agent is reading…" -f target_url="$RUN" > /dev/null || true
+
   review:
     runs-on: ubuntu-latest
     outputs:
@@ -126,7 +154,7 @@ jobs:
   # Write job: only trusted scripts from the default branch run here, never files Claude could have touched.
   # A review cancelled by a newer run of the same PR stays quiet: the newer run reports.
   share:
-    needs: review
+    needs: [review, working]
     if: ${{ !cancelled() && needs.review.result != 'cancelled' }}
     runs-on: ubuntu-latest
     permissions:

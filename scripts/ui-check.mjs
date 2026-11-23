@@ -69,10 +69,11 @@ function fakeStatus() {
   try { ids = [...readFileSync(join(ROOT, 'ecosystem.html'), 'utf8').matchAll(/\{id:'([a-z0-9-]+)'/g)].map(m => m[1]); } catch {}
   const at = new Date(Date.now() - 5 * 60e3).toISOString(), agents = {};
   const summary = 'PR #99: Ready to merge. No lesson files changed. This run checked every page and every widget, and the copy check passed. One minor note about a long line that wraps on a narrow phone screen.';
-  for (const id of ids) {
+  ids.forEach((id, i) => {
     const e = { state: 'ok', summary, link: 'https://github.com/', at };
-    agents[id] = { ...e, runs: 12, history: [e, e, e] };
-  }
+    // Every other agent is mid-run, so the yellow "working" look is checked too.
+    agents[id] = { ...e, runs: 12, history: [e, e, e], ...(i % 2 ? { now: { at: new Date().toISOString(), run: '1', link: e.link } } : {}) };
+  });
   return JSON.stringify({ connected: true, agents, updated: at });
 }
 

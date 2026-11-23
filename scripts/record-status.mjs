@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Records what an agent just did, for the live Ecosystem page.
 // Usage: node scripts/record-status.mjs <agent>   (agent = an id in the AGENTS list on ecosystem.html, e.g. writer, live-check)
-// Env: STATE = ok | flag | fail | skip, SUMMARY = one or two plain sentences, LINK = where to see more,
+// Env: STATE = ok | flag | fail | skip (a finished run), or run (this run is working now: shown yellow on the page)
+//      or idle (this run ended without a result to show: clears its own working mark), SUMMARY = one or two plain sentences, LINK = where to see more,
 //      GITHUB_TOKEN with contents: write, GITHUB_REPOSITORY.
 // It writes status/all.json on the `agent-status` branch, a data-only branch that is never deployed and
 // holds no site content (so agents still never push to main). Never fails the workflow.
@@ -19,6 +20,8 @@ try {
 } catch { console.log('::warning::record-status: banned-words.txt not found, summary not scrubbed'); }
 const scrub = t => banned.reduce((acc, re) => acc.replace(re, '[source]'), t);
 
+const RUN = process.env.GITHUB_RUN_ID || '';
+const mode = ['run', 'idle'].includes(process.env.STATE) ? process.env.STATE : 'done';
 const entry = {
   state: ['ok', 'flag', 'fail', 'skip'].includes(process.env.STATE) ? process.env.STATE : 'ok',
   summary: scrub(process.env.SUMMARY || '').replace(/\s+/g, ' ').trim().slice(0, 400),
@@ -57,12 +60,19 @@ try {
     try { data = JSON.parse(Buffer.from(cur.json.content || '', 'base64').toString() || '{}'); } catch {}
     data.agents ||= {};
     const prev = data.agents[agent] || {};
-    data.agents[agent] = { ...entry, runs: (prev.runs || 0) + 1, history: [entry, ...(prev.history || [])].slice(0, KEEP) };
+    // `now` marks a run that is still working. A run only ever clears its own mark, so a newer run's mark stays.
+    const mine = prev.now && String(prev.now.run) === RUN;
+    let next;
+    if (mode === 'run') next = { ...prev, now: { at: entry.at, run: RUN, link: entry.link } };
+    else if (mode === 'idle') { if (!mine) { console.log(`Nothing to clear for ${agent}`); process.exit(0); } next = { ...prev }; delete next.now; }
+    else { next = { ...entry, runs: (prev.runs || 0) + 1, history: [entry, ...(prev.history || [])].slice(0, KEEP) }; if (prev.now && !mine) next.now = prev.now; }
+    data.agents[agent] = next;
     data.updated = entry.at;
+    const label = mode === 'done' ? entry.state : mode === 'run' ? 'working' : 'idle';
     const put = await gh('PUT', `/contents/${PATH}`, {
-      message: `${agent}: ${entry.state}`, branch: BRANCH, sha: cur.json.sha, content: b64(JSON.stringify(data, null, 1) + '\n'),
+      message: `${agent}: ${label}`, branch: BRANCH, sha: cur.json.sha, content: b64(JSON.stringify(data, null, 1) + '\n'),
     });
-    if (put.status < 300) { console.log(`Recorded ${agent} = ${entry.state}`); process.exit(0); }
+    if (put.status < 300) { console.log(`Recorded ${agent} = ${label}`); process.exit(0); }
     if (put.status !== 409 && put.status !== 422) throw new Error(`${put.status} ${put.json.message}`);
     await new Promise(r => setTimeout(r, 1000 * attempt + Math.random() * 1000)); // another agent wrote first; retry
   }
