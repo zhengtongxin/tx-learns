@@ -1,50 +1,78 @@
-# Writer agent: when TX pushes raw notes into inbox/<concept>/ on test, Claude writes a lesson draft
-# to STYLE.md and opens a pull request into test. It never pushes to test or main itself.
+# Writer agent: when raw notes land in inbox/<concept>/ on the notes branch, Claude writes a lesson draft to
+# STYLE.md and opens a pull request into main. It never pushes to main itself.
+# The notes branch is data only (never deployed, never merged). A push there only hands the folders over to this
+# workflow as it is on main (workflow_dispatch on main), so the writer always runs main's trusted version.
 # That pull request is the only one for the lesson: the reader and reviewer agents add their fixes to it as
 # commits, and the reviewer agent tells TX on Telegram when it is ready to approve. TX merges once.
 name: Claude writer
 on:
   push:
-    branches: [test]
+    branches: [notes]
     paths:
       - 'inbox/**'
       - '!inbox/README.md'
   workflow_dispatch:
     inputs:
       folder:
-        description: Inbox folder to write up, e.g. inbox/agents-as-tools
+        description: Inbox folders on the notes branch to write up, space separated, e.g. inbox/agents-as-tools
         required: true
 permissions:
   contents: write
   pull-requests: write
   actions: write
 concurrency:
-  group: writer
+  group: writer-${{ github.event_name }}
   cancel-in-progress: false
 jobs:
-  write:
+  # A push to the notes branch: find the note folders that changed and start the writer on main with them.
+  handoff:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
+      - name: Start the writer on main
+        env:
+          BEFORE: ${{ github.event.before }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then BEFORE=$(git rev-parse HEAD~1); fi
+          dirs=$(git diff --name-only --diff-filter=AM "$BEFORE" "$GITHUB_SHA" -- inbox/ | grep -v '^inbox/README.md$' | awk -F/ 'NF>2{print $1"/"$2}' | sort -u | tr '\n' ' ')
+          [ -z "${dirs// }" ] && { echo "No note folders changed."; exit 0; }
+          echo "Folders: $dirs"
+          gh workflow run writer.yml --ref main -R "$GITHUB_REPOSITORY" -f folder="$dirs"
+
+  write:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Find the notes to write up
+      - name: Bring in the notes
         id: notes
         env:
-          BEFORE: ${{ github.event.before }}
           FOLDER: ${{ inputs.folder }}
         run: |
-          if [ -n "$FOLDER" ]; then
-            dirs="${FOLDER%/}"
-          else
-            if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then BEFORE=$(git rev-parse HEAD~1); fi
-            dirs=$(git diff --name-only --diff-filter=AM "$BEFORE" "$GITHUB_SHA" -- inbox/ \
-                   | grep -v '^inbox/README.md$' | awk -F/ 'NF>2{print $1"/"$2}' | sort -u)
-          fi
-          [ -z "$dirs" ] && { echo "No note folders changed."; echo "dirs=" >> "$GITHUB_OUTPUT"; exit 0; }
+          git fetch -q origin notes 2>/dev/null || echo "No notes branch; using inbox/ on main."
+          dirs=
+          for d in $FOLDER; do
+            d="${d%/}"
+            if git rev-parse -q --verify origin/notes >/dev/null && git ls-tree -d origin/notes -- "$d" | grep -q .; then git checkout origin/notes -- "$d"; fi
+            [ -d "$d" ] && dirs="$dirs$d"$'\n' || echo "::warning::$d not found"
+          done
+          dirs=$(printf '%s' "$dirs" | sed '/^$/d')
+          [ -z "$dirs" ] && { echo "No note folders found."; echo "dirs=" >> "$GITHUB_OUTPUT"; exit 0; }
+          git reset -q -- inbox
           echo "Folders: $dirs"
           { echo "dirs<<EOF"; echo "$dirs"; echo "EOF"; } >> "$GITHUB_OUTPUT"
           echo "slug=$(echo "$dirs" | head -1 | cut -d/ -f2 | tr -cd 'a-z0-9-' | cut -c1-40)" >> "$GITHUB_OUTPUT"
@@ -99,7 +127,7 @@ jobs:
       - name: Count check
         if: steps.notes.outputs.dirs != ''
         run: node scripts/check-counts.mjs
-      - name: Open a pull request into test
+      - name: Open a pull request into main
         id: pr
         if: steps.notes.outputs.dirs != ''
         env:
@@ -119,7 +147,7 @@ jobs:
             cat .writer-summary.md 2>/dev/null; echo; echo "Copy check: $(tail -1 /tmp/copy-check.txt)"; echo;
             echo "Next, by themselves: the reader agent reads the preview and adds clearer wording here as a commit if the lesson scores under 8/10,";
             echo "then the reviewer agent reviews it and adds its fixes here too. You get one Telegram message when it is ready to approve."; } > /tmp/pr-body.md
-          url=$(gh pr create --base test --head "$branch" --title "Draft lesson: ${SLUG:-new notes}" --body-file /tmp/pr-body.md)
+          url=$(gh pr create --base main --head "$branch" --title "Draft lesson: ${SLUG:-new notes}" --body-file /tmp/pr-body.md)
           gh pr edit "$url" --add-assignee "${{ github.repository_owner }}" || true
           echo "url=$url" >> "$GITHUB_OUTPUT"
           # A push with the workflow token starts no workflows, so start the required copy check on this branch.

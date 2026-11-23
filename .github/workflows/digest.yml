@@ -1,0 +1,32 @@
+# Daily digest: one Telegram message at 8 PM Malaysia time (12:00 UTC) about the last 24 hours: what went live,
+# anything rolled back, what waits for TX, and what every agent did. No AI, read-only, never pushes.
+# Only trusted scripts from main run (scheduled runs always use the default branch).
+name: Daily digest
+on:
+  schedule:
+    - cron: '0 12 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+  pull-requests: read
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          sparse-checkout: |
+            scripts
+            banned-words.txt
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Send the digest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: node scripts/digest.mjs
