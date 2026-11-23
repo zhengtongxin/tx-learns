@@ -34,8 +34,8 @@ CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000"]
 docker run --env-file .env -p 8000:8000 canteen-helper</span></div>
 <div class="try" id="t1"></div>
 <h2><span class="en">Step 3 · Create a repository and push the image</span><span class="zh">第 3 步 · 创建仓库并推送镜像</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Make a repository in the registry, one per app. Then log your container tool in using a <b>temporary token</b> that the cloud tool prints for your user (it expires, which is the point). <b>Tag</b> the image with the repository's full address, and push. This assumes the cloud command-line tool is installed and signed in as your daily user, with your default region set.</p>
-<p class="zh" style="margin:0 0 8px">在镜像仓库里建一个仓库，一个应用一个。然后用云的命令行工具为你的用户生成的<b>临时令牌</b>让容器工具登录（它会过期，这正是用意）。给镜像打上仓库完整地址的<b>标签（tag）</b>，再推送。这里假设云的命令行工具已安装，并用你的日常用户登录，默认区域也设好了。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Make a repository in the registry, one per app. Then log your container tool in using a <b>temporary token</b> that the cloud tool prints for your user (it expires, which is the point). <b>Tag</b> the image with the repository's full address, and push. This assumes the cloud command-line tool is installed and signed in as your daily user, with your default region set. In the commands, <code>$(...)</code> runs a command and keeps its answer. <code>aws sts get-caller-identity</code> asks the cloud who you are, and its answer is your account ID. <code>--password-stdin</code> passes the token in without typing it into the command.</p>
+<p class="zh" style="margin:0 0 8px">在镜像仓库里建一个仓库，一个应用一个。然后用云的命令行工具为你的用户生成的<b>临时令牌</b>让容器工具登录（它会过期，这正是用意）。给镜像打上仓库完整地址的<b>标签（tag）</b>，再推送。这里假设云的命令行工具已安装，并用你的日常用户登录，默认区域也设好了。命令里，<code>$(...)</code> 会运行一条命令并保存它的结果。<code>aws sts get-caller-identity</code> 问云你是谁，返回的就是你的账号 ID。<code>--password-stdin</code> 让令牌直接传进去，而不用写在命令里。</p></div>
 <div class="codebox"><span class="dim">REGION=ap-southeast-1
 ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 REGISTRY=$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
@@ -46,8 +46,8 @@ docker tag canteen-helper:latest $REGISTRY/canteen-helper:latest
 docker push $REGISTRY/canteen-helper:latest</span></div>
 <div class="try" id="t2"></div>
 <h2><span class="en">Step 4 · Create the function and turn on its URL</span><span class="zh">第 4 步 · 创建函数并打开它的地址</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">In the console, create a function from the container image you pushed. Set the memory and a generous timeout. Add the <b>environment variables</b>: the model key and the sign-in keys, the same names as in your local <code>.env</code>. Then turn on the <b>function URL</b> with the streaming setting. Copy the address it gives you.</p>
-<p class="zh" style="margin:0 0 8px">在控制台里，用你推送的容器镜像创建一个函数。设置内存和一个宽裕的超时时间。添加<b>环境变量</b>：模型密钥和登录密钥，名字和你本地 <code>.env</code> 里的一样。然后用流式设置打开<b>函数地址</b>，把它给出的地址复制下来。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">In the console, create a function from the container image you pushed. Set the memory and a generous timeout. Add the <b>environment variables</b>: the model key and the sign-in keys (the sign-in service, Clerk in this code, checks who people are), the same names as in your local <code>.env</code>. Then turn on the <b>function URL</b> with the streaming setting. Copy the address it gives you.</p>
+<p class="zh" style="margin:0 0 8px">在控制台里，用你推送的容器镜像创建一个函数。设置内存和一个宽裕的超时时间。添加<b>环境变量</b>：模型密钥和登录密钥（登录服务，这段代码里用的是 Clerk，负责检查人是谁），名字和你本地 <code>.env</code> 里的一样。然后用流式设置打开<b>函数地址</b>，把它给出的地址复制下来。</p></div>
 <div class="codebox"><span class="dim">Function: canteen-helper   (from image canteen-helper:latest)
   Memory 512 MB · Timeout 60 s
   Environment variables:
@@ -56,8 +56,8 @@ docker push $REGISTRY/canteen-helper:latest</span></div>
   → https://abc123.lambda-url.ap-southeast-1.on.aws/</span></div>
 <div class="try" id="t3"></div>
 <h2><span class="en">Step 5 · Tell the sign-in service about the new address</span><span class="zh">第 5 步 · 把新地址告诉登录服务</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The sign-in service only lets people come back to addresses it knows. It still lists the old host, so sign-in fails on the new one. Add the function URL to its allowed addresses in its dashboard (and, in the API's CORS settings, if the front end is hosted elsewhere). Then test in order: sign in, subscribe with the test card, ask a question and watch it stream.</p>
-<p class="zh" style="margin:0 0 8px">登录服务只允许人们回到它认识的地址。它的列表里还是旧主机，所以在新地址上登录会失败。到它的后台把函数地址加进允许的地址里（如果前端放在别处，也要加进 API 的 CORS 设置）。然后按顺序测试：登录、用测试卡订阅、提一个问题并看着它流式输出。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The sign-in service only lets people come back to addresses it knows. It still lists the old host, so sign-in fails on the new one. Add the function URL to its allowed addresses in its dashboard (and, in the API's CORS settings, if the front end is hosted elsewhere). Then test in order: sign in, subscribe with a test card (a fake card number the payment service accepts only in test mode), ask a question and watch it stream.</p>
+<p class="zh" style="margin:0 0 8px">登录服务只允许人们回到它认识的地址。它的列表里还是旧主机，所以在新地址上登录会失败。到它的后台把函数地址加进允许的地址里（如果前端放在别处，也要加进 API 的 CORS 设置）。然后按顺序测试：登录、用测试卡（支付服务只在测试模式下接受的假卡号）订阅、提一个问题并看着它流式输出。</p></div>
 <div class="codebox"><span class="dim">Sign-in dashboard → allowed addresses
   https://old-host.example.com         (old)
   </span><span class="chg">https://abc123.lambda-url.ap-southeast-1.on.aws</span><span class="dim">   (new)
@@ -65,8 +65,8 @@ docker push $REGISTRY/canteen-helper:latest</span></div>
 Test in order:  1 sign in   2 subscribe (test card)   3 ask a question → streams?</span></div>
 <div class="try" id="t4"></div>
 <h2><span class="en">Step 6 · Read the logs, then know how to tear it all down</span><span class="zh">第 6 步 · 读日志，并知道怎么全部拆掉</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Something will fail, so find the function's log group first. Read the newest lines from the bottom: the error is usually in the last few. When you are done experimenting, delete what you made so nothing quietly keeps billing. Confirm the console is clean in each region you used.</p>
-<p class="zh" style="margin:0 0 8px">总会有东西失败，所以先找到函数的日志组。从最底下读最新的几行：错误通常就在最后几行里。实验结束后，把你建的东西删掉，免得有什么在悄悄计费。确认你用过的每个区域在控制台里都是干净的。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Something will fail, so find the function's log group first (the folder where its logs are kept). Read the newest lines from the bottom: the error is usually in the last few. When you are done experimenting, delete what you made so nothing quietly keeps billing. Confirm the console is clean in each region you used.</p>
+<p class="zh" style="margin:0 0 8px">总会有东西失败，所以先找到函数的日志组（保存它日志的文件夹）。从最底下读最新的几行：错误通常就在最后几行里。实验结束后，把你建的东西删掉，免得有什么在悄悄计费。确认你用过的每个区域在控制台里都是干净的。</p></div>
 <div class="codebox"><span class="dim"># read the newest log lines
 </span><span class="chg">aws logs tail /aws/lambda/canteen-helper --since 10m --region $REGION</span><span class="dim">
 

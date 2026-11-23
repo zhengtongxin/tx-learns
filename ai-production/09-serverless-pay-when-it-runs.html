@@ -15,8 +15,8 @@ request 2 (right after):                              run  →  answer   </span>
 (long quiet spell: the box is put away again, and the bill stops)</span></div>
 <div class="try" id="t0"></div>
 <h2><span class="en">Step 2 · Its own address, and streaming</span><span class="zh">第 2 步 · 自己的地址，以及流式输出</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>function URL</b> gives the function its own HTTPS address, with no extra API gateway in front. It can also <b>stream</b> the answer word by word, like the helper does in the browser. But streaming only works if you choose the streaming-capable setting. The default is "buffered": the function collects the whole answer and sends it at the end. These are settings in the console, not code.</p>
-<p class="zh" style="margin:0 0 8px"><b>函数地址（function URL）</b>让函数拥有自己的 HTTPS 地址，前面不需要再加 API 网关。它还能像助手在浏览器里那样，把回答一个词一个词地<b>流式</b>发出来。但只有选了支持流式的设置才行，默认是“缓冲”：函数先把整个回答攒齐，最后一次发出。这些都是控制台里的设置，不是代码。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>function URL</b> gives the function its own HTTPS address, with no extra API gateway in front. It can also <b>stream</b> the answer word by word, like the helper does in the browser. But streaming only works if you choose the streaming-capable setting. The default is "buffered": the function collects the whole answer and sends it at the end. The invoke mode is a console switch. Step 3 adds a matching switch inside the container, and both must say streaming.</p>
+<p class="zh" style="margin:0 0 8px"><b>函数地址（function URL）</b>让函数拥有自己的 HTTPS 地址，前面不需要再加 API 网关。它还能像助手在浏览器里那样，把回答一个词一个词地<b>流式</b>发出来。但只有选了支持流式的设置才行，默认是“缓冲”：函数先把整个回答攒齐，最后一次发出。调用模式是控制台里的一个开关，第 3 步会在容器里再加一个对应的开关。两个都要设成流式。</p></div>
 <div class="codebox"><span class="dim">Function URL settings
   Auth type:    NONE            (the app does its own sign-in check)
   Invoke mode:  </span><span class="chg">RESPONSE_STREAM</span><span class="dim">    (BUFFERED, the default, waits for the whole answer)</span></div>
@@ -35,8 +35,8 @@ COPY . .
 CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000"]</span></div>
 <div class="try" id="t2"></div>
 <h2><span class="en">Step 4 · Create the function from the image</span><span class="zh">第 4 步 · 用镜像创建函数</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">With the image in your registry (the project lesson after this one shows the push line by line), create the function in the console: choose "container image", pick yours, and the console makes a basic role for it. Then set the memory, the <b>timeout</b> and the <b>environment variables</b> (your secrets, kept out of the image). Raise the timeout: the default is a few seconds, and a model call can take longer.</p>
-<p class="zh" style="margin:0 0 8px">镜像进了你的仓库之后（这节之后的项目课会逐行演示怎么推送），就可以在控制台创建函数：选“容器镜像”，选你的镜像，控制台会替它建一个基本角色。然后设置内存、<b>超时时间</b>和<b>环境变量</b>（你的密钥，放在镜像外面）。把超时调大：默认只有几秒，而一次模型调用可能更久。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">With the image in your registry (the project lesson after this one shows the push line by line), create the function in the console: choose "container image", pick yours, and the console makes a basic <b>role</b> for it (a set of permissions that lets the function run and write its logs). Then set the memory, the <b>timeout</b> and the <b>environment variables</b> (your secrets, kept out of the image). Raise the timeout: the default is a few seconds, and a model call can take longer.</p>
+<p class="zh" style="margin:0 0 8px">镜像进了你的仓库之后（这节之后的项目课会逐行演示怎么推送），就可以在控制台创建函数：选“容器镜像”，选你的镜像，控制台会替它建一个基本<b>角色</b>（一组权限，让函数能运行并写日志）。然后设置内存、<b>超时时间</b>和<b>环境变量</b>（你的密钥，放在镜像外面）。把超时调大：默认只有几秒，而一次模型调用可能更久。</p></div>
 <div class="codebox"><span class="dim">Function settings
   Source:      container image  canteen-helper:latest
   Memory:      512 MB
