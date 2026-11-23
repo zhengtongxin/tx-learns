@@ -97,6 +97,15 @@
 .guard .imp em{color:var(--ok)}
 .plumb{margin-top:14px;font:12px/1.7 var(--mono);color:var(--mut);text-align:center;overflow-wrap:anywhere}
 .plumb b{color:var(--fg);font-weight:600}
+/* breathing room */
+.eco section{margin-top:84px}.eco section>p{max-width:760px;line-height:1.75}
+.panel{margin-top:28px;padding:22px 18px}
+.panel .e.ck{display:none}
+.guards{grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px;margin-top:22px}
+.guard{padding:22px 24px;gap:14px}.guard p{line-height:1.65}.guard .who{padding-top:14px}
+.gh{margin-top:56px}.key{margin:22px 0 8px;gap:12px 26px}.kb{margin-top:20px}
+.feed li{padding:16px 6px}.rule-line{margin-top:64px}
+@media(max-width:760px){.eco section{margin-top:56px}.guards{grid-template-columns:1fr;gap:16px}.guard{padding:18px}}
 /* phone: the diagrams become ordered lists */
 .olist{display:none;list-style:none;margin:16px 0 0;padding:0}
 .olist .h{font:11px var(--mono);color:var(--mut);letter-spacing:.14em;text-transform:uppercase;margin:16px 0 4px}
@@ -114,6 +123,7 @@
 .olist .more{display:none;margin:8px 0 4px;padding:10px 12px;border-radius:6px;border:1px solid var(--box);background:var(--node)}.olist .it.open .more{display:block}.olist .more .last{margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font-size:13px;overflow-wrap:anywhere}.olist .more p{margin:0 0 8px;font-size:14px}
 .olist .lk{font:10px var(--mono);color:var(--mut);margin-left:6px;letter-spacing:.06em}
 @media(max-width:760px){.panel{display:none}.olist{display:block}}
+@media(max-width:760px){.olist .it{padding:11px 0 11px 32px}.olist .it::before{top:17px}.olist .it[data-n]::before{top:12px}.olist .it.g::before{top:12px}}
 @media(prefers-reduced-motion:reduce){.panel .ring{animation:none}}
 /* activity */
 .feed{list-style:none;margin:14px 0 0;padding:0}
@@ -388,7 +398,7 @@
 
   document.getElementById('key').innerHTML=
     AGENTS.filter(function(a){return a.hue}).map(function(a){return '<span><i class="sw" style="--h:'+a.hue+'"></i>'+t(a.en,a.zh)+'</span>'}).join('')+
-    '<span><i class="sq">1</i>'+t('lesson path','一课的路径')+'</span><span><i class="ln lp"></i>'+t('feedback loop','反馈回路')+'</span><span><i class="ln ck"></i>'+t('check','检查')+'</span>'+
+    '<span><i class="sq">1</i>'+t('lesson path','一课的路径')+'</span><span><i class="ln lp"></i>'+t('feedback loop','反馈回路')+'</span>'+
     '<span><svg viewBox="-6 -8 12 16" aria-hidden="true"><g class="lock" style="fill:var(--fg);stroke:var(--fg)">'+LOCK.replace('<path','<path fill="none" stroke-width="1.6"')+'</g></svg>'+t('all green to merge','全绿才合并')+'</span>'+
     '<span><svg viewBox="-7 -7 14 14" aria-hidden="true" class="kpl">'+PLANE+'</svg>'+t('pings me on Telegram every run','每次运行都发 Telegram 给我')+'</span>'+
     '<span><svg viewBox="-7 -7 14 14" aria-hidden="true" class="kpl ho">'+PLANE+'</svg>'+t('only on a problem','只在出问题时')+'</span>'+
