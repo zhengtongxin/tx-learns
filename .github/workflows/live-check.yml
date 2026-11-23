@@ -61,6 +61,7 @@ jobs:
       summary: ${{ steps.run.outputs.summary }}
       deploy: ${{ steps.deploy.outputs.state }}
       prev: ${{ steps.prev.outputs.state }}
+      newest: ${{ steps.newest.outputs.yes }}
     env:
       # The production domain, not the per-deploy URL (that one may sit behind Vercel's login).
       SITE: ${{ inputs.url || vars.LIVE_URL || 'https://tx-learns.vercel.app/' }}
@@ -109,6 +110,13 @@ jobs:
           node -e 'const r=require("/tmp/live-check.json");console.log("summary="+r.summary.replace(/\n/g," "))' >> "$GITHUB_OUTPUT" || echo "summary=The live check could not finish." >> "$GITHUB_OUTPUT"
           if [ "$code" = 0 ]; then echo "state=ok" >> "$GITHUB_OUTPUT"; elif [ "$code" = 1 ]; then echo "state=flag" >> "$GITHUB_OUTPUT"; else echo "state=fail" >> "$GITHUB_OUTPUT"; fi
           [ "$code" -le 1 ]
+      - name: Is this still the newest merge?
+        id: newest
+        if: ${{ !cancelled() }}
+        run: |
+          # A later merge may have gone live while this check waited its turn; the site then holds more than this commit's lists, and blaming this merge would be wrong.
+          head=$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha || true)
+          if [ -z "$head" ] || [ "$head" = "$SHA" ]; then echo "yes=1" >> "$GITHUB_OUTPUT"; else echo "A newer merge ($head) is on main, so this result can not be blamed on $SHA."; echo "yes=0" >> "$GITHUB_OUTPUT"; fi
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
@@ -118,8 +126,8 @@ jobs:
       - name: Tell TX on Telegram
         # Not when the rollback job takes over (it sends the one message), and not on a cancelled run.
         if: >-
-          ${{ !cancelled() && steps.run.outputs.state != 'ok' &&
-              !((github.event_name == 'push' || inputs.merge != '') && steps.run.outputs.state == 'flag' && steps.prev.outputs.state == 'ok' && steps.deploy.outputs.state == 'success') }}
+          ${{ !cancelled() && steps.run.outputs.state != 'ok' && steps.newest.outputs.yes != '0' &&
+              !((github.event_name == 'push' || inputs.merge != '') && steps.run.outputs.state == 'flag' && steps.prev.outputs.state == 'ok' && steps.deploy.outputs.state == 'success' && steps.newest.outputs.yes == '1') }}
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -143,7 +151,7 @@ jobs:
     needs: check
     if: >-
       ${{ !cancelled() && (github.event_name == 'push' || inputs.merge != '') && needs.check.outputs.state == 'flag' &&
-          needs.check.outputs.prev == 'ok' && needs.check.outputs.deploy == 'success' }}
+          needs.check.outputs.prev == 'ok' && needs.check.outputs.deploy == 'success' && needs.check.outputs.newest == '1' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
