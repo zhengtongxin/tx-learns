@@ -16,6 +16,7 @@
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">From here the worker uses OpenAI's <code>gpt-4o-mini</code> model, so set an <code>OPENAI_API_KEY</code> in your <code>.env</code> file the way you set the Google key in the first lesson of this tour. <code>board</code> is the shared task board from the story, a small SQLite database that lists the goals.</p><p class="en" style="margin:0 0 8px"><b>Strands</b> marks tools with <code>@tool</code> and builds <code>Agent(model, system_prompt, tools)</code>. Its headline feature is portability: swap the model class for another provider and nothing else changes.</p><p class="zh" style="margin:0 0 8px">从这里开始，工人改用 OpenAI 的 <code>gpt-4o-mini</code> 模型，所以要像这组巡礼的第一课那样，在 <code>.env</code> 文件里设置 <code>OPENAI_API_KEY</code>。<code>board</code> 是故事里的共享任务板，就是一个列出目标的小型 SQLite 数据库。</p><p class="zh" style="margin:0 0 8px"><b>Strands</b> 用 <code>@tool</code> 标记工具，构造 <code>Agent(model, system_prompt, tools)</code>。它的招牌是可移植：把模型类换成别的供应商，其余代码不用动。</p></div>
 <div class="codebox"><span class="dim">pip install "strands-agents[openai]" "pydantic-ai-slim[mcp,openai]" mcp fastmcp python-dotenv
 
+import os, subprocess
 from strands import Agent, tool
 from strands.models.openai import OpenAIModel
 from strands.tools.mcp import MCPClient
@@ -35,7 +36,9 @@ def show_board() -> list[dict]:
 worker = Agent(model=model, system_prompt="Work the pending goal on the board.", tools=[show_board, files])
 await worker.invoke_async("Please work the pending goal.")</span></div>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><b>Pydantic AI</b> takes a model string like <code>"openai-chat:gpt-4o-mini"</code>, <code>instructions=</code>, plain functions as tools and MCP servers as <code>toolsets=</code>. Its special strength is <b>typed, validated output</b>: pass <code>output_type=</code> a Pydantic model and you get a checked object back, not loose text.</p><p class="zh" style="margin:0 0 8px"><b>Pydantic AI</b> 用 <code>"openai-chat:gpt-4o-mini"</code> 这样的模型字符串、<code>instructions=</code>、普通函数当工具，MCP 服务放进 <code>toolsets=</code>。它的特长是<b>带类型、经过校验的输出</b>：给 <code>output_type=</code> 传一个 Pydantic 模型，拿回的就是校验过的对象，而不是随意的文字。</p></div>
-<div class="codebox"><span class="dim">from pydantic_ai import Agent
+<div class="codebox"><span class="dim">import os
+from pathlib import Path
+from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPToolset
 from fastmcp.client.transports import StdioTransport
 

@@ -25,7 +25,9 @@ await InMemoryRunner(agent=drinks).run_debug("What is iced barley?", verbose=Tru
 <div class="try" id="p1"></div>
 <h2><span class="en">Step 2 · Tools and MCP</span><span class="zh">第 2 步 · 工具与 MCP</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Mei needs to remember orders, so she needs tools. In ADK a tool is a plain typed function with a docstring. No decorator: ADK reads the type hints and the docstring, just like the SDK you met earlier.</p><p class="zh" style="margin:0 0 8px">Mei 要记订单，所以需要工具。在 ADK 里，工具就是带类型标注和文档字符串的普通函数，不需要装饰器：ADK 会读类型标注和文档字符串，和你之前见过的 SDK 一样。</p><p class="en" style="margin:0 0 8px">Tools that someone else wrote plug in through <b>MCP</b>, a standard plug for tools (it gets its own topic later). Scope it to one folder, so the agent cannot touch anything else.</p><p class="zh" style="margin:0 0 8px">别人写好的工具通过 <b>MCP</b> 接入，它是工具的标准插头（之后会有单独的主题）。把它限定在一个文件夹里，智能体就碰不到别的东西。</p></div>
-<div class="codebox"><span class="dim">def save_order(item: str, qty: int) -> str:
+<div class="codebox"><span class="dim">notepad = []                    # Mei's notepad: a plain list
+
+def save_order(item: str, qty: int) -> str:
 </span><span class="chg">    """Write one customer order on the notepad. Use it after the customer confirms."""</span><span class="dim">
     notepad.append((item, qty))
     return "saved"
