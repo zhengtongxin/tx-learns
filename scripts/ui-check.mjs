@@ -41,9 +41,9 @@ const MAX_TARGETS = 60, MAX_TABS = 40, MAX_TILES = 6;
 const SKIP = '.top, .side, .prog, [data-uicheck-skip]';
 
 function defaultPages() {
-  const lessons = existsSync(join(ROOT, 'agentic-ai'))
-    ? readdirSync(join(ROOT, 'agentic-ai')).filter(f => /^\d+.*\.html$/.test(f)).sort().map(f => 'agentic-ai/' + f) : [];
-  return ['index.html', 'ecosystem.html', 'agentic-ai/index.html', ...lessons].filter(p => existsSync(join(ROOT, p)));
+  const dirs = readdirSync(ROOT).filter(d => existsSync(join(ROOT, d, 'lessons.js')));
+  const lessons = dirs.flatMap(d => readdirSync(join(ROOT, d)).filter(f => /^\d+.*\.html$/.test(f)).sort().map(f => d + '/' + f));
+  return ['index.html', 'ecosystem.html', ...dirs.map(d => d + '/index.html'), ...lessons].filter(p => existsSync(join(ROOT, p)));
 }
 
 // A tiny static server for the repo folder, so the check works without reaching Vercel.

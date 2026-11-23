@@ -325,11 +325,17 @@
   document.addEventListener('keydown',function(ev){if(ev.key==='Escape')hideTip()});
 
   // Knowledge base line comes from the track's lessons.js, loaded after site.js has set up the page (so it stays a home-level page).
-  (function loadTopics(){var sc=document.createElement('script');sc.src='agentic-ai/lessons.js';
-    sc.onload=function(){var T=window.TRACK;try{delete window.TRACK}catch(e){window.TRACK=undefined}
-      if(!T||!T.topics)return;var all=0,done=0;T.topics.forEach(function(w){all+=w.items.length;done+=w.items.filter(function(x){return x.file}).length});
-      document.getElementById('kb').innerHTML=t('knowledge base: <b>'+T.topics.length+'</b> topics · <b>'+done+'</b> of '+all+' lessons live · ','知识库：<b>'+T.topics.length+'</b> 个主题 · 已上线 <b>'+done+'</b> / '+all+' 课 · ')+'<a href="agentic-ai/index.html">'+t('browse →','去看看 →')+'</a>'};
-    document.body.appendChild(sc)})();
+  (function loadTopics(){
+    function run(list){var tp=0,all=0,done=0,i=0;
+      (function next(){var c=list[i++];
+        if(!c){document.getElementById('kb').innerHTML=t('knowledge base: <b>'+tp+'</b> topics · <b>'+done+'</b> of '+all+' lessons live · ','知识库：<b>'+tp+'</b> 个主题 · 已上线 <b>'+done+'</b> / '+all+' 课 · ')+'<a href="index.html#topics">'+t('browse →','去看看 →')+'</a>';return}
+        var sc=document.createElement('script');sc.src=c.href.replace(/[^\/]*$/,'')+'lessons.js';
+        sc.onload=sc.onerror=function(){var T=window.TRACK;try{delete window.TRACK}catch(e){window.TRACK=undefined}
+          if(T&&T.topics){tp+=T.topics.length;T.topics.forEach(function(w){all+=w.items.length;done+=w.items.filter(function(x){return x.file}).length})}
+          next()};
+        document.body.appendChild(sc)})()}
+    if(window.TRACKS)return run(window.TRACKS);
+    var ts=document.createElement('script');ts.src='tracks.js';ts.onload=function(){run(window.TRACKS||[])};document.body.appendChild(ts)})();
 
   // Guardrails: a plain title, one number with its unit, what it stops, what that means, and the agents it covers.
   // Numbers are true to .github/workflows/.

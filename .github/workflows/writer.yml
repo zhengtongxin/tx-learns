@@ -109,20 +109,23 @@ jobs:
           set -o pipefail
           if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then unset ANTHROPIC_API_KEY; echo "Auth: Claude subscription"; else unset CLAUDE_CODE_OAUTH_TOKEN; echo "Auth: API key (no CLAUDE_CODE_OAUTH_TOKEN secret)"; fi
           cat > /tmp/writer-prompt.md <<'PROMPT'
-          You are the writer for TX Learns, a bilingual (EN/中文) interactive learning site about agentic AI.
+          You are the writer for TX Learns, a bilingual (EN/中文) interactive learning site about AI.
           TX has dropped raw notes in these inbox folders:
           __DIRS__
 
           Turn each folder into ONE new lesson. Work only on files; do not run git.
+          Track: a folder may hold a one-line file named TRACK with the id of the learning track it belongs to
+          (a top-level folder listed in tracks.js, e.g. ai-engineer). No TRACK file means agentic-ai. Below,
+          <track> is that folder. If <track>/STORY.md exists it names this track's setting and characters: use them.
 
           1. Read CLAUDE.md and STYLE.md. Follow STYLE.md exactly; it is the whole point.
           2. Read every file in the folder (notes, code, images). TX's own confusions and "aha" moments are
              the human touch: keep them, especially for the "What I got wrong" callout.
-          3. Study agentic-ai/07-agents-sdk-basics.html and assets/teach.js as the model for structure and widgets
+          3. Study agentic-ai/07-agents-sdk-basics.html (and the last lessons already in <track>/) and assets/teach.js as the model for structure and widgets
              (.story, .teach, .codebox with .dim/.chg, TX2.predict, TX2.game, .cl checklist, .card takeaways).
              Reuse those widgets; do not invent new CSS unless needed.
-          4. Read agentic-ai/lessons.js. If a planned item (no file) matches the concept, use it; otherwise add a new
-             item under the best-fitting topic. Name the file agentic-ai/NN-slug.html with the next free NN,
+          4. Read <track>/lessons.js. If a planned item (no file) matches the concept, use it; otherwise add a new
+             item under the best-fitting topic. Name the file <track>/NN-slug.html with the next free NN in that track,
              and add file:'NN-slug.html'. Tag: a project item (k:'p') gets "<Topic> · Project"; any other item gets
              "<Topic> · Lesson N", where N counts only the non-project items of that topic up to and including it.
              Check the tags of the topic's existing lessons and follow them. If the notes name a tag, use it.
@@ -133,7 +136,7 @@ jobs:
           6. Every .en block needs a matching, natural .zh block.
           7. Run `node scripts/check-copy.mjs`, `node scripts/check-counts.mjs` and `node scripts/check-pages.mjs` and fix everything they report until all pass.
              Then run `node scripts/check-pages.mjs --fix`: it updates sitemap.xml, the lesson list and the lesson's updated date.
-             Start from agentic-ai/_template.html: fill in its <title> and its description and og: tags with the lesson's own title and hero line.
+             Start from agentic-ai/_template.html (copy it into <track>/): fill in its <title> and its description and og: tags with the lesson's own title and hero line.
           8. Write .writer-summary.md (repo root): the lesson title, file name, topic, a 3-line summary of the story,
              and anything in the notes you were unsure about or left out (as questions for TX).
           PROMPT
@@ -142,7 +145,7 @@ jobs:
             --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(node scripts/check-counts.mjs:*),Bash(node scripts/check-pages.mjs:*),Bash(ls:*)" \
             --output-format text | tail -40
           # Drop scratch files the writer made outside the site (e.g. a .gen/ page generator), so they never deploy.
-          git -c core.quotePath=false ls-files --others --exclude-standard | { grep -v -E '^(agentic-ai|assets)/|^\.writer-summary\.md$|^inbox/' || true; } | while read -r f; do echo "Removing scratch file $f"; rm -f -- "$f"; done
+          git -c core.quotePath=false ls-files --others --exclude-standard | { grep -v -E '^(agentic-ai|ai-engineer|assets)/|^\.writer-summary\.md$|^inbox/' || true; } | while read -r f; do echo "Removing scratch file $f"; rm -f -- "$f"; done
       - name: Copy check
         if: steps.notes.outputs.dirs != ''
         run: node scripts/check-copy.mjs | tee /tmp/copy-check.txt; exit ${PIPESTATUS[0]}

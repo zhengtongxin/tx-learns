@@ -83,7 +83,7 @@ jobs:
           elif echo "$msg" | grep -qE '^(Reader|Reviewer):'; then echo "This deploy is an agent's own fix; not reading it again."; files=
           elif echo "$msg" | grep -qE '^Merge pull request #[0-9]+ from [^ ]+/(writer|reader)/'; then echo "This lesson was already read on its own pull request."; files=
           elif echo "$msg" | grep -qE "^Merge (remote-tracking )?branch '(origin/)?main'"; then echo "This deploy only brings main up to date; those lessons were read on their own pull requests."; files=
-          else files=$(git diff --name-only --diff-filter=AM "$SHA^1" "$SHA" -- 'agentic-ai/[0-9]*.html' | tr '\n' ' '); fi
+          else files=$(git diff --name-only --diff-filter=AM "$SHA^1" "$SHA" -- '*/[0-9]*.html' | tr '\n' ' '); fi
           # Cap one run at 6 lessons: a sweep that touches every lesson (a theme or wording change) must not make Claude read them all.
           files=$(echo $files | tr ' ' '\n' | head -6 | tr '\n' ' ')
           files=$(echo $files)
@@ -142,7 +142,7 @@ jobs:
         run: |
           mkdir -p /tmp/out
           cp /tmp/reader.json /tmp/reader-comment.md /tmp/out/ 2>/dev/null || true
-          git diff -- 'agentic-ai/*.html' > /tmp/out/fix.patch
+          git diff -- '*/[0-9]*.html' > /tmp/out/fix.patch
       - uses: actions/upload-artifact@v4
         if: always() && steps.find.outputs.files != ''
         with:
@@ -201,10 +201,10 @@ jobs:
           if [ "$FIX" = 1 ] && [ -s /tmp/out/fix.patch ] && [ "$low" -lt 8 ]; then
             # The fix lands on the lesson's own pull request, so TX still merges once per lesson.
             cd work
-            git apply --include='agentic-ai/*.html' /tmp/out/fix.patch
+            git apply --include='*/[0-9]*.html' /tmp/out/fix.patch
             git config user.name "TX Learns reader"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add -- 'agentic-ai/*.html'
+            git add -- '*/[0-9]*.html'
             git commit -m "Reader: clearer wording for newcomers" -m "Suggested by the reader agent (Claude) after reading the preview."
             auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
             git -c "http.https://github.com/.extraheader=$auth" push origin "HEAD:refs/heads/$HEAD"

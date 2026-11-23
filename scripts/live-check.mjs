@@ -13,7 +13,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import { loadTrack, arg } from './lib.mjs';
+import { loadTracks, arg } from './lib.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const BASE = (arg('base', process.env.SITE || 'https://tx-learns.vercel.app/')).replace(/\/?$/, '/');
@@ -31,26 +31,29 @@ async function get(url) {
 }
 
 try {
-  const localList = readFileSync(join(ROOT, 'agentic-ai/lessons.js'), 'utf8');
-  const T = loadTrack(localList);
-  const lessons = T.topics.flatMap(w => w.items).filter(i => i.file).map(i => ({ path: 'agentic-ai/' + i.file, title: i.title.en }));
-  const total = T.topics.reduce((n, w) => n + w.items.length, 0);
+  const TR = loadTracks(ROOT);
+  const lessons = TR.flatMap(t => t.T.topics.flatMap(w => w.items).filter(i => i.file).map(i => ({ path: t.dir + '/' + i.file, title: i.title.en })));
+  const total = TR.reduce((n, t) => n + t.T.topics.reduce((m, w) => m + w.items.length, 0), 0);
+  const topicCount = TR.reduce((n, t) => n + t.T.topics.length, 0);
 
   // 1. Wait for the released lesson list to be live.
   const t0 = Date.now();
+  for (const t of TR) {
+  const lf = t.dir + '/lessons.js', localList = readFileSync(join(ROOT, lf), 'utf8');
   let live;
   while (true) {
-    live = await get(BASE + 'agentic-ai/lessons.js');
+    live = await get(BASE + lf);
     if (live.status === 200 && live.text.trim() === localList.trim()) break;
     if ((Date.now() - t0) / 1000 >= WAIT) {
-      bad('agentic-ai/lessons.js', live.status === 200 ? `the live lesson list is still the old one after ${Math.round(WAIT / 60)} min` : `does not open (HTTP ${live.status || live.err})`);
+      bad(lf, live.status === 200 ? `the live lesson list is still the old one after ${Math.round(WAIT / 60)} min` : `does not open (HTTP ${live.status || live.err})`);
       break;
     }
     await sleep(15000);
   }
+  }
 
   // 2. Pages, lessons and every link in them.
-  const pages = ['index.html', 'ecosystem.html', 'agentic-ai/index.html', ...lessons.map(l => l.path)];
+  const pages = ['index.html', 'ecosystem.html', ...TR.map(t => t.dir + '/index.html'), ...lessons.map(l => l.path)];
   const links = new Map();
   for (const p of pages) {
     const r = await get(BASE + p);
@@ -84,7 +87,7 @@ try {
   if (chromium) {
     const browser = await chromium.launch();
     const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
-    for (const p of ['index.html', 'ecosystem.html', 'agentic-ai/index.html', ...lessons.map(l => l.path)]) {
+    for (const p of pages) {
       const page = await ctx.newPage(), errs = [];
       page.on('pageerror', e => errs.push(`script error: ${e.message.split('\n')[0]}`));
       page.on('console', m => { if (m.type() === 'error' && !/favicon|api\/status|^Failed to load resource/.test(m.text())) errs.push(`console error: ${m.text().slice(0, 160)}`); });
@@ -94,10 +97,10 @@ try {
         await page.waitForTimeout(1800);
         if (p === 'index.html') {
           const got = await page.evaluate(() => ({ topics: document.querySelector('[data-sum="topics"]')?.textContent, lessons: document.querySelector('[data-sum="lessons"]')?.textContent }));
-          if (+got.topics !== T.topics.length) errs.push(`home page shows ${got.topics} topics, lessons.js has ${T.topics.length}`);
+          if (+got.topics !== topicCount) errs.push(`home page shows ${got.topics} topics, lessons.js has ${topicCount}`);
           if (+got.lessons !== total) errs.push(`home page shows ${got.lessons} lessons, lessons.js has ${total}`);
         }
-        if (p.startsWith('agentic-ai/') && /\d\d-/.test(p)) {
+        if (/^[\w-]+\/\d\d-/.test(p)) {
           const got = await page.evaluate(() => ({ tag: document.querySelector('.tag')?.innerText.trim(), h1: document.querySelector('h1')?.innerText.trim() }));
           if (!got.tag) errs.push('no lesson tag shows');
           if (!got.h1) errs.push('no title shows');

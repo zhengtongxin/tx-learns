@@ -101,7 +101,7 @@ jobs:
           if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then unset ANTHROPIC_API_KEY; echo "Auth: Claude subscription"; else unset CLAUDE_CODE_OAUTH_TOKEN; echo "Auth: API key (no CLAUDE_CODE_OAUTH_TOKEN secret)"; fi
           if [ "$FIX" = 1 ]; then
             MODE="This is a lesson's own pull request. After reviewing, fix every finding you can in the lesson files
-             (agentic-ai/NN-*.html) only: wording, EN/中文 matching, broken code lines, facts you are sure about.
+             (<track>/NN-*.html) only: wording, EN/中文 matching, broken code lines, facts you are sure about.
              Keep TX's voice, the story and the structure. Then run node scripts/check-copy.mjs,
              node scripts/check-counts.mjs and node scripts/check-pages.mjs --fix until all pass. Your verdict describes the lesson AFTER your fixes:
              \"✅ Ready to merge\" when nothing is left for TX, else \"⚠️ Fix before merging\" with only what is left.
@@ -146,7 +146,7 @@ jobs:
         run: |
           mkdir -p /tmp/out
           cp /tmp/review-comment.md /tmp/review-summary.txt /tmp/out/ 2>/dev/null || true
-          git diff -- 'agentic-ai/*.html' > /tmp/out/fix.patch
+          git diff -- '*/[0-9]*.html' > /tmp/out/fix.patch
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -209,10 +209,10 @@ jobs:
           pushed=
           if [ "$FIX" = 1 ] && [ -s /tmp/out/fix.patch ]; then
             cd work
-            git apply --include='agentic-ai/*.html' /tmp/out/fix.patch
+            git apply --include='*/[0-9]*.html' /tmp/out/fix.patch
             git config user.name "TX Learns reviewer"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add -- 'agentic-ai/*.html'
+            git add -- '*/[0-9]*.html'
             if ! git diff --cached --quiet; then
               git commit -m "Reviewer: fixes from the review" -m "Made by the reviewer agent (Claude) on the lesson's own pull request."
               auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"

@@ -14,7 +14,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { loadTrack, arg, escHtml as e } from './lib.mjs';
+import { loadTracks, arg, escHtml as e } from './lib.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = (process.env.SITE || 'https://tx-learns.vercel.app/').replace(/\/?$/, '/');
@@ -29,14 +29,14 @@ function published(file) {
 }
 
 function plan() {
-  const T = loadTrack(readFileSync(join(ROOT, 'agentic-ai/lessons.js'), 'utf8'));
+  const TR = loadTracks(ROOT);
   const all = [];
-  for (const w of T.topics) for (const it of w.items) if (it.file) {
-    const at = published('agentic-ai/' + it.file);
+  for (const t of TR) for (const w of t.T.topics) for (const it of w.items) if (it.file) {
+    const at = published(t.dir + '/' + it.file);
     if (!at) continue;
     const age = (NOW - at) / DAY;
     const step = STEPS.findIndex(s => s <= age && s > age - 7);
-    all.push({ file: 'agentic-ai/' + it.file, title: it.title, topic: w.title, age: Math.floor(age), step });
+    all.push({ file: t.dir + '/' + it.file, title: it.title, topic: w.title, age: Math.floor(age), step });
   }
   let due = all.filter(l => l.step >= 0).sort((a, b) => b.age - a.age);
   // Nothing due: bring back the lesson that has gone longest since its last review day.
@@ -45,7 +45,7 @@ function plan() {
     due = [all.sort((a, b) => since(b) - since(a))[0]];
     due[0].extra = true;
   }
-  const gaps = T.topics.map(w => ({ topic: w.title, live: w.items.filter(i => i.file).length, total: w.items.length, next: (w.items.find(i => !i.file) || {}).title }))
+  const gaps = TR.flatMap(t => t.T.topics).map(w => ({ topic: w.title, live: w.items.filter(i => i.file).length, total: w.items.length, next: (w.items.find(i => !i.file) || {}).title }))
     .filter(g => g.next);
   return { at: NOW.toISOString(), due: due.slice(0, MAX), more: due.slice(MAX).map(l => l.title.en), gaps };
 }
@@ -55,10 +55,10 @@ function ago(d) { return d < 1 ? 'today' : d < 2 ? 'yesterday' : d < 14 ? `${d} 
 // Model ids as lessons write them in code, e.g. gpt-5.4-mini, claude-sonnet-4-6, gemini-3.1-flash-lite, llama3.2.
 const MODEL = /\b(?:gpt-[0-9][\w.-]*|gpt-oss-[\w.-]+|o[1-9]-(?:mini|pro)|claude-[a-z]+-[\w.-]+|gemini-[0-9][\w.-]*|llama[0-9][\w.:-]*|deepseek-[\w.-]+|qwen[0-9][\w.:-]*|mistral-[\w.-]+|grok-[0-9][\w.-]*)\b/gi;
 function models() {
-  const T = loadTrack(readFileSync(join(ROOT, 'agentic-ai/lessons.js'), 'utf8')), found = {};
-  for (const l of T.topics.flatMap(w => w.items).filter(x => x.file)) {
-    const text = readFileSync(join(ROOT, 'agentic-ai', l.file), 'utf8');
-    for (const m of text.match(MODEL) || []) { const id = m.replace(/[.:-]+$/, '').toLowerCase(); (found[id] ||= new Set()).add('agentic-ai/' + l.file); }
+  const found = {};
+  for (const t of loadTracks(ROOT)) for (const l of t.T.topics.flatMap(w => w.items).filter(x => x.file)) {
+    const text = readFileSync(join(ROOT, t.dir, l.file), 'utf8');
+    for (const m of text.match(MODEL) || []) { const id = m.replace(/[.:-]+$/, '').toLowerCase(); (found[id] ||= new Set()).add(t.dir + '/' + l.file); }
   }
   return Object.fromEntries(Object.entries(found).sort().map(([k, v]) => [k, [...v]]));
 }
