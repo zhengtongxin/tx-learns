@@ -49,8 +49,8 @@ def coder(self) -> Agent:
 <div class="try" id="p2"></div>
 
 <h2><span class="en">Step 3 · Split the work into four roles</span><span class="zh">第 3 步 · 把工作分给四个角色</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px"><code>agents.yaml</code> now has four entries. Only the <b>lead</b> gets the stronger, pricier model, because a good design pays off all the way down the chain. The others use the cheaper one.</p><p class="en"style="margin:0"><code>tasks.yaml</code> chains the roles with <code>context</code> from the last lesson, so each role sees only the earlier work it needs. The design feeds the code. The code feeds both the screen and the tests.</p>
-<p class="zh"style="margin:0 0 8px"><code>agents.yaml</code> 现在有四项。只有<b>负责人</b>用更强也更贵的模型，因为好的设计会在整条链上带来回报，其余角色用便宜的模型。</p><p class="zh"style="margin:0"><code>tasks.yaml</code> 用上一课的 <code>context</code> 把角色串起来，每个角色只看到它需要的前面成果。设计供代码使用，代码同时供界面和测试使用。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px"><code>agents.yaml</code> now has four entries. Only the <b>lead</b> gets the stronger, pricier model, because a good design pays off all the way down the chain. The others use the cheaper one.</p><p class="en"style="margin:0"><code>tasks.yaml</code> chains the roles with <code>context</code> from the last lesson, so each role sees only the earlier work it needs. The design feeds the code. The code feeds both the screen and the tests. (Gradio, in the screen task, is a Python library that turns a few lines into a simple web page.)</p>
+<p class="zh"style="margin:0 0 8px"><code>agents.yaml</code> 现在有四项。只有<b>负责人</b>用更强也更贵的模型，因为好的设计会在整条链上带来回报，其余角色用便宜的模型。</p><p class="zh"style="margin:0"><code>tasks.yaml</code> 用上一课的 <code>context</code> 把角色串起来，每个角色只看到它需要的前面成果。设计供代码使用，代码同时供界面和测试使用。（界面任务里的 Gradio 是一个 Python 库，几行代码就能做出简单的网页。）</p></div>
 <div class="codebox"><span class="dim"># config/agents.yaml
 lead:
   role: Engineering lead for a {module_name} module
@@ -97,8 +97,8 @@ test_task:
 <div class="sc" id="g1"></div>
 
 <h2><span class="en">Step 4 · One kickoff, a working app</span><span class="zh">第 4 步 · 一次启动，得到一个能用的应用</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">The requirements go in as one block of plain text, with the module name next to it. The test prices are fixed (<code>teh_tarik</code>, <code>kopi_o</code>, <code>roti_canai</code>) so the tester has something to check against.</p><p class="en"style="margin:0">After a run the sandbox holds the design, the module, the screen, the tests and the test report. Run <code>uv run app.py</code> inside the sandbox for a working little screen. That is the payoff: four roles, one kickoff.</p>
-<p class="zh"style="margin:0 0 8px">需求作为一整段普通文字传入，旁边再放模块名。测试价格是固定的（<code>teh_tarik</code>、<code>kopi_o</code>、<code>roti_canai</code>），这样测试员才有依据去检查。</p><p class="zh"style="margin:0">运行结束后，沙盒里有设计、模块、界面、测试和测试报告。在沙盒里运行 <code>uv run app.py</code>，就能得到一个能用的小界面。这就是回报：四个角色，一次启动。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">The requirements go in as one block of plain text, with the module name next to it. The test prices are fixed (<code>teh_tarik</code>, <code>kopi_o</code>, <code>roti_canai</code>) so the tester has something to check against. <code>get_price(item)</code> is just a small price lookup that the backend dev is asked to write into the module.</p><p class="en"style="margin:0">After a run the sandbox holds the design, the module, the screen, the tests and the test report. Run <code>uv run app.py</code> inside the sandbox for a working little screen. That is the payoff: four roles, one kickoff.</p>
+<p class="zh"style="margin:0 0 8px">需求作为一整段普通文字传入，旁边再放模块名。测试价格是固定的（<code>teh_tarik</code>、<code>kopi_o</code>、<code>roti_canai</code>），这样测试员才有依据去检查。<code>get_price(item)</code> 只是一个简单的查价函数，需求要求后端开发把它写进模块里。</p><p class="zh"style="margin:0">运行结束后，沙盒里有设计、模块、界面、测试和测试报告。在沙盒里运行 <code>uv run app.py</code>，就能得到一个能用的小界面。这就是回报：四个角色，一次启动。</p></div>
 <div class="codebox"><span class="dim"># main.py
 REQS = """
 A tab system for regular customers at a drinks stall.
@@ -116,8 +116,8 @@ def run():
 <div class="try" id="p4"></div>
 
 <h2><span class="en">Step 5 · Give two roles live docs through MCP</span><span class="zh">第 5 步 · 通过 MCP 给两个角色实时文档</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">A model learnt a library at some point in the past, so the frontend dev may write screen code for an old version of Gradio. <b>MCP</b> is a standard plug for outside tools (it gets its own topic later). In recent CrewAI versions, you hand an agent a list of MCP server addresses with <code>mcps=</code>. This one serves up-to-date library docs.</p><p class="en"style="margin:0">Give it only to the roles that need it: the lead and the frontend dev. The backend dev writes plain Python and does not.</p>
-<p class="zh"style="margin:0 0 8px">模型是在过去某个时间学到一个库的，所以前端开发可能会按旧版 Gradio 写界面代码。<b>MCP</b> 是连接外部工具的标准插头（后面有专门的主题）。在较新的 CrewAI 版本里，你用 <code>mcps=</code> 给智能体一份 MCP 服务地址列表。这个服务提供最新的库文档。</p><p class="zh"style="margin:0">只给需要的角色：负责人和前端开发。后端开发写的是普通 Python，不需要。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">A model learnt a library at some point in the past, so the frontend dev may write screen code for an old version of Gradio. <b>MCP</b> is a standard plug for outside tools (it gets its own topic later). In recent CrewAI versions, you hand an agent a list of MCP server addresses with <code>mcps=</code>. This one serves up-to-date library docs.</p><p class="en"style="margin:0">Give it only to the roles that need it, such as the frontend dev below (the lead can get it the same way). The backend dev writes plain Python and does not.</p>
+<p class="zh"style="margin:0 0 8px">模型是在过去某个时间学到一个库的，所以前端开发可能会按旧版 Gradio 写界面代码。<b>MCP</b> 是连接外部工具的标准插头（后面有专门的主题）。在较新的 CrewAI 版本里，你用 <code>mcps=</code> 给智能体一份 MCP 服务地址列表。这个服务提供最新的库文档。</p><p class="zh"style="margin:0">只给需要的角色，比如下面的前端开发（负责人也可以用同样的方式拿到）。后端开发写的是普通 Python，不需要。</p></div>
 <div class="codebox"><span class="dim">@agent
 def frontend_dev(self) -> Agent:
     return Agent(
