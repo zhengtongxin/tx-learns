@@ -58,7 +58,7 @@
     /* stage progress ring */
     var rb=document.querySelector('.ringbox');
     if(C&&rb){var n=count(C.id),R=36,L=2*Math.PI*R,p=n/C.total;
-      rb.innerHTML='<div class="bigring"><svg width="84" height="84" viewBox="0 0 84 84"><defs><linearGradient id="rg"><stop offset="0" stop-color="#4c7dff"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><circle class="bg" cx="42" cy="42" r="'+R+'"/><circle class="fg" cx="42" cy="42" r="'+R+'" stroke-dasharray="'+L+'" stroke-dashoffset="'+L+'"/></svg><b>'+Math.round(p*100)+'%</b></div><div style="text-align:left"><div style="font-weight:700">'+t({en:n+' of '+C.total+' lessons completed',zh:'已完成 '+n+' / '+C.total+' 课'})+'</div><div class="meta">'+t({en:C.lessons.length+' available now',zh:'当前已发布 '+C.lessons.length+' 课'})+'</div></div>';
+      rb.innerHTML='<div class="bigring"><svg width="84" height="84" viewBox="0 0 84 84"><defs><linearGradient id="rg"><stop offset="0" stop-color="#ffb703"/><stop offset="1" stop-color="#ffe066"/></linearGradient></defs><circle class="bg" cx="42" cy="42" r="'+R+'"/><circle class="fg" cx="42" cy="42" r="'+R+'" stroke-dasharray="'+L+'" stroke-dashoffset="'+L+'"/></svg><b>'+Math.round(p*100)+'%</b></div><div style="text-align:left"><div style="font-weight:700">'+t({en:n+' of '+C.total+' lessons completed',zh:'已完成 '+n+' / '+C.total+' 课'})+'</div><div class="meta">'+t({en:C.lessons.length+' available now',zh:'当前已发布 '+C.lessons.length+' 课'})+'</div></div>';
       setTimeout(function(){rb.querySelector('.fg').style.strokeDashoffset=L*(1-p)},200)}
     var tm=document.querySelector('.track-meta');
     if(C&&tm)tm.innerHTML=t({en:C.topics.length+' topics · '+C.total+' lessons',zh:C.topics.length+' 个主题 · '+C.total+' 课'});

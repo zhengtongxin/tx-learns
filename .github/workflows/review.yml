@@ -138,7 +138,7 @@ jobs:
              name the file and step instead.
           Do not run git.
           PROMPT
-          claude --model sonnet -p "$(cat /tmp/review-prompt.md)" --max-turns 40 \
+          claude --model sonnet --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/review-prompt.md)" --max-turns 40 \
             --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(node scripts/check-counts.mjs:*),Bash(node scripts/check-pages.mjs:*)" \
             --output-format text | tail -30
       - name: Package the result for the share job

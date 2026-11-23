@@ -23,6 +23,14 @@ Assume they are smart, busy and have never seen this topic. If a sentence needs 
 5. **Now make it yours** (`.cl` checklist). Two or three things to try on their own.
 6. **Takeaways** (`.card`). Five to seven bullets, one idea each.
 
+## The kopitiam thread
+
+Kopi Corner, Uncle Lim's kopitiam in Penang, is the recurring setting. Every lesson ends with one short "Back at the kopitiam" callout (`.callout tip`, EN and 中文) that ties its idea to the shop, just before the takeaways. Keep the cast and props the same:
+
+- People: Uncle Lim (towkay), Auntie Suria (counter, remembers regulars), Aina (his niece, the builder), Ah Seng (drinks), Kak Ros (noodles), Uncle Rahim (mamak credit notebook).
+- Props: the order pad (shared state), the chalkboard menu (tool list), the "ting!" bell (handoff), the QR sign (cashless payment), kopi, teh, kaya toast.
+- A lesson's own story can use another setting. The callout is the bridge back.
+
 ## Writing rules
 
 - Short sentences, one idea each. Paragraphs of three sentences or fewer.
