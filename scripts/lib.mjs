@@ -30,7 +30,9 @@ export async function gh(method, path, body, { raw = false, ok404 = false } = {}
 
 export async function telegram(text, { html = false } = {}) {
   const token = process.env.TELEGRAM_BOT_TOKEN, chat = process.env.TELEGRAM_CHAT_ID;
-  text = String(text || '').trim().slice(0, 3900);
+  text = String(text || '').trim();
+  // Telegram's limit is 4096. Cut at a line break, so an HTML message is never cut inside a tag.
+  if (text.length > 3900) text = text.slice(0, text.lastIndexOf('\n', 3900) > 0 ? text.lastIndexOf('\n', 3900) : 3900) + '\n…';
   if (!text) return;
   if (process.env.DRY_RUN || !token || !chat) {
     console.log(`--- Telegram${token && chat ? ' (dry run)' : ' (not sent: no TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID)'} ---\n${text}\n---`);
