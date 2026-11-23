@@ -9,7 +9,7 @@
   function setLang(l){root.setAttribute('data-lang',l);root.lang=l==='zh'?'zh-Hans':'en'}setLang(L0);
   var calm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
   root.setAttribute('data-theme',get(TH,'dark'));
-  var f=document.createElement('link');f.rel='stylesheet';f.href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap';document.head.appendChild(f);
+  /* Fonts: the reader's own system fonts (CSS --sans), so nothing loads from a font host and Chinese uses a native font. */
 
   function burst(x,y){if(calm)return;var e=['✨','⭐','💠','🎉','💫'];for(var i=0;i<14;i++){var s=document.createElement('span');s.className='pc';s.textContent=e[i%e.length];
     s.style.left=x+'px';s.style.top=y+'px';s.style.setProperty('--dx',(Math.random()*260-130)+'px');s.style.setProperty('--dy',(Math.random()*-220-20)+'px');s.style.setProperty('--r',(Math.random()*360)+'deg');
