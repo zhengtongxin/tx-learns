@@ -10,7 +10,7 @@
 
 <h2><span class="en">Step 1 · A test set of questions with known answers</span><span class="zh">第 1 步 · 带标准答案的测试集</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">"Looks good in the chat" is a feeling, not evidence. You want a number that moves when you improve things. For that you need a test set: one JSON object per line, in a file (JSON is plain text that writes a record as named fields, like the lines below). Each has a question, a few keywords that must appear in the right chunks, a reference answer and a category: a direct fact, a relationship, a comparison, or a holistic question that spans many documents. A few dozen questions across the categories is enough to start.</p>
-<p class="zh" style="margin:0 0 8px">“聊天里看起来不错”只是感觉，不是证据。你需要一个会随改进而变化的数字。为此要有测试集：一个文件，每行一个 JSON 对象（JSON 是一种纯文本格式，用带名字的字段来写一条记录，就像下面的几行）。每条有问题、几个必须出现在正确块里的关键词、标准答案，以及类别：直接事实、关系、比较，或是跨很多文档的整体性问题。每个类别有几十道题，就足够起步了。</p></div>
+<p class="zh" style="margin:0 0 8px">“聊天里看起来不错”只是感觉，不是证据。你需要一个会随改进而变化的数字。为此要有测试集：一个文件，每行一个 JSON 对象（JSON 是一种纯文本格式，用带名字的字段来写一条记录，就像下面的几行）。每条有问题、几个必须出现在正确块里的关键词、标准答案，以及类别：直接事实、关系、比较，或是跨很多文档的整体性问题。各类别加起来有几十道题，就足够起步了。</p></div>
 <div class="codebox"><span class="dim"># tests.jsonl  (one question per line, made-up examples)
 </span><span class="chg">{"question": "Who is in charge of lift repairs?", "keywords": ["lift", "Hafiz"], "reference": "Hafiz Rahman handles lift repairs.", "category": "direct"}
 {"question": "Which officer reports to the estate manager?", "keywords": ["estate manager", "reports"], "reference": "The lift officer reports to her.", "category": "relationship"}
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded',function(){
  game($('g3'),[
   {en:'The page about lift repairs never shows up in the top 10.',zh:'电梯维修那一页从没出现在前 10 名里。',a:'r',ex:{en:'Missing chunks lower MRR and coverage.',zh:'缺少块会拉低 MRR 和覆盖率。'},hint:{en:'Is the problem in the search or the writing?',zh:'问题出在搜索还是写作？'}},
   {en:'The right chunk came back, but the reply names the wrong officer.',zh:'对的块回来了，回答却点错了职员的名字。',a:'a',ex:{en:'The search was fine. The judge sees the wrong answer.',zh:'搜索没问题。裁判会发现回答是错的。'},hint:{en:'Is the problem in the search or the writing?',zh:'问题出在搜索还是写作？'}},
-  {en:'The right chunk sits at rank 9 instead of rank 1.',zh:'对的块排在第 9 名，而不是第 1 名。',a:'r',ex:{en:'Rank is exactly what MRR and nDCG measure.',zh:'名次正是 MRR 和 nDCG 衡量的东西。'},hint:{en:'Which score looks at ranks?',zh:'哪种分数看名次？'}}],[{k:'r',en:'Retrieval score',zh:'检索分数'},{k:'a',en:'Answer score',zh:'回答分数'}],{en:'Item',zh:'项目'});
+  {en:'The right chunk sits at rank 9 instead of rank 1.',zh:'对的块排在第 9 名，而不是第 1 名。',a:'r',ex:{en:'Rank is exactly what MRR measures.',zh:'名次正是 MRR 衡量的东西。'},hint:{en:'Which score looks at ranks?',zh:'哪种分数看名次？'}}],[{k:'r',en:'Retrieval score',zh:'检索分数'},{k:'a',en:'Answer score',zh:'回答分数'}],{en:'Item',zh:'项目'});
  predict($('p4'),{q:{en:'You raise k from 5 to 10 and also switch the embedding model. Scores go up. What do you know?',zh:'你把 k 从 5 提高到 10，同时换了向量模型。分数上升了。你能确定什么？'},opts:[{k:'a',en:'Only that something helped; you cannot tell which change',zh:'只知道有东西起了作用，分不清是哪个改动'},{k:'b',en:'That the new embedding model is better',zh:'新的向量模型更好'}],a:'a',ex:{en:'Two changes at once blur the cause. Change one thing per run.',zh:'同时改两样，原因就糊了。每次只改一样。'},hint:{en:'Which of the two changes caused the rise?',zh:'这两个改动里，是哪个让分数上升的？'}});
 });
 </script></body></html>
