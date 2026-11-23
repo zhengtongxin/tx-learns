@@ -1,0 +1,162 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Roles, tasks and crews | TX Learns</title>
+<meta name="description" content="Split one job between workers who each have a role, with CrewAI."><meta property="og:title" content="Roles, tasks and crews | TX Learns"><meta property="og:description" content="Split one job between workers who each have a role, with CrewAI."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/agentic-ai/12-roles-tasks-crews.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#0b1020">
+<meta name="updated" content="2026-11-23">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Multi-agent teams · Lesson 1</span><span class="zh">多智能体团队 · 第 1 课</span></span><h1><span class="en">Roles, tasks and crews</span><span class="zh">角色、任务与团队</span></h1><p class="meta"><span class="en">Split one job between workers who each have a role, with CrewAI · ~25 min · hands-on</span><span class="zh">用 CrewAI 把一件事分给各有角色的工人 · 约 25 分钟 · 动手实践</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en"style="margin:0">Wira runs a small stall at a night market and keeps wondering: should <b>durian cendol</b> go on the menu? Friends argue both ways, and Wira never hears the arguments side by side. So Wira builds a tiny crew: one worker argues for, the same worker argues against, and a picky regular customer reads both and picks the winner. Along the way you learn the three words that run through every multi-agent team: <b>agent</b>, <b>task</b> and <b>crew</b>.</p>
+<p class="zh"style="margin:0">Wira 在夜市开了一个小摊，总在想：菜单上该不该加<b>榴莲 cendol</b>？朋友们各说各的，Wira 从没把两边的理由放在一起听过。于是 Wira 搭了一个小团队：一个工人陈述赞成的理由，同一个工人再陈述反对的理由，最后由一位挑剔的熟客读完两份，选出赢家。过程中你会学到每个多智能体团队都离不开的三个词：<b>智能体</b>、<b>任务</b>和<b>团队</b>。</p></div>
+
+<h2><span class="en">Step 1 · Start a crew from the scaffold</span><span class="zh">第 1 步 · 用脚手架创建一个团队</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Before any code, a picture. Think of a kopitiam at 7am. Ah Seng only makes drinks. Kak Ros only cooks noodles. The towkay (the boss) cooks nothing: he takes orders and decides who does what. Nobody's job overlaps, and everyone knows what “done” looks like.</p><p class="en"style="margin:0">CrewAI is a Python library built on exactly this picture. An <b>agent</b> is a worker with a role, a goal and a backstory. A <b>task</b> is one order slip. A <b>crew</b> is the shop: the workers plus the slips. The command <code>crewai create crew</code> builds the shop for you. Pin the version, because the library changes fast and a newer one can break the generated project.</p>
+<p class="zh"style="margin:0 0 8px">先看一幅画面。想象早上 7 点的 kopitiam（街坊咖啡店）。Ah Seng 只做饮料，Kak Ros 只煮面。towkay（老板）什么都不煮：他接单，并决定谁做什么。每个人的工作互不重叠，也都知道“做完”是什么样子。</p><p class="zh"style="margin:0">CrewAI 是一个完全按这幅画面设计的 Python 库。<b>智能体</b>是有角色、目标和背景故事的工人。<b>任务</b>是一张订单。<b>团队（crew）</b>就是整间店：工人加订单。命令 <code>crewai create crew</code> 会替你搭好这间店。要锁定版本，因为这个库更新很快，新版本可能弄坏生成的项目。</p></div>
+<div class="codebox"><span class="dim"># pin the version, then check it
+uv tool install crewai==1.14.4
+uv tool list
+
+# build a project called menu_argument, then run it
+</span><span class="chg">crewai create crew menu_argument
+cd menu_argument
+crewai run</span><span class="dim">
+
+# what you get (the parts we touch):
+#   src/menu_argument/config/agents.yaml   who the workers are
+#   src/menu_argument/config/tasks.yaml    the order slips
+#   src/menu_argument/crew.py              wires them into a crew
+#   src/menu_argument/main.py              the start button</span></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Describe the workers in agents.yaml</span><span class="zh">第 2 步 · 在 agents.yaml 里描述工人</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Our practice crew settles an argument for Wira, who wonders if durian cendol belongs on the menu. One agent argues the case, and a picky regular customer decides who argued better.</p><p class="en"style="margin:0">Each worker gets a <b>role</b> (the job title), a <b>goal</b> (what it is trying to do) and a <b>backstory</b> (a line of character). Anything in <code>{curly braces}</code> is a blank that gets filled in when you start the crew. The <code>llm</code> line picks a model per agent, written as <code>provider/model</code>. The prompts live in YAML, so you can reword them without touching Python.</p>
+<p class="zh"style="margin:0 0 8px">我们的练习团队要替 Wira 解决一个争论：菜单上要不要加榴莲 cendol（一种冰甜品）。一个智能体负责陈述理由，一位挑剔的熟客来判断谁说得更好。</p><p class="zh"style="margin:0">每个工人有<b>角色</b>（职位名称）、<b>目标</b>（它要做什么）和<b>背景故事</b>（一句人物设定）。<code>{花括号}</code> 里的内容是空格，启动团队时才填入。<code>llm</code> 这一行给每个智能体选模型，写成 <code>提供商/模型</code>。提示词放在 YAML 里，改措辞不用动 Python。</p></div>
+<div class="codebox"><span class="dim"># config/agents.yaml
+arguer:
+  role: >
+    Stall owner who loves a good pitch
+  goal: >
+    Make one short, convincing case about this menu idea: {idea}
+  backstory: >
+    You have sold food at night markets for years and know what people pay for.
+  </span><span class="chg">llm: openai/gpt-4o-mini</span><span class="dim">
+
+regular:
+  role: >
+    Picky regular customer
+  goal: >
+    Read both cases about {idea} and pick the stronger one. Judge only the arguments.
+  backstory: >
+    You eat here every morning and you are hard to impress.
+  llm: openai/gpt-4o-mini</span></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Write the order slips in tasks.yaml</span><span class="zh">第 3 步 · 在 tasks.yaml 里写订单</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">A task says <i>what</i> to do and <i>what done looks like</i>. The <code>description</code> is the order. The <code>expected_output</code> is the finish line, like “one teh tarik, less sweet, in a glass”. The <code>agent</code> line says who takes the slip.</p><p class="en"style="margin:0">One worker can take many slips. Here <code>arguer</code> takes two: the case for and the case against. <code>output_file</code> saves each result to disk.</p>
+<p class="zh"style="margin:0 0 8px">任务说明<i>做什么</i>和<i>做成什么样才算完成</i>。<code>description</code> 是订单内容，<code>expected_output</code> 是终点线，就像“一杯少甜的拉茶，装在玻璃杯里”。<code>agent</code> 这一行说明谁来接这张单。</p><p class="zh"style="margin:0">一个工人可以接多张单。这里 <code>arguer</code> 接了两张：赞成的理由和反对的理由。<code>output_file</code> 把每个结果存到磁盘。</p></div>
+<div class="codebox"><span class="dim"># config/tasks.yaml
+argue_for:
+  description: >
+    Argue in favour of: {idea}. Keep it tight.
+  expected_output: >
+    A short, punchy argument for the idea.
+  </span><span class="chg">agent: arguer</span><span class="dim">
+  output_file: output/for.md
+
+argue_against:
+  description: >
+    Argue against: {idea}.
+  expected_output: >
+    A short, punchy argument against the idea.
+  </span><span class="chg">agent: arguer</span><span class="dim">
+  output_file: output/against.md
+
+verdict:
+  description: >
+    Read both arguments, decide which side wins and say why.
+  expected_output: >
+    The winning side plus two or three reasons.
+  </span><span class="chg">agent: regular</span><span class="dim">
+  output_file: output/verdict.md</span></div>
+<div class="try" id="p3"></div>
+
+<h2><span class="en">Step 4 · Wire it up in crew.py and start it</span><span class="zh">第 4 步 · 在 crew.py 里接线并启动</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px"><code>crew.py</code> turns the YAML into real objects. The <code>@agent</code> and <code>@task</code> decorators collect every method they mark into <code>self.agents</code> and <code>self.tasks</code>, <b>in the order the methods are written</b>. In a <b>sequential</b> crew, that order is the running order, and each task automatically sees the results of the tasks before it. That is how <code>verdict</code> can read both arguments without you passing anything by hand.</p><p class="en"style="margin:0"><code>kickoff(inputs=...)</code> is the start button. Its dictionary fills the <code>{curly}</code> blanks, so every blank in both YAML files needs a key.</p>
+<p class="zh"style="margin:0 0 8px"><code>crew.py</code> 把 YAML 变成真正的对象。<code>@agent</code> 和 <code>@task</code> 这两个装饰器会把它们标记的方法收集进 <code>self.agents</code> 和 <code>self.tasks</code>，<b>顺序就是方法的书写顺序</b>。在<b>顺序式（sequential）</b>团队里，这个顺序就是执行顺序，而且每个任务会自动看到前面任务的结果。所以 <code>verdict</code> 不用你手动传递，就能读到两份论点。</p><p class="zh"style="margin:0"><code>kickoff(inputs=...)</code> 是启动键。它的字典用来填 <code>{花括号}</code> 里的空格，所以两个 YAML 文件里的每个空格都要有对应的键。</p></div>
+<div class="codebox"><span class="dim"># crew.py
+from crewai import Agent, Crew, Process, Task
+from crewai.project import CrewBase, agent, crew, task
+
+@CrewBase
+class MenuArgument():
+    @agent
+    def arguer(self) -> Agent:
+        return Agent(config=self.agents_config["arguer"], verbose=True)
+
+    @agent
+    def regular(self) -> Agent:
+        return Agent(config=self.agents_config["regular"], verbose=True)
+
+    @task                                   # the order here is the running order
+    def argue_for(self) -> Task:
+        return Task(config=self.tasks_config["argue_for"])
+
+    @task
+    def argue_against(self) -> Task:
+        return Task(config=self.tasks_config["argue_against"])
+
+    @task
+    def verdict(self) -> Task:
+        return Task(config=self.tasks_config["verdict"])
+
+    @crew
+    def crew(self) -> Crew:
+        return Crew(agents=self.agents, tasks=self.tasks,
+                    </span><span class="chg">process=Process.sequential,</span><span class="dim">   # slips handled top to bottom
+                    verbose=True)
+
+# main.py
+def run():
+    idea = input("Menu idea to argue about: ")
+    result = MenuArgument().crew().</span><span class="chg">kickoff(inputs={"idea": idea})</span><span class="dim">
+    print(result.raw)</span></div>
+<div class="try" id="p4"></div>
+<p class="en">Sort each piece into the part of the shop it belongs to.</p><p class="zh">把每一项归到它所属的部分。</p>
+<div class="sc" id="g1"></div>
+
+<h2><span class="en">Step 5 · Sequential or hierarchical?</span><span class="zh">第 5 步 · 顺序式还是层级式？</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px"><b>Sequential</b> is the default: the slips run in the listed order and each result flows forward. It is predictable and cheap.</p><p class="en"style="margin:0 0 8px"><b>Hierarchical</b> adds a manager, like the towkay. The manager decides which worker takes which task and can send work back. It is more flexible, but it uses more tokens and is less predictable. Pick it only when the order truly cannot be fixed in advance.</p><p class="en"style="margin:0">One more trick: placeholders also work inside a role. A second practice crew had a researcher whose role was “{topic} Senior Researcher”, so the same YAML works for any topic you pass in.</p>
+<p class="zh"style="margin:0 0 8px"><b>顺序式</b>是默认做法：订单按列出的顺序执行，每个结果往下传。结果可预期，也便宜。</p><p class="zh"style="margin:0 0 8px"><b>层级式</b>加了一位主管，就像 towkay。主管决定哪个工人接哪个任务，还能把活打回去重做。它更灵活，但更耗 token，也更难预料。只有当顺序真的没法事先定好时才选它。</p><p class="zh"style="margin:0">还有一个小技巧：占位符也能放进角色里。我的第二个练习团队里，研究员的角色写成“{topic} 高级研究员”，同一份 YAML 就能用于你传入的任何主题。</p></div>
+<div class="codebox"><span class="dim">Crew(
+    agents=self.agents,
+    tasks=self.tasks,
+    </span><span class="chg">process=Process.hierarchical,
+    manager_llm="openai/gpt-4o",</span><span class="dim">    # a manager model hands out the slips
+)</span></div>
+<div class="try" id="p5"></div>
+
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en"><b>Task order is method order.</b> I once wrote the <code>verdict</code> method first, and the regular “judged” before any argument existed. <b>Placeholders need keys.</b> My YAML used <code>{idea}</code> but I started the crew with <code>{"topic": ...}</code>, and it failed the moment the blanks were filled in. <b>I forgot to pin the version.</b> A newer CrewAI broke the generated project, so now I run <code>uv tool list</code> first and <code>uv tool uninstall crewai</code> if an old one is hanging around.</span><span class="zh"><b>任务顺序就是方法顺序。</b>我曾把 <code>verdict</code> 方法写在最前面，结果熟客在任何论点出现之前就“裁决”了。<b>占位符需要对应的键。</b>我的 YAML 用的是 <code>{idea}</code>，启动团队时却传了 <code>{"topic": ...}</code>，一填空格就报错。<b>我忘了锁定版本。</b>新版 CrewAI 弄坏了生成的项目，所以现在我先运行 <code>uv tool list</code>，如果还留着旧版本，就用 <code>uv tool uninstall crewai</code> 清掉。</span></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Argue your own question.</b> Change the idea to something you really wonder about and read the three files in <code>output/</code>.</span><span class="zh"><b>争论你自己的问题。</b>把想法换成你真正在犹豫的事，读一读 <code>output/</code> 里的三个文件。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Swap the process</b> to hierarchical and compare how long it takes and how many tokens it uses.</span><span class="zh"><b>把流程换成层级式</b>，比较耗时和 token 用量。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Give the two agents different models</b> in <code>agents.yaml</code> and see if the verdict changes.</span><span class="zh"><b>在 <code>agents.yaml</code> 里给两个智能体换不同的模型</b>，看裁决会不会变。</span></span></label></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• An <b>agent</b> is a worker with a role, a goal and a backstory.<br>• A <b>task</b> is one order slip: a description and an expected output.<br>• A <b>crew</b> holds the workers and the slips and runs them.<br>• Prompts live in YAML and wiring lives in Python, so you can reword without touching code.<br>• In a sequential crew, method order is running order, and each task sees what came before.<br>• Hierarchical adds a manager: more flexible, but costlier and less predictable.<br>• Pin the version and match every <code>{blank}</code> with an input key.</p><p class="zh" style="margin:0">• <b>智能体</b>是有角色、目标和背景故事的工人。<br>• <b>任务</b>是一张订单：一段描述加一个预期输出。<br>• <b>团队</b>装着工人和订单，并负责执行。<br>• 提示词放 YAML，接线放 Python，改措辞不用动代码。<br>• 顺序式团队里，方法顺序就是执行顺序，每个任务都能看到前面的结果。<br>• 层级式加了一位主管：更灵活，但更贵，也更难预料。<br>• 锁定版本，并让每个 <code>{空格}</code> 都有对应的输入键。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Agentic AI</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var $=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('p1'),{q:{en:'You install the newest CrewAI instead of the pinned version, then run the generated project. What is the risk?',zh:'你装了最新版 CrewAI，而不是锁定的版本，然后运行生成的项目。风险是什么？'},opts:[{k:'a',en:'Imports or generated files may no longer match, and it breaks',zh:'导入或生成的文件可能对不上，项目跑不起来'},{k:'b',en:'Nothing, libraries never change',zh:'没事，库从不变'},{k:'c',en:'It only gets slower',zh:'只会变慢'}],a:'a',ex:{en:'This library makes breaking changes, so a pinned version keeps the notes and the code in step.',zh:'这个库会做不兼容的改动，锁定版本才能让笔记和代码保持一致。'},hint:{en:'How fast does this library change?',zh:'这个库更新得有多快？'}});
+ predict($('p2'),{q:{en:'Which line decides what the picky customer is trying to do?',zh:'哪一行决定挑剔熟客要做什么？'},opts:[{k:'a',en:'role',zh:'role'},{k:'b',en:'goal',zh:'goal'},{k:'c',en:'llm',zh:'llm'}],a:'b',ex:{en:'The role is the title, the goal is what it is trying to do, and llm only picks the model.',zh:'role 是职位，goal 才是它要做的事，llm 只是选模型。'},hint:{en:'Which word means “what it is trying to do”?',zh:'哪个词的意思是“它要做什么”？'}});
+ predict($('p3'),{q:{en:'Two tasks use the same agent, <code>arguer</code>. Is that allowed?',zh:'两个任务用同一个智能体 <code>arguer</code>。这样可以吗？'},opts:[{k:'a',en:'Yes, one worker can take many slips',zh:'可以，一个工人能接多张单'},{k:'b',en:'No, each agent can have only one task',zh:'不行，每个智能体只能有一个任务'}],a:'a',ex:{en:'The task points at an agent by name. Nothing stops two slips pointing at the same worker.',zh:'任务按名字指向智能体，没有规定两张单不能指向同一个工人。'},hint:{en:'Think of Ah Seng taking two drink orders.',zh:'想想 Ah Seng 接了两张饮料单。'}});
+ predict($('p4'),{q:{en:'In <code>crew.py</code> you accidentally write the <code>verdict</code> method above the two <code>argue</code> methods. What happens in a sequential crew?',zh:'在 <code>crew.py</code> 里你不小心把 <code>verdict</code> 方法写在了两个 <code>argue</code> 方法上面。顺序式团队会怎样？'},opts:[{k:'a',en:'The customer judges before any argument exists',zh:'熟客在任何论点出现之前就先裁决了'},{k:'b',en:'CrewAI re-sorts them for you',zh:'CrewAI 会替你重新排序'},{k:'c',en:'Nothing, order is ignored',zh:'没事，顺序会被忽略'}],a:'a',ex:{en:'In a sequential crew the order of the methods is the order the tasks run.',zh:'在顺序式团队里，方法的顺序就是任务执行的顺序。'},hint:{en:'What decides the running order?',zh:'什么决定了执行顺序？'}});
+ predict($('p5'),{q:{en:'The steps never change: argue for, argue against, verdict. Which process fits?',zh:'步骤从不改变：赞成、反对、裁决。哪种流程合适？'},opts:[{k:'a',en:'Sequential',zh:'顺序式'},{k:'b',en:'Hierarchical',zh:'层级式'}],a:'a',ex:{en:'A fixed recipe does not need a manager. Sequential is cheaper and more predictable.',zh:'流程固定就不需要主管。顺序式更便宜，也更可预期。'},hint:{en:'Do you need someone to decide the order?',zh:'需要有人来决定顺序吗？'}});
+ game($('g1'),[
+  {en:'The picky customer, with a role and a goal',zh:'挑剔的熟客，有角色和目标',a:'a',ex:{en:'A worker with a role, goal and backstory is an agent.',zh:'有角色、目标和背景故事的工人就是智能体。'},hint:{en:'Is it a person or a slip?',zh:'是一个人，还是一张单？'}},
+  {en:'“Argue against durian cendol”, with an expected output',zh:'“反对榴莲 cendol”，带预期输出',a:'t',ex:{en:'A description plus an expected output is one order slip, a task.',zh:'描述加预期输出就是一张订单，也就是任务。'},hint:{en:'It says what to do and what done looks like.',zh:'它说明了做什么，以及做成什么样。'}},
+  {en:'The shop that holds the workers and the slips and runs them',zh:'装着工人和订单并负责执行的那间店',a:'c',ex:{en:'The crew holds agents and tasks and runs them.',zh:'团队装着智能体和任务，并负责执行。'},hint:{en:'Which one holds the others?',zh:'哪一个包含其他的？'}},
+  {en:'A line saying who takes this slip',zh:'一行说明谁来接这张单',a:'t',ex:{en:'The agent line belongs to the task.',zh:'agent 这一行属于任务。'},hint:{en:'It sits inside the slip.',zh:'它写在订单里面。'}}],[{k:'a',en:'Agent',zh:'智能体'},{k:'t',en:'Task',zh:'任务'},{k:'c',en:'Crew',zh:'团队'}],{en:'Piece',zh:'部分'});
+});
+</script></body></html>
