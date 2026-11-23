@@ -12,14 +12,14 @@ Bilingual (EN/中文) interactive learning site. Static HTML/CSS/JS, no build st
 - `assets/site.css|js` shared layout, nav, progress; `assets/teach.css|js` lesson widgets (`TX2.game`, `TX2.predict`, ...).
 - `scripts/check-copy.mjs` + `banned-words.txt` the copyright scrubber.
 - `scripts/check-counts.mjs` the count check. `lessons.js` is the only source of truth for topic and lesson counts: pages compute them (`assets/site.js`), and the check fails on any count typed by hand, a lesson file missing from or doubled in `lessons.js`, or a tag that does not match its place.
-- `scripts/check-pages.mjs` the page check: every page has `<html lang>`, a title, a meta description and `og:` link-preview tags, alt text on images, headings that never skip a level, and as many `.en` as `.zh` (in markup and in `{en,zh}` script strings). It also keeps `sitemap.xml`, the no-JavaScript lesson list on the track page (between `<!-- lessons:start -->` markers) and the `data-start` links in step with `lessons.js`: `--fix` rewrites them, never by hand. Runs in the copy check.
+- `scripts/check-pages.mjs` the page check: every page has `<html lang>`, a title, a meta description and `og:` link-preview tags, alt text on images, headings that never skip a level, and as many `.en` as `.zh` (in markup and in `{en,zh}` script strings). It also keeps `sitemap.xml`, the no-JavaScript lesson list on the track page (between `<!-- lessons:start -->` markers) and the `data-start` links in step with `lessons.js`: `--fix` rewrites them, never by hand. Each lesson also carries `<meta name="updated">`, shown as "Updated ...": `--fix` sets it to today when the lesson's text changed since the last commit. Runs in the copy check.
 - `404.html` (uses `<base href="/">`), `robots.txt`, `favicon.ico`, `assets/icon.svg`, `assets/apple-touch-icon.png`, `assets/og.png` (link previews).
 - `scripts/record-status.mjs <agent>` records an agent's last run (`STATE=run` marks it working, `idle` clears that mark; each workflow's `working` job sets it, and cancelled runs record nothing) in `status/all.json` on the data-only `agent-status` branch (never deployed, never merged).
 - `scripts/ui-check.mjs` the UI check agent's browser test. Run `node scripts/ui-check.mjs --pages <page.html>` after changing anything people hover, click or open (needs Playwright).
 - `scripts/notify-telegram.mjs` sends TX a Telegram message (secrets `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`; without the chat id it only sends a one-time setup tip).
 - `scripts/digest.mjs` the daily Telegram digest (what went live, rollbacks, what waits for TX, agent runs). `DRY_RUN=1` prints instead of sending; `GITHUB_API` points it at a test server.
 - `scripts/live-check.mjs --base <url>` the live check agent's script: every live page, lesson, link and file, rendered in a browser, counts against `lessons.js`.
-- `scripts/recall.mjs plan|message` the recall agent: lessons due for spaced review (1, 3, 7, 14, 30... days after they went live) and the gaps.
+- `scripts/recall.mjs plan|message` the recall agent: lessons due for spaced review (1, 3, 7, 14, 30... days after they went live) and the gaps; `models` lists the AI model names lessons use, for the monthly outdated-model check.
 - `scripts/lib.mjs` shared helpers for the digest, live check and recall scripts (GitHub calls, Telegram, `lessons.js`, scrubbing).
 - `.github/rulesets/main.json` the branch rules for main (pull request only; `copy-check`, `UI check` and `Reviewer` must pass on the exact commit). Import it in Settings → Rules → Rulesets.
 
@@ -34,7 +34,7 @@ Bilingual (EN/中文) interactive learning site. Static HTML/CSS/JS, no build st
 | `ui-check.yml` | Every finished Vercel preview deploy, or manual | `scripts/ui-check.mjs` hovers, clicks and Tabs through every page in a headless browser (desktop + phone) and flags anything clickable that Tab cannot reach, overlapping, covered (opening behind other content) or see-through popups, content wider than the screen and script errors (locally it serves a full fake `api/status` so popups are full size); Claude looks at screenshots of changed pages. Sets a `UI check` status, one PR comment, Telegram only when something is flagged. The browser and Claude run in a read-only job; a separate share job with trusted scripts from main does the writing |
 | `live-check.yml` | Every push to main (each merge), or manual | Waits up to 15 minutes for Vercel's production deploy of that commit, then `scripts/live-check.mjs` on the live site. If the merge broke a site that was fine before (last live check passed, deploy succeeded), the rollback job opens a `Rollback:` PR that reverts it, sets its `Reviewer` status, merges it as soon as the checks allow (up to 20 minutes, else TX gets the link) and checks the site again. One Telegram message; a cancelled run sends nothing and records nothing. Manual runs never roll back |
 | `digest.yml` | Daily 8 PM Malaysia time (12:00 UTC), or manual | `scripts/digest.mjs`: the one daily Telegram digest |
-| `recall.yml` | Sundays 9 AM Malaysia time (01:00 UTC), or manual | Weekly Telegram: lessons due for spaced review with two questions each (Claude, read-only), and the gaps |
+| `recall.yml` | Sundays 9 AM Malaysia time (01:00 UTC), or manual | Weekly Telegram: lessons due for spaced review with two questions each (Claude, read-only), and the gaps. On the first Sunday of the month (or manual `models: true`) Claude also web-searches which model names in lessons are outdated |
 | `telegram-ping.yml` | Manual | Sends a test Telegram message |
 
 Telegram: one digest a day at 8 PM. Instant messages only for failures, a rollback, a lesson ready to approve, a ⚠️ review, and the weekly review.
@@ -57,5 +57,5 @@ Easiest: drop notes in `inbox/<concept>/` on the `notes` branch and let the writ
 
 1. Copy `agentic-ai/_template.html` to `agentic-ai/NN-slug.html` (next free number).
 2. Write it to `STYLE.md`, with the tag `<Topic> · Lesson N`.
-3. Add `file:'NN-slug.html'` to its item in `agentic-ai/lessons.js` (or add the item under the right topic), then run `node scripts/check-pages.mjs --fix`.
+3. Add `file:'NN-slug.html'` to its item in `agentic-ai/lessons.js` (or add the item under the right topic), then run `node scripts/check-pages.mjs --fix` (it also stamps the lesson's updated date).
 4. Fill in the `<title>`, description and `og:` tags, run `node scripts/check-copy.mjs`, `node scripts/check-counts.mjs` and `node scripts/check-pages.mjs`, then open the page in a browser and click every widget.

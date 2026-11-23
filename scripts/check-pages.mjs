@@ -4,8 +4,11 @@
 // headings that skip a level, or English text without its 中文 twin (and the other way round).
 // It also keeps the files that list lessons in step with lessons.js: sitemap.xml, the no-JavaScript lesson list on
 // the track page, and the "start here" links (data-start) that point at the first published lesson.
+// Each lesson carries <meta name="updated" content="YYYY-MM-DD">, shown on the page as "Updated ...". --fix sets it to
+// today (Malaysia time) when the lesson's text differs from the last commit, or to its last commit date when it is missing.
 // Usage: node scripts/check-pages.mjs [--fix] [page.html ...]   (no pages = every page; --fix rewrites those lists)
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { loadTrack } from './lib.mjs';
 
 const root = new URL('..', import.meta.url);
@@ -47,6 +50,23 @@ for (const p of pages) {
   if (sen !== szh) bad(p, `scripts have ${sen} English strings but ${szh} 中文 strings`);
 }
 
+// "Updated" dates on lessons.
+const isLesson = p => /^agentic-ai\/\d\d-[\w-]+\.html$/.test(p);
+const UPD = /<meta name="updated" content="([^"]*)">\n?/;
+const today = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
+const git = (...a) => { try { return execFileSync('git', a, { cwd: new URL('.', root), encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }); } catch { return null; } };
+for (const p of all.filter(isLesson)) {
+  const cur = readFileSync(new URL(p, root), 'utf8'), m = cur.match(UPD);
+  if (FIX) {
+    const head = git('show', `HEAD:${p}`);
+    const changed = head === null || head.replace(UPD, '') !== cur.replace(UPD, '');
+    const date = changed ? today : (m && m[1]) || (git('log', '-1', '--format=%cs', '--', p) || '').trim() || today;
+    const tag = `<meta name="updated" content="${date}">\n`;
+    const next = m ? cur.replace(UPD, tag) : cur.replace(/(<meta name="theme-color"[^>]*>)\n?/, `$1\n${tag}`);
+    if (next !== cur) writeFileSync(new URL(p, root), next);
+  } else if (!m || !/^\d{4}-\d\d-\d\d$/.test(m[1]) || m[1] > today) bad(p, 'no valid <meta name="updated" content="YYYY-MM-DD"> (run node scripts/check-pages.mjs --fix)');
+}
+
 // Lists that come from lessons.js. --fix rewrites them; otherwise a stale list fails the check.
 const SITE = 'https://tx-learns.vercel.app/';
 const T = loadTrack(readFileSync(new URL('agentic-ai/lessons.js', root), 'utf8'));
@@ -74,4 +94,4 @@ for (const f of ['index.html', 'agentic-ai/index.html']) {
 }
 
 if (problems.length) { console.log(`✗ Page check failed (${problems.length}):\n` + problems.map(x => '  - ' + x).join('\n')); process.exit(1); }
-console.log(`✓ Page check passed: ${pages.length} pages have lang, title, description, link previews, favicon, alt text, heading order and EN/中文 twins; sitemap, lesson list and start links match lessons.js.`);
+console.log(`✓ Page check passed: ${pages.length} pages have lang, title, description, link previews, favicon, alt text, heading order, EN/中文 twins and an updated date on each lesson; sitemap, lesson list and start links match lessons.js.`);

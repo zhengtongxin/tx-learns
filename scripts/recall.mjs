@@ -3,8 +3,10 @@
 //   Spaced recall: each lesson comes back 1, 3, 7, 14, 30, 60, 120, 240 and 365 days after it went live.
 //                  A lesson is due this week when one of those days fell in the last 7 days.
 //   Gap finder:    topics with planned lessons not written yet, and the next one to learn in each.
+//   Model check:   once a month (first Sunday), the AI model names used in lessons, so Claude can flag outdated ones.
 // Usage: node scripts/recall.mjs plan --out plan.json        (needs the repo with full git history)
-//        node scripts/recall.mjs message --plan plan.json [--questions questions.json]
+//        node scripts/recall.mjs models --out models.json    (model names and the lessons that use them)
+//        node scripts/recall.mjs message --plan plan.json [--questions questions.json] [--stale stale.json]
 //   plan picks the lessons; Claude (in the workflow, read-only) writes questions for them;
 //   message prints the Telegram text (HTML) to stdout.
 // Env: SITE (live URL for links), NOW (ISO date, for testing).
@@ -50,7 +52,18 @@ function plan() {
 
 function ago(d) { return d < 1 ? 'today' : d < 2 ? 'yesterday' : d < 14 ? `${d} days ago` : d < 60 ? `${Math.round(d / 7)} weeks ago` : `${Math.round(d / 30)} months ago`; }
 
-function message(P, Q) {
+// Model ids as lessons write them in code, e.g. gpt-5.4-mini, claude-sonnet-4-6, gemini-3.1-flash-lite, llama3.2.
+const MODEL = /\b(?:gpt-[0-9][\w.-]*|gpt-oss-[\w.-]+|o[1-9]-(?:mini|pro)|claude-[a-z]+-[\w.-]+|gemini-[0-9][\w.-]*|llama[0-9][\w.:-]*|deepseek-[\w.-]+|qwen[0-9][\w.:-]*|mistral-[\w.-]+|grok-[0-9][\w.-]*)\b/gi;
+function models() {
+  const T = loadTrack(readFileSync(join(ROOT, 'agentic-ai/lessons.js'), 'utf8')), found = {};
+  for (const l of T.topics.flatMap(w => w.items).filter(x => x.file)) {
+    const text = readFileSync(join(ROOT, 'agentic-ai', l.file), 'utf8');
+    for (const m of text.match(MODEL) || []) { const id = m.replace(/[.:-]+$/, '').toLowerCase(); (found[id] ||= new Set()).add('agentic-ai/' + l.file); }
+  }
+  return Object.fromEntries(Object.entries(found).sort().map(([k, v]) => [k, [...v]]));
+}
+
+function message(P, Q, S) {
   const qs = {};
   for (const l of (Q && Q.lessons) || []) if (l && l.file && Array.isArray(l.qs)) qs[l.file] = l.qs.slice(0, 2);
   const L = ['🧠 <b>Weekly review</b>', ''];
@@ -68,6 +81,12 @@ function message(P, Q) {
     for (const g of P.gaps.slice(0, 4)) L.push(`• ${e(g.topic.en)}: ${g.live} of ${g.total} written. Next: ${e(g.next.en)}`);
     L.push('');
   }
+  const stale = ((S && S.stale) || []).filter(x => x && x.model).slice(0, 8);
+  if (stale.length) {
+    L.push('🧪 <b>Model names to update</b> (monthly check)');
+    for (const x of stale) L.push(`• <code>${e(x.model)}</code>${x.use ? ` → <code>${e(x.use)}</code>` : ''}: ${e(x.why || '')} (${e((x.files || []).map(f => f.replace(/^.*\//, '')).join(', '))})`);
+    L.push('');
+  } else if (S) L.push('🧪 Monthly model check: every model name in the lessons is still current.', '');
   L.push('Tap a 💡 to see the answer.');
   return L.join('\n');
 }
@@ -77,8 +96,13 @@ if (mode === 'plan') {
   const P = plan();
   writeFileSync(arg('out', 'plan.json'), JSON.stringify(P, null, 1));
   console.log(`Due: ${P.due.map(l => l.file).join(', ') || 'none'}. Gaps: ${P.gaps.length} topics.`);
+} else if (mode === 'models') {
+  const M = models();
+  writeFileSync(arg('out', 'models.json'), JSON.stringify(M, null, 1));
+  console.log(`Models in lessons: ${Object.keys(M).join(', ') || 'none'}.`);
 } else if (mode === 'message') {
   const P = JSON.parse(readFileSync(arg('plan', 'plan.json'), 'utf8'));
   let Q = null; try { Q = JSON.parse(readFileSync(arg('questions', 'questions.json'), 'utf8')); } catch {}
-  process.stdout.write(message(P, Q) + '\n');
-} else { console.log('Usage: node scripts/recall.mjs plan|message'); process.exit(2); }
+  let S = null; try { S = JSON.parse(readFileSync(arg('stale', 'stale.json'), 'utf8')); } catch {}
+  process.stdout.write(message(P, Q, S) + '\n');
+} else { console.log('Usage: node scripts/recall.mjs plan|models|message'); process.exit(2); }
