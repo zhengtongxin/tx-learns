@@ -63,13 +63,21 @@ export function loadTracks(root) {
   return ctx.window.TRACKS.map(t => ({ id: t.id, dir: t.id, T: loadTrack(readFileSync(join(root, t.id, 'lessons.js'), 'utf8')) }));
 }
 
+// Banned terms: the generic rules in banned-words.txt (public) plus the source names, which live outside the repo:
+// optional: the BANNED_WORDS_EXTRA variable (one pattern per line) or an untracked banned-words.local.txt on a machine.
+export function bannedSources(root) {
+  const lines = [];
+  for (const f of ['banned-words.txt', 'banned-words.local.txt']) {
+    try { lines.push(...readFileSync(join(root, f), 'utf8').split('\n')); } catch {}
+  }
+  lines.push(...String(process.env.BANNED_WORDS_EXTRA || '').split('\n'));
+  return lines.map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+}
+
 let banned;
 export function scrub(text) {
   if (!banned) {
-    try {
-      banned = readFileSync(new URL('../banned-words.txt', import.meta.url), 'utf8').split('\n')
-        .map(l => l.trim()).filter(l => l && !l.startsWith('#')).map(l => new RegExp(l, 'giu'));
-    } catch { banned = []; }
+    try { banned = bannedSources(new URL('..', import.meta.url).pathname).map(l => new RegExp(l, 'giu')); } catch { banned = []; }
   }
   return banned.reduce((acc, re) => acc.replace(re, '[source]'), String(text || ''));
 }
