@@ -25,10 +25,10 @@ window.TRACK={id:'ai-fde',title:{en:'AI FDE',zh:'AI FDE'},topics:[
   {k:'c',file:'17-swarms-of-agents-in-parallel.html',title:{en:'Swarms of agents in parallel',zh:'多个智能体并行'}},
   {k:'p',file:'18-swarm-with-a-cap.html',title:{en:'Project: a swarm with a cap',zh:'项目：有上限的智能体群'}}]},
  {n:7,title:{en:'Improving and securing',zh:'改进与加固'},items:[
-  {k:'c',title:{en:'A judge with a reference answer',zh:'带参考答案的评委'}},
-  {k:'p',title:{en:'Project: an improver a human approves',zh:'项目：由人批准的改进者'}},
-  {k:'c',title:{en:'Hidden instructions and guardrails',zh:'藏起来的指令与护栏'}},
-  {k:'c',title:{en:'Gateway, keys and policy',zh:'网关、密钥与策略'}}]},
+  {k:'c',file:'19-a-judge-with-a-reference-answer.html',title:{en:'A judge with a reference answer',zh:'带参考答案的评委'}},
+  {k:'p',file:'20-improver-a-human-approves.html',title:{en:'Project: an improver a human approves',zh:'项目：由人批准的改进者'}},
+  {k:'c',file:'21-hidden-instructions-and-guardrails.html',title:{en:'Hidden instructions and guardrails',zh:'藏起来的指令与护栏'}},
+  {k:'c',file:'22-gateway-keys-and-policy.html',title:{en:'Gateway, keys and policy',zh:'网关、密钥与策略'}}]},
  {n:8,title:{en:'Handing it over',zh:'交付上线'},items:[
   {k:'c',title:{en:'The context layer as its own service',zh:'把上下文层做成独立服务'}},
   {k:'c',title:{en:'An agent on a managed runtime',zh:'托管运行时上的智能体'}},
