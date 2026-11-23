@@ -23,9 +23,9 @@ window.TRACK={id:'agentic-ai',title:{en:'Agentic AI',zh:'智能体 AI'},topics:[
   {k:'c',file:'16-graph-memory-tools-search.html',title:{en:'Memory, tools and web search in a graph',zh:'图中的记忆、工具与联网搜索'}},
   {k:'p',file:'17-personal-helper-that-remembers.html',title:{en:'Project: a personal helper that remembers',zh:'项目：会记事的个人助手'}}]},
  {n:6,title:{en:'Framework tour',zh:'框架巡礼'},items:[
-  {k:'c',title:{en:'Agent-to-agent protocols',zh:'智能体之间的协议'}},
-  {k:'c',title:{en:'Comparing Python and JS/TS frameworks',zh:'对比 Python 与 JS/TS 框架'}},
-  {k:'p',title:{en:'Project: write your own agent loop',zh:'项目：自己写一个智能体循环'}}]},
+  {k:'c',file:'18-agent-to-agent.html',title:{en:'Agent-to-agent protocols',zh:'智能体之间的协议'}},
+  {k:'c',file:'19-python-vs-ts-frameworks.html',title:{en:'Comparing Python and JS/TS frameworks',zh:'对比 Python 与 JS/TS 框架'}},
+  {k:'p',file:'20-own-agent-loop.html',title:{en:'Project: write your own agent loop',zh:'项目：自己写一个智能体循环'}}]},
  {n:7,title:{en:'MCP',zh:'MCP'},items:[
   {k:'f',title:{en:'Why MCP exists',zh:'为什么需要 MCP'}},
   {k:'c',title:{en:'Build an MCP server and client',zh:'构建 MCP 服务端与客户端'}},
