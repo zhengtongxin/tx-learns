@@ -21,6 +21,10 @@ on:
         default: run
         type: choice
         options: [run, digest]
+      dry:
+        description: Trial only - read everything, change nothing, send no Telegram (prints what it would do)
+        type: boolean
+        default: false
 permissions:
   contents: write
   pull-requests: write
@@ -43,7 +47,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.repository.default_branch || 'main' }}
+          # Scheduled runs use main's scripts. A manual run (only people with write access can start one) uses the
+          # branch it was started on, so a change can be tried before it reaches main.
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.ref_name || github.event.repository.default_branch || 'main' }}
           sparse-checkout: |
             scripts
             banned-words.txt
@@ -58,13 +64,14 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           STEP: ${{ inputs.step || (github.event.schedule == '0 12 * * *' && 'digest' || 'run') }}
+          DRY_RUN: ${{ inputs.dry && '1' || '' }}
         run: |
           echo "Step: $STEP"
           if [ "$STEP" = digest ]; then node scripts/release.mjs digest --status; else node scripts/release.mjs run; fi
       - name: Record status for the Ecosystem page
         # Quiet hours (nothing to release, or checks still running) are not recorded, so the page and the digest
         # show what the release agent did, not every hourly look. A cancelled run records nothing.
-        if: ${{ !cancelled() && steps.run.outputs.state != 'skip' && steps.run.outputs.state != 'wait' }}
+        if: ${{ !cancelled() && !inputs.dry && steps.run.outputs.state != 'skip' && steps.run.outputs.state != 'wait' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           STATE: ${{ steps.run.outputs.state || 'fail' }}
