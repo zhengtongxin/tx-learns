@@ -5,9 +5,9 @@ window.TRACK={id:'ai-fde',title:{en:'AI FDE',zh:'AI FDE'},topics:[
   {k:'c',file:'02-plan-then-build-with-a-coding-agent.html',title:{en:'Plan first, then build with a coding agent',zh:'先做计划，再让编程智能体来建'}},
   {k:'p',file:'03-claims-desk-pilot.html',title:{en:'Project: a claims desk pilot',zh:'项目：理赔台试点'}}]},
  {n:2,title:{en:'Picking the model for the job',zh:'为任务挑模型'},items:[
-  {k:'c',title:{en:'Frontier models on real claims',zh:'云端大模型处理真实理赔'}},
-  {k:'c',title:{en:'Open models, local models and token cost',zh:'开源模型、本地模型与 token 成本'}},
-  {k:'p',title:{en:'Project: the cheapest model that is good enough',zh:'项目：够用的最便宜模型'}}]},
+  {k:'c',file:'04-frontier-models-on-real-claims.html',title:{en:'Frontier models on real claims',zh:'云端大模型处理真实理赔'}},
+  {k:'c',file:'05-open-models-local-and-token-cost.html',title:{en:'Open models, local models and token cost',zh:'开源模型、本地模型与 token 成本'}},
+  {k:'p',file:'06-cheapest-model-good-enough.html',title:{en:'Project: the cheapest model that is good enough',zh:'项目：够用的最便宜模型'}}]},
  {n:3,title:{en:'Harness engineering',zh:'Harness 工程'},items:[
   {k:'f',file:'07-what-a-harness-is.html',title:{en:'What a harness is',zh:'什么是 harness'}},
   {k:'c',file:'08-two-ways-to-build-a-harness.html',title:{en:'Two ways to build a harness',zh:'搭 harness 的两种路线'}},
