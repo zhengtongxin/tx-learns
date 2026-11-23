@@ -1,0 +1,146 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Memory, tools and web search in a graph | TX Learns</title>
+<meta name="description" content="One line gives you a tool-using agent with memory. For a big research job, a deep agent plans, searches and delegates."><meta property="og:title" content="Memory, tools and web search in a graph | TX Learns"><meta property="og:description" content="One line gives you a tool-using agent with memory. For a big research job, a deep agent plans, searches and delegates."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/agentic-ai/16-graph-memory-tools-search.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#0b1020">
+<meta name="updated" content="2026-11-23">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Graphs and state · Lesson 2</span><span class="zh">图与状态 · 第 2 课</span></span><h1><span class="en">Memory, tools and web search in a graph</span><span class="zh">图中的记忆、工具与联网搜索</span></h1><p class="meta"><span class="en">The graph you wired by hand now comes in one line, and a bigger job gets a planner · ~25 min · hands-on</span><span class="zh">你手工接线的那张图，现在一行就能得到；更大的任务则交给会做计划的智能体 · 约 25 分钟 · 动手实践</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">Your cousin <b>Hui</b> runs a small tuition centre above a row of shops in Kajang. She wants to sell breakfast to parents in the mornings, but before she spends any money she wants a short briefing: what sells near schools, what the competition charges, and a recommendation. One small question needs one agent with a couple of tools. The whole briefing is a much bigger job. You will meet both sizes.</p>
+<p class="zh" style="margin:0">你的表姐 <b>惠</b> 在加影一排店屋楼上开了一间小补习中心。她想在早上卖早餐给家长，但花钱之前想先要一份简短的报告：学校附近什么好卖、竞争对手卖多少钱、最后给个建议。一个小问题只要一个带几件工具的智能体；整份报告则是大得多的任务。这节课你会遇到这两种规模。</p></div>
+
+<h2><span class="en">Step 1 · create_agent: the tool loop in one line</span><span class="zh">第 1 步 · create_agent：一行搞定工具循环</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Last lesson you wired a model node, a tools node and a conditional edge yourself. <code>create_agent</code> hands you the same graph ready-made. You give it a model as a <code>"provider:model"</code> string, some tools and a system prompt. It is a real LangGraph graph underneath: a model node and a tools node going round in a loop.</p>
+<p class="zh" style="margin:0 0 8px">上一课你亲手接了模型节点、工具节点和条件边。<code>create_agent</code> 直接给你一张现成的同样的图。你只要给它一个 <code>"provider:model"</code> 形式的模型字符串、几件工具和一段系统提示词。底下仍然是一张真正的 LangGraph 图：模型节点和工具节点绕着圈。</p></div>
+<div class="codebox"><span class="dim"># pip install langchain langchain-openai langgraph langchain-community langchain-mcp-adapters deepagents
+# env: OPENAI_API_KEY, SERPER_API_KEY
+from langchain.agents import create_agent
+from langchain_core.tools import tool
+
+@tool
+def stall_price(item: str) -> str:
+    """Typical price in RM for a breakfast item near schools in Kajang."""
+    return {"nasi lemak": "RM3.50", "kuih": "RM0.80 each", "milo ais": "RM2.80"}.get(item.lower(), "not sure")
+
+@tool
+def footfall(hour: int) -> str:
+    """Rough number of parents passing the shop at a given hour (24h)."""
+    return "about 120" if 7 &lt;= hour &lt;= 8 else "under 30"
+
+</span><span class="chg">helper = create_agent(
+    model="openai:gpt-5.4-mini",
+    tools=[stall_price, footfall],
+    system_prompt="You help a small shop owner plan a breakfast corner. Use your tools for numbers.",
+)</span><span class="dim">
+out = helper.invoke({"messages": [{"role": "user", "content": "Is 7:30am busy, and what does nasi lemak go for?"}]})
+print(out["messages"][-1].content)</span></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Memory and structured output</span><span class="zh">第 2 步 · 记忆与结构化输出</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Memory works the same way as in a graph: a checkpointer plus a <code>thread_id</code>. If you want the answer as data instead of prose, pass a <code>response_format</code>. The reply then carries a <code>structured_response</code> that is already filled in, ready for your code.</p>
+<p class="zh" style="margin:0 0 8px">记忆的做法和图里一样：检查点加 <code>thread_id</code>。如果你想要的是数据而不是一段话，就传入 <code>response_format</code>。回复里会带一个已经填好的 <code>structured_response</code>，可以直接给代码用。</p></div>
+<div class="codebox"><span class="dim">from langgraph.checkpoint.memory import MemorySaver
+from pydantic import BaseModel, Field
+
+</span><span class="chg">chatty = create_agent(model="openai:gpt-5.4-mini", tools=[stall_price], checkpointer=MemorySaver())
+cfg = {"configurable": {"thread_id": "cousin-hui"}}</span><span class="dim">
+chatty.invoke({"messages": [{"role": "user", "content": "My budget is RM800 for equipment."}]}, cfg)
+
+class Plan(BaseModel):
+    items: list[str] = Field(description="Breakfast items to sell")
+    est_daily_sales: str = Field(description="Rough daily sales estimate in RM")
+
+</span><span class="chg">planner = create_agent(model="openai:gpt-5.4-mini", tools=[stall_price, footfall], response_format=Plan)</span><span class="dim">
+plan = planner.invoke({"messages": [{"role": "user", "content": "Plan the menu."}]})["structured_response"]</span></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Middleware: code at fixed points in the loop</span><span class="zh">第 3 步 · 中间件：在循环固定位置运行的代码</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Sometimes you want to peek into the loop without rewriting it. <b>Middleware</b> is code that runs at fixed points: before the model call, or around each tool call. Think of a supervisor who watches every slip pass by. This one prints every tool call, which is my favourite debugging trick. Ready-made ones exist too: summarising long chats, hiding personal data, limiting calls and retrying.</p>
+<p class="zh" style="margin:0 0 8px">有时你想看一眼循环里面，又不想重写它。<b>中间件</b>是在固定位置运行的代码：模型调用之前，或者每次工具调用的前后。就像一位盯着每张单子经过的主管。下面这个会把每次工具调用都打印出来，是我最爱的调试办法。也有现成的：总结过长的对话、隐藏个人信息、限制调用次数和重试。</p></div>
+<div class="codebox"><span class="dim">from langchain.agents.middleware import wrap_tool_call
+
+</span><span class="chg">@wrap_tool_call
+def spy(request, handler):
+    print("tool ->", request.tool_call["name"], request.tool_call["args"])
+    return handler(request)</span><span class="dim">
+
+watched = create_agent(model="openai:gpt-5.4-mini", tools=[stall_price], middleware=[spy])</span></div>
+<div class="sc" id="g3"></div>
+
+<h2><span class="en">Step 4 · Tools someone else wrote: MCP and a real browser</span><span class="zh">第 4 步 · 别人写好的工具：MCP 与真正的浏览器</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Tools do not have to be your own Python functions. <b>MCP</b> is a standard plug that lets an agent use tools someone else wrote (it gets its own topic later). With <code>langchain-mcp-adapters</code> you load the tools an MCP server offers. The Playwright server gives your agent a real browser, and needs Node and <code>npx</code>. These tools are <b>async</b>, so the call changes from <code>invoke</code> to <code>await ainvoke</code>. In a notebook you can <code>await</code> at the top level; in a <code>.py</code> file wrap it in <code>async def</code>, as before.</p>
+<p class="zh" style="margin:0 0 8px">工具不一定是你自己写的 Python 函数。<b>MCP</b> 是一种标准插头，让智能体使用别人写好的工具（后面有专门的主题）。用 <code>langchain-mcp-adapters</code> 就能载入某个 MCP 服务提供的工具。Playwright 服务给你的智能体一个真正的浏览器，需要 Node 和 <code>npx</code>。这些工具是<b>异步</b>的，所以调用要从 <code>invoke</code> 改成 <code>await ainvoke</code>。笔记本里可以在最外层直接 <code>await</code>；在 <code>.py</code> 文件里则要像之前那样包进 <code>async def</code>。</p></div>
+<div class="codebox"><span class="dim">from langchain_mcp_adapters.client import MultiServerMCPClient
+
+client = MultiServerMCPClient({
+    "browser": {"transport": "stdio", "command": "npx",
+                "args": ["-y", "@playwright/mcp@latest", "--isolated"]},
+})
+</span><span class="chg">browser_tools = await client.get_tools()</span><span class="dim">
+surfer = create_agent(model="openai:gpt-5.4-mini", tools=browser_tools,
+                      system_prompt="Browse to answer. Report briefly.")
+</span><span class="chg">res = await surfer.ainvoke(</span><span class="dim">{"messages": [{"role": "user",
+      "content": "Open a food delivery site and list three breakfast places in Kajang."}]})</span></div>
+<div class="try" id="p4"></div>
+
+<h2><span class="en">Step 5 · The big job: a deep agent</span><span class="zh">第 5 步 · 大任务：深度智能体</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Hui's full briefing needs planning, lots of searching, a file to write and helpers. A <b>deep agent</b> is <code>create_agent</code> with a harness added: a todo list for planning, file tools (<code>write_file</code>, <code>read_file</code>) and a <code>task</code> tool to delegate to <b>sub-agents</b>. Each sub-agent starts with a <b>fresh context</b>, so the lead's context stays small. <code>virtual_mode=True</code> keeps every file inside one folder.</p>
+<p class="zh" style="margin:0 0 8px">惠的完整报告需要做计划、大量搜索、写文件，还要有帮手。<b>深度智能体</b>就是在 <code>create_agent</code> 外面加一层外壳：用来做计划的待办清单、文件工具（<code>write_file</code>、<code>read_file</code>），以及把工作交给<b>子智能体</b>的 <code>task</code> 工具。每个子智能体都从<b>全新的上下文</b>开始，所以主智能体的上下文不会变大。<code>virtual_mode=True</code> 让所有文件都留在同一个文件夹里。</p></div>
+<div class="codebox"><span class="dim">import os
+from langchain_openai import ChatOpenAI
+from langchain_community.tools import GoogleSerperRun
+from langchain_community.utilities import GoogleSerperAPIWrapper
+from deepagents import create_deep_agent
+from deepagents.backends import FilesystemBackend
+
+box = os.path.abspath("workspace"); os.makedirs(box, exist_ok=True)
+search = GoogleSerperRun(api_wrapper=GoogleSerperAPIWrapper())
+
+</span><span class="chg">competitor_scout = {
+    "name": "competitor-scout",
+    "description": "Looks up one nearby breakfast competitor and returns three facts: menu, prices, hours.",
+    "system_prompt": "Research the single shop you are given with the search tool. Return three short facts.",
+}</span><span class="dim">
+
+lead = create_deep_agent(
+    model=ChatOpenAI(model="gpt-5.4-mini"),
+    tools=[search],
+    </span><span class="chg">subagents=[competitor_scout],</span><span class="dim">
+    system_prompt="Plan with your todos, delegate each competitor to competitor-scout, "
+                  "then write a one-page markdown briefing with a recommendation.",
+    </span><span class="chg">backend=FilesystemBackend(root_dir=box, virtual_mode=True),</span><span class="dim">
+)
+lead.invoke({"messages": [{"role": "user", "content":
+    "Should a tuition centre in Kajang sell breakfast to parents? Write breakfast.md."}]})</span></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Sub-agents can have their own tools and <b>skills</b>. A skill is a folder with a <code>SKILL.md</code>: a name and description at the top, instructions below. Only the name and description sit in the prompt. The full file is read when it is needed, so skills cost almost nothing until used.</p>
+<p class="zh" style="margin:0 0 8px">子智能体可以有自己的工具和<b>技能（skill）</b>。技能是一个带 <code>SKILL.md</code> 的文件夹：开头是名称和描述，下面是详细说明。提示词里只放名称和描述，需要时才读完整文件，所以技能在被用到之前几乎不占成本。</p></div>
+<div class="sc" id="g5"></div>
+<div class="try" id="p5"></div>
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">Three things tripped me. First, MCP tools only work with <code>ainvoke</code>: calling <code>invoke</code> fails, and once one async tool is in, the whole call goes async. Second, deep agent paths are virtual: the agent writes <code>/breakfast.md</code>, which lands inside my workspace folder, not at my real root. I was confused until I looked in that folder. Third, a deep agent is overkill for a two-tool question, and <code>create_agent</code> is cheaper and faster. On Windows with Jupyter, starting a stdio MCP server can also fail because the notebook's error stream is not a real file. The fix is to send the adapter's <code>errlog</code> to <code>subprocess.DEVNULL</code>. Mac and Linux do not need it.</span><span class="zh">我栽过三个跟头。第一，MCP 工具只能用 <code>ainvoke</code>：用 <code>invoke</code> 会失败，只要混进一个异步工具，整个调用就要改成异步。第二，深度智能体的路径是虚拟的：它写的是 <code>/breakfast.md</code>，实际落在我的工作文件夹里，而不是真正的根目录，我看了那个文件夹才弄明白。第三，两件工具的小问题用深度智能体是杀鸡用牛刀，<code>create_agent</code> 更便宜也更快。另外在 Windows 的 Jupyter 里启动 stdio 的 MCP 服务可能失败，因为笔记本的错误输出流不是真正的文件，解决办法是把适配器的 <code>errlog</code> 指向 <code>subprocess.DEVNULL</code>。Mac 和 Linux 不需要。</span></div>
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Spy on your agent.</b> Add the <code>spy</code> middleware and watch which tools your agent calls, and with what arguments.</span><span class="zh"><b>监视你的智能体。</b>加上 <code>spy</code> 中间件，看它调用了哪些工具、参数是什么。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Ask a small question, then a big one.</b> Try <code>create_agent</code> first. Only move to a deep agent when it clearly runs out of room.</span><span class="zh"><b>先问小问题，再问大问题。</b>先试 <code>create_agent</code>，只有明显不够用时再换成深度智能体。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Find the file.</b> Run the deep agent and open your <code>workspace</code> folder to find where <code>/breakfast.md</code> really is.</span><span class="zh"><b>找到那个文件。</b>运行深度智能体，打开 <code>workspace</code> 文件夹，找出 <code>/breakfast.md</code> 实际在哪里。</span></span></label></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• <code>create_agent</code> is the model-and-tools loop in one line. Underneath it is still a graph.<br>• Memory is a checkpointer plus a <code>thread_id</code>. <code>response_format</code> gives you data back as <code>structured_response</code>.<br>• <b>Middleware</b> runs at fixed points in the loop: spy, summarise, hide personal data, limit, retry.<br>• MCP tools come from someone else's server. They are async, so use <code>await ainvoke</code>.<br>• A <b>deep agent</b> adds a todo list, files and sub-agents. It is for big jobs, not small questions.<br>• Sub-agents start with a fresh context. Skills load their full text only when needed.<br>• Deep agent file paths are virtual: they live inside the folder you chose.</p><p class="zh" style="margin:0">• <code>create_agent</code> 一行就是“模型加工具”的循环，底下仍然是一张图。<br>• 记忆就是检查点加 <code>thread_id</code>。<code>response_format</code> 让你以 <code>structured_response</code> 拿回数据。<br>• <b>中间件</b>在循环的固定位置运行：监视、总结、隐藏个人信息、限制、重试。<br>• MCP 工具来自别人的服务，是异步的，所以要用 <code>await ainvoke</code>。<br>• <b>深度智能体</b>多了待办清单、文件和子智能体，适合大任务，不适合小问题。<br>• 子智能体从全新上下文开始。技能只有在需要时才载入完整内容。<br>• 深度智能体的文件路径是虚拟的：实际都在你选定的文件夹里。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Agentic AI</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('p1'),{q:{en:'Hui asks “Is 7:30am busy?”. Which does the agent do?',zh:'惠问“早上 7:30 忙吗？”。智能体会怎么做？'},opts:[{k:'a',en:'Guess from what the model remembers',zh:'凭模型的记忆猜一个'},{k:'b',en:'Call <code>footfall(7)</code> because the system prompt says to use tools for numbers, then answer from the result',zh:'因为系统提示词说数字要用工具，所以调用 <code>footfall(7)</code>，再根据结果回答'}],a:'b',out:{en:'tool → footfall {"hour": 7}\nanswer: about 120 parents pass at that hour, so yes, it is busy.',zh:'工具 → footfall {"hour": 7}\n回答：那个时段大约有 120 位家长经过，所以确实很忙。'},ex:{en:'The loop sends the tool result back to the model, which then writes the answer. That is the same loop you drew by hand.',zh:'循环把工具结果送回模型，模型再写出回答。这和你手画的是同一个循环。'},hint:{en:'What does “use your tools for numbers” tell the model?',zh:'“数字要用工具”这句话在告诉模型什么？'}});
+ predict($('p2'),{q:{en:'You call <code>planner.invoke(...)</code> (the one with <code>response_format=Plan</code>). Where is the filled-in <code>Plan</code>?',zh:'你调用 <code>planner.invoke(...)</code>（带 <code>response_format=Plan</code> 的那个）。填好的 <code>Plan</code> 在哪里？'},opts:[{k:'a',en:'In <code>["messages"][-1].content</code> as text',zh:'在 <code>["messages"][-1].content</code> 里，是文字'},{k:'b',en:'In <code>["structured_response"]</code>',zh:'在 <code>["structured_response"]</code> 里'}],a:'b',ex:{en:'<code>structured_response</code> is its own key in the result, already an object with <code>items</code> and <code>est_daily_sales</code>.',zh:'<code>structured_response</code> 是结果里单独的一个键，已经是带 <code>items</code> 和 <code>est_daily_sales</code> 的对象。'},hint:{en:'Look at the last line of the code box in this step.',zh:'看看这一步代码框的最后一行。'}});
+ game($('g3'),[
+  {en:'Print every tool call and its arguments',zh:'把每次工具调用和参数打印出来',a:'m',ex:{en:'Middleware watches each call as it passes.',zh:'中间件会盯着每次调用经过。'},hint:{en:'It does not change what the agent does, it watches.',zh:'它不改变智能体做什么，只是观察。'}},
+  {en:'Change what the agent is allowed to do: add a new tool the agent can call',zh:'改变智能体能做什么：加一个它能调用的新工具',a:'t',ex:{en:'A new ability is a tool in the <code>tools</code> list.',zh:'新能力就是放进 <code>tools</code> 列表的一件工具。'},hint:{en:'Is it watching, or a new ability?',zh:'是观察，还是新能力？'}},
+  {en:'Stop a runaway agent after too many model calls',zh:'模型调用太多次时叫停失控的智能体',a:'m',ex:{en:'A call limit is a ready-made middleware.',zh:'调用次数上限就是一个现成的中间件。'},hint:{en:'It sits around the loop, not inside a tool.',zh:'它在循环外围，不在工具里面。'}},
+  {en:'Look up a breakfast price from a small dictionary',zh:'从一个小字典里查早餐价格',a:'t',ex:{en:'That is the work itself, so it is a tool.',zh:'这是实际要做的事，所以是工具。'},hint:{en:'Is it the work, or a check on the work?',zh:'是做事本身，还是对做事的检查？'}}],[{k:'m',en:'Middleware',zh:'中间件'},{k:'t',en:'Tool',zh:'工具'}],{en:'Job',zh:'任务'});
+ predict($('p4'),{q:{en:'You load browser tools from an MCP server and then run <code>surfer.invoke(...)</code>. What happens?',zh:'你从 MCP 服务载入了浏览器工具，然后运行 <code>surfer.invoke(...)</code>。会怎样？'},opts:[{k:'a',en:'It fails: these tools are async, so use <code>await surfer.ainvoke(...)</code>',zh:'会失败：这些工具是异步的，要用 <code>await surfer.ainvoke(...)</code>'},{k:'b',en:'It works the same, just slower',zh:'一样能用，只是更慢'}],a:'a',ex:{en:'MCP tools are async-only. Once one is in the mix, the whole call goes async.',zh:'MCP 工具只支持异步。只要混进一个，整个调用都要改成异步。'},hint:{en:'Which word did the code box add?',zh:'代码框里多了哪个词？'}});
+ game($('g5'),[
+  {en:'“What does a kopi peng cost nearby?”',zh:'“附近一杯冰咖啡多少钱？”',a:'c',ex:{en:'A couple of tools and one answer: <code>create_agent</code> is cheaper and faster.',zh:'几件工具、一个答案：<code>create_agent</code> 更便宜也更快。'},hint:{en:'Is this a plan, or one lookup?',zh:'这是要做计划，还是一次查询？'}},
+  {en:'Research five competitors, write a one-page briefing to a file and recommend',zh:'调研五家对手，把一页简报写进文件并给出建议',a:'d',ex:{en:'Planning, many searches, a file and delegation: a deep agent.',zh:'要做计划、大量搜索、写文件还要分工：用深度智能体。'},hint:{en:'Does it need a plan and a file?',zh:'它需要计划和文件吗？'}},
+  {en:'“Is 7:30am busy?”',zh:'“早上 7:30 忙吗？”',a:'c',ex:{en:'One tool call is enough.',zh:'一次工具调用就够了。'},hint:{en:'How many steps does it take?',zh:'需要几步？'}},
+  {en:'Give each competitor to its own helper so the lead\'s context stays small',zh:'每家对手交给各自的帮手，让主智能体的上下文保持小',a:'d',ex:{en:'Sub-agents with fresh contexts are a deep agent feature.',zh:'带全新上下文的子智能体是深度智能体的功能。'},hint:{en:'Who can delegate: create_agent or a deep agent?',zh:'谁能分派任务：create_agent 还是深度智能体？'}}],[{k:'c',en:'create_agent',zh:'create_agent'},{k:'d',en:'Deep agent',zh:'深度智能体'}],{en:'Job',zh:'任务'});
+ predict($('p5'),{q:{en:'A deep agent writes <code>/breakfast.md</code> with <code>virtual_mode=True</code>. Where is the file on your computer?',zh:'深度智能体在 <code>virtual_mode=True</code> 下写了 <code>/breakfast.md</code>。这个文件在你电脑的哪里？'},opts:[{k:'a',en:'At the real root of the disk, <code>/breakfast.md</code>',zh:'在磁盘真正的根目录，<code>/breakfast.md</code>'},{k:'b',en:'Inside the <code>workspace</code> folder you chose',zh:'在你选定的 <code>workspace</code> 文件夹里面'}],a:'b',ex:{en:'Virtual paths map into the root folder you gave the backend. That keeps all file writes in one place.',zh:'虚拟路径会映射到你交给后端的根文件夹里，所有写文件的动作都被限制在同一个地方。'},hint:{en:'What is “virtual” protecting?',zh:'“虚拟”是在保护什么？'}});
+});
+</script></body></html>

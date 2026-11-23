@@ -1,0 +1,160 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Project: a personal helper that remembers | TX Learns</title>
+<meta name="description" content="Build Kaki: a helper that runs errands, asks before it acts, and has a checker that decides when the job is really done."><meta property="og:title" content="Project: a personal helper that remembers | TX Learns"><meta property="og:description" content="Build Kaki: a helper that runs errands, asks before it acts, and has a checker that decides when the job is really done."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/agentic-ai/17-personal-helper-that-remembers.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#0b1020">
+<meta name="updated" content="2026-11-23">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Graphs and state · Project</span><span class="zh">图与状态 · 项目</span></span><h1><span class="en">Project: a personal helper that remembers</span><span class="zh">项目：会记事的个人助手</span></h1><p class="meta"><span class="en">You build a helper that does errands, asks before it acts and checks its own work · ~40 min · project</span><span class="zh">你做一个会跑腿、行动前先问你、还会检查自己成果的助手 · 约 40 分钟 · 项目</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">Meet <b>Kaki</b> (like “my kaki”, my buddy). You give Kaki an errand and a line saying what <b>done means</b>: <i>“Find three kopitiams within 2 km of SS2 that open before 7am and sell half-boiled eggs. Write them to <code>kopi.md</code> and ping my phone with the best one.”</i> Kaki is a small shop with two people. A <b>worker</b> goes out and does the errand. A <b>checker</b> reads the report against your “done means” line. And before anything leaves the shop, like a ping to your phone, the worker has to <b>ask you first</b>.</p>
+<p class="zh" style="margin:0">认识 <b>Kaki</b>（就是“我的 kaki”，我的伙伴）。你给 Kaki 一件差事，再写一句<b>怎样算完成</b>：<i>“在 SS2 周围 2 公里内找三家早上 7 点前开门、有卖半熟蛋的咖啡店，写进 <code>kopi.md</code>，再把最好的一家推送到我的手机。”</i>Kaki 像一家有两个人的小店：<b>跑腿的</b>出去办事，<b>检查员</b>对照你的“完成标准”读他的报告。而任何要离开店里的动作，比如推送到你手机，跑腿的必须<b>先问你</b>。</p></div>
+
+<h2><span class="en">Step 1 · Tools first: your own, ready-made and MCP</span><span class="zh">第 1 步 · 先备工具：自己写的、现成的和 MCP</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A worker is only as good as its toolbox, so build that first. Kaki gets a search tool, a Wikipedia tool, two functions you write (<code>ping_phone</code> and <code>ask_human</code>), plus a browser and a file tool from MCP servers. The browser has to keep its state, like open tabs and cookies, between calls. So you keep the MCP sessions <b>open</b> with <code>client.session(name)</code> and <code>load_mcp_tools(session)</code>, instead of the default open-per-call.</p>
+<p class="zh" style="margin:0 0 8px">跑腿的本事取决于工具箱，所以先备工具。Kaki 有一个搜索工具、一个维基百科工具、你自己写的两个函数（<code>ping_phone</code> 和 <code>ask_human</code>），再加上来自 MCP 服务的浏览器和文件工具。浏览器在两次调用之间要保持状态，比如打开的标签页和 cookie。所以要用 <code>client.session(name)</code> 加 <code>load_mcp_tools(session)</code> 让 MCP 会话一直<b>开着</b>，而不是默认的每次调用才开一次。</p></div>
+<div class="codebox"><span class="dim"># pip install langchain langchain-openai langgraph langchain-community langchain-mcp-adapters wikipedia gradio python-dotenv
+# also Node + npx. env: OPENAI_API_KEY, SERPER_API_KEY, PUSHOVER_USER, PUSHOVER_TOKEN
+import os, requests
+from contextlib import AsyncExitStack
+from langchain_core.tools import tool
+from langchain_community.tools import GoogleSerperRun, WikipediaQueryRun
+from langchain_community.utilities import GoogleSerperAPIWrapper, WikipediaAPIWrapper
+from langchain_mcp_adapters.client import MultiServerMCPClient
+from langchain_mcp_adapters.tools import load_mcp_tools
+
+search = GoogleSerperRun(api_wrapper=GoogleSerperAPIWrapper())
+wiki = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())
+
+</span><span class="chg">@tool
+def ping_phone(text: str) -> str:
+    """Send a short push notification to my phone."""
+    requests.post("https://api.pushover.net/1/messages.json",
+                  data={"token": os.getenv("PUSHOVER_TOKEN"), "user": os.getenv("PUSHOVER_USER"), "message": text})
+    return "sent"
+
+@tool
+def ask_human(instructions: str) -> str:
+    """Ask me to do something only a human can do (login, captcha), with exact steps."""
+    return "The human says it's done. Continue."</span><span class="dim">
+
+mcp_servers = {
+    "browser": {"transport": "stdio", "command": "npx", "args": ["@playwright/mcp@latest", "--isolated"]},
+    "files":   {"transport": "stdio", "command": "npx",
+                "args": ["-y", "@modelcontextprotocol/server-filesystem", "/abs/path/to/workspace"]},
+}
+
+# keep each session open so the browser remembers its tabs
+client = MultiServerMCPClient(mcp_servers)
+stack = AsyncExitStack()
+mcp_tools = []
+for name in mcp_servers:
+    session = await stack.enter_async_context(client.session(name))
+    mcp_tools += await load_mcp_tools(session)
+</span><span class="chg">all_tools = [search, wiki, ping_phone, ask_human] + mcp_tools</span></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · The worker: one agent, a stack of middleware</span><span class="zh">第 2 步 · 跑腿的：一个智能体加一叠中间件</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The worker is one <code>create_agent</code> with <code>all_tools</code>. Its safety comes from middleware you met last lesson: a visible todo plan, hiding emails and card numbers, a cap on model calls to stop runaway cost, and a pause before risky tools. A checkpointer lets it remember the errand across turns. The prompt says what to do when a page needs a login: call <code>ask_human</code> with exact steps.</p>
+<p class="zh" style="margin:0 0 8px">跑腿的就是一个带着 <code>all_tools</code> 的 <code>create_agent</code>。它的安全靠上一课见过的中间件：看得见的待办计划、隐藏邮箱和银行卡号、限制模型调用次数以免费用失控，以及在危险工具前暂停。检查点让它能跨回合记住这件差事。提示词写明了遇到要登录的页面怎么办：用 <code>ask_human</code> 并写清具体步骤。</p></div>
+<div class="codebox"><span class="dim">from datetime import datetime
+from langchain.agents import create_agent
+from langchain.agents.middleware import (
+    HumanInTheLoopMiddleware, ModelCallLimitMiddleware, PIIMiddleware, TodoListMiddleware,
+)
+from langgraph.checkpoint.memory import InMemorySaver
+
+RUNNER_PROMPT = """You are Kaki, a practical helper who runs errands for me.
+Read pages with the browser (snapshot first, click only when needed), search when useful,
+and save anything you produce into the workspace. If a page needs a login or captcha,
+call ask_human with exact steps. Stop when the 'done means' line is satisfied."""
+
+worker = create_agent(
+    model="openai:gpt-5.4-mini",
+    tools=all_tools,
+    system_prompt=f"{RUNNER_PROMPT}\nToday is {datetime.now():%A %d %B %Y}.",
+    middleware=[
+        TodoListMiddleware(),                         # keeps a visible plan
+        PIIMiddleware("email"),                       # redact emails
+        PIIMiddleware("credit_card", apply_to_tool_results=True),
+        ModelCallLimitMiddleware(run_limit=30),       # stop runaway cost
+</span><span class="chg">        HumanInTheLoopMiddleware(interrupt_on={"ping_phone": True, "ask_human": True}),</span><span class="dim">
+    ],
+    checkpointer=InMemorySaver(),
+)</span></div>
+<div class="sc" id="g2"></div>
+
+<h2><span class="en">Step 3 · Ask first: human-in-the-loop</span><span class="zh">第 3 步 · 先问再做：人在回路中</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">With <code>HumanInTheLoopMiddleware</code> the run <b>pauses</b> just before a listed tool. The result then contains <code>__interrupt__</code>. You look at what Kaki wants to do and resume with a <code>Command</code> holding one decision per paused call: approve, reject with a message, or edit the arguments first. A rejection does not end the run. Kaki reads your message and carries on, which feels very natural.</p>
+<p class="zh" style="margin:0 0 8px">有了 <code>HumanInTheLoopMiddleware</code>，运行会在列出的工具<b>之前暂停</b>。结果里会出现 <code>__interrupt__</code>。你先看 Kaki 想做什么，再用 <code>Command</code> 恢复，里面给每个暂停的调用一个决定：批准、附上留言拒绝，或者先修改参数。拒绝不会让运行结束，Kaki 会读你的留言然后继续，用起来很自然。</p></div>
+<div class="codebox"><span class="dim">from langgraph.types import Command
+
+errand = "Find three kopitiams within 2 km of SS2 that open before 7am and sell half-boiled eggs. Write them to kopi.md and ping my phone with the best one."
+cfg = {"configurable": {"thread_id": "errand-1"}}
+res = await worker.ainvoke({"messages": [{"role": "user", "content": errand}]}, cfg)
+
+</span><span class="chg">if "__interrupt__" in res:
+    asks = res["__interrupt__"][0].value["action_requests"]
+    print("Kaki wants to:", asks[0]["description"])
+    res = await worker.ainvoke(Command(resume={"decisions": [{"type": "approve"}] * len(asks)}), cfg)
+    # or: {"type": "reject", "message": "Don't ping me after 10pm"}
+    # or: {"type": "edit", ...} to change the arguments first</span></div>
+<div class="try" id="p3"></div>
+
+<h2><span class="en">Step 4 · The checker: does “done” mean done?</span><span class="zh">第 4 步 · 检查员：“做完了”真的做完了吗？</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Workers can say “done!” too early. The checker is just a model that returns a structured <code>Verdict</code>: feedback, whether it is done, and whether a human is needed. The loop around it is plain Python, not a graph. One detail matters a lot: give the checker the <b>list of tools actually called</b>. Otherwise the worker can simply <i>say</i> “notification sent” without ever calling the tool.</p>
+<p class="zh" style="margin:0 0 8px">跑腿的可能太早说“做完了！”。检查员只是一个返回结构化 <code>Verdict</code> 的模型：反馈、是否完成、是否需要人介入。外面的循环是普通 Python，不是图。有个细节非常重要：要把<b>实际调用过的工具列表</b>交给检查员。否则跑腿的可以只是<i>嘴上说</i>“通知已发送”，却从没调用过工具。</p></div>
+<div class="codebox"><span class="dim">from pydantic import BaseModel, Field
+from langchain_openai import ChatOpenAI
+
+class Verdict(BaseModel):
+    feedback: str = Field(description="Short, concrete feedback")
+    done: bool = Field(description="Has the 'done means' line been met?")
+    need_human: bool = Field(description="Is the worker stuck or asking a question?")
+
+checker = ChatOpenAI(model="gpt-5.4-mini").with_structured_output(Verdict)
+
+async def run_errand(errand: str, done_means: str, cfg: dict, tries: int = 3):
+    msg = {"messages": [{"role": "user", "content": f"{errand}\n\nDone means: {done_means}"}]}
+    for _ in range(tries):
+        res = await worker.ainvoke(msg, cfg)
+        if "__interrupt__" in res:
+            return res                      # let the screen show an Approve button
+        reply = res["messages"][-1].content
+</span><span class="chg">        used = [c["name"] for m in res["messages"] for c in (getattr(m, "tool_calls", None) or [])]
+        v = await checker.ainvoke(
+            f"Errand: {errand}\nDone means: {done_means}\nTools used: {used}\nReply: {reply}\n"
+            "Judge using the tool calls as evidence.")</span><span class="dim">
+        if v.done or v.need_human:
+            return reply, v.feedback
+        msg = {"messages": [{"role": "user", "content": f"Not done yet. Feedback: {v.feedback}. Keep going."}]}
+    return reply, "gave up after max tries"</span></div>
+<div class="try" id="p4"></div>
+<div class="sc" id="g4"></div>
+
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en"><b>One session, one task.</b> A stdio MCP session has to be opened and closed in the <i>same</i> asyncio task. I opened it in one place and closed it from another (a Gradio callback), and got confusing cancel-scope errors. The fix is one background task that owns the sessions: it opens them, waits on an <code>Event</code>, and unwinds when told to stop. <b>Two pauses, two decisions.</b> If the worker pauses on two tools at once, one “approve” is not enough: send one decision per call, as the <code>* len(asks)</code> does. <b>Infinite polishing.</b> Without <code>tries</code> and <code>ModelCallLimitMiddleware</code>, a strict checker plus an eager worker can loop for a long time and cost real money. Keep both limits on.</span><span class="zh"><b>一个会话，一个任务。</b>stdio 的 MCP 会话必须在<i>同一个</i> asyncio 任务里打开和关闭。我在一个地方打开，却在另一个地方（Gradio 的回调）关闭，结果得到莫名其妙的 cancel-scope 错误。解决办法是用一个后台任务专门负责会话：它打开会话，等待一个 <code>Event</code>，被通知停止时再收尾。<b>两个暂停，两个决定。</b>如果跑腿的同时在两个工具前暂停，一个“批准”不够：每个调用都要一个决定，就像 <code>* len(asks)</code> 做的那样。<b>无止境的打磨。</b>没有 <code>tries</code> 和 <code>ModelCallLimitMiddleware</code>，严格的检查员加上积极的跑腿者可能循环很久，花掉真金白银。两个上限都要开着。</span></div>
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Write your own errand.</b> Pick something small you do each week and write its “done means” line first. Run it through <code>run_errand</code>.</span><span class="zh"><b>写你自己的差事。</b>选一件你每周都做的小事，先写好它的“完成标准”，再交给 <code>run_errand</code>。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Reject once.</b> Reject the ping with a message like “not before 8am” and watch Kaki change its plan.</span><span class="zh"><b>拒绝一次。</b>用“8 点前不要推送”之类的留言拒绝那次推送，看 Kaki 怎么改计划。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Give it a face.</b> Put a small Gradio screen on top: an errand box, a “done means” box, the todo list and an Approve button.</span><span class="zh"><b>给它一个界面。</b>在上面加一个简单的 Gradio 界面：差事输入框、“完成标准”输入框、待办清单和一个批准按钮。</span></span></label></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Give a helper an errand <b>and</b> a “done means” line. It makes finishing checkable.<br>• Build the toolbox first. Keep MCP sessions open when a browser must remember its state.<br>• The worker is one <code>create_agent</code> with middleware: plan, hide personal data, limit calls, pause before risky tools.<br>• <b>Human-in-the-loop</b> pauses before a listed tool. Resume with one decision per paused call: approve, reject or edit.<br>• The checker is a structured-output model. Show it the tools actually called, so “I sent it” needs proof.<br>• Always cap the loop: <code>tries</code> and a model-call limit.<br>• A stdio MCP session must be opened and closed in the same asyncio task.</p><p class="zh" style="margin:0">• 给助手一件差事，<b>再加</b>一句“完成标准”，完成与否才能被检查。<br>• 先备好工具箱。浏览器需要记住状态时，让 MCP 会话一直开着。<br>• 跑腿的就是一个带中间件的 <code>create_agent</code>：计划、隐藏个人信息、限制调用、危险工具前暂停。<br>• <b>人在回路中</b>会在列出的工具前暂停。恢复时每个暂停的调用一个决定：批准、拒绝或修改。<br>• 检查员是一个结构化输出的模型。把实际调用过的工具给它看，“我发了”才需要证据。<br>• 循环一定要设上限：<code>tries</code> 和模型调用次数限制。<br>• stdio 的 MCP 会话必须在同一个 asyncio 任务里打开和关闭。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Agentic AI</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('p1'),{q:{en:'Why keep the MCP sessions open instead of opening one for each tool call?',zh:'为什么要让 MCP 会话一直开着，而不是每次工具调用都开一个？'},opts:[{k:'a',en:'The browser must keep open tabs and cookies between calls',zh:'浏览器在两次调用之间要保留打开的标签页和 cookie'},{k:'b',en:'It makes the model smarter',zh:'它会让模型更聪明'},{k:'c',en:'Opening a session costs money each time',zh:'每次开会话都要花钱'}],a:'a',ex:{en:'A fresh session is a fresh browser. Page one would be forgotten before you click on page two.',zh:'新会话就是新的浏览器。点第二页之前，第一页就被忘掉了。'},hint:{en:'Think about what a browser holds on to.',zh:'想想浏览器会记住什么。'}});
+ game($('g2'),[
+  {en:'<code>ModelCallLimitMiddleware(run_limit=30)</code>',zh:'<code>ModelCallLimitMiddleware(run_limit=30)</code>',a:'c',ex:{en:'It stops runaway cost.',zh:'它防止费用失控。'},hint:{en:'Is it about money, privacy or asking permission?',zh:'它管的是钱、隐私，还是请求许可？'}},
+  {en:'<code>PIIMiddleware("email")</code>',zh:'<code>PIIMiddleware("email")</code>',a:'p',ex:{en:'It redacts personal data.',zh:'它隐藏个人信息。'},hint:{en:'What does PII stand for?',zh:'PII 是什么的缩写？'}},
+  {en:'<code>HumanInTheLoopMiddleware(interrupt_on={"ping_phone": True})</code>',zh:'<code>HumanInTheLoopMiddleware(interrupt_on={"ping_phone": True})</code>',a:'a',ex:{en:'It pauses so you can approve first.',zh:'它会暂停，让你先批准。'},hint:{en:'Who must say yes?',zh:'谁必须点头？'}},
+  {en:'<code>PIIMiddleware("credit_card", apply_to_tool_results=True)</code>',zh:'<code>PIIMiddleware("credit_card", apply_to_tool_results=True)</code>',a:'p',ex:{en:'Card numbers on a page are hidden before the model sees them.',zh:'页面上的银行卡号在模型看到之前就被隐藏。'},hint:{en:'Card numbers are personal data.',zh:'银行卡号属于个人信息。'}}],[{k:'c',en:'Cost',zh:'费用'},{k:'p',en:'Privacy',zh:'隐私'},{k:'a',en:'Ask first',zh:'先问你'}],{en:'Middleware',zh:'中间件'});
+ predict($('p3'),{q:{en:'The worker pauses on <code>ping_phone</code> and <code>ask_human</code> at the same time. You resume with <code>[{"type": "approve"}]</code>. What happens?',zh:'跑腿的同时在 <code>ping_phone</code> 和 <code>ask_human</code> 前暂停。你用 <code>[{"type": "approve"}]</code> 恢复。会怎样？'},opts:[{k:'a',en:'Both are approved',zh:'两个都被批准'},{k:'b',en:'It is not enough: you must send two decisions',zh:'不够：必须发两个决定'}],a:'b',ex:{en:'One decision per paused call. That is why the code multiplies by <code>len(asks)</code>.',zh:'每个暂停的调用要一个决定，所以代码里乘以了 <code>len(asks)</code>。'},hint:{en:'How many calls are waiting for an answer?',zh:'有几个调用在等回答？'}});
+ predict($('p4'),{q:{en:'The worker replies “Done! I pinged your phone.” but never called <code>ping_phone</code>. Why does the checker still catch it?',zh:'跑腿的回复“做完了！我已经推送到你手机。”，但其实从没调用 <code>ping_phone</code>。检查员为什么还能发现？'},opts:[{k:'a',en:'It sees “Tools used: []” and the done line needs one notification',zh:'它看到“Tools used: []”，而完成标准要求一条通知'},{k:'b',en:'It trusts the worker\'s words',zh:'它相信跑腿者的话'}],a:'a',out:{en:'Tools used: [\'search\', \'write_file\']\n→ done: False, feedback: "No notification tool was called."',zh:'Tools used: [\'search\', \'write_file\']\n→ done: False，反馈："没有调用任何通知工具。"'},ex:{en:'Tool calls are evidence. Words are not.',zh:'工具调用是证据，嘴上说的不是。'},hint:{en:'What extra thing did we give the checker?',zh:'我们额外给了检查员什么？'}});
+ game($('g4'),[
+  {en:'Kaki wants to send a push notification to your phone',zh:'Kaki 想往你手机发推送',a:'h',ex:{en:'It leaves the shop, so ask first.',zh:'它会离开店里，所以先问。'},hint:{en:'Does it affect something outside the workspace?',zh:'它影响工作区之外的东西吗？'}},
+  {en:'Kaki searches the web for opening times',zh:'Kaki 上网搜索营业时间',a:'g',ex:{en:'Reading and searching are safe to run on their own.',zh:'阅读和搜索可以放心自己运行。'},hint:{en:'Can it hurt anything?',zh:'它会伤害什么吗？'}},
+  {en:'A page needs a captcha only a human can solve',zh:'某个页面需要只有人能解的验证码',a:'h',ex:{en:'<code>ask_human</code> is on the pause list, so you do the step.',zh:'<code>ask_human</code> 在暂停名单上，由你来完成这一步。'},hint:{en:'Who can solve a captcha?',zh:'谁能解验证码？'}},
+  {en:'Kaki writes its list into <code>kopi.md</code> in the workspace folder',zh:'Kaki 把清单写进工作区文件夹里的 <code>kopi.md</code>',a:'g',ex:{en:'It stays inside the one folder you chose.',zh:'它只留在你选定的那个文件夹里。'},hint:{en:'Does the file leave the workspace?',zh:'文件会离开工作区吗？'}}],[{k:'h',en:'Pause and ask me',zh:'暂停并问我'},{k:'g',en:'Go ahead',zh:'直接做'}],{en:'Action',zh:'动作'});
+});
+</script></body></html>
