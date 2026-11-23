@@ -13,9 +13,9 @@ window.TRACK={id:'ai-fde',title:{en:'AI FDE',zh:'AI FDE'},topics:[
   {k:'c',file:'08-two-ways-to-build-a-harness.html',title:{en:'Two ways to build a harness',zh:'搭 harness 的两种路线'}},
   {k:'p',file:'09-agent-that-works-the-queue.html',title:{en:'Project: an agent that works the queue',zh:'项目：自己处理队列的智能体'}}]},
  {n:4,title:{en:'Measuring an agent',zh:'衡量智能体'},items:[
-  {k:'c',title:{en:'Right and wrong answers that cost differently',zh:'对与错，代价各不相同'}},
-  {k:'c',title:{en:'Tracing and experiments',zh:'追踪与实验'}},
-  {k:'p',title:{en:'Project: a scoreboard for the agent',zh:'项目：智能体计分板'}}]},
+  {k:'c',file:'10-right-and-wrong-answers-that-cost-differently.html',title:{en:'Right and wrong answers that cost differently',zh:'对与错，代价各不相同'}},
+  {k:'c',file:'11-tracing-and-experiments.html',title:{en:'Tracing and experiments',zh:'追踪与实验'}},
+  {k:'p',file:'12-scoreboard-for-the-agent.html',title:{en:'Project: a scoreboard for the agent',zh:'项目：智能体计分板'}}]},
  {n:5,title:{en:'Knowledge and memory',zh:'知识与记忆'},items:[
   {k:'c',title:{en:'Agentic RAG over a manual',zh:'在手册上做智能体式检索'}},
   {k:'c',title:{en:'A memory over MCP',zh:'通过 MCP 给智能体记忆'}},

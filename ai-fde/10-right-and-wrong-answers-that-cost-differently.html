@@ -1,0 +1,145 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Right and wrong answers that cost differently | TX Learns</title>
+<meta name="description" content="Two agents can agree with the handlers equally often and still cost very different amounts. Build a mistake table, name each kind of mistake, and put a price on it."><meta property="og:title" content="Right and wrong answers that cost differently | TX Learns"><meta property="og:description" content="Two agents can agree with the handlers equally often and still cost very different amounts. Build a mistake table, name each kind of mistake, and put a price on it."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-fde/10-right-and-wrong-answers-that-cost-differently.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-24">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Measuring an agent · Lesson 1</span><span class="zh">衡量智能体 · 第 1 课</span></span><h1><span class="en">Right and wrong answers that cost differently</span><span class="zh">对与错，代价各不相同</span></h1><p class="meta"><span class="en">Two agents can agree with the handlers equally often and still cost very different amounts: learn to name each kind of mistake and price it · ~25 min · concept with one runnable idea</span><span class="zh">两个智能体和理赔员一致的次数可以一样多，花费却天差地别：学会给每一种错误起名字、标价格 · 约 25 分钟 · 概念课，附一个可动手的做法</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">Mei Ling has two versions of the claims agent, A and B. Both agree with the handlers on 19 of 25 claims, which is 76%. “Pick either,” she says. Mr Goh puts down his pen. “Agree on which 19? And the other six, what did they do to us?” He is right: a wrong answer is not one thing. Paying a claim that should have been refused is not the same as sending a plain claim to a handler. So she builds a scoreboard that tells the mistakes apart and puts a price on each.</p>
+<p class="zh" style="margin:0">Mei Ling 手上有两个版本的理赔智能体，A 和 B。两个都在 25 份理赔里和理赔员一致了 19 份，也就是 76%。“随便挑一个吧。”她说。Goh 先生放下笔：“一致的是哪 19 份？另外那六份，它们给我们惹了什么麻烦？”他说得对：错误不是一种东西。把该拒的理赔赔了出去，和把一份很普通的理赔转给理赔员，完全是两回事。所以她做了一块计分板：把错误分开，并给每一种标上价格。</p></div>
+
+<h2><span class="en">Step 1 · The mistake table</span><span class="zh">第 1 步 · 错误对照表</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A single percentage hides which answers were wrong. So lay the results out in a grid, called a <b>confusion matrix</b>. Each <i>row</i> is what the handler decided. Each <i>column</i> is what the agent decided. The diagonal, where row and column match, holds the agreements. Everything off the diagonal is a mistake, and its position tells you what kind. Like a marking sheet that shows not just your score but which questions you missed. Save the code in a file called <code>scoring.py</code>. The next lessons use it again. Here “agree” only means the same action: approve, decline or refer. Payout amounts come later.</p>
+<p class="zh" style="margin:0 0 8px">一个百分比会藏起“哪些答案错了”。所以把结果摆进一张格子里，叫<b>混淆矩阵</b>。每一<i>行</i>是理赔员的决定，每一<i>列</i>是智能体的决定。行和列相同的那条对角线是一致的地方，不在对角线上的都是错误，而且它的位置就告诉你是哪一种错。就像一张批改单：不只告诉你得了几分，还告诉你错了哪几题。把代码存进一个叫 <code>scoring.py</code> 的文件，后面几课还会用。这里的“一致”只指动作相同：批准、拒绝或转交。赔付金额留到后面。</p></div>
+<div class="codebox"><span class="dim"># scoring.py
+from collections import Counter
+
+ACTIONS = ["approve", "decline", "refer"]
+
+</span><span class="chg">def matrix(pairs):
+    """pairs: one (handler's decision, agent's decision) per claim."""
+    counts = Counter(pairs)
+    return [[counts[(h, a)] for a in ACTIONS] for h in ACTIONS]   # rows: handler, columns: agent</span><span class="dim">
+
+# practice data typed as counts: rows = handler, columns = agent (approve, decline, refer)
+GRID_A = [[12, 0, 2],
+          [3, 3, 0],
+          [1, 0, 4]]
+GRID_B = [[10, 2, 2],
+          [0, 5, 1],
+          [0, 1, 4]]
+
+def accuracy(grid):
+    total = sum(map(sum, grid))
+    return sum(grid[i][i] for i in range(3)) / total</span></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Name the mistakes</span><span class="zh">第 2 步 · 给错误起名字</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Mei Ling and Aisha name three kinds of mistake, by what the agent did. A <b>wrongful payment</b>: the agent approves, but the handler would not have. Money is out of the door. A <b>wrongful decline</b>: the agent says no, but the handler would not have. A customer is let down. A <b>needless referral</b>: the agent hands over a claim a handler would have decided at once. Only handler time is wasted. Counting an approve against a claim a handler would have referred as a wrongful payment is on purpose: money moved before a human looked.</p>
+<p class="zh" style="margin:0 0 8px">Mei Ling 和 Aisha 按智能体做了什么，给错误起了三个名字。<b>错付</b>：智能体批准了，但理赔员不会批准，钱已经出了门。<b>错拒</b>：智能体说不，但理赔员不会拒，客户被辜负了。<b>白转交</b>：智能体把一份理赔员本可以当场决定的理赔转了过来，浪费的只是理赔员的时间。如果理赔员本来会转交、智能体却直接批准，也算错付，这是有意的：钱在人看过之前就动了。</p></div>
+<div class="codebox"><span class="dim"># scoring.py, continued
+</span><span class="chg"># (handler's decision, agent's decision) -> what kind of mistake
+KIND = {("decline", "approve"): "wrongful payment", ("refer", "approve"): "wrongful payment",
+        ("approve", "decline"): "wrongful decline", ("refer", "decline"): "wrongful decline",
+        ("approve", "refer"): "needless referral", ("decline", "refer"): "needless referral"}
+
+def mistakes(grid):
+    found = Counter()
+    for i, handler in enumerate(ACTIONS):
+        for j, agent in enumerate(ACTIONS):
+            if i != j:
+                found[KIND[(handler, agent)]] += grid[i][j]
+    return dict(found)</span></div>
+<p class="en">What kind of mistake is each of these?</p>
+<p class="zh">下面每一种分别是哪类错误？</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Step 3 · Precision and recall for approvals</span><span class="zh">第 3 步 · 批准的精确率与召回率</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Two questions about approvals. <b>Precision</b>: when the agent says approve, how often is it right? <b>Recall</b>: of the claims the handlers approved, how many did the agent also approve? Think of a lifeguard. High precision means whenever they blow the whistle, someone really is in trouble. High recall means they catch every swimmer who is in trouble. One agent can be strong on one and weak on the other.</p>
+<p class="zh" style="margin:0 0 8px">关于批准，有两个问题。<b>精确率</b>：智能体说批准的时候，有多少次是对的？<b>召回率</b>：理赔员批准的那些理赔里，智能体也批准了多少？想想救生员。精确率高，意思是只要他吹哨，就一定真有人遇险；召回率高，意思是每一个遇险的游泳者他都能发现。一个智能体可能这个强、那个弱。</p></div>
+<div class="codebox"><span class="dim"># scoring.py, continued
+</span><span class="chg">def approval_precision_recall(grid):
+    said_approve = sum(row[0] for row in grid)     # the agent's approve column
+    should_approve = sum(grid[0])                  # the handler's approve row
+    right = grid[0][0]
+    return right / said_approve, right / should_approve</span></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 4 · Kappa: agreement beyond luck</span><span class="zh">第 4 步 · Kappa：扣掉运气之后的一致</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Handlers approve 14 of the 25 claims, which is 56%. An agent that approves <i>everything</i> already scores 56%, without reading a word. <b>Kappa</b> takes that luck away. It asks: how much better than chance is the agreement? Zero means no better than chance, and 1 means perfect. The chance part is worked out from how often each side says each answer: multiply the two sides’ shares for each answer and add them up.</p>
+<p class="zh" style="margin:0 0 8px">理赔员批准了 25 份里的 14 份，也就是 56%。一个<i>什么都批准</i>的智能体，一个字都没读，就已经拿到 56%。<b>Kappa</b> 把这份运气扣掉，它问的是：一致的程度比碰运气好多少？0 表示不比碰运气好，1 表示完美。“运气”那部分，用双方各自说每个答案的比例来算：每个答案把两边的比例相乘，再全部加起来。</p></div>
+<div class="codebox"><span class="dim"># scoring.py, continued
+</span><span class="chg">def kappa(grid):
+    total = sum(map(sum, grid))
+    seen = accuracy(grid)
+    by_handler = [sum(row) for row in grid]                        # row totals
+    by_agent = [sum(row[j] for row in grid) for j in range(3)]     # column totals
+    by_chance = sum(h * a for h, a in zip(by_handler, by_agent)) / total ** 2
+    return (seen - by_chance) / (1 - by_chance)</span></div>
+<div class="try" id="p3"></div>
+
+<h2><span class="en">Step 5 · Straight-through rate</span><span class="zh">第 5 步 · 直通率</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">An agent that refers every claim never pays a wrong claim. It also saves nobody any time. The <b>straight-through rate</b> is the share of claims the agent decides itself, without a referral. Report it beside accuracy, so a cautious agent cannot hide behind a clean-looking record. It is the same thing as 1 minus the referral share.</p>
+<p class="zh" style="margin:0 0 8px">一个把每份理赔都转交的智能体，永远不会错付，但也没替任何人省时间。<b>直通率</b>是智能体自己做决定、不用转交的理赔所占的比例。把它和准确率放在一起汇报，谨慎的智能体就不能躲在一份干净的记录后面。它等于 1 减去转交的比例。</p></div>
+<div class="codebox"><span class="dim"># scoring.py, continued
+</span><span class="chg">def straight_through(grid):
+    total = sum(map(sum, grid))
+    referred = sum(row[2] for row in grid)    # the agent's refer column
+    return 1 - referred / total</span></div>
+<div class="try" id="p4"></div>
+
+<h2><span class="en">Step 6 · Price each mistake</span><span class="zh">第 6 步 · 给每种错误标价</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Now the scoreboard Mr Goh asked for. Sit with him and Aisha and agree what each kind of mistake costs the company, in S$. The prices below are invented: yours come from them. A wrongful payment is the money plus the effort to get it back. A wrongful decline is a complaint and a lost customer. A needless referral is a few minutes of a handler’s time. Then multiply and add. The agent with the lower total is the better one for this desk.</p>
+<p class="zh" style="margin:0 0 8px">现在轮到 Goh 先生要的那块计分板。和他、Aisha 坐下来，谈好每一种错误让公司花多少钱，用新元算。下面的价格是编的，你的价格要从他们那里来。错付是那笔钱，加上追回它的力气。错拒是一次投诉，加一个流失的客户。白转交是理赔员几分钟的时间。然后相乘再相加。总数更低的那个智能体，才是适合这个理赔台的。</p></div>
+<div class="codebox"><span class="dim"># scoring.py, continued
+</span><span class="chg">PRICE = {"wrongful payment": 400, "wrongful decline": 150, "needless referral": 15}   # S$, invented
+
+def mistake_cost(grid, price=PRICE):
+    return sum(price[kind] * n for kind, n in mistakes(grid).items())</span><span class="dim">
+
+for name, grid in [("A", GRID_A), ("B", GRID_B)]:
+    print(name, f"{accuracy(grid):.0%}", f"kappa {kappa(grid):.2f}",
+          f"straight-through {straight_through(grid):.0%}", "cost S$", mistake_cost(grid))</span></div>
+<div class="try" id="p5"></div>
+<p class="en">Which agent would you give Mr Goh? Sort the numbers that matter.</p>
+<p class="zh">你会把哪个智能体交给 Goh 先生？把重要的数字分一分。</p><div class="sc" id="g2"></div>
+
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我当时想错了</span></b><span class="en">I trusted accuracy first. A and B tied at 76%, and A had the better straight-through rate, so I leaned towards A. Then wrongful payments got a price, and A was the expensive one: four payments that should not have happened. The “best” agent changed the moment each mistake had a price.</span><span class="zh">我一开始只信准确率。A 和 B 都是 76%，A 的直通率还更高，所以我偏向 A。后来错付有了价格，A 就成了贵的那个：四笔本不该发生的赔付。每种错误一标上价格，“最好”的智能体就换人了。</span></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Change the price of a wrongful payment</b> in <code>PRICE</code> (try 100, then 800) and watch which agent is cheaper.</span><span class="zh"><b>改一改 <code>PRICE</code> 里错付的价格</b>（先试 100，再试 800），看哪个智能体更便宜。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Work out kappa by hand</b> for ten claims where handler and agent each approve 5 and agree on 8.</span><span class="zh"><b>手算一次 kappa</b>：十份理赔，理赔员和智能体各批准 5 份，一致 8 份。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Decide what Mr Goh would call unacceptable</b>, such as more than one wrongful payment per run, and write it as a number.</span><span class="zh"><b>想想 Goh 先生会说什么是不可接受的</b>，比如一轮里错付超过一笔，并把它写成一个数。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">Back at the shophouse</span><span class="zh">回到店屋</span></b><span class="en">Mr Goh reads the two rows, then holds the red rubber stamp above Agent B’s page and stops. “Three people told no, and I can phone each of them,” he says. “Four payments gone, I can never call back.” He puts the stamp down on B. At Kaya, a mistake you can fix on Monday is cheaper than one you cannot.</span><span class="zh">Goh 先生读完这两行，把红色橡皮图章举到智能体 B 那页上方，又停住了。“三位客户被拒了，我可以一个个打电话过去，”他说，“四笔赔出去的钱，我再也叫不回来。”他把图章落在了 B 上。在 Kaya，周一能补救的错误，比补救不了的便宜。</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Accuracy flatters: it counts every mistake the same.<br>• A confusion matrix shows handler decisions in rows and agent decisions in columns; the off-diagonal cells are the mistakes.<br>• Name the kinds of mistake: wrongful payment, wrongful decline and needless referral.<br>• Precision asks “when it says yes, is it right?”; recall asks “did it catch the yeses?”.<br>• Kappa takes away the agreement you would get by luck: an agent that approves everything scores near zero.<br>• Report the straight-through rate beside accuracy, so an agent that refers everything cannot look safe.<br>• Put a price on each kind of mistake and total it: the ranking can change.</p><p class="zh" style="margin:0">• 准确率会讨好人：它把每个错误都算成一样。<br>• 混淆矩阵的行是理赔员的决定，列是智能体的决定；不在对角线上的格子就是错误。<br>• 给错误起名字：错付、错拒和白转交。<br>• 精确率问“说是的时候对不对”；召回率问“是的那些都抓到了吗”。<br>• Kappa 扣掉碰运气也会有的一致：什么都批准的智能体，得分接近零。<br>• 把直通率和准确率放在一起汇报，什么都转交的智能体就不会显得安全。<br>• 给每种错误标上价格再加总：排名可能就变了。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI FDE</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+
+ predict($('p1'),{q:{en:'Look at GRID_A. The handler approved a claim and the agent referred it. Which number counts those claims?',zh:'看 GRID_A。理赔员批准了、智能体却转交的理赔，是哪个数字？'},opts:[{k:'a',en:'2 (row approve, column refer)',zh:'2（approve 行，refer 列）'},{k:'b',en:'12 (row approve, column approve)',zh:'12（approve 行，approve 列）'},{k:'c',en:'1 (row refer, column approve)',zh:'1（refer 行，approve 列）'}],a:'a',out:{en:'GRID_A[0][2] = 2\naccuracy(GRID_A) = (12 + 3 + 4) ÷ 25 = 76%',zh:'GRID_A[0][2] = 2\naccuracy(GRID_A) = (12 + 3 + 4) ÷ 25 = 76%'},ex:{en:'Rows are the handler, columns are the agent. So the handler’s approve row meets the agent’s refer column at 2. The 12 is an agreement, and the 1 is the opposite mistake.',zh:'行是理赔员，列是智能体。理赔员的 approve 行和智能体的 refer 列交叉处是 2。12 是一致的，1 是反方向的错误。'},hint:{en:'Pick the row for what the handler did first, then the column for the agent.',zh:'先找理赔员那一行，再找智能体那一列。'}});
+
+ game($('g1'),[
+  {en:'The agent approves a lost-bag claim that the handler would have declined',zh:'智能体批准了一份丢行李的理赔，理赔员本会拒绝',a:'p',ex:{en:'Money went out that should not have.',zh:'不该出的钱出去了。'},hint:{en:'Did money leave the company?',zh:'公司的钱有没有流出去？'}},
+  {en:'The agent declines a flight-delay claim that the handler would have approved',zh:'智能体拒绝了一份航班延误理赔，理赔员本会批准',a:'d',ex:{en:'A customer who is owed money is told no.',zh:'一位该拿到钱的客户被说了不。'},hint:{en:'Who got a no they did not deserve?',zh:'谁收到了不该收到的“不”？'}},
+  {en:'The agent refers a plain S$60 claim that the handler would have approved in a minute',zh:'智能体把一份普通的 S$60 理赔转了过来，理赔员一分钟就会批准',a:'r',ex:{en:'Nothing went wrong except handler time.',zh:'除了理赔员的时间，没有别的损失。'},hint:{en:'Was anyone paid or refused wrongly?',zh:'有人被错赔或错拒吗？'}},
+  {en:'The agent approves a tricky claim that the handler would have referred',zh:'智能体批准了一份刁钻的理赔，理赔员本会转交',a:'p',ex:{en:'The money moved before a human looked, so it counts as a wrongful payment.',zh:'钱在人看过之前就动了，所以算错付。'},hint:{en:'It paid when it should have waited.',zh:'该等的时候它赔了。'}},
+  {en:'The agent declines a claim that the handler would have referred',zh:'智能体拒绝了一份理赔，理赔员本会转交',a:'d',ex:{en:'The customer was told no before anyone looked.',zh:'没人看过，客户就被说了不。'},hint:{en:'The agent said no. Who did it affect?',zh:'智能体说了不，影响的是谁？'}}],[{k:'p',en:'Wrongful payment',zh:'错付'},{k:'d',en:'Wrongful decline',zh:'错拒'},{k:'r',en:'Needless referral',zh:'白转交'}],{en:'Mistake',zh:'错误'});
+
+ predict($('p2'),{q:{en:'Agent B approved 10 claims, all 10 correct. The handlers approved 14 claims. What is B’s recall for approvals?',zh:'智能体 B 批准了 10 份，全都对。理赔员批准了 14 份。B 批准的召回率是多少？'},opts:[{k:'a',en:'100%',zh:'100%'},{k:'b',en:'71%',zh:'71%'},{k:'c',en:'76%',zh:'76%'}],a:'b',out:{en:'precision = 10 ÷ 10 = 100%\nrecall = 10 ÷ 14 = 71%',zh:'精确率 = 10 ÷ 10 = 100%\n召回率 = 10 ÷ 14 = 71%'},ex:{en:'Recall divides by what the handlers approved (14), not by what the agent approved (10). B is careful: whenever it says approve it is right, but it misses four approvals.',zh:'召回率除以的是理赔员批准的数量（14），不是智能体批准的数量（10）。B 很谨慎：它说批准就一定对，但漏掉了四份该批准的。'},hint:{en:'Recall asks how many of the handlers’ 14 approvals the agent caught.',zh:'召回率问的是理赔员那 14 份批准里，它抓到了几份。'}});
+
+ predict($('p3'),{q:{en:'Ten claims. The handler and the agent each approve 5 and decline 5, and they agree on 8. What is kappa?',zh:'十份理赔。理赔员和智能体各批准 5 份、拒绝 5 份，两边一致的有 8 份。kappa 是多少？'},opts:[{k:'a',en:'0.8',zh:'0.8'},{k:'b',en:'0.6',zh:'0.6'},{k:'c',en:'0.3',zh:'0.3'}],a:'b',out:{en:'accuracy = 8 ÷ 10 = 0.8\nchance = 0.5 × 0.5 + 0.5 × 0.5 = 0.5\nkappa = (0.8 − 0.5) ÷ (1 − 0.5) = 0.6',zh:'准确率 = 8 ÷ 10 = 0.8\n运气 = 0.5 × 0.5 + 0.5 × 0.5 = 0.5\nkappa = (0.8 − 0.5) ÷ (1 − 0.5) = 0.6'},ex:{en:'Half the claims would match by luck alone, so only the part above 0.5 is real. That part is 0.3 out of the 0.5 left to win, which is 0.6.',zh:'光靠运气就有一半会一致，所以只有超过 0.5 的部分才是真本事。0.5 里能拿的部分，拿了 0.3，也就是 0.6。'},hint:{en:'Chance agreement here is 0.5. Subtract it from 0.8, then divide by what is left after taking 0.5 from 1.',zh:'这里碰运气的一致是 0.5。用 0.8 减去它，再除以 1 减 0.5 剩下的部分。'}});
+
+ predict($('p4'),{q:{en:'An agent refers all 25 claims to a handler. What is true?',zh:'一个智能体把 25 份理赔全转给了理赔员。下面哪个说法对？'},opts:[{k:'a',en:'No wrongful payments, and a straight-through rate of 0%',zh:'没有错付，直通率 0%'},{k:'b',en:'No wrongful payments, and a straight-through rate of 100%',zh:'没有错付，直通率 100%'},{k:'c',en:'Accuracy is 100%',zh:'准确率 100%'}],a:'a',out:{en:'straight_through = 1 − 25 ÷ 25 = 0%\naccuracy = 5 ÷ 25 = 20%',zh:'straight_through = 1 − 25 ÷ 25 = 0%\naccuracy = 5 ÷ 25 = 20%'},ex:{en:'It never approves, so it never pays wrongly. But it decides nothing itself, so nothing goes straight through. Its accuracy is only the 5 claims the handlers also referred.',zh:'它从不批准，所以从不错付。但它自己什么也不决定，所以没有任何一份直通。它的准确率只有理赔员也转交的那 5 份。'},hint:{en:'Every claim is referred. How many did the agent decide on its own?',zh:'每份都转交了。智能体自己决定了几份？'}});
+
+ predict($('p5'),{q:{en:'Agent A makes 4 wrongful payments and 2 needless referrals. With the prices in PRICE, what is A’s total mistake cost?',zh:'智能体 A 有 4 笔错付、2 次白转交。按 PRICE 里的价格，A 的错误总成本是多少？'},opts:[{k:'a',en:'S$1,630',zh:'S$1,630'},{k:'b',en:'S$1,600',zh:'S$1,600'},{k:'c',en:'S$495',zh:'S$495'}],a:'a',out:{en:'4 × 400 + 0 × 150 + 2 × 15 = 1,630\nAgent B: 0 × 400 + 3 × 150 + 3 × 15 = 495',zh:'4 × 400 + 0 × 150 + 2 × 15 = 1,630\n智能体 B：0 × 400 + 3 × 150 + 3 × 15 = 495'},ex:{en:'Both agents agree 76% of the time, yet A’s mistakes cost more than three times B’s. S$495 is B’s total, not A’s. And do not forget the two referrals.',zh:'两个智能体都是 76% 一致，但 A 的错误成本是 B 的三倍多。S$495 是 B 的总数，不是 A 的。别忘了那两次转交。'},hint:{en:'Add the three kinds: 4 × 400, then 0 × 150, then 2 × 15.',zh:'把三种加起来：4 × 400，再 0 × 150，再 2 × 15。'}});
+
+ game($('g2'),[
+  {en:'Both agents agree 76% of the time',zh:'两个智能体都有 76% 的一致',a:'n',ex:{en:'It is the same for both, so it cannot choose between them.',zh:'两个一样，没法在它们之间做选择。'},hint:{en:'Does it differ between A and B?',zh:'A 和 B 有差别吗？'}},
+  {en:'A makes 4 wrongful payments, B makes none',zh:'A 有 4 笔错付，B 一笔都没有',a:'y',ex:{en:'The costliest kind of mistake differs a lot.',zh:'代价最高的那一种错误差得很远。'},hint:{en:'Which mistake is the expensive one?',zh:'哪种错误最贵？'}},
+  {en:'The total cost: A S$1,630, B S$495',zh:'总成本：A S$1,630，B S$495',a:'y',ex:{en:'It puts all the mistakes into one number the owners understand.',zh:'它把所有错误变成了老板们看得懂的一个数。'},hint:{en:'Does it show the money at risk?',zh:'它能看出风险的金额吗？'}},
+  {en:'A’s straight-through rate is 76% and B’s is 72%',zh:'A 的直通率 76%，B 的 72%',a:'y',ex:{en:'It shows what A gains for the extra risk, so it is worth reporting beside the cost.',zh:'它显示了 A 为多担的风险换来了什么，所以值得和成本放在一起报。'},hint:{en:'Does it say how much work the agent saves?',zh:'它说明智能体省了多少活吗？'}}],[{k:'y',en:'Matters for the choice',zh:'对选择有用'},{k:'n',en:'Cannot tell them apart',zh:'分不出高下'}],{en:'Number',zh:'数字'});
+});
+</script></body></html>
