@@ -78,8 +78,8 @@ print(len(false_alarms), "false alarms out of", len(claims), false_alarms)</span
 <div class="try" id="p4"></div>
 
 <h2><span class="en">Step 5 · Put it before the agent, and keep other layers</span><span class="zh">第 5 步 · 放在智能体前面，并保留别的层</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><b>Middleware</b> is code that every claim passes through on its way to the agent. Here it runs the guard first. A flagged claim never reaches the agent: it goes to a person. If the guard itself fails, treat that as flagged too. Then add a second layer that uses no model at all: a plain rule that no payout above S$800 is approved without a signature. No check is final, so each layer covers what the other misses.</p>
-<p class="zh" style="margin:0 0 8px"><b>中间件</b>是每份理赔在去往智能体的路上都要经过的代码。这里它先跑护栏。被标的理赔绝不会到智能体手里：它交给人。如果护栏自己出了故障，也当作被标。然后再加第二层，完全不用模型：一条普通规则，超过 S$800 的赔付没有签字就不能批准。没有哪一道检查是终局，所以每一层都补上别的层漏掉的。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><b>Middleware</b> is code that every claim passes through on its way to the agent. Here it runs the guard first. A flagged claim never reaches the agent: it goes to a person. If the guard itself fails, treat that as flagged too. This is called <b>fail closed</b>: when unsure, stop and send it to a person. Then add a second layer that uses no model at all: a plain rule that no payout above S$800 is approved without a signature. The reworded claim is flagged, so the guard stops it here. If a disguised order ever got past the guard, the S$800 rule would be the next door. No check is final, so each layer covers what the other misses.</p>
+<p class="zh" style="margin:0 0 8px"><b>中间件</b>是每份理赔在去往智能体的路上都要经过的代码。这里它先跑护栏。被标的理赔绝不会到智能体手里：它交给人。如果护栏自己出了故障，也当作被标。这叫<b>出错时关闭</b>（fail closed）：拿不准，就先拦下，交给人。然后再加第二层，完全不用模型：一条普通规则，超过 S$800 的赔付没有签字就不能批准。这里改写后的理赔被标了，所以护栏先拦下它。要是有伪装的命令溜过了护栏，S$800 规则就是下一道门。没有哪一道检查是终局，所以每一层都补上别的层漏掉的。</p></div>
 <div class="codebox"><span class="dim"># guard.py, continued
 </span><span class="chg">MAX_AUTO = 800
 

@@ -9,8 +9,8 @@
 <p class="zh" style="margin:0">计分板告诉 Mei Ling，智能体的<em>判定</em>和理赔员的是否一致。但 Goh 先生还要看智能体的<em>解释</em>，他要它给出和理赔员一样的理由。Aisha 一天读不完一百份解释。于是 Mei Ling 请第二个模型来打分。这一课用到计分板那课的 <code>bench.py</code>（<code>gateway</code>、<code>key</code>、<code>held_claims</code>、<code>small_prompt</code>、<code>ask</code>）。它假设 <code>key</code> 里每一项还带着理赔员的 <code>reason</code>（理由）；你的没有就补上。</p></div>
 
 <h2><span class="en">Step 1 · Put the two reasons side by side</span><span class="zh">第 1 步 · 把两个理由摆在一起</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Grading “is this a good explanation?” by feel gives wobbly answers. Grading “does it match what an expert wrote?” is much steadier. The expert’s text is the <b>reference answer</b>, like a marking scheme a teacher holds while marking. So for every held-out claim we keep two texts: the agent’s explanation and the handler’s reason.</p>
-<p class="zh" style="margin:0 0 8px">凭感觉给“这是不是好解释”打分，答案会晃来晃去。给“它和专家写的是否一致”打分，就稳得多。专家写的那段文字就是<b>参考答案</b>，像老师改卷时手边的评分标准。所以每份留出的理赔，我们留两段文字：智能体的解释，和理赔员的理由。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Grading “is this a good explanation?” by feel gives wobbly answers. Grading “does it match what an expert wrote?” is much steadier. The expert’s text is the <b>reference answer</b>, like a marking scheme a teacher holds while marking. So for every held-out claim (one kept back from tuning, as in the scoreboard lesson) we keep two texts: the agent’s explanation and the handler’s reason.</p>
+<p class="zh" style="margin:0 0 8px">凭感觉给“这是不是好解释”打分，答案会晃来晃去。给“它和专家写的是否一致”打分，就稳得多。专家写的那段文字就是<b>参考答案</b>，像老师改卷时手边的评分标准。所以每份留出的理赔（就是计分板那课里不拿来调校的那些），我们留两段文字：智能体的解释，和理赔员的理由。</p></div>
 <div class="codebox"><span class="chg"># judge.py
 import json
 from bench import gateway, key, held_claims, small_prompt, ask
@@ -68,8 +68,8 @@ def judge_all(pairs):
 <div class="try" id="p2"></div>
 
 <h2><span class="en">Step 3 · Check the judge against a person</span><span class="zh">第 3 步 · 拿人来检查评委</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A judge is just another model, so it can be wrong in its own ways. Grade ten of the explanations yourself first, without looking at its grades, and save them as <code>{"C007": 2, ...}</code>. Then measure how often you agree, exactly and within one point. Also look for a lean: does the judge give higher marks to longer explanations than you do?</p>
-<p class="zh" style="margin:0 0 8px">评委也只是另一个模型，它有它自己的出错方式。先自己给其中十份解释打分，别看它的分数，存成 <code>{"C007": 2, ...}</code>。然后算你们有多常一致：完全相同，以及相差不超过一分。还要找一找有没有偏向：评委是不是比你更偏爱长的解释？</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A judge is just another model, so it can be wrong in its own ways. Grade ten of the explanations yourself first, without looking at its grades, and save them in <code>answer_key/my_grades.json</code> as <code>{"C007": 2, ...}</code>. Then measure how often you agree, exactly and within one point. Also look for a lean: does the judge give higher marks to longer explanations than you do?</p>
+<p class="zh" style="margin:0 0 8px">评委也只是另一个模型，它有它自己的出错方式。先自己给其中十份解释打分，别看它的分数，存进 <code>answer_key/my_grades.json</code>，格式是 <code>{"C007": 2, ...}</code>。然后算你们有多常一致：完全相同，以及相差不超过一分。还要找一找有没有偏向：评委是不是比你更偏爱长的解释？</p></div>
 <div class="codebox"><span class="dim"># judge.py, continued
 verdicts, spent = judge_all(pairs)
 </span><span class="chg">human = json.load(open("answer_key/my_grades.json"))    # {claim id: 0 to 3}, graded by you first
