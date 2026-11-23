@@ -1,0 +1,95 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Why MCP exists | TX Learns</title>
+<meta name="description" content="Plug in tools other people wrote, the same way every time, like one QR for every stall."><meta property="og:title" content="Why MCP exists | TX Learns"><meta property="og:description" content="Plug in tools other people wrote, the same way every time, like one QR for every stall."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/agentic-ai/21-why-mcp.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#0b1020">
+<meta name="updated" content="2026-11-23">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">MCP · Lesson 1</span><span class="zh">MCP · 第 1 课</span></span><h1><span class="en">Why MCP exists</span><span class="zh">为什么需要 MCP</span></h1><p class="meta"><span class="en">Plug in tools other people wrote, the same way every time · ~25 min · hands-on</span><span class="zh">每次都用同样的方式接上别人写好的工具 · 约 25 分钟 · 动手实践</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">You are helping <b>Siew</b>, who wants an agent that can search the web for a laksa recipe and save a summary on her computer. She has no wish to write a browser, and she does not want to learn a new plug for every tool she tries. At the kopitiam she noticed that every stall takes the same QR payment now. Today you build her agent the same way: ready-made tool programs, one plug.</p>
+<p class="zh" style="margin:0">你在帮 <b>Siew</b>，她想要一个能上网搜叻沙食谱、再把摘要存到电脑上的智能体。她不想自己写浏览器，也不想为试的每个工具都学一种新插头。她在咖啡店发现，现在每个摊位都收同一种二维码付款。今天你就用同样的办法来做她的智能体：现成的工具程序，一种插头。</p></div>
+<h2><span class="en">Step 1 · Why a shared standard</span><span class="zh">第 1 步 · 为什么要有共同的标准</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Every kopitiam stall used to take payment its own way. One had a DuitNow QR, one wanted exact cash, one had a card machine from a bank nobody had heard of. Then most stalls switched to the <b>same QR standard</b>. Now any customer's banking app can pay any stall, and the owner does not care which bank you use.</p><p class="zh" style="margin:0 0 8px">以前每个咖啡店摊位收款的方式都不一样：有的用 DuitNow 二维码，有的只收零钱现金，有的用没人听过的银行刷卡机。后来大部分摊位改用<b>同一个二维码标准</b>。现在任何顾客的银行 App 都能付给任何摊位，摊主也不用管你用哪家银行。</p><p class="en" style="margin:0 0 8px"><b>MCP</b> (Model Context Protocol) is that shared QR for agent tools. The <b>stall</b> is an MCP <b>server</b>: a separate program that offers tools. The <b>customer's app</b> is the MCP <b>client</b>, which lives inside your agent framework. Because the plug is the same everywhere, you stop writing glue code for each tool.</p><p class="zh" style="margin:0 0 8px"><b>MCP</b>（Model Context Protocol，模型上下文协议）就是智能体工具的这个共同二维码。<b>摊位</b>是 MCP <b>服务端</b>：一个单独的程序，对外提供工具。<b>顾客的 App</b> 是 MCP <b>客户端</b>，住在你的智能体框架里。插头到处都一样，你就不用为每个工具写一份胶水代码。</p><p class="en" style="margin:0 0 8px">MCP is not magic. It is still just tools. The only new thing is that the tools live in <i>someone else's program</i>, and you plug them in the same way every time.</p><p class="zh" style="margin:0 0 8px">MCP 不是魔法，它还是工具。唯一新鲜的是：这些工具住在<i>别人的程序</i>里，而你每次都用同一种方式把它们接上。</p></div>
+<div class="codebox"><span class="dim">  your agent  (inside a framework)
+        |
+   MCP client   &lt;-- same plug, every time --&gt;   MCP server
+                                                  |-- tools     (actions the model can call)
+                                                  |-- resources (read-only data)
+                                                  '-- prompts   (ready-made instructions)</span></div>
+<div class="try" id="p1"></div>
+<h2><span class="en">Step 2 · Look inside a ready-made server</span><span class="zh">第 2 步 · 先看看现成的服务端</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Siew does not want to write a browser function. A <b>local</b> server is started as a subprocess on your own machine and talks to your code over <b>stdio</b> (standard input and output, like two programs passing notes through a pipe).</p><p class="zh" style="margin:0 0 8px">Siew 不想自己写浏览器函数。<b>本地</b>服务端会作为子进程在你自己的电脑上启动，并通过 <b>stdio</b>（标准输入输出，就像两个程序通过一根管子互传纸条）和你的代码对话。</p><p class="en" style="margin:0 0 8px">Before giving a server to an agent, list its tools. The description and the input schema (the JSON that says what to pass in) are exactly what the model reads. Here we use the OpenAI Agents SDK as the client, as in the earlier SDK lessons.</p><p class="zh" style="margin:0 0 8px">把服务端交给智能体之前，先列出它的工具。工具的描述和输入格式（说明要传什么的 JSON）正是模型会读到的内容。这里用 OpenAI Agents SDK 作客户端，和之前的 SDK 课一样。</p></div>
+<div class="codebox"><span class="dim">pip install openai-agents python-dotenv      # plus Node + npx, or uv/uvx, to start servers
+
+from agents.mcp import MCPServerStdio
+
+</span><span class="chg">fetch = {"command": "uvx", "args": ["mcp-server-fetch"]}
+
+async with MCPServerStdio(params=fetch, client_session_timeout_seconds=60) as server:
+    tools = await server.list_tools()
+for t in tools:
+    print(t.name, "-", t.description[:80])
+    print(t.inputSchema)          # the JSON schema the model sees</span></div>
+<div class="try" id="p2"></div>
+<h2><span class="en">Step 3 · Two servers, one agent</span><span class="zh">第 3 步 · 两个服务端，一个智能体</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Now Siew gets a real browser (the Playwright server) and a file server. The file server can read and write <b>one folder only</b>: you pass the folder as an argument, and nothing outside it is reachable.</p><p class="zh" style="margin:0 0 8px">现在 Siew 有了真正的浏览器（Playwright 服务端）和一个文件服务端。文件服务端<b>只能读写一个文件夹</b>：你把文件夹作为参数传进去，夹外的东西一概碰不到。</p><p class="en" style="margin:0 0 8px">Both go into <code>mcp_servers=[...]</code>. The agent decides when to browse and when to write. You never wrote a browser or file function.</p><p class="zh" style="margin:0 0 8px">两个服务端一起放进 <code>mcp_servers=[...]</code>。什么时候上网、什么时候写文件由智能体决定，你一个浏览器函数或文件函数都没写。</p></div>
+<div class="codebox"><span class="dim">import os
+from agents import Agent, Runner, trace
+
+box = os.path.abspath("sandbox"); os.makedirs(box, exist_ok=True)
+</span><span class="chg">browser = {"command": "npx", "args": ["@playwright/mcp@latest"]}
+files   = {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-filesystem", box]}</span><span class="dim">
+
+RULES = """You browse the web to get things done. Close cookie banners and pop-ups.
+If one site is useless, try another. Only write files inside sandbox/."""
+
+</span><span class="chg">async with MCPServerStdio(params=browser, client_session_timeout_seconds=60) as b, \
+           MCPServerStdio(params=files, client_session_timeout_seconds=60) as f:
+    agent = Agent(name="recipe_hunter", instructions=RULES, model="gpt-4o-mini", mcp_servers=[b, f])
+    with trace("recipe_hunter"):
+        res = await Runner.run(agent, "Find a good Penang asam laksa recipe and save a markdown summary to sandbox/laksa.md")</span><span class="dim">
+print(res.final_output)</span></div>
+<div class="try" id="p3"></div>
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我踩过的坑</span></b><span class="en">I listed the tools inside the <code>async with</code> block, left the block, then tried to run the agent. It failed, because the server is a subprocess and it dies when the block ends. Create <i>and run</i> the agent inside the block. Two more traps: the first run is slow because <code>npx</code> and <code>uvx</code> download the server, so I set <code>client_session_timeout_seconds=60</code> everywhere. And on Windows inside Jupyter, the launch can die with <code>io.UnsupportedOperation: fileno</code>. Wrapping the SDK's <code>stdio_client</code> with <code>functools.partial(..., errlog=subprocess.DEVNULL)</code> fixed it for me. An <code>npx</code> path with spaces can also break it.</span><span class="zh">我在 <code>async with</code> 代码块里列出了工具，离开代码块后才去运行智能体，结果失败了：服务端是个子进程，代码块一结束它就没了。要在代码块<i>里面</i>创建<i>并运行</i>智能体。还有两个坑：第一次运行很慢，因为 <code>npx</code> 和 <code>uvx</code> 要先下载服务端，所以我到处都设了 <code>client_session_timeout_seconds=60</code>。另外在 Windows 的 Jupyter 里，启动可能报 <code>io.UnsupportedOperation: fileno</code>，用 <code>functools.partial(..., errlog=subprocess.DEVNULL)</code> 包住 SDK 的 <code>stdio_client</code> 就解决了。<code>npx</code> 路径带空格也可能出问题。</span></div>
+<h2><span class="en">Step 4 · A remote server is just a URL</span><span class="zh">第 4 步 · 远程服务端只是一个网址</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Not every server has to run on your machine. A <b>remote</b> server is hosted by someone else, so you install nothing: you give a URL. It talks over <b>streamable HTTP</b> instead of stdio.</p><p class="zh" style="margin:0 0 8px">不是每个服务端都要跑在你的电脑上。<b>远程</b>服务端由别人托管，你什么都不用装，只要给一个网址。它走的是<b>可流式 HTTP</b>，而不是 stdio。</p><p class="en" style="margin:0 0 8px">Try one that serves up-to-date library docs. A model alone often guesses at new features. With live docs it does not have to.</p><p class="zh" style="margin:0 0 8px">试试一个提供最新库文档的服务端。单靠模型，遇到新功能常常是瞎猜；有了实时文档，就不必猜了。</p></div>
+<div class="codebox"><span class="dim">from agents.mcp import MCPServerStreamableHttp
+
+question = "In the latest version of the OpenAI Agents SDK, how do I filter which MCP tools an agent can see?"
+
+</span><span class="chg">async with MCPServerStreamableHttp(name="docs", params={"url": "https://mcp.context7.com/mcp", "timeout": 60}) as docs:</span><span class="dim">
+    agent = Agent(name="docs_expert", instructions="Answer using the docs tools. Say so if unsure.",
+                  model="gpt-4o-mini", mcp_servers=[docs])
+    print((await Runner.run(agent, question)).final_output)</span></div>
+<div class="try" id="p4"></div>
+<h2><span class="en">Step 5 · When to use MCP, and when not</span><span class="zh">第 5 步 · 什么时候用 MCP，什么时候不用</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><b>Use it</b> to plug in tools other people maintain (browser, files, search, a product's official server), or to share your own tools across several frameworks.</p><p class="zh" style="margin:0 0 8px"><b>该用的时候</b>：接入别人维护的工具（浏览器、文件、搜索、某个产品的官方服务端），或者想把自己的工具共享给好几个框架。</p><p class="en" style="margin:0 0 8px"><b>Skip it</b> for one small function used by one agent: a plain <code>@function_tool</code> is simpler. And <b>be careful</b>. A server is code running on your machine with your permissions. Use servers from sources you trust, scope file servers to one folder, and read what a server's tools can do before handing them to an agent. Marketplaces list thousands of servers, which is exactly why caution matters.</p><p class="zh" style="margin:0 0 8px"><b>不必用的时候</b>：只有一个智能体用的一个小函数，直接用 <code>@function_tool</code> 更简单。还要<b>小心</b>：服务端是以你的权限在你电脑上运行的代码。只用你信任的来源，文件服务端限定在一个文件夹，把工具交给智能体之前先看清它们能做什么。市面上有列着成千上万个服务端的市场，所以更要谨慎。</p></div>
+<div class="codebox"><span class="dim">                 Local stdio              Remote HTTP
+Runs             subprocess on my PC      someone else's server
+Setup            command + args           url
+Good for         files, browser, my code  hosted services, docs, SaaS</span></div>
+<p class="en">Plain function tool or MCP server? Sort each case.</p>
+<p class="zh">用普通函数工具，还是 MCP 服务端？逐个分类。</p>
+<div class="sc" id="g5"></div>
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>List before you trust.</b> Start any server, print every tool name, description and schema, and decide whether you would hand all of them to an agent.</span><span class="zh"><b>先列出来再信任。</b>启动任意一个服务端，打印每个工具的名字、描述和输入格式，想想你愿不愿意把它们全交给智能体。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Fence the files.</b> Point the file server at an empty folder and ask the agent to write outside it. Watch what happens.</span><span class="zh"><b>把文件圈起来。</b>让文件服务端只管一个空文件夹，再叫智能体往夹外写文件，看看会怎样。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Docs versus guessing.</b> Ask the same library question with and without the docs server, and compare the answers.</span><span class="zh"><b>查文档对比瞎猜。</b>同一个库的问题，分别在有和没有文档服务端时提问，比较两个答案。</span></span></label></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• MCP is a shared plug: a <b>server</b> offers tools, a <b>client</b> inside your framework uses them.<br>• It is still just tools. The new part is that they live in someone else's program.<br>• A server offers tools, resources (read-only data) and prompts.<br>• <b>Local</b> servers start as a subprocess over stdio. <b>Remote</b> ones are a URL over streamable HTTP.<br>• List a server's tools first: the description and schema are what the model reads.<br>• The server only lives inside <code>async with</code>, so run the agent in there. First runs are slow, so raise the timeout.<br>• A server runs with your permissions. Trust the source and fence the files.</p><p class="zh" style="margin:0">• MCP 是共同的插头：<b>服务端</b>提供工具，框架里的<b>客户端</b>使用它们。<br>• 它依然只是工具，新鲜的只是工具住在别人的程序里。<br>• 服务端可以提供工具、资源（只读数据）和提示词。<br>• <b>本地</b>服务端作为子进程，通过 stdio 通信；<b>远程</b>服务端是一个网址，走可流式 HTTP。<br>• 先列出服务端的工具：描述和输入格式就是模型读到的内容。<br>• 服务端只活在 <code>async with</code> 里，所以要在里面运行智能体；第一次很慢，把超时设长一点。<br>• 服务端以你的权限运行：信任来源，圈好文件范围。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Agentic AI</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('p1'),{q:{en:'Siew wants her agent to use a browser tool somebody else wrote. What does MCP save her from?',zh:'Siew 想让智能体用别人写好的浏览器工具。MCP 帮她省掉了什么？'},opts:[{k:'a',en:'Writing glue code for that one tool and framework',zh:'为这一个工具和这一个框架写专门的胶水代码'},{k:'b',en:'Needing an LLM at all',zh:'根本不需要大模型'},{k:'c',en:'Paying for the model',zh:'不用付模型的钱'}],a:'a',ex:{en:'The standard plug means a tool written once can be used by every framework that speaks MCP.',zh:'标准插头意味着工具只写一次，所有支持 MCP 的框架都能用。'},hint:{en:'Think about the QR standard: what did stall owners stop doing?',zh:'想想二维码标准：摊主不用再做什么？'}});
+ predict($('p2'),{q:{en:'Why list a server\'s tools before giving it to an agent?',zh:'为什么在把服务端交给智能体之前要先列出工具？'},opts:[{k:'a',en:'The description and input schema are exactly what the model reads, so you see what it will see',zh:'描述和输入格式正是模型会读到的内容，你能提前看到它所看到的'},{k:'b',en:'Listing makes the server start faster',zh:'列出来能让服务端启动更快'},{k:'c',en:'The SDK refuses to run otherwise',zh:'不列的话 SDK 会拒绝运行'}],a:'a',ex:{en:'It also shows you what the tools can do, which matters because the server runs with your permissions.',zh:'这也让你看清工具能做什么，而服务端是以你的权限运行的，这点很重要。'},hint:{en:'Look at what <code>print(t.inputSchema)</code> shows.',zh:'看看 <code>print(t.inputSchema)</code> 打印的是什么。'}});
+ predict($('p3'),{q:{en:'The agent runs after the <code>async with</code> block has ended. What happens when it tries to use a tool?',zh:'智能体是在 <code>async with</code> 代码块结束之后才运行的。它想用工具时会怎样？'},opts:[{k:'a',en:'It works, the server keeps running in the background',zh:'能用，服务端会一直在后台运行'},{k:'b',en:'It fails, because the server subprocess is gone once the block ends',zh:'失败，因为代码块一结束服务端子进程就没了'}],a:'b',ex:{en:'The server lives only inside the block. Create and run the agent in there.',zh:'服务端只活在代码块里，要在里面创建并运行智能体。'},hint:{en:'What does leaving <code>async with</code> do to the subprocess?',zh:'离开 <code>async with</code> 时，子进程会怎样？'}});
+ predict($('p4'),{q:{en:'Which is true for a remote MCP server?',zh:'关于远程 MCP 服务端，哪一句是对的？'},opts:[{k:'a',en:'You install its package and start it with npx',zh:'你要安装它的包，再用 npx 启动'},{k:'b',en:'You give a URL, and the provider hosts it',zh:'你给一个网址，由提供方托管'},{k:'c',en:'It only works for one folder',zh:'它只能用于一个文件夹'}],a:'b',ex:{en:'Nothing to install, but you trust their uptime and their sign-in.',zh:'不用安装，但你要信任对方的稳定性和登录方式。'},hint:{en:'Look at the table: what goes in the Setup row for remote?',zh:'看看表格：远程那一列的 Setup 写的是什么？'}});
+ game($('g5'),[
+  {en:'A 3-line function that adds two numbers, used by one agent.',zh:'一个只有 3 行、给一个智能体用的加法函数。',a:'f',ex:{en:'Too small to be worth a separate program: use <code>@function_tool</code>.',zh:'太小了，不值得另起一个程序，用 <code>@function_tool</code>。'},hint:{en:'Does anyone else need it?',zh:'还有别人需要它吗？'}},
+  {en:'A real browser the agent can click around in, maintained by others.',zh:'一个别人维护的、智能体能点来点去的真浏览器。',a:'m',ex:{en:'Someone already built it once. Plug it in.',zh:'别人已经做好了，接上就行。'},hint:{en:'Would you want to write this yourself?',zh:'你愿意自己写这个吗？'}},
+  {en:'The same tools needed in two different agent frameworks.',zh:'同样的工具要在两个不同的智能体框架里用。',a:'m',ex:{en:'One server, two clients. That is the point of the standard.',zh:'一个服务端，两个客户端，这正是标准的意义。'},hint:{en:'How many times would you write it otherwise?',zh:'不这样的话你要写几遍？'}},
+  {en:'A product\'s official server for its live data.',zh:'某个产品为其实时数据提供的官方服务端。',a:'m',ex:{en:'The maker keeps it current, so you do not wrap their API yourself.',zh:'厂商会持续更新，你不用自己再包一层接口。'},hint:{en:'Who knows that API best?',zh:'谁最了解这个接口？'}}],[{k:'f',en:'Plain function tool',zh:'普通函数工具'},{k:'m',en:'MCP server',zh:'MCP 服务端'}],{en:'Case',zh:'情景'});
+});
+</script></body></html>
