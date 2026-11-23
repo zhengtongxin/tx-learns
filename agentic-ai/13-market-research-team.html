@@ -1,0 +1,168 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Project: a market research team | TX Learns</title>
+<meta name="description" content="Build a crew with a manager that searches the web, studies each option and pings your phone with one pick."><meta property="og:title" content="Project: a market research team | TX Learns"><meta property="og:description" content="Build a crew with a manager that searches the web, studies each option and pings your phone with one pick."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/agentic-ai/13-market-research-team.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#0b1020">
+<meta name="updated" content="2026-11-23">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Multi-agent teams · Project</span><span class="zh">多智能体团队 · 项目</span></span><h1><span class="en">Project: a market research team</span><span class="zh">项目：市场调研团队</span></h1><p class="meta"><span class="en">Build a crew with a manager that searches the web, studies each option and pings your phone with one pick · ~35 min · hands-on</span><span class="zh">搭一个带主管的团队：联网搜索、逐一研究，最后把唯一的推荐推送到你的手机 · 约 35 分钟 · 动手实践</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en"style="margin:0">Mei's aunt sells <b>kuih</b> (bite-sized Malaysian cakes) and wants a second stall at a <b>pasar malam</b> (night market). She asks: “Which one should I go to?” Answering that well takes a small team. A <b>scout</b> searches online for night markets people are talking about right now. A <b>researcher</b> studies each one: crowd, rent, how many kuih sellers are already there. A <b>picker</b> chooses the single best market and messages the aunt's phone. A <b>manager</b> sits above them, hands out the work and checks it.</p>
+<p class="zh"style="margin:0">Mei 的阿姨卖 <b>kuih</b>（马来西亚小糕点），想在 <b>pasar malam</b>（夜市）再开一个摊位。她问：“我该去哪一个？”要答好这个问题，需要一个小团队。<b>侦察员</b>上网搜索最近大家在谈论的夜市。<b>研究员</b>逐个研究：人流、租金、已有多少卖 kuih 的摊位。<b>挑选员</b>选出唯一最好的夜市，并发消息到阿姨的手机。上面还有一位<b>主管</b>，负责分配工作并检查。</p></div>
+
+<h2><span class="en">Step 1 · Give the scout a web search tool</span><span class="zh">第 1 步 · 给侦察员一个联网搜索工具</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">A model only knows what it learnt in the past, and night markets open and close all the time. A <b>tool</b> lets an agent do something outside its own head. CrewAI ships ready-made tools in the <code>crewai_tools</code> package. <code>SerperDevTool</code> searches the web through the Serper service, and it needs a <code>SERPER_API_KEY</code>.</p><p class="en"style="margin:0">Each search counts against your quota, so keep test runs small. Putting today's date into the scout's task helps too: “trending now” means nothing to a model that does not know the date. We pass that date in at kickoff, later.</p>
+<p class="zh"style="margin:0 0 8px">模型只知道过去学到的东西，而夜市随时在开张和关门。<b>工具</b>让智能体能做它“脑子”以外的事。CrewAI 在 <code>crewai_tools</code> 包里自带现成的工具。<code>SerperDevTool</code> 通过 Serper 服务搜索网络，需要一个 <code>SERPER_API_KEY</code>。</p><p class="zh"style="margin:0">每次搜索都会消耗配额，所以测试时要少跑。在侦察员的任务里写上今天的日期也有帮助：不知道日期的模型，没法理解“最近热门”。这个日期我们稍后在启动时传入。</p></div>
+<div class="codebox"><span class="dim"># inside the crew project
+#   uv add crewai-tools
+# .env needs: OPENAI_API_KEY and SERPER_API_KEY
+
+from crewai import Agent
+</span><span class="chg">from crewai_tools import SerperDevTool</span><span class="dim">
+
+@agent
+def scout(self) -> Agent:
+    return Agent(
+        config=self.agents_config["scout"],
+        </span><span class="chg">tools=[SerperDevTool()],</span><span class="dim">    # can now search the web
+        verbose=True,
+    )</span></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Pass typed lists between agents</span><span class="zh">第 2 步 · 在智能体之间传有类型的列表</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Free text between agents is fragile: the researcher can misread what the scout wrote. Instead, hand the scout a form to fill in. A class built on <code>BaseModel</code> (from the library Pydantic, the same idea as in the structured outputs lesson) is a form with named blanks, and <code>output_pydantic</code> tells the task to answer in that form.</p><p class="en"style="margin:0">Then link the tasks with <code>context</code>. It names which earlier tasks' results a task should read, so the researcher definitely gets the scout's list.</p>
+<p class="zh"style="margin:0 0 8px">智能体之间传自由文本很脆弱：研究员可能读错侦察员写的内容。换个做法：给侦察员一张表格去填。基于 <code>BaseModel</code>（来自 Pydantic 库，和结构化输出那一课是同一个思路）的类就是一张有具名空格的表格，<code>output_pydantic</code> 让任务按这张表格作答。</p><p class="zh"style="margin:0">然后用 <code>context</code> 把任务连起来。它指明某个任务要读哪些前面任务的结果，这样研究员一定能拿到侦察员的名单。</p></div>
+<div class="codebox"><span class="dim">from pydantic import BaseModel, Field
+from crewai import Task
+
+class Market(BaseModel):
+    name: str = Field(description="Name of the night market")
+    town: str = Field(description="Town or area")
+    why_now: str = Field(description="Why people are talking about it lately")
+
+class MarketList(BaseModel):
+    markets: list[Market] = Field(description="Night markets worth a look")
+
+class MarketStudy(BaseModel):
+    name: str
+    crowd: str = Field(description="Typical crowd size and peak hours")
+    competition: str = Field(description="How many kuih sellers are already there")
+    verdict: str = Field(description="Is it worth a stall?")
+
+class MarketStudyList(BaseModel):
+    studies: list[MarketStudy]
+
+@task
+def find_markets(self) -> Task:
+    return Task(config=self.tasks_config["find_markets"], </span><span class="chg">output_pydantic=MarketList</span><span class="dim">)
+
+@task
+def study_markets(self) -> Task:
+    return Task(config=self.tasks_config["study_markets"], </span><span class="chg">output_pydantic=MarketStudyList</span><span class="dim">)
+
+# config/tasks.yaml
+study_markets:
+  description: >
+    For each market found, research crowd, rent and competition for a kuih stall in {state}.
+  expected_output: >
+    A study of each market.
+  agent: researcher
+  </span><span class="chg">context:
+    - find_markets</span><span class="dim">
+  output_file: output/studies.json</span></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Build a tool that pings a phone</span><span class="zh">第 3 步 · 做一个能给手机发提醒的工具</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">The ready-made tools do not cover everything, so you can write your own. It is a plain function with the <code>@tool</code> decorator. The one rule that matters: <b>the docstring is the description the model reads</b>. Write it like instructions to a new colleague, including what each argument means.</p><p class="en"style="margin:0">This one sends a push message through Pushover, a notification service. It needs <code>PUSHOVER_USER</code> and <code>PUSHOVER_TOKEN</code> in <code>.env</code>. Only the picker will get it.</p>
+<p class="zh"style="margin:0 0 8px">现成的工具不能涵盖所有需求，所以你可以自己写。它就是一个带 <code>@tool</code> 装饰器的普通函数。最关键的一条规则：<b>文档字符串（docstring）就是模型读到的说明</b>。要像给新同事写指示一样去写，包括每个参数的含义。</p><p class="zh"style="margin:0">这个工具通过通知服务 Pushover 发送推送消息，需要在 <code>.env</code> 里放 <code>PUSHOVER_USER</code> 和 <code>PUSHOVER_TOKEN</code>。只有挑选员会拿到它。</p></div>
+<div class="codebox"><span class="dim"># tools/notify.py
+import os, requests
+from crewai.tools import tool
+
+</span><span class="chg">@tool("Notify My Aunt")</span><span class="dim">
+def notify(message: str) -> str:
+    </span><span class="chg">"""Send a short push message to the stall owner's phone.
+    Args:
+        message: the text to send, under 200 characters.
+    """</span><span class="dim">
+    resp = requests.post(
+        "https://api.pushover.net/1/messages.json",
+        data={"user": os.getenv("PUSHOVER_USER"),
+              "token": os.getenv("PUSHOVER_TOKEN"),
+              "message": message},
+    )
+    return f"sent, status {resp.status_code}"
+
+# in crew.py: only the picker gets this tool
+@agent
+def picker(self) -> Agent:
+    return Agent(config=self.agents_config["picker"], tools=[notify], verbose=True)</span></div>
+<div class="try" id="p3"></div>
+
+<h2><span class="en">Step 4 · Put a manager on top</span><span class="zh">第 4 步 · 在上面放一位主管</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Now the crew goes <b>hierarchical</b> with your own manager agent, like the one in the roles lesson but with a full description. Two rules. The manager needs <code>allow_delegation=True</code> so it may hand work out. And it is passed as <code>manager_agent=</code>, <b>not</b> listed in <code>agents</code>. If you declared it with <code>@agent</code>, the crew would treat it as one more ordinary worker.</p><p class="en"style="margin:0">Start the crew with today's date, so the scout's “trending now” has something to measure against.</p>
+<p class="zh"style="margin:0 0 8px">现在让团队变成<b>层级式</b>，并用你自己的主管智能体，就像角色那一课里讲的，不过这次有完整的设定。有两条规则。主管需要 <code>allow_delegation=True</code>，才能把活分出去。而且它要用 <code>manager_agent=</code> 传入，<b>不能</b>列在 <code>agents</code> 里。如果你用 <code>@agent</code> 声明了它，团队会把它当成又一个普通工人。</p><p class="zh"style="margin:0">启动团队时带上今天的日期，这样侦察员的“最近热门”才有个参照。</p></div>
+<div class="codebox"><span class="dim">from datetime import date
+
+@crew
+def crew(self) -> Crew:
+    </span><span class="chg">boss = Agent(config=self.agents_config["boss"], allow_delegation=True)</span><span class="dim">
+    return Crew(
+        agents=self.agents,          # scout, researcher, picker (not the boss)
+        tasks=self.tasks,
+        process=Process.hierarchical,
+        </span><span class="chg">manager_agent=boss,</span><span class="dim">
+        verbose=True,
+    )
+
+PasarPicker().crew().kickoff(inputs={"state": "Selangor", "today": str(date.today())})</span></div>
+<div class="try" id="p4"></div>
+<p class="en">Which team member does each job? Sort them.</p><p class="zh">每项工作该由哪位队员来做？请分类。</p>
+<div class="sc" id="g1"></div>
+
+<h2><span class="en">Step 5 · Add memory so the shortlist stays fresh</span><span class="zh">第 5 步 · 加上记忆，让名单保持新鲜</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Run the crew twice and you may get the same three markets twice. <code>memory=True</code> turns on CrewAI's built-in memory. <b>Short-term</b> memory holds what happened earlier in this run. <b>Long-term</b> memory keeps results and lessons from earlier runs on disk. <b>Entity</b> memory keeps facts about named things, such as one market or one town.</p><p class="en"style="margin:0">The neat trick is to pair memory with the prompt. If the scout's task says “find markets you have not suggested before”, long-term memory is what makes that sentence work across runs. Memory needs an embedder (it turns text into numbers so it can be searched), which by default uses the same OpenAI key, so each run costs a little extra.</p>
+<p class="zh"style="margin:0 0 8px">团队跑两次，可能会两次都拿到同样的三个夜市。<code>memory=True</code> 会打开 CrewAI 内置的记忆。<b>短期</b>记忆保存这一次运行里早先发生的事。<b>长期</b>记忆把以前运行的结果和教训存在磁盘上。<b>实体</b>记忆保存有名字的事物的信息，比如某个夜市或某个城镇。</p><p class="zh"style="margin:0">巧妙之处是把记忆和提示词配合起来。如果侦察员的任务写着“找出你以前没推荐过的夜市”，是长期记忆让这句话在多次运行之间真正生效。记忆需要一个嵌入模型（把文字变成数字以便检索），默认用同一个 OpenAI 密钥，所以每次运行会多花一点钱。</p></div>
+<div class="codebox"><span class="dim"># config/tasks.yaml
+find_markets:
+  description: >
+    Today is {today}. Search for night markets in {state} that people are talking
+    about right now. </span><span class="chg">Find markets you have not suggested before.</span><span class="dim">
+  expected_output: >
+    A list of night markets, each with a reason it is trending.
+  agent: scout
+
+# crew.py
+return Crew(
+    agents=self.agents, tasks=self.tasks,
+    process=Process.hierarchical, manager_agent=boss,
+    </span><span class="chg">memory=True,</span><span class="dim">      # short-term, long-term and entity memory
+    verbose=True,
+)</span></div>
+<div class="try" id="p5"></div>
+
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en"><b>I listed the boss as a worker.</b> Declared with <code>@agent</code>, the manager became an ordinary member of the crew. With <code>manager_agent=</code> you build it inside <code>crew()</code> without the decorator. <b>A hierarchical crew is chatty.</b> The manager re-delegated the same task several times and once skipped the notification. Clear <code>expected_output</code> text and telling the picker to “always send exactly one notification” helped. When the flow is fixed anyway, sequential with <code>context</code> is more reliable. <b>Stale and costly search.</b> Every Serper call uses quota, and results looked old until I put <code>{today}</code> in the scout's task.</span><span class="zh"><b>我把主管列成了工人。</b>用 <code>@agent</code> 声明后，主管变成了团队里的普通成员。用 <code>manager_agent=</code> 时，要在 <code>crew()</code> 里创建它，并且不加装饰器。<b>层级式团队很啰嗦。</b>主管把同一个任务重复分配好几次，有一次还漏掉了通知。写清楚 <code>expected_output</code>，并告诉挑选员“必须只发一条通知”，就好多了。如果流程本来就固定，用带 <code>context</code> 的顺序式更可靠。<b>搜索结果过时又花钱。</b>每次 Serper 调用都消耗配额，在侦察员的任务里加上 <code>{today}</code> 之前，结果看上去都很旧。</span></div>
+<div class="callout"><b class="lbl"><span class="en">Check before you trust it</span><span class="zh">相信之前先核对</span></b><span class="en">The team ranks what the web says. Before the aunt pays any rent, Mei visits the market once and counts the kuih sellers herself.</span><span class="zh">团队只是把网上的说法排了个序。在阿姨交任何租金之前，Mei 要亲自去那个夜市一趟，自己数一数卖 kuih 的摊位。</span></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Pick your own question.</b> Best café to open in your town, a supplier to try, an event to attend. Rename the scout, researcher and picker to fit.</span><span class="zh"><b>换成你自己的问题。</b>在你的城镇开哪家咖啡馆最好、试哪个供应商、去哪个活动。把侦察员、研究员、挑选员改成合适的名字。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Run it twice</b> with memory on, and check that the second shortlist is different.</span><span class="zh"><b>开着记忆跑两次</b>，确认第二次的名单不一样。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Try sequential</b> with <code>context</code> instead of a manager and compare cost and reliability.</span><span class="zh"><b>试试用带 <code>context</code> 的顺序式</b>代替主管，比较成本和可靠性。</span></span></label></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A tool like <code>SerperDevTool</code> lets an agent reach the live web. Each call costs quota.<br>• Pass a Pydantic form with <code>output_pydantic</code> so the next agent reads a typed list, not loose text.<br>• <code>context</code> names which earlier results a task reads.<br>• In a custom tool, the docstring is the description the model reads.<br>• A manager is passed as <code>manager_agent=</code>, with <code>allow_delegation=True</code>, and is not in <code>agents</code>.<br>• Hierarchical is flexible but chatty. Clear expected outputs keep it in line.<br>• <code>memory=True</code> plus a prompt like “not suggested before” gives a fresh shortlist each run.<br>• Put today's date in the task so “trending now” means something.</p><p class="zh" style="margin:0">• <code>SerperDevTool</code> 这样的工具让智能体能访问实时网络，每次调用都消耗配额。<br>• 用 <code>output_pydantic</code> 传一张 Pydantic 表格，下一个智能体读到的就是有类型的列表，而不是零散文字。<br>• <code>context</code> 指明任务要读哪些前面的结果。<br>• 自定义工具里，文档字符串就是模型读到的说明。<br>• 主管用 <code>manager_agent=</code> 传入，带 <code>allow_delegation=True</code>，不在 <code>agents</code> 里。<br>• 层级式灵活但啰嗦，写清预期输出能让它守规矩。<br>• <code>memory=True</code> 加上“以前没推荐过”这样的提示，每次运行都有新名单。<br>• 在任务里写上今天的日期，“最近热门”才有意义。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Agentic AI</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var $=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('p1'),{q:{en:'Why does the scout need <code>SerperDevTool()</code>?',zh:'为什么侦察员需要 <code>SerperDevTool()</code>？'},opts:[{k:'a',en:'The model alone cannot know which night markets are trending now',zh:'模型自己没法知道现在哪些夜市正热门'},{k:'b',en:'It makes the model smarter',zh:'它会让模型更聪明'},{k:'c',en:'It is free and has no limits',zh:'它免费，也没有限制'}],a:'a',ex:{en:'The tool reaches the live web. It does not change the model, and every call counts against your quota.',zh:'工具能连到实时网络，但不会改变模型，而且每次调用都消耗配额。'},hint:{en:'Where would fresh facts come from?',zh:'最新的信息从哪来？'}});
+ predict($('p2'),{q:{en:'What does <code>context: [find_markets]</code> do for the researcher\'s task?',zh:'<code>context: [find_markets]</code> 对研究员的任务起什么作用？'},opts:[{k:'a',en:'It makes sure the researcher reads the scout\'s list',zh:'确保研究员读到侦察员的名单'},{k:'b',en:'It runs the scout twice',zh:'让侦察员运行两次'},{k:'c',en:'It turns on memory',zh:'打开记忆'}],a:'a',ex:{en:'context names the earlier results a task should read.',zh:'context 指明任务该读哪些前面的结果。'},hint:{en:'The word means “what this task is given to read”.',zh:'这个词的意思是“这个任务被交给了什么来读”。'}});
+ predict($('p3'),{q:{en:'You write a vague docstring on <code>notify</code>: “does stuff”. What is the likely result?',zh:'你给 <code>notify</code> 写了含糊的文档字符串：“做点事”。可能的结果是什么？'},opts:[{k:'a',en:'The model may not know when or how to use the tool',zh:'模型可能不知道何时、如何使用这个工具'},{k:'b',en:'Nothing, the docstring is just for humans',zh:'没事，文档字符串只是写给人看的'}],a:'a',ex:{en:'The docstring is exactly what the model reads to decide whether and how to call the tool.',zh:'模型正是读文档字符串来决定要不要、怎么调用这个工具。'},hint:{en:'Who reads the docstring?',zh:'谁在读这个文档字符串？'}});
+ predict($('p4'),{q:{en:'You also declare the boss with <code>@agent</code>. What happens?',zh:'你同时用 <code>@agent</code> 声明了主管。会怎样？'},opts:[{k:'a',en:'The crew treats it as one more ordinary worker',zh:'团队把它当成又一个普通工人'},{k:'b',en:'It becomes a better manager',zh:'它会成为更好的主管'},{k:'c',en:'The run is faster',zh:'运行更快'}],a:'a',ex:{en:'Anything marked with @agent goes into the agents list. The manager is built inside crew() and passed as manager_agent.',zh:'用 @agent 标记的都会进入 agents 列表。主管要在 crew() 里创建，并以 manager_agent 传入。'},hint:{en:'Where do @agent methods end up?',zh:'@agent 方法最后去了哪里？'}});
+ predict($('p5'),{q:{en:'The scout\'s task says “find markets you have not suggested before”, but <code>memory</code> is off. What happens on the second run?',zh:'侦察员的任务写着“找出你以前没推荐过的夜市”，但 <code>memory</code> 是关着的。第二次运行会怎样？'},opts:[{k:'a',en:'It has no record of the first run, so it may repeat itself',zh:'它没有第一次运行的记录，可能重复推荐'},{k:'b',en:'It still remembers perfectly',zh:'它依然记得清清楚楚'}],a:'a',ex:{en:'Long-term memory is what carries the first run into the second. The prompt line only works with it.',zh:'是长期记忆把第一次运行带到第二次。这句提示要靠它才能生效。'},hint:{en:'What stores earlier runs?',zh:'什么保存了以前的运行？'}});
+ game($('g1'),[
+  {en:'Searches the web for night markets that are trending',zh:'上网搜索正热门的夜市',a:'s',ex:{en:'The scout holds the web search tool.',zh:'联网搜索工具在侦察员手上。'},hint:{en:'Who works first, with the search tool?',zh:'谁最先开工，带着搜索工具？'}},
+  {en:'Checks crowd, rent and competition for each market',zh:'核查每个夜市的人流、租金和竞争',a:'r',ex:{en:'It reads the scout\'s list and studies each item.',zh:'它读侦察员的名单，逐项研究。'},hint:{en:'Who reads the list and digs deeper?',zh:'谁读名单并深挖？'}},
+  {en:'Chooses one market and sends the phone message',zh:'选出一个夜市并发手机消息',a:'p',ex:{en:'Only the picker holds the notify tool.',zh:'只有挑选员拿着 notify 工具。'},hint:{en:'Who has the notify tool?',zh:'谁有 notify 工具？'}},
+  {en:'Hands out the work and sends it back if it is weak',zh:'分配工作，质量不行就打回',a:'b',ex:{en:'Delegating and checking is the manager\'s whole job.',zh:'分配和检查就是主管的全部工作。'},hint:{en:'Who does none of the work itself?',zh:'谁自己什么活都不干？'}}],[{k:'s',en:'Scout',zh:'侦察员'},{k:'r',en:'Researcher',zh:'研究员'},{k:'p',en:'Picker',zh:'挑选员'},{k:'b',en:'Manager',zh:'主管'}],{en:'Job',zh:'工作'});
+});
+</script></body></html>
