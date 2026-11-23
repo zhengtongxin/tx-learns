@@ -1,0 +1,106 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Why clicking in a console does not scale | TX Learns</title>
+<meta name="description" content="Feel the pain of hand-built infrastructure, then meet the fix: describe your setup in files that you can review, version and rebuild."><meta property="og:title" content="Why clicking in a console does not scale | TX Learns"><meta property="og:description" content="Feel the pain of hand-built infrastructure, then meet the fix: describe your setup in files that you can review, version and rebuild."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-production/17-why-console-clicking-does-not-scale.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-24">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Infrastructure as code · Lesson 1</span><span class="zh">基础设施即代码 · 第 1 课</span></span><h1><span class="en">Why clicking in a console does not scale</span><span class="zh">为什么在控制台点点点不够用</span></h1><p class="meta"><span class="en">Feel the pain of hand-built infrastructure, then meet the fix: describe your setup in files that you can review, version and rebuild · ~30 min · hands-on</span><span class="zh">先体会手工搭建基础设施的痛，再认识解法：把你的搭建写成文件，可以审阅、可以版本管理、可以重建 · 约 30 分钟 · 动手实践</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0"><b>Mr Ong</b> likes the twin so much that he wants three copies: one to play with, one to test, one for the public. <b>Mei Ling</b> built the first copy by clicking through the console for an afternoon, and she cannot remember every click. <b>Kumar</b> peers at her screen and says what he always says: "If you do it twice, it should be a script. And before that, a plan on paper."</p>
+<p class="zh" style="margin:0"><b>Ong 先生</b>太喜欢这个分身了，想要三份：一份玩，一份测试，一份给公众。<b>Mei Ling</b> 是花了一个下午在控制台里一点一点点出第一份的，她已经记不清每一下点击。<b>Kumar</b> 凑过来看她的屏幕，说了他的口头禅：“做两遍的事，就该写成脚本。在那之前，先在纸上画个方案。”</p></div>
+<h2><span class="en">Step 1 · Take the hand-made twin apart</span><span class="zh">第 1 步 · 先把手工搭的分身拆掉</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Before the fix, feel the problem. Delete the whole hand-made twin on purpose. You will see how many parts there were, and that they depend on each other: a thing that points at another thing must go first, or you hit "still in use" errors. Buckets must also be emptied before they can be deleted.</p>
+<p class="zh" style="margin:0">解法之前，先感受问题。有意把手工搭的整个分身删掉。你会看到原来有这么多部件，而且它们互相依赖：指向别的东西的部件要先删，否则会撞上“仍在使用中”的错误。存储桶也要先清空才能删。</p></div>
+<div class="codebox"><span class="dim">1. </span><span class="chg">CDN</span><span class="dim">            disable it, wait a few minutes, then delete (it points at the site bucket)
+2. </span><span class="chg">API gateway</span><span class="dim">    it points at the function
+3. </span><span class="chg">function</span><span class="dim">       it uses the role
+4. </span><span class="chg">function's role</span><span class="dim">   detach its policies, then delete
+5. </span><span class="chg">memory bucket</span><span class="dim">    empty it, then delete
+6. </span><span class="chg">site bucket</span><span class="dim">      empty it, then delete          six parts, around thirty clicks</span></div>
+<div class="try" id="t0"></div>
+<h2><span class="en">Step 2 · Infrastructure as code</span><span class="zh">第 2 步 · 基础设施即代码</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0"><b>Infrastructure as code</b> means the setup is text in files, not a memory of clicks. Text can be <b>reviewed</b> (someone reads it before it changes), <b>versioned</b> (every change is in git history), <b>repeated</b> (run it again for a second copy) and <b>shared</b> (a teammate gets the same setup). Think of the berth plan pinned to the wall: anyone can read what goes where, and a change must be written on the plan first.</p>
+<p class="zh" style="margin:0"><b>基础设施即代码</b>的意思是：搭建本身就是文件里的文字，而不是一堆点击的记忆。文字可以被<b>审阅</b>（改动前有人先读）、被<b>版本管理</b>（每次改动都在 git 历史里）、被<b>重复</b>（再跑一遍就得到第二份）、被<b>共享</b>（队友拿到的搭建是一样的）。就像贴在墙上的泊位图：谁都能读出什么放哪儿，要改也得先改在图上。</p></div>
+<div class="codebox"><span class="dim">clicking:   remember → click → hope → forget what you did
+</span><span class="chg">as code:    write it → plan (read the diff) → apply → it is in git</span></div>
+<div class="sc" id="t1"></div>
+<h2><span class="en">Step 3 · Five Terraform ideas</span><span class="zh">第 3 步 · Terraform 的五个概念</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0"><b>Terraform</b> is a popular tool for infrastructure as code. It has five ideas. A <b>resource</b> is a thing to create, like a bucket. A <b>provider</b> is the plugin that knows how to talk to one cloud. A <b>variable</b> is a knob you set per run. The <b>state</b> is Terraform's record of what really exists. A <b>workspace</b> is a separate copy of the state, so one set of files can drive several environments.</p>
+<p class="zh" style="margin:0"><b>Terraform</b> 是一个常用的基础设施即代码工具。它有五个概念。<b>资源（resource）</b>是要创建的东西，比如一个存储桶。<b>提供者（provider）</b>是懂得和某个云打交道的插件。<b>变量（variable）</b>是每次运行时设置的旋钮。<b>状态（state）</b>是 Terraform 对“实际存在什么”的记录。<b>工作区（workspace）</b>是状态的一份独立副本，所以同一套文件可以驱动多个环境。</p></div>
+<div class="codebox"><span class="chg">resource</span><span class="dim">   what to make                       aws_s3_bucket "memory"
+</span><span class="chg">provider</span><span class="dim">   which cloud's plugin               aws
+</span><span class="chg">variable</span><span class="dim">   a knob                             var.environment
+</span><span class="chg">state</span><span class="dim">      what exists right now              terraform.tfstate
+</span><span class="chg">workspace</span><span class="dim">  a separate copy of the state       dev, test, prod</span></div>
+<div class="sc" id="t2"></div>
+<h2><span class="en">Step 4 · Install it, and keep its local files out of git</span><span class="zh">第 4 步 · 安装它，并让它的本地文件远离 git</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Install Terraform from its official download page or your system's package manager, then check it with <code>terraform -version</code>. Before the first commit, write a <code>.gitignore</code>. Terraform downloads provider plugins into a folder, and it writes the <b>state</b> to a file that can hold passwords and keys in plain text. Neither belongs in git. (The small <code>.terraform.lock.hcl</code> file, which pins plugin versions, should be committed.)</p>
+<p class="zh" style="margin:0">从官方下载页或你系统的包管理器安装 Terraform，然后用 <code>terraform -version</code> 检查。第一次提交之前，先写好 <code>.gitignore</code>。Terraform 会把提供者插件下载到一个文件夹里，还会把<b>状态</b>写进一个文件，这个文件里可能以明文存着密码和密钥。这两样都不该进 git。（记录插件版本的小文件 <code>.terraform.lock.hcl</code> 则应该提交。）</p></div>
+<div class="codebox"><span class="dim">$ terraform -version
+
+# .gitignore
+</span><span class="chg">.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+crash.log</span></div>
+<div class="try" id="t3"></div>
+<h2><span class="en">Step 5 · Read one small config, line by line</span><span class="zh">第 5 步 · 一行一行读一份小配置</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Start with one bucket, and understand every line before you make more. The first block says which provider to download. The second sets its region. The third is the resource: its type, a local name (<code>memory</code>), and its settings. Then run the four commands: <code>init</code> downloads plugins, <code>plan</code> shows what <i>would</i> change without changing anything, <code>apply</code> does it, <code>destroy</code> removes it.</p>
+<p class="zh" style="margin:0 0 8px">先从一个存储桶开始，每一行都弄懂了再去建更多。第一块说明要下载哪个提供者。第二块设置它的区域。第三块是资源：它的类型、一个本地名字（<code>memory</code>）和它的设置。然后运行四条命令：<code>init</code> 下载插件，<code>plan</code> 显示<i>将会</i>改什么、但不真的改，<code>apply</code> 去执行，<code>destroy</code> 把它移除。</p>
+<p class="en" style="margin:0">Bucket names are shared by everyone in the cloud, so change the name below to one of your own.</p>
+<p class="zh" style="margin:0">存储桶的名字是全云共用的，所以请把下面的名字换成你自己的。</p></div>
+<div class="codebox"><span class="dim"># main.tf
+terraform {
+  required_providers {
+    aws = { source = "hashicorp/aws", version = "~> 5.0" }
+  }
+}
+
+provider "aws" {
+  region = "ap-southeast-1"
+}
+
+</span><span class="chg">resource "aws_s3_bucket" "memory" {
+  bucket = "wharf-twin-practice-ml-2026"
+  tags   = { Project = "twin" }
+}</span><span class="dim">
+
+# then, in the same folder:
+terraform init
+terraform plan
+terraform apply
+terraform destroy</span></div>
+<div class="try" id="t4"></div>
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en"><b>Three slips.</b> I thought code for infrastructure would be harder than clicking. The first time it is; by the tenth time it is far easier. I deleted things in the wrong order and hit dependency errors. And I almost committed the state file, which can hold secrets.</span><span class="zh"><b>三个失误。</b>我以为用代码管基础设施比点鼠标难。第一次确实难；到第十次就容易多了。我删东西的顺序不对，撞上了依赖错误。我还差点把状态文件提交上去，而它里面可能有秘密。</span></div>
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Write a config for one bucket,</b> plan it, apply it, then destroy it.</span><span class="zh"><b>写一份只有一个存储桶的配置，</b>plan、apply，再 destroy。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Change a tag</b> and read the plan's diff before you apply.</span><span class="zh"><b>改一个标签</b>，apply 之前先读 plan 的差异。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Count the clicks</b> you made building the twin in the last topic.</span><span class="zh"><b>数一数</b>上一个主题里搭分身时你点了多少下。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">At the wharf</span><span class="zh">在码头</span></b><span class="en">A terminal run from memory works until the one person who remembers goes on leave. The berth plan on the wall is the same terminal written down: anyone can read it, change it on paper first, and rebuild a berth from it. Anything you can click, you should be able to rebuild from a file.</span><span class="zh">一个靠记忆运转的码头，只要记得的那个人休假就完了。墙上的泊位图就是把码头写了下来：谁都能读，改动先改在图纸上，还能照着它重建一个泊位。凡是你能点出来的东西，你都应该能从一份文件里重建出来。</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Hand-built infrastructure is hard to remember, repeat or share; deleting it shows how many parts there were.<br>• Delete in dependency order: whatever points at something goes first, and buckets are emptied before they go.<br>• Infrastructure as code means the setup is text that can be reviewed, versioned, repeated and shared.<br>• Terraform's five ideas: resources, providers, variables, state and workspaces.<br>• Keep <code>.terraform/</code> and state files out of git, because state can hold secrets.<br>• <code>plan</code> shows what will change before anything changes.<br>• Anything I can click, I should be able to rebuild from a file.</p><p class="zh" style="margin:0">• 手工搭的基础设施难记、难重复、难共享；把它删掉就能看出原来有多少部件。<br>• 按依赖顺序删除：指向别的东西的先删，存储桶先清空再删。<br>• 基础设施即代码，就是让搭建成为可审阅、可版本管理、可重复、可共享的文字。<br>• Terraform 的五个概念：资源、提供者、变量、状态和工作区。<br>• 把 <code>.terraform/</code> 和状态文件挡在 git 之外，因为状态里可能有秘密。<br>• <code>plan</code> 在任何东西改变之前，先显示将会改什么。<br>• 凡是我能点出来的，我都应该能从一份文件里重建出来。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Production</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('t0'),{q:{en:'Which should you delete first: the CDN, or the site bucket it serves files from?',zh:'先删哪个：CDN，还是它取文件的那个网站存储桶？'},opts:[{k:'a',en:'The CDN, because it points at the bucket',zh:'CDN，因为它指向存储桶'},{k:'b',en:'The bucket, because it holds the files',zh:'存储桶，因为文件在它那里'},{k:'c',en:'Either: order never matters',zh:'随便哪个：顺序无所谓'}],a:'a',ex:{en:'Whatever points at another thing goes first; deleting the bucket first leaves the CDN pointing at nothing.',zh:'指向别的东西的先删；先删存储桶，CDN 就会指向一片空。'},hint:{en:'Which one depends on the other?',zh:'哪一个依赖另一个？'}});
+ game($('t1'),[
+  {en:'A teammate can read what the setup is before it changes',zh:'队友能在改动之前读到搭建是什么样',a:'c',ex:{en:'Text can be reviewed like any other file.',zh:'文字可以像别的文件一样被审阅。'},hint:{en:'Can you read a click?',zh:'你能“阅读”一次点击吗？'}},
+  {en:'A second copy is just another run',zh:'再来一份，只是再跑一遍',a:'c',ex:{en:'The same files make the same setup again.',zh:'同样的文件会再做出同样的搭建。'},hint:{en:'Do you need to remember anything?',zh:'你需要记住什么吗？'}},
+  {en:'The setup lives in someone\'s memory of the clicks',zh:'搭建只存在于某人对点击的记忆里',a:'k',ex:{en:'Memory fades, and it cannot be shared or reviewed.',zh:'记忆会淡忘，也没法共享或审阅。'},hint:{en:'Where is the record?',zh:'记录在哪里？'}},
+  {en:'Every change shows up in git history',zh:'每次改动都出现在 git 历史里',a:'c',ex:{en:'Files can be versioned; clicks cannot.',zh:'文件能做版本管理，点击不能。'},hint:{en:'Can git see a click?',zh:'git 能看见一次点击吗？'}},
+  {en:'Nobody can tell what changed last Tuesday',zh:'没人知道上周二改了什么',a:'k',ex:{en:'Console changes leave no readable diff.',zh:'控制台里的改动不会留下可读的差异。'},hint:{en:'Is there a diff to read?',zh:'有可读的差异吗？'}}],
+  [{k:'c',en:'As code',zh:'写成代码'},{k:'k',en:'By clicking',zh:'靠点击'}],{en:'Property',zh:'特点'});
+ game($('t2'),[
+  {en:'A bucket that should exist',zh:'一个应该存在的存储桶',a:'r',ex:{en:'A thing to create is a resource.',zh:'要创建的东西就是资源。'},hint:{en:'Is it a thing, a plugin, a knob or a record?',zh:'它是东西、插件、旋钮还是记录？'}},
+  {en:'The plugin that talks to one cloud',zh:'和某个云打交道的插件',a:'p',ex:{en:'Providers are the plugins.',zh:'提供者就是插件。'},hint:{en:'Which one gets downloaded by init?',zh:'init 会下载哪一个？'}},
+  {en:'The environment name you choose per run',zh:'每次运行时选的环境名',a:'v',ex:{en:'A knob you set is a variable.',zh:'你来设的旋钮就是变量。'},hint:{en:'Which one do you set yourself?',zh:'哪一个是你自己来设的？'}},
+  {en:'The record of what really exists',zh:'实际存在内容的记录',a:'s',ex:{en:'State matches the files to real things.',zh:'状态把文件和真实的东西对应起来。'},hint:{en:'Which one holds a record?',zh:'哪一个保存记录？'}},
+  {en:'A separate copy of the state for dev',zh:'给 dev 用的一份独立的状态副本',a:'w',ex:{en:'Workspaces keep one state each.',zh:'每个工作区各有一份状态。'},hint:{en:'Which one gives you several copies?',zh:'哪一个让你拥有好几份？'}}],
+  [{k:'r',en:'Resource',zh:'资源'},{k:'p',en:'Provider',zh:'提供者'},{k:'v',en:'Variable',zh:'变量'},{k:'s',en:'State',zh:'状态'},{k:'w',en:'Workspace',zh:'工作区'}],{en:'Description',zh:'描述'});
+ predict($('t3'),{q:{en:'Why does the state file go in <code>.gitignore</code>?',zh:'为什么状态文件要放进 <code>.gitignore</code>？'},opts:[{k:'a',en:'It can hold secrets in plain text, and it belongs in a shared, protected place instead',zh:'它里面可能有明文的秘密，应该放在受保护的共享位置'},{k:'b',en:'Git cannot store files that end in .tfstate',zh:'git 存不了 .tfstate 结尾的文件'},{k:'c',en:'It is always empty',zh:'它永远是空的'}],a:'a',ex:{en:'Anyone who can read the repo could read those secrets. A later lesson moves state to a protected shared bucket.',zh:'能读仓库的人就能读到那些秘密。后面的课会把状态挪到一个受保护的共享存储桶里。'},hint:{en:'What might a record of real resources contain?',zh:'一份真实资源的记录里可能有什么？'}});
+ predict($('t4'),{q:{en:'You run <code>terraform plan</code> on the new bucket config. What happens?',zh:'你对新的存储桶配置运行 <code>terraform plan</code>。会发生什么？'},opts:[{k:'a',en:'It shows that one bucket would be created, and creates nothing yet',zh:'它显示将创建一个存储桶，但还什么都没创建'},{k:'b',en:'It creates the bucket straight away',zh:'它立刻创建存储桶'},{k:'c',en:'It deletes everything else in the account',zh:'它删掉账号里其他所有东西'}],a:'a',ex:{en:'Plan is a preview. Only apply changes anything.',zh:'plan 只是预览。只有 apply 才会真的改东西。'},hint:{en:'Which command actually makes changes?',zh:'哪条命令才真的做改动？'}});
+});
+</script></body></html>

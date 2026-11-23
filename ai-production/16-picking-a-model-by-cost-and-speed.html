@@ -1,0 +1,146 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Picking a model by cost and speed, then watching it | TX Learns</title>
+<meta name="description" content="Choose a model size on purpose by testing it, work out what a month costs, then watch real usage once the twin is live."><meta property="og:title" content="Picking a model by cost and speed, then watching it | TX Learns"><meta property="og:description" content="Choose a model size on purpose by testing it, work out what a month costs, then watch real usage once the twin is live."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-production/16-picking-a-model-by-cost-and-speed.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-24">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Managed models in the cloud · Lesson 2</span><span class="zh">云上的托管模型 · 第 2 课</span></span><h1><span class="en">Picking a model by cost and speed, then watching it</span><span class="zh">按成本和速度选模型，然后盯着它</span></h1><p class="meta"><span class="en">Choose a model size on purpose by testing it, work out what a month costs, then watch real usage once the twin is live · ~30 min · hands-on</span><span class="zh">用测试有意识地选定模型大小，算出一个月要花多少钱，上线后再盯着真实的使用情况 · 约 30 分钟 · 动手实践</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">The twin now runs on the managed model service. <b>Mei Ling</b> chose the biggest model "to be safe". <b>Mr Ong</b> asks one question: "What will this cost us in a month?" She has no answer. So she picks a size by test instead of by feeling, and then sets up a way to see what the twin does once <b>Auntie Siti</b> and the canteen crowd start chatting with it.</p>
+<p class="zh" style="margin:0">分身现在跑在托管模型服务上。<b>Mei Ling</b> “为了保险”选了最大的模型。<b>Ong 先生</b>只问一句：“这个一个月要花我们多少钱？”她答不上来。于是她改成靠测试而不是靠感觉来选大小，并且装好一套办法，等 <b>Siti 阿姨</b>和食堂的人开始跟分身聊天后，能看见它在做什么。</p></div>
+<h2><span class="en">Step 1 · Three sizes, and the model id as a knob</span><span class="zh">第 1 步 · 三种大小，把模型 id 做成一个旋钮</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The provider's own model family comes in three sizes. <b>Micro</b> is the fastest and cheapest, good for simple jobs. <b>Lite</b> is balanced. <b>Pro</b> is the best at reasoning, and the slowest and dearest. Make the model id an <b>environment variable</b> (a setting the function reads when it starts) so that switching size needs no code change.</p>
+<p class="zh" style="margin:0 0 8px">服务商自己的模型家族有三种大小。<b>Micro</b> 最快最便宜，适合简单的活。<b>Lite</b> 比较均衡。<b>Pro</b> 推理最强，也最慢最贵。把模型 id 做成一个<b>环境变量</b>（函数启动时读取的设置），这样换大小就不用改代码。</p>
+<p class="en" style="margin:0">One catch: the command below replaces the function's whole set of variables, so list every one you still need.</p>
+<p class="zh" style="margin:0">有一个坑：下面这条命令会替换函数的整套变量，所以还需要的变量都要列出来。</p></div>
+<div class="codebox"><span class="dim">import os
+</span><span class="chg">MODEL_ID = os.environ["MODEL_ID"]     # no size is written in the code any more</span><span class="dim">
+
+# switch the size without touching the code (list EVERY variable the function needs):
+aws lambda update-function-configuration --function-name wharf-twin \
+  --environment "Variables={</span><span class="chg">MODEL_ID=us.amazon.nova-micro-v1:0</span><span class="dim">,MEMORY_BUCKET=wharf-twin-memory}"</span></div>
+<div class="try" id="t0"></div>
+<h2><span class="en">Step 2 · What a month costs</span><span class="zh">第 2 步 · 一个月要花多少钱</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">A model is priced per thousand <b>tokens</b> (small pieces of text, roughly three-quarters of a word), with one price for the text going in and a higher one for the text coming out. So a chat costs: input tokens × input price + output tokens × output price. Multiply by how many chats you expect. The prices below are made-up round numbers for practice; always read the provider's current price page.</p>
+<p class="zh" style="margin:0">模型按每一千个 <b>token</b>（文字的小片段，大约四分之三个英文单词）计价，输入的文字一个价，输出的文字一个更高的价。所以一次聊天的费用是：输入 token 数 × 输入单价 + 输出 token 数 × 输出单价，再乘以你预计的聊天次数。下面的价格是练习用的整数，是编的；实际请读服务商当前的价格页。</p></div>
+<div class="codebox"><span class="dim"># example prices in dollars per 1,000 tokens: (input, output) -- not real, check today's page
+</span><span class="chg">PRICES = {"micro": (0.00004, 0.00016),
+          "lite":  (0.00006, 0.00024),
+          "pro":   (0.0008,  0.0032)}
+
+def cost_per_chat(size, tokens_in=800, tokens_out=200):
+    p_in, p_out = PRICES[size]
+    return tokens_in / 1000 * p_in + tokens_out / 1000 * p_out</span><span class="dim">
+
+for size in PRICES:
+    c = cost_per_chat(size)
+    print(size, round(c, 6), "per chat,", round(c * 1000, 3), "per 1,000 chats")
+# micro 6.4e-05 per chat, 0.064 per 1,000 chats
+# lite  9.6e-05 per chat, 0.096 per 1,000 chats
+# pro   0.00128 per chat, 1.28 per 1,000 chats</span></div>
+<div class="try" id="t1"></div>
+<h2><span class="en">Step 3 · Same ten questions, three sizes</span><span class="zh">第 3 步 · 同样十道题，三种大小</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Do not judge a model on one prompt. Write ten questions the twin must answer well, with a word each good answer must contain, and run all of them on every size. Record what passed, how long it took and how many tokens it used. A keyword check is crude, but it is repeatable, and you can read the failures yourself.</p>
+<p class="zh" style="margin:0 0 8px">别拿一个提示就给模型下结论。写十道分身必须答好的题，每题写一个好答案里必须出现的词，然后在每种大小上都跑一遍。记下通过了几道、用了多久、用了多少 token。关键词检查很粗糙，但它可以重复，而且失败的答案你可以自己去读。</p>
+<p class="en" style="margin:0">The code shows four questions to keep it short; grow the list to ten.</p>
+<p class="zh" style="margin:0">代码里为了简短只放四道题；请把清单扩到十道。</p></div>
+<div class="codebox"><span class="dim">import os
+import time
+import boto3
+
+client = boto3.client("bedrock-runtime", region_name=os.environ.get("AWS_REGION", "ap-southeast-1"))
+SYSTEM = ("You are Mei Ling's twin. Facts: she works in the wharf IT office, "
+          "she studies on weekends, her favourite lunch is Auntie Siti's laksa.")
+</span><span class="chg">SIZES = {"micro": "us.amazon.nova-micro-v1:0",
+         "lite":  "us.amazon.nova-lite-v1:0",
+         "pro":   "us.amazon.nova-pro-v1:0"}
+QUESTIONS = [("What is Mei Ling's favourite lunch?", "laksa"),     # grow this list to ten
+             ("Where does Mei Ling work?", "wharf"),
+             ("When does Mei Ling study?", "weekend"),
+             ("Who makes her favourite lunch?", "siti")]
+
+def run(size):
+    passed, secs, tin, tout = 0, 0.0, 0, 0
+    for question, must_have in QUESTIONS:
+        t0 = time.time()
+        r = client.converse(modelId=SIZES[size], system=[{"text": SYSTEM}],
+                            messages=[{"role": "user", "content": [{"text": question}]}],
+                            inferenceConfig={"maxTokens": 200})
+        secs += time.time() - t0
+        text = r["output"]["message"]["content"][0]["text"].lower()
+        passed += must_have in text
+        tin += r["usage"]["inputTokens"]
+        tout += r["usage"]["outputTokens"]
+    return passed, round(secs, 1), tin, tout
+
+for size in SIZES:
+    print(size, run(size))     # (passed, seconds, input tokens, output tokens)</span></div>
+<div class="sc" id="t2"></div>
+<h2><span class="en">Step 4 · Watch it once it is live</span><span class="zh">第 4 步 · 上线后盯着它</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">The test tells you what should happen. The logs tell you what does. The logs service already counts <b>invocations</b>, <b>duration</b> and <b>errors</b> for the function. Add one line per model call with the model, the time and the token counts, so a slow or costly request shows up as a single searchable line. Then set an <b>alarm</b>: it messages you when errors go over a limit, so you hear about it before a user complains.</p>
+<p class="zh" style="margin:0">测试告诉你应该发生什么，日志告诉你实际发生了什么。日志服务已经替函数统计了<b>调用次数</b>、<b>时长</b>和<b>错误数</b>。再给每次模型调用加一行，写上模型、耗时和 token 数，这样慢的或贵的请求就成了一行能搜到的记录。然后设一个<b>警报</b>：错误超过上限时它会通知你，这样用户还没抱怨你就先知道了。</p></div>
+<div class="codebox"><span class="dim">import json
+import os
+import time
+import boto3
+
+client = boto3.client("bedrock-runtime", region_name=os.environ.get("AWS_REGION", "ap-southeast-1"))
+MODEL_ID = os.environ["MODEL_ID"]
+
+def ask_logged(system_prompt: str, messages: list) -> str:
+    </span><span class="chg">t0 = time.time()
+    resp = client.converse(modelId=MODEL_ID, system=[{"text": system_prompt}], messages=messages,
+                           inferenceConfig={"maxTokens": 300})
+    print(json.dumps({"event": "model_call", "model": MODEL_ID,
+                      "ms": round((time.time() - t0) * 1000),
+                      "in": resp["usage"]["inputTokens"], "out": resp["usage"]["outputTokens"]}))</span><span class="dim">
+    return resp["output"]["message"]["content"][0]["text"]
+
+# an alarm on errors (the last line is the address of an alert topic that emails you; make one first):
+aws cloudwatch put-metric-alarm --alarm-name twin-errors --namespace AWS/Lambda --metric-name Errors \
+  --dimensions Name=FunctionName,Value=wharf-twin --statistic Sum --period 300 --evaluation-periods 1 \
+  --threshold 1 --comparison-operator GreaterThanOrEqualToThreshold \
+  --alarm-actions arn:aws:sns:ap-southeast-1:111122223333:wharf-alerts</span></div>
+<div class="try" id="t3"></div>
+<h2><span class="en">Step 5 · Cost tips that keep working</span><span class="zh">第 5 步 · 一直管用的省钱办法</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Most of the bill is tokens, so cut tokens. Keep the system prompt short. Cap the history sent each time, for example the last ten messages. And pick the <b>smallest model that passes your test</b>. When quality ever drops, you can move up one size, because the id is a knob.</p>
+<p class="zh" style="margin:0">账单的大头是 token，所以要减少 token。系统提示写短一点。限制每次发送的历史长度，比如只发最近十条消息。再就是选<b>能通过你测试的最小模型</b>。以后质量真的下降时，往上调一档就行，因为模型 id 是个旋钮。</p></div>
+<div class="codebox"><span class="dim">MAX_TURNS = 10
+
+def trim(messages: list) -> list:
+    """Send only the most recent turns; older ones cost tokens and add little."""
+    </span><span class="chg">recent = messages[-MAX_TURNS:]
+    while recent and recent[0]["role"] != "user":    # a history must start with the user
+        recent = recent[1:]
+    return recent</span></div>
+<div class="sc" id="t4"></div>
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en"><b>Three slips.</b> I picked the biggest model "to be safe" and never checked whether the small one passed. I judged quality on one prompt, which told me nothing. And I did not look at the logs until a user complained that the twin was slow.</span><span class="zh"><b>三个失误。</b>我“为了保险”选了最大的模型，却从没检查小模型能不能通过。我只用一个提示判断质量，什么也说明不了。我也没去看日志，直到有用户抱怨分身太慢。</span></div>
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Build a ten-question test</b> and score all three sizes.</span><span class="zh"><b>做一份十道题的测试</b>，给三种大小都打分。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Estimate the cost per chat</b> for each size, using your real token counts.</span><span class="zh"><b>估算每种大小一次聊天的费用</b>，用你真实的 token 数。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Find one log line</b> that shows a slow request.</span><span class="zh"><b>找出一行日志</b>，它显示了一次慢请求。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">At the wharf</span><span class="zh">在码头</span></b><span class="en">You would not send a prime mover to carry a single parcel across the yard. Mr Ong wants the smallest vehicle that does the job, and he wants the control tower to tell him when something is running slow or running up the bill. Choose the size by test, then keep the tower screens on.</span><span class="zh">你不会派一辆重型牵引车去运一个小包裹穿过堆场。Ong 先生要的是能完成任务的最小车辆，还要控制塔在有东西变慢或花费暴涨时告诉他。用测试选大小，然后让控制塔的屏幕一直亮着。</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• The model family comes in micro, lite and pro: trade speed and price against reasoning.<br>• Keep the model id in an environment variable so switching size needs no code change.<br>• A chat costs input tokens × input price + output tokens × output price.<br>• Run the same ten questions on every size and compare quality, speed and cost.<br>• Log one line per model call, and read invocations, duration, errors and tokens.<br>• Set an alarm so you hear about problems before users tell you.<br>• Shorter prompts, a history cap and the smallest model that passes are the cost levers.</p><p class="zh" style="margin:0">• 模型家族有 micro、lite 和 pro：在速度、价格与推理能力之间取舍。<br>• 把模型 id 放进环境变量，这样换大小不用改代码。<br>• 一次聊天的费用 = 输入 token × 输入单价 + 输出 token × 输出单价。<br>• 每种大小都跑同样的十道题，比较质量、速度和费用。<br>• 每次模型调用记一行日志，并关注调用次数、时长、错误和 token。<br>• 设一个警报，让你比用户先知道问题。<br>• 更短的提示、限制历史长度、选能通过的最小模型，就是省钱的杠杆。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Production</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('t0'),{q:{en:'Testing shows the micro size is good enough. What is the least work to switch the twin to it?',zh:'测试表明 micro 已经够用。把分身切到它，最省事的做法是什么？'},opts:[{k:'a',en:'Change the MODEL_ID variable and leave the code alone',zh:'改 MODEL_ID 变量，代码不动'},{k:'b',en:'Rewrite the function for the new size',zh:'为新的大小重写函数'},{k:'c',en:'Create a new cloud account',zh:'新建一个云账号'}],a:'a',ex:{en:'The code reads the id from the environment, so size is a setting, not code.',zh:'代码从环境里读取 id，所以大小是一个设置，不是代码。'},hint:{en:'Where does the code get its model id?',zh:'代码从哪里拿到它的模型 id？'}});
+ predict($('t1'),{q:{en:'With the example prices, a chat of 800 input tokens and 200 output tokens on the lite size costs about…',zh:'按例子里的价格，lite 大小上一次 800 个输入 token、200 个输出 token 的聊天，大约花…'},opts:[{k:'a',en:'$0.000096',zh:'0.000096 美元'},{k:'b',en:'$0.0096',zh:'0.0096 美元'},{k:'c',en:'$0.96',zh:'0.96 美元'}],a:'a',ex:{en:'0.8 × 0.00006 + 0.2 × 0.00024 = 0.000096. That is about ten cents for a thousand chats.',zh:'0.8 × 0.00006 + 0.2 × 0.00024 = 0.000096。一千次聊天大约一毛钱美元。'},hint:{en:'Tokens are in thousands: 800 tokens is 0.8 of a thousand.',zh:'token 按千计：800 个 token 是 0.8 个千。'}});
+ game($('t2'),[
+  {en:'Score all three sizes on the same ten questions',zh:'三种大小都用同样的十道题打分',a:'g',ex:{en:'The same test makes the sizes comparable.',zh:'同一份测试，才能比较各个大小。'},hint:{en:'Is the comparison fair?',zh:'这样比较公平吗？'}},
+  {en:'Judge by one clever prompt that went well',zh:'凭一个答得好的巧妙提示下结论',a:'b',ex:{en:'One prompt is luck, not evidence.',zh:'一个提示只是运气，不是证据。'},hint:{en:'Would a second prompt agree?',zh:'换第二个提示还会一样吗？'}},
+  {en:'Record time and token counts next to the pass count',zh:'在通过数旁边记下耗时和 token 数',a:'g',ex:{en:'Speed and cost are half of the choice.',zh:'速度和费用占了选择的一半。'},hint:{en:'Is quality the only thing you are paying for?',zh:'你付钱买的只有质量吗？'}},
+  {en:'Pick the biggest model "to be safe" without testing a smaller one',zh:'不测试小模型，“为了保险”直接选最大的',a:'b',ex:{en:'You may pay twenty times more for no gain.',zh:'你可能多花二十倍的钱，却没有任何好处。'},hint:{en:'Did you check whether the small one passes?',zh:'你查过小模型能不能通过吗？'}}],
+  [{k:'g',en:'Good habit',zh:'好习惯'},{k:'b',en:'Bad habit',zh:'坏习惯'}],{en:'Habit',zh:'做法'});
+ predict($('t3'),{q:{en:'A user says the twin felt slow at lunch time. Which field in your log line helps you find that call?',zh:'有用户说午饭时分身很慢。你的日志行里哪个字段能帮你找到那次调用？'},opts:[{k:'a',en:'ms, the time the model call took',zh:'ms，模型调用花的时间'},{k:'b',en:'model, the id of the model',zh:'model，模型的 id'},{k:'c',en:'event, the word model_call',zh:'event，也就是 model_call 这个词'}],a:'a',ex:{en:'Sort or search the log lines by ms to find the slowest calls, then look at their token counts.',zh:'按 ms 排序或搜索日志行，就能找到最慢的调用，再看它们的 token 数。'},hint:{en:'Which field measures time?',zh:'哪个字段衡量时间？'}});
+ game($('t4'),[
+  {en:'Send only the last ten messages',zh:'只发最近十条消息',a:'s',ex:{en:'Fewer input tokens on every chat.',zh:'每次聊天的输入 token 都更少。'},hint:{en:'Does it add or remove tokens?',zh:'它增加还是减少 token？'}},
+  {en:'Paste the whole fact sheet into every prompt, three times',zh:'把整份事实资料在每个提示里贴三遍',a:'c',ex:{en:'Repeated text is paid for again and again.',zh:'重复的文字要一遍又一遍地付钱。'},hint:{en:'Who pays for each repeated token?',zh:'每个重复的 token 谁来付钱？'}},
+  {en:'Use the smallest size that passes the test',zh:'用能通过测试的最小大小',a:'s',ex:{en:'Smaller sizes charge less per token.',zh:'小模型每个 token 收费更少。'},hint:{en:'Which size charges least?',zh:'哪个大小收费最少？'}},
+  {en:'Keep a long, chatty system prompt "just in case"',zh:'“以防万一”保留一个又长又啰嗦的系统提示',a:'c',ex:{en:'The system prompt is sent on every single call.',zh:'系统提示每一次调用都要发送。'},hint:{en:'How many times is it sent?',zh:'它会被发送多少次？'}}],
+  [{k:'s',en:'Saves money',zh:'省钱'},{k:'c',en:'Costs more',zh:'多花钱'}],{en:'Choice',zh:'做法'});
+});
+</script></body></html>
