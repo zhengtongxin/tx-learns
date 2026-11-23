@@ -23,10 +23,10 @@ window.TRACK={id:'ai-engineer',title:{en:'AI Engineer',zh:'AI 工程师'},topics
   {k:'c',title:{en:'Measuring whether retrieval works',zh:'怎么衡量检索好不好'}},
   {k:'p',title:{en:'Project: a company knowledge helper',zh:'项目：公司知识助手'}}]},
  {n:6,title:{en:'Predicting with data',zh:'用数据做预测'},items:[
-  {k:'c',title:{en:'Curating and cleaning a dataset',zh:'整理并清洗数据集'}},
-  {k:'c',title:{en:'Baselines: average, linear, forest',zh:'基线：平均值、线性、随机森林'}},
-  {k:'c',title:{en:'Neural networks and frontier models as predictors',zh:'神经网络与云端大模型当预测器'}},
-  {k:'p',title:{en:'Project: a price guesser',zh:'项目：价格估算器'}}]},
+  {k:'c',file:'18-curating-and-cleaning-a-dataset.html',title:{en:'Curating and cleaning a dataset',zh:'整理并清洗数据集'}},
+  {k:'c',file:'19-baselines-average-linear-forest.html',title:{en:'Baselines: average, linear, forest',zh:'基线：平均值、线性、随机森林'}},
+  {k:'c',file:'20-neural-nets-and-frontier-as-predictors.html',title:{en:'Neural networks and frontier models as predictors',zh:'神经网络与云端大模型当预测器'}},
+  {k:'p',file:'21-price-guesser.html',title:{en:'Project: a price guesser',zh:'项目：价格估算器'}}]},
  {n:7,title:{en:'Fine-tuning open models',zh:'微调开源模型'},items:[
   {k:'c',title:{en:'LoRA and quantisation, in plain words',zh:'LoRA 与量化的大白话'}},
   {k:'c',title:{en:'Training run: what to watch',zh:'一次训练：该盯哪些指标'}},

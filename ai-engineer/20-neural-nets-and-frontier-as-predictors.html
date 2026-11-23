@@ -1,0 +1,102 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Neural networks and frontier models as predictors | TX Learns</title>
+<meta name="description" content="Plug a human, a small neural network, a prompted frontier model and a fine-tuned model into the same scoring harness, then compare them by error and cost."><meta property="og:title" content="Neural networks and frontier models as predictors | TX Learns"><meta property="og:description" content="Plug a human, a small neural network, a prompted frontier model and a fine-tuned model into the same scoring harness, then compare them by error and cost."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-engineer/20-neural-nets-and-frontier-as-predictors.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-23">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Predicting with data · Lesson 3</span><span class="zh">用数据做预测 · 第 3 课</span></span><h1><span class="en">Neural networks and frontier models as predictors</span><span class="zh">神经网络与云端大模型当预测器</span></h1><p class="meta"><span class="en">You will plug a human, a small neural network and a big model into the same scoring harness and compare them fairly · ~25 min · concept</span><span class="zh">你会把人、小神经网络和大模型接进同一块计分板，公平地比较 · 约 25 分钟 · 概念课</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0"><b>Wei Jie</b> has the scoring board and the classic baselines from the last lesson. Now <b>Ah Boy</b> asks the fun question: "Who guesses prices best: me, a neural network, or one of those big cloud models?" Everyone takes the same test, and the board decides.</p>
+<p class="zh" style="margin:0"><b>Wei Jie</b> 已经有了上一课的计分板和传统基线。现在 <b>Ah Boy</b> 问了个有趣的问题：“谁猜价格最准：我、神经网络，还是那些云端大模型？”大家考同一份卷子，由计分板说了算。</p></div>
+
+<h2><span class="en">Step 1 · A human baseline</span><span class="zh">第 1 步 · 人类基线</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Before any model, Wei Jie exported 100 test descriptions to a CSV, guessed the prices himself and read them back through the same scoring function. He was not great: knowing prices from daily life only gets you so far. That is a useful dose of humility. A human here is worse than a decent model and better than random.</p>
+<p class="zh" style="margin:0 0 8px">在碰任何模型之前，Wei Jie 先把 100 条测试描述导出成 CSV，自己猜价格，再用同一个评分函数读回来。他表现不算好：靠日常生活积累的价格感，也就到这个程度。这是一剂有用的清醒药：在这个任务上，人比像样的模型差，却比随机猜好。</p></div>
+<div class="codebox"><span class="dim">import csv
+</span><span class="chg">with open("my_guesses.csv") as f:
+    mine = {row["id"]: float(row["guess"]) for row in csv.DictReader(f)}
+
+def human_pricer(item):
+    return mine[item.id]
+
+evaluate(human_pricer, test[:100])      # the same evaluate as before</span></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · A vanilla neural network</span><span class="zh">第 2 步 · 朴素的神经网络</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">First turn each description into a long vector of 5,000 hashed word counts: each word is hashed to a slot number, so there is no vocabulary list to store. A small PyTorch network is a few linear layers with activation functions between them. Training repeats four moves: forward, loss, backward, step. Watch the parameter count and the validation loss each epoch. It did about as well as the best classical model: neural nets are not magic on small features.</p>
+<p class="zh" style="margin:0 0 8px">先把每段描述变成 5000 维的哈希词频向量：每个词被哈希到一个槽位，所以不用存词表。小小的 PyTorch 网络就是几层线性层，中间夹着激活函数。训练不断重复四步：前向、算损失、反向、更新。每个 epoch 都看参数量和验证集损失。它的表现和最好的传统模型差不多：特征不多时，神经网络并不神奇。</p></div>
+<div class="codebox"><span class="dim">import torch, torch.nn as nn
+from sklearn.feature_extraction.text import HashingVectorizer
+hasher = HashingVectorizer(n_features=5000)
+</span><span class="chg">class PriceNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.layers = nn.Sequential(
+            nn.Linear(5000, 128), nn.ReLU(),
+            nn.Linear(128, 32), nn.ReLU(),
+            nn.Linear(32, 1))
+
+    def forward(self, x):
+        return self.layers(x).squeeze(-1)
+
+net = PriceNet()
+opt = torch.optim.Adam(net.parameters(), lr=1e-3)
+for x, y in batches:                  # x: word counts, y: true prices
+    loss = nn.functional.l1_loss(net(x), y)
+    opt.zero_grad()
+    loss.backward()
+    opt.step()</span></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · A frontier model, no training</span><span class="zh">第 3 步 · 不训练的云端大模型</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Now skip training entirely: ask a big model "Estimate the price of this product. Reply with the price only", plus the description. It is surprisingly strong, because it has seen the world's prices during its own training. The catch is a cost on every call, and a smaller model is usually weaker. Models add words anyway, so pull the number out with a regex.</p>
+<p class="zh" style="margin:0 0 8px">现在完全不训练：问大模型“估一下这件商品的价格，只回答价格”，再附上描述。它出奇地强，因为它自己的训练中见过世界各地的价格。代价是每次调用都要花钱，而小一点的模型通常更弱。模型总爱多说话，所以用正则把数字抠出来。</p></div>
+<div class="codebox"><span class="dim">import re
+from openai import OpenAI
+client = OpenAI()
+</span><span class="chg">def frontier_pricer(item, model="your-big-model"):
+    reply = client.chat.completions.create(model=model, messages=[
+        {"role": "user", "content":
+         "Estimate the price of this product. Reply with the price only.\n\n" + item.summary}])
+    match = re.search(r"\d[\d,]*\.?\d*", reply.choices[0].message.content)
+    return float(match.group().replace(",", "")) if match else 0.0</span></div>
+<div class="try" id="p3"></div>
+
+<h2><span class="en">Step 4 · Get examples ready for fine-tuning</span><span class="zh">第 4 步 · 为微调准备样例</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Fine-tuning a hosted model takes examples in JSON Lines: one chat per line, with a user message (the item) and an assistant message (the price, rounded to a whole number to save tokens). Providers suggest starting with 50 to 100 examples. Wei Jie used 100 for one epoch, so the bill stayed tiny, plus a small validation file. Upload the files, start a job, wait, then plug the tuned model's name into the same predictor and the same <code>evaluate</code>.</p>
+<p class="zh" style="margin:0 0 8px">微调托管模型需要 JSON Lines 格式的样例：每行一段对话，包含 user 消息（商品）和 assistant 消息（价格，取整数以省 token）。服务商建议从 50 到 100 条开始。Wei Jie 用了 100 条、跑一个 epoch，账单才会很小，另外再配一个小的验证文件。上传文件、开始任务、等待，然后把微调后的模型名字接进同一个预测函数和同一个 <code>evaluate</code>。</p></div>
+<div class="codebox"><span class="dim">import json
+</span><span class="chg">def to_line(item):
+    return json.dumps({"messages": [
+        {"role": "user", "content": "Estimate the price: " + item.summary},
+        {"role": "assistant", "content": f"{round(item.price)}"}]})
+
+with open("tune_train.jsonl", "w") as f:
+    for item in train[:100]:
+        f.write(to_line(item) + "\n")</span></div>
+<p class="en">Which of these is a good way to compare these predictors?</p>
+<p class="zh">下面哪种比较这些预测器的做法是对的？</p><div class="sc" id="g4"></div>
+
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I believed a fine-tuned model would clearly beat the plain frontier model. With a strong base model and only 100 examples, the change is small. The real benefit shows with more data and a cheaper base model: lower cost and more consistent answers.</span><span class="zh">我原以为微调后的模型会明显赢过直接用的大模型。底子强的模型只配 100 条样例，变化很小。真正的好处要在更多数据、更便宜的底座模型上才看得出：成本更低、答案更稳定。</span></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Guess 20 prices yourself</b> and score them with evaluate.</span><span class="zh"><b>自己猜 20 个价格，</b>用 evaluate 打分。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Write the one-line "price only" prompt</b> and parse the reply.</span><span class="zh"><b>写出一行“只回答价格”的提示词，</b>并解析回复。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Produce the JSONL for 20 examples</b> and open it to look at one line.</span><span class="zh"><b>生成 20 条样例的 JSONL，</b>打开看一行。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">Back at the void deck</span><span class="zh">回到组屋底层</span></b><span class="en">At the void deck, Uncle Raj, Mdm Tan and Ah Boy each guess the price of the same radio. Nobody argues about who sounds clever: you write down the real price and see who was closest. The harness does that for models.</span><span class="zh">在组屋底层，Raj 叔叔、Mdm Tan 和 Ah Boy 各自猜同一台收音机的价钱。没人争论谁听起来聪明：写下真实价格，看谁最接近就行。计分板对模型做的就是这件事。</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Same harness, many predictors: human, classic ML, neural net, prompted model, fine-tuned model.<br>• A human is worse than a decent model but better than random.<br>• Hashed word counts give a vector with no vocabulary to store.<br>• A neural net trains by forward, loss, backward, step, and is no magic on small features.<br>• A frontier model can predict with no training, but costs money per call.<br>• Ask for the number only, then parse it with a regex.<br>• Fine-tuning data is JSON Lines with the price as the assistant reply; gains are small with few examples.</p><p class="zh" style="margin:0">• 同一块计分板，很多预测器：人、传统机器学习、神经网络、提示词大模型、微调模型。<br>• 人比像样的模型差，但比随机猜好。<br>• 哈希词频得到的向量，不用存词表。<br>• 神经网络靠“前向、损失、反向、更新”训练，特征不多时并不神奇。<br>• 大模型不用训练就能预测，但每次调用都要花钱。<br>• 让它只回答数字，再用正则解析。<br>• 微调数据是 JSON Lines，价格放在 assistant 回复里；样例少时提升很小。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('p1'),{q:{en:'Why score your own guesses through the same <code>evaluate</code>?',zh:'为什么要把自己的猜测也送进同一个 <code>evaluate</code>？'},opts:[{k:'a',en:'So the human result is directly comparable with every model',zh:'这样人的成绩能和每个模型直接比较'},{k:'b',en:'Because humans need a different metric',zh:'因为人需要另一个指标'}],a:'a',ex:{en:'Same test, same metric: that is what makes a comparison fair.',zh:'同样的测试、同样的指标，比较才公平。'},hint:{en:'What is the point of a shared harness?',zh:'共用计分板的意义是什么？'}});
+ predict($('p2'),{q:{en:'In the loop, which line makes the network actually change its weights?',zh:'循环里，哪一行才真正让网络改变权重？'},opts:[{k:'a',en:'<code>opt.step()</code>',zh:'<code>opt.step()</code>'},{k:'b',en:'<code>loss = ...</code>',zh:'<code>loss = ...</code>'}],a:'a',ex:{en:'The loss measures the error and backward finds the direction; step moves the weights.',zh:'loss 衡量误差，backward 找方向，step 才真正移动权重。'},hint:{en:'Which line is the "update"?',zh:'哪一行是“更新”？'}});
+ predict($('p3'),{q:{en:'A reply says "About $120 maybe". What does the regex return?',zh:'回复是“About $120 maybe”。正则会返回什么？'},opts:[{k:'a',en:'<code>120.0</code>',zh:'<code>120.0</code>'},{k:'b',en:'The whole sentence',zh:'整句话'}],a:'a',ex:{en:'The regex pulls out the first number and ignores the extra words.',zh:'正则抠出第一个数字，忽略多余的词。'},hint:{en:'What does <code>match.group()</code> hold?',zh:'<code>match.group()</code> 里是什么？'}});
+ game($('g4'),[
+  {en:'Score every predictor on the same test set with the same evaluate.',zh:'所有预测器在同一个测试集上、用同一个 evaluate 打分。',a:'fair',ex:{en:'Only a shared test makes the numbers comparable.',zh:'只有共用测试，数字才能比较。'},hint:{en:'Is the exam the same for all?',zh:'大家的考卷一样吗？'}},
+  {en:'Test the neural net on easy items and the frontier model on hard ones.',zh:'神经网络考简单的，大模型考难的。',a:'unfair',ex:{en:'Different questions give different scores, so nothing compares.',zh:'题目不同，分数就不同，没法比较。'},hint:{en:'Are they facing the same questions?',zh:'它们面对的是同样的题吗？'}},
+  {en:'Report only error and hide the cost per call.',zh:'只报误差，隐藏每次调用的成本。',a:'unfair',ex:{en:'A tiny gain at ten times the cost is a different story. Pick by error and cost.',zh:'提升一点点却贵十倍，结论就不同了。要按误差和成本一起选。'},hint:{en:'Does a big model cost anything per call?',zh:'大模型每次调用要花钱吗？'}}],[{k:'fair',en:'Fair comparison',zh:'公平比较'},{k:'unfair',en:'Unfair',zh:'不公平'}],{en:'Verdict',zh:'判断'});
+});
+</script></body></html>

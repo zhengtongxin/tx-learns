@@ -1,0 +1,114 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Curating and cleaning a dataset | TX Learns</title>
+<meta name="description" content="Turn a messy pile of product listings into a clean, balanced, split dataset before any model sees it: filter, clean, balance, split and save."><meta property="og:title" content="Curating and cleaning a dataset | TX Learns"><meta property="og:description" content="Turn a messy pile of product listings into a clean, balanced, split dataset before any model sees it: filter, clean, balance, split and save."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-engineer/18-curating-and-cleaning-a-dataset.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-23">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Predicting with data · Lesson 1</span><span class="zh">用数据做预测 · 第 1 课</span></span><h1><span class="en">Curating and cleaning a dataset</span><span class="zh">整理并清洗数据集</span></h1><p class="meta"><span class="en">You will turn a messy pile of listings into a clean, balanced dataset that later lessons can learn from · ~20 min · concept</span><span class="zh">你会把一堆杂乱的商品列表整理成干净、均衡的数据集，供后面的课使用 · 约 20 分钟 · 概念课</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0"><b>Ah Boy</b> knows second-hand prices by heart, but he cannot sit at the counter all day. <b>Wei Jie</b> wants a program that reads a gadget's description and guesses its price. Ah Boy hands over a huge pile of online listings: title, description, features and price. Before any model, Wei Jie has to make that pile fit to learn from.</p>
+<p class="zh" style="margin:0"><b>Ah Boy</b> 把二手价格背得滚瓜烂熟，可他不能整天守在柜台。<b>Wei Jie</b> 想做个程序，读一件数码产品的描述就猜出价格。Ah Boy 给了他一大堆网上的商品列表：标题、描述、特点和价格。在碰任何模型之前，Wei Jie 得先把这堆东西整理到适合学习的程度。</p></div>
+
+<h2><span class="en">Step 1 · Look before you touch</span><span class="zh">第 1 步 · 先看，再动手</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A model can only learn from what you feed it, so look at the data first. Load a published dataset from the Hugging Face hub with <code>load_dataset</code>. Print one record, the most expensive record, and how many records have a price at all. Think of a stock-take: you count what is on the shelf before you decide what to sell.</p>
+<p class="zh" style="margin:0 0 8px">模型只能从你喂给它的东西里学，所以先看数据。用 <code>load_dataset</code> 从 Hugging Face hub 加载一个公开数据集。打印一条记录、最贵的一条记录，以及到底有多少条记录有价格。就像盘点货架：先数清货架上有什么，再决定卖什么。</p></div>
+<div class="codebox"><span class="dim">from datasets import load_dataset
+
+listings = load_dataset("your-name/gadget-listings", split="train")   # your own dataset id
+</span><span class="chg">print(listings[0])                                        # one record
+priced = [r for r in listings if r["price"]]               # many have no price
+print(len(priced), "of", len(listings), "have a price")
+print(max(priced, key=lambda r: float(r["price"])))        # the most extreme row</span></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Keep only what is usable</span><span class="zh">第 2 步 · 只留下能用的</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Throw away rows with no price, rows with too little text, and prices that are tiny or absurd. Wei Jie kept prices between $1 and $1000, and descriptions with at least a minimum number of characters. A few huge outliers drag a model the wrong way, like one wrong price tag that makes a whole shelf look expensive.</p>
+<p class="zh" style="margin:0 0 8px">丢掉没有价格的行、文字太少的行，以及太便宜或离谱的价格。Wei Jie 只保留 1 到 1000 美元之间的价格，以及描述至少达到最少字符数的行。几个特别大的离群值会把模型带偏，就像一张标错的价签，让整排货架都显得很贵。</p></div>
+<div class="codebox"><span class="chg">MIN_CHARS = 300
+
+def usable(row):
+    if not row["price"]:
+        return False
+    price = float(row["price"])
+    text = row["description"] or ""
+    return 1 <= price <= 1000 and len(text) >= MIN_CHARS
+
+kept = [r for r in listings if usable(r)]
+print("kept", len(kept), "of", len(listings))</span></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Clean the text into an Item</span><span class="zh">第 3 步 · 把文字清洗成 Item</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Put each survivor into a small <code>Item</code> class with one clean <code>summary</code> text and a <code>price</code>. Strip stray symbols and boilerplate lines such as "Manufacturer" or "Date first available". Drop any word with a long run of digits, like a part number: it adds noise, not meaning. Finally cut the text to a fixed length, so every example is about the same size.</p>
+<p class="zh" style="margin:0 0 8px">把每个幸存的记录放进一个小小的 <code>Item</code> 类：一段干净的 <code>summary</code> 文字加一个 <code>price</code>。去掉乱码符号和“Manufacturer”“Date first available”这类套话。含一长串数字的词（比如零件编号）也删掉：它只带来噪音，没有意义。最后把文字截到固定长度，让每个例子大小差不多。</p></div>
+<div class="codebox"><span class="dim">import re
+</span><span class="chg">NOISE_LINES = ("Manufacturer", "ASIN", "Date first available")
+MAX_CHARS = 800
+
+def clean(row):
+    lines = [ln for ln in row["description"].splitlines()
+             if not ln.startswith(NOISE_LINES)]
+    words = [w for w in " ".join(lines).split()
+             if len(re.findall(r"\d", w)) < 5]       # drop part numbers
+    return " ".join(words)[:MAX_CHARS]
+
+class Item:
+    def __init__(self, row):
+        self.summary = clean(row)
+        self.price = float(row["price"])
+
+items = [Item(r) for r in kept]</span></div>
+<div class="try" id="p3"></div>
+
+<h2><span class="en">Step 4 · Plot, then balance</span><span class="zh">第 4 步 · 画图，再均衡</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Plot the text lengths and the prices. Prices are skewed: lots of cheap things and a long tail of expensive ones. If you train on that as it is, the model learns "the answer is about thirty dollars" and is rarely wrong by much, yet never useful. So sample on purpose: keep every expensive item and only part of the huge cheap crowd, so every price range and category is represented.</p>
+<p class="zh" style="margin:0 0 8px">把文字长度和价格都画出来。价格是偏斜的：便宜的东西很多，昂贵的拖着一条长尾巴。如果原样训练，模型会学到“答案大概是三十块”，很少错得离谱，却毫无用处。所以要有意识地抽样：贵的全留，便宜的庞大人群只留一部分，让每个价格区间和类别都有代表。</p></div>
+<div class="codebox"><span class="dim">import random
+random.seed(42)
+</span><span class="chg">cheap = [i for i in items if i.price < 50]
+dear  = [i for i in items if i.price >= 50]
+balanced = dear + random.sample(cheap, k=min(len(cheap), len(dear)))
+random.shuffle(balanced)</span></div>
+<p class="en">Which of these makes a model useless for price guessing?</p>
+<p class="zh">下面哪一种情况会让价格预测模型变得没用？</p><div class="sc" id="g4"></div>
+
+<h2><span class="en">Step 5 · Split, then save</span><span class="zh">第 5 步 · 切分，然后保存</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Split into three sets: a big training set (hundreds of thousands), a validation set (a few thousand) and a test set (about 2,000). Think of Priya's tuition class: practice papers, a mock exam and the real exam. Never peek at the test set until the very end. Then push the finished dataset to the hub so a later notebook or cloud machine loads it in one line. Keep a small "lite" copy for quick runs.</p>
+<p class="zh" style="margin:0 0 8px">切成三份：很大的训练集（几十万条）、验证集（几千条）和测试集（约 2000 条）。就像 Priya 的补习班：练习卷、模拟考和真正的考试。测试集在最后之前绝不能偷看。然后把整理好的数据集推送到 hub，以后的 notebook 或云端机器一行就能加载。再留一份小的“lite”版本，方便快速跑。</p></div>
+<div class="codebox"><span class="dim">from datasets import Dataset, DatasetDict
+</span><span class="chg">test  = balanced[:2000]
+valid = balanced[2000:6000]
+train = balanced[6000:]
+
+def to_ds(rows):
+    return Dataset.from_list([{"text": i.summary, "price": i.price} for i in rows])
+
+data = DatasetDict({"train": to_ds(train), "validation": to_ds(valid), "test": to_ds(test)})
+data.push_to_hub("your-name/gadget-prices")                    # needs a hub login
+lite = DatasetDict({k: v.select(range(min(500, len(v)))) for k, v in data.items()})
+lite.push_to_hub("your-name/gadget-prices-lite")</span></div>
+<div class="try" id="p5"></div>
+
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I spent time on models before I looked at the data. The first plot showed a few absurd prices that I would otherwise have trained on. Now the plot and the most extreme row come first, every time.</span><span class="zh">我没看数据就先花时间去弄模型。第一张图一画，就看到几个离谱的价格，要是没看，我就拿它们去训练了。现在每次都先画图、先看最极端的那一行。</span></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Load a small public dataset</b> and print its most extreme row.</span><span class="zh"><b>加载一个小的公开数据集，</b>打印它最极端的一行。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Write a cleaning function</b> and count how many rows it removes.</span><span class="zh"><b>写一个清洗函数，</b>数一数它删掉了多少行。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Plot a histogram</b> of the target before and after filtering.</span><span class="zh"><b>画目标值的直方图，</b>对比过滤前后。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">Back at the void deck</span><span class="zh">回到组屋底层</span></b><span class="en">Before Ah Boy lists a phone, he wipes it, checks the box and throws out the broken ones. He never photographs the mess. Data is the same: tidy first, then show it to the model.</span><span class="zh">Ah Boy 上架一部手机之前，会先擦干净、核对盒子，坏的直接丢掉，从不拍一堆乱糟糟的东西。数据也一样：先整理好，再给模型看。</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Data work comes first and is most of the job.<br>• Look at one record and the most extreme record before anything else.<br>• Filter out missing, tiny and absurd prices.<br>• Clean the text: boilerplate, part numbers, fixed length.<br>• Plot the target: skewed prices need balancing.<br>• Split train, validation and test, and never peek at test.<br>• Push the finished dataset to the hub, with a small lite copy for fast tests.</p><p class="zh" style="margin:0">• 数据工作排在最前，而且是工作的大头。<br>• 任何事之前，先看一条记录和最极端的那条。<br>• 过滤掉缺失、过小和离谱的价格。<br>• 清洗文字：套话、零件编号、固定长度。<br>• 把目标值画出来：偏斜的价格需要均衡。<br>• 切成训练、验证、测试，测试集绝不偷看。<br>• 把成品推送到 hub，再留一份小的 lite 版本做快速测试。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('p1'),{q:{en:'Why print the most expensive record before doing anything else?',zh:'为什么一开始就要打印最贵的那条记录？'},opts:[{k:'a',en:'To spot absurd values early, before they get trained on',zh:'尽早发现离谱的数值，免得被拿去训练'},{k:'b',en:'To train the model on the best example',zh:'用最好的例子去训练模型'}],a:'a',ex:{en:'The extreme rows are where bad data hides.',zh:'坏数据最爱藏在极端的行里。'},hint:{en:'Is it a quality check or a training step?',zh:'这是质量检查，还是训练步骤？'}});
+ predict($('p2'),{q:{en:'A listing says the price is $9,999,999. What does <code>usable</code> do with it?',zh:'某条列表的价格是 9,999,999 美元。<code>usable</code> 会怎么处理它？'},opts:[{k:'a',en:'Rejects it, because it is over 1000',zh:'拒绝，因为超过了 1000'},{k:'b',en:'Keeps it, because it has a price',zh:'保留，因为它有价格'}],a:'a',ex:{en:'Having a price is not enough: the range check removes outliers.',zh:'有价格还不够，范围检查会去掉离群值。'},hint:{en:'Read the <code>1 &lt;= price &lt;= 1000</code> line.',zh:'看看 <code>1 &lt;= price &lt;= 1000</code> 那一行。'}});
+ predict($('p3'),{q:{en:'Why does <code>clean</code> drop words with five or more digits?',zh:'为什么 <code>clean</code> 要删掉含五个及以上数字的词？'},opts:[{k:'a',en:'Part numbers add noise but no meaning about price',zh:'零件编号只有噪音，说明不了价格'},{k:'b',en:'Digits crash the model',zh:'数字会让模型崩溃'}],a:'a',ex:{en:'A long number like a part code is unique to one item, so it teaches nothing that carries over.',zh:'零件码这类长数字只属于某一件商品，学不到可以推广的东西。'},hint:{en:'Would the same code appear on other items?',zh:'同样的编号会出现在别的商品上吗？'}});
+ game($('g4'),[
+  {en:'The training data is 95% items around $30, with almost no expensive ones.',zh:'训练数据 95% 是约 30 美元的东西，几乎没有贵的。',a:'bad',ex:{en:'The model learns to say about $30 every time. Balance the sample.',zh:'模型会学到每次都说大约 30 美元。要把样本均衡。'},hint:{en:'What is the easiest answer to learn here?',zh:'这里最容易学会的答案是什么？'}},
+  {en:'Cheap and expensive items both appear in the training data.',zh:'训练数据里便宜和昂贵的东西都有。',a:'ok',ex:{en:'Every price range gives the model something to learn from.',zh:'每个价格区间都给模型提供了可学的东西。'},hint:{en:'Is any range missing?',zh:'有没有哪个区间缺失？'}},
+  {en:'The test set was used while tuning the cleaning rules.',zh:'调整清洗规则时用到了测试集。',a:'bad',ex:{en:'You peeked, so the final score is too hopeful. Keep test untouched until the end.',zh:'你偷看了，最终分数会过于乐观。测试集要留到最后。'},hint:{en:'Who is allowed to see the test set, and when?',zh:'测试集什么时候、谁才能看？'}}],[{k:'bad',en:'Makes it useless',zh:'会变得没用'},{k:'ok',en:'Fine',zh:'没问题'}],{en:'Effect',zh:'影响'});
+ predict($('p5'),{q:{en:'Why keep a small "lite" copy of the dataset?',zh:'为什么要留一份小的“lite”数据集？'},opts:[{k:'a',en:'For quick test runs without waiting for the full data',zh:'快速试跑，不必等完整数据'},{k:'b',en:'Because the full one cannot be loaded',zh:'因为完整的加载不了'}],a:'a',ex:{en:'Check the whole pipeline on 500 rows, then run the big one once.',zh:'先用 500 行验证整条流程，再跑一次大的。'},hint:{en:'Think of a small taste before cooking a big pot.',zh:'想想开大锅之前先尝一小口。'}});
+});
+</script></body></html>
