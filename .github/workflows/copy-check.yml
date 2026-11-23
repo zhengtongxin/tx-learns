@@ -39,6 +39,8 @@ jobs:
         with:
           node-version: 22
       - name: Scan served files
+        env:
+          BANNED_WORDS_EXTRA: ${{ secrets.BANNED_WORDS_EXTRA }}
         run: node scripts/check-copy.mjs | tee copy-check.txt; exit ${PIPESTATUS[0]}
       - name: Check lesson counts and tags
         if: success() || failure()

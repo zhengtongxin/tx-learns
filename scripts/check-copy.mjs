@@ -5,12 +5,20 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { bannedSources, hasPrivateNames } from './lib.mjs';
 
 const root = new URL('..', import.meta.url).pathname;
 const SKIP = new Set(['.git', 'node_modules', 'scripts', '.github', 'inbox']);
-const patterns = readFileSync(join(root, 'banned-words.txt'), 'utf8')
-  .split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'))
-  .map(src => ({ src, re: new RegExp(src, 'giu') }));
+const publicRules = new Set(readFileSync(join(root, 'banned-words.txt'), 'utf8').split('\n').map(l => l.trim()));
+// A private rule (a source's name) is never printed: logs and PR comments are public.
+const patterns = bannedSources(root).map(src => ({ src, priv: !publicRules.has(src), re: new RegExp(src, 'giu') }));
+// The source names are not kept in the repo (it is public). In CI the BANNED_WORDS_EXTRA secret must supply them,
+// otherwise a pass would mean nothing.
+if (!hasPrivateNames(root)) {
+  const msg = 'The source-name rules are missing (secret BANNED_WORDS_EXTRA or banned-words.local.txt), so only the generic rules ran.';
+  if (process.env.GITHUB_ACTIONS) { console.error('✗ ' + msg); process.exit(1); }
+  console.log('::warning::' + msg);
+}
 
 function walk(dir, out = []) {
   for (const name of readdirSync(dir)) {
@@ -28,13 +36,14 @@ for (const f of files) {
   if (!/\.(html|js|css|json)$/.test(f)) continue;
   const lines = readFileSync(f, 'utf8').split('\n');
   lines.forEach((line, i) => {
-    for (const { src, re } of patterns) {
+    for (const { src, priv, re } of patterns) {
       re.lastIndex = 0;
       let m;
       while ((m = re.exec(line))) {
         hits++;
         const s = Math.max(0, m.index - 40);
-        console.log(`${relative(root, f)}:${i + 1}: "${m[0]}" (rule: ${src})\n    …${line.slice(s, m.index + m[0].length + 40).trim()}…`);
+        if (priv) console.log(`${relative(root, f)}:${i + 1}: a source's name appears here (rule kept private)`);
+        else console.log(`${relative(root, f)}:${i + 1}: "${m[0]}" (rule: ${src})\n    …${line.slice(s, m.index + m[0].length + 40).trim()}…`);
       }
     }
   });

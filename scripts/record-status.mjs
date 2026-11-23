@@ -12,12 +12,8 @@ const BRANCH = 'agent-status', PATH = 'status/all.json', KEEP = 12;
 if (!agent || !token || !repo) { console.log('::warning::record-status: missing agent, GITHUB_TOKEN or GITHUB_REPOSITORY'); process.exit(0); }
 
 // Summaries end up on the public Ecosystem page, so scrub banned terms (source names etc.) first.
-import { readFileSync } from 'node:fs';
-let banned = [];
-try {
-  banned = readFileSync(new URL('../banned-words.txt', import.meta.url), 'utf8').split('\n')
-    .map(l => l.trim()).filter(l => l && !l.startsWith('#')).map(l => new RegExp(l, 'giu'));
-} catch { console.log('::warning::record-status: banned-words.txt not found, summary not scrubbed'); }
+import { bannedSources } from './lib.mjs';
+const banned = bannedSources(new URL('..', import.meta.url).pathname).map(l => new RegExp(l, 'giu'));
 const scrub = t => banned.reduce((acc, re) => acc.replace(re, '[source]'), t);
 
 const RUN = process.env.GITHUB_RUN_ID || '';

@@ -148,6 +148,8 @@ jobs:
           git -c core.quotePath=false ls-files --others --exclude-standard | { grep -v -E '^(agentic-ai|ai-engineer|assets)/|^\.writer-summary\.md$|^inbox/' || true; } | while read -r f; do echo "Removing scratch file $f"; rm -f -- "$f"; done
       - name: Copy check
         if: steps.notes.outputs.dirs != ''
+        env:
+          BANNED_WORDS_EXTRA: ${{ secrets.BANNED_WORDS_EXTRA }}
         run: node scripts/check-copy.mjs | tee /tmp/copy-check.txt; exit ${PIPESTATUS[0]}
       # Writer PRs are opened with GITHUB_TOKEN, so the Copy check workflow does not run on them: check here.
       - name: Count check
