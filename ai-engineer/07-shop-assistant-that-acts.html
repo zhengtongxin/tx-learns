@@ -35,8 +35,8 @@ def set_price(place, price):
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 2 · The tools and the chat loop</span><span class="zh">第 2 步 · 工具和聊天循环</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Describe each function to the model and run the loop from the last lesson: ask, run what was requested, answer, and repeat while the model keeps asking. A customer may ask about two trips in one sentence, so handle many calls and chained calls. Print each call while testing so you can see what the model asked for. A <code>dispatch</code> table maps the tool name to the function.</p>
-<p class="zh" style="margin:0 0 8px">把每个函数向模型描述一遍，再跑上一课的循环：请求、执行被请求的调用、回答，模型继续请求就继续。顾客可能一句话问两个行程，所以要处理多个调用和连续调用。测试时把每个调用打印出来，看看模型到底请求了什么。用一张 <code>dispatch</code> 表把工具名映射到函数。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Describe each function to the model and run the loop from the last lesson: ask, run what was requested, answer, and repeat while the model keeps asking. A customer may ask about two trips in one sentence, so handle many calls and chained calls. Print each call while testing so you can see what the model asked for. A <code>dispatch</code> table maps the tool name to the function. Careful: the words “Staff only” in the <code>set_price</code> description are a hint to the model, not a lock. Anyone who can chat can ask for it, so keep it off a public screen or put it behind a login.</p>
+<p class="zh" style="margin:0 0 8px">把每个函数向模型描述一遍，再跑上一课的循环：请求、执行被请求的调用、回答，模型继续请求就继续。顾客可能一句话问两个行程，所以要处理多个调用和连续调用。测试时把每个调用打印出来，看看模型到底请求了什么。用一张 <code>dispatch</code> 表把工具名映射到函数。注意：<code>set_price</code> 描述里的“Staff only”只是提示模型，不是锁。能聊天的人都可以请它调用，所以公开的界面上要么别放它，要么放在登录之后。</p></div>
 <div class="codebox"><span class="dim">import json
 from openai import OpenAI
 client = OpenAI()

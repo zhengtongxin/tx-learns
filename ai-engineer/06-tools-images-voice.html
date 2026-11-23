@@ -48,8 +48,8 @@ print(run_chat([{"role": "user", "content": "How much is an umbrella and a tin o
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I thought the model ran my function. It does not, it only asks. I also forgot to return a tool message for every call id, which gives an API error.</span><span class="zh">我以为模型会运行我的函数。其实不会，它只是发出请求。我还漏了为每个 call id 返回 tool 消息，结果 API 报错。</span></div>
 
 <h2><span class="en">Step 3 · Real data behind the tool</span><span class="zh">第 3 步 · 工具背后放真实数据</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A dict in memory is a toy. Wei Jie swapped it for a small SQLite table and added a second tool that <b>changes</b> a price. Now the model reads and writes real state. That raises a new question: who is allowed to ask for the change? A reader tool is low risk. A writer tool needs thought.</p>
-<p class="zh" style="margin:0 0 8px">放在内存里的字典只是玩具。Wei Jie 把它换成一张小小的 SQLite 表，再加了第二个会<b>修改</b>价格的工具。现在模型读写的是真实状态。这就带来新问题：谁有权请求修改？只读的工具风险低，会写入的工具得好好想想。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A dict in memory is a toy. Wei Jie swapped it for a small SQLite table (a tiny database kept in one file) and wrote a second tool that <b>changes</b> a price. Now the model reads and writes real state. That raises a new question: who is allowed to ask for the change? A reader tool is low risk. A writer tool needs thought. To offer the new tool to the model, describe it in JSON like <code>price_tool</code>, add it to the <code>tools</code> list, and have the loop pick the function by its name (the next lesson uses a dispatch table for this).</p>
+<p class="zh" style="margin:0 0 8px">放在内存里的字典只是玩具。Wei Jie 把它换成一张小小的 SQLite 表（存在单个文件里的小数据库），再加了第二个会<b>修改</b>价格的工具。现在模型读写的是真实状态。这就带来新问题：谁有权请求修改？只读的工具风险低，会写入的工具得好好想想。要让模型用上新工具，就像 <code>price_tool</code> 那样用 JSON 描述它，加进 <code>tools</code> 列表，并让循环按名字挑选函数（下一课用 dispatch 表来做这件事）。</p></div>
 <div class="codebox"><span class="dim">import sqlite3
 db = sqlite3.connect("shop.db")
 db.execute("CREATE TABLE IF NOT EXISTS prices (item TEXT PRIMARY KEY, price REAL)")
@@ -66,8 +66,8 @@ def get_price(item):
 <p class="zh">给一个面向公众的聊天机器人，哪种工具风险更大？</p><div class="sc" id="g3"></div>
 
 <h2><span class="en">Step 4 · Images and voice are more calls</span><span class="zh">第 4 步 · 图像和语音只是更多的调用</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The chat model decides what to say. Other models draw or speak it. An <b>image model</b> takes a prompt and a size and sends back base64 text, which you decode with PIL. A <b>text-to-speech model</b> takes text and a voice and returns audio bytes. These are just two more API calls. Images cost a few cents each, so do not call them in a loop.</p>
-<p class="zh" style="margin:0 0 8px">聊天模型决定说什么，别的模型负责画或读出来。<b>图像模型</b>收到提示词和尺寸，返回 base64 文本，你用 PIL 解码。<b>语音合成模型</b>收到文字和音色，返回音频字节。它们不过是再多两次 API 调用。图片每张要花几分钱，别放进循环里调用。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The chat model decides what to say. Other models draw or speak it. An <b>image model</b> takes a prompt and a size and sends back base64 text, which you decode with PIL (the Pillow image library).A <b>text-to-speech model</b> takes text and a voice and returns audio bytes. These are just two more API calls. Images cost a few cents each, so do not call them in a loop.</p>
+<p class="zh" style="margin:0 0 8px">聊天模型决定说什么，别的模型负责画或读出来。<b>图像模型</b>收到提示词和尺寸，返回 base64 文本，你用 PIL（Pillow 图像库）解码。<b>语音合成模型</b>收到文字和音色，返回音频字节。它们不过是再多两次 API 调用。图片每张要花几分钱，别放进循环里调用。</p></div>
 <div class="codebox"><span class="dim">import base64
 from io import BytesIO
 from PIL import Image

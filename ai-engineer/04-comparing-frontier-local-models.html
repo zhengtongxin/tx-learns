@@ -9,8 +9,8 @@
 <p class="zh" style="margin:0">补习老师 <b>Priya</b> 给 <b>Wei Jie</b> 出了道题：“哪个模型最适合批改我学生的答案？”Wei Jie 不想为每家服务商各写一个脚本。他想要一个辅助函数、许多模型，再公平地看看谁配得上这份活。</p></div>
 
 <h2><span class="en">Step 1 · One helper, many providers</span><span class="zh">第 1 步 · 一个函数，多家服务商</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Most providers copy the same chat-completions shape. So you keep <b>one</b> helper and only swap three things: the <b>base URL</b>, the <b>key</b> and the <b>model name</b>. Some providers, and a local server such as Ollama, offer an OpenAI-compatible address, so the very same <code>OpenAI(...)</code> object works. Think of one plug that fits many wall sockets.</p>
-<p class="zh" style="margin:0 0 8px">大多数服务商都照搬同一种 chat-completions 格式。所以你只留<b>一个</b>辅助函数，只换三样：<b>base URL</b>、<b>密钥</b>和<b>模型名</b>。有些服务商，以及 Ollama 这样的本地服务，提供兼容 OpenAI 的地址，所以同一个 <code>OpenAI(...)</code> 对象就能用。就像一个插头能插进许多插座。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Most providers copy the same chat-completions shape. So you keep <b>one</b> helper and only swap three things: the <b>base URL</b>, the <b>key</b> and the <b>model name</b>. Some providers, and a local server such as Ollama, offer an OpenAI-compatible address, so the very same <code>OpenAI(...)</code> object works. Keep each key in <code>.env</code>, not in the code (KEY_B is the second provider's key). Think of one plug that fits many wall sockets.</p>
+<p class="zh" style="margin:0 0 8px">大多数服务商都照搬同一种 chat-completions 格式。所以你只留<b>一个</b>辅助函数，只换三样：<b>base URL</b>、<b>密钥</b>和<b>模型名</b>。有些服务商，以及 Ollama 这样的本地服务，提供兼容 OpenAI 的地址，所以同一个 <code>OpenAI(...)</code> 对象就能用。密钥放在 <code>.env</code> 里，别写进代码（KEY_B 就是第二家服务商的密钥）。就像一个插头能插进许多插座。</p></div>
 <div class="codebox"><span class="dim">from openai import OpenAI
 
 clients = {
@@ -26,8 +26,8 @@ def ask(which, model, prompt, **extra):
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 2 · Easy prompts tell you nothing</span><span class="zh">第 2 步 · 简单的题看不出差别</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Wei Jie first asked two providers for a joke. Both answered fine. Easy prompts hide the differences, so a good test is a hard prompt with a trap. A favourite: “Two coins are flipped. One is heads. What is the chance the other is tails?” The tempting answer is one half. A careful one works through the possible pairs.</p>
-<p class="zh" style="margin:0 0 8px">Wei Jie 先让两家服务商讲个笑话，两边都答得不错。简单的题会把差别藏起来，所以好的测试是带陷阱的难题。一个常用的：“抛两枚硬币，其中一枚是正面，另一枚是反面的概率是多少？”诱人的答案是二分之一，仔细的人会把可能的组合一一列出来。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Wei Jie first asked two providers for a joke. Both answered fine. Easy prompts hide the differences, so a good test is a hard prompt with a trap. A favourite: “Two coins are flipped. One is heads. What is the chance the other is tails?” The tempting answer is one half. A careful one works through the possible pairs: HH, HT and TH, each equally likely once we know at least one is heads. The other coin is tails in two of those three, so the answer is 2/3.</p>
+<p class="zh" style="margin:0 0 8px">Wei Jie 先让两家服务商讲个笑话，两边都答得不错。简单的题会把差别藏起来，所以好的测试是带陷阱的难题。一个常用的：“抛两枚硬币，其中一枚是正面，另一枚是反面的概率是多少？”诱人的答案是二分之一。仔细的人会把可能的组合一一列出来：已知至少一枚是正面，就只剩 HH、HT、TH 三种，各自等可能。另一枚是反面的有两种，所以答案是 2/3。</p></div>
 <div class="codebox"><span class="dim">question = "Two coins are flipped. At least one is heads. What is the chance the other is tails? Explain briefly."
 
 for which, model in [("cloud-a", "gpt-5-mini"), ("local", "llama3.2")]:
