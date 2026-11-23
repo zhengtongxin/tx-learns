@@ -23,7 +23,11 @@ Assume they are smart, busy and have never seen this topic. If a sentence needs 
 5. **Now make it yours** (`.cl` checklist). Two or three things to try on their own.
 6. **Takeaways** (`.card`). Five to seven bullets, one idea each.
 
-## The kopitiam thread
+## The running setting
+
+Each track has its own setting. Agentic AI uses the kopitiam below; the AI Engineer track uses a night market (see `ai-engineer/STORY.md`, which has its own cast, props and "Back at the pasar malam" callout). Never mix the two.
+
+### The kopitiam thread (Agentic AI)
 
 Kopi Corner, Uncle Lim's kopitiam in Penang, is the recurring setting. Every lesson ends with one short "Back at the kopitiam" callout (`.callout tip`, EN and 中文) that ties its idea to the shop, just before the takeaways. Keep the cast and props the same:
 
@@ -46,7 +50,7 @@ Kopi Corner, Uncle Lim's kopitiam in Penang, is the recurring setting. Every les
 The site records what TX learnt, in TX's own words. It never reproduces where it came from.
 
 - Never name the platform, the paid program, its instructor or its students. Never write "course" / 课程.
-- Never use week, day or "Project N" numbering from a source. Lessons are grouped by concept in `agentic-ai/lessons.js`.
+- Never use week, day or "Project N" numbering from a source. Lessons are grouped by concept in each track's `lessons.js`.
 - Never reuse a source's example names, characters, prompts, project names or datasets. Invent our own.
 - Code may show standard library usage (that is how the tool works), but rewrite comments, variable names and prompts in our own words. No copied notebooks.
 - No screenshots or slides from a source.
@@ -61,5 +65,5 @@ The site records what TX learnt, in TX's own words. It never reproduces where it
 - [ ] EN and 中文 match
 - [ ] Code runs as written (correct package names, imports, `await` placement)
 - [ ] Nothing in the code is used before the step that builds it
-- [ ] Added to `agentic-ai/lessons.js` with a `file`
+- [ ] Added to the track's `lessons.js` with a `file`
 - [ ] `node scripts/check-copy.mjs`, `node scripts/check-counts.mjs` and `node scripts/check-pages.mjs --fix` pass (the last one also stamps the lesson's "updated" date)

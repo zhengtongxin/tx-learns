@@ -4,6 +4,7 @@
 //   loadTrack(source)       window.TRACK from lessons.js text
 //   scrub(text)             replaces banned terms (banned-words.txt) with [source]
 import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import vm from 'node:vm';
 
 export const REPO = process.env.GITHUB_REPOSITORY || 'zhengtongxin/tx-learns';
@@ -53,6 +54,13 @@ export function loadTrack(source) {
   const ctx = { window: {} };
   vm.runInNewContext(source, ctx, { filename: 'lessons.js' });
   return ctx.window.TRACK;
+}
+
+// Every track listed in tracks.js: { id, dir, T } where dir is the track's folder and T is its lessons.js.
+export function loadTracks(root) {
+  const ctx = { window: {} };
+  vm.runInNewContext(readFileSync(join(root, 'tracks.js'), 'utf8'), ctx, { filename: 'tracks.js' });
+  return ctx.window.TRACKS.map(t => ({ id: t.id, dir: t.id, T: loadTrack(readFileSync(join(root, t.id, 'lessons.js'), 'utf8')) }));
 }
 
 let banned;

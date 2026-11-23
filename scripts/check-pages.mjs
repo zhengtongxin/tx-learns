@@ -9,11 +9,12 @@
 // Usage: node scripts/check-pages.mjs [--fix] [page.html ...]   (no pages = every page; --fix rewrites those lists)
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
-import { loadTrack } from './lib.mjs';
+import { loadTracks } from './lib.mjs';
 
 const root = new URL('..', import.meta.url);
 const FIX = process.argv.includes('--fix');
-const all = ['index.html', 'ecosystem.html', '404.html', ...readdirSync(new URL('agentic-ai/', root)).filter(f => f.endsWith('.html')).map(f => 'agentic-ai/' + f)];
+const TR = loadTracks(new URL('.', root).pathname);
+const all = ['index.html', 'ecosystem.html', '404.html', ...TR.flatMap(t => readdirSync(new URL(t.dir + '/', root)).filter(f => f.endsWith('.html')).map(f => t.dir + '/' + f))];
 const named = process.argv.slice(2).filter(a => a !== '--fix');
 const pages = named.length ? named : all;
 const problems = [];
@@ -51,7 +52,7 @@ for (const p of pages) {
 }
 
 // "Updated" dates on lessons.
-const isLesson = p => /^agentic-ai\/\d\d-[\w-]+\.html$/.test(p);
+const isLesson = p => /^[\w-]+\/\d\d-[\w-]+\.html$/.test(p);
 const UPD = /<meta name="updated" content="([^"]*)">\n?/;
 const today = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
 const git = (...a) => { try { return execFileSync('git', a, { cwd: new URL('.', root), encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }); } catch { return null; } };
@@ -69,27 +70,25 @@ for (const p of all.filter(isLesson)) {
 
 // Lists that come from lessons.js. --fix rewrites them; otherwise a stale list fails the check.
 const SITE = 'https://tx-learns.vercel.app/';
-const T = loadTrack(readFileSync(new URL('agentic-ai/lessons.js', root), 'utf8'));
-const live = T.topics.flatMap(w => w.items).filter(x => x.file);
+const live = TR.flatMap(t => t.T.topics.flatMap(w => w.items).filter(x => x.file).map(x => ({ ...x, path: t.dir + '/' + x.file })));
 const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 const want = {
   'sitemap.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<!-- Made by node scripts/check-pages.mjs --fix from lessons.js. Do not edit by hand. -->\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-    ['', 'ecosystem.html', 'agentic-ai/index.html', ...live.map(x => 'agentic-ai/' + x.file)].map(u => `<url><loc>${SITE}${u}</loc></url>`).join('\n') + '\n</urlset>\n',
+    ['', 'ecosystem.html', ...TR.map(t => t.dir + '/index.html'), ...live.map(x => x.path)].map(u => `<url><loc>${SITE}${u}</loc></url>`).join('\n') + '\n</urlset>\n',
 };
-const lists = {
-  'agentic-ai/index.html': [/<!-- lessons:start -->[\s\S]*?<!-- lessons:end -->/, '<!-- lessons:start --><noscript><ol>' +
-    live.map(x => `<li><a href="${x.file}">${esc(x.title.en)} · ${esc(x.title.zh)}</a></li>`).join('') + '</ol></noscript><!-- lessons:end -->'],
-};
-const first = live[0] && live[0].file;
+const lists = Object.fromEntries(TR.map(t => [t.dir + '/index.html', [/<!-- lessons:start -->[\s\S]*?<!-- lessons:end -->/, '<!-- lessons:start --><noscript><ol>' +
+    t.T.topics.flatMap(w => w.items).filter(x => x.file).map(x => `<li><a href="${x.file}">${esc(x.title.en)} · ${esc(x.title.zh)}</a></li>`).join('') + '</ol></noscript><!-- lessons:end -->']]));
+const firstOf = t => { const x = t.T.topics.flatMap(w => w.items).find(i => i.file); return x && x.file; };
 for (const [f, text] of Object.entries(want)) {
   let cur = ''; try { cur = readFileSync(new URL(f, root), 'utf8'); } catch {}
   if (cur !== text) { if (FIX) writeFileSync(new URL(f, root), text); else bad(f, 'out of date with lessons.js (run node scripts/check-pages.mjs --fix)'); }
 }
-for (const f of ['index.html', 'agentic-ai/index.html']) {
+for (const f of ['index.html', ...TR.map(t => t.dir + '/index.html')]) {
   const cur = readFileSync(new URL(f, root), 'utf8');
   let next = cur;
   if (lists[f]) { const [re, block] = lists[f]; if (!re.test(cur)) bad(f, 'missing <!-- lessons:start --><!-- lessons:end --> markers'); else next = next.replace(re, block); }
-  if (first) next = next.replace(/(<a [^>]*data-start[^>]*href=")[^"]*(")/g, (m, a, b) => a + (f === 'index.html' ? 'agentic-ai/' : '') + first + b);
+  const own = f === 'index.html' ? TR[0] : TR.find(t => t.dir + '/index.html' === f), first = own && firstOf(own);
+  if (first) next = next.replace(/(<a [^>]*data-start[^>]*href=")[^"]*(")/g, (m, a, b) => a + (f === 'index.html' ? own.dir + '/' : '') + first + b);
   if (next !== cur) { if (FIX) writeFileSync(new URL(f, root), next); else bad(f, 'lesson list or start link out of date with lessons.js (run node scripts/check-pages.mjs --fix)'); }
 }
 
