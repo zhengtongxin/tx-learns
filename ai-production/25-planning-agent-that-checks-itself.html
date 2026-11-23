@@ -1,0 +1,119 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Project: a planning agent that checks itself | TX Learns</title>
+<meta name="description" content="Finish with an agent in the cloud that plans, solves, then proves its own answer by running code in a safe sandbox."><meta property="og:title" content="Project: a planning agent that checks itself | TX Learns"><meta property="og:description" content="Finish with an agent in the cloud that plans, solves, then proves its own answer by running code in a safe sandbox."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-production/25-planning-agent-that-checks-itself.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-24">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Agents as a managed service · Project</span><span class="zh">托管的智能体服务 · 项目</span></span><h1><span class="en">Project: a planning agent that checks itself</span><span class="zh">项目：会自我验证的规划智能体</span></h1><p class="meta"><span class="en">Finish with a cloud agent that plans, solves, then proves its answer by running code in a safe sandbox · ~50 min · project</span><span class="zh">做出一个云上的智能体：先计划、再解题、然后在安全的沙盒里跑代码来证明自己的答案 · 约 50 分钟 · 项目</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">The planner can now write its steps down. But <b>Mr Ong</b> asks the hard question: "It sounds sure. How do I know it is right?" <b>Mei Ling</b> decides the agent should check its own work by running a small program, the way a crane operator double-checks a load weight on the scale. <b>Sergeant Lee</b> insists the program runs in a sealed sandbox, never on the wharf's own machines.</p>
+<p class="zh" style="margin:0">规划智能体现在能把步骤写下来了。但 <b>Ong 主管</b>问了个难题：“它说得挺肯定，我怎么知道它对不对？”<b>Mei Ling</b> 决定让智能体自己检查工作：跑一小段程序，就像吊机司机会在磅秤上复核货物重量一样。<b>Lee 警长</b>坚持这段程序必须在封闭的沙盒里运行，绝不能跑在码头自己的机器上。</p></div>
+<h2><span class="en">Step 1 · Start from the planner</span><span class="zh">第 1 步 · 从规划智能体出发</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Begin with the planner from the last lesson: the to-do item, the list, and the tools to add, tick and show. Do not rebuild anything. Everything new is added on top, so you can tell what broke if something does. Before you add anything, launch it once and confirm it still plans.</p>
+<p class="zh" style="margin:0 0 8px">从上一课的规划智能体开始：待办条目、清单，以及新增、打钩、显示的工具。什么都不要重建，所有新东西都加在上面，这样出了问题你知道是哪里坏的。加东西之前，先启动一次，确认它还能做计划。</p></div>
+<div class="codebox"><span class="dim">Project so far (one entry-point file, agent.py):
+  Todo model            description + done flag
+  plan list             in memory
+  tools                 add_todo, mark_done, show_plan
+  launched and invoked  </span><span class="chg">still plans? yes → continue</span></div>
+<div class="try" id="t1"></div>
+<h2><span class="en">Step 2 · Add a sandbox tool for running code</span><span class="zh">第 2 步 · 加一个跑代码的沙盒工具</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>code interpreter</b> is a managed sandbox: a sealed box in the cloud that runs Python and hands back the output. Your tool sends code to it and reads the streamed result. The code never touches your own machines. Create the sandbox in the same region as your agent, or the call fails.</p>
+<p class="zh" style="margin:0 0 8px"><b>代码解释器</b>是一个托管沙盒：云上一个封闭的盒子，运行 Python 并把输出交回来。你的工具把代码发给它，再读取流式返回的结果。代码绝不会碰到你自己的机器。沙盒要建在和智能体相同的区域，否则调用会失败。</p></div>
+<div class="codebox"><span class="dim">from bedrock_agentcore.tools.code_interpreter_client import code_session
+
+@tool
+def run_python(code: str) -&gt; str:
+    """Run Python code in a safe sandbox and return what it prints.
+    Use it to check an answer. Always print the result."""
+    </span><span class="chg">with code_session("ap-southeast-1") as sandbox:
+        response = sandbox.invoke(
+            "executeCode",
+            {"code": code, "language": "python", "clearContext": False},
+        )
+        output = ""
+        for event in response["stream"]:
+            output += str(event["result"])
+    return output</span></div>
+<div class="try" id="t2"></div>
+<h2><span class="en">Step 3 · Make the check a required to-do</span><span class="zh">第 3 步 · 把验证写成必做的待办</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Giving the agent the sandbox is not enough: it may just skip it. So change the system prompt in two ways. Solve in your head first, without code. Then add a to-do that starts with "Write Python code to..." and run it to check. Because it is a line in the plan, it is no longer optional.</p>
+<p class="zh" style="margin:0 0 8px">光给智能体一个沙盒不够：它可能直接跳过。所以从两方面改系统提示词。先不用代码，靠自己推理解出来。然后加一条以“Write Python code to...”开头的待办，并运行它来验证。因为它是计划里的一行，就不再是可选的了。</p></div>
+<div class="codebox"><span class="dim">checker = Agent(
+    </span><span class="chg">system_prompt=(
+        "Make a plan with add_todo. Solve the task yourself first, without code. "
+        "Then add one more to-do that starts with 'Write Python code to' "
+        "and use run_python to check your answer. "
+        "If the check disagrees, fix the answer. Mark each step done, then reply."
+    ),
+    tools=[add_todo, mark_done, show_plan, run_python],</span><span class="dim">
+)</span></div>
+<div class="sc" id="t3"></div>
+<h2><span class="en">Step 4 · Colour the coding steps, relaunch and try a puzzle</span><span class="zh">第 4 步 · 给写代码的步骤上色，重新启动并出一道谜题</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Make the check easy to spot. In <code>show_plan</code>, wrap any line that starts with "Write Python code" in a colour code (terminals read <code>\033[96m</code> as "cyan" and <code>\033[0m</code> as "reset"). Then launch again and invoke with a puzzle. Read three things: the plan, the answer, and the check.</p>
+<p class="zh" style="margin:0 0 8px">让验证步骤一眼就能看到。在 <code>show_plan</code> 里，把以“Write Python code”开头的行包上颜色代码（终端把 <code>\033[96m</code> 读作“青色”，<code>\033[0m</code> 读作“恢复”）。然后再启动，用一道谜题调用它。读三样东西：计划、答案和验证。</p></div>
+<div class="codebox"><span class="dim">@tool
+def show_plan() -&gt; str:
+    """Return the current plan, one line per step."""
+    lines = []
+    for i, t in enumerate(plan, start=1):
+        line = f"{i}. [{'x' if t.done else ' '}] {t.description}"
+        </span><span class="chg">if t.description.startswith("Write Python code"):
+            line = "\033[96m" + line + "\033[0m"</span><span class="dim">
+        lines.append(line)
+    return "\n".join(lines)
+
+# agentcore launch
+# agentcore invoke '{"prompt": "How many ways can 4 crane operators swap shifts so nobody keeps their own?"}'</span></div>
+<div class="try" id="t4"></div>
+<h2><span class="en">Step 5 · Turn on observability and read the trace</span><span class="zh">第 5 步 · 打开可观测性，读调用轨迹</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>trace</b> is a recording of one run: each tool call, how long it took and how many tokens it used. It stays empty until you switch observability on in the console first. After that, run the puzzle again and open the trace. Look for the slowest step and the longest wait.</p>
+<p class="zh" style="margin:0 0 8px"><b>轨迹</b>是一次运行的录像：每次工具调用、用了多久、花了多少 token。必须先在控制台里打开可观测性，否则它一直是空的。打开后，再跑一次谜题，然后打开轨迹。找出最慢的一步和等得最久的地方。</p></div>
+<div class="codebox"><span class="dim">Trace of one run:
+  add_todo x4              0.4 s
+  (model: solve first)     3.1 s    1,900 tokens
+  </span><span class="chg">run_python              6.8 s    ← slowest</span><span class="dim">
+  mark_done x4             0.3 s
+  final answer             1.2 s</span></div>
+<div class="sc" id="t5"></div>
+<h2><span class="en">Step 6 · Delete the agent and its resources</span><span class="zh">第 6 步 · 删掉智能体和它的资源</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">When you are done, remove what you made: the deployed agent, its container image in the registry and its roles. A forgotten agent is a small bill that nobody remembers approving. Write the list of what to remove before you start deleting, and check the console afterwards to be sure it is empty.</p>
+<p class="zh" style="margin:0 0 8px">做完之后，把你建的东西清掉：已部署的智能体、仓库里的容器镜像和它的角色。被遗忘的智能体就是一笔没人记得批准过的小账单。动手删之前，先把要删的东西列成清单，删完再去控制台确认已经清空。</p></div>
+<div class="codebox"><span class="dim">Clean-up list
+  [ ] </span><span class="chg">the deployed agent</span><span class="dim">
+  [ ] its image in the registry
+  [ ] the roles made for it
+  [ ] the log groups (or set a short retention)
+  [ ] open the console and check that nothing is left</span></div>
+<div class="try" id="t6"></div>
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en"><b>Three slips.</b> The sandbox was created in a different region from the agent, so the first check failed. The agent skipped the check when the prompt only said "you may use code"; making it a required to-do fixed that. And the trace stayed empty until I turned on observability in the console, which I had to do before the run, not after.</span><span class="zh"><b>三个失误。</b>沙盒建在了和智能体不同的区域，所以第一次验证失败了。提示词只写“你可以用代码”时，智能体跳过了验证；把它写成必做的待办之后就好了。轨迹一直是空的，直到我在控制台里打开可观测性，而且必须在运行之前打开，不是之后。</span></div>
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Ask something where the first answer tends to be wrong</b> and see whether the check catches it.</span><span class="zh"><b>问一个第一反应容易答错的问题</b>，看验证能不能把错抓出来。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Find the slowest step</b> in the trace.</span><span class="zh"><b>在轨迹里找出最慢的一步。</b></span></span></label><label><input type="checkbox"><span><span class="en"><b>Compare the cost</b> with and without the code check.</span><span class="zh"><b>比较成本</b>：有代码验证和没有代码验证。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">At the wharf</span><span class="zh">在码头</span></b><span class="en">A good operator does not trust a load weight just because it feels right. They put it on the scale, and the control tower keeps the log. Plan, act, check and keep a trace: that is how Mr Ong learns to trust the agent without watching it every minute.</span><span class="zh">好的操作员不会因为“感觉对”就相信货物重量，而是把它放上磅秤，控制塔还留着记录。计划、行动、验证、留下轨迹：Ong 主管就是这样学会信任智能体，而不用每分钟盯着它。</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Start from the working planner and add one thing at a time.<br>• A managed code interpreter runs code in a sealed sandbox, not on your machines.<br>• Keep the sandbox in the same region as the agent.<br>• Make the check a required to-do in the plan, not a suggestion.<br>• Turn on observability before the run, then read the trace.<br>• Delete the agent and its resources when you finish.<br>• Verification beats confidence: plan, act, check, and keep a trace.</p><p class="zh" style="margin:0">• 从能跑的规划智能体出发，一次只加一样东西。<br>• 托管的代码解释器在封闭沙盒里跑代码，不在你的机器上。<br>• 沙盒和智能体放在同一个区域。<br>• 把验证写成计划里的必做待办，而不是建议。<br>• 运行之前先打开可观测性，然后读轨迹。<br>• 做完之后，把智能体和它的资源删掉。<br>• 验证胜过自信：计划、行动、验证，并留下轨迹。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Production</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('t1'),{q:{en:'Why launch the planner once before adding the sandbox?',zh:'为什么加沙盒之前，要先把规划智能体启动一次？'},opts:[{k:'a',en:'So that if something breaks later, you know it was the new part',zh:'这样之后出了问题，你就知道是新加的部分'},{k:'b',en:'Because the runtime requires it',zh:'因为运行时要求这样'},{k:'c',en:'To make the plan longer',zh:'为了让计划更长'}],a:'a',ex:{en:'One change at a time keeps the blame small.',zh:'一次只改一样，查错的范围就小。'},hint:{en:'What helps you find a bug?',zh:'什么能帮你找 bug？'}});
+ predict($('t2'),{q:{en:'Why does the tool call the sandbox instead of running the code in the agent\'s own process?',zh:'为什么工具把代码交给沙盒，而不是在智能体自己的进程里运行？'},opts:[{k:'a',en:'The code is written by a model, so it should run in a sealed box',zh:'代码是模型写的，应该放在封闭的盒子里运行'},{k:'b',en:'Sandboxes are always faster',zh:'沙盒总是更快'},{k:'c',en:'Python cannot run anywhere else',zh:'Python 在别处跑不了'}],a:'a',ex:{en:'Model-written code could do anything. A sandbox keeps the damage inside the box.',zh:'模型写的代码什么都可能做。沙盒把影响限制在盒子里面。'},hint:{en:'Who wrote the code?',zh:'代码是谁写的？'}});
+ game($('t3'),[
+  {en:'"You may use code if you like."',zh:'“你想用的话可以用代码。”',a:'b',ex:{en:'It is optional, so the agent skipped the check.',zh:'它是可选的，所以智能体跳过了验证。'},hint:{en:'Is it required?',zh:'它是必须的吗？'}},
+  {en:'A to-do that starts "Write Python code to..."',zh:'一条以“Write Python code to...”开头的待办',a:'g',ex:{en:'It sits in the plan, so it has to be done and ticked.',zh:'它在计划里，所以必须做完并打钩。'},hint:{en:'Is it a step in the plan?',zh:'它是计划里的一步吗？'}},
+  {en:'"If the check disagrees, fix the answer."',zh:'“如果验证结果不一致，就修正答案。”',a:'g',ex:{en:'It says what to do when the check fails.',zh:'它说明了验证不通过时该怎么办。'},hint:{en:'Does it say what happens next?',zh:'它说了接下来怎么办吗？'}},
+  {en:'"Be careful and confident."',zh:'“要小心，要自信。”',a:'b',ex:{en:'It checks nothing. Confidence is not a test.',zh:'它什么也没检查。自信不是测试。'},hint:{en:'Can anyone verify it?',zh:'有人能验证它吗？'}}],
+  [{k:'g',en:'Makes the check happen',zh:'能让验证发生'},{k:'b',en:'Leaves it to chance',zh:'靠运气'}],{en:'Prompt line',zh:'提示词'});
+ predict($('t4'),{q:{en:'The plan shows the cyan "Write Python code" step ticked, but the answer is still wrong. What is the best next move?',zh:'计划里青色的“Write Python code”步骤已经打钩，但答案还是错的。最好的下一步是什么？'},opts:[{k:'a',en:'Read the code the agent ran and its printed output; maybe the code checked the wrong thing',zh:'读智能体跑的代码和它打印的输出；也许代码检查错了东西'},{k:'b',en:'Trust the tick',zh:'相信那个钩'},{k:'c',en:'Delete the sandbox',zh:'删掉沙盒'}],a:'a',ex:{en:'A tick means the step ran, not that the check was a good one. Read what it really tested.',zh:'打钩只表示这一步跑过了，不表示验证本身是好的。要读它到底测了什么。'},hint:{en:'Does a tick prove the test was good?',zh:'打钩能证明测试写得好吗？'}});
+ game($('t5'),[
+  {en:'Which tool was called, and in what order',zh:'调用了哪个工具，顺序如何',a:'y',ex:{en:'It shows how the agent decided.',zh:'它显示了智能体是怎么决定的。'},hint:{en:'Is it in the trace?',zh:'轨迹里有吗？'}},
+  {en:'How long each step took',zh:'每一步用了多久',a:'y',ex:{en:'It points to the slowest step.',zh:'它能指出最慢的一步。'},hint:{en:'Can you spot the slow one?',zh:'能看出哪个慢吗？'}},
+  {en:'How many tokens were used',zh:'用了多少 token',a:'y',ex:{en:'Tokens drive the cost.',zh:'token 决定成本。'},hint:{en:'What do you pay for?',zh:'你为什么付钱？'}},
+  {en:'Whether the answer is correct',zh:'答案是否正确',a:'n',ex:{en:'A trace shows what happened, not whether it was right. That is what the code check is for.',zh:'轨迹显示发生了什么，不显示对不对。验证对错是代码检查的事。'},hint:{en:'Does a recording judge the result?',zh:'录像会评判结果吗？'}}],
+  [{k:'y',en:'In the trace',zh:'轨迹里有'},{k:'n',en:'Not in the trace',zh:'轨迹里没有'}],{en:'Item',zh:'项目'});
+ predict($('t6'),{q:{en:'Why write the clean-up list before you start deleting?',zh:'为什么要在开始删之前先写清理清单？'},opts:[{k:'a',en:'So nothing is missed, and nothing needed is removed by mistake',zh:'这样不会漏掉，也不会误删需要的东西'},{k:'b',en:'Lists make the bill smaller by themselves',zh:'清单本身就能让账单变小'},{k:'c',en:'The console demands it',zh:'控制台要求这样'}],a:'a',ex:{en:'A written list is calm and complete. Deleting from memory misses things.',zh:'写好的清单冷静又完整。凭记忆删会漏掉东西。'},hint:{en:'Why not rely on memory?',zh:'为什么不靠记忆？'}});
+});
+</script></body></html>
