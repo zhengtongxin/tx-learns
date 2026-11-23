@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Live check agent: after each release reaches the live site, confirm it looks right. No AI here.
+// Live check agent: twice a day (12 PM and 12 AM Malaysia time), confirm the live site looks right. No AI here.
 //   1. The live lesson list is the released one (waits up to --wait seconds for the new deploy to show).
 //   2. Every page and every published lesson opens (HTTP 200), and every link and file they point to exists.
 //   3. In a headless browser (when Playwright is available): home, How it works, the track page and every

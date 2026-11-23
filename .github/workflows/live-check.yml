@@ -1,10 +1,14 @@
-# Live check agent: after every release reaches the live site, a script opens every page, lesson, link and file
-# there, renders each page in a headless browser and checks the topic and lesson counts against lessons.js.
+# Live check agent: twice a day (12 PM and 12 AM Malaysia time) a script opens every page, lesson, link and file
+# on the live site, renders each page in a headless browser and checks the topic and lesson counts against lessons.js.
 # It tells TX on Telegram only when something is off; a pass shows on the How it works page and in the digest.
 # No AI, read-only token, never pushes. Only trusted scripts from main run.
 name: Live check
 on:
-  deployment_status:
+  # A schedule, not Vercel's deployment events: one deploy sends several of those, and each one cancelled the last.
+  # 04:00 and 16:00 UTC = 12 PM and 12 AM Malaysia time; midnight follows the 10 PM release.
+  schedule:
+    - cron: '0 4 * * *'
+    - cron: '0 16 * * *'
   workflow_dispatch:
     inputs:
       url:
@@ -13,15 +17,13 @@ on:
 permissions:
   contents: read
 concurrency:
+  # A second run waits for the first instead of cancelling it.
   group: live-check
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   check:
-    # Only finished production deploys (a release). Previews are covered by the UI check and reader agents.
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production')
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     outputs:
       state: ${{ steps.run.outputs.state }}
       summary: ${{ steps.run.outputs.summary }}
@@ -31,8 +33,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # The released commit, so the check knows which lesson list should be live.
-          ref: ${{ github.event.deployment.sha || github.event.repository.default_branch }}
+          # main is what should be live, so its lessons.js is the list the live site must match.
+          ref: ${{ github.event.repository.default_branch }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -51,7 +53,8 @@ jobs:
           if [ "$code" = 0 ]; then echo "state=ok" >> "$GITHUB_OUTPUT"; elif [ "$code" = 1 ]; then echo "state=flag" >> "$GITHUB_OUTPUT"; else echo "state=fail" >> "$GITHUB_OUTPUT"; fi
           [ "$code" -le 1 ]
       - name: Tell TX on Telegram
-        if: always() && steps.run.outputs.state != 'ok'
+        # Not on a cancelled run: someone stopped it, which is not a problem with the site.
+        if: ${{ !cancelled() && steps.run.outputs.state != 'ok' }}
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -67,7 +70,8 @@ jobs:
   # Separate job: the write token for the status log never shares a job with the checked-out release.
   record:
     needs: check
-    if: always() && needs.check.result != 'skipped'
+    # A cancelled run records nothing, so it never shows as a failure on the How it works page.
+    if: ${{ !cancelled() && needs.check.result != 'skipped' && needs.check.result != 'cancelled' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
