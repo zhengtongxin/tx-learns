@@ -3,12 +3,12 @@ window.TRACK={id:'ai-engineer',title:{en:'AI Engineer',zh:'AI 工程师'},topics
  {n:1,title:{en:'Talking to models',zh:'和模型对话'},items:[
   {k:'f',file:'01-what-an-llm-call-is.html',title:{en:'What an LLM call really is',zh:'一次大模型调用到底是什么'}},
   {k:'c',file:'02-tokens-context-memory.html',title:{en:'Tokens, context and the illusion of memory',zh:'token、上下文与“记忆”的错觉'}},
-  {k:'p',title:{en:'Project: a stall brochure maker',zh:'项目：摊位宣传册生成器'}}]},
+  {k:'p',file:'03-stall-brochure-maker.html',title:{en:'Project: a stall brochure maker',zh:'项目：摊位宣传册生成器'}}]},
  {n:2,title:{en:'Many models, one app',zh:'多个模型，一个应用'},items:[
-  {k:'c',title:{en:'Comparing frontier and local models',zh:'对比云端模型与本地模型'}},
-  {k:'c',title:{en:'A chat screen in minutes',zh:'几分钟做出聊天界面'}},
-  {k:'c',title:{en:'Tools, images and voice',zh:'工具、图像与语音'}},
-  {k:'p',title:{en:'Project: a shop assistant that acts',zh:'项目：会动手的店铺助手'}}]},
+  {k:'c',file:'04-comparing-frontier-local-models.html',title:{en:'Comparing frontier and local models',zh:'对比云端模型与本地模型'}},
+  {k:'c',file:'05-chat-screen-in-minutes.html',title:{en:'A chat screen in minutes',zh:'几分钟做出聊天界面'}},
+  {k:'c',file:'06-tools-images-voice.html',title:{en:'Tools, images and voice',zh:'工具、图像与语音'}},
+  {k:'p',file:'07-shop-assistant-that-acts.html',title:{en:'Project: a shop assistant that acts',zh:'项目：会动手的店铺助手'}}]},
  {n:3,title:{en:'Open-source models',zh:'开源模型'},items:[
   {k:'c',title:{en:'Pipelines: models in a few lines',zh:'pipeline：几行代码用上模型'}},
   {k:'c',title:{en:'Tokenizers and how models load',zh:'分词器与模型加载'}},

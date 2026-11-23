@@ -1,0 +1,112 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Project: a stall brochure maker | TX Learns</title>
+<meta name="description" content="Chain two small model calls to turn a shop website into a short brochure: pick the useful links, then write and stream it."><meta property="og:title" content="Project: a stall brochure maker | TX Learns"><meta property="og:description" content="Chain two small model calls to turn a shop website into a short brochure: pick the useful links, then write and stream it."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-engineer/03-stall-brochure-maker.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-23">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Talking to models · Project</span><span class="zh">和模型对话 · 项目</span></span><h1><span class="en">Project: a stall brochure maker</span><span class="zh">项目：摊位宣传册生成器</span></h1><p class="meta"><span class="en">You will chain two model calls so that a shop's website turns into a short brochure · ~25 min · hands-on</span><span class="zh">你会把两次模型调用串起来，让一家店的网站变成一份简短的宣传册 · 约 25 分钟 · 动手实践</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0"><b>Ah Boy</b> sells second-hand gadgets online and has a website, but nothing short to hand to a new customer or a job seeker. <b>Wei Jie</b> offers to build a brochure maker: give it a name and a web address, get back one page. It is Wei Jie's first time chaining more than one model call, and the first small taste of an agentic pattern.</p>
+<p class="zh" style="margin:0"><b>Ah Boy</b> 在网上卖二手数码产品，有个网站，却没有一份可以递给新顾客或求职者的简短介绍。<b>Wei Jie</b> 提出做一个宣传册生成器：给它店名和网址，就得到一页纸。这是 Wei Jie 第一次把不止一次模型调用串起来，也是智能体模式的第一次小小尝试。</p></div>
+
+<h2><span class="en">Step 1 · A summariser for one page</span><span class="zh">第 1 步 · 只总结一个页面</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Start small: one page in, one summary out. A <b>system prompt</b> sets the task and tone. A <b>user prompt</b> carries the page text. First a helper fetches the page and strips it to plain text (remove scripts, styles and images). Pages that need JavaScript to draw themselves come back nearly empty this way, and some sites block scrapers with a 403. That is a limit of this simple helper, not of the model.</p>
+<p class="zh" style="margin:0 0 8px">先做最小的：一个页面进，一份摘要出。<b>system 提示词</b>定任务和语气，<b>user 提示词</b>装页面文字。先用一个辅助函数抓取页面，把它剥成纯文字（去掉脚本、样式和图片）。靠 JavaScript 才能画出内容的页面，用这个办法抓回来几乎是空的，有些网站还会用 403 拒绝爬取。这是这个简单函数的局限，不是模型的问题。</p></div>
+<div class="codebox"><span class="dim">import requests
+from bs4 import BeautifulSoup
+from openai import OpenAI
+client = OpenAI()
+
+</span><span class="chg">def page_text(url):
+    soup = BeautifulSoup(requests.get(url, timeout=10).text, "html.parser")
+    for junk in soup(["script", "style", "img"]):
+        junk.decompose()
+    return soup.get_text(separator="\n", strip=True)
+</span><span class="dim">
+def ask(system, user):
+    reply = client.chat.completions.create(model="gpt-5-mini", messages=[
+        {"role": "system", "content": system},
+        {"role": "user", "content": user}])
+    return reply.choices[0].message.content
+
+</span><span class="chg">print(ask("Summarise this shop page in three lines.", page_text("https://example.com")))</span></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Let the model choose the links</span><span class="zh">第 2 步 · 让模型挑出有用的链接</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A brochure needs the About and Careers pages, not the Privacy page. That is hard to write as rules and easy for a model. So call 1 gets the links on the landing page and returns <b>JSON only</b>. Show one example in the prompt (<b>one-shot prompting</b>) so the model copies the shape. Ask for JSON mode, then <code>json.loads</code> the reply, because it arrives as a string, not a Python dict.</p>
+<p class="zh" style="margin:0 0 8px">一份宣传册需要“关于我们”和“招聘”页，不需要“隐私”页。这很难写成规则，对模型却很简单。所以第 1 次调用拿到首页上的链接，<b>只返回 JSON</b>。在提示词里给一个例子（<b>单样本提示</b>），让模型照着它的格式写。开启 JSON 模式，再用 <code>json.loads</code> 解析，因为回来的是字符串，不是 Python 字典。</p></div>
+<div class="codebox"><span class="dim">import json
+from urllib.parse import urljoin
+
+</span><span class="chg">def all_links(url):
+    soup = BeautifulSoup(requests.get(url, timeout=10).text, "html.parser")
+    return [urljoin(url, a["href"]) for a in soup.find_all("a", href=True)]
+</span><span class="dim">
+link_system = """Pick the links a customer or job seeker would want.
+Skip terms, privacy and mailto. Reply as JSON like:
+{"links": [{"type": "about page", "url": "https://shop.example/about"}]}"""
+
+def pick_links(url, links):
+    reply = client.chat.completions.create(model="gpt-5-mini", messages=[
+        {"role": "system", "content": link_system},
+        {"role": "user", "content": f"Site: {url}\nLinks:\n" + "\n".join(links)}],
+        </span><span class="chg">response_format={"type": "json_object"})
+    return json.loads(reply.choices[0].message.content)["links"]</span></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Gather the pages and write the brochure</span><span class="zh">第 3 步 · 收集页面，写宣传册</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Call 2 needs the text of the landing page plus every page call 1 picked. Join them under headings, then <b>cut the combined text to a fixed length</b> so the call stays cheap and inside the context window. A second system prompt asks for a short markdown brochure. Change one sentence of that prompt, say “formal” to “funny”, and the tone changes. Tone is just prompt.</p>
+<p class="zh" style="margin:0 0 8px">第 2 次调用需要首页文字，加上第 1 次挑出的每个页面。把它们放在小标题下拼起来，再把<b>总文字截到固定长度</b>，这样调用既便宜又不超出上下文窗口。第二个 system 提示词要求写一份简短的 markdown 宣传册。把其中一句从“正式”改成“搞笑”，语气就变了。语气不过是提示词。</p></div>
+<div class="codebox"><span class="dim">brochure_system = "Write a short brochure in markdown for customers and job seekers. Include culture, customers and careers if present. Tone: warm and plain."
+
+def build_material(url):
+    parts = ["Landing page:\n" + page_text(url)]
+    for link in pick_links(url, all_links(url)):
+        parts.append("Link: " + link["type"] + "\n" + page_text(link["url"]))
+    </span><span class="chg">return "\n\n".join(parts)[:5000]</span><span class="dim">
+
+def brochure(url):
+    return ask(brochure_system, build_material(url))</span></div>
+<p class="en">Which job belongs to the model, and which to plain code?</p>
+<p class="zh">哪些活交给模型，哪些交给普通代码？</p><div class="sc" id="g3"></div>
+
+<h2><span class="en">Step 4 · Stream the answer</span><span class="zh">第 4 步 · 把回答流式显示</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A long brochure can take several seconds, and a blank screen feels broken. Pass <code>stream=True</code> and the reply comes in small chunks. Add each chunk's <code>delta</code> to the text so far and redraw. It is the same call, but the reader sees words straight away. It does not make the model faster, it just stops the waiting from feeling like nothing.</p>
+<p class="zh" style="margin:0 0 8px">长的宣传册可能要好几秒，空白的屏幕让人觉得坏了。传入 <code>stream=True</code>，回复就会一小块一小块地到来。把每块的 <code>delta</code> 加到已有文字后面，再重画一次。调用本身没变，读的人却立刻看到字。它不会让模型变快，只是让等待不再像什么都没发生。</p></div>
+<div class="codebox"><span class="dim">def brochure_stream(url):
+    </span><span class="chg">stream = client.chat.completions.create(model="gpt-5-mini", stream=True, messages=[
+        {"role": "system", "content": brochure_system},
+        {"role": "user", "content": build_material(url)}])
+    text = ""
+    for chunk in stream:
+        text += chunk.choices[0].delta.content or ""
+        yield text</span><span class="dim">
+
+for so_far in brochure_stream("https://example.com"):
+    print(so_far[-40:])</span></div>
+<div class="try" id="p4"></div>
+
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I pasted a whole website into one prompt and hit the length limit. Choosing the pages first, then cutting the text, fixed it. I also forgot the link list came back as a JSON string until I added <code>json.loads</code>.</span><span class="zh">我把整个网站塞进一个提示词，撞上了长度上限。先挑页面、再截断文字，问题就解决了。我还忘了链接列表回来的是 JSON 字符串，直到加上 <code>json.loads</code> 才好。</span></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Make a brochure for a business you know.</b> Try a shop whose site is plain HTML.</span><span class="zh"><b>给你熟悉的一家店做一份宣传册。</b>选一个纯 HTML 网站的店。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Switch the tone to funny</b> by changing one sentence, and compare the two brochures.</span><span class="zh"><b>把语气改成搞笑</b>，只改一句话，比较两份宣传册。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Swap in a local model</b> and note what gets worse (the JSON links are a good place to look).</span><span class="zh"><b>换成本地模型</b>，看看什么变差了（JSON 链接那一步最值得看）。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">Back at the void deck</span><span class="zh">回到组屋底层</span></b><span class="en">Uncle Raj does the same two-step job at the noticeboard. First he decides which notices matter this month, then he writes one tidy announcement from just those. Picking first and writing second keeps the board neat and the announcement short.</span><span class="zh">Raj 叔叔在公告板前也是分两步做事：先判断这个月哪些通知重要，再只用这些写一条清爽的公告。先挑、后写，公告板才整齐，公告也才简短。</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Two small calls beat one giant one.<br>• Let the model make the fuzzy choice (which links). Let code do the plumbing.<br>• Show one example in the prompt so the reply copies its shape.<br>• JSON replies arrive as strings: <code>json.loads</code> them.<br>• Prompts set tone. Change one sentence and the voice changes.<br>• Cut the input so the call stays cheap and inside the context window.<br>• Stream the output so the reader sees words straight away.</p><p class="zh" style="margin:0">• 两次小调用胜过一次巨大的调用。<br>• 模糊的判断（选哪些链接）交给模型，管道活交给代码。<br>• 在提示词里给一个例子，回复就会照着它的格式。<br>• JSON 回复是字符串，要用 <code>json.loads</code> 解析。<br>• 提示词决定语气，改一句话，口吻就变了。<br>• 截短输入，调用才便宜，也不超出上下文窗口。<br>• 流式输出，让读的人立刻看到字。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('p1'),{q:{en:'A shop\'s page is drawn entirely by JavaScript. What does <code>page_text</code> most likely return?',zh:'一个店铺页面完全由 JavaScript 画出来，<code>page_text</code> 多半会返回什么？'},opts:[{k:'a',en:'The full page, as a browser would show it',zh:'和浏览器看到的一样的完整页面'},{k:'b',en:'Almost nothing, because the text is not in the HTML we downloaded',zh:'几乎什么都没有，因为我们下载的 HTML 里没有那些文字'}],a:'b',ex:{en:'<code>requests</code> only downloads the raw HTML. It does not run scripts, so the text never appears.',zh:'<code>requests</code> 只下载原始 HTML，不会运行脚本，所以文字根本不会出现。'},hint:{en:'Does <code>requests</code> behave like a browser?',zh:'<code>requests</code> 像浏览器一样吗？'}});
+ predict($('p2'),{q:{en:'The model replies with a JSON string. What do you need before you can write <code>chosen[0]["url"]</code>?',zh:'模型回复的是一段 JSON 字符串。要写 <code>chosen[0]["url"]</code>，你还需要什么？'},opts:[{k:'a',en:'Nothing, the reply is already a dict',zh:'什么都不用，回复本来就是字典'},{k:'b',en:'<code>json.loads(...)</code> to turn the string into a dict',zh:'<code>json.loads(...)</code>，把字符串变成字典'}],a:'b',ex:{en:'The API gives you text. <code>json.loads</code> parses it into Python lists and dicts.',zh:'API 给你的是文本，<code>json.loads</code> 把它解析成 Python 的列表和字典。'},hint:{en:'What type does <code>reply.choices[0].message.content</code> have?',zh:'<code>reply.choices[0].message.content</code> 是什么类型？'}});
+ game($('g3'),[
+  {en:'Decide that “About us” matters and “Privacy” does not.',zh:'判断“关于我们”重要而“隐私”不重要。',a:'m',ex:{en:'This is a fuzzy judgement. Rules would be long and brittle.',zh:'这是模糊的判断，写规则又长又脆弱。'},hint:{en:'Could you list every possible link name in advance?',zh:'你能事先列出所有可能的链接名吗？'}},
+  {en:'Download each chosen page and strip the tags.',zh:'下载每个选中的页面并去掉标签。',a:'k',ex:{en:'Fetching and cleaning is plumbing. Code does it the same way every time.',zh:'抓取和清洗是管道活，代码每次做得一样。'},hint:{en:'Is there any judgement involved?',zh:'里面有判断吗？'}},
+  {en:'Cut the joined text to 5000 characters.',zh:'把拼好的文字截到 5000 个字符。',a:'k',ex:{en:'A length cap is a plain slice of a string.',zh:'长度上限就是对字符串的一次切片。'},hint:{en:'Is a rule enough?',zh:'一条规则够用吗？'}},
+  {en:'Write the brochure in a warm tone.',zh:'用温暖的语气写宣传册。',a:'m',ex:{en:'Writing in a tone is what the model is good at.',zh:'按语气写作正是模型擅长的。'},hint:{en:'Is it a rule or language?',zh:'这是规则还是语言？'}}],[{k:'m',en:'Model',zh:'模型'},{k:'k',en:'Plain code',zh:'普通代码'}],{en:'Job',zh:'任务'});
+ predict($('p4'),{q:{en:'Why add <code>or ""</code> after <code>delta.content</code>?',zh:'为什么在 <code>delta.content</code> 后面加 <code>or ""</code>？'},opts:[{k:'a',en:'Some chunks carry no text (the last one, for example), so it would be None',zh:'有些块没有文字（比如最后一块），那时它是 None'},{k:'b',en:'It makes the model reply faster',zh:'它能让模型回复更快'}],a:'a',ex:{en:'Adding None to a string raises an error. An empty string keeps the loop safe.',zh:'字符串加 None 会报错，空字符串让循环保持安全。'},hint:{en:'What does a chunk with no words contain?',zh:'没有文字的块里装的是什么？'}});
+});
+</script></body></html>
