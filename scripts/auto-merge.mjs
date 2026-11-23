@@ -6,7 +6,10 @@
 //     it back. It never merges while a live check is still running, so each merge is checked on its own.
 //   - tells TX once (a PR comment plus Telegram) when a pull request is stuck: a check failed, the agents could
 //     not fix it, it has a merge conflict, it changes the agents' own workflows (GitHub only lets a person merge
-//     those), or a check has not reported after 3 hours.
+//     those and no MERGE_TOKEN is set), or a check has not reported after 3 hours.
+//   - A PR that changes .github/workflows/ is merged only with MERGE_TOKEN (a fine-grained token with the Workflows
+//     permission; the workflow token cannot). It still needs every check green, the Reviewer included, and it is
+//     left to TX if it touches the merge guardrails themselves (PROTECTED below).
 // Skips drafts, pull requests from forks, the label "hold", and Rollback pull requests (the live check merges those).
 // Usage: node scripts/auto-merge.mjs   Env: GITHUB_TOKEN (contents, pull-requests, statuses, actions: write),
 //        GITHUB_REPOSITORY, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID; DRY_RUN=1 changes nothing and only prints.
@@ -16,6 +19,9 @@ import { gh, telegram, scrub, REPO } from './lib.mjs';
 const ROOT = new URL('..', import.meta.url).pathname;
 const DRY = !!process.env.DRY_RUN;
 const STUCK_H = 3;
+const MERGE_TOKEN = process.env.MERGE_TOKEN || '';
+// The guardrails of the merge itself: a PR that changes these is always left for TX, even with MERGE_TOKEN.
+const PROTECTED = ['.github/workflows/auto-merge.yml', 'scripts/auto-merge.mjs', '.github/rulesets/main.json'];
 const out = (k, v) => process.env.GITHUB_OUTPUT && appendFileSync(process.env.GITHUB_OUTPUT, `${k}<<EOF\n${v}\nEOF\n`);
 let REQUIRED = ['copy-check', 'UI check', 'Reviewer'];
 try { REQUIRED = JSON.parse(readFileSync(ROOT + '.github/rulesets/main.json', 'utf8')).rules.find(r => r.type === 'required_status_checks').parameters.required_status_checks.map(c => c.context); } catch {}
@@ -82,8 +88,13 @@ try {
       continue;
     }
     const files = await gh('GET', `/pulls/${p.number}/files?per_page=100`);
-    if (files.some(f => f.filename.startsWith('.github/workflows/'))) {
-      await stuck(p, 'Every check is green, but it changes the agents\' own workflows, and GitHub only lets a person merge those. Merge it when you are happy.');
+    const touchesWorkflows = files.some(f => f.filename.startsWith('.github/workflows/'));
+    if (files.some(f => PROTECTED.includes(f.filename))) {
+      await stuck(p, 'Every check is green, but it changes the auto-merge rules themselves (auto-merge.yml, auto-merge.mjs or the ruleset), so a person merges it.');
+      continue;
+    }
+    if (touchesWorkflows && !MERGE_TOKEN) {
+      await stuck(p, 'Every check is green, but it changes the agents\' own workflows, and GitHub only lets a person (or the MERGE_TOKEN secret) merge those. Merge it when you are happy.');
       continue;
     }
     const full = await gh('GET', `/pulls/${p.number}`);
@@ -92,12 +103,15 @@ try {
     if (merged || busy) { console.log(`${n}: ready, waits for the live check of the last merge`); continue; }
     if (DRY) { console.log(`${n}: ready, would merge now (dry run)`); merged = n; continue; }
     const before = (await gh('GET', '/git/ref/heads/main')).object.sha;
-    const r = await gh('PUT', `/pulls/${p.number}/merge`, { merge_method: 'merge', sha: p.head.sha }).catch(e => ({ err: e.message }));
+    const r = await gh('PUT', `/pulls/${p.number}/merge`, { merge_method: 'merge', sha: p.head.sha }, { token: touchesWorkflows ? MERGE_TOKEN : '' }).catch(e => ({ err: e.message }));
     if (!r.merged) { console.log(`${n}: merge refused: ${r.err || r.message}`); await stuck(p, 'Every check is green, but GitHub refused the merge.'); continue; }
     merged = n; log.push(`${n} ${scrub(p.title).slice(0, 80)}`);
     console.log(`${n}: merged as ${r.sha}`);
     await gh('POST', `/issues/${p.number}/comments`, { body: `🚀 Merged by itself: ${REQUIRED.join(', ')} were all green on ${p.head.sha.slice(0, 7)}. The product engineer agent now checks the live site and rolls this back if it broke it.` }).catch(() => {});
-    // The merge was made with the workflow token, which starts no workflow: start the live check on it by hand.
+    // A merge made with the workflow token starts no workflow, and one made with MERGE_TOKEN starts a plain push run
+    // that cannot roll back (it queues behind this one: live-check has a concurrency group). Either way, start the
+    // live check by hand with merge/before so that this merge can be rolled back.
+    if (touchesWorkflows) console.log(`${n}: changes workflows, merged with MERGE_TOKEN`);
     await gh('POST', '/actions/workflows/live-check.yml/dispatches', { ref: 'main', inputs: { merge: r.sha, before } })
       .catch(e => console.log(`::warning::could not start the live check: ${e.message}`));
   }
