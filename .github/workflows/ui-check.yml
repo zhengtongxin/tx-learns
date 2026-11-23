@@ -52,6 +52,7 @@ jobs:
   check:
     needs: start
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read
       pull-requests: read
@@ -86,6 +87,7 @@ jobs:
           "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium
       - name: Hover, click and Tab through every page
         id: run
+        timeout-minutes: 12
         env:
           PLAYWRIGHT_DIR: ${{ runner.temp }}/pw
           PAGES: ${{ inputs.pages }}
@@ -108,6 +110,7 @@ jobs:
         if: steps.find.outputs.shots != '' && steps.run.outputs.ran == '1'
         run: npm install -g @anthropic-ai/claude-code
       - name: Visual pass with Claude
+        timeout-minutes: 6
         if: steps.find.outputs.shots != '' && steps.run.outputs.ran == '1'
         continue-on-error: true
         env:
