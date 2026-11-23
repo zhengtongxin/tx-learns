@@ -1,10 +1,10 @@
-# Writer agent: when raw notes land in inbox/<concept>/ on the notes branch, Claude writes a lesson draft to
+# Content creator agent (the writer): when raw notes land in inbox/<concept>/ on the notes branch, Claude writes a lesson draft to
 # STYLE.md and opens a pull request into main. It never pushes to main itself.
 # The notes branch is data only (never deployed, never merged). A push there only hands the folders over to this
 # workflow as it is on main (workflow_dispatch on main), so the writer always runs main's trusted version.
 # That pull request is the only one for the lesson: the reader and reviewer agents add their fixes to it as
 # commits, and the reviewer agent tells TX on Telegram when it is ready to approve. TX merges once.
-name: Claude writer
+name: Content creator (writer)
 on:
   push:
     branches: [notes]
@@ -109,7 +109,9 @@ jobs:
           set -o pipefail
           if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then unset ANTHROPIC_API_KEY; echo "Auth: Claude subscription"; else unset CLAUDE_CODE_OAUTH_TOKEN; echo "Auth: API key (no CLAUDE_CODE_OAUTH_TOKEN secret)"; fi
           cat > /tmp/writer-prompt.md <<'PROMPT'
-          You are the writer for TX Learns, a bilingual (EN/中文) interactive learning site about AI.
+          You are the content creator for TX Learns, a bilingual (EN/中文) interactive learning site about AI.
+          Your reader is a smart newcomer to AI. Your job: turn TX's raw notes into one lesson they enjoy and can
+          follow without the source, in TX's own voice.
           TX has dropped raw notes in these inbox folders:
           __DIRS__
 
@@ -137,7 +139,10 @@ jobs:
           7. Run `node scripts/check-copy.mjs`, `node scripts/check-counts.mjs` and `node scripts/check-pages.mjs` and fix everything they report until all pass.
              Then run `node scripts/check-pages.mjs --fix`: it updates sitemap.xml, the lesson list and the lesson's updated date.
              Start from agentic-ai/_template.html (copy it into <track>/): fill in its <title> and its description and og: tags with the lesson's own title and hero line.
-          8. Write .writer-summary.md (repo root): the lesson title, file name, topic, a 3-line summary of the story,
+          8. Before you finish, read your lesson once as that newcomer: every term is explained before it is used, every
+             quiz answer was taught, no step's code uses something a later step creates, and each code box is complete
+             enough to run (imports included, no placeholder that breaks the syntax).
+          9. Write .writer-summary.md (repo root): the lesson title, file name, topic, a 3-line summary of the story,
              and anything in the notes you were unsure about or left out (as questions for TX).
           PROMPT
           python3 -c "import os,sys;p='/tmp/writer-prompt.md';s=open(p).read().replace('__DIRS__',os.environ['DIRS']);open(p,'w').write(s)"
@@ -163,16 +168,17 @@ jobs:
         run: |
           if [ -z "$(git status --porcelain -- . ':!inbox' ':!.writer-summary.md')" ]; then echo "The writer changed nothing."; exit 1; fi
           branch="writer/${SLUG:-notes}-${GITHUB_RUN_NUMBER}"
-          git config user.name "TX Learns writer"
+          git config user.name "TX Learns content creator"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
           git add -A -- . ':!inbox' ':!.writer-summary.md'
-          git commit -m "Draft lesson from ${DIRS//$'\n'/, }" -m "Written by the writer agent (Claude) from TX's notes."
+          git commit -m "Draft lesson from ${DIRS//$'\n'/, }" -m "Written by the content creator agent (Claude) from TX's notes."
           git push -u origin "$branch"
-          { echo "Draft lesson from \`${DIRS//$'\n'/\`, \`}\`, written by the writer agent to STYLE.md."; echo;
+          { echo "Draft lesson from \`${DIRS//$'\n'/\`, \`}\`, written by the content creator agent to STYLE.md."; echo;
             cat .writer-summary.md 2>/dev/null; echo; echo "Copy check: $(tail -1 /tmp/copy-check.txt)"; echo;
-            echo "Next, by themselves: the reader agent reads the preview and adds clearer wording here as a commit if the lesson scores under 8/10,";
-            echo "then the reviewer agent reviews it and adds its fixes here too. You get one Telegram message when it is ready to approve."; } > /tmp/pr-body.md
+            echo "Next, by themselves: the intern agent reads the preview as a newcomer and adds clearer wording here if the lesson scores under 8/10,";
+            echo "the frontend engineer agent clicks through it, then the backend engineer agent reviews the facts and code and adds its fixes here too.";
+            echo "When all of them are green it merges by itself and the product engineer agent checks the live site. You only hear about it if it gets stuck."; } > /tmp/pr-body.md
           url=$(gh pr create --base main --head "$branch" --title "Draft lesson: ${SLUG:-new notes}" --body-file /tmp/pr-body.md)
           gh pr edit "$url" --add-assignee "${{ github.repository_owner }}" || true
           echo "url=$url" >> "$GITHUB_OUTPUT"
@@ -187,7 +193,7 @@ jobs:
           URL: ${{ steps.pr.outputs.url }}
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          node scripts/notify-telegram.mjs "⚠️ The writer agent could not finish a draft from your notes.${URL:+ Draft: $URL} Logs: $RUN"
+          node scripts/notify-telegram.mjs "⚠️ The content creator agent could not finish a draft from your notes.${URL:+ Draft: $URL} Logs: $RUN"
       - name: Record status for the Ecosystem page
         if: ${{ !cancelled() }}
         env:
@@ -198,6 +204,6 @@ jobs:
         run: |
           # No notes to draft: just clear this run's working mark.
           [ -z "$DIRS" ] && { STATE=idle node scripts/record-status.mjs writer; exit 0; }
-          if [ -n "$URL" ]; then STATE=ok; SUMMARY="Drafted a lesson from the $SLUG notes. The reader and reviewer agents look at it next."
+          if [ -n "$URL" ]; then STATE=ok; SUMMARY="Drafted a lesson from the $SLUG notes. The intern, frontend and backend engineer agents look at it next."
           else STATE=fail; SUMMARY="Could not finish a draft from the $SLUG notes."; fi
           STATE=$STATE SUMMARY="$SUMMARY" LINK="$URL" node scripts/record-status.mjs writer
