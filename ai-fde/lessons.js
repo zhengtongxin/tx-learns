@@ -17,9 +17,9 @@ window.TRACK={id:'ai-fde',title:{en:'AI FDE',zh:'AI FDE'},topics:[
   {k:'c',title:{en:'Tracing and experiments',zh:'追踪与实验'}},
   {k:'p',title:{en:'Project: a scoreboard for the agent',zh:'项目：智能体计分板'}}]},
  {n:5,title:{en:'Knowledge and memory',zh:'知识与记忆'},items:[
-  {k:'c',title:{en:'Agentic RAG over a manual',zh:'在手册上做智能体式检索'}},
-  {k:'c',title:{en:'A memory over MCP',zh:'通过 MCP 给智能体记忆'}},
-  {k:'p',title:{en:'Project: an agent that remembers customers',zh:'项目：记得客户的智能体'}}]},
+  {k:'c',file:'13-agentic-rag-over-a-manual.html',title:{en:'Agentic RAG over a manual',zh:'在手册上做智能体式检索'}},
+  {k:'c',file:'14-a-memory-over-mcp.html',title:{en:'A memory over MCP',zh:'通过 MCP 给智能体记忆'}},
+  {k:'p',file:'15-agent-that-remembers-customers.html',title:{en:'Project: an agent that remembers customers',zh:'项目：记得客户的智能体'}}]},
  {n:6,title:{en:'Pausing and working in parallel',zh:'暂停与并行'},items:[
   {k:'c',title:{en:'Pause for approval, resume after a crash',zh:'等人批准再继续，崩溃后接着干'}},
   {k:'c',title:{en:'Swarms of agents in parallel',zh:'多个智能体并行'}},
