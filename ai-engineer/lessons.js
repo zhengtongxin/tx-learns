@@ -10,12 +10,12 @@ window.TRACK={id:'ai-engineer',title:{en:'AI Engineer',zh:'AI 工程师'},topics
   {k:'c',file:'06-tools-images-voice.html',title:{en:'Tools, images and voice',zh:'工具、图像与语音'}},
   {k:'p',file:'07-shop-assistant-that-acts.html',title:{en:'Project: a shop assistant that acts',zh:'项目：会动手的店铺助手'}}]},
  {n:3,title:{en:'Open-source models',zh:'开源模型'},items:[
-  {k:'c',title:{en:'Pipelines: models in a few lines',zh:'pipeline：几行代码用上模型'}},
-  {k:'c',title:{en:'Tokenizers and how models load',zh:'分词器与模型加载'}},
-  {k:'p',title:{en:'Project: a meeting minutes writer',zh:'项目：会议纪要助手'}}]},
+  {k:'c',file:'08-pipelines-models-few-lines.html',title:{en:'Pipelines: models in a few lines',zh:'pipeline：几行代码用上模型'}},
+  {k:'c',file:'09-tokenizers-how-models-load.html',title:{en:'Tokenizers and how models load',zh:'分词器与模型加载'}},
+  {k:'p',file:'10-meeting-minutes-writer.html',title:{en:'Project: a meeting minutes writer',zh:'项目：会议纪要助手'}}]},
  {n:4,title:{en:'Choosing the right model',zh:'选对模型'},items:[
-  {k:'c',title:{en:'Benchmarks, leaderboards and their limits',zh:'基准、排行榜与它们的局限'}},
-  {k:'p',title:{en:'Project: a code translator',zh:'项目：代码翻译器'}}]},
+  {k:'c',file:'11-benchmarks-leaderboards-limits.html',title:{en:'Benchmarks, leaderboards and their limits',zh:'基准、排行榜与它们的局限'}},
+  {k:'p',file:'12-code-translator.html',title:{en:'Project: a code translator',zh:'项目：代码翻译器'}}]},
  {n:5,title:{en:'Retrieval (RAG)',zh:'检索增强（RAG）'},items:[
   {k:'f',title:{en:'Why a model needs your documents',zh:'为什么模型需要你的文档'}},
   {k:'c',title:{en:'Chunks, embeddings and vector stores',zh:'分块、向量与向量库'}},

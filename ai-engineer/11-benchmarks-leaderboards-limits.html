@@ -1,0 +1,89 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Benchmarks, leaderboards and their limits | TX Learns</title>
+<meta name="description" content="Read what leaderboards really measure, why scores can mislead, and how a tiny test of your own questions picks the cheapest good-enough model."><meta property="og:title" content="Benchmarks, leaderboards and their limits | TX Learns"><meta property="og:description" content="Read what leaderboards really measure, why scores can mislead, and how a tiny test of your own questions picks the cheapest good-enough model."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-engineer/11-benchmarks-leaderboards-limits.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-23">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Choosing the right model · Lesson 1</span><span class="zh">选对模型 · 第 1 课</span></span><h1><span class="en">Benchmarks, leaderboards and their limits</span><span class="zh">基准、排行榜与它们的局限</span></h1><p class="meta"><span class="en">You will learn to read a leaderboard as a shortlist, then settle the choice with your own small test · ~15 min · concept</span><span class="zh">你会学会把排行榜当成候选名单来读，再用自己的小测试定下选择 · 约 15 分钟 · 概念课</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0"><b>Mdm Tan</b> asks Wei Jie which AI model her provision shop should use to sort customer messages. There are twenty to pick from. <b>Wei Jie</b> admits he used to choose by brand and mood. This time he looks at what the charts measure, then asks <b>Priya</b>, who checks answers for a living, to help him test properly.</p>
+<p class="zh" style="margin:0"><b>Tan 太太</b>问 Wei Jie，她的杂货店该用哪个 AI 模型来分类顾客的留言。可选的有二十个。<b>Wei Jie</b> 承认自己以前是看品牌、凭心情选的。这次他先看图表到底量了什么，再请以批改答案为生的 <b>Priya</b> 帮忙做一次像样的测试。</p></div>
+
+<h2><span class="en">Step 1 · What the charts measure</span><span class="zh">第 1 步 · 图表到底量了什么</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A benchmark is a fixed set of questions with known answers. There are sets for exam-style knowledge and reasoning, for coding (write a function that passes hidden tests), for following instructions, for recalling facts in long text and for using tools. Arenas work differently: people compare two anonymous answers and vote, and a rating like a chess Elo is computed. Beside the quality columns sit the practical ones: price per million tokens in and out, speed in tokens per second, context size and licence.</p>
+<p class="zh" style="margin:0 0 8px">基准就是一套答案已知的固定题目。有考试式的知识和推理题、有编程题（写一个能通过隐藏测试的函数）、有指令遵循、有在长文本里找回事实、还有工具使用。竞技场的做法不同：人们比较两个匿名的回答并投票，再算出类似国际象棋 Elo 的评分。除了质量列，还有实用的几列：每百万 token 的输入输出价格、每秒生成 token 的速度、上下文大小和许可证。</p></div>
+<div class="codebox"><span class="dim">leaderboard row (made-up numbers)
+model          exam   code   arena   $ per 1M in/out   tokens/s   context   licence
+big-model-a    91     88     1320    3.00 / 15.00      60         200k      closed
+mid-model-b    86     80     1270    0.50 / 2.00       140        128k      open
+small-model-c  71     62     1150    0.05 / 0.20       300        32k       open</span></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Why a score can mislead</span><span class="zh">第 2 步 · 为什么分数会误导</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Four traps. Leakage: a model may have seen the test questions while training, so the score flatters it. Saturation: when everyone gets 95 percent the test no longer separates anyone. Style: arena votes reward long, confident, friendly answers as much as correct ones. Averages: a model that is top overall can be mediocre at your narrow job. And models change monthly, so any notes about them age fast.</p>
+<p class="zh" style="margin:0 0 8px">四个陷阱。泄漏：模型训练时可能见过测试题，分数就偏高。饱和：大家都拿 95% 时，这套题已经分不出高下。风格：竞技场的投票奖励又长、又自信、又友好的回答，不只是对的回答。平均数：总分第一的模型，做你那个窄任务可能很普通。而且模型每月都在变，关于它们的笔记很快就过时。</p></div>
+<div class="codebox"><span class="dim">Same model, two views:
+overall average ........... top 3
+sorting shop messages ..... somewhere in the middle
+price you pay ............. ten times the small model</span></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Your own twenty questions</span><span class="zh">第 3 步 · 你自己的二十道题</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">First shortlist three to five models from public rankings plus price and speed. Then write twenty real examples from your own job, each with a known good answer. Priya's tip: collect real messages, not invented ones. Run every model on them with the identical prompt, and score by a simple rule, or by another model acting as judge. Record cost and time too.</p>
+<p class="zh" style="margin:0 0 8px">先从公开排名加上价格和速度里，挑出三到五个候选模型。然后从你自己的工作里写二十个真实例子，每个都有已知的好答案。Priya 的建议：收集真实的留言，别自己编。用完全相同的提示词让每个模型都跑一遍，用简单规则打分，或者让另一个模型当裁判。成本和耗时也要记录。</p></div>
+<div class="codebox"><span class="dim">import time
+from openai import OpenAI
+client = OpenAI()
+
+cases = [("Where is my parcel? It is three days late", "delivery"),
+         ("Can I get a refund for the broken kettle", "refund"),
+         # ... eighteen more real messages with the answer you want
+        ]
+
+</span><span class="chg">def run_one(model, message):
+    start = time.time()
+    reply = client.chat.completions.create(model=model, messages=[
+        {"role": "system", "content": "Reply with one word: delivery, refund or other."},
+        {"role": "user", "content": message}])
+    return reply.choices[0].message.content.strip().lower(), time.time() - start</span></div>
+<div class="try" id="p3"></div>
+
+<h2><span class="en">Step 4 · The table, and the cheapest good-enough</span><span class="zh">第 4 步 · 表格，以及最便宜的够用模型</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Loop over the shortlist and fill a small table: correct out of the total, seconds, and cost. Then pick the cheapest model that is good enough for the job, not the one at the top of the chart. Test again every few months, because new models keep arriving. A leaderboard gets you the shortlist. Your table gets you the decision.</p>
+<p class="zh" style="margin:0 0 8px">遍历候选名单，填一张小表：答对几道（共几道）、耗时、成本。然后选对这份工作来说够用的最便宜的模型，而不是图表最上面的那个。每隔几个月再测一次，因为新模型不断出现。排行榜给你候选名单，你的表格才给你决定。</p></div>
+<div class="codebox"><span class="dim">candidates = ["big-model-a", "mid-model-b", "small-model-c"]   # your shortlist
+
+</span><span class="chg">for model in candidates:
+    right, seconds = 0, 0.0
+    for message, wanted in cases:
+        got, took = run_one(model, message)
+        right += (got == wanted)
+        seconds += took
+    print(model, f"{right}/{len(cases)}", f"{seconds:.1f}s")   # add the cost from your usage page</span></div>
+<p class="en">Which of these is a leaderboard limit, and which is the fix?</p>
+<p class="zh">下面哪些是排行榜的局限，哪些是对策？</p><div class="sc" id="g4"></div>
+
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I chose a model because it topped one chart, then paid ten times more than needed for a task a small model did equally well. I only found out when I ran my own examples.</span><span class="zh">我因为一个模型在某张图表上排第一就选了它，结果为一个小模型同样能做好的任务多花了十倍的钱。直到我跑了自己的例子才发现。</span></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Build a tiny table</b> (model, correct out of 10, seconds, cost) for three models on your own ten questions.</span><span class="zh"><b>做一张小表</b>（模型、十题答对几道、耗时、成本），用你自己的十道题测三个模型。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check the leaderboard's own columns:</b> note the price and speed of your top pick against a cheaper one.</span><span class="zh"><b>看看排行榜自带的列：</b>把你首选模型的价格和速度，同一个更便宜的比一比。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">Back at the void deck</span><span class="zh">回到组屋底层</span></b><span class="en">Ah Boy knows the price of every second-hand phone by heart, but he still turns the phone on before he buys it. A leaderboard is the price tag. Your own test is turning the phone on.</span><span class="zh">Ah Boy 把每部二手手机的价钱背得滚瓜烂熟，可买之前他还是会先开机试试。排行榜就是价签，你自己的测试就是开机试一试。</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Benchmarks are a starting list, not a verdict.<br>• Read the practical columns too: price, speed, context size and licence.<br>• Scores can be flattered by leakage, and saturate when everyone is near the top.<br>• Arena votes reward style as well as correctness.<br>• A top overall average can hide a mediocre result on your own job.<br>• Test three to five models on twenty real examples with the same prompt.<br>• Pick the cheapest model that is good enough, and re-test every few months.</p><p class="zh" style="margin:0">• 基准是起点名单，不是裁决。<br>• 也要看实用的几列：价格、速度、上下文大小和许可证。<br>• 分数可能因泄漏而偏高，大家都接近满分时也会饱和。<br>• 竞技场投票奖励风格，也奖励正确。<br>• 总分第一，可能掩盖它在你那份工作上的平庸表现。<br>• 用同一份提示词，在二十个真实例子上测三到五个模型。<br>• 选够用的最便宜的模型，并每隔几个月重测。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('p1'),{q:{en:'Mdm Tan needs to sort thousands of short messages a day on a small budget. Which columns matter besides quality?',zh:'Tan 太太每天要用很少的预算分类几千条短留言。除了质量，哪些列也重要？'},opts:[{k:'a',en:'Price per million tokens and speed',zh:'每百万 token 的价格和速度'},{k:'b',en:'None, quality is all that matters',zh:'都不重要，只有质量重要'}],a:'a',ex:{en:'At thousands of calls a day, price and speed decide what you can afford and how long customers wait.',zh:'每天几千次调用，价格和速度决定你付得起多少、顾客要等多久。'},hint:{en:'Think about the monthly bill.',zh:'想想每月的账单。'}});
+ predict($('p2'),{q:{en:'Every top model scores about 95 percent on a test. What does the test now tell you?',zh:'所有顶尖模型在某套题上都拿 95% 左右。这套题现在告诉你什么？'},opts:[{k:'a',en:'Very little about which one is better: it has saturated',zh:'几乎分不出谁更好：它已经饱和了'},{k:'b',en:'That all of them will do your job perfectly',zh:'它们做你的工作都会很完美'}],a:'a',ex:{en:'When everyone aces it, the test stops separating models, and it says nothing about your own job.',zh:'大家都满分时，这套题分不出模型的高下，也说明不了你的工作。'},hint:{en:'Can you rank people who all got the same mark?',zh:'分数一样的人能排名次吗？'}});
+ predict($('p3'),{q:{en:'Why does every model get the identical system message and the same twenty cases?',zh:'为什么每个模型都用完全相同的 system 消息和同样的二十个例子？'},opts:[{k:'a',en:'So any difference in the score comes from the model, not the test',zh:'这样分数上的差别来自模型，而不是测试'},{k:'b',en:'Models refuse to answer if the prompts differ',zh:'提示词不同，模型就拒绝回答'}],a:'a',ex:{en:'Change two things at once and you cannot tell which one caused the difference.',zh:'同时改两样东西，你就分不清是哪个造成了差别。'},hint:{en:'It is a fair-test idea.',zh:'这是公平测试的想法。'}});
+ game($('g4'),[
+  {en:'The model saw the test questions while it was trained.',zh:'模型训练时见过这些测试题。',a:'l',ex:{en:'That is leakage, so the score flatters it.',zh:'这就是泄漏，分数因此偏高。'},hint:{en:'Is it a problem or an answer?',zh:'这是问题还是答案？'}},
+  {en:'Writing twenty real examples from your own job, with known answers.',zh:'从自己的工作里写二十个有标准答案的真实例子。',a:'f',ex:{en:'Your own test measures your task directly.',zh:'你自己的测试直接衡量你的任务。'},hint:{en:'It makes the chart match your job.',zh:'它让图表对得上你的工作。'}},
+  {en:'People vote for the longer, friendlier answer.',zh:'人们把票投给更长、更友好的回答。',a:'l',ex:{en:'Arena votes reward style as well as correctness.',zh:'竞技场投票奖励风格，也奖励正确。'},hint:{en:'Does the vote check correctness?',zh:'投票会检查对错吗？'}},
+  {en:'Re-running the test every few months.',zh:'每隔几个月重新跑一次测试。',a:'f',ex:{en:'Models change monthly, so the choice must be refreshed.',zh:'模型每月都在变，所以选择要更新。'},hint:{en:'Do old notes age?',zh:'旧笔记会过时吗？'}}],[{k:'l',en:'Limit of a leaderboard',zh:'排行榜的局限'},{k:'f',en:'Fix',zh:'对策'}],{en:'Item',zh:'项目'});
+});
+</script></body></html>
