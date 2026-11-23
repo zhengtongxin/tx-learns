@@ -38,7 +38,7 @@ async function digest() {
   const back = merged.filter(p => /^Rollback:/.test(p.title)), live = merged.filter(p => !/^Rollback:/.test(p.title));
   if (live.length) lines.push(`🚀 Went live (${live.length}):`, ...live.map(p => `• #${p.number} ${scrub(p.title).slice(0, 90)}`));
   else lines.push('🚀 Nothing went live in the last 24 hours.');
-  if (back.length) lines.push('', `↩️ Rolled back (${back.length}):`, ...back.map(p => `• ${scrub(p.title).slice(0, 100)}`, ));
+  if (back.length) lines.push('', `↩️ Rolled back (${back.length}):`, ...back.map(p => `• ${scrub(p.title).slice(0, 100)}`));
   lines.push('');
 
   // Waiting for TX: open pull requests into main

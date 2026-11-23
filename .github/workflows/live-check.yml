@@ -15,6 +15,9 @@ on:
       url:
         description: Site to check (empty = the live site). A manual run never rolls anything back.
         required: false
+      sha:
+        description: Wait for Vercel's production deploy of this commit first (the rollback's re-check sets it)
+        required: false
 permissions:
   contents: read
   deployments: read
@@ -34,7 +37,7 @@ jobs:
     env:
       # The production domain, not the per-deploy URL (that one may sit behind Vercel's login).
       SITE: ${{ inputs.url || vars.LIVE_URL || 'https://tx-learns.vercel.app/' }}
-      SHA: ${{ github.sha }}
+      SHA: ${{ inputs.sha || github.sha }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
@@ -52,7 +55,7 @@ jobs:
           echo "Last live check: ${st:-none}"; echo "state=$st" >> "$GITHUB_OUTPUT"
       - name: Wait for Vercel to finish the production deploy
         id: deploy
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' || inputs.sha != ''
         run: |
           # Up to 15 minutes. If Vercel never reports, the check still runs and compares the live lesson list.
           for i in $(seq 1 30); do
@@ -126,11 +129,12 @@ jobs:
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       SHA: ${{ github.sha }}
+      BEFORE: ${{ github.event.before }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: main
-          fetch-depth: 20
+          fetch-depth: 50
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -149,7 +153,11 @@ jobs:
           git config user.name "TX Learns live check"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
-          if [ "$(git rev-list --parents -n1 "$SHA" | wc -w)" -gt 2 ]; then git revert --no-edit -m 1 "$SHA"; else git revert --no-edit "$SHA"; fi
+          # Undo everything the push changed (main before it -> after it), so a merge, squash or rebase of several
+          # commits is undone in full. If main has moved on and this conflicts, the step fails and TX is told.
+          git cat-file -e "$BEFORE^{commit}" 2>/dev/null || git fetch -q origin "$BEFORE"
+          git diff --binary "$BEFORE" "$SHA" | git apply -R --3way --index
+          git commit -q -m "Revert \"$title\"" -m "Puts main back as it was before ${SHA:0:7}, which broke the live site."
           auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
           git -c "http.https://github.com/.extraheader=$auth" push origin "HEAD:refs/heads/$branch"
           { echo "The live site broke after ${pr:-commit ${SHA:0:7}} (\"$title\"), and it was fine before, so the live check agent undoes it."; echo;
@@ -177,7 +185,12 @@ jobs:
           echo "merged=" >> "$GITHUB_OUTPUT"
       - name: Check the site again after the rollback
         if: steps.merge.outputs.merged == '1'
-        run: gh workflow run live-check.yml --ref main -R "$GITHUB_REPOSITORY" || true
+        env:
+          URL: ${{ steps.revert.outputs.url }}
+        run: |
+          # The rollback's own merge starts no run (workflow token), so start one that waits for its deploy first.
+          m=$(gh pr view "$URL" --json mergeCommit --jq .mergeCommit.oid -R "$GITHUB_REPOSITORY" || true)
+          gh workflow run live-check.yml --ref main -f sha="$m" -R "$GITHUB_REPOSITORY" || true
       - name: Tell TX on Telegram
         if: always()
         env:
