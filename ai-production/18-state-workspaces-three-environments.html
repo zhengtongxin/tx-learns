@@ -8,8 +8,8 @@
 <div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0"><b>Mei Ling</b> now has the twin described in files. <b>Mr Ong</b> wants three copies: <b>dev</b> for experiments, <b>test</b> for <b>Auntie Siti</b> to try, and <b>prod</b> for everyone. Her first idea is to copy the folder three times. <b>Kumar</b> shakes his head: "Three copies of a plan drift apart by Friday. One berth plan, three berths."</p>
 <p class="zh" style="margin:0"><b>Mei Ling</b> 现在已经把分身写成了文件。<b>Ong 先生</b>要三份：<b>dev</b> 给人做实验，<b>test</b> 给 <b>Siti 阿姨</b>试用，<b>prod</b> 给所有人。她的第一个想法是把文件夹复制三份。<b>Kumar</b> 摇头：“三份图纸到周五就各改各的了。一张泊位图，三个泊位。”</p></div>
 <h2><span class="en">Step 1 · One folder, and a variable called environment</span><span class="zh">第 1 步 · 一个文件夹，和一个叫 environment 的变量</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Keep one folder of config: a provider file, a variables file, a main file with the resources (memory bucket, site bucket, function role, function, gateway and CDN) and an outputs file. Then add a variable called <code>environment</code> and feed it into <b>every name</b>. That is what stops dev and prod from colliding: they are the same files with a different word in the names.</p>
-<p class="zh" style="margin:0">只留一个配置文件夹：一个提供者文件、一个变量文件、一个放资源的主文件（记忆存储桶、网站存储桶、函数角色、函数、网关和 CDN），再加一个输出文件。然后添加一个叫 <code>environment</code> 的变量，把它放进<b>每一个名字</b>里。这样 dev 和 prod 才不会撞车：它们是同样的文件，只是名字里的那个词不同。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Keep one folder of config: a provider file, a variables file, a main file with the resources (memory bucket, site bucket, function role, function, gateway and CDN) and an outputs file (the code below leaves out the gateway, CDN and outputs blocks to keep it short; the next lesson reads their outputs). Then add a variable called <code>environment</code> and feed it into <b>every name</b>. That is what stops dev and prod from colliding: they are the same files with a different word in the names.</p>
+<p class="zh" style="margin:0">只留一个配置文件夹：一个提供者文件、一个变量文件、一个放资源的主文件（记忆存储桶、网站存储桶、函数角色、函数、网关和 CDN），再加一个输出文件（下面的代码为了简短，省略了网关、CDN 和输出的部分；下一课的部署脚本会读取它们的输出）。然后添加一个叫 <code>environment</code> 的变量，把它放进<b>每一个名字</b>里。这样 dev 和 prod 才不会撞车：它们是同样的文件，只是名字里的那个词不同。</p></div>
 <div class="codebox"><span class="dim">infra/              (next to the backend/ and frontend/ folders)
   providers.tf    which cloud, which region
   variables.tf    the knobs (below)
@@ -71,8 +71,8 @@ terraform plan  -var="environment=dev"
 terraform apply -var="environment=dev"</span></div>
 <div class="try" id="t3"></div>
 <h2><span class="en">Step 5 · Per-environment settings</span><span class="zh">第 5 步 · 每个环境自己的设置</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Environments should share a shape but not every setting. Dev can use a small, cheap model and prod a bigger one. Put the choice in a <b>map</b> (a lookup table) keyed by environment name, and pick from it with one line. The function below also needs its role, so that is included. (Attaching the permissions from earlier lessons to the role is left out to keep this short.)</p>
-<p class="zh" style="margin:0">各环境应该结构一样，但不必每项设置都一样。dev 可以用小而便宜的模型，prod 用更大的。把这个选择放进一张以环境名为键的<b>映射表</b>（map，查找表）里，再用一行去取。下面的函数还需要它的角色，所以也一起写出来。（把前几课的权限挂到角色上这一步为了简短省略了。）</p>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Environments should share a shape but not every setting. Dev can use a small, cheap model and prod a bigger one. Put the choice in a <b>map</b> (a lookup table) keyed by environment name, and pick from it with one line. The function below also needs its role, so that is included. (Attaching the permissions from earlier lessons to the role is left out to keep this short. Without them the function cannot call the model, so add them before you deploy.)</p>
+<p class="zh" style="margin:0">各环境应该结构一样，但不必每项设置都一样。dev 可以用小而便宜的模型，prod 用更大的。把这个选择放进一张以环境名为键的<b>映射表</b>（map，查找表）里，再用一行去取。下面的函数还需要它的角色，所以也一起写出来。（把前几课的权限挂到角色上这一步为了简短省略了。没有它们，函数就调不了模型，部署前要先加上。）</p>
 <p class="en" style="margin:0">Optional: a custom domain through DNS is one more resource per environment, with the environment name in the address.</p>
 <p class="zh" style="margin:0">可选项：用 DNS 配自定义域名，每个环境再多一个资源，地址里带上环境名。</p></div>
 <div class="codebox"><span class="dim">variable "model_ids" {
@@ -105,6 +105,7 @@ resource "aws_lambda_function" "twin" {
   filename         = "${path.module}/../backend/twin.zip"
   source_code_hash = filebase64sha256("${path.module}/../backend/twin.zip")
   timeout          = 30
+  memory_size      = 512
   environment {
     variables = {
       </span><span class="chg">MODEL_ID      = local.model_id</span><span class="dim">

@@ -21,7 +21,7 @@ aws lambda update-function-configuration --function-name wharf-twin \
 <div class="try" id="t0"></div>
 <h2><span class="en">Step 2 · What a month costs</span><span class="zh">第 2 步 · 一个月要花多少钱</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">A model is priced per thousand <b>tokens</b> (small pieces of text, roughly three-quarters of a word), with one price for the text going in and a higher one for the text coming out. So a chat costs: input tokens × input price + output tokens × output price. Multiply by how many chats you expect. The prices below are made-up round numbers for practice; always read the provider's current price page.</p>
-<p class="zh" style="margin:0">模型按每一千个 <b>token</b>（文字的小片段，大约四分之三个英文单词）计价，输入的文字一个价，输出的文字一个更高的价。所以一次聊天的费用是：输入 token 数 × 输入单价 + 输出 token 数 × 输出单价，再乘以你预计的聊天次数。下面的价格是练习用的整数，是编的；实际请读服务商当前的价格页。</p></div>
+<p class="zh" style="margin:0">模型按每一千个 <b>token</b>（文字的小片段，大约四分之三个英文单词）计价，输入的文字一个价，输出的文字一个更高的价。所以一次聊天的费用是：输入 token 数 × 输入单价 + 输出 token 数 × 输出单价，再乘以你预计的聊天次数。下面的价格是练习用的数字，是编的；实际请读服务商当前的价格页。</p></div>
 <div class="codebox"><span class="dim"># example prices in dollars per 1,000 tokens: (input, output) -- not real, check today's page
 </span><span class="chg">PRICES = {"micro": (0.00004, 0.00016),
           "lite":  (0.00006, 0.00024),
@@ -76,8 +76,8 @@ for size in SIZES:
     print(size, run(size))     # (passed, seconds, input tokens, output tokens)</span></div>
 <div class="sc" id="t2"></div>
 <h2><span class="en">Step 4 · Watch it once it is live</span><span class="zh">第 4 步 · 上线后盯着它</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">The test tells you what should happen. The logs tell you what does. The logs service already counts <b>invocations</b>, <b>duration</b> and <b>errors</b> for the function. Add one line per model call with the model, the time and the token counts, so a slow or costly request shows up as a single searchable line. Then set an <b>alarm</b>: it messages you when errors go over a limit, so you hear about it before a user complains.</p>
-<p class="zh" style="margin:0">测试告诉你应该发生什么，日志告诉你实际发生了什么。日志服务已经替函数统计了<b>调用次数</b>、<b>时长</b>和<b>错误数</b>。再给每次模型调用加一行，写上模型、耗时和 token 数，这样慢的或贵的请求就成了一行能搜到的记录。然后设一个<b>警报</b>：错误超过上限时它会通知你，这样用户还没抱怨你就先知道了。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">The test tells you what should happen. The logs tell you what does. The logs service already counts <b>invocations</b>, <b>duration</b> and <b>errors</b> for the function. Add one line per model call with the model, the time and the token counts, so a slow or costly request shows up as a single searchable line (<code>print</code> sends it to the function's logs). Then set an <b>alarm</b>: it messages you when errors go over a limit, so you hear about it before a user complains.</p>
+<p class="zh" style="margin:0">测试告诉你应该发生什么，日志告诉你实际发生了什么。日志服务已经替函数统计了<b>调用次数</b>、<b>时长</b>和<b>错误数</b>。再给每次模型调用加一行，写上模型、耗时和 token 数，这样慢的或贵的请求就成了一行能搜到的记录（<code>print</code> 会把这一行送进函数的日志）。然后设一个<b>警报</b>：错误超过上限时它会通知你，这样用户还没抱怨你就先知道了。</p></div>
 <div class="codebox"><span class="dim">import json
 import os
 import time
@@ -128,7 +128,7 @@ def trim(messages: list) -> list:
 document.addEventListener('DOMContentLoaded',function(){
  var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
  predict($('t0'),{q:{en:'Testing shows the micro size is good enough. What is the least work to switch the twin to it?',zh:'测试表明 micro 已经够用。把分身切到它，最省事的做法是什么？'},opts:[{k:'a',en:'Change the MODEL_ID variable and leave the code alone',zh:'改 MODEL_ID 变量，代码不动'},{k:'b',en:'Rewrite the function for the new size',zh:'为新的大小重写函数'},{k:'c',en:'Create a new cloud account',zh:'新建一个云账号'}],a:'a',ex:{en:'The code reads the id from the environment, so size is a setting, not code.',zh:'代码从环境里读取 id，所以大小是一个设置，不是代码。'},hint:{en:'Where does the code get its model id?',zh:'代码从哪里拿到它的模型 id？'}});
- predict($('t1'),{q:{en:'With the example prices, a chat of 800 input tokens and 200 output tokens on the lite size costs about…',zh:'按例子里的价格，lite 大小上一次 800 个输入 token、200 个输出 token 的聊天，大约花…'},opts:[{k:'a',en:'$0.000096',zh:'0.000096 美元'},{k:'b',en:'$0.0096',zh:'0.0096 美元'},{k:'c',en:'$0.96',zh:'0.96 美元'}],a:'a',ex:{en:'0.8 × 0.00006 + 0.2 × 0.00024 = 0.000096. That is about ten cents for a thousand chats.',zh:'0.8 × 0.00006 + 0.2 × 0.00024 = 0.000096。一千次聊天大约一毛钱美元。'},hint:{en:'Tokens are in thousands: 800 tokens is 0.8 of a thousand.',zh:'token 按千计：800 个 token 是 0.8 个千。'}});
+ predict($('t1'),{q:{en:'With the example prices, a chat of 800 input tokens and 200 output tokens on the lite size costs about…',zh:'按例子里的价格，lite 大小上一次 800 个输入 token、200 个输出 token 的聊天，大约花…'},opts:[{k:'a',en:'$0.000096',zh:'0.000096 美元'},{k:'b',en:'$0.0096',zh:'0.0096 美元'},{k:'c',en:'$0.96',zh:'0.96 美元'}],a:'a',ex:{en:'0.8 × 0.00006 + 0.2 × 0.00024 = 0.000096. That is about ten cents for a thousand chats.',zh:'0.8 × 0.00006 + 0.2 × 0.00024 = 0.000096。一千次聊天大约十美分。'},hint:{en:'Tokens are in thousands: 800 tokens is 0.8 of a thousand.',zh:'token 按千计：800 个 token 是 0.8 个千。'}});
  game($('t2'),[
   {en:'Score all three sizes on the same ten questions',zh:'三种大小都用同样的十道题打分',a:'g',ex:{en:'The same test makes the sizes comparable.',zh:'同一份测试，才能比较各个大小。'},hint:{en:'Is the comparison fair?',zh:'这样比较公平吗？'}},
   {en:'Judge by one clever prompt that went well',zh:'凭一个答得好的巧妙提示下结论',a:'b',ex:{en:'One prompt is luck, not evidence.',zh:'一个提示只是运气，不是证据。'},hint:{en:'Would a second prompt agree?',zh:'换第二个提示还会一样吗？'}},
