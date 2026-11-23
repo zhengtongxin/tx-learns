@@ -20,8 +20,8 @@ BAR = {"easy": 0.90,          # matches the handlers on at least 90% of easy cla
 <p class="zh">下面哪些该写进标准线？来分一分。</p><div class="sc" id="g1"></div>
 
 <h2><span class="en">Step 2 · Run the candidates, twice each</span><span class="zh">第 2 步 · 候选模型各跑两遍</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Pick three or four candidates: one small and cheap, one or two mid-priced, one strong. Give each the small prompt on all 25 claims, and do it twice, because one run can be luck. This uses the helpers you saved in <code>bench.py</code> over the last two lessons. The prices are invented, so copy your gateway’s real ones.</p>
-<p class="zh" style="margin:0 0 8px">挑三四个候选：一个小而便宜的，一两个中等价位的，一个强的。每个都用小提示词跑完 25 份理赔，并且跑两遍，因为一遍可能只是运气。这里用的是你前两课存进 <code>bench.py</code> 的那些函数。价格是编的，请换成你的网关上的真实价格。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Pick three or four candidates: one small and cheap, one or two mid-priced, one strong. Give each the small prompt on all 25 claims, and do it twice, because one run can be luck. This uses the helpers you saved in <code>bench.py</code> over the last two lessons. Importing <code>bench</code> runs every top-level line in it, so keep the one-off experiments (the <code>runs = ...</code> loop, the local-model run and the prints) out of it, or put them under <code>if __name__ == "__main__":</code>. Otherwise this import would re-run them. The prices are invented, so copy your gateway’s real ones.</p>
+<p class="zh" style="margin:0 0 8px">挑三四个候选：一个小而便宜的，一两个中等价位的，一个强的。每个都用小提示词跑完 25 份理赔，并且跑两遍，因为一遍可能只是运气。这里用的是你前两课存进 <code>bench.py</code> 的那些函数。导入 <code>bench</code> 会把里面所有顶层代码都跑一遍，所以一次性的实验（<code>runs = ...</code> 那个循环、本地模型那次运行和各种打印）不要留在里面，或者放到 <code>if __name__ == "__main__":</code> 下面。否则这次导入会把它们重跑一遍。价格是编的，请换成你的网关上的真实价格。</p></div>
 <div class="codebox"><span class="dim">from collections import defaultdict
 from bench import claims, key, matches, small_prompt, ask, gateway
 
