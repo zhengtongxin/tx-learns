@@ -1,0 +1,142 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Project: a price guesser | TX Learns</title>
+<meta name="description" content="Build a price guesser that reads a gadget description and answers with an estimate, then line up classic, frontier and tuned predictors by error, cost and speed."><meta property="og:title" content="Project: a price guesser | TX Learns"><meta property="og:description" content="Build a price guesser that reads a gadget description and answers with an estimate, then line up classic, frontier and tuned predictors by error, cost and speed."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-engineer/21-price-guesser.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-23">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Predicting with data · Project</span><span class="zh">用数据做预测 · 项目</span></span><h1><span class="en">Project: a price guesser</span><span class="zh">项目：价格估算器</span></h1><p class="meta"><span class="en">You will build a screen that guesses a gadget's price and shows how good each guesser is, in accuracy, cost and speed · ~30 min · hands-on</span><span class="zh">你会做出一个估价界面，并展示每个预测器在准确度、成本和速度上的表现 · 约 30 分钟 · 动手实践</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0"><b>Ah Boy</b> is tired of pricing every new trade-in by hand. <b>Wei Jie</b> ties the last three lessons into one tool: type a description, get an estimated price, and see how much to trust it. The answer is never "the smartest model wins". It is a table that shows what each guesser costs for what it gets right.</p>
+<p class="zh" style="margin:0"><b>Ah Boy</b> 厌倦了给每件新收来的旧货手工定价。<b>Wei Jie</b> 把前三课串成一个工具：输入描述，得到估价，并知道该信几分。答案从来不是“最聪明的模型赢”，而是一张表，显示每个预测器的成本，换来多少准确度。</p></div>
+
+<h2><span class="en">Step 1 · Load the lite data and keep the scoring board</span><span class="zh">第 1 步 · 加载 lite 数据，沿用计分板</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Start with the small "lite" dataset from the cleaning lesson, so each run takes seconds. Then extend the shared <code>evaluate</code>: besides the average error, count the guesses that land within a tolerance (say $40 or 20% of the real price), and record how many replies could not be read. One test set, one board, every guesser.</p>
+<p class="zh" style="margin:0 0 8px">先用整理数据那课的小号“lite”数据集，每次运行只要几秒。然后扩展共用的 <code>evaluate</code>：除了平均误差，还要数一数落在容忍范围内的猜测（比如误差不超过 40 美元或真实价格的 20%），并记录有多少回复读不出来。一个测试集、一块计分板、所有预测器共用。</p></div>
+<div class="codebox"><span class="dim">from datasets import load_dataset
+
+lite = load_dataset("your-name/gadget-prices-lite")     # built in the cleaning lesson
+train, test = lite["train"], lite["test"]
+</span><span class="chg">def evaluate(pricer_fn, rows, tol_dollars=40, tol_pct=0.2):
+    errors, hits = [], 0
+    for row in rows:
+        guess = pricer_fn(row["text"])
+        err = abs(guess - row["price"])
+        errors.append(err)
+        if err <= tol_dollars or err <= tol_pct * row["price"]:
+            hits += 1
+    return {"avg_error": sum(errors) / len(errors), "hit_rate": hits / len(errors)}</span></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · The baselines and their scores</span><span class="zh">第 2 步 · 基线与它们的分数</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Rebuild the three classic guessers from the baseline lesson: the constant average, word counts plus linear regression, and a random forest. This time each takes plain text, so they all fit the same shape. Save each score in a small dictionary: it becomes the table in step 5.</p>
+<p class="zh" style="margin:0 0 8px">重新做出基线那课的三个传统预测器：常数平均值、词频加线性回归、随机森林。这次每个都接收纯文本，形状一致。把每个分数存进一个小字典：它会变成第 5 步的表格。</p></div>
+<div class="codebox"><span class="dim">from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+
+counter = CountVectorizer(max_features=1500, stop_words="english")
+X = counter.fit_transform(train["text"])
+y = train["price"]
+average = sum(y) / len(y)
+linear = LinearRegression().fit(X, y)
+forest = RandomForestRegressor(n_estimators=100, n_jobs=-1, random_state=42).fit(X, y)
+</span><span class="chg">def average_pricer(text): return average
+def linear_pricer(text):  return float(linear.predict(counter.transform([text]))[0])
+def forest_pricer(text):  return float(forest.predict(counter.transform([text]))[0])
+
+scores = {}
+for name, fn in [("average", average_pricer), ("linear", linear_pricer), ("forest", forest_pricer)]:
+    scores[name] = evaluate(fn, test)</span></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · The frontier predictor, parsed defensively</span><span class="zh">第 3 步 · 云端大模型预测器，防御式解析</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Send the description with a one-line instruction and parse a number from the reply. Models do not always obey "price only": you may get "About $120 maybe". Wei Jie's first version failed to parse such replies and scored them as zero, which quietly ruined the average. Now a failed parse is counted separately, and a fallback (the training average) is used.</p>
+<p class="zh" style="margin:0 0 8px">把描述加一行指令发过去，从回复里解析出数字。模型并不总听“只回答价格”：你可能收到“About $120 maybe”。Wei Jie 第一版解析不了这种回复，就当成零，悄悄毁掉了平均误差。现在解析失败会单独计数，并使用备用值（训练集平均价）。</p></div>
+<div class="codebox"><span class="dim">import re
+from openai import OpenAI
+client = OpenAI()
+</span><span class="chg">unparsed = 0
+
+def frontier_pricer(text):
+    global unparsed
+    reply = client.chat.completions.create(model="your-big-model", messages=[
+        {"role": "user", "content":
+         "Estimate the price in dollars. Reply with the number only.\n\n" + text}])
+    found = re.search(r"\d[\d,]*\.?\d*", reply.choices[0].message.content)
+    if not found:
+        unparsed += 1
+        return average                      # fallback, and we know we used it
+    return float(found.group().replace(",", ""))</span></div>
+<div class="try" id="p3"></div>
+
+<h2><span class="en">Step 4 · A tuned small model</span><span class="zh">第 4 步 · 微调的小模型</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Fine-tune a hosted small model on 100 examples, as in the last lesson, then wrap the resulting model name in a <code>tuned_pricer</code> with the same shape as every other guesser. With so few examples, expect only a small gain. It is still worth knowing, because a cheap tuned model can be more consistent.</p>
+<p class="zh" style="margin:0 0 8px">像上一课那样，用 100 条样例微调一个托管的小模型，再把得到的模型名包进 <code>tuned_pricer</code>，形状和其他预测器一样。样例这么少，只能期待小幅提升。但仍然值得知道，因为便宜的微调模型可能更稳定。</p></div>
+<div class="codebox"><span class="chg">TUNED_MODEL = "ft:your-small-model:your-org::abc123"      # name returned by your tuning job
+
+def tuned_pricer(text):
+    global unparsed
+    reply = client.chat.completions.create(model=TUNED_MODEL, messages=[
+        {"role": "user", "content": "Estimate the price: " + text}])
+    found = re.search(r"\d[\d,]*\.?\d*", reply.choices[0].message.content)
+    if not found:
+        unparsed += 1
+        return average
+    return float(found.group().replace(",", ""))</span></div>
+<div class="try" id="p4"></div>
+
+<h2><span class="en">Step 5 · One table, three numbers</span><span class="zh">第 5 步 · 一张表，三个数字</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Put every guesser in one table: name, average error, cost per 1,000 guesses and seconds per guess. The usual pattern is random worse than average, then linear, then forest and neural net, then a prompted frontier model on top, with tuning helping a little. The cheapest acceptable winner is often a classic model. The most accurate is often the frontier or tuned model. That trade-off is the whole lesson.</p>
+<p class="zh" style="margin:0 0 8px">把所有预测器放进一张表：名字、平均误差、每 1000 次猜测的成本、每次猜测的秒数。常见规律是：随机比平均差，然后依次是线性、森林和神经网络，最上面是提示词大模型，微调略有帮助。最便宜的“够用”赢家通常是传统模型，最准的通常是大模型或微调模型。这种取舍就是这一课的重点。</p></div>
+<div class="codebox"><span class="dim">import time
+</span><span class="chg">def row_for(name, fn, cost_per_1000):
+    start = time.time()
+    result = evaluate(fn, test)
+    secs = (time.time() - start) / len(test)
+    return {"name": name, **result, "cost_per_1000": cost_per_1000, "sec_per_guess": round(secs, 3)}
+
+table = [row_for("average", average_pricer, 0.0), row_for("forest", forest_pricer, 0.0),
+         row_for("frontier", frontier_pricer, 1.5)]       # use your own price list
+print("unreadable replies:", unparsed)</span></div>
+<p class="en">For each situation, which guesser would you pick?</p>
+<p class="zh">每种情况下，你会选哪个预测器？</p><div class="sc" id="g5"></div>
+
+<h2><span class="en">Step 6 · A tiny screen where they disagree</span><span class="zh">第 6 步 · 一个让它们“吵起来”的小界面</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Wrap it in a small Gradio screen: a text box in, the estimated price out, with the other guessers' answers beside it. When they disagree a lot, that is a sign to be careful. A guesser that is only off by a little everywhere is easier to trust.</p>
+<p class="zh" style="margin:0 0 8px">用 Gradio 包成一个小界面：左边输入文字，输出估价，旁边列出其他预测器的答案。当它们分歧很大，就是该小心的信号。一个到处都只差一点点的预测器，反而更容易信任。</p></div>
+<div class="codebox"><span class="dim">import gradio as gr
+</span><span class="chg">GUESSERS = {"average": average_pricer, "forest": forest_pricer, "frontier": frontier_pricer}
+
+def guess_all(text):
+    answers = {name: round(fn(text)) for name, fn in GUESSERS.items()}
+    return answers["frontier"], answers          # main answer, then everyone's
+
+gr.Interface(fn=guess_all, inputs=gr.Textbox(label="Describe the gadget"),
+             outputs=[gr.Number(label="Estimated price"), gr.JSON(label="All guessers")]).launch()</span></div>
+<div class="try" id="p6"></div>
+
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I forgot replies like "About $120 maybe". The parse failed and the guess counted as zero, which made the frontier model look terrible. I added a fallback and a count of unparsed replies, so I can see the problem instead of hiding it.</span><span class="zh">我忘了处理“About $120 maybe”这样的回复。解析失败，猜测被当成零，让大模型看起来糟糕透顶。我加了备用值和“读不出来的回复”计数，这样问题看得见，而不是被藏起来。</span></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Add your own category</b> of items and re-run the table.</span><span class="zh"><b>加入你自己的商品类别，</b>重新跑一遍表格。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Show a confidence band</b> by running the predictor three times and taking the spread.</span><span class="zh"><b>显示置信区间：</b>让预测器跑三次，取它们的差距。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Decide a rule</b> for when a guess is good enough to act on.</span><span class="zh"><b>定一条规则：</b>什么时候一个估价好到可以据此行动。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">Back at the void deck</span><span class="zh">回到组屋底层</span></b><span class="en">Ah Boy asks three friends to price a used phone. If all three say about the same, he buys with confidence. If they are far apart, he looks closer first. Your screen does the same.</span><span class="zh">Ah Boy 会请三个朋友给一部二手手机估价。三人说的差不多，他就放心收；差得远，他会先多看两眼。你的界面做的是同样的事。</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Always report accuracy, cost and speed together.<br>• Use the same test set for every guesser.<br>• Start with the lite data so each run is quick.<br>• Parse model replies defensively, with a fallback and a count of failures.<br>• Classic models are often the cheapest acceptable winner.<br>• Frontier and tuned models are often the most accurate, at a cost.<br>• Disagreement between guessers is a useful warning.</p><p class="zh" style="margin:0">• 永远把准确度、成本和速度放在一起报告。<br>• 所有预测器共用同一个测试集。<br>• 先用 lite 数据，每次运行才快。<br>• 防御式解析模型回复：有备用值，也数一数失败次数。<br>• 传统模型常常是最便宜的“够用”赢家。<br>• 大模型和微调模型常常最准，但要花钱。<br>• 预测器之间的分歧是有用的警告。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('p1'),{q:{en:'A guess of $70 for a $60 item. Is it a hit with the defaults?',zh:'一件 60 美元的东西猜 70 美元。按默认设置算命中吗？'},opts:[{k:'a',en:'Yes: the error is $10, within $40',zh:'算：误差 10 美元，在 40 美元以内'},{k:'b',en:'No: it is not exact',zh:'不算：因为不精确'}],a:'a',ex:{en:'A hit only needs to land within the tolerance, not be exact.',zh:'命中只需落在容忍范围内，不必精确。'},hint:{en:'Read the <code>if err &lt;=</code> line.',zh:'看看 <code>if err &lt;=</code> 那一行。'}});
+ predict($('p2'),{q:{en:'Why does each classic pricer here take plain text?',zh:'这里每个传统预测器为什么都接收纯文本？'},opts:[{k:'a',en:'So they all share the shape <code>evaluate</code> expects',zh:'这样它们都符合 <code>evaluate</code> 期望的形状'},{k:'b',en:'Because linear regression cannot use numbers',zh:'因为线性回归不能用数字'}],a:'a',ex:{en:'One shape in, one number out, so every guesser plugs into the same board.',zh:'同样的输入、同样的输出，每个预测器都能接进同一块计分板。'},hint:{en:'Look at what <code>evaluate</code> passes in.',zh:'看看 <code>evaluate</code> 传进来的是什么。'}});
+ predict($('p3'),{q:{en:'The reply has no number at all. What happens in <code>frontier_pricer</code>?',zh:'回复里根本没有数字。<code>frontier_pricer</code> 会怎样？'},opts:[{k:'a',en:'It counts one unparsed reply and returns the average',zh:'记一次“读不出”，并返回平均价'},{k:'b',en:'It returns zero silently',zh:'悄悄返回零'}],a:'a',ex:{en:'A visible count and a sensible fallback beat a silent zero.',zh:'看得见的计数加合理的备用值，胜过悄悄返回零。'},hint:{en:'Read the <code>if not found</code> branch.',zh:'看看 <code>if not found</code> 这个分支。'}});
+ predict($('p4'),{q:{en:'You tune on only 100 examples. What gain should you expect over the plain frontier model?',zh:'你只用 100 条样例微调。相比直接用大模型，该期待什么提升？'},opts:[{k:'a',en:'Small, and maybe mainly in cost and consistency',zh:'很小，可能主要体现在成本和稳定性上'},{k:'b',en:'A huge jump in accuracy',zh:'准确度大幅跃升'}],a:'a',ex:{en:'A strong base with few examples barely moves; the benefit shows with more data and a cheaper base.',zh:'底子强、样例少，几乎不动；更多数据、更便宜的底座才看得出好处。'},hint:{en:'Remember the mistake in the last lesson.',zh:'想想上一课的错误。'}});
+ game($('g5'),[
+  {en:'Thousands of quick guesses a day, tight budget, rough accuracy is fine.',zh:'每天成千上万次快速估价，预算紧，粗略准确就行。',a:'classic',ex:{en:'A forest costs nothing per call and answers instantly.',zh:'森林每次调用不花钱，立刻有答案。'},hint:{en:'Which guesser costs nothing per call?',zh:'哪个预测器每次调用不花钱？'}},
+  {en:'A few high-value trade-ins where a miss is costly.',zh:'少量高价值的收货，估错代价很大。',a:'frontier',ex:{en:'Pay more per guess where accuracy matters most.',zh:'在准确最重要的地方，愿意为每次猜测多付一点。'},hint:{en:'Where does cost matter less than accuracy?',zh:'哪里准确比成本更重要？'}},
+  {en:'You need an answer your shop can run offline for free.',zh:'你需要店里能离线免费运行的答案。',a:'classic',ex:{en:'A classic model runs on your own machine with no per-call fee.',zh:'传统模型在你自己的机器上跑，不按次收费。'},hint:{en:'Which one needs no hosted service?',zh:'哪个不需要托管服务？'}}],[{k:'classic',en:'Classic model',zh:'传统模型'},{k:'frontier',en:'Frontier or tuned',zh:'大模型或微调模型'}],{en:'Pick',zh:'选择'});
+ predict($('p6'),{q:{en:'Three guessers say $45, $50 and $210. What should the screen suggest?',zh:'三个预测器分别说 45、50 和 210 美元。界面该提示什么？'},opts:[{k:'a',en:'They disagree: check the item by hand',zh:'它们分歧很大：人工看看这件东西'},{k:'b',en:'Take the highest, it is the safest',zh:'取最高的，最稳妥'}],a:'a',ex:{en:'Big disagreement is a signal of uncertainty, not a reason to pick the biggest number.',zh:'分歧大是不确定的信号，不是挑最大数字的理由。'},hint:{en:'Would you trust all three?',zh:'你会信这三个吗？'}});
+});
+</script></body></html>
