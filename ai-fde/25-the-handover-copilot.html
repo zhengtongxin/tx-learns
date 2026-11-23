@@ -1,0 +1,337 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Project: the handover copilot | TX Learns</title>
+<meta name="description" content="Build a copilot in the dashboard's sidebar that handlers ask in plain English. It acts with each handler's own permissions, shows every step and asks before it pays. Then check the pilot's goals and tear everything down."><meta property="og:title" content="Project: the handover copilot | TX Learns"><meta property="og:description" content="Build a copilot in the dashboard's sidebar that handlers ask in plain English. It acts with each handler's own permissions, shows every step and asks before it pays. Then check the pilot's goals and tear everything down."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-fde/25-the-handover-copilot.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-24">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Handing it over · Project</span><span class="zh">交付上线 · 项目</span></span><h1><span class="en">Project: the handover copilot</span><span class="zh">项目：交接用的助手</span></h1><p class="meta"><span class="en">Build a copilot that handlers ask in plain English, then check the pilot’s goals and tear it all down · ~30 min · hands-on</span><span class="zh">做一个理赔员可以用大白话提问的助手，然后核对试点的目标，再把一切拆干净 · 约 30 分钟 · 动手实践</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">The pilot is ending. Mei Ling will soon be back at her own desk, and Aisha will be the one asking things like “what needs me today?”. So Mei Ling builds a <b>copilot</b>: a chat box in the dashboard’s sidebar that can look things up, start the agent’s work and send decisions back. It only works because everything before it is solid: records, permissions, policy and traces. The last job is the handover itself, and a teardown, so the pilot leaves nothing running. You need Flask, requests and the Agents SDK (<code>pip install flask requests openai-agents</code>), and the gateway from the earlier lessons.</p>
+<p class="zh" style="margin:0">试点快结束了。Mei Ling 很快就要回到自己的座位，而 Aisha 会成为那个问“今天有什么要我处理的？”的人。所以 Mei Ling 做了一个<b>助手</b>：看板侧边栏里的一个聊天框，能查资料、启动智能体的工作、把决定退回去。它能用，全靠前面的一切都扎实：记录、权限、策略和追踪。最后一件事是交接本身，还有拆除，让试点不留下任何还在跑的东西。你需要 Flask、requests 和 Agents SDK（<code>pip install flask requests openai-agents</code>），以及前面几课的网关。</p></div>
+
+<h2><span class="en">Step 1 · A sidebar on every page that remembers if it is open</span><span class="zh">第 1 步 · 每个页面都有的侧边栏，记得它开着还是关着</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Handlers will not open a separate tool, so put the copilot where they already work: a sidebar on every dashboard page. It can collapse to a thin tab, so it never blocks the claim table. The browser remembers the choice in <code>localStorage</code>, a small store that keeps its values after the page closes. Add one script tag to every page and you are done. It sends the handler’s sign-in token with each question. The dashboard keeps that token in <code>sessionStorage</code> as <code>token</code>.</p>
+<p class="zh" style="margin:0 0 8px">理赔员不会特地去打开另一个工具，所以把助手放在他们本来就在干活的地方：每个看板页面的侧边栏。它可以收成一条窄窄的标签，所以不会挡住理赔表格。浏览器用 <code>localStorage</code> 记住这个选择，它是页面关掉之后也还保留数据的小仓库。给每个页面加一行 script 标签就行。它每次提问都带上理赔员的登录令牌。看板把令牌以 <code>token</code> 为名放在 <code>sessionStorage</code> 里。</p></div>
+<div class="codebox"><span class="chg">/* copilot.js, loaded on every dashboard page */
+(function () {
+  var side = document.createElement("aside");
+  side.id = "copilot";
+  side.style.cssText = "position:fixed;top:0;right:0;bottom:0;width:320px;background:#fff;border-left:1px solid #ccc;padding:8px;overflow:auto;z-index:50";
+  side.innerHTML = '&lt;button id="cp-tab" aria-expanded="true"&gt;Copilot&lt;/button&gt;' +
+    '&lt;div id="cp-body"&gt;&lt;ol id="cp-log"&gt;&lt;/ol&gt;&lt;input id="cp-q" placeholder="Ask in plain English"&gt;&lt;button id="cp-go"&gt;Ask&lt;/button&gt;&lt;/div&gt;';
+  document.body.appendChild(side);
+
+  var tab = document.getElementById("cp-tab"), body = document.getElementById("cp-body");
+  function setOpen(open) {
+    body.style.display = open ? "" : "none";
+    side.style.width = open ? "320px" : "auto";
+    tab.setAttribute("aria-expanded", open);
+    localStorage.setItem("copilot-open", open ? "1" : "0");
+  }
+  setOpen(localStorage.getItem("copilot-open") !== "0");     // the first visit starts open
+  tab.onclick = function () { setOpen(body.style.display === "none"); };
+
+  document.getElementById("cp-go").onclick = async function () {
+    var q = document.getElementById("cp-q").value;
+    var reply = await fetch("/copilot/ask", {
+      method: "POST",
+      headers: {"Authorization": "Bearer " + sessionStorage.getItem("token"), "Content-Type": "application/json"},
+      body: JSON.stringify({question: q})
+    });
+    var data = await reply.json();
+    var li = document.createElement("li");
+    li.textContent = data.answer || data.error;               // textContent, never innerHTML
+    document.getElementById("cp-log").appendChild(li);
+  };
+})();</span></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · It acts as the handler who asked</span><span class="zh">第 2 步 · 它以提问的那位理赔员的身份行事</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The copilot gets <b>no powers of its own</b>. Every call it makes carries the sign-in of the handler who asked, so it can do what that person can do, and no more. If a junior handler may not sign off over S$800, neither can their copilot. Keep the rule in one function. And make the services behind it check the same thing, because the copilot’s check is a courtesy, and the lock is on the service.</p>
+<p class="zh" style="margin:0 0 8px">助手<b>自己没有任何权力</b>。它发出的每个调用，都带着提问的那位理赔员的登录凭证，所以那个人能做什么它就能做什么，多一点都不行。初级理赔员不能签批超过 S$800，他的助手也不能。把这条规则放在一个函数里。后面的服务也要检查同样的事，因为助手这边的检查只是客气，真正的锁在服务那边。</p></div>
+<div class="codebox"><span class="chg"># permissions.py  (demo tokens only; real ones come from your sign-in system)
+USERS = {
+    "demo-token-aisha":  {"name": "Aisha",  "role": "senior", "limit": 5000},
+    "demo-token-junior": {"name": "Junior handler", "role": "junior", "limit": 800},
+}
+
+def user_of(header):
+    token = header.removeprefix("Bearer ").strip()
+    found = USERS.get(token)
+    return None if found is None else {**found, "token": token}
+
+def allowed(user, tool, args):
+    if tool == "pay_claim":
+        try:
+            return float(args.get("amount")) &lt;= user["limit"]
+        except (TypeError, ValueError):
+            return False                                   # missing or not a number: refuse
+    return True</span><span class="dim">
+
+# try_it.py
+# from permissions import user_of, allowed
+# junior = user_of("Bearer demo-token-junior")
+# print(allowed(junior, "pay_claim", {"amount": 1200}))     # False
+# print(allowed(user_of("Bearer demo-token-aisha"), "pay_claim", {"amount": 1200}))   # True</span></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Tools: look up, start work, send back, and ask before paying</span><span class="zh">第 3 步 · 工具：查询、启动、退回，付款前先问</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The copilot gets five tools. Looking things up in the records or the context layer is safe, so it just runs. Starting the agent’s work or sending a decision back also runs, but it leaves a trace. <b>Paying</b> asks first: the tool returns a question, and only the handler’s own click on a Confirm button runs it. The click goes to a separate route. If the model could pass <code>confirmed=True</code> itself, the question would mean nothing. Each call is forwarded to the gateway with the handler’s token. The gateway needs a matching route for each tool, in the pattern of <code>pay_claim</code>.</p>
+<p class="zh" style="margin:0 0 8px">助手有五个工具。在记录或上下文层里查资料是安全的，直接执行。启动智能体的工作、把决定退回去也直接执行，但会留下痕迹。<b>付款</b>要先问：工具返回一个问题，只有理赔员自己点下“确认”按钮才会真正执行。这一下点击走的是另一条路由。如果模型自己能传 <code>confirmed=True</code>，这个询问就一文不值。每个调用都带着理赔员的令牌转给网关。网关要为每个工具准备对应的路由，写法照 <code>pay_claim</code> 的样子。</p></div>
+<div class="codebox"><span class="chg"># copilot_tools.py
+import os, requests
+from urllib.parse import quote
+from permissions import allowed
+
+GATEWAY = os.environ.get("GATEWAY_URL", "http://127.0.0.1:5001")
+
+def send(user, method, path, body=None):
+    reply = requests.request(method, GATEWAY + path, json=body, timeout=10,
+                             headers={"Authorization": "Bearer " + user["token"]})     # the handler’s own token
+    return {"status": reply.status_code, "body": reply.text}
+
+def cid(args):
+    return quote(str(args.get("claim_id", "")), safe="")
+
+TOOLS = {
+    "lookup_claim": {"asks": False, "run": lambda u, a: send(u, "GET", "/claims/" + cid(a))},
+    "read_context": {"asks": False, "run": lambda u, a: send(u, "GET", "/context/" + quote(str(a.get("name", "")), safe=""))},
+    "start_work":   {"asks": False, "run": lambda u, a: send(u, "POST", "/tools/start_work", {"claim_id": a.get("claim_id")})},
+    "send_back":    {"asks": False, "run": lambda u, a: send(u, "POST", "/tools/send_back", {"claim_id": a.get("claim_id"), "note": a.get("note")})},
+    "pay_claim":    {"asks": True,  "run": lambda u, a: send(u, "POST", "/tools/pay_claim", {"claim_id": a.get("claim_id"), "amount": a.get("amount")})},
+}
+
+def run_tool(user, name, args, confirmed=False):
+    tool = TOOLS.get(name)
+    if tool is None:
+        return {"error": "unknown tool"}
+    if not allowed(user, name, args):
+        return {"refused": "You are not allowed to do that, so the copilot cannot either."}
+    if tool["asks"] and not confirmed:
+        return {"confirm": "Pay S$%s on %s?" % (args.get("amount"), args.get("claim_id")), "args": args}
+    return tool["run"](user, args)</span><span class="dim">
+
+# try_it.py: swap the network call for a stand-in, so it runs without services
+# import copilot_tools as t
+# from permissions import user_of
+# t.send = lambda user, method, path, body=None: {"as": user["name"], "path": path}
+# aisha = user_of("Bearer demo-token-aisha")
+# print(t.run_tool(aisha, "lookup_claim", {"claim_id": "C007"}))     # runs straight away
+# print(t.run_tool(aisha, "pay_claim", {"claim_id": "C007", "amount": 300}))   # {'confirm': 'Pay S$300 on C007?', ...}</span></div>
+<p class="en">Which tools run straight away, and which ask first? Sort them.</p>
+<p class="zh">哪些工具直接执行，哪些要先问？来分一分。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Step 4 · Show every step, and keep the conversation</span><span class="zh">第 4 步 · 展示每一步，并留住对话</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A copilot that just says “done” is hard to trust. Log every tool call as a <b>step</b> the handler can read: what it called, with what, and what came back. Store the whole conversation in a small database, keyed by the handler, so the copilot picks up where that person left off and never mixes people. Then wire the Agents SDK to the tools, and give the page three routes: ask, confirm and history. Aisha’s questions never reach the junior handler’s history.</p>
+<p class="zh" style="margin:0 0 8px">一个只会说“搞定了”的助手，很难让人信任。把每次工具调用都记成一个<b>步骤</b>，让理赔员读得到：调用了什么、带了什么、返回了什么。把整段对话存进一个小数据库，按理赔员分开存，这样助手能接上那个人上次说到的地方，也绝不会把两个人混在一起。然后把 Agents SDK 接到这些工具上，给页面三条路由：提问、确认和历史。Aisha 的提问，永远不会出现在初级理赔员的历史里。</p></div>
+<div class="codebox"><span class="chg"># copilot_log.py
+import sqlite3
+
+db = sqlite3.connect("copilot.db", check_same_thread=False)
+db.execute("CREATE TABLE IF NOT EXISTS turns (handler TEXT, kind TEXT, text TEXT)")
+
+def log_turn(handler, kind, text):                 # kind: user, assistant or step
+    db.execute("INSERT INTO turns VALUES (?, ?, ?)", (handler, kind, text))
+    db.commit()
+
+def history(handler, limit=20):
+    rows = db.execute("SELECT kind, text FROM turns WHERE handler = ? AND kind IN ('user', 'assistant') "
+                      "ORDER BY rowid DESC LIMIT ?", (handler, limit)).fetchall()
+    return [{"role": kind, "content": text} for kind, text in reversed(rows)]
+
+def steps(handler, limit=20):
+    rows = db.execute("SELECT text FROM turns WHERE handler = ? AND kind = 'step' ORDER BY rowid DESC LIMIT ?", (handler, limit)).fetchall()
+    return [r[0] for r in reversed(rows)]
+
+# copilot_agent.py
+import json
+from agents import Agent, Runner, RunContextWrapper, function_tool
+from copilot_tools import run_tool
+from copilot_log import log_turn, history
+
+def use(ctx, name, args):
+    user = ctx.context
+    result = run_tool(user, name, args)                  # never confirmed here: only the handler’s click does that
+    if "confirm" in result:
+        user["pending"].append(result["args"])
+    log_turn(user["name"], "step", name + " " + json.dumps(args) + " -> " + json.dumps(result)[:300])
+    return json.dumps(result)
+
+@function_tool
+def lookup_claim(ctx: RunContextWrapper[dict], claim_id: str) -> str:
+    """Look up one claim in the records."""
+    return use(ctx, "lookup_claim", {"claim_id": claim_id})
+
+@function_tool
+def read_context(ctx: RunContextWrapper[dict], name: str) -> str:
+    """Read one governed context file, such as manual or claim_rules."""
+    return use(ctx, "read_context", {"name": name})
+
+@function_tool
+def start_work(ctx: RunContextWrapper[dict], claim_id: str) -> str:
+    """Start the agent on a claim."""
+    return use(ctx, "start_work", {"claim_id": claim_id})
+
+@function_tool
+def send_back(ctx: RunContextWrapper[dict], claim_id: str, note: str) -> str:
+    """Send a decision back to the agent with a note."""
+    return use(ctx, "send_back", {"claim_id": claim_id, "note": note})
+
+@function_tool
+def pay_claim(ctx: RunContextWrapper[dict], claim_id: str, amount: float) -> str:
+    """Ask to pay a claim. The handler must confirm."""
+    return use(ctx, "pay_claim", {"claim_id": claim_id, "amount": amount})
+
+copilot = Agent(
+    name="Handover copilot",
+    instructions=("You help claims handlers at a small travel insurer. Look things up before you answer, and say which record "
+                  "or context file you used. You cannot pay by yourself: if a tool asks for confirmation, tell the handler what is waiting."),
+    tools=[lookup_claim, read_context, start_work, send_back, pay_claim],
+)
+
+def ask(user, question):
+    user["pending"] = []
+    log_turn(user["name"], "user", question)
+    result = Runner.run_sync(copilot, history(user["name"]), context=user)
+    log_turn(user["name"], "assistant", result.final_output)
+    return {"answer": result.final_output, "pending": user["pending"]}
+
+# copilot_api.py
+from flask import Flask, jsonify, request
+from permissions import user_of
+from copilot_agent import ask
+from copilot_tools import run_tool
+from copilot_log import history, steps, log_turn
+
+app = Flask(__name__)
+
+def who():
+    return user_of(request.headers.get("Authorization", ""))
+
+@app.post("/copilot/ask")
+def ask_route():
+    user = who()
+    if user is None:
+        return jsonify(error="sign in first"), 401
+    out = ask(user, (request.get_json(silent=True) or {}).get("question", ""))
+    out["steps"] = steps(user["name"], 10)
+    return jsonify(out)
+
+@app.post("/copilot/confirm")
+def confirm_route():
+    user = who()
+    if user is None:
+        return jsonify(error="sign in first"), 401
+    args = request.get_json(silent=True) or {}
+    result = run_tool(user, "pay_claim", args, confirmed=True)       # the handler’s click, not the model
+    log_turn(user["name"], "step", "confirmed pay_claim " + str(args) + " -> " + str(result)[:300])
+    return jsonify(result)
+
+@app.get("/copilot/history")
+def history_route():
+    user = who()
+    if user is None:
+        return jsonify(error="sign in first"), 401
+    return jsonify(history(user["name"]))</span></div>
+<div class="try" id="p4"></div>
+
+<h2><span class="en">Step 5 · Check the goals agreed at the start</span><span class="zh">第 5 步 · 核对一开始就定好的目标</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">On the first day of the pilot, Mr Goh and Mei Ling wrote down what “it worked” means: a few <b>success criteria</b>, each with a number. At handover you measure and compare. If you write the goals at the end, you will write goals the pilot already meets. A criterion with no measurement is not a pass. Mark it “not measured”, so the gap stays visible. Put the numbers from your scoreboard into <code>measured.json</code>.</p>
+<p class="zh" style="margin:0 0 8px">试点第一天，Goh 先生和 Mei Ling 就写下了“成功”是什么意思：几条<b>成功标准</b>，每条都有数字。交接时去测量、去对照。如果目标是最后才写的，写出来的就是试点本来就达到了的目标。没有测量值的标准，不算通过。把它标成“未测量”，缺口才看得见。把计分板上的数字放进 <code>measured.json</code>。</p></div>
+<div class="codebox"><span class="chg"># criteria.py: written on the first day, and changed only with Mr Goh’s say-so
+CRITERIA = [
+    {"id": "agreement", "text": "Agent decisions match Aisha on at least 90% of the test claims", "measure": "agreement", "min": 0.90},
+    {"id": "unsigned", "text": "No payment over S$800 without a sign-off", "measure": "unsigned_big_payments", "max": 0},
+    {"id": "speed", "text": "Median time to a decision under 120 seconds", "measure": "median_seconds", "max": 120},
+]
+
+def check(measured):
+    rows = []
+    for c in CRITERIA:
+        value = measured.get(c["measure"])
+        if value is None:
+            met = None                                   # not measured is not a pass
+        elif "min" in c:
+            met = value &gt;= c["min"]
+        else:
+            met = value &lt;= c["max"]
+        rows.append({"id": c["id"], "text": c["text"], "value": value, "met": met})
+    return rows
+
+if __name__ == "__main__":
+    for row in check({"agreement": 0.93, "unsigned_big_payments": 0}):
+        print({True: "met", False: "NOT met", None: "not measured"}[row["met"]], "|", row["text"])</span></div>
+<div class="try" id="p5"></div>
+
+<h2><span class="en">Step 6 · The handover conversation, then the teardown</span><span class="zh">第 6 步 · 交接对话，然后拆除</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Give the copilot one more tool that reads <code>pilot_notes.md</code> (what was built, what was decided, what is still open) and the criteria results. Now the owner can simply ask it what the pilot learnt. Then comes the teardown, which is a person’s job. Handlers do not have permission to delete cloud resources, so the copilot cannot either. Run your infrastructure tool’s destroy command, then <b>check what is left</b> and what it cost. Tag everything <code>project=kaya-pilot</code> from the first day, so the leftover search can find it. The script below uses the AWS command line. Swap in your cloud’s equivalent.</p>
+<p class="zh" style="margin:0 0 8px">再给助手加一个工具，读 <code>pilot_notes.md</code>（造了什么、定了什么、还有什么没解决）和标准的核对结果。这样接手的人只要问它，就知道试点学到了什么。然后是拆除，这是人的活。理赔员没有删除云资源的权限，所以助手也没有。运行你的基础设施工具的销毁命令，然后<b>检查还剩下什么</b>、花了多少钱。从第一天起就给所有东西打上 <code>project=kaya-pilot</code> 标签，这样查剩余时才找得到。下面的脚本用的是 AWS 命令行，换成你那家云的对应命令。</p></div>
+<div class="codebox"><span class="chg"># handover.py
+import datetime, json, subprocess
+from criteria import check
+
+def handover_facts():
+    """What the copilot may say about the pilot."""
+    return {"notes": open("pilot_notes.md").read(), "criteria": check(json.load(open("measured.json")))}
+
+def aws(*args):
+    out = subprocess.run(["aws", *args, "--output", "json"], capture_output=True, text=True, check=True).stdout
+    return json.loads(out)
+
+def leftovers():
+    return aws("resourcegroupstaggingapi", "get-resources", "--tag-filters", "Key=project,Values=kaya-pilot",
+               "--query", "ResourceTagMappingList[].ResourceARN")
+
+def spent_last_week():
+    today = datetime.date.today()
+    amounts = aws("ce", "get-cost-and-usage", "--time-period", "Start=%s,End=%s" % (today - datetime.timedelta(days=7), today),
+                  "--granularity", "DAILY", "--metrics", "UnblendedCost", "--query", "ResultsByTime[].Total.UnblendedCost.Amount")
+    return round(sum(float(a) for a in amounts), 2)
+
+if __name__ == "__main__":
+    left = leftovers()
+    print(len(left), "tagged resources still exist")
+    for arn in left:
+        print("  ", arn)
+    print("spent in the last 7 days: $", spent_last_week())</span><span class="dim">
+
+# in copilot_agent.py, add a sixth tool and put it in the tools list
+# from handover import handover_facts
+# @function_tool
+# def pilot_handover() -> str:
+#     """Answer questions about what the pilot built, decided and measured."""
+#     return json.dumps(handover_facts())</span></div>
+<div class="try" id="p6"></div>
+
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我当时想错了</span></b><span class="en">After the demo went well, I closed the laptop and went to lunch. A few things in the cloud account were still running, and I only remembered when I thought about the bill. Nothing terrible happened, but it could have. The teardown and a check of everything left on the account, and its cost, now sit in the plan from the first day. They are not an afterthought.</span><span class="zh">演示很顺利，我合上笔记本去吃午饭。云账号里还有几样东西在跑，我是想到账单才记起来的。没出大事，但本来可能出。现在，拆除、检查账号上剩下的所有东西以及花费，从第一天起就写在计划里，不再是事后补的。</span></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Ask it three questions Aisha would ask</b>, such as “what needs me today?”, and read the steps it shows.</span><span class="zh"><b>问它三个 Aisha 会问的问题</b>，比如“今天有什么要我处理的？”，并读一读它展示的步骤。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Try to make it do something the handler is not allowed to do</b>, such as paying S$1,200 as the junior handler. Note which layer says no.</span><span class="zh"><b>试着让它做理赔员不被允许做的事</b>，比如以初级理赔员的身份付 S$1,200。记下是哪一层说了不。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Run the teardown and list what stayed.</b> Then find out why each thing stayed.</span><span class="zh"><b>运行拆除，列出留下来的东西。</b>再查清楚每样为什么还在。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">Back at the shophouse</span><span class="zh">回到店屋</span></b><span class="en">On the last Friday, Mei Ling sits Aisha down at the front desk and asks her to ask the copilot three things she would normally ask Auntie Siew. It answers, and shows where it looked. Then it cannot stamp a large payment for the junior handler, just as the junior handler cannot. Kumar walks the building afterwards, like the closing round: fans off, umbrella stand empty, every light checked. He reads the bill too. Only then does Mei Ling hand back the keys.</span><span class="zh">最后一个星期五，Mei Ling 让 Aisha 坐在前台，请她问助手三件平时会去问 Siew 阿姨的事。助手回答了，还展示了它查过哪里。然后，它没法替初级理赔员盖大额付款的章，就像那位初级理赔员自己也盖不了。之后 Kumar 把整栋楼巡一遍，像打烊前那一圈：吊扇关了，雨伞架空了，每盏灯都看过。他连账单也看了。到这时，Mei Ling 才交还钥匙。</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Put the copilot in the sidebar of every page, collapsible, and let the browser remember the choice.<br>• A copilot inherits the user’s permissions: every call carries their sign-in, and the services check too.<br>• It looks things up freely, but it asks before it pays, and only the handler’s own click confirms.<br>• Show every step it takes, and keep each handler’s conversation apart.<br>• Success criteria are agreed at the start, then checked at the handover. Not measured is not a pass.<br>• The copilot works because records, permissions, policy and traces came first.<br>• Plan the handover and the teardown from the first day, then check what is left and what it cost.</p><p class="zh" style="margin:0">• 把助手放在每个页面的侧边栏里，可收起，让浏览器记住这个选择。<br>• 助手继承用户的权限：每个调用都带着他们的登录凭证，服务那边也要检查。<br>• 查资料随便查，付款前一定先问，而且只有理赔员自己点击才算确认。<br>• 展示它走的每一步，并把每位理赔员的对话分开存。<br>• 成功标准在开始时就定好，交接时再核对。没有测量值，不算通过。<br>• 助手之所以能用，是因为记录、权限、策略和追踪都先做好了。<br>• 从第一天起就计划好交接和拆除，然后检查还剩下什么、花了多少钱。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI FDE</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+
+ predict($('p1'),{q:{en:'Aisha collapses the sidebar, then opens another dashboard page. What does she see?',zh:'Aisha 把侧边栏收起来，然后打开另一个看板页面。她会看到什么？'},opts:[{k:'a',en:'The sidebar still collapsed, because the browser remembered her choice',zh:'侧边栏仍然是收起的，因为浏览器记住了她的选择'},{k:'b',en:'The sidebar open again, because every page starts fresh',zh:'侧边栏又打开了，因为每个页面都是从头开始'},{k:'c',en:'No sidebar at all',zh:'完全没有侧边栏'}],a:'a',ex:{en:'localStorage keeps its values between pages, and the script reads it when each page loads.',zh:'localStorage 在页面之间保留数据，每个页面加载时脚本都会读它。'},hint:{en:'Where does setOpen save the choice?',zh:'setOpen 把选择存在哪里？'}});
+
+ predict($('p2'),{q:{en:'The junior handler asks the copilot to pay S$1,200. What happens?',zh:'初级理赔员让助手付 S$1,200。会怎样？'},opts:[{k:'a',en:'It is refused, because the copilot has only the handler’s own limit of S$800',zh:'被拒绝，因为助手只有这位理赔员自己的 S$800 限额'},{k:'b',en:'It goes through, because the copilot is a trusted system',zh:'通过，因为助手是受信任的系统'},{k:'c',en:'It goes through, but with a warning',zh:'通过，但带一条警告'}],a:'a',ex:{en:'The copilot is not a second, stronger user. It borrows the permissions of the one who asked.',zh:'助手不是另一个更强的用户。它借用的是提问者的权限。'},hint:{en:'Whose token and limit does allowed() use?',zh:'allowed() 用的是谁的令牌和限额？'}});
+
+ game($('g1'),[
+  {en:'Look up a claim in the records',zh:'在记录里查一份理赔',a:'r',ex:{en:'It only reads, and it is logged as a step.',zh:'它只读，并且会记成一个步骤。'},hint:{en:'Does it change anything?',zh:'它会改变什么吗？'}},
+  {en:'Read the claims manual from the context layer',zh:'从上下文层读理赔手册',a:'r',ex:{en:'Read only, so no question is needed.',zh:'只读，不需要问。'},hint:{en:'Can the agent write to context?',zh:'智能体能写上下文吗？'}},
+  {en:'Send a large payout back with a note',zh:'把一笔大额赔付附上说明退回',a:'r',ex:{en:'It moves no money. It asks the agent to decide again, and a person still signs the new result.',zh:'它不动钱。它让智能体重新判定，新的结果仍由人来签。'},hint:{en:'Does money leave the building?',zh:'钱会离开吗？'}},
+  {en:'Pay a claim',zh:'给一份理赔付款',a:'q',ex:{en:'Money cannot be taken back, so the handler’s own click comes first.',zh:'钱发出去收不回来，所以先要理赔员自己点一下。'},hint:{en:'Which action cannot be undone?',zh:'哪个动作撤不回？'}}],[{k:'r',en:'Runs straight away',zh:'直接执行'},{k:'q',en:'Asks first',zh:'先问'}],{en:'Action',zh:'动作'});
+
+ predict($('p4'),{q:{en:'The junior handler opens the copilot after Aisha has used it all morning. What do they see in the conversation?',zh:'Aisha 整个上午都在用助手，之后初级理赔员打开了它。对话里会看到什么？'},opts:[{k:'a',en:'Only their own earlier questions, because history is keyed by handler',zh:'只有他们自己之前的提问，因为历史是按理赔员分开存的'},{k:'b',en:'Aisha’s whole conversation, to save time',zh:'Aisha 的整段对话，省得再问'},{k:'c',en:'A blank page, because the copilot forgets everyone',zh:'一片空白，因为助手忘了所有人'}],a:'a',ex:{en:'history() filters by handler name. Mixing people would leak what one handler asked to another.',zh:'history() 按理赔员的名字过滤。混在一起，会把一个人问过的事泄露给另一个人。'},hint:{en:'Look at the WHERE in history().',zh:'看 history() 里的 WHERE。'}});
+
+ predict($('p5'),{q:{en:'Why write the success criteria on the first day of the pilot instead of at the end?',zh:'为什么要在试点第一天就写下成功标准，而不是最后才写？'},opts:[{k:'a',en:'Goals written afterwards tend to fit what the pilot already did, so they prove nothing',zh:'事后写的目标往往正好贴合试点已经做到的，什么也证明不了'},{k:'b',en:'The checker script cannot run on the last day',zh:'检查脚本在最后一天跑不了'},{k:'c',en:'It makes the pilot cheaper',zh:'这样试点更便宜'}],a:'a',ex:{en:'A target you set before you see the result is a real test. One set after is a description.',zh:'看到结果之前定的目标，才是真正的考试。看到之后定的，只是一份描述。'},hint:{en:'Which is harder to bend: a goal set before or after?',zh:'哪个更难被迁就：事前定的目标，还是事后定的？'}});
+
+ predict($('p6'),{q:{en:'After the teardown the tag search finds nothing, but the bill still shows a charge. What might explain it?',zh:'拆除之后，按标签搜索什么都找不到，但账单上还有一笔费用。可能是什么原因？'},opts:[{k:'a',en:'Something was never tagged, or another region still has it, or the bill still lags behind',zh:'有东西从没打过标签，或者另一个区域还留着，或者账单还没更新'},{k:'b',en:'The tag search is always wrong',zh:'标签搜索总是不准'},{k:'c',en:'Cloud accounts always have a charge',zh:'云账号总会有一笔费用'}],a:'a',ex:{en:'The tag search only finds what is tagged, region by region. That is why you tag from day one and also read the bill.',zh:'标签搜索只找得到打了标签的，而且是一个区域一个区域地查。所以才要第一天就打标签，还要看账单。'},hint:{en:'What can a search by tag never find?',zh:'按标签搜索永远找不到什么？'}});
+});
+</script></body></html>
