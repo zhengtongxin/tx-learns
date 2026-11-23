@@ -1,0 +1,73 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pipelines: models in a few lines | TX Learns</title>
+<meta name="description" content="Name a job, get a ready tool: use Hugging Face pipelines to run open models for sentiment, summaries, labels and more on a rented GPU."><meta property="og:title" content="Pipelines: models in a few lines | TX Learns"><meta property="og:description" content="Name a job, get a ready tool: use Hugging Face pipelines to run open models for sentiment, summaries, labels and more on a rented GPU."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-engineer/08-pipelines-models-few-lines.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-23">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Open-source models · Lesson 1</span><span class="zh">开源模型 · 第 1 课</span></span><h1><span class="en">Pipelines: models in a few lines</span><span class="zh">pipeline：几行代码用上模型</span></h1><p class="meta"><span class="en">You will run open models on your own rented GPU by naming the job, with no API bill · ~15 min · hands-on</span><span class="zh">你会只说出任务名，就在自己租的 GPU 上跑开源模型，没有 API 账单 · 约 15 分钟 · 动手实践</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0"><b>Priya</b> has a pile of feedback slips from her tuition students' parents. She wants to know which ones are praise, which are complaints and which are about fees, without sending every slip to a paid API. <b>Wei Jie</b> shows her that open models can do each of these small jobs in a few lines, on a free cloud notebook with a GPU.</p>
+<p class="zh" style="margin:0"><b>Priya</b> 手上有一叠学生家长写的反馈条。她想知道哪些是表扬、哪些是投诉、哪些是关于学费的，又不想把每张条子都发给付费 API。<b>Wei Jie</b> 给她看：开源模型几行代码就能做这些小任务，在带 GPU 的免费云 notebook 上就行。</p></div>
+
+<h2><span class="en">Step 1 · Name the job, get a tool</span><span class="zh">第 1 步 · 说出任务名，拿到工具</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Hugging Face is the hub where open models live. Its <code>transformers</code> library has two levels. The high level is <code>pipeline("task")</code>: you say the job, it hands back a ready tool. The low level, tokenizer plus model, comes next lesson. Think of ordering at a hawker stall: you say “chicken rice” and do not explain how to cook it.</p>
+<p class="zh" style="margin:0 0 8px">Hugging Face 是开源模型聚集的地方。它的 <code>transformers</code> 库分两层。高层是 <code>pipeline("任务名")</code>：你说出任务，它递给你一个现成的工具。低层是分词器加模型，下一课再讲。就像在小贩中心点餐：你说“鸡饭”，不用解释怎么煮。</p></div>
+<div class="codebox"><span class="chg">from transformers import pipeline
+
+feel = pipeline("sentiment-analysis")
+print(feel("Teacher Priya explains slowly and my son finally gets fractions"))</span><span class="dim">
+# [{'label': 'POSITIVE', 'score': 0.99...}]</span></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · One job per pipeline</span><span class="zh">第 2 步 · 一个任务一条 pipeline</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Each task name gives a different tool: summarising, translating, answering a question from a passage, pulling out names, or sorting text into labels you invent. The last one, <code>zero-shot-classification</code>, is perfect for Priya: she makes up the labels and needs no training data. The output shape changes with the task, so print it first and look.</p>
+<p class="zh" style="margin:0 0 8px">每个任务名对应不同的工具：做摘要、翻译、从一段文字里回答问题、抽出人名地名，或者把文字分到你自己定的标签里。最后一个 <code>zero-shot-classification</code> 正适合 Priya：标签自己编，不需要训练数据。输出的形状随任务而变，所以先打印出来看看。</p></div>
+<div class="codebox"><span class="dim">from transformers import pipeline
+
+sorter = pipeline("zero-shot-classification")
+slip = "Please tell me when the next term payment is due."
+</span><span class="chg">result = sorter(slip, candidate_labels=["praise", "complaint", "fees"])
+print(result["labels"][0], result["scores"][0])</span><span class="dim">
+# fees 0.9...</span></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Where it runs, and the first-call download</span><span class="zh">第 3 步 · 在哪里运行，以及第一次调用的下载</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The first call to a pipeline downloads a default model, which can be gigabytes. After that it is cached. Then comes the device: on a CPU a big model crawls, so switch the notebook runtime to a GPU and pass <code>device="cuda"</code>. Think of the aircon compressor at the void deck: the GPU is the loud machine that does the heavy lifting. You can also choose a different model from the hub for the same task, by name.</p>
+<p class="zh" style="margin:0 0 8px">第一次调用 pipeline 会下载一个默认模型，可能有好几个 GB，之后就有缓存了。然后是设备：CPU 跑大模型慢得像爬，所以把 notebook 的运行环境切到 GPU，并传 <code>device="cuda"</code>。想想组屋底层嗡嗡响的冷气压缩机：GPU 就是干重活的那台响机器。你也可以按名字从 hub 里换一个别的模型来做同一个任务。</p></div>
+<div class="codebox"><span class="dim">from transformers import pipeline
+
+</span><span class="chg">shorten = pipeline("summarization", device="cuda")
+# or pick the model yourself:
+# shorten = pipeline("summarization", model="some-org/some-summary-model", device="cuda")</span><span class="dim">
+print(shorten(long_letter, max_length=60)[0]["summary_text"])</span></div>
+<div class="try" id="p3"></div>
+
+<h2><span class="en">Step 4 · Why bother, when an API exists?</span><span class="zh">第 4 步 · 有 API 了，为什么还要自己跑？</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Three reasons. No per-call bill, and the data stays with you. A small model built for one narrow job is often cheaper and faster than a huge general one. And you can swap models freely. The price is that you now own the setup: the GPU, the downloads and the library versions.</p>
+<p class="zh" style="margin:0 0 8px">三个理由。没有按次计费，数据也留在你手里。专为一个窄任务做的小模型，往往比巨大的通用模型更便宜更快。而且模型可以随便换。代价是整套环境归你管：GPU、下载和库的版本。</p></div>
+<p class="en">Which tool fits each of Priya's jobs?</p>
+<p class="zh">Priya 的每件事该用哪个工具？</p><div class="sc" id="g4"></div>
+
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I ran it on a CPU runtime and waited ages, then wondered if it was broken. It just needed a GPU runtime. I also forgot that the first call downloads gigabytes, so I thought the notebook had frozen.</span><span class="zh">我在 CPU 运行环境下跑，等了很久，还以为坏了。其实只要换成 GPU 环境。我还忘了第一次调用会下载好几个 GB，以为 notebook 卡死了。</span></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Classify ten of your own sentences</b> with zero-shot labels you invent.</span><span class="zh"><b>拿十句你自己的话，</b>用自己编的标签做零样本分类。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Compare a pipeline summary</b> with a frontier-model summary of the same text.</span><span class="zh"><b>对比 pipeline 的摘要</b>和云端大模型对同一段文字的摘要。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Pick a different model name</b> from the hub for the same task and see what changes.</span><span class="zh"><b>从 hub 里换一个模型名</b>做同一个任务，看看有什么变化。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">Back at the void deck</span><span class="zh">回到组屋底层</span></b><span class="en">A pipeline is like the little specialist stalls in the heartland mall: one does keys, one does phone screens. You do not need a department store for a key. Just remember the compressor hums and the stall needs its own rent: the GPU.</span><span class="zh">pipeline 就像社区商场里的小专门店：一家配钥匙，一家换手机屏。配把钥匙用不着百货公司。只要记得压缩机会嗡嗡响，这家店也要付自己的租金：那就是 GPU。</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• <code>pipeline("task")</code> means: task name in, ready tool out.<br>• Different tasks give different output shapes, so print first.<br>• Zero-shot classification lets you invent the labels.<br>• The first call downloads a default model, sometimes gigabytes.<br>• Use a GPU runtime and set <code>device</code>.<br>• Small specialised models are a real option, cheaper and faster for one job.<br>• You save the API bill but own the setup.</p><p class="zh" style="margin:0">• <code>pipeline("任务名")</code> 的意思是：给任务名，拿到现成工具。<br>• 不同任务的输出形状不同，先打印出来看。<br>• 零样本分类让你自己定标签。<br>• 第一次调用会下载默认模型，有时好几个 GB。<br>• 用 GPU 运行环境，并设置 <code>device</code>。<br>• 小而专的模型是真正的选项，做单个任务更便宜更快。<br>• 省了 API 账单，但环境要自己管。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('p1'),{q:{en:'You write <code>pipeline("sentiment-analysis")</code> and give no model name. Which model runs?',zh:'你写了 <code>pipeline("sentiment-analysis")</code>，没给模型名。会运行哪个模型？'},opts:[{k:'a',en:'None, it errors until you name one',zh:'没有，不给名字就报错'},{k:'b',en:'A default model for that task, downloaded on first use',zh:'这个任务的默认模型，第一次使用时下载'}],a:'b',ex:{en:'The task name picks a sensible default. That is the whole point of the high level.',zh:'任务名会选一个合理的默认模型，这正是高层接口的意义。'},hint:{en:'Remember the hawker stall: you only say the dish.',zh:'想想小贩摊：你只说菜名。'}});
+ predict($('p2'),{q:{en:'You change <code>candidate_labels</code> to add a fourth label, “other”. What must you retrain?',zh:'你在 <code>candidate_labels</code> 里加了第四个标签“other”。需要重新训练什么？'},opts:[{k:'a',en:'Nothing, labels are given at call time',zh:'什么都不用，标签是调用时才给的'},{k:'b',en:'The whole model, with examples of each new label',zh:'整个模型，要给每个新标签的例子'}],a:'a',ex:{en:'Zero-shot means no examples are needed. You just pass different labels next time.',zh:'零样本就是不需要例子，下次传不同的标签就行。'},hint:{en:'What does “zero” in zero-shot count?',zh:'零样本里的“零”指的是什么？'}});
+ predict($('p3'),{q:{en:'The first call takes five minutes, the second takes one second. Why?',zh:'第一次调用花了五分钟，第二次只要一秒。为什么？'},opts:[{k:'a',en:'The first call downloaded the model, the second reused it',zh:'第一次下载了模型，第二次直接复用'},{k:'b',en:'The second answer was copied from the first',zh:'第二个答案是从第一个复制来的'}],a:'a',ex:{en:'The model files are cached after the first download, then each call only runs the model.',zh:'模型文件第一次下载后会缓存，之后每次调用只需要运行模型。'},hint:{en:'Think about what must happen before a model can run at all.',zh:'想想模型要运行起来，首先需要什么。'}});
+ game($('g4'),[
+  {en:'Sorting 200 feedback slips into praise, complaint or fees, with no API bill.',zh:'把 200 张反馈条分成表扬、投诉或学费，不要 API 账单。',a:'z',ex:{en:'Zero-shot classification on your own GPU.',zh:'在自己的 GPU 上做零样本分类。'},hint:{en:'She invents the labels herself.',zh:'标签是她自己编的。'}},
+  {en:'Shrinking a long parent letter into two lines.',zh:'把一封很长的家长来信压成两行。',a:'s',ex:{en:'The summarization pipeline.',zh:'摘要 pipeline。'},hint:{en:'Long text in, short text out.',zh:'长文字进，短文字出。'}},
+  {en:'Finding every name mentioned in a pile of notes.',zh:'在一堆笔记里找出提到的每个名字。',a:'n',ex:{en:'The named-entity (ner) pipeline pulls out names, places and so on.',zh:'命名实体（ner）pipeline 能抽出人名、地名等。'},hint:{en:'It tags words as person, place or organisation.',zh:'它把词标成人、地点或机构。'}}],[{k:'z',en:'zero-shot-classification',zh:'zero-shot-classification'},{k:'s',en:'summarization',zh:'summarization'},{k:'n',en:'ner',zh:'ner'}],{en:'Job',zh:'任务'});
+});
+</script></body></html>
