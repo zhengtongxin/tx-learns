@@ -14,7 +14,7 @@ import { loadTracks } from './lib.mjs';
 const root = new URL('..', import.meta.url);
 const FIX = process.argv.includes('--fix');
 const TR = loadTracks(new URL('.', root).pathname);
-const all = ['index.html', 'ecosystem.html', '404.html', ...TR.flatMap(t => readdirSync(new URL(t.dir + '/', root)).filter(f => f.endsWith('.html')).map(f => t.dir + '/' + f))];
+const all = ['index.html', 'ecosystem.html', 'glossary.html', '404.html', ...TR.flatMap(t => readdirSync(new URL(t.dir + '/', root)).filter(f => f.endsWith('.html')).map(f => t.dir + '/' + f))];
 const named = process.argv.slice(2).filter(a => a !== '--fix');
 const pages = named.length ? named : all;
 const problems = [];
@@ -74,7 +74,7 @@ const live = TR.flatMap(t => t.T.topics.flatMap(w => w.items).filter(x => x.file
 const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 const want = {
   'sitemap.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<!-- Made by node scripts/check-pages.mjs --fix from lessons.js. Do not edit by hand. -->\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-    ['', 'ecosystem.html', ...TR.map(t => t.dir + '/index.html'), ...live.map(x => x.path)].map(u => `<url><loc>${SITE}${u}</loc></url>`).join('\n') + '\n</urlset>\n',
+    ['', 'ecosystem.html', 'glossary.html', ...TR.map(t => t.dir + '/index.html'), ...live.map(x => x.path)].map(u => `<url><loc>${SITE}${u}</loc></url>`).join('\n') + '\n</urlset>\n',
 };
 const lists = Object.fromEntries(TR.map(t => [t.dir + '/index.html', [/<!-- lessons:start -->[\s\S]*?<!-- lessons:end -->/, '<!-- lessons:start --><noscript><ol>' +
     t.T.topics.flatMap(w => w.items).filter(x => x.file).map(x => `<li><a href="${x.file}">${esc(x.title.en)} · ${esc(x.title.zh)}</a></li>`).join('') + '</ol></noscript><!-- lessons:end -->']]));
