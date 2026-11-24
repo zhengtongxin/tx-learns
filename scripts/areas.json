@@ -1,0 +1,89 @@
+{
+  "about": "The site's independent parts. Every file belongs to one area (first match wins). Each learning track is an area of its own, read from tracks.js, so a new track needs no edit here. The scope guard (scripts/scope-guard.mjs) and .github/CODEOWNERS use this map. Generated files belong to every area.",
+  "generated": [
+    "sitemap.xml",
+    "vercel.json",
+    "robots.txt",
+    "assets/search-index.json"
+  ],
+  "areas": [
+    {
+      "id": "ecosystem",
+      "about": "The How it works page and its status API",
+      "paths": [
+        "ecosystem.html",
+        "assets/build-concepts.js",
+        "api/"
+      ]
+    },
+    {
+      "id": "site-shell",
+      "about": "Home page, shared layout, nav, widgets and search",
+      "paths": [
+        "index.html",
+        "404.html",
+        "tracks.js",
+        "favicon.ico",
+        "assets/"
+      ]
+    },
+    {
+      "id": "glossary",
+      "about": "The AI glossary and concept map",
+      "paths": [
+        "glossary.html",
+        "glossary.js"
+      ]
+    },
+    {
+      "id": "changelog",
+      "about": "The What changed page",
+      "paths": [
+        "changelog.html",
+        "changelog.js"
+      ]
+    },
+    {
+      "id": "agents",
+      "about": "The agents: workflows, scripts, schemas, evals and the branch rules",
+      "paths": [
+        ".github/",
+        "scripts/",
+        "schemas/",
+        "evals/"
+      ]
+    },
+    {
+      "id": "rules",
+      "about": "The rules and style guide, notes intake and docs",
+      "paths": [
+        "CLAUDE.md",
+        "STYLE.md",
+        "README.md",
+        "banned-words.txt",
+        "inbox/",
+        ".vercelignore",
+        ".gitignore"
+      ]
+    }
+  ],
+  "branches": {
+    "writer/": {
+      "maxAreas": 1,
+      "only": "track",
+      "why": "A lesson draft may change one track and nothing else."
+    },
+    "reader/": {
+      "maxAreas": 1,
+      "only": "track",
+      "why": "The intern's wording fixes may change one track and nothing else."
+    },
+    "improver/": {
+      "maxAreas": 1,
+      "why": "The improvement agent makes one change in one area per pull request."
+    }
+  },
+  "exempt": [
+    "rollback/"
+  ]
+}

@@ -1,0 +1,98 @@
+{
+ "about": "Golden cases for the scope guard's path rules (scripts/scope-guard.mjs, scripts/areas.json). The AI comparison itself is not tested here.",
+ "tracks": [
+  "agentic-ai",
+  "ai-engineer",
+  "ai-production",
+  "ai-fde"
+ ],
+ "cases": [
+  {
+   "name": "a lesson file belongs to its track",
+   "kind": "area",
+   "path": "ai-engineer/05-x.html",
+   "expect": "ai-engineer"
+  },
+  {
+   "name": "a project package belongs to its track",
+   "kind": "area",
+   "path": "packages/ai-fde/01-a/README.txt",
+   "expect": "ai-fde"
+  },
+  {
+   "name": "the build-concepts script belongs to the How it works page, not the shared shell",
+   "kind": "area",
+   "path": "assets/build-concepts.js",
+   "expect": "ecosystem"
+  },
+  {
+   "name": "shared layout belongs to the site shell",
+   "kind": "area",
+   "path": "assets/site.js",
+   "expect": "site-shell"
+  },
+  {
+   "name": "a workflow belongs to the agents",
+   "kind": "area",
+   "path": ".github/workflows/writer.yml",
+   "expect": "agents"
+  },
+  {
+   "name": "the sitemap is generated, so it belongs to every area",
+   "kind": "area",
+   "path": "sitemap.xml",
+   "expect": "generated"
+  },
+  {
+   "name": "a lesson draft in one track passes",
+   "kind": "branch",
+   "branch": "writer/x-1",
+   "areas": [
+    "ai-engineer",
+    "generated"
+   ],
+   "expect": "ok"
+  },
+  {
+   "name": "a lesson draft that also edits a workflow is blocked",
+   "kind": "branch",
+   "branch": "writer/x-1",
+   "areas": [
+    "ai-engineer",
+    "agents"
+   ],
+   "expect": "block"
+  },
+  {
+   "name": "a lesson draft that spans two tracks is blocked",
+   "kind": "branch",
+   "branch": "writer/x-1",
+   "areas": [
+    "ai-engineer",
+    "ai-fde"
+   ],
+   "expect": "block"
+  },
+  {
+   "name": "the intern's wording fix may not touch the ecosystem page",
+   "kind": "branch",
+   "branch": "reader/fixes-1",
+   "areas": [
+    "ai-fde",
+    "ecosystem"
+   ],
+   "expect": "block"
+  },
+  {
+   "name": "an ordinary branch may change several areas (the AI comparison judges it)",
+   "kind": "branch",
+   "branch": "claude/thread",
+   "areas": [
+    "agents",
+    "ecosystem",
+    "rules"
+   ],
+   "expect": "ok"
+  }
+ ]
+}
