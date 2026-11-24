@@ -39,7 +39,8 @@
 <path class="lnk" d="M333,75 L387,75" marker-end="url(#ah)"/>
 <path class="lnk" d="M527,75 L581,75" marker-end="url(#ah)"/>
 </svg><figcaption><span class="en">A call is one request out and one reply back; the key rides in the header.</span><span class="zh">一次调用就是发出一次请求、收回一次回复；密钥放在请求头里。</span></figcaption></figure>
-<div class="codebox" data-file="call_raw.py" data-lang="python"><span class="dim"># one-time setup: pip install requests python-dotenv
+<div class="codebox" data-file="call_raw.py" data-lang="python"><span class="dim"># one-time setup: pip install requests openai python-dotenv
+# .env file next to this notebook, one line:  OPENAI_API_KEY=your-key-here
 import os, requests
 from dotenv import load_dotenv
 load_dotenv()   # reads OPENAI_API_KEY from your .env file
@@ -54,7 +55,8 @@ payload = {
 </span><span class="chg">r = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)</span><span class="dim">
 print(r.json()["choices"][0]["message"]["content"])</span></div>
 <div class="codebox" data-file="output" data-lang="text">Durians have thorns so sharp that fallen fruit can hurt people, yet
-the smell is strong enough to be banned on some trains.</div>
+the smell is strong enough to be banned on some trains.
+# example only: the model's wording will differ every run</div>
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 2 · Messages: who is speaking</span><span class="zh">第 2 步 · 消息：是谁在说话</span></h2>
@@ -71,7 +73,8 @@ client = OpenAI()</span><span class="dim">
 reply = </span><span class="chg">client.chat.completions.create(model="gpt-5-mini", messages=payload["messages"])</span><span class="dim">
 print(reply.choices[0].message.content)</span></div>
 <div class="codebox" data-file="output" data-lang="text">Durians have thorns so sharp that fallen fruit can hurt people, yet
-the smell is strong enough to be banned on some trains.</div>
+the smell is strong enough to be banned on some trains.
+# example only: the model's wording will differ every run</div>
 <div class="try" id="p3"></div>
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I thought calling a model was magic, and that the <code>openai</code> package had a model inside it. It does not. It only builds the request. The model runs on someone else's machine, and the package just talks to it.</span><span class="zh">我以为调用模型很神秘，还以为 <code>openai</code> 这个包里装着模型。其实不是。它只负责构造请求，模型运行在别人的机器上，这个包只是去和它通信。</span></div>
 
