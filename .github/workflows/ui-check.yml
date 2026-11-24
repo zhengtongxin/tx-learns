@@ -101,7 +101,7 @@ jobs:
         timeout-minutes: 20
         env:
           PLAYWRIGHT_DIR: ${{ runner.temp }}/pw
-          PAGES: ${{ inputs.pages || steps.find.outputs.pages }}
+          PAGES: ${{ inputs.pages || (github.event_name == 'deployment_status' && steps.find.outputs.pages) || '' }}
           SHOTS: ${{ steps.find.outputs.shots }}
           # Optional. With Vercel's "Protection Bypass for Automation" secret the check opens the real preview;
           # without it, it serves this commit's files itself (the site is plain static files, so they are the same).
@@ -280,3 +280,9 @@ jobs:
         run: |
           [ -f $T/record-status.mjs ] || { echo "No record script on the default branch yet."; exit 0; }
           SUMMARY="$(cat /tmp/line.txt 2>/dev/null || echo 'Could not finish.')" node $T/record-status.mjs ui-check
+      - name: Let auto-merge look at it
+        # Not when no served page changed: the run did nothing, so there is nothing new for auto-merge to see.
+        if: always() && needs.check.outputs.nopages != '1'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run auto-merge.yml --ref main -R "$GITHUB_REPOSITORY" || echo "Auto-merge picks it up on its 30-minute run."
