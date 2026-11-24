@@ -1,0 +1,26 @@
+{
+  "about": "Golden cases for the checks (scripts/run-evals.mjs). Each case edits a copy of one real file and says what the check must do. 'control' cases must pass: they prove the check is not simply failing everything. Banned words and key shapes are written as @@PLACEHOLDERS@@ so this file itself passes the copy and security checks.",
+  "base": "agentic-ai/05-autonomy-and-tools.html",
+  "cases": [
+    { "name": "copy: clean lesson passes", "check": "copy", "expect": "pass" },
+    { "name": "copy: the English word for a paid programme is caught", "check": "copy", "append": "<p class=\"en\">Welcome back to the @@PAID1@@.</p><p class=\"zh\">欢迎回来。</p>", "expect": "fail", "match": "rule" },
+    { "name": "copy: the 中文 word for a paid programme is caught", "check": "copy", "append": "<p class=\"zh\">欢迎来到这个@@PAID2@@。</p><p class=\"en\">Welcome.</p>", "expect": "fail", "match": "rule" },
+    { "name": "copy: week numbering is caught", "check": "copy", "append": "<p class=\"en\">This is @@PAID3@@ of the plan.</p><p class=\"zh\">这是计划。</p>", "expect": "fail", "match": "rule" },
+
+    { "name": "pages: clean lesson passes", "check": "pages", "expect": "pass" },
+    { "name": "pages: missing description is caught", "check": "pages", "regex": ["<meta name=\"description\"[^>]*>", ""], "expect": "fail", "match": "description" },
+    { "name": "pages: image without alt text is caught", "check": "pages", "append": "<img src=\"x.png\">", "expect": "fail", "match": "alt" },
+    { "name": "pages: English without its 中文 twin is caught", "check": "pages", "append": "<p class=\"en\">Only English here.</p>", "expect": "fail", "match": "[Zz]h|中文" },
+    { "name": "pages: skipped heading level is caught", "check": "pages", "append": "<h5>Jumped</h5>", "expect": "fail", "match": "heading" },
+    { "name": "pages: missing language attribute is caught", "check": "pages", "regex": ["<html lang=\"[a-zA-Z-]+\"", "<html"], "expect": "fail", "match": "lang" },
+
+    { "name": "security: clean repo passes", "check": "security", "expect": "pass" },
+    { "name": "security: an API key is caught and never printed", "check": "security", "append": "<!-- @@ANTHROPIC_KEY@@ -->", "expect": "fail", "match": "API key", "mustNotPrint": "@@ANTHROPIC_KEY@@" },
+    { "name": "security: new-tab link without noopener is caught", "check": "security", "append": "<a href=\"https://example.org\" target=\"_blank\">x</a>", "expect": "fail", "match": "noopener" },
+    { "name": "security: script from an unlisted site is caught", "check": "security", "append": "<script src=\"https://evil.example/x.js\"></script>", "expect": "fail", "match": "not on" },
+    { "name": "security: javascript: link is caught", "check": "security", "append": "<a href=\"javascript:alert(1)\">x</a>", "expect": "fail", "match": "javascript:" },
+
+    { "name": "counts: clean repo passes", "check": "counts", "expect": "pass" },
+    { "name": "counts: a hand-typed lesson count is caught", "check": "counts", "file": "index.html", "append": "<p>We have 24 lessons.</p>", "expect": "fail", "match": "typed by hand" }
+  ]
+}
