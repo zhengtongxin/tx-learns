@@ -10,10 +10,11 @@
 <div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">Mr Goh points at a payout on the claim page and asks two questions. “Which wording of the baggage rule did the agent follow? And who last checked it?” Mei Ling goes quiet. She had pasted the plan limits and the rules straight into the agent’s prompt and code. Nobody owns a pasted rule, and nobody can say when it was last checked. So she moves them out, to a service of their own, owned by data governance. You need Flask and requests (<code>pip install flask requests</code>) and the gateway and agent tools from the last lesson.</p>
 <p class="zh" style="margin:0">Goh 先生指着理赔页上的一笔赔付，问了两个问题。“智能体照的是哪一版行李规则的措辞？最后是谁核对过的？”Mei Ling 一时答不上来。她把保单限额和规则直接贴进了智能体的提示词和代码里。贴进去的规则没有主人，也没人说得出上次核对是什么时候。所以她把它们搬出来，放进一个独立的服务，由数据治理部门负责。你需要 Flask 和 requests（<code>pip install flask requests</code>），还有上一课的网关和智能体工具。</p></div>
 
+<div class="callout tip"><b class="lbl"><span class="en">Words in this lesson</span><span class="zh">这一课用到的词</span></b><span class="en"><b>Context layer</b>: the shared, reviewed facts the agent reads: glossary, rules, limits, each with an owner.<br><b>Manifest</b>: a list saying where each file came from, who owns it and when it was last reviewed.<br><b>Read-only service</b>: a service with no way to write, so the agent cannot change what it reads.</span><span class="zh"><b>上下文层</b>：智能体读取的、共享并审核过的事实：词汇表、规则、限额，各有负责人。<br><b>清单</b>：一份列表，写明每个文件的来源、负责人和上次审核时间。<br><b>只读服务</b>：没有写入入口的服务，智能体改不了它读到的内容。</span></div>
 <h2><span class="en">Step 1 · Three sources, three owners</span><span class="zh">第 1 步 · 三个来源，三个主人</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Everything the agent knows comes from one of three places. The <b>context layer</b> holds the business’s own definitions and rules, copied from other systems. Data governance owns it, and the agent may only read it. <b>Memory</b> is the agent’s own notes, which it may write. The <b>database</b> is the system of record: claims and payments. Think of the shophouse: the printed manual on the wall, Auntie Siew’s notebook of regulars, and the receipt book at the till.</p>
 <p class="zh" style="margin:0 0 8px">智能体知道的一切，都来自三个地方之一。<b>上下文层</b>放业务自己的定义和规则，是从其他系统复制来的。它归数据治理部门所有，智能体只能读。<b>记忆</b>是智能体自己的笔记，它可以写。<b>数据库</b>是权威记录：理赔和付款。想想店屋里的东西：墙上贴的手册、Siew 阿姨记着老客人的小本子，还有收银台上的收据本。</p></div>
-<div class="codebox"><span class="chg">SOURCES = {
+<div class="codebox" data-file="sources.py" data-lang="python"><span class="chg">SOURCES = {
     "context layer": {"holds": "definitions and rules from other systems",
                       "owner": "data governance", "agent may": "read"},
     "memory":        {"holds": "the agent’s own notes about customers",
@@ -23,14 +24,15 @@
 }
 
 for name, s in SOURCES.items():
-    print(name, "| owner:", s["owner"], "| agent may:", s["agent may"])</span></div>
+    print(name, "| owner:", s["owner"], "| agent may:", s["agent may"])</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">context layer | owner: data governance | agent may: read
+memory | owner: the agent | agent may: read and write</div>
 <p class="en">Which source does each fact belong to? Sort them.</p>
 <p class="zh">下面每个事实属于哪个来源？来分一分。</p><div class="sc" id="g1"></div>
 
 <h2><span class="en">Step 2 · Seven files, each with an owner and a date</span><span class="zh">第 2 步 · 七个文件，每个有主人和日期</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Data governance supplies seven files: plans, claim rules, a glossary, a data dictionary, reference data, the wording of customer letters, and the claims manual. Next to them goes a <b>manifest</b>: a small file that says, for each one, where it came from, who owns it and when it was last reviewed. A rule without those three things is just a rumour. The script below stands in for governance’s own export.</p>
 <p class="zh" style="margin:0 0 8px">数据治理部门提供七个文件：保险计划、理赔规则、术语表、数据字典、参考数据、给客户的信函措辞，以及理赔手册。旁边再放一个<b>清单文件</b>（manifest）：它为每个文件写明来自哪里、谁负责、上次什么时候复核。缺了这三样的规则，只是一句传言。下面的脚本代替治理部门自己的导出。</p></div>
-<div class="codebox"><span class="chg"># make_context.py: stands in for data governance’s export
+<div class="codebox" data-file="make_context.py" data-lang="python"><span class="chg"># make_context.py: stands in for data governance’s export
 import json, pathlib
 
 FILES = {
@@ -50,14 +52,14 @@ for name, (source, content) in FILES.items():
     (root / (name + ".json")).write_text(json.dumps(content, indent=2))
     manifest[name] = {"source": source, "owner": "data governance", "reviewed": "2026-11-02"}
 (root / "manifest.json").write_text(json.dumps(manifest, indent=2))
-print(len(manifest), "files written")</span></div>
+print(len(manifest), "files written")</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">4 files written</div>
 <div class="try" id="p2"></div>
 
 <h2><span class="en">Step 3 · Serve them as a small service with its own sign-in</span><span class="zh">第 3 步 · 做成有自己登录的小服务</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Now serve the files from a service of their own, with its own key, like the backend in the last lesson. The key check uses <code>hmac.compare_digest</code>. It takes the same time however much of a wrong key matches, so nobody can guess the key one character at a time by timing replies. It has <em>only</em> read routes, so there is no way to write through it. It opens a file fresh on every request. That is what lets governance change a rule and have it show up without a deployment. And it only opens names found in the manifest, so a request like <code>../secrets</code> goes nowhere.</p>
 <p class="zh" style="margin:0 0 8px">现在用一个独立的服务把这些文件提供出去，它有自己的密钥，和上一课的后端一样。密钥检查用的是 <code>hmac.compare_digest</code>：不管错的密钥有多少字符对上，它花的时间都一样，所以没人能靠测算回复的时间，一个字符一个字符地猜出密钥。它<em>只有</em>读的路由，没有任何办法通过它写入。每次请求都重新打开文件，所以治理部门改了规则，不用部署就能生效。它也只打开清单里有的名字，所以像 <code>../secrets</code> 这样的请求哪里也去不了。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="The agent reaches the context service through the gateway; each read returns the file, its owner and date, which go into the decision record"><defs><marker id="ah23" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><path class="lnk" d="M185 75L275 75" marker-end="url(#ah23)"/><path class="lnk hot" d="M445 75L535 75" marker-end="url(#ah23)"/><path class="lnk hot" d="M620 110L620 150" marker-end="url(#ah23)"/><rect class="box soft" x="15" y="40" width="170" height="70" rx="10"/><text class="en" x="100" y="79">The agent</text><text class="zh" x="100" y="79">智能体</text><rect class="box soft" x="275" y="40" width="170" height="70" rx="10"/><text class="en" x="360" y="71">Gateway</text><text class="zh" x="360" y="71">网关</text><text class="en sm" x="360" y="88">second target</text><text class="zh sm" x="360" y="88">第二个目标</text><rect class="box new" x="535" y="40" width="170" height="70" rx="10"/><text class="en" x="620" y="71">Context service</text><text class="zh" x="620" y="71">上下文服务</text><text class="en sm" x="620" y="88">7 files, own sign-in</text><text class="zh sm" x="620" y="88">7 份文件，独立登录</text><rect class="box" x="505" y="150" width="200" height="50" rx="10"/><text class="en" x="605" y="171">Decision record</text><text class="zh" x="605" y="171">决定记录</text><text class="en sm" x="605" y="188">file · owner · date</text><text class="zh sm" x="605" y="188">文件 · 负责人 · 日期</text><text class="en sm" x="560" y="137">what was read</text><text class="zh sm" x="560" y="137">读了什么</text></svg><figcaption><span class="en">Rules live in one place with an owner and a date, so a payout can point to the sheet it followed.</span><span class="zh">规则只放在一处，有负责人和日期，所以每笔赔付都能指向它依据的那一页。</span></figcaption></figure>
-<div class="codebox"><span class="chg"># context_service.py
+<div class="codebox" data-file="context_service.py" data-lang="python"><span class="chg"># context_service.py
 import hmac, json, os, pathlib
 from flask import Flask, jsonify, request
 
@@ -94,13 +96,14 @@ def one(name):
 # from context_service import app
 # client, key = app.test_client(), {"X-API-Key": os.environ["CONTEXT_KEY"]}
 # print(client.get("/context/glossary", headers=key).status_code)                # 200
-# print(client.post("/context/glossary", json={"excess": "x"}, headers=key).status_code)   # 405: no write route</span></div>
+# print(client.post("/context/glossary", json={"excess": "x"}, headers=key).status_code)   # 405: no write route</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">200
+405</div>
 <div class="try" id="p3"></div>
 
 <h2><span class="en">Step 4 · A second target behind the same gateway</span><span class="zh">第 4 步 · 挂在同一个网关后面的第二个目标</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The agent should not hold a key for this service either. Add the context service as a <b>second target</b> of the action gateway from the last lesson. The gateway checks the agent’s key, then forwards the read with the context key that only it holds. Reads now pass the same door as actions, and the same log sees them. The agent gets one more tool, <code>read_context</code>. Set <code>CONTEXT_KEY</code> (and optionally <code>CONTEXT_URL</code>) for the gateway too.</p>
 <p class="zh" style="margin:0 0 8px">智能体也不该持有这个服务的密钥。把上下文服务加成上一课那个动作网关的<b>第二个目标</b>。网关核对智能体的密钥，再用只有它才有的上下文密钥转发这次读取。读取和动作走同一扇门，同一份日志也看得到它们。智能体多了一个工具 <code>read_context</code>。网关也要设置 <code>CONTEXT_KEY</code>（以及可选的 <code>CONTEXT_URL</code>）。</p></div>
-<div class="codebox"><span class="dim"># action_gateway.py: add below the existing routes (re, requests, jsonify and os are already imported)
+<div class="codebox" data-file="action_gateway.py" data-lang="python"><span class="dim"># action_gateway.py: add below the existing routes (re, requests, jsonify and os are already imported)
 </span><span class="chg">CONTEXT_URL = os.environ.get("CONTEXT_URL", "http://127.0.0.1:5002")
 CONTEXT_KEY = os.environ["CONTEXT_KEY"]                # only the gateway holds this
 
@@ -123,7 +126,7 @@ def read_context(name: str) -> str:
 <h2><span class="en">Step 5 · A decision record you could audit</span><span class="zh">第 5 步 · 一份经得起审计的判定记录</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Because every read has an owner and a date, the record of a decision can now be complete. It keeps the <b>calculation</b> as numbers, <b>who or what decided</b>, the <b>version of the manual</b> it followed, and every file it read with its source and review date. Store the facts as they were that day, not pointers to files that may change tomorrow.</p>
 <p class="zh" style="margin:0 0 8px">既然每次读取都有主人和日期，判定记录就能做到完整。它把<b>计算过程</b>用数字记下来，写明<b>是谁或什么做的决定</b>、依据的<b>手册版本</b>，以及读过的每个文件、它的来源和复核日期。要把当天的事实存下来，而不是存指向明天可能会变的文件的指针。</p></div>
-<div class="codebox"><span class="chg"># record.py
+<div class="codebox" data-file="record.py" data-lang="python"><span class="chg"># record.py
 import datetime
 
 def calculate(claimed, plan):
@@ -151,7 +154,7 @@ def build_record(claim_id, claimed, plan_id, ctx, decided_by):
 <h2><span class="en">Step 6 · Show every step on the claim page</span><span class="zh">第 6 步 · 在理赔页上展示每一步</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A record nobody can see does not help Mr Goh. Turn it into an ordered list on the claim page: what was read, from where, the sum, and who decided. Text that came from files goes through <code>escape</code>, so a stray <code>&lt;</code> in a file can never become markup on the page.</p>
 <p class="zh" style="margin:0 0 8px">没人看得到的记录，对 Goh 先生没有用。把它变成理赔页上一份有顺序的清单：读了什么、来自哪里、算式，以及谁做的决定。来自文件的文字都要过一遍 <code>escape</code>，这样文件里偶然出现的 <code>&lt;</code> 永远不会变成页面上的标记。</p></div>
-<div class="codebox"><span class="chg"># claim_page.py
+<div class="codebox" data-file="claim_page.py" data-lang="python"><span class="chg"># claim_page.py
 from html import escape
 
 def page(r):
@@ -167,6 +170,8 @@ def page(r):
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Change a rule in the context layer</b> (say the excess from 100 to 150) and rerun a claim. No redeploy. (Edit the excess in <code>context/plans.json</code>, then send the claim through the gateway again.)</span><span class="zh"><b>改一条上下文层里的规则</b>（比如把免赔额从 100 改成 150），再跑一次理赔。不用重新部署。（把 <code>context/plans.json</code> 里的 excess 改掉，再通过网关把这份理赔发一次。）</span></span></label><label><input type="checkbox"><span><span class="en"><b>Show which files each decision used</b>, by reading the <code>read</code> list of two records side by side.</span><span class="zh"><b>展示每个决定用了哪些文件</b>：把两份记录的 <code>read</code> 清单并排看。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add the review date to the claim page</b>, next to each file’s source.</span><span class="zh"><b>把复核日期加到理赔页上</b>，放在每个文件的来源旁边。</span></span></label></div>
 <div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now every payout on the claim page points to the sheet it followed, its owner and the date it was checked, like labelled sheets in one grey cabinet drawer. The next problem is where the pilot lives: it still runs on Mei Ling’s laptop, and Kumar does not want one more server to look after.</span><span class="zh">现在理赔页面上的每笔赔付都指向它依据的那一页、负责人和核对日期，就像灰色档案柜一个抽屉里贴好标签的纸页。下一个问题是试点住在哪里：它还跑在 Mei Ling 的笔记本上，而 Kumar 不想再多管一台服务器。</span></div>
+<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2><div class="card"><p class="en" style="margin:0 0 12px"><code>SystemExit: CONTEXT_KEY is missing or too short</code><br>Cause: the service refuses to start without a long key. Fix: make one and export <code>CONTEXT_KEY</code> before starting.</p><p class="zh" style="margin:0 0 12px"><code>SystemExit: CONTEXT_KEY is missing or too short</code><br>原因：没有足够长的密钥，服务拒绝启动。解决：生成一把，并在启动前 export <code>CONTEXT_KEY</code>。</p><p class="en" style="margin:0 0 12px"><code>FileNotFoundError: context/manifest.json</code><br>Cause: the export has not been made yet. Fix: run <code>make_context.py</code> first.</p><p class="zh" style="margin:0 0 12px"><code>FileNotFoundError: context/manifest.json</code><br>原因：还没生成导出文件。解决：先运行 <code>make_context.py</code>。</p><p class="en" style="margin:0 0 12px"><code>405 Method Not Allowed</code><br>Cause: you tried to write to the context layer. Fix: that is on purpose; changes go through its owner, not through the agent.</p><p class="zh" style="margin:0 0 12px"><code>405 Method Not Allowed</code><br>原因：你想往上下文层写东西。解决：这是故意的；修改要通过它的负责人，不是通过智能体。</p></div>
+<h2><span class="en">Recap</span><span class="zh">小结</span></h2><div class="card"><p class="en" style="margin:0">• Move the shared facts into their own service, with an owner for each source.<br>• The agent can read the context layer but has no route to change it.<br>• Every answer carries which context it used and when it was reviewed.</p><p class="zh" style="margin:0">• 把共享的事实搬进独立的服务，每个来源有负责人。<br>• 智能体可以读上下文层，但没有任何途径去改它。<br>• 每个答案都带上它用了哪些上下文、什么时候审核的。</p></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• The agent reads from three places: the context layer, its own memory and the database. Each has a different owner.<br>• Context has an owner, a source and a review date, written in a manifest.<br>• The agent only reads the context layer. A fix goes to the owner, never into the files.<br>• Serve context as its own service, with its own key and no write routes, so a rule can change without a deployment.<br>• Put the service behind the same gateway as a second target, so reads pass the same door as actions.<br>• A decision record keeps the calculation, who or what decided, the manual version and the files read, as they were that day.<br>• Show those steps on the claim page, with text escaped.</p><p class="zh" style="margin:0">• 智能体从三个地方读：上下文层、自己的记忆和数据库。每个地方的主人不同。<br>• 上下文有主人、有来源、有复核日期，写在清单文件里。<br>• 智能体对上下文层只读。要改就找主人，绝不直接改文件。<br>• 把上下文做成独立服务，有自己的密钥，没有写入路由，规则才能不用部署就更新。<br>• 把服务放在同一个网关后面当第二个目标，读取和动作走同一扇门。<br>• 判定记录保存算式、是谁或什么做的决定、手册版本和读过的文件，都是当天的样子。<br>• 把这些步骤展示在理赔页上，文字要转义。</p></div>
 

@@ -13,7 +13,7 @@
 <h2><span class="en">Step 1 · Make the sample data, and hide the answer key</span><span class="zh">第 1 步 · 造样本数据，并把答案藏起来</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">You cannot test on real customers, so you invent 25 claims, their policies, their customers and a plain policy wording. Also write down what the handlers decided for each. That list is the <b>answer key</b>, and it must live in a folder the agent never reads. Like a teacher who keeps the marking sheet out of the exam hall.</p>
 <p class="zh" style="margin:0 0 8px">不能拿真实客户来测试，所以你自己编 25 份理赔、对应的保单、客户，还有一份朴素的保单条款。同时把理赔员对每份的决定也写下来。这份清单就是<b>答案</b>，必须放在智能体永远读不到的文件夹里。就像老师把评分表留在考场外面。</p></div>
-<div class="codebox"><span class="dim">pilot/
+<div class="codebox" data-file="pilot-layout.txt" data-lang="text"><span class="dim">pilot/
   data/                      # the agent may read this
     claims.json              # 25 invented claims
     policies.json            # policy id -> cover and limits
@@ -30,7 +30,7 @@
 <h2><span class="en">Step 2 · The backend queue</span><span class="zh">第 2 步 · 后端的队列</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Every claim needs a state, so everyone knows where it is. Four are enough: <b>waiting</b>, <b>in progress</b>, <b>waiting for sign-off</b> and <b>decided</b>. In the code they are the words <code>waiting</code>, <code>in_progress</code>, <code>waiting_signoff</code> and <code>decided</code>. It works like the queue-number ticket machine at the shophouse door: a claim is always in exactly one place.</p>
 <p class="zh" style="margin:0 0 8px">每份理赔都要有一个状态，让大家知道它在哪。四个就够：<b>等待中</b>、<b>处理中</b>、<b>等待签字</b>、<b>已决定</b>。代码里它们分别写作 <code>waiting</code>、<code>in_progress</code>、<code>waiting_signoff</code> 和 <code>decided</code>。就像店屋门口的取号机：一份理赔在任何时刻都只在一个地方。</p></div>
-<div class="codebox"><span class="dim"># backend.py
+<div class="codebox" data-file="queue.py" data-lang="python"><span class="dim"># backend.py
 queue = {}   # claim id -> its record
 
 def add_claim(claim):
@@ -43,7 +43,7 @@ def start(claim_id):
 <h2><span class="en">Step 3 · A dashboard to look at</span><span class="zh">第 3 步 · 一个能看的看板</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The handlers will not read JSON. They need to see the queue, each claim in full, the agent’s reasons, and what the agent is doing step by step. A real page can come later. For the pilot, even a printout of the queue is something Aisha can react to, and that is the point.</p>
 <p class="zh" style="margin:0 0 8px">理赔员不会去读 JSON。他们要看到队列、每份理赔的全部内容、智能体给的理由，以及智能体一步步在做什么。真正的网页可以以后再做。试点阶段，哪怕只是把队列打印出来，Aisha 也能有反应，而这正是目的。</p></div>
-<div class="codebox"><span class="dim"># backend.py, continued
+<div class="codebox" data-file="queue.py" data-lang="python"><span class="dim"># backend.py, continued
 def show_queue():
     for claim_id, item in queue.items():
         decision = item["decision"]
@@ -58,7 +58,7 @@ def show_queue():
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Any payout over the sign-off limit (here S$800) must wait for a handler, even if the agent tries to pay. A rule in the prompt is a request the model may ignore. A rule in the code is a locked door. So put it in the backend, in the one function every decision passes through. A refer also goes to a handler.</p>
 <p class="zh" style="margin:0 0 8px">任何超过签字上限（这里是 S$800）的赔付都必须等理赔员，哪怕智能体想直接赔。提示词里的规矩只是请求，模型可能不听；代码里的规矩是一扇锁住的门。所以把它放进后端，放在每个决定都必经的那个函数里。转交（refer）也交给理赔员。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="Claims go to the agent, the agent proposes to the backend, the backend applies the payout limit, then the dashboard shows Aisha"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><path class="lnk" d="M150 110L190 110" marker-end="url(#ah)"/><path class="lnk hot" d="M320 110L360 110" marker-end="url(#ah)"/><path class="lnk" d="M510 110L550 110" marker-end="url(#ah)"/><rect class="box soft" x="20" y="75" width="130" height="70" rx="12"/><text class="en" x="85.0" y="105.5">25 claims</text><text class="zh" x="85.0" y="105.5">25 份理赔</text><text class="en sm" x="85.0" y="122.5">sample data</text><text class="zh sm" x="85.0" y="122.5">样本数据</text><rect class="box" x="190" y="75" width="130" height="70" rx="12"/><text class="en" x="255.0" y="105.5">Agent</text><text class="zh" x="255.0" y="105.5">智能体</text><text class="en sm" x="255.0" y="122.5">reads one claim</text><text class="zh sm" x="255.0" y="122.5">读一份理赔</text><rect class="box new" x="360" y="75" width="150" height="70" rx="12"/><text class="en" x="435.0" y="105.5">Backend rule</text><text class="zh" x="435.0" y="105.5">后端规则</text><text class="en sm" x="435.0" y="122.5">over S$800 waits</text><text class="zh sm" x="435.0" y="122.5">超 800 新元要等</text><rect class="box" x="550" y="75" width="150" height="70" rx="12"/><text class="en" x="625.0" y="105.5">Dashboard</text><text class="zh" x="625.0" y="105.5">看板</text><text class="en sm" x="625.0" y="122.5">Aisha stamps</text><text class="zh sm" x="625.0" y="122.5">Aisha 盖章</text></svg><figcaption><span class="en">The limit lives in the backend, not in the prompt: even if the agent tries to pay a big claim, it waits for Aisha.</span><span class="zh">这条上限放在后端，而不是提示词里：就算智能体想赔一笔大额，也得等 Aisha。</span></figcaption></figure>
-<div class="codebox"><span class="dim"># backend.py, continued
+<div class="codebox" data-file="queue.py" data-lang="python"><span class="dim"># backend.py, continued
 </span><span class="chg">SIGNOFF_LIMIT = 800</span><span class="dim">
 
 def record_decision(claim_id, decision):
@@ -76,7 +76,7 @@ def sign_off(claim_id, handler):
 <h2><span class="en">Step 5 · The agent that reads one claim</span><span class="zh">第 5 步 · 读一份理赔的智能体</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Now the part everyone came to see. The agent gets one claim, with its policy and the wording pasted into the prompt, and returns a decision as JSON: <code>action</code>, <code>payout</code> and <code>reason</code>. It never touches the queue itself. It only returns an answer, and <code>record_decision</code> from Step 4 decides what happens to it. This first agent has no tools: it is one model call, and the code gives it everything it needs. Install with <code>pip install openai</code> and set your <code>OPENAI_API_KEY</code>.</p>
 <p class="zh" style="margin:0 0 8px">现在是大家最想看的部分。智能体拿到一份理赔，保单和条款已经贴在提示词里，然后以 JSON 返回决定：<code>action</code>、<code>payout</code>、<code>reason</code>。它自己不碰队列，只返回答案，怎么处理由第 4 步的 <code>record_decision</code> 决定。这第一个智能体没有工具：它就是一次模型调用，代码把它需要的一切都给了它。用 <code>pip install openai</code> 安装，并设置好 <code>OPENAI_API_KEY</code>。</p></div>
-<div class="codebox"><span class="dim"># agent.py
+<div class="codebox" data-file="decide.py" data-lang="python"><span class="dim"># agent.py
 import json
 from openai import OpenAI
 
@@ -104,7 +104,7 @@ Reply with JSON only: {{"action": "approve" or "decline" or "refer", "payout": a
 <h2><span class="en">Step 6 · Run it on the queue and compare</span><span class="zh">第 6 步 · 跑整条队列并对比</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Load the claims, run each through the agent and the backend, then show the queue. Scoring is a separate step that runs once the queue is built, and it is the only place that opens the answer key. A pilot like this usually agrees with the handlers on most claims. It struggles on the ones that need the claims manual or the customer’s history. That gap is the plan for everything that follows.</p>
 <p class="zh" style="margin:0 0 8px">加载理赔，逐份交给智能体和后端，然后显示队列。打分是队列跑完之后的另一步，也是唯一会打开答案的地方。这样的试点通常在大多数理赔上和理赔员一致，难的是那些需要理赔手册或客户历史才能判断的。这个差距，就是后面所有内容的计划。</p></div>
-<div class="codebox"><span class="dim"># run_pilot.py
+<div class="codebox" data-file="run_pilot.py" data-lang="python"><span class="dim"># run_pilot.py
 import json
 from backend import queue, add_claim, start, record_decision, show_queue   # Steps 2 to 4
 from agent import decide                                                   # Step 5
@@ -120,7 +120,11 @@ show_queue()
 # It is the ONLY code that opens the answer key.
 key = json.load(open("answer_key/handler_decisions.json"))   # {claim id: handler's action}, e.g. {"C007": "approve"}; Lesson 4 turns each into a dict
 agree = sum(1 for cid, item in queue.items() if item["decision"]["action"] == key[cid])
-</span><span class="chg">print(f"agrees with handlers on {agree} of {len(key)} claims")</span></div>
+</span><span class="chg">print(f"agrees with handlers on {agree} of {len(key)} claims")</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">C001  done  approve  S$310  flight delayed 7 hours, receipts match
+C002  done  decline  S$0  strike announced before booking
+C003  for_handler  approve  S$1200  over S$800, needs a sign-off
+...
+agrees with handlers on 21 of 25 claims</div>
 <p class="en">Which claims will the pilot most likely get wrong? Sort them.</p>
 <p class="zh">试点最可能在哪些理赔上出错？来分一分。</p><div class="sc" id="g3"></div>
 
@@ -129,6 +133,7 @@ agree = sum(1 for cid, item in queue.items() if item["decision"]["action"] == ke
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Add five claims of your own,</b> including one tricky one.</span><span class="zh"><b>加五份你自己的理赔，</b>其中一份要刁钻一点。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Test the sign-off rule:</b> make the agent approve a big payout and watch the backend hold it in <code>waiting_signoff</code> instead of finishing it.</span><span class="zh"><b>试试签字规则：</b>让智能体批准一笔大额赔付，看后端把它留在 <code>waiting_signoff</code>（等待签字），而不是直接办完。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Write down what the agent got wrong</b> and why.</span><span class="zh"><b>写下智能体错在哪里</b>以及为什么。</span></span></label></div>
 <div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the pilot reads 25 sample claims, suggests approve, decline or refer with reasons, and holds any payout over S$800 for Aisha’s red stamp. The next problem is that Mr Goh asks “Why that model?” and Mei Ling has only tried one.</span><span class="zh">现在试点能读 25 份样本理赔，给出批准、拒绝或转交的建议并说明理由，超过 800 新元的赔付则留给 Aisha 的红色图章。下一个问题是：Goh 先生问“为什么选这个模型？”，而 Mei Ling 只试过一个。</span></div>
+<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2><div class="card"><p class="en" style="margin:0 0 12px"><code>openai.AuthenticationError: Error code: 401 - Incorrect API key provided</code><br>Cause: the key is missing, mistyped or for another service. Fix: set it in the terminal (<code>export OPENAI_API_KEY=...</code>) and never paste it into the code.</p><p class="zh" style="margin:0 0 12px"><code>openai.AuthenticationError: Error code: 401 - Incorrect API key provided</code><br>原因：密钥没设、打错了，或者是别的服务的。解决：在终端里设置（<code>export OPENAI_API_KEY=...</code>），不要把它粘进代码。</p><p class="en" style="margin:0 0 12px"><code>json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)</code><br>Cause: the model replied with words around the JSON, so <code>json.loads</code> cannot read it. Fix: say "JSON only" in the prompt, and ask for a JSON reply format if the library offers one.</p><p class="zh" style="margin:0 0 12px"><code>json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)</code><br>原因：模型在 JSON 前后加了话，<code>json.loads</code> 读不了。解决：在提示里写明“只返回 JSON”，库支持的话再指定 JSON 回复格式。</p><p class="en" style="margin:0 0 12px"><code>KeyError: 'C026'</code><br>Cause: the answer key has a claim id that is not in the queue (or the other way round). Fix: check that <code>claims.json</code> and the key list the same 25 ids.</p><p class="zh" style="margin:0 0 12px"><code>KeyError: 'C026'</code><br>原因：答案表里有队列中没有的理赔编号（或反过来）。解决：确认 <code>claims.json</code> 和答案表列的是同样的 25 个编号。</p></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• Build the smallest thing the customer can react to.<br>• Invent your own sample claims, and keep the answer key where the agent cannot read it.<br>• Give every claim one clear state: waiting, in progress, waiting for sign-off, decided.<br>• Enforce the sign-off rule in the backend, not in the prompt.<br>• The agent only returns an answer. The backend decides what happens to it.<br>• A score from an agent that saw the answers means nothing.<br>• The gap where the pilot fails is the plan for what comes next.</p><p class="zh" style="margin:0">• 做出客户能有反应的最小东西。<br>• 样本理赔自己编，答案放在智能体读不到的地方。<br>• 每份理赔只有一个明确的状态：等待、处理中、等待签字、已决定。<br>• 签字规则放在后端执行，而不是写在提示词里。<br>• 智能体只返回答案，怎么处理由后端决定。<br>• 见过答案的智能体，分数毫无意义。<br>• 试点出错的地方，就是接下来要做的事。</p></div>
 

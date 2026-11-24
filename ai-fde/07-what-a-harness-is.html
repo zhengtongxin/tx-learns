@@ -13,7 +13,7 @@
 <h2><span class="en">Step 1 · Where the pilot is clumsy</span><span class="zh">第 1 步 · 试点笨在哪里</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">In the pilot, the model does one small thing: it reads a claim and answers. Everything else is Mei Ling’s code. It picks the order, pastes in the whole wording, and trusts every call to succeed. Like a manager who hands out each customer slip one at a time and never lets the clerk decide anything.</p>
 <p class="zh" style="margin:0 0 8px">在试点里，模型只做一件小事：读一份理赔，给出答案。其余全是 Mei Ling 的代码在管：它挑顺序、贴上整本条款，还默认每次调用都会成功。就像一个经理，把顾客单子一张一张递给职员，从不让职员自己做任何决定。</p></div>
-<div class="codebox"><span class="dim"># the pilot loop from the claims desk project
+<div class="codebox" data-file="loop.py" data-lang="python"><span class="dim"># the pilot loop from the claims desk project
 for claim_id in list(queue):</span><span class="chg">        # my code picks the order, one at a time</span><span class="dim">
     start(claim_id)</span><span class="chg">
     # decide() pastes the WHOLE policy wording into every prompt
@@ -26,7 +26,7 @@ for claim_id in list(queue):</span><span class="chg">        # my code picks the
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">An agent is a <b>model</b> plus a <b>harness</b>. The model does the thinking. The harness is everything around it that lets the thinking turn into work. Think of the model as a very good clerk and the harness as the desk: the manual on the shelf, the to-do tray, the rule that big payouts wait for the red stamp, and someone to call when it goes wrong. A <b>tool</b> is a plain function your code offers the model, which the model can ask your code to run.</p>
 <p class="zh" style="margin:0 0 8px">智能体 = <b>模型</b> + <b>harness</b>。模型负责思考，harness 是围在它身边、让思考变成工作的一切。把模型想成一位很能干的职员，harness 就是他的办公桌：架子上的手册、待办托盘、“大额赔付要等红色图章”的规矩，还有出事时可以找的人。<b>工具</b>是你的代码提供给模型的普通函数，模型可以请你的代码去运行它。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="A model in the middle with four harness parts around it: queue and order, retries, manual tools and recording the decision"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><path class="lnk" d="M220 70L290 100" marker-end="url(#ah)"/><path class="lnk" d="M220 157L290 120" marker-end="url(#ah)"/><path class="lnk" d="M500 70L430 100" marker-end="url(#ah)"/><path class="lnk" d="M500 157L430 120" marker-end="url(#ah)"/><rect class="box soft" x="20" y="12" width="680" height="196" rx="12"/><rect class="box new" x="290" y="78" width="140" height="64" rx="12"/><text class="en" x="360.0" y="105.5">Model</text><text class="zh" x="360.0" y="105.5">模型</text><text class="en sm" x="360.0" y="122.5">reads and decides</text><text class="zh sm" x="360.0" y="122.5">阅读并决定</text><rect class="box" x="50" y="45" width="170" height="44" rx="12"/><text class="en" x="135.0" y="71.0">Queue and order</text><text class="zh" x="135.0" y="71.0">队列与顺序</text><rect class="box" x="50" y="135" width="170" height="44" rx="12"/><text class="en" x="135.0" y="161.0">Retry on failure</text><text class="zh" x="135.0" y="161.0">失败就重试</text><rect class="box" x="500" y="45" width="170" height="44" rx="12"/><text class="en" x="585.0" y="71.0">Manual tools</text><text class="zh" x="585.0" y="71.0">查手册的工具</text><rect class="box" x="500" y="135" width="170" height="44" rx="12"/><text class="en" x="585.0" y="161.0">Record the decision</text><text class="zh" x="585.0" y="161.0">记录决定</text><text class="en sm" x="360" y="35">Harness</text><text class="zh sm" x="360" y="35">Harness</text></svg><figcaption><span class="en">The harness is everything around the model: Mei Ling’s code decides what it sees, what it can do and what happens when something breaks.</span><span class="zh">harness 就是模型周围的一切：Mei Ling 的代码决定它看到什么、能做什么，以及出错时怎么办。</span></figcaption></figure>
-<div class="codebox"><span class="dim">agent = model + harness
+<div class="codebox" data-file="harness.txt" data-lang="text"><span class="dim">agent = model + harness
 
 harness for the claims desk:</span><span class="chg">
   1. instructions   what the job is and what good looks like
@@ -40,7 +40,7 @@ harness for the claims desk:</span><span class="chg">
 <h2><span class="en">Step 3 · The goal: one run, a list to watch, a fresh helper per claim</span><span class="zh">第 3 步 · 目标：一次运行、一张看得见的清单、每份理赔一个新帮手</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Here is what Mei Ling wants. One run works the whole queue. The agent chooses the order itself and keeps a to-do list the handlers can watch. For each claim it hands the job to a <b>helper</b>: a fresh model call that starts clean, sees only that claim, and reports back in one line. A fresh start matters because a long chat drags every earlier claim along, and you pay for all of it each time.</p>
 <p class="zh" style="margin:0 0 8px">这是 Mei Ling 想要的：一次运行处理完整条队列。智能体自己选顺序，并维护一张理赔员看得到的待办清单。每份理赔，它交给一个<b>帮手</b>：一次全新的模型调用，从干净状态开始，只看这一份理赔，最后用一行话回报。重新开始很重要，因为长对话会把之前所有的理赔都拖着走，而你每次都要为它们付费。</p></div>
-<div class="codebox"><span class="dim">to do         C015  C016  C017
+<div class="codebox" data-file="board.txt" data-lang="text"><span class="dim">to do         C015  C016  C017
 in progress  C014</span><span class="chg">
 done         C001 approve S$310 · C002 decline S$0 · C003 refer
 for handler  C009 failed twice</span></div>
@@ -49,7 +49,7 @@ for handler  C009 failed twice</span></div>
 <h2><span class="en">Step 4 · Let the agent find what it needs</span><span class="zh">第 4 步 · 让智能体自己找需要的内容</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The pilot pasted the whole wording into every prompt, even for a cancelled flight that needs one paragraph. Better: give the agent a list of section titles and a <b>tool</b> that reads one section. It looks up only what it needs, like opening one drawer of the grey filing cabinet instead of carrying out the whole cabinet.</p>
 <p class="zh" style="margin:0 0 8px">试点把整本条款贴进每个提示词，哪怕一份航班取消只需要其中一段。更好的做法：给智能体一张章节标题清单，再给它一个能读取某一节的<b>工具</b>。它只查需要的，就像只拉开灰色档案柜的一个抽屉，而不是把整个柜子搬出来。</p></div>
-<div class="codebox"><span class="dim">SECTIONS = {"Flight delays": "...", "Lost baggage": "...", "Reasonable costs": "..."}
+<div class="codebox" data-file="tools.py" data-lang="python"><span class="dim">SECTIONS = {"Flight delays": "...", "Lost baggage": "...", "Reasonable costs": "..."}
 </span><span class="chg">
 def read_section(title):
     """Return one section of the manual, by its title."""
@@ -59,7 +59,7 @@ def read_section(title):
 <h2><span class="en">Step 5 · Make problems fix themselves</span><span class="zh">第 5 步 · 让问题自己修好</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Long runs fail somewhere: a timeout, a bad reply, a crash. The harness decides what happens next, so the model never has to. The rule here: a failed claim goes back to the queue once, and if it fails again it is left for a handler. One bad claim must never stop the run. A rule in code is a locked door; a rule in the prompt is only a request.</p>
 <p class="zh" style="margin:0 0 8px">长时间运行总会在某处出错：超时、坏回复、崩溃。接下来怎么办由 harness 决定，模型不用操心。这里的规矩是：失败的理赔回到队列一次，再失败就留给理赔员。一份坏理赔绝不能拖垮整次运行。代码里的规矩是锁住的门，提示词里的规矩只是请求。</p></div>
-<div class="codebox"><span class="dim"># uses queue, decide and record_decision from the claims desk pilot
+<div class="codebox" data-file="retry.py" data-lang="python"><span class="dim"># uses queue, decide and record_decision from the claims desk pilot
 MAX_TRIES = 2
 tries = {}   # claim id -> attempts so far
 
