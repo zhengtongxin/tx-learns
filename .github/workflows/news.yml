@@ -1,0 +1,99 @@
+# News agent: once a day it reads official AI blogs and release notes (RSS/Atom, public sources in scripts/news-sources.json)
+# and leaves at most 3 "refresh this lesson" ideas in the ideas backlog (signals/ideas.json on the agent-status branch).
+# The improvement agent acts on them like any other idea: one small PR, the normal checks, the scope guard, auto-merge.
+# No AI runs unless something new matches a lesson (scripts/news.mjs plan). Then Haiku, with no tools, judges at most 10 items.
+# It never edits the site, never proposes new lessons or tracks (those come from TX's notes) and never pushes except to agent-status.
+name: News agent
+on:
+  schedule:
+    - cron: '17 1 * * *'   # daily, 09:17 Malaysia time, before the improvement agent's morning run
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: news
+  cancel-in-progress: false
+jobs:
+  working:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: scripts
+          persist-credentials: false
+      - name: Show the agent as working
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATE: run
+        run: "[ -f scripts/record-status.mjs ] && node scripts/record-status.mjs news || true"
+
+  news:
+    needs: working
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    outputs:
+      summary: ${{ steps.result.outputs.summary }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Read the feeds and match new items to lessons (no AI)
+        id: plan
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/news.mjs plan --out /tmp/news
+      - name: Install Claude Code
+        if: steps.plan.outputs.news == 'true'
+        run: npm install -g @anthropic-ai/claude-code
+      - name: Judge the items (Haiku, no tools)
+        if: steps.plan.outputs.news == 'true'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set -o pipefail
+          if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then unset ANTHROPIC_API_KEY; else unset CLAUDE_CODE_OAUTH_TOKEN; fi
+          mkdir -p /tmp/out
+          curl -fsS -o /tmp/claude-run.mjs "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/scripts/claude-run.mjs" && CC="node /tmp/claude-run.mjs news" || CC=claude
+          TRACE_STEP=news $CC --model haiku --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/news/prompt.md)" --max-turns 2 \
+            --tools "" --output-format text > /tmp/news/answer.txt
+          tail -20 /tmp/news/answer.txt
+      - name: Keep the ideas and remember what was read
+        id: result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PLANNED: ${{ steps.plan.outputs.news }}
+          PLAN_SUMMARY: ${{ steps.plan.outputs.summary }}
+        run: |
+          if [ "$PLANNED" = true ]; then node scripts/news.mjs add /tmp/news/answer.txt /tmp/news/plan.json | tee /tmp/news/add.txt
+          else echo "summary=$PLAN_SUMMARY" >> "$GITHUB_OUTPUT"; fi
+      - name: Record what the agent used
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: "[ -f scripts/trace.mjs ] && node scripts/trace.mjs push news /tmp/out || true"
+      - name: Tell TX on Telegram when it cannot finish
+        if: ${{ failure() }}
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          node scripts/notify-telegram.mjs "⚠️ The news agent could not finish. Logs: $RUN"
+      - name: Record status for the Ecosystem page
+        if: ${{ !cancelled() }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATE: ${{ job.status == 'success' && 'ok' || 'fail' }}
+          SUMMARY: ${{ steps.result.outputs.summary || 'Could not finish reading the news.' }}
+        run: node scripts/record-status.mjs news
