@@ -2,105 +2,109 @@
  "lessons": {
   "agentic-ai/01-agentic-workflow.html": {
    "score": 8,
-   "at": "2026-11-24T08:22:09.156Z",
+   "at": "2026-11-24T09:24:05.228Z",
    "confusing": [
     {
-     "where": "Hero meta line",
-     "why": "The Before you start card says about 5 minutes of hands-on time, so the same page gives two different times."
+     "where": "Step 2 · Learn (token cost)",
+     "why": "A newcomer may read this as one token equals one unit of money. Price per token depends on the model and on input versus output."
     },
     {
-     "where": "Title and Step 1 Learn",
-     "why": "The title says agentic workflow, and Lesson 2 uses workflow for a fixed route with no LLM choice. I could not tell whether I had built a workflow or an agent."
+     "where": "Step 3 · Attach model + memory",
+     "why": "The lesson says what to pick but not where the connector is on the n8n canvas, so a first-time builder cannot tell how to attach them."
     },
     {
-     "where": "Step 3, step 1 of the stepper",
-     "why": "Self-hosted is never explained, so I did not know it meant running n8n on my own server."
+     "where": "Key idea callout",
+     "why": "A box on a canvas is not a loop. Readers may look for a loop node and not find one."
     }
    ]
   },
   "agentic-ai/02-agents-and-patterns.html": {
-   "score": 8,
-   "at": "2026-11-24T08:22:09.156Z",
+   "score": 6,
+   "at": "2026-11-24T09:24:05.228Z",
    "confusing": [
     {
-     "where": "Step 1, the three definitions",
-     "why": "The first definition comes with a named person's attribution and no reason it matters, which pulled my attention away from the idea."
+     "where": "Step 2 · Learn, zoom level 2",
+     "why": "Here a workflow reads as the opposite of an agent, but Step 3 calls a workflow an agentic system. The reader cannot tell whether a workflow counts as an agent."
     },
     {
-     "where": "Step 3, the definition of agent",
-     "why": "Lesson 1 built exactly this kind (an AI Agent node that picks its own tools), but the lesson never says so, so the link between the two lessons is missing."
+     "where": "Step 3 · Workflow vs agent",
+     "why": "Step 2 already defined an agent as an LLM with tools in a loop. Step 3 adds agentic system as an umbrella, so two layers of names arrive in one step."
+    },
+    {
+     "where": "agent.py sketch (Step 2)",
+     "why": "choice.name and choice.args appear with no explanation of what ask_model returns, so the reader cannot follow the loop's data."
     }
    ]
   },
   "agentic-ai/03-first-api-calls.html": {
    "score": 7,
-   "at": "2026-11-24T08:22:09.156Z",
+   "at": "2026-11-24T09:24:05.228Z",
    "confusing": [
     {
-     "where": "Step 3 · Chain three calls, the judge prompt",
-     "why": "The question is open-ended, so correct or incorrect has no clear meaning. The trace then shows the judge replying Correct. to a customer answer, and I could not tell what was being judged."
+     "where": "Hero meta line",
+     "why": "The Before you start card on the same page says about 25 minutes, and setting up Python, a notebook, a virtual environment and an OpenAI account takes longer than 10."
     },
     {
-     "where": "Step 2 · Make your first call",
-     "why": "The code loads the key and checks it, then creates the client with no key. The prose never says the client reads OPENAI_API_KEY by itself; only a quiz explains it."
+     "where": "If something breaks · API Key not set",
+     "why": "The troubleshooting entry is titled API Key not set, but the code actually prints the message in this quote. A reader who sees the printed text cannot find their fix."
     },
     {
-     "where": "Now make it yours, call 3 (中文)",
-     "why": "The Chinese has a stray space and mixes AI 智能体 with the English agentic AI. It reads like a patch on the English."
+     "where": "Step 1 · checklist",
+     "why": "override=True is never explained in the prose. Readers who wonder what it does have to guess."
     }
    ]
   },
   "agentic-ai/04-many-models.html": {
-   "score": 6,
-   "at": "2026-11-24T08:22:09.156Z",
+   "score": 7,
+   "at": "2026-11-24T09:24:05.228Z",
    "confusing": [
     {
-     "where": "Step 5 · Be the judge, the judge prompt",
-     "why": "The doubled braces inside the f-string are never explained, so the example looks wrong."
+     "where": "Step 4 · Learn",
+     "why": "Step 4 already calls sending to many models parallelization. This caveat only appears after the Step 5 code, so the reader meets the word before its limit."
     },
     {
-     "where": "Step 5 · Read a verdict in code",
-     "why": "The - 1 is explained only in the quiz feedback after I answer. The prose never says the judge counts from 1 and Python lists start at 0."
+     "where": "Step 4 · Learn",
+     "why": "The seven steps are shown only as a trace. The competitor loop that stores names and answers is never listed, so the reader cannot see how the lists are filled."
     },
     {
-     "where": "Step 4 · Build the competition",
-     "why": "The seven steps appear only in the trace widget. The script is never shown as text, yet the Now make it yours task asks me to build something like it."
+     "where": "Step 3 · quiz feedback",
+     "why": "The reason is never taught in the text. The lesson only says any placeholder works."
     }
    ]
   },
   "agentic-ai/05-autonomy-and-tools.html": {
    "score": 6,
-   "at": "2026-11-24T08:22:09.156Z",
+   "at": "2026-11-24T09:24:05.228Z",
    "confusing": [
     {
-     "where": "Step 4 · Loop, the quiz Choose the simplest version that wor",
-     "why": "The for loop already handles several tool requests in one reply. So the answer while for two emails in one message is not supported; while is for when another round is needed."
+     "where": "Step 2 · chat.py code box",
+     "why": "client is used here but never created in this lesson. The reader has to remember the notebook from Lesson 3 or guess."
     },
     {
-     "where": "② Memory, the chat() code",
-     "why": "This lesson uses client but never creates it. The file is new, so I had to go back to Lesson 3 to remember the setup."
+     "where": "Step 3 · tools.py code box",
+     "why": "A deliberate blank. The quiz asks which text fits, but the lesson never says to paste it in, so the code looks broken."
     },
     {
-     "where": "③ Tool, the JSON description",
-     "why": "The block is called JSON but is a Python dictionary, so I was not sure whether to write JSON text or Python."
+     "where": "Step 2 · chat function",
+     "why": "The lesson never shows what history looks like (a list of message dictionaries), so the reader cannot tell what to pass in."
     }
    ]
   },
   "agentic-ai/06-career-agent.html": {
    "score": 7,
-   "at": "2026-11-24T08:22:09.156Z",
+   "at": "2026-11-24T09:24:05.228Z",
    "confusing": [
     {
-     "where": "Hero meta line",
-     "why": "The Before you start card shows about 45 minutes of hands-on time, so the same page gives two times."
+     "where": "Step 4 · JSON block (Step 2 code)",
+     "why": "The lesson calls this the full JSON, but it is a Python dict with a capital F. Lesson 5 defined JSON as plain text, so the reader is unsure what they are looking at."
     },
     {
-     "where": "Step 4 · From a tool name to a real call",
-     "why": "The lesson does not say which to use. The quiz rewards the lookup, but the later callout says not to use globals() in a public app, and Step 5 deploys publicly. I was not sure which to copy."
+     "where": "Step 5 · A",
+     "why": "Step 5 presents Pushover as required, but the package note says it is optional and the code prints the push without it. A newcomer may pay or skip without knowing that."
     },
     {
-     "where": "Step 5 · B · Split the code by job",
-     "why": "push() is written in push.py in Step 1, but no file in the split holds it, so I did not know where it goes."
+     "where": "Common errors",
+     "why": "The steps and error hints expect linkedin.pdf, but the shipped starter and final folders contain twin/linkedin.txt. The reader cannot tell which file to use."
     }
    ]
   }
