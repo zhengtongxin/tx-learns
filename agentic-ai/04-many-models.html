@@ -97,7 +97,9 @@ answer = response.choices[0].message.content</span></div>
 <p class="en">A judge using that rubric would reply <code>{"results": ["2", "3", "1"]}</code>. The judge only does that because the prompt tells it to. Here is the prompt, with the answers already glued in as “Response from competitor N”:</p>
 <p class="zh">按这个标准，裁判会返回 <code>{"results": ["2", "3", "1"]}</code>。裁判之所以这样回复，是因为提示词要求它这样做。下面是提示词，各回答已经拼成“Response from competitor N”放在里面：</p>
 <span class="lab"><span class="en">Python · compare.py (the judge prompt)</span><span class="zh">Python · compare.py（裁判提示词）</span></span>
-<div class="codebox"><span class="dim">judge = f"""You are judging a competition between {len(competitors)} competitors.
+<div class="codebox"><span class="dim"># together = the numbered answers glued into one string (see Step 4)
+# competitors = the list of model names
+judge = f"""You are judging a competition between {len(competitors)} competitors.
 Rank them by clarity and strength of argument for this question:
 {question}
 
