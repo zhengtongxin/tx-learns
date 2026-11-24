@@ -58,6 +58,9 @@ export async function pick() {
   const q = issues.find(i => !i.pull_request && i.title === 'Quality check');
   if (q) {
     const pages = [...new Set((q.body || '').match(/\b[a-z0-9-]+(?:\/[a-z0-9-]+)?\.html\b/gi) || [])].filter(p => existsSync(join(ROOT, p)));
+    // One area per pull request: keep only pages in the same folder as the first one (top-level pages count as one group).
+    const area = p => (p.includes('/') ? p.split('/')[0] : '.');
+    pages.splice(0, pages.length, ...pages.filter(p => area(p) === area(pages[0])));
     const key = `quality:${pages.slice(0, 3).join(',')}`;
     if (pages.length && fresh(key)) return { kind: 'quality', key, files: pages.slice(0, 3), text: `The weekly quality check found these problems (open issue "Quality check"):\n\n${short((q.body || '').replace(/\n{3,}/g, '\n\n'), 3000)}\n\nFix only the problems on the listed pages. Do not touch anything else.` };
   }

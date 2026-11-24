@@ -142,7 +142,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
           git commit -m "Improve: one fix from what the agents found" -m "Made by the improvement agent (Claude); see the pull request for what and why."
-          git push -u origin "$branch"
+          auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          git -c "http.https://github.com/.extraheader=$auth" push -u origin "$branch"
           title=$(head -1 /tmp/improver-summary.md | sed 's/^#* *//' | cut -c1-70)
           [ -n "$title" ] || title="Improve: one fix from what the agents found"
           { cat /tmp/improver-summary.md; echo; echo "---"; echo "Found by the quality check or the intern agent, fixed by the improvement agent. The scope guard compares this description with the code, the backend engineer agent reviews it, and auto-merge and the live rollback apply as usual."; } > /tmp/pr-body.md
