@@ -70,6 +70,7 @@
     if(um&&hm&&/^\d{4}-\d\d-\d\d$/.test(um.content)){var ud=um.content.split('-'),MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
       var us=document.createElement('span');us.className='updated';us.innerHTML=' · '+t({en:'Updated '+(+ud[2])+' '+MO[ud[1]-1]+' '+ud[0],zh:'更新于 '+ud[0]+' 年 '+(+ud[1])+' 月 '+(+ud[2])+' 日'});hm.appendChild(us)}
 
+    var LV={1:{en:'Beginner',zh:'入门'},2:{en:'Intermediate',zh:'进阶'},3:{en:'Advanced',zh:'高级'}};
     /* journey: topic tabs + lesson cards */
     var jr=document.querySelector('.journey');
     if(C&&jr){
@@ -77,7 +78,7 @@
       var draw=function(){
         var w=C.topics[cur],rd=w.items.filter(function(x){return x.file}).length;
         jr.innerHTML='<div class="wtabs">'+C.topics.map(function(x,i){return '<button class="wtab'+(i===cur?' on':'')+'" data-i="'+i+'">'+t(x.title)+'</button>'}).join('')+'</div>'+
-          '<div class="wph"><div><div class="ey">'+t({en:'Topic '+w.n,zh:'主题 '+w.n})+'</div><h3>'+t(w.title)+'</h3></div><div class="meta">'+t({en:rd+' of '+w.items.length+' lessons available',zh:'已发布 '+rd+' / '+w.items.length+' 课'})+'</div></div>'+
+          '<div class="wph"><div><div class="ey">'+t({en:'Topic '+w.n,zh:'主题 '+w.n})+(w.level?' · '+t(LV[w.level]):'')+'</div><h3>'+t(w.title)+'</h3></div><div class="meta">'+t({en:rd+' of '+w.items.length+' lessons available',zh:'已发布 '+rd+' / '+w.items.length+' 课'})+'</div></div>'+
           '<div class="lgrid">'+w.items.map(function(l){
             var no=('0'+l.g).slice(-2),chip='<span class="chip '+l.k+'">'+t(TYPE[l.k])+'</span>';
             if(l.file){var fin=d[C.id+'/'+l.file];return '<a class="lcard ready spot" href="'+l.file+'"><span class="n">'+no+'</span>'+chip+'<h4>'+t(l.title)+'</h4><span class="st">'+(fin?t({en:'✓ Completed',zh:'✓ 已完成'}):t({en:'Start →',zh:'开始 →'}))+'</span></a>'}
@@ -90,8 +91,8 @@
     /* hub: topic and lesson counts are never typed by hand. They come from each track's lessons.js
        (scripts/check-counts.mjs fails a PR that types one). */
     var hub=document.querySelector('.track-list'),sums=document.querySelectorAll('[data-sum]');
-    function drawHub(){if(hub)hub.innerHTML=window.TRACKS.map(function(c){var n=count(c.id),ok=c.total>0;
-      return '<a class="cc spot" href="'+c.href+'"><div class="orbi">'+c.icon+'</div><div><h3>'+t(c.title)+'</h3><div class="meta" style="margin-top:4px">'+t(c.desc)+'</div><div class="chips">'+(ok?'<span class="chip">'+t({en:c.topics+' topics',zh:c.topics+' 个主题'})+'</span><span class="chip">'+t({en:c.total+' lessons',zh:c.total+' 课'})+'</span>':'')+'<span class="chip">'+t({en:'Bilingual',zh:'双语'})+'</span></div><div class="mini"><i style="width:'+(ok?n/c.total*100:0)+'%"></i></div></div><div class="go">→</div></a>'}).join('')}
+    function drawHub(){if(hub)hub.innerHTML=window.TRACKS.map(function(c,ci){var n=count(c.id),ok=c.total>0;
+      return '<a class="cc spot" href="'+c.href+'"><div class="orbi">'+c.icon+'</div><div><h3>'+t(c.title)+'</h3><div class="meta" style="margin-top:4px">'+t(c.desc)+'</div><div class="chips"><span class="chip">'+t({en:'Step '+(ci+1),zh:'第 '+(ci+1)+' 步'})+(c.level?' · '+t(LV[c.level]):'')+'</span>'+(ok?'<span class="chip">'+t({en:c.topics+' topics',zh:c.topics+' 个主题'})+'</span><span class="chip">'+t({en:c.total+' lessons',zh:c.total+' 课'})+'</span>':'')+'<span class="chip">'+t({en:'Bilingual',zh:'双语'})+'</span></div><div class="mini"><i style="width:'+(ok?n/c.total*100:0)+'%"></i></div></div><div class="go">→</div></a>'}).join('')}
     if(window.TRACKS&&(hub||sums.length)){var q=window.TRACKS.slice();
       (function next(){var c=q.shift();
         if(!c){var tot={topics:0,lessons:0,published:0};window.TRACKS.forEach(function(x){tot.topics+=x.topics||0;tot.lessons+=x.total||0;tot.published+=x.published||0});

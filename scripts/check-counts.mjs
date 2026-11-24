@@ -23,7 +23,9 @@ function load(file, name) {
 const tracks = load('tracks.js', 'TRACKS') || [];
 let allTopics = 0, allLessons = 0;
 
+tracks.reduce((prev, tr) => { if (tr.level < prev) say('tracks.js', `"${tr.id}" is level ${tr.level} after a level ${prev} track: list easier tracks first`); return tr.level; }, 1);
 for (const tr of tracks) {
+  if (![1, 2, 3].includes(tr.level)) say('tracks.js', `"${tr.id}" needs level 1, 2 or 3`);
   for (const k of ['topics', 'total']) if (k in tr) say('tracks.js', `"${tr.id}" has ${k}:${tr[k]} typed by hand. Remove it: the page counts lessons.js.`);
   const dir = dirname(tr.href);
   const T = load(join(dir, 'lessons.js'), 'TRACK');
@@ -42,6 +44,13 @@ for (const tr of tracks) {
   for (const f of onDisk) if (!listed.has(f)) say(join(dir, f), 'lesson file is not listed in lessons.js, so it is not counted or linked');
   const nums = onDisk.map(f => f.slice(0, 2));
   for (const n of new Set(nums)) if (nums.filter(x => x === n).length > 1) say(dir, `two lesson files start with ${n}-`);
+
+  // Difficulty: every topic has level 1-3 and the levels never go down the list (easiest first).
+  let prev = 1;
+  for (const w of T.topics) {
+    if (![1, 2, 3].includes(w.level)) say(join(dir, 'lessons.js'), `topic ${w.n} has no level 1, 2 or 3`);
+    else { if (w.level < prev) say(join(dir, 'lessons.js'), `topic ${w.n} ("${w.title.en}") is level ${w.level} after a level ${prev} topic: put easier topics first`); prev = w.level; }
+  }
 
   // 3. Each published lesson's tag matches its place in lessons.js.
   for (const w of T.topics) {
