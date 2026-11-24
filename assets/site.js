@@ -1,3 +1,4 @@
+/* probe */
 (function(){
   var KEY='learn-lang',DONE='learn-done',TH='learn-theme',root=document.documentElement;
   function get(k,d){try{return localStorage.getItem(k)||d}catch(e){return d}}
