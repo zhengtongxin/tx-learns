@@ -84,11 +84,11 @@ jobs:
           # Nothing to ask when the pull request is exempt, breaks a path rule already, or has no files.
           if node -e 'const i=require("/tmp/scope/input.json");process.exit(i.exempt||i.violations.length||!i.files.length?0:1)'; then echo "No AI needed."; else
             # Call 1: the diff alone. It has not seen the request.
-            $CC --model haiku --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/scope/blind-prompt.md)" --max-turns 1 --allowedTools "" --output-format text > /tmp/scope/blind.out.txt || echo "::warning::The first call failed."
+            TRACE_STEP=blind $CC --model haiku --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/scope/blind-prompt.md)" --max-turns 1 --allowedTools "" --output-format text > /tmp/scope/blind.out.txt || echo "::warning::The first call failed."
             rm -f /tmp/scope/compare-prompt.md
             node scripts/scope-guard.mjs compare --dir /tmp/scope
             # Call 2: the inferred description against the request (skipped when the first call gave no usable answer).
-            if [ -s /tmp/scope/compare-prompt.md ]; then $CC --model haiku --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/scope/compare-prompt.md)" --max-turns 1 --allowedTools "" --output-format text > /tmp/scope/verdict.out.txt || echo "::warning::The second call failed."; fi
+            if [ -s /tmp/scope/compare-prompt.md ]; then TRACE_STEP=compare $CC --model haiku --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/scope/compare-prompt.md)" --max-turns 1 --allowedTools "" --output-format text > /tmp/scope/verdict.out.txt || echo "::warning::The second call failed."; fi
           fi
           node scripts/scope-guard.mjs decide --dir /tmp/scope
           cp /tmp/scope/result.json /tmp/out/ || true

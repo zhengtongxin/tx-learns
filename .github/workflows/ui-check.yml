@@ -140,16 +140,16 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then unset ANTHROPIC_API_KEY; echo "Auth: Claude subscription"; else unset CLAUDE_CODE_OAUTH_TOKEN; echo "Auth: API key (no CLAUDE_CODE_OAUTH_TOKEN secret)"; fi
-          ls /tmp/out/shots/*-[0-9].png > /tmp/out/tiles.txt || { echo 'No screenshot tiles to look at.'; exit 0; }
+          ls /tmp/out/shots/*-[0-9].png > /tmp/out/tiles.txt || { echo 'No screenshots to look at.'; exit 0; }
           cat > /tmp/ui-prompt.md <<'PROMPT'
           You are the frontend engineer for TX Learns, a bilingual (EN/中文) learning site. You care that every page
           looks finished and readable on a laptop and a phone. The pages that changed were
-          screenshotted on a 1280px desktop and a 390px phone, cut into tiles from the top of the page down.
-          Tiles are listed in /tmp/out/tiles.txt, named <page>-<desktop|phone>-<n>.png.
+          screenshotted once on a 1280px desktop and once on a 390px phone: the top of each page, up to 2000 to 2400 px tall.
+          The images are listed in /tmp/out/tiles.txt, named <page>-<desktop|phone>-1.png.
           A script has already hovered, clicked and Tabbed through every page; its findings are in /tmp/out/ui-check.json.
           Do not repeat those.
 
-          Look at every tile with the Read tool and report only clear visual bugs a visitor would notice:
+          Look at every image with the Read tool, once each and report only clear visual bugs a visitor would notice:
           text running into or over other text, words or buttons cut off, boxes spilling out of their container,
           text you cannot read against its background, a widget or diagram that looks broken or empty,
           a phone layout squeezed into unreadable columns, a button too small to tap on the phone, a popup or
@@ -164,7 +164,7 @@ jobs:
           PROMPT
           # Claude can only read. Its answer is captured from the output instead of giving it a write tool.
           curl -fsS -o /tmp/claude-run.mjs "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/scripts/claude-run.mjs" && CC="node /tmp/claude-run.mjs ui-check" || CC=claude
-          $CC --model haiku --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/ui-prompt.md)" --max-turns 30 --add-dir /tmp/out --allowedTools "Read" --output-format text > /tmp/out/visual.txt || true
+          $CC --model haiku --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/ui-prompt.md)" --max-turns 14 --add-dir /tmp/out --allowedTools "Read" --output-format text > /tmp/out/visual.txt || true
           tail -20 /tmp/out/visual.txt
           node -e 'const fs=require("fs"),t=fs.readFileSync("/tmp/out/visual.txt","utf8"),v=JSON.parse(t.slice(t.indexOf("{"),t.lastIndexOf("}")+1));if(!Array.isArray(v.issues))throw new Error("no issues list");fs.writeFileSync("/tmp/out/visual.json",JSON.stringify({issues:v.issues.slice(0,6)}))' \
             && echo "Visual notes saved." || echo "::warning::The visual pass gave no readable result."

@@ -122,7 +122,8 @@ jobs:
           (a top-level folder listed in tracks.js, e.g. ai-engineer). No TRACK file means agentic-ai. Below,
           <track> is that folder. If <track>/STORY.md exists it names this track's setting and characters: use them.
 
-          1. Read CLAUDE.md and STYLE.md. Follow STYLE.md exactly; it is the whole point.
+          1. Follow the rule packet at the end of this prompt: it is STYLE.md and CLAUDE.md boiled down to what you need. The full
+             documents are reference only; open a section of STYLE.md only for a real question the packet cannot answer.
           2. Read every file in the folder (notes, code, images). TX's own confusions and "aha" moments are
              the human touch: keep them, especially for the "What I got wrong" callout.
           3. Study agentic-ai/07-agents-sdk-basics.html (and the last lessons already in <track>/) and assets/teach.js as the model for structure and widgets
@@ -130,10 +131,9 @@ jobs:
              Reuse those widgets; do not invent new CSS unless needed.
           3c. /tmp/memory.json is the authoring memory: how often each kind of mistake was found in earlier reviews (with the
              latest example), and decisions to keep. It may be empty. Read it before you write and avoid those mistakes.
-          3b. Look up what the site already says, so the lesson links back instead of repeating itself: run
-             node scripts/rag.mjs "<the concept in a few words>" and node scripts/rag.mjs --related <track>/<an earlier lesson>.
-             It prints the closest lessons with a passage each (local search, free). Reuse their terms and characters,
-             point to them in one short sentence ("we built this in ..."), and do not re-teach what they already teach.
+          3b. The brief at the end of this prompt has the closest passages the site already has on these notes (already searched,
+             so do not run rag.mjs). Reuse their terms and characters, point to them in one short sentence ("we built this in ..."),
+             and do not re-teach what they already teach.
           4. Read <track>/lessons.js. If a planned item (no file) matches the concept, use it; otherwise add a new
              item under the best-fitting topic. Name the file <track>/NN-slug.html with the next free NN in that track,
              and add file:'NN-slug.html'. Tag: a project item (k:'p') gets "<Topic> · Project"; any other item gets
@@ -159,9 +159,18 @@ jobs:
              and anything in the notes you were unsure about or left out (as questions for TX).
           PROMPT
           python3 -c "import os,sys;p='/tmp/writer-prompt.md';s=open(p).read().replace('__DIRS__',os.environ['DIRS']);open(p,'w').write(s)"
+          # Deterministic prep before Claude: the 2 KB rule packet and the top passages the site already has on these notes.
+          if [ -s scripts/rules/writer.md ] && [ -f scripts/agent-context.mjs ] && node scripts/agent-context.mjs writer --dirs "$(echo $DIRS)" --out /tmp/writer-brief.md; then
+            { echo; echo "=== RULE PACKET ==="; cat scripts/rules/writer.md; echo; echo "=== BRIEF ==="; cat /tmp/writer-brief.md; } >> /tmp/writer-prompt.md
+          else
+            echo "No rule packet yet: falling back to the full documents."
+            echo "Read CLAUDE.md and STYLE.md first and follow STYLE.md exactly. Link back to lessons the site already has on the concept." >> /tmp/writer-prompt.md
+          fi
+          curl -fsS -o /tmp/runs.json "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/agent-status/trace/runs.json" || true
+          TURNS=80; [ -f scripts/max-turns.mjs ] && TURNS=$(node scripts/max-turns.mjs writer 80 --floor 30 || echo 80)
           curl -fsS -o /tmp/claude-run.mjs "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/scripts/claude-run.mjs" && CC="node /tmp/claude-run.mjs writer" || CC=claude
-          $CC --model sonnet --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/writer-prompt.md)" --max-turns 80 \
-            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(node scripts/check-counts.mjs:*),Bash(node scripts/check-pages.mjs:*),Bash(node scripts/rag.mjs:*),Bash(node scripts/search-index.mjs:*),Bash(ls:*)" \
+          $CC --model sonnet --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/writer-prompt.md)" --max-turns "$TURNS" \
+            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(node scripts/check-counts.mjs:*),Bash(node scripts/check-pages.mjs:*),Bash(node scripts/search-index.mjs:*),Bash(ls:*)" \
             --output-format text | tail -40
           # Drop scratch files the writer made outside the site (e.g. a .gen/ page generator), so they never deploy.
           keep=$(node -e "global.window={};require('./tracks.js');console.log(window.TRACKS.map(t=>t.id).join('|'))")

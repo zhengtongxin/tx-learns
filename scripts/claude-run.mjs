@@ -32,6 +32,7 @@ const rec = {
   in: n(u.input_tokens), out: n(u.output_tokens), cacheRead: n(u.cache_read_input_tokens), cacheWrite: n(u.cache_creation_input_tokens),
   ok: !!j && !j.is_error && r.status === 0, end: (j && j.subtype) || (r.error ? 'spawn_error' : 'no_json'),
   run: process.env.GITHUB_RUN_ID || '',
+  step: (process.env.TRACE_STEP || 'main').slice(0, 24), // which Claude call of the workflow (review, review-fix, blind, compare ...)
 };
 try {
   const dir = process.env.TRACE_DIR || '/tmp/out';

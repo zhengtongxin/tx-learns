@@ -3,13 +3,14 @@
 //   node scripts/trace.mjs push <agent> [dir]   add dir/trace-<agent>.jsonl (default /tmp/out) to trace/runs.json on the
 //                                               data-only `agent-status` branch (never deployed, never merged). Never fails a workflow.
 //   node scripts/trace.mjs report [--hours 24]  print the totals (needs GITHUB_REPOSITORY; the repo is public)
+//   node scripts/trace.mjs weekly               the last 7 days by model and workflow step against the 7 days before (the digest adds it on Sundays)
 // Env for push: GITHUB_TOKEN with contents: write, GITHUB_REPOSITORY. Only numbers and short known words are kept, so a
 // forged trace file cannot put text on any page or message.
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const BRANCH = 'agent-status', PATH = 'trace/runs.json', KEEP = 400;
+const BRANCH = 'agent-status', PATH = 'trace/runs.json', KEEP = 1500; // about two weeks of calls, so the weekly report can set this week against the last
 const AGENTS = ['writer', 'reader', 'reviewer', 'scope-guard', 'ui-check', 'optimizer', 'improver', 'recall'];
 const n = v => (Number.isFinite(+v) ? +v : 0);
 
@@ -22,6 +23,7 @@ export function clean(line, agent) {
     usd: +Math.min(50, Math.max(0, n(r.usd))).toFixed(4), turns: Math.min(500, n(r.turns)), ms: Math.min(36e5, n(r.ms)),
     in: n(r.in), out: n(r.out), cacheRead: n(r.cacheRead), cacheWrite: n(r.cacheWrite), ok: r.ok === true,
     end: /^[a-z_]{1,40}$/.test(r.end) ? r.end : 'unknown', run: /^\d{1,20}$/.test(String(r.run)) ? String(r.run) : '',
+    step: typeof r.step === 'string' && /^[a-z0-9-]{1,24}$/.test(r.step) ? r.step : 'main',
   };
 }
 
@@ -34,6 +36,34 @@ export function summarize(runs, since) {
     a.calls++; a.usd += r.usd; a.tokens += r.in + r.out + r.cacheRead + r.cacheWrite; a.turns += r.turns; if (!r.ok) a.bad++;
   }
   return by;
+}
+
+const p95 = a => { const t = [...a].sort((x, y) => x - y); return t.length ? t[Math.min(t.length - 1, Math.ceil(0.95 * t.length) - 1)] : 0; };
+// One row per group: calls, average and p95 turns, average input and output tokens, average seconds, cost.
+function table(runs, key) {
+  const g = {};
+  for (const r of runs) (g[key(r)] ||= []).push(r);
+  return Object.entries(g).sort((a, b) => b[1].reduce((x, r) => x + r.usd, 0) - a[1].reduce((x, r) => x + r.usd, 0)).map(([k, v]) => {
+    const sum = f => v.reduce((x, r) => x + f(r), 0);
+    return { k, calls: v.length, turns: sum(r => r.turns) / v.length, p95: p95(v.map(r => r.turns)), tin: sum(r => r.in + r.cacheRead + r.cacheWrite) / v.length, tout: sum(r => r.out) / v.length, secs: sum(r => r.ms) / v.length / 1000, usd: sum(r => r.usd), bad: v.filter(r => !r.ok).length };
+  });
+}
+// The weekly report: the last 7 days grouped by model and by workflow step, set against the 7 days before.
+export function weekly(runs, now = Date.now()) {
+  const wk = 7 * 864e5, at = r => +new Date(r.at);
+  const cur = runs.filter(r => at(r) >= now - wk), prev = runs.filter(r => at(r) < now - wk && at(r) >= now - 2 * wk);
+  if (!cur.length) return 'No Claude calls were traced in the last 7 days.';
+  const k = n => (n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? Math.round(n / 1e3) + 'k' : String(Math.round(n)));
+  const usd = a => a.reduce((x, r) => x + r.usd, 0), pu = usd(prev);
+  const pct = (a, b) => (b ? `${a >= b ? '+' : ''}${Math.round((a / b - 1) * 100)}%` : 'new');
+  const row = (t, pt) => `• ${t.k}: ${t.calls} call${t.calls > 1 ? 's' : ''}, ${t.turns.toFixed(0)} turns (p95 ${t.p95}), ${k(t.tin)} in / ${k(t.tout)} out per call (${pt ? pct(t.tin, pt.tin) + ' input' : 'new'}), ${t.secs.toFixed(0)}s, $${t.usd.toFixed(2)}${t.bad ? `, ${t.bad} not ok` : ''}`;
+  const L = [`💰 Agent use, last 7 days: ${cur.length} calls, about $${usd(cur).toFixed(2)} at API prices${pu ? ` (${pct(usd(cur), pu)} vs the week before)` : ''}`, '', 'By model:'];
+  const pm = table(prev, r => r.model);
+  for (const t of table(cur, r => r.model)) L.push(row(t, pm.find(x => x.k === t.k)));
+  L.push('', 'By workflow step:');
+  const step = r => `${r.agent}/${r.step || 'main'}`, ps = table(prev, step);
+  for (const t of table(cur, step).slice(0, 14)) L.push(row(t, ps.find(x => x.k === t.k)));
+  return L.join('\n');
 }
 
 async function api(method, path, body) {
@@ -75,6 +105,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       const hours = +(process.argv[process.argv.indexOf('--hours') + 1] || 24);
       const by = summarize((await readRuns()).runs, Date.now() - hours * 36e5);
       for (const [k, v] of Object.entries(by)) console.log(`${k}: ${v.calls} calls, ${v.turns} turns, ${v.tokens} tokens, ~$${v.usd.toFixed(3)}${v.bad ? `, ${v.bad} not ok` : ''}`);
-    } else console.log('Usage: node scripts/trace.mjs push <agent> [dir] | report [--hours 24]');
+    } else if (cmd === 'weekly') console.log(weekly((await readRuns()).runs));
+    else console.log('Usage: node scripts/trace.mjs push <agent> [dir] | report [--hours 24] | weekly');
   } catch (e) { console.log(`::warning::trace: ${e.message}`); }
 }

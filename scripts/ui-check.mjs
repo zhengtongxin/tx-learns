@@ -14,7 +14,7 @@
 // Usage: node scripts/ui-check.mjs [--base URL] [--pages a.html,b.html] [--out DIR] [--shots a.html,b.html]
 //   --base   site to test. Without it, the repo folder is served locally (the site is plain static files).
 //   --pages  pages to test (default: home, How it works, track index and every published lesson).
-//   --shots  pages to also save tiled screenshots of, for the visual pass (default: none).
+//   --shots  pages to also save one desktop and one phone screenshot of (top of the page, capped), for the visual pass (default: none).
 //   --out    where ui-check.json, ui-check.md and the screenshots go (default: ui-check-out).
 // Env: VERCEL_AUTOMATION_BYPASS_SECRET lets it open a protected Vercel preview.
 //      PLAYWRIGHT_DIR is a folder where `playwright` is installed, if it is not resolvable from here.
@@ -39,7 +39,7 @@ const VIEWPORTS = [
   { name: 'desktop', viewport: { width: 1280, height: 800 }, hover: true },
   { name: 'phone', viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, hover: false },
 ];
-const MAX_TARGETS = 60, MAX_TABS = 40, MAX_TILES = 6;
+const MAX_TARGETS = 60, MAX_TABS = 40;
 // Site chrome (top bar, side menu) is the same on every page and changes language/theme; skip it.
 const SKIP = '.top, .side, .prog, [data-uicheck-skip]';
 
@@ -304,15 +304,14 @@ async function main() {
 }
 
 const slug = p => p.replace(/\.html$/, '').replace(/[^a-z0-9]+/gi, '-');
-// Screenshots cut into screen-sized tiles, so a long page stays readable for the visual pass.
+// One screenshot per screen size for the visual pass: the top of the page, capped in height (desktop 2000 px, phone 2400 px), so
+// Claude reads one desktop and one phone image per changed page instead of a column of tiles. Layout bugs a script can see
+// (overflow, overlap, popups, Tab) are tested on the whole page anyway.
 async function tiles(page, path, name) {
-  const H = page.viewportSize().height * (name === 'phone' ? 1.5 : 1), total = await page.evaluate(() => document.documentElement.scrollHeight), out = [];
-  for (let y = 0, k = 1; y < total && k <= MAX_TILES; y += H, k++) {
-    const f = join(OUT, 'shots', `${slug(path)}-${name}-${k}.png`);
-    await page.screenshot({ path: f, fullPage: true, clip: { x: 0, y, width: page.viewportSize().width, height: Math.min(H, total - y) } });
-    out.push(f);
-  }
-  return out;
+  const total = await page.evaluate(() => document.documentElement.scrollHeight), cap = name === 'phone' ? 2400 : 2000;
+  const f = join(OUT, 'shots', `${slug(path)}-${name}-1.png`);
+  await page.screenshot({ path: f, fullPage: true, clip: { x: 0, y: 0, width: page.viewportSize().width, height: Math.min(cap, total) } });
+  return [f];
 }
 
 const LABEL = { 'popup-overlap': 'Overlapping popups', 'popup-offscreen': 'Popup off screen', 'popup-covered': 'Popup behind other content', 'popup-see-through': 'See-through popup', overflow: 'Wider than the screen', 'js-error': 'Script or file error', load: 'Page did not load' };
