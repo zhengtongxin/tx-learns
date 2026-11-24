@@ -12,7 +12,7 @@
 <h2><span class="en">Step 1 · Start from the planner</span><span class="zh">第 1 步 · 从规划智能体出发</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Begin with the planner from the last lesson: the to-do item, the list, and the tools to add, tick and show. Do not rebuild anything. Everything new is added on top, so you can tell what broke if something does. Before you add anything, launch it once and confirm it still plans.</p>
 <p class="zh" style="margin:0 0 8px">从上一课的规划智能体开始：待办条目、清单，以及新增、打钩、显示的工具。什么都不要重建，所有新东西都加在上面，这样出了问题你知道是哪里坏的。加东西之前，先启动一次，确认它还能做计划。</p></div>
-<div class="codebox"><span class="dim">Project so far (one entry-point file, agent.py):
+<div class="codebox" data-file="summary"><span class="dim">Project so far (one entry-point file, agent.py):
   Todo model            description + done flag
   plan list             in memory
   tools                 add_todo, mark_done, show_plan
@@ -21,7 +21,7 @@
 <h2><span class="en">Step 2 · Add a sandbox tool for running code</span><span class="zh">第 2 步 · 加一个跑代码的沙盒工具</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>code interpreter</b> is a managed sandbox: a sealed box in the cloud that runs Python and hands back the output. Your tool sends code to it and reads the result. <b>Streamed</b> means the answer arrives in pieces, so the loop joins the pieces into one string. <code>with</code> opens the sandbox and closes it when the block ends. <code>clearContext: False</code> tells it not to wipe its earlier state first. The code never touches your own machines. A model wrote that code, so it could do anything; the sandbox keeps any damage inside the box. Create the sandbox in the same region as your agent, or the call fails.</p>
 <p class="zh" style="margin:0 0 8px"><b>代码解释器</b>是一个托管沙盒：云上一个封闭的盒子，运行 Python 并把输出交回来。你的工具把代码发给它，再读取返回的结果。“流式”的意思是结果分成小块陆续到达，所以循环要把这些小块拼成一个字符串。<code>with</code> 负责打开沙盒，块结束时自动关掉。<code>clearContext: False</code> 表示先不要清掉它之前的状态。代码绝不会碰到你自己的机器。模型写的代码可能做任何事，沙盒把损害关在盒子里。沙盒要建在和智能体相同的区域，否则调用会失败。</p></div>
-<div class="codebox"><span class="dim">from bedrock_agentcore.tools.code_interpreter_client import code_session
+<div class="codebox" data-file="agent.py" data-lang="python"><span class="dim">from bedrock_agentcore.tools.code_interpreter_client import code_session
 
 @tool
 def run_python(code: str) -&gt; str:
@@ -41,7 +41,7 @@ def run_python(code: str) -&gt; str:
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Giving the agent the sandbox is not enough: it may just skip it. So change the system prompt in two ways. Solve in your head first, without code. Then add a to-do that starts with "Write Python code to..." and run it to check. Because it is a line in the plan, it is no longer optional.</p>
 <p class="zh" style="margin:0 0 8px">光给智能体一个沙盒不够：它可能直接跳过。所以从两方面改系统提示词。先不用代码，靠自己推理解出来。然后加一条以“Write Python code to...”开头的待办，并运行它来验证。因为它是计划里的一行，就不再是可选的了。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 150" role="img" aria-label="The plan includes a check step: the agent writes a small program, a sandbox runs it, the result is compared to the answer, and a trace is logged"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box" x="0.0" y="50" width="120.0" height="64" rx="12"/><text class="en" x="60.0" y="78.0">Plan</text><text class="zh" x="60.0" y="78.0">计划</text><text class="en sm" x="60.0" y="96.0">includes a check</text><text class="zh sm" x="60.0" y="96.0">含一个检查步骤</text><path class="lnk" d="M122.0 82.0 L147.0 82.0" marker-end="url(#ah)"/><rect class="box" x="150.0" y="50" width="120.0" height="64" rx="12"/><text class="en" x="210.0" y="78.0">Write check</text><text class="zh" x="210.0" y="78.0">写检查程序</text><text class="en sm" x="210.0" y="96.0">a small program</text><text class="zh sm" x="210.0" y="96.0">一个小程序</text><path class="lnk hot" d="M272.0 82.0 L297.0 82.0" marker-end="url(#ah)"/><rect class="box new" x="300.0" y="50" width="120.0" height="64" rx="12"/><text class="en" x="360.0" y="78.0">Sandbox runs</text><text class="zh" x="360.0" y="78.0">沙箱运行</text><text class="en sm" x="360.0" y="96.0">sealed off</text><text class="zh sm" x="360.0" y="96.0">与码头隔离</text><path class="lnk" d="M422.0 82.0 L447.0 82.0" marker-end="url(#ah)"/><rect class="box" x="450.0" y="50" width="120.0" height="64" rx="12"/><text class="en" x="510.0" y="78.0">Compare</text><text class="zh" x="510.0" y="78.0">对比结果</text><text class="en sm" x="510.0" y="96.0">answer vs check</text><text class="zh sm" x="510.0" y="96.0">答案对检查</text><path class="lnk" d="M572.0 82.0 L597.0 82.0" marker-end="url(#ah)"/><rect class="box" x="600.0" y="50" width="120.0" height="64" rx="12"/><text class="en" x="660.0" y="78.0">Trace</text><text class="zh" x="660.0" y="78.0">轨迹</text><text class="en sm" x="660.0" y="96.0">logged for review</text><text class="zh sm" x="660.0" y="96.0">记录下来备查</text></svg><figcaption><span class="en">The check is a required line on the plan. It runs in a sealed sandbox, and the trace shows what it did.</span><span class="zh">检查是计划里必须完成的一行。它在封闭沙箱里运行，轨迹会显示它做了什么。</span></figcaption></figure>
-<div class="codebox"><span class="dim">checker = Agent(
+<div class="codebox" data-file="agent.py" data-lang="python"><span class="dim">checker = Agent(
     </span><span class="chg">system_prompt=(
         "Make a plan with add_todo. Solve the task yourself first, without code. "
         "Then add one more to-do that starts with 'Write Python code to' "
@@ -55,7 +55,7 @@ def run_python(code: str) -&gt; str:
 <h2><span class="en">Step 4 · Colour the coding steps, relaunch and try a puzzle</span><span class="zh">第 4 步 · 给写代码的步骤上色，重新启动并出一道谜题</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Make the check easy to spot. In <code>show_plan</code>, wrap any line that starts with "Write Python code" in a colour code (terminals read <code>\033[96m</code> as "cyan" and <code>\033[0m</code> as "reset"). Then launch again and invoke with a puzzle. The right answer is 9 (the number of ways to reshuffle 4 people so that nobody keeps their own), so you can check the agent. Read three things: the plan, the answer, and the check.</p>
 <p class="zh" style="margin:0 0 8px">让验证步骤一眼就能看到。在 <code>show_plan</code> 里，把以“Write Python code”开头的行包上颜色代码（终端把 <code>\033[96m</code> 读作“青色”，<code>\033[0m</code> 读作“恢复”）。然后再启动，用一道谜题调用它。这道题的正确答案是 9（4 个人互换班次、谁都不留回自己班次的方法数），你可以拿它来核对。读三样东西：计划、答案和验证。</p></div>
-<div class="codebox"><span class="dim">@tool
+<div class="codebox" data-file="agent.py" data-lang="python"><span class="dim">@tool
 def show_plan() -&gt; str:
     """Return the current plan, one line per step."""
     lines = []
@@ -65,14 +65,19 @@ def show_plan() -&gt; str:
             line = "\033[96m" + line + "\033[0m"</span><span class="dim">
         lines.append(line)
     return "\n".join(lines)
-
-# agentcore launch
+</span></div>
+<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim"># agentcore launch
 # agentcore invoke '{"prompt": "How many ways can 4 crane operators swap shifts so nobody keeps their own?"}'</span></div>
+<div class="codebox" data-file="output">1. [x] Work out the answer by reasoning: 9
+2. [x] Write Python code to check the count of derangements of 4
+   output: 9
+3. [x] Compare the two
+There are 9 ways.</div>
 <div class="try" id="t4"></div>
 <h2><span class="en">Step 5 · Turn on observability and read the trace</span><span class="zh">第 5 步 · 打开可观测性，读调用轨迹</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>trace</b> is a recording of one run: each tool call, how long it took and how many <b>tokens</b> it used (a token is a small piece of text, about a word or part of one, that the model reads and writes; you pay per token). It stays empty until you switch observability on in the console first. After that, run the puzzle again and open the trace. Look for the slowest step and the longest wait.</p>
 <p class="zh" style="margin:0 0 8px"><b>轨迹</b>是一次运行的录像：每次工具调用、用了多久、花了多少 token（一小段文字，大约一个词或一个词的一部分，模型读和写的都是它，按 token 计费）。必须先在控制台里打开可观测性，否则它一直是空的。打开后，再跑一次谜题，然后打开轨迹。找出最慢的一步和等得最久的地方。</p></div>
-<div class="codebox"><span class="dim">Trace of one run:
+<div class="codebox" data-file="trace"><span class="dim">Trace of one run:
   add_todo x4              0.4 s
   (model: solve first)     3.1 s    1,900 tokens
   </span><span class="chg">run_python              6.8 s    ← slowest</span><span class="dim">
@@ -82,7 +87,7 @@ def show_plan() -&gt; str:
 <h2><span class="en">Step 6 · Delete the agent and its resources</span><span class="zh">第 6 步 · 删掉智能体和它的资源</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">When you are done, remove what you made: the deployed agent, its container image (the packed copy of your code) in the registry, and its roles. A forgotten agent is a small bill that nobody remembers approving. Write the list of what to remove before you start deleting, and check the console afterwards to be sure it is empty.</p>
 <p class="zh" style="margin:0 0 8px">做完之后，把你建的东西清掉：已部署的智能体、仓库里的容器镜像（打包好的代码副本）和它的角色。被遗忘的智能体就是一笔没人记得批准过的小账单。动手删之前，先把要删的东西列成清单，删完再去控制台确认已经清空。</p></div>
-<div class="codebox"><span class="dim">Clean-up list
+<div class="codebox" data-file="checklist"><span class="dim">Clean-up list
   [ ] </span><span class="chg">the deployed agent</span><span class="dim">
   [ ] its image in the registry
   [ ] the roles made for it
@@ -93,6 +98,10 @@ def show_plan() -&gt; str:
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Ask something where the first answer tends to be wrong</b> and see whether the check catches it.</span><span class="zh"><b>问一个第一反应容易答错的问题</b>，看验证能不能把错抓出来。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Find the slowest step</b> in the trace.</span><span class="zh"><b>在轨迹里找出最慢的一步。</b></span></span></label><label><input type="checkbox"><span><span class="en"><b>Compare the cost</b> with and without the code check.</span><span class="zh"><b>比较成本</b>：有代码验证和没有代码验证。</span></span></label></div>
 <div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the wharf product plans, runs a check in a sandbox, and leaves a trace on the control tower, so Mr Ong can trust its answers without watching every minute, and it deploys from one push at the cost he planned. Your turn: it has not yet touched a real wharf job, so give it one, one tool at a time, with Sergeant Lee's permissions and Mr Ong's budget alarm in place first.</span><span class="zh">现在码头产品会做计划，在沙箱里跑检查，并在控制塔上留下轨迹，Ong 先生不用每分钟盯着也能信任它的答案，而且它一次推送就能部署，花费也在他的预算之内。下一个问题交给你：它还没碰过真正的码头工作，所以给它一件，一次加一个工具，并且先设好 Lee 警长的权限和 Ong 先生的预算警报。</span></div>
+<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
+<div class="card"><p class="en" style="margin:0">• <code>AccessDeniedException on code interpreter</code> The agent role may not use the code-interpreter service. <b>Fix:</b> Add that permission to the role (or relaunch so the toolkit adds it).<br>• <code>The checker never calls run_python</code> The prompt does not say to write a "Write Python code to" step. <b>Fix:</b> Keep that sentence exactly in the system prompt.<br>• <code>The sandbox prints nothing</code> The code computed a value but never printed it. <b>Fix:</b> The tool says "always print the result"; keep that line.</p><p class="zh" style="margin:0">• <code>AccessDeniedException on code interpreter</code> 智能体的角色无权使用代码解释器服务。 <b>解决：</b>给角色加上这项权限（或重新启动让工具包补上）。<br>• <code>The checker never calls run_python</code> 提示词没有要求添加以 “Write Python code to” 开头的步骤。 <b>解决：</b>把那句话原样保留在系统提示词里。<br>• <code>The sandbox prints nothing</code> 代码算出了结果，却没有打印。 <b>解决：</b>工具说明里写着 “always print the result”，请保留这一句。</p></div>
+<div class="callout tip"><b class="lbl"><span class="en">Recap</span><span class="zh">小结</span></b><span class="en">A second opinion from code catches answers the model got wrong.<br>The sandbox keeps untrusted code away from your account.<br>Read the trace to find the slow step, and clean up everything you launched.</span><span class="zh">让代码给出第二意见，能抓出模型答错的地方。<br>沙箱让不可信的代码远离你的账号。<br>读追踪记录找出慢的那一步，并清理所有你启动过的东西。</span></div>
+<div class="callout tip"><b class="lbl"><span class="en">Plain words</span><span class="zh">白话词汇</span></b><span class="en"><b>Sandbox</b>: a locked room where code can run without touching your account. <b>Trace</b>: a timed list of every step one run took.</span><span class="zh"><b>沙箱（sandbox）</b>：代码可以在其中运行、却碰不到你账号的隔离房间。<b>追踪记录（trace）</b>：一次运行每一步的耗时清单。</span></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• Start from the working planner and add one thing at a time.<br>• A managed code interpreter runs code in a sealed sandbox, not on your machines.<br>• Keep the sandbox in the same region as the agent.<br>• Make the check a required to-do in the plan, not a suggestion.<br>• Turn on observability before the run, then read the trace.<br>• Delete the agent and its resources when you finish.<br>• Verification beats confidence: plan, act, check, and keep a trace.</p><p class="zh" style="margin:0">• 从能跑的规划智能体出发，一次只加一样东西。<br>• 托管的代码解释器在封闭沙盒里跑代码，不在你的机器上。<br>• 沙盒和智能体放在同一个区域。<br>• 把验证写成计划里的必做待办，而不是建议。<br>• 运行之前先打开可观测性，然后读轨迹。<br>• 做完之后，把智能体和它的资源删掉。<br>• 验证胜过自信：计划、行动、验证，并留下轨迹。</p></div>
 
