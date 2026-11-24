@@ -13,7 +13,7 @@
 // Only real breakage counts as a problem. A word like "undefined" or "NaN" counts only when a script put it on the
 // page: a lesson that teaches those words has them in its own HTML too. Each broken page is opened a second time
 // before it counts, so one slow load never rolls back a merge.
-// Usage: node scripts/live-check.mjs --base https://tx-learns.vercel.app/ [--wait 300] [--out live-check.json]
+// Usage: node scripts/live-check.mjs --base https://tx-learns.vercel.app/ [--wait 300] [--out live-check.json] [--concurrency 5]
 // Env: PLAYWRIGHT_DIR is a folder where `playwright` is installed, if it is not resolvable from here.
 // Exit code: 0 all good, 1 something is off (listed in the output), 2 the check itself broke.
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -30,6 +30,13 @@ const issues = [], notes = [], product = [];
 const html = new Map(); // each page's own HTML, to tell a lesson's words from a script's broken output
 const bad = (page, what) => issues.push({ page, what });
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+const CONC = Math.max(1, Math.min(8, +arg('concurrency', process.env.LIVE_CONCURRENCY || 5))); // pages open at once
+// Runs fn over items, CONC at a time; results come back in the original order.
+async function pool(items, fn, n = CONC) {
+  const out = new Array(items.length); let next = 0;
+  await Promise.all(Array.from({ length: Math.min(n, items.length) }, async () => { while (next < items.length) { const i = next++; out[i] = await fn(items[i], i); } }));
+  return out;
+}
 
 async function get(url) {
   for (let i = 0; i < 3; i++) {
@@ -63,8 +70,9 @@ try {
   // 2. Pages, lessons and every link in them.
   const pages = ['index.html', 'ecosystem.html', 'glossary.html', 'changelog.html', ...TR.map(t => t.dir + '/index.html'), ...lessons.map(l => l.path)];
   const links = new Map();
-  for (const p of pages) {
-    const r = await get(BASE + p);
+  const fetched = await pool(pages, p => get(BASE + p));
+  for (const [k, p] of pages.entries()) {
+    const r = fetched[k];
     if (r.status !== 200) { bad(p, `does not open (HTTP ${r.status || r.err})`); continue; }
     html.set(p, r.text);
     if (!/<title>/i.test(r.text)) bad(p, 'opens but has no <title>, so it may not be the real page');
@@ -77,10 +85,10 @@ try {
       if (!links.has(u.href)) links.set(u.href, p);
     }
   }
-  for (const [u, from] of links) {
+  await pool([...links], async ([u, from]) => {
     const r = await get(u);
     if (r.status !== 200) bad(from, `links to ${u.replace(BASE, '')}, which is missing (HTTP ${r.status || r.err})`);
-  }
+  }, CONC * 3);
 
   // 4. Live agent status.
   const s = await get(BASE + 'api/status');
@@ -101,6 +109,19 @@ try {
     const PLACEHOLDERS = [/\bundefined\b/g, /\bNaN\b/g, /\{\{/g, /\[object Object\]/g];
     // Real breakage on one page: script errors, missing files, wrong counts, a missing tag or title, and placeholder
     // words that a script put there (more of them on the screen than in the page's own HTML).
+    // Ready signal instead of a fixed wait: fonts loaded, the page's own rendered pieces present (home counts, lesson tag and
+    // title) and two frames drawn, then a short settle so late script errors still land. Never waits more than 6 s.
+    async function ready(page, p) {
+      const kind = p === 'index.html' ? 'home' : /^[\w-]+\/\d\d-/.test(p) ? 'lesson' : 'other';
+      await page.waitForFunction(k => {
+        if (document.fonts && document.fonts.status === 'loading') return false;
+        if (k === 'home') { const a = document.querySelector('[data-sum="topics"]'), b = document.querySelector('[data-sum="lessons"]'); return !!(a && b && a.textContent.trim() && b.textContent.trim() && a.textContent.trim() !== '0'); }
+        if (k === 'lesson') return !!(document.querySelector('.tag') && document.querySelector('h1'));
+        return document.body && document.body.innerText.trim().length > 0;
+      }, kind, { timeout: 6000, polling: 100 }).catch(() => {});
+      await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
+      await page.waitForTimeout(300);
+    }
     async function render(p) {
       const page = await ctx.newPage(), errs = [];
       page.on('pageerror', e => errs.push(`script error: ${e.message.split('\n')[0]}`));
@@ -111,7 +132,7 @@ try {
         await page.goto(BASE + p, { waitUntil: 'load', timeout: 30000 });
         const took = Date.now() - t0;
         if (took > 8000) product.push(`${p} took ${Math.round(took / 1000)} s to load`);
-        await page.waitForTimeout(1800);
+        await ready(page, p);
         if (p === 'index.html') {
           const got = await page.evaluate(() => ({ topics: document.querySelector('[data-sum="topics"]')?.textContent, lessons: document.querySelector('[data-sum="lessons"]')?.textContent }));
           if (+got.topics !== topicCount) errs.push(`home page shows ${got.topics} topics, lessons.js has ${topicCount}`);
@@ -138,23 +159,23 @@ try {
       await page.close();
       return [...new Set(errs)];
     }
-    for (const p of pages) {
+    await pool(pages, async p => {
       let errs = await render(p);
       // A second look before it counts: a slow CDN or one dropped request is not a broken site.
       if (errs.length) { await sleep(10000); errs = await render(p); }
       errs.slice(0, 4).forEach(e => bad(p, e));
-    }
+    });
     // Phone: is any page wider than the screen? A product note, never a rollback.
-    for (const p of pages) {
+    await pool(pages, async p => {
       const page = await phone.newPage();
       try {
         await page.goto(BASE + p, { waitUntil: 'load', timeout: 30000 });
-        await page.waitForTimeout(600);
+        await ready(page, p);
         const w = await page.evaluate(() => document.documentElement.scrollWidth);
         if (w > 392) product.push(`${p} is ${w}px wide on a 390px phone`);
       } catch {}
       await page.close();
-    }
+    });
     await browser.close();
   }
   if (product.length) notes.push(...product.slice(0, 12).map(x => `product note: ${x}`));

@@ -90,11 +90,21 @@ jobs:
           nopages=; [ "${{ github.event_name }}" = deployment_status ] && [ -z "$pages" ] && nopages=1
           echo "pr=$pr shots=$shots pages=$pages nopages=$nopages"
           { echo "pr=$pr"; echo "shots=$shots"; echo "pages=$pages"; echo "nopages=$nopages"; } >> "$GITHUB_OUTPUT"
+      - name: Cache the headless browser
+        if: steps.find.outputs.nopages != '1'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ${{ runner.temp }}/pw
+          key: pw-1.49.1-${{ runner.os }}
       - name: Install a headless browser
         if: steps.find.outputs.nopages != '1'
         run: |
-          npm install --no-save --no-audit --no-fund --prefix "$RUNNER_TEMP/pw" playwright@1.49.1
-          "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium
+          [ -x "$RUNNER_TEMP/pw/node_modules/.bin/playwright" ] || npm install --no-save --no-audit --no-fund --prefix "$RUNNER_TEMP/pw" playwright@1.49.1
+          # A cache hit already holds the browser; only install it (and its system libraries) when it cannot start.
+          node -e "require(process.argv[1]+'/node_modules/playwright').chromium.launch().then(b=>b.close())" "$RUNNER_TEMP/pw" 2>/dev/null \
+            && echo "Browser from cache" || "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium
       - name: Hover, click and Tab through the pages that changed (every page on a manual run)
         id: run
         if: steps.find.outputs.nopages != '1'
