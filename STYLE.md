@@ -25,9 +25,9 @@ Assume they are smart, busy and have never seen this topic. If a sentence needs 
 
 ## The running setting
 
-Each track has its own setting. Agentic AI uses the kopitiam below; the AI Engineer track uses a Singapore HDB estate (see `ai-engineer/STORY.md`, which has its own cast, props and "Back at the void deck" callout). The AI FDE track uses a Tanjong Pagar shophouse insurer (`ai-fde/STORY.md`, "Back at the shophouse"). Never mix settings.
+Each track has its own setting. AI Agentic uses the kopitiam below; the AI Engineer track uses a Singapore HDB estate (see `ai-engineer/STORY.md`, which has its own cast, props and "Back at the void deck" callout). The AI FDE track uses a Tanjong Pagar shophouse insurer (`ai-fde/STORY.md`, "Back at the shophouse"). Never mix settings.
 
-### The kopitiam thread (Agentic AI)
+### The kopitiam thread (AI Agentic)
 
 Kopi Corner, Uncle Lim's kopitiam in Penang, is the recurring setting. Every lesson ends with one short "Back at the kopitiam" callout (`.callout tip`, EN and 中文) that ties its idea to the shop, just before the takeaways. Keep the cast and props the same:
 
