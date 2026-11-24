@@ -60,7 +60,7 @@ jobs:
           if echo "$changed" | grep -qE '^assets/(site|teach)\.(css|js)$|^tracks\.js$'; then
             pages="index.html ecosystem.html glossary.html $(for d in $(ls -d */ | tr -d /); do [ -f "$d/lessons.js" ] && { echo "$d/index.html"; ls "$d" | grep -E '^[0-9]+.*\.html$' | sort | head -1 | sed "s#^#$d/#"; }; done)"
           fi
-          pages=$(echo $pages | tr ' ' '\n' | sort -u | head -12 | tr '\n' ' ')
+          pages=$(echo $pages | tr ' ' '\n' | sort -u | head -12 | xargs)
           if [ -z "$pages" ]; then echo "No served page changed: nothing to fit-check." | tee fit.txt; exit 0; fi
           { npm install --no-save --no-audit --no-fund --prefix "$RUNNER_TEMP/pw" playwright@1.49.1 >/dev/null && "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium >/dev/null; } \
             || { echo "::notice::The browser could not be installed, so the phone fit was skipped on this run."; exit 0; }
