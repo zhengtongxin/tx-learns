@@ -27,7 +27,7 @@ Before every commit run the copy, count and page checks; all three must pass. Ev
 ## How it is built
 
 ```
-index.html, ecosystem.html, glossary.html, changelog.html   site pages
+index.html, ecosystem.html, glossary.html   site pages
 tracks.js                    the learning tracks (window.TRACKS)
 <track>/lessons.js           topics and lessons of one track (the only source of counts)
 <track>/NN-slug.html         one lesson per file, widgets in <track>/js/NN-slug.js
