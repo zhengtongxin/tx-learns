@@ -1,16 +1,44 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Project: a shop assistant that acts | TX Learns</title>
 <meta name="description" content="Combine a chat model, database tools, a picture and a voice into one assistant that looks up prices, shows the place and speaks the answer."><meta property="og:title" content="Project: a shop assistant that acts | TX Learns"><meta property="og:description" content="Combine a chat model, database tools, a picture and a voice into one assistant that looks up prices, shows the place and speaks the answer."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-engineer/07-shop-assistant-that-acts.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
-<meta name="updated" content="2026-11-23">
+<meta name="updated" content="2026-11-24">
 <link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Many models, one app · Project</span><span class="zh">多个模型，一个应用 · 项目</span></span><h1><span class="en">Project: a shop assistant that acts</span><span class="zh">项目：会动手的店铺助手</span></h1><p class="meta"><span class="en">You will join a chat model, a database, a picture and a voice into one assistant · ~30 min · hands-on</span><span class="zh">你会把聊天模型、数据库、图片和声音合成一个助手 · 约 30 分钟 · 动手实践</span></p></div>
-<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0"><b>Uncle Raj</b> sells seats on weekend coach trips from the bus interchange, and people keep asking him the same price questions. <b>Wei Jie</b> builds him a desk assistant: it answers prices from a database, shows a picture of the place being discussed and speaks the reply. It uses the three lessons before it.</p>
-<p class="zh" style="margin:0"><b>Raj 叔叔</b>在巴士转换站卖周末旅游巴士的座位，总有人反复问同样的价格问题。<b>Wei Jie</b> 给他做了个柜台助手：从数据库回答价格，显示正在谈到的地方的图片，并把回复读出来。它用到了前面三课的内容。</p></div>
+<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the helper could look up one price through a tool. Today it fails when a neighbour wants the price, a picture of the place and a spoken answer at the same desk. We fix it by combining the tools, picture and voice into one assistant.</p>
+<p class="zh" style="margin:0">上回助手能通过工具查到一个价格。今天它的毛病是邻居在同一个柜台前，既要价格，又要看地方的图片，还要听口头回答。解决办法是把工具、图片和声音合成一个助手。</p></div>
+<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en" style="margin:0"><b>Uncle Raj</b> sells seats on weekend coach trips from the bus interchange, and people keep asking him the same price questions. <b>Wei Jie</b> builds him a desk assistant: it answers prices from a database, shows a picture of the place being discussed and speaks the reply. It uses the three lessons before it. The coach-trip desk is a side case: it is the helper's price, picture and voice skills pointed at Uncle Raj's weekend trips.</p>
+<p class="zh" style="margin:0"><b>Raj 叔叔</b>在巴士转换站卖周末旅游巴士的座位，总有人反复问同样的价格问题。<b>Wei Jie</b> 给他做了个柜台助手：从数据库回答价格，显示正在谈到的地方的图片，并把回复读出来。它用到了前面三课的内容。 旅游巴士柜台是支线案例：它是助手的价格、图片和声音本领，用在 Raj 叔叔的周末行程上。</p></div>
 
 <h2><span class="en">Step 1 · The brief, the voice of the desk and the data</span><span class="zh">第 1 步 · 需求、柜台的口吻和数据</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The finished shape is: user text, then the chat loop (model plus database tools), then the reply text, then a picture of the place and speech of the reply, all on one screen. Build it in small, testable pieces. Start with the system message: short, polite, accurate, and willing to say “I don't know”. Then the data: a SQLite table of trip prices.</p>
 <p class="zh" style="margin:0 0 8px">成品的形状是：用户文字，然后聊天循环（模型加数据库工具），然后回复文字，再然后是地点图片和回复的语音，全部放在一个界面里。把它拆成小而可测试的部分来做。先写 system 消息：简短、有礼貌、准确，不确定就说“我不知道”。再准备数据：一张 SQLite 的旅游价格表。</p></div>
+<figure class="fig"><svg viewBox="0 0 720 150" role="img" aria-label="The finished desk assistant">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9a9aa8"/></marker></defs>
+<rect class="box soft" x="2" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="69" y="71">User text</text>
+<text class="en sm" x="69" y="92">typed question</text>
+<text class="zh" x="69" y="71">用户文字</text>
+<text class="zh sm" x="69" y="92">输入的问题</text>
+<rect class="box new" x="196" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="263" y="71">Chat loop</text>
+<text class="en sm" x="263" y="92">model + DB tools</text>
+<text class="zh" x="263" y="71">聊天循环</text>
+<text class="zh sm" x="263" y="92">模型 + 数据库工具</text>
+<rect class="box soft" x="390" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="457" y="71">Reply text</text>
+<text class="en sm" x="457" y="92">price from the DB</text>
+<text class="zh" x="457" y="71">文字回复</text>
+<text class="zh sm" x="457" y="92">来自数据库的价格</text>
+<rect class="box new" x="584" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="651" y="71">Picture + voice</text>
+<text class="en sm" x="651" y="92">only when needed</text>
+<text class="zh" x="651" y="71">图片 + 声音</text>
+<text class="zh sm" x="651" y="92">需要时才用</text>
+<path class="lnk hot" d="M139,75 L193,75" marker-end="url(#ah)"/>
+<path class="lnk" d="M333,75 L387,75" marker-end="url(#ah)"/>
+<path class="lnk hot" d="M527,75 L581,75" marker-end="url(#ah)"/>
+</svg><figcaption><span class="en">One text question goes through the tool loop; the picture and voice are extra calls on the reply.</span><span class="zh">一条文字问题走完工具循环；图片和声音是对回复额外发起的调用。</span></figcaption></figure>
 <div class="codebox"><span class="chg">system_message = """You are the desk assistant for Uncle Raj's weekend coach trips.
 Be short, polite and accurate. Use the tools for prices.
 If you are not sure, say you do not know."""
@@ -119,7 +147,7 @@ screen.launch()</span></div>
 
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Add a “book a trip” tool</b> that writes a row in a second table.</span><span class="zh"><b>加一个“订行程”工具，</b>往第二张表写一行。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Print every tool call</b> to the console so you can see what the model asked for.</span><span class="zh"><b>把每个工具调用打印到控制台，</b>看模型到底请求了什么。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Replace the database with a CSV</b> and see what changes.</span><span class="zh"><b>把数据库换成 CSV，</b>看看有什么变化。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">Back at the void deck</span><span class="zh">回到组屋底层</span></b><span class="en">Uncle Raj used to do all of this alone: check the price sheet, point at the route map, announce over the PA. Now each job has its own small helper, and a clerk at the desk decides which to call. Keep each helper small and testable, and watch the bill for the fancy ones.</span><span class="zh">Raj 叔叔以前一个人包办这一切：查价目表、指路线图、用广播通知。现在每件事有自己的小帮手，由柜台的职员决定叫谁。让每个帮手保持小而可测试，贵的那些要盯紧账单。</span></div>
+<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the desk answers coach-trip prices from a database, shows a picture of the place and reads the reply aloud, so Uncle Raj stops repeating himself at the noticeboard. The picture and voice run only when needed, to keep the bill down. The next problem is that every message still goes to a paid API, which adds up across a whole estate.</span><span class="zh">现在这个柜台能从数据库回答旅游巴士的价格，显示地方的图片，并把回复读出来，Raj 叔叔不用再在公告板前重复同样的话。图片和声音只在需要时才用，免得账单飙升。下一个问题是：每条消息仍然要付费调用 API，整个社区用起来费用会累积。</span></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• Chat model plus tools plus other media models makes an assistant that does things.<br>• Build it in small, testable pieces, one at a time.<br>• Handle many and chained tool calls with a loop.<br>• Print tool calls while testing.<br>• Call image generation only when a tool actually looked something up.<br>• Split “add the user message” from “get the answer” in the screen.<br>• Cost control matters: images and long histories add up.<br>• This is the bridge into agents.</p><p class="zh" style="margin:0">• 聊天模型加工具，再加其他媒体模型，就成了会动手的助手。<br>• 拆成小而可测试的部分，一块一块地做。<br>• 用循环处理多个、连续的工具调用。<br>• 测试时把工具调用打印出来。<br>• 只有工具真的查过东西，才调用图片生成。<br>• 界面里把“加入用户消息”和“得到回答”拆开。<br>• 成本要控制：图片和很长的历史会越积越多。<br>• 这是通往智能体的桥梁。</p></div>
 
