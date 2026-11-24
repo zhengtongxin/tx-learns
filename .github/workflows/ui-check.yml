@@ -59,6 +59,7 @@ jobs:
     outputs:
       pr: ${{ steps.find.outputs.pr }}
       ran: ${{ steps.run.outputs.ran }}
+      nopages: ${{ steps.find.outputs.nopages }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -79,18 +80,28 @@ jobs:
           else changed=$(git diff --name-only "$SHA^1" "$SHA" 2>/dev/null || true); fi
           # Pages Claude looks at: served pages that changed, at most 4.
           shots=$(echo "$changed" | grep -E '\.html$' | grep -vE '^(inbox/|scripts/|\.github/)|_template\.html$' | while read -r f; do [ -f "$f" ] && echo "$f"; done | head -4 | tr '\n' ' ')
-          echo "pr=$pr shots=$shots"
-          { echo "pr=$pr"; echo "shots=$shots"; } >> "$GITHUB_OUTPUT"
+          # Pages to test: the served pages that changed (a small sample when shared layout files changed). A manual run with `pages` or empty
+          # input on a manual run tests what it is told / everything; a preview of a pull request tests only what changed.
+          pages=$(echo "$changed" | grep -E '\.html$' | grep -vE '^(inbox/|scripts/|\.github/)|_template\.html$|^404\.html$' | while read -r f; do if [ -f "$f" ]; then echo "$f"; fi; done)
+          if echo "$changed" | grep -qE '^assets/(site|teach)\.(css|js)$|^tracks\.js$'; then
+            pages="index.html ecosystem.html glossary.html $(for d in $(ls -d */ | tr -d /); do if [ -f "$d/lessons.js" ]; then echo "$d/index.html"; ls "$d" | grep -E '^[0-9]+.*\.html$' | sort | head -1 | sed "s#^#$d/#"; fi; done)"
+          fi
+          pages=$(echo $pages | tr ' ' '\n' | sort -u | head -12 | xargs)
+          nopages=; [ "${{ github.event_name }}" = deployment_status ] && [ -z "$pages" ] && nopages=1
+          echo "pr=$pr shots=$shots pages=$pages nopages=$nopages"
+          { echo "pr=$pr"; echo "shots=$shots"; echo "pages=$pages"; echo "nopages=$nopages"; } >> "$GITHUB_OUTPUT"
       - name: Install a headless browser
+        if: steps.find.outputs.nopages != '1'
         run: |
           npm install --no-save --no-audit --no-fund --prefix "$RUNNER_TEMP/pw" playwright@1.49.1
           "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium
-      - name: Hover, click and Tab through every page
+      - name: Hover, click and Tab through the pages that changed (every page on a manual run)
         id: run
+        if: steps.find.outputs.nopages != '1'
         timeout-minutes: 20
         env:
           PLAYWRIGHT_DIR: ${{ runner.temp }}/pw
-          PAGES: ${{ inputs.pages }}
+          PAGES: ${{ inputs.pages || (github.event_name == 'deployment_status' && steps.find.outputs.pages) || '' }}
           SHOTS: ${{ steps.find.outputs.shots }}
           # Optional. With Vercel's "Protection Bypass for Automation" secret the check opens the real preview;
           # without it, it serves this commit's files itself (the site is plain static files, so they are the same).
@@ -199,6 +210,10 @@ jobs:
         id: share
         run: |
           # A check job that broke before the browser ran must never look like a pass.
+          if [ "${{ needs.check.outputs.nopages }}" = 1 ]; then
+            gh api "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state=success -f context="$CONTEXT" -f description="Skipped: no served page changed" -f target_url="$RUN" >/dev/null
+            echo "state=skip" >> "$GITHUB_OUTPUT"; echo "No served page changed, so nothing to click through." > /tmp/line.txt; exit 0
+          fi
           if [ "$RAN" != 1 ] && [ "$CHECK" != success ]; then
             gh api "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state=error -f context="$CONTEXT" -f description="The UI check could not finish. See the logs." -f target_url="$RUN" >/dev/null
             echo "state=fail" >> "$GITHUB_OUTPUT"; echo "The UI check could not finish." > /tmp/line.txt; exit 0
@@ -266,7 +281,8 @@ jobs:
           [ -f $T/record-status.mjs ] || { echo "No record script on the default branch yet."; exit 0; }
           SUMMARY="$(cat /tmp/line.txt 2>/dev/null || echo 'Could not finish.')" node $T/record-status.mjs ui-check
       - name: Let auto-merge look at it
-        if: always()
+        # Not when no served page changed: the run did nothing, so there is nothing new for auto-merge to see.
+        if: always() && needs.check.outputs.nopages != '1'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh workflow run auto-merge.yml --ref main -R "$GITHUB_REPOSITORY" || echo "Auto-merge picks it up on its 30-minute run."
