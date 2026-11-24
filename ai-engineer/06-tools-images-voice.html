@@ -136,15 +136,4 @@ def speak(text):
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script src="lessons.js?v=0ada53e6"></script><script src="../assets/site.js?v=5acebb39"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script>
-document.addEventListener('DOMContentLoaded',function(){
- var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
- predict($('p1'),{q:{en:'The model decides it needs a price. What does it send back?',zh:'模型认为需要查价格，它会回传什么？'},opts:[{k:'a',en:'The price, after running <code>get_price</code> itself',zh:'自己运行 <code>get_price</code> 之后得到的价格'},{k:'b',en:'A request asking your code to call <code>get_price</code> with some arguments',zh:'一条请求，让你的代码带着参数去调用 <code>get_price</code>'}],a:'b',ex:{en:'The model only writes the request. Your code runs the function.',zh:'模型只写出请求，函数由你的代码来运行。'},hint:{en:'Where does <code>get_price</code> live?',zh:'<code>get_price</code> 住在哪里？'}});
- predict($('p2'),{q:{en:'The model asks for two prices in one reply. You append only one <code>tool</code> message. What happens?',zh:'模型在一次回复里请求了两个价格，你只加了一条 <code>tool</code> 消息，会怎样？'},opts:[{k:'a',en:'The API returns an error, because every call id needs its own answer',zh:'API 报错，因为每个 call id 都需要自己的回答'},{k:'b',en:'The model quietly guesses the missing price',zh:'模型悄悄猜出缺的那个价格'}],a:'a',ex:{en:'Each tool call must be answered by a tool message with the matching id.',zh:'每个工具调用都必须有一条 id 对应的 tool 消息来回答。'},hint:{en:'Count calls and answers.',zh:'数一数请求和回答的数量。'}});
- game($('g3'),[
-  {en:'<code>get_price(item)</code> reads a price.',zh:'<code>get_price(item)</code> 读取价格。',a:'l',ex:{en:'It only reads, so the worst case is a wrong answer.',zh:'它只读不写，最坏也就是答错。'},hint:{en:'Does it change anything?',zh:'它会改动什么吗？'}},
-  {en:'<code>set_price(item, price)</code> changes a price.',zh:'<code>set_price(item, price)</code> 修改价格。',a:'h',ex:{en:'A stranger could talk the bot into setting a price to S$0. Gate it behind a login or a human check.',zh:'陌生人可能哄机器人把价格改成 S$0。要放在登录或人工确认之后。'},hint:{en:'Who can ask the model to call it?',zh:'谁能让模型去调用它？'}},
-  {en:'A tool that returns today\'s opening hours.',zh:'一个返回今天营业时间的工具。',a:'l',ex:{en:'Read-only and harmless.',zh:'只读，无害。'},hint:{en:'Does it write anything?',zh:'它写入什么吗？'}}],[{k:'l',en:'Lower risk',zh:'风险较低'},{k:'h',en:'Needs care',zh:'需要小心'}],{en:'Tool',zh:'工具'});
- predict($('p4'),{q:{en:'You call the image model inside the loop that runs for every message. What goes wrong?',zh:'你在每条消息都会跑的循环里调用图像模型，会出什么问题？'},opts:[{k:'a',en:'Each message costs money and time, even when no picture is needed',zh:'每条消息都花钱花时间，哪怕根本不需要图片'},{k:'b',en:'Nothing, images are free',zh:'没问题，图片是免费的'}],a:'a',ex:{en:'Images cost a few cents each and take seconds. Call them only when there is a reason.',zh:'每张图要花几分钱，还要几秒。有理由才调用。'},hint:{en:'Is an image call as cheap as a text call?',zh:'图片调用和文字调用一样便宜吗？'}});
-});
-</script></body></html>
+<script src="js/06-tools-images-voice.js?v=7fbfa2bd"></script></body></html>

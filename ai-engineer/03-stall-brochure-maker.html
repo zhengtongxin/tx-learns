@@ -135,16 +135,4 @@ Ah Huat Stall sells fresh kaya toast and
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script src="lessons.js?v=0ada53e6"></script><script src="../assets/site.js?v=5acebb39"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script>
-document.addEventListener('DOMContentLoaded',function(){
- var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
- predict($('p1'),{q:{en:'A shop\'s page is drawn entirely by JavaScript. What does <code>page_text</code> most likely return?',zh:'一个店铺页面完全由 JavaScript 画出来，<code>page_text</code> 多半会返回什么？'},opts:[{k:'a',en:'The full page, as a browser would show it',zh:'和浏览器看到的一样的完整页面'},{k:'b',en:'Almost nothing, because the text is not in the HTML we downloaded',zh:'几乎什么都没有，因为我们下载的 HTML 里没有那些文字'}],a:'b',ex:{en:'<code>requests</code> only downloads the raw HTML. It does not run scripts, so the text never appears.',zh:'<code>requests</code> 只下载原始 HTML，不会运行脚本，所以文字根本不会出现。'},hint:{en:'Does <code>requests</code> behave like a browser?',zh:'<code>requests</code> 像浏览器一样吗？'}});
- predict($('p2'),{q:{en:'The model replies with a JSON string. What do you need before you can write <code>chosen[0]["url"]</code>?',zh:'模型回复的是一段 JSON 字符串。要写 <code>chosen[0]["url"]</code>，你还需要什么？'},opts:[{k:'a',en:'Nothing, the reply is already a dict',zh:'什么都不用，回复本来就是字典'},{k:'b',en:'<code>json.loads(...)</code> to turn the string into a dict',zh:'<code>json.loads(...)</code>，把字符串变成字典'}],a:'b',ex:{en:'The API gives you text. <code>json.loads</code> parses it into Python lists and dicts.',zh:'API 给你的是文本，<code>json.loads</code> 把它解析成 Python 的列表和字典。'},hint:{en:'What type does <code>reply.choices[0].message.content</code> have?',zh:'<code>reply.choices[0].message.content</code> 是什么类型？'}});
- game($('g3'),[
-  {en:'Decide that “About us” matters and “Privacy” does not.',zh:'判断“关于我们”重要而“隐私”不重要。',a:'m',ex:{en:'This is a fuzzy judgement. Rules would be long and brittle.',zh:'这是模糊的判断，写规则又长又脆弱。'},hint:{en:'Could you list every possible link name in advance?',zh:'你能事先列出所有可能的链接名吗？'}},
-  {en:'Download each chosen page and strip the tags.',zh:'下载每个选中的页面并去掉标签。',a:'k',ex:{en:'Fetching and cleaning is plumbing. Code does it the same way every time.',zh:'抓取和清洗是管道活，代码每次做得一样。'},hint:{en:'Is there any judgement involved?',zh:'里面有判断吗？'}},
-  {en:'Cut the joined text to 5000 characters.',zh:'把拼好的文字截到 5000 个字符。',a:'k',ex:{en:'A length cap is a plain slice of a string.',zh:'长度上限就是对字符串的一次切片。'},hint:{en:'Is a rule enough?',zh:'一条规则够用吗？'}},
-  {en:'Write the brochure in a warm tone.',zh:'用温暖的语气写宣传册。',a:'m',ex:{en:'Writing in a tone is what the model is good at.',zh:'按语气写作正是模型擅长的。'},hint:{en:'Is it a rule or language?',zh:'这是规则还是语言？'}}],[{k:'m',en:'Model',zh:'模型'},{k:'k',en:'Plain code',zh:'普通代码'}],{en:'Job',zh:'任务'});
- predict($('p4'),{q:{en:'Why add <code>or ""</code> after <code>delta.content</code>?',zh:'为什么在 <code>delta.content</code> 后面加 <code>or ""</code>？'},opts:[{k:'a',en:'Some chunks carry no text (the last one, for example), so it would be None',zh:'有些块没有文字（比如最后一块），那时它是 None'},{k:'b',en:'It makes the model reply faster',zh:'它能让模型回复更快'}],a:'a',ex:{en:'Adding None to a string raises an error. An empty string keeps the loop safe.',zh:'字符串加 None 会报错，空字符串让循环保持安全。'},hint:{en:'What does a chunk with no words contain?',zh:'没有文字的块里装的是什么？'}});
-});
-</script></body></html>
+<script src="js/03-stall-brochure-maker.js?v=86b9813f"></script></body></html>

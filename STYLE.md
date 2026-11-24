@@ -66,6 +66,7 @@ The site records what TX learnt, in TX's own words. It never reproduces where it
 - [ ] Code runs as written (correct package names, imports, `await` placement)
 - [ ] Nothing in the code is used before the step that builds it
 - [ ] Added to the track's `lessons.js` with a `file`
+- [ ] Widget code is in `<track>/js/NN-slug.js` (loaded after `assets/teach.js`), not an inline `<script>`
 - [ ] `node scripts/check-copy.mjs`, `node scripts/check-counts.mjs` and `node scripts/check-pages.mjs --fix` pass (the last one also stamps the lesson's "updated" date)
 
 ## One story per track

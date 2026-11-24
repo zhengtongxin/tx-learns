@@ -93,15 +93,4 @@ print(shorten(long_letter, max_length=60)[0]["summary_text"])</span></div>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script src="lessons.js?v=0ada53e6"></script><script src="../assets/site.js?v=5acebb39"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script>
-document.addEventListener('DOMContentLoaded',function(){
- var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
- predict($('p1'),{q:{en:'You write <code>pipeline("sentiment-analysis")</code> and give no model name. Which model runs?',zh:'你写了 <code>pipeline("sentiment-analysis")</code>，没给模型名。会运行哪个模型？'},opts:[{k:'a',en:'None, it errors until you name one',zh:'没有，不给名字就报错'},{k:'b',en:'A default model for that task, downloaded on first use',zh:'这个任务的默认模型，第一次使用时下载'}],a:'b',ex:{en:'The task name picks a sensible default. That is the whole point of the high level.',zh:'任务名会选一个合理的默认模型，这正是高层接口的意义。'},hint:{en:'Remember the hawker stall: you only say the dish.',zh:'想想小贩摊：你只说菜名。'}});
- predict($('p2'),{q:{en:'You change <code>candidate_labels</code> to add a fourth label, “other”. What must you retrain?',zh:'你在 <code>candidate_labels</code> 里加了第四个标签“other”。需要重新训练什么？'},opts:[{k:'a',en:'Nothing, labels are given at call time',zh:'什么都不用，标签是调用时才给的'},{k:'b',en:'The whole model, with examples of each new label',zh:'整个模型，要给每个新标签的例子'}],a:'a',ex:{en:'Zero-shot means no examples are needed. You just pass different labels next time.',zh:'零样本就是不需要例子，下次传不同的标签就行。'},hint:{en:'What does “zero” in zero-shot count?',zh:'零样本里的“零”指的是什么？'}});
- predict($('p3'),{q:{en:'The first call takes five minutes, the second takes one second. Why?',zh:'第一次调用花了五分钟，第二次只要一秒。为什么？'},opts:[{k:'a',en:'The first call downloaded the model, the second reused it',zh:'第一次下载了模型，第二次直接复用'},{k:'b',en:'The second answer was copied from the first',zh:'第二个答案是从第一个复制来的'}],a:'a',ex:{en:'The model files are cached after the first download, then each call only runs the model.',zh:'模型文件第一次下载后会缓存，之后每次调用只需要运行模型。'},hint:{en:'Think about what must happen before a model can run at all.',zh:'想想模型要运行起来，首先需要什么。'}});
- game($('g4'),[
-  {en:'Sorting 200 feedback slips into praise, complaint or fees, with no API bill.',zh:'把 200 张反馈条分成表扬、投诉或学费，不要 API 账单。',a:'z',ex:{en:'Zero-shot classification on your own GPU.',zh:'在自己的 GPU 上做零样本分类。'},hint:{en:'She invents the labels herself.',zh:'标签是她自己编的。'}},
-  {en:'Shrinking a long parent letter into two lines.',zh:'把一封很长的家长来信压成两行。',a:'s',ex:{en:'The summarization pipeline.',zh:'摘要 pipeline。'},hint:{en:'Long text in, short text out.',zh:'长文字进，短文字出。'}},
-  {en:'Finding every name mentioned in a pile of notes.',zh:'在一堆笔记里找出提到的每个名字。',a:'n',ex:{en:'The named-entity (ner) pipeline pulls out names, places and so on.',zh:'命名实体（ner）pipeline 能抽出人名、地名等。'},hint:{en:'It tags words as person, place or organisation.',zh:'它把词标成人、地点或机构。'}}],[{k:'z',en:'zero-shot-classification',zh:'zero-shot-classification'},{k:'s',en:'summarization',zh:'summarization'},{k:'n',en:'ner',zh:'ner'}],{en:'Job',zh:'任务'});
-});
-</script></body></html>
+<script src="js/08-pipelines-models-few-lines.js?v=7d9035da"></script></body></html>

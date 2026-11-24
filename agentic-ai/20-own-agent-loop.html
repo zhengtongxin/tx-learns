@@ -140,22 +140,4 @@ async def judge(uri: str) -> dict:
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Agentic</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script src="lessons.js?v=40b1397f"></script><script src="../assets/site.js?v=5acebb39"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script>
-document.addEventListener('DOMContentLoaded',function(){
- var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
- game($('g1'),[
-  {en:'Start a worker process and stop it after 300 seconds.',zh:'启动一个工人进程，300 秒后停掉它。',a:'t',ex:{en:'Exact and repeatable: a tool.',zh:'精确且可重复：用工具。'},hint:{en:'Is there any judgement involved?',zh:'有判断的成分吗？'}},
-  {en:'Decide which framework should build which booth.',zh:'决定哪个框架做哪个摊位。',a:'m',ex:{en:'A choice: leave it to the model.',zh:'属于选择：交给模型。'},hint:{en:'Is there one correct mechanical answer?',zh:'有唯一的机械答案吗？'}},
-  {en:'Check that <code>site/booth.html</code> exists.',zh:'检查 <code>site/booth.html</code> 是否存在。',a:'t',ex:{en:'A file check is deterministic.',zh:'检查文件是确定性的操作。'},hint:{en:'Can a simple check answer it?',zh:'一个简单检查就能回答吗？'}},
-  {en:'Decide whether a page is good enough or needs a fix.',zh:'判断一个页面够不够好，是否需要修。',a:'m',ex:{en:'Quality is a judgement call.',zh:'质量是判断题。'},hint:{en:'Would two people always agree instantly?',zh:'两个人会立刻达成一致吗？'}},
-  {en:'Kill a stuck process and its child processes.',zh:'杀掉卡住的进程及其子进程。',a:'t',ex:{en:'Mechanical and brittle: a tool.',zh:'机械又脆弱：用工具。'},hint:{en:'Is it a choice or a procedure?',zh:'这是选择还是流程？'}}],[{k:'t',en:'A tool does it',zh:'工具来做'},{k:'m',en:'The model decides',zh:'模型来决定'}],{en:'Task',zh:'任务'});
- predict($('p2'),{q:{en:'Why is <code>start_builder</code> separate from <code>wait_for_builders</code>?',zh:'为什么 <code>start_builder</code> 和 <code>wait_for_builders</code> 要分开？'},opts:[{k:'a',en:'So all five start at once, and waiting happens only when the coordinator chooses',zh:'这样五个能同时启动，只有总协调决定时才等待'},{k:'b',en:'Because Python cannot do both in one function',zh:'因为 Python 不能在一个函数里做这两件事'},{k:'c',en:'To make the code longer',zh:'为了让代码更长'}],a:'a',ex:{en:'If start waited, builders would run one by one.',zh:'如果启动时就等待，建造者就变成一个接一个地跑了。'},hint:{en:'What would happen if each start blocked until finished?',zh:'如果每次启动都要等到结束，会怎样？'}});
- predict($('p3'),{q:{en:'How does the coordinator learn that a builder finished a step?',zh:'总协调怎么知道建造者完成了一步？'},opts:[{k:'a',en:'The builder sends it a message',zh:'建造者给它发消息'},{k:'b',en:'The step is ticked off on the shared board',zh:'步骤在共享任务板上被打了勾'}],a:'b',ex:{en:'The board is the only channel. The coordinator never talks to a builder directly.',zh:'任务板是唯一的通道，总协调从不直接和建造者说话。'},hint:{en:'Is there any other way to talk in this design?',zh:'这个设计里还有别的沟通方式吗？'}});
- predict($('p4'),{q:{en:'Why make a new inspector agent for every page instead of reusing one?',zh:'为什么每个页面都新建一个检查员，而不是复用一个？'},opts:[{k:'a',en:'It is required by the browser',zh:'浏览器要求这样'},{k:'b',en:'A small fresh session keeps one confusing page from eating the whole budget',zh:'小而全新的会话，能防止一个让人困惑的页面吃掉整个预算'},{k:'c',en:'Agents cannot be reused',zh:'智能体不能复用'}],a:'b',ex:{en:'Short-lived agents keep each browser session and context small.',zh:'短命的智能体让每个浏览器会话和上下文都很小。'},hint:{en:'What goes wrong when one agent inspects all five pages?',zh:'一个智能体检查五个页面时，会出什么问题？'}});
- game($('g5'),[
-  {en:'<code>max_llm_calls</code> on the coordinator and on each inspector',zh:'给总协调和每个检查员设 <code>max_llm_calls</code>',a:'c',ex:{en:'It caps spending on model calls.',zh:'它限制模型调用的花费。'},hint:{en:'What does it limit: calls or time?',zh:'它限制的是调用次数还是时间？'}},
-  {en:'A per-worker timeout and an inspection timeout',zh:'每个工人的超时和检查的超时',a:'t',ex:{en:'It stops a stuck process from holding the team forever.',zh:'防止卡住的进程永远拖住整个团队。'},hint:{en:'What does it limit: calls or time?',zh:'它限制的是调用次数还是时间？'}},
-  {en:'Only one fix attempt per page',zh:'每个页面只修一次',a:'r',ex:{en:'A page still broken after its fix stays visible instead of looping.',zh:'修完仍有问题的页面会被留着显示，而不是反复重试。'},hint:{en:'What stops an endless fix loop?',zh:'什么能阻止无尽的修复循环？'}},
-  {en:'A plain template written when the model call for a page fails',zh:'某个页面的模型调用失败时，写入的朴素模板',a:'f',ex:{en:'There is always a front page, even if a call failed.',zh:'即使调用失败，也总有首页。'},hint:{en:'What do you show if the model call fails?',zh:'模型调用失败时，你展示什么？'}}],[{k:'c',en:'Cap the calls',zh:'限制调用'},{k:'t',en:'Cap the time',zh:'限制时间'},{k:'r',en:'Cap the retries',zh:'限制重试'},{k:'f',en:'Fallback',zh:'备用方案'}],{en:'Safeguard',zh:'保护措施'});
-});
-</script></body></html>
+<script src="js/20-own-agent-loop.js?v=9bfacb04"></script></body></html>

@@ -107,15 +107,4 @@ Lift B is closed on Tuesday for a service. Please use Lift A.</div>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script src="lessons.js?v=0ada53e6"></script><script src="../assets/site.js?v=5acebb39"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script>
-document.addEventListener('DOMContentLoaded',function(){
- var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
- predict($('p1'),{q:{en:'You run the same sentence through two different model families. What do you expect?',zh:'你把同一句话交给两个不同的模型家族。你预计会怎样？'},opts:[{k:'a',en:'Identical ids and the same count',zh:'id 和数量完全一样'},{k:'b',en:'Different ids, and often a different count',zh:'id 不同，数量往往也不同'}],a:'b',ex:{en:'Each family has its own vocabulary and its own way of cutting text.',zh:'每个家族有自己的词表和切分方式。'},hint:{en:'Think of each gate reading only its own card.',zh:'想想每个闸机只认自己的卡。'}});
- predict($('p2'),{q:{en:'Why use <code>apply_chat_template</code> instead of typing the role markers yourself?',zh:'为什么用 <code>apply_chat_template</code>，而不是自己敲角色标记？'},opts:[{k:'a',en:'The markers differ per family and a typo quietly hurts the answers',zh:'标记因家族而异，打错一个字会悄悄拉低回答质量'},{k:'b',en:'Hand-written markers are not allowed by Python',zh:'Python 不允许手写标记'}],a:'a',ex:{en:'The model was trained on one exact layout. The template reproduces it for you.',zh:'模型训练时只见过一种确切的版式，模板会替你还原它。'},hint:{en:'Nothing stops you typing them. What is the risk?',zh:'没有什么拦着你手写。风险在哪？'}});
- predict($('p3'),{q:{en:'You load a chat model with one tokenizer and a different family’s model. What happens?',zh:'你用一个家族的分词器去配另一个家族的模型。会发生什么？'},opts:[{k:'a',en:'It runs, but the output is nonsense because the ids mean different things',zh:'能跑，但输出是乱码，因为 id 的含义不同'},{k:'b',en:'Python converts the ids for you automatically',zh:'Python 会自动帮你转换 id'}],a:'a',ex:{en:'Nothing checks the pairing for you. The model reads ids as if they came from its own vocabulary.',zh:'没人替你检查配对。模型会把 id 当成自己词表里的 id 来读。'},hint:{en:'Is there any translation between two vocabularies?',zh:'两张词表之间有翻译吗？'}});
- game($('g4'),[
-  {en:'Cutting a sentence into ids.',zh:'把句子切成 id。',a:'t',ex:{en:'That is the tokenizer.',zh:'这是分词器的活。'},hint:{en:'Text in, numbers out.',zh:'文字进，数字出。'}},
-  {en:'Putting system and user turns into the right layout.',zh:'把 system 和 user 的轮次排成正确的版式。',a:'c',ex:{en:'The chat template does this.',zh:'对话模板负责这个。'},hint:{en:'It adds the special markers.',zh:'它会加上特殊标记。'}},
-  {en:'Cutting memory to about a quarter by storing 4 bits per weight.',zh:'每个权重只存 4 位，把内存降到约四分之一。',a:'q',ex:{en:'That is quantisation.',zh:'这就是量化。'},hint:{en:'Fewer bits, same message.',zh:'位数少了，意思还在。'}}],[{k:'t',en:'Tokenizer',zh:'分词器'},{k:'c',en:'Chat template',zh:'对话模板'},{k:'q',en:'Quantisation',zh:'量化'}],{en:'Job',zh:'任务'});
-});
-</script></body></html>
+<script src="js/09-tokenizers-how-models-load.js?v=0af5d696"></script></body></html>

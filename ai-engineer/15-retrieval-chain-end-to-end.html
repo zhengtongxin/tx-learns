@@ -92,15 +92,4 @@ answer("And what about his manager?", history)
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script src="lessons.js?v=0ada53e6"></script><script src="../assets/site.js?v=5acebb39"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script>
-document.addEventListener('DOMContentLoaded',function(){
- var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
- predict($('p1'),{q:{en:'The store was built with one embedding model, and here a different one is passed in. What do you expect?',zh:'向量库是用某个向量模型建的，这里却传入另一个。你预期会怎样？'},opts:[{k:'a',en:'Poor results: questions and chunks live in different spaces',zh:'结果很差：问题和块处在不同的空间'},{k:'b',en:'Better results, since the newer model is used',zh:'结果更好，因为用了较新的模型'}],a:'a',ex:{en:'Last lesson\'s rule: one embedding model for both sides.',zh:'上一课的规则：两边用同一个向量模型。'},hint:{en:'Remember the centimetre ruler and the inch ruler.',zh:'想想厘米尺和英寸尺。'}});
- predict($('p2'),{q:{en:'Why does the template say "if the answer is not in the context, say you do not know"?',zh:'为什么模板里写“答案不在内容里，就说你不知道”？'},opts:[{k:'a',en:'Without it the model fills the gap with a confident guess',zh:'没有它，模型会用一个自信的猜测来补空白'},{k:'b',en:'It makes the retriever search harder',zh:'它会让检索器搜得更用力'}],a:'a',ex:{en:'The rule is what turns "no match found" into an honest answer instead of an invented one.',zh:'有了这条规则，“没找到”就会变成诚实的回答，而不是编出来的回答。'},hint:{en:'The retriever is finished before the prompt is read.',zh:'提示词被读到时，检索器已经做完了。'}});
- game($('g3'),[
-  {en:'Finds the four closest chunks for the question.',zh:'为问题找出最接近的四块。',a:'r',ex:{en:'Searching the store is the retriever\'s job.',zh:'搜索向量库是检索器的工作。'},hint:{en:'Which one searches?',zh:'哪个负责搜索？'}},
-  {en:'Carries the rule "say you do not know".',zh:'带着“说不知道”这条规则。',a:'p',ex:{en:'Rules and slots live in the prompt.',zh:'规则和空位都放在提示词里。'},hint:{en:'Which one holds instructions?',zh:'哪个负责放指令？'}},
-  {en:'Writes the final sentence a resident reads.',zh:'写出居民读到的最后那句话。',a:'m',ex:{en:'Only the model writes text.',zh:'只有模型会写文字。'},hint:{en:'Which one writes?',zh:'哪个负责写？'}}],[{k:'r',en:'Retriever',zh:'检索器'},{k:'p',en:'Prompt',zh:'提示词'},{k:'m',en:'Model',zh:'模型'}],{en:'Item',zh:'项目'});
- predict($('p4'),{q:{en:'A resident asks "And what about his manager?". Why does the answer go wrong?',zh:'居民问“那他的上司呢？”。为什么回答会出错？'},opts:[{k:'a',en:'The search only uses that one sentence, which names nobody',zh:'搜索只用这一句话，而它没有点名任何人'},{k:'b',en:'The model forgot the earlier turns',zh:'模型忘了前面的对话'}],a:'a',ex:{en:'The history reaches the model, but the retriever searched with a sentence that has no name in it.',zh:'聊天记录到了模型那里，但检索器搜索用的那句话里没有名字。'},hint:{en:'What text does the retriever receive?',zh:'检索器收到的是什么文字？'}});
-});
-</script></body></html>
+<script src="js/15-retrieval-chain-end-to-end.js?v=6d07526e"></script></body></html>
