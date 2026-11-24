@@ -154,11 +154,13 @@ const UPD_RE = /<meta name="updated" content="([^"]*)">/;
 const unversioned = [];
 // A script file loaded twice runs twice (double nav, listeners, polling): --fix drops the later copy.
 const dedupeScripts = html => { const seen = new Set(); return html.replace(/<script src="([^"]+)"><\/script>(\r?\n(?=<script src=))?/g, (m, src) => { const k = src.replace(/\?.*$/, ''); if (seen.has(k)) return ''; seen.add(k); return m; }).replace(/\n{2,}(?=<script)/g, '\n').replace(/(<\/script>)\n(?=\n)/g, '$1'); };
+// A page that loads its track's lessons.js needs tracks.js before it (site.js used to document.write it, which blocks the parser).
+const withTracks = html => /<script src="lessons\.js[^"]*"><\/script>/.test(html) && !/<script src="\.\.\/tracks\.js/.test(html) ? html.replace(/<script src="lessons\.js/, '<script src="../tracks.js"></script><script src="lessons.js') : html;
 for (const p of pages) {
   const cur = readFileSync(new URL(p, root), 'utf8');
   const tpl = p === '404.html' || p.split('/').pop().startsWith('_'); // 404.html and _template.html get ?v= versions but no canonical or JSON-LD
   const { url, ld } = tpl ? {} : headFor(p, cur);
-  let next = dedupeScripts(cur).replace(REF, (m, a, ref, v, z) => {
+  let next = withTracks(dedupeScripts(cur)).replace(REF, (m, a, ref, v, z) => {
     const target = resolve(p, ref);
     if (!VERSIONED.test(target) || !existsSync(new URL(target, root))) return m;
     return a + ref + '?v=' + hashOf(target) + z;
@@ -168,7 +170,7 @@ for (const p of pages) {
   next = /<link rel="canonical"[^>]*>/.test(next) ? next.replace(/<link rel="canonical"[^>]*>/, canon) : next.replace(/(<link rel="icon")/, canon + '$1');
   next = /<script type="application\/ld\+json">[\s\S]*?<\/script>/.test(next) ? next.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, () => ld) : next.replace('</head>', () => ld + '</head>');
   }
-  if (next !== cur) { if (FIX) writeFileSync(new URL(p, root), next); else bad(p, (dedupeScripts(cur) !== cur ? 'a script file is loaded twice, ' : '') + 'canonical link, JSON-LD or ?v= asset versions out of date (run node scripts/check-pages.mjs --fix)'); }
+  if (next !== cur) { if (FIX) writeFileSync(new URL(p, root), next); else bad(p, (dedupeScripts(cur) !== cur ? 'a script file is loaded twice, ' : '') + (withTracks(cur) !== cur ? 'tracks.js is not loaded before lessons.js, ' : '') + 'canonical link, JSON-LD or ?v= asset versions out of date (run node scripts/check-pages.mjs --fix)'); }
   // Every use of a file that vercel.json caches as immutable must carry ?v=.
   for (const m of (FIX ? next : cur).matchAll(REF)) { const t = resolve(p, m[2]); if (/^assets\/(site|teach|build-concepts)\.(js|css)$|^[\w-]+\/js\/[\w-]+\.js$/.test(t) && !m[3]) unversioned.push(`${p}: ${m[2]}`); }
 }
