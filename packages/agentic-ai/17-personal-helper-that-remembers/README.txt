@@ -101,3 +101,21 @@ state, a stack of safety middleware, a pause for human approval, and a checker m
 decides whether "done" really means done. Added beyond the lesson's code: open_toolbox
 (the one-task session fix), a terminal approval loop, optional search and push keys with
 print fallbacks, and the split into four files.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- The run prints Kaki's todo plan and tool calls, then pauses with 'Kaki wants to: ...' before the phone ping.
+- After you approve, it ends with 'Kaki says: ...' and 'Checker says: ...' saying the line was met.
+- final/workspace/kopi.md exists after the run.
+- Rejecting once with a reason makes Kaki change its plan instead of stopping.
+- The run still stops after the tries and ModelCallLimitMiddleware(run_limit=30) if the checker is never satisfied.
+
+Compare your work with final/ afterwards, starting with worker.py, checker.py and tools.py.
+
+验收标准（中文）
+- 运行时先打印 Kaki 的待办计划和工具调用，然后在手机提醒前暂停并显示 “Kaki wants to: ...”。
+- 你批准后，结束时出现 “Kaki says: ...” 和说明已达标的 “Checker says: ...”。
+- 运行后 final/workspace/kopi.md 存在。
+- 带理由拒绝一次，Kaki 会改变计划而不是停下。
+- 即使检查者始终不满意，运行也会在尝试次数和 ModelCallLimitMiddleware(run_limit=30) 处停止。

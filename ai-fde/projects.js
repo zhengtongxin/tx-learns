@@ -1,4 +1,4 @@
-/* Project card data for each project lesson, shown by assets/site.js. Shape: window.PROJECTS[file]={goal,deliver,level:1-3,mins,accept:[{en,zh}],fail:[],stretch:[],pkg:{dir:"packages/<track>/<name>",files:[...],note}} (goal, deliver and list items are {en,zh}) */
+/* Project card data for each project lesson, shown by assets/site.js. Shape: window.PROJECTS[file]={goal,deliver,level:1-3,mins,accept:{en:[],zh:[]},solution:{en,zh},fail:[],stretch:[],pkg:{dir:"packages/<track>/<name>",files:[...],note}} (goal, deliver and list items are {en,zh}) */
 window.PROJECTS=window.PROJECTS||{};
 Object.assign(window.PROJECTS,{
  "03-claims-desk-pilot.html": {
@@ -12,24 +12,22 @@ Object.assign(window.PROJECTS,{
   },
   "level": 1,
   "mins": 45,
-  "accept": [
-   {
-    "en": "Every claim ends in exactly one state: waiting, in progress, waiting for sign-off or decided.",
-    "zh": "每份理赔最终只处于一种状态：等待、处理中、等待签字或已决定。"
-   },
-   {
-    "en": "Any approval over S$800 and every refer waits for sign-off. None of them shows as decided.",
-    "zh": "超过 S$800 的批准和所有转交都停在等待签字，没有一个直接变成已决定。"
-   },
-   {
-    "en": "The run ends with the line “agrees with handlers on N of M claims”.",
-    "zh": "运行结束时会打印“agrees with handlers on N of M claims”这一行。"
-   },
-   {
-    "en": "Only the scoring code opens the answer_key folder. The agent never does.",
-    "zh": "只有打分代码会打开 answer_key 文件夹，智能体从不读它。"
-   }
-  ],
+  "accept": {
+   "en": [
+    "Running the pilot from final/ prints one line per claim (25 claims) and ends with 'agrees with handlers on N of M claims'.",
+    "Every claim ends in exactly one state: waiting, in progress, waiting for sign-off or decided.",
+    "Any approval over S$800 (C008, C009, C014, C017, C024) and every refer shows waiting_signoff, never decided.",
+    "Only the scoring code opens the answer_key folder; the agent never does.",
+    "The dry-run score proves the plumbing only; a real model struggles most on C012, C013, C019 and C025."
+   ],
+   "zh": [
+    "在 final/ 里运行试点，每个理赔（共 25 个）打印一行，最后是 “agrees with handlers on N of M claims”。",
+    "每个理赔最后只处于一个状态：等待、处理中、等待签批或已决定。",
+    "任何超过 S$800 的批准（C008、C009、C014、C017、C024）和每个转交，都显示 waiting_signoff，绝不是 decided。",
+    "只有评分代码会打开 answer_key 文件夹，智能体从不打开。",
+    "试运行的分数只证明流程接通；真实模型在 C012、C013、C019 和 C025 上最吃力。"
+   ]
+  },
   "fail": [
    {
     "en": "The score looks great because the agent saw the answer key. Keep the key where the agent cannot read it.",
@@ -77,6 +75,10 @@ Object.assign(window.PROJECTS,{
     "en": "For a test without a key, run DRY_RUN=1 python run_pilot.py inside final/. starter/ has the same data files as final/.",
     "zh": "想不用密钥先试一遍，在 final/ 里运行 DRY_RUN=1 python run_pilot.py。starter/ 的数据文件与 final/ 相同。"
    }
+  },
+  "solution": {
+   "en": "The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with desk_queue.py, agent.py and run_pilot.py. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.",
+   "zh": "完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从desk_queue.py、agent.py、run_pilot.py看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"
   }
  },
  "06-cheapest-model-good-enough.html": {
@@ -90,24 +92,22 @@ Object.assign(window.PROJECTS,{
   },
   "level": 2,
   "mins": 40,
-  "accept": [
-   {
-    "en": "The bar is written in numbers in the code before any model runs.",
-    "zh": "在任何模型运行之前，及格线已经用数字写进代码。"
-   },
-   {
-    "en": "Each candidate runs all claims twice and gets one row: accuracy by difficulty, cost per 1,000 claims, seconds per claim, wrong big approvals.",
-    "zh": "每个候选模型把全部理赔跑两遍，得到一行：按难度的准确率、每 1,000 份的成本、每份用时、错误的大额批准数。"
-   },
-   {
-    "en": "A model counts as clearing the bar only if it passes every line of it.",
-    "zh": "只有通过及格线上的每一条，模型才算过关。"
-   },
-   {
-    "en": "The program prints the cheapest model that clears the bar, a fallback, and the memo with real numbers filled in.",
-    "zh": "程序打印出过关的最便宜模型、备用模型，以及填好真实数字的说明。"
-   }
-  ],
+  "accept": {
+   "en": [
+    "python bench.py prints two lines, such as 'full 377 tokens, small 225 tokens, saved 40%' and 'approving everything scores 56%'.",
+    "The bar is written as numbers in the code before any model runs.",
+    "choose_model.py gives each candidate one row: accuracy by difficulty, cost per 1,000 claims, seconds per claim and wrong big approvals.",
+    "A model clears the bar only if it passes every line of it.",
+    "It prints the cheapest model that clears the bar, a fallback, and a memo with real numbers filled in."
+   ],
+   "zh": [
+    "python bench.py 打印两行，例如 “full 377 tokens, small 225 tokens, saved 40%” 和 “approving everything scores 56%”。",
+    "及格线在任何模型运行之前，就以数字写在代码里。",
+    "choose_model.py 为每个候选模型一行：按难度的准确率、每 1,000 个理赔成本、每个理赔秒数和错误的大额批准数。",
+    "只有通过全部条件的模型才算达标。",
+    "它打印达标中最便宜的模型、一个备选，以及填入真实数字的备忘。"
+   ]
+  },
   "fail": [
    {
     "en": "“nobody clears the bar” is the program working. Improve the prompt or add a candidate. Do not lower the bar after seeing scores.",
@@ -154,6 +154,10 @@ Object.assign(window.PROJECTS,{
     "en": "Run DRY_RUN=1 python choose_model.py inside final/ to test the plumbing with no key. starter/ has the same data files as final/.",
     "zh": "在 final/ 里运行 DRY_RUN=1 python choose_model.py，可不用密钥测试流程。starter/ 的数据文件与 final/ 相同。"
    }
+  },
+  "solution": {
+   "en": "The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with choose_model.py, bench.py and the bar definition. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.",
+   "zh": "完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从choose_model.py、bench.py、及格线的定义看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"
   }
  },
  "09-agent-that-works-the-queue.html": {
@@ -167,24 +171,22 @@ Object.assign(window.PROJECTS,{
   },
   "level": 2,
   "mins": 45,
-  "accept": [
-   {
-    "en": "python run_queue.py --limit 5 works five claims and prints the to-do list by state.",
-    "zh": "python run_queue.py --limit 5 处理五份理赔，并按状态打印待办清单。"
-   },
-   {
-    "en": "todo.json shows each claim as to_do, in_progress, done or for_handler, and nothing is left in progress.",
-    "zh": "todo.json 里每份理赔都是 to_do、in_progress、done 或 for_handler，没有一份停在处理中。"
-   },
-   {
-    "en": "A claim that fails goes back once, then is left for a handler. The rest of the run carries on.",
-    "zh": "失败的理赔退回一次，再失败就留给理赔员，其余的继续跑。"
-   },
-   {
-    "en": "Each claim’s read list shows which manual sections the helper opened.",
-    "zh": "每份理赔的 read 列表显示助手打开过手册的哪些部分。"
-   }
-  ],
+  "accept": {
+   "en": [
+    "DRY_RUN=1 python run_queue.py --limit 5 --break C003 prints the to-do list by state and ends 'Dry run: 5 claims worked.'",
+    "done lists C001, C002, C004 and C005; for_handler lists C003.",
+    "todo.json shows C003 with \"tries\": 2 and nothing left in to_do or in_progress.",
+    "Running again without --break skips finished claims, and C003 stays for_handler.",
+    "With a real model, each claim's \"read\" list shows which manual sections the helper opened."
+   ],
+   "zh": [
+    "DRY_RUN=1 python run_queue.py --limit 5 --break C003 按状态打印待办清单，并以 “Dry run: 5 claims worked.” 结束。",
+    "done 列出 C001、C002、C004、C005；for_handler 列出 C003。",
+    "todo.json 中 C003 的 \"tries\" 为 2，to_do 和 in_progress 里都没有剩余。",
+    "不加 --break 再运行，已完成的理赔被跳过，C003 仍留给人工处理。",
+    "用真实模型时，每个理赔的 \"read\" 列表显示助手打开了哪些手册章节。"
+   ]
+  },
   "fail": [
    {
     "en": "Nothing happens on a re-run because todo.json says everything is done. Delete it for a fresh run.",
@@ -229,6 +231,10 @@ Object.assign(window.PROJECTS,{
     "en": "Try it first with DRY_RUN=1 python run_queue.py --limit 5 --break C003 inside final/. starter/ has the same data files as final/.",
     "zh": "先在 final/ 里试 DRY_RUN=1 python run_queue.py --limit 5 --break C003。starter/ 的数据文件与 final/ 相同。"
    }
+  },
+  "solution": {
+   "en": "The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with desk_queue.py, run_queue.py and the retry rule. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.",
+   "zh": "完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从desk_queue.py、run_queue.py、重试规则看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"
   }
  },
  "12-scoreboard-for-the-agent.html": {
@@ -242,24 +248,22 @@ Object.assign(window.PROJECTS,{
   },
   "level": 2,
   "mins": 45,
-  "accept": [
-   {
-    "en": "data/held_out_ids.json lists 10 claim ids and stays the same on every run.",
-    "zh": "data/held_out_ids.json 列出 10 个理赔编号，每次运行都不变。"
-   },
-   {
-    "en": "POST /evaluations answers 201 with agreement, mistake cost in S$, straight-through rate, kappa, and cost and seconds per claim.",
-    "zh": "POST /evaluations 返回 201，带着一致率、以 S$ 计的错误代价、直通率、kappa，以及每份理赔的成本和用时。"
-   },
-   {
-    "en": "Every run is its own file in runs/, and GET /evaluations lists them.",
-    "zh": "每次运行都是 runs/ 里的一个独立文件，GET /evaluations 能列出它们。"
-   },
-   {
-    "en": "compare_runs.py says better, same or WORSE for each number.",
-    "zh": "compare_runs.py 对每个数字说明更好、相同或更差。"
-   }
-  ],
+  "accept": {
+   "en": [
+    "data/held_out_ids.json lists 10 claim ids and stays the same on every run.",
+    "POST /evaluations answers 201 with agreement, mistake_cost_sgd, straight_through, kappa, and cost and seconds per claim.",
+    "Every run is its own file in runs/, and GET /evaluations lists them.",
+    "A second POST while one runs answers 409 'an evaluation is already running'.",
+    "compare_runs.py prints better, same or WORSE for each number."
+   ],
+   "zh": [
+    "data/held_out_ids.json 列出 10 个理赔编号，每次运行都不变。",
+    "POST /evaluations 返回 201，含 agreement、mistake_cost_sgd、straight_through、kappa，以及每个理赔的成本和秒数。",
+    "每次运行各有一个 runs/ 文件，GET /evaluations 把它们列出来。",
+    "运行期间再次 POST 返回 409 “an evaluation is already running”。",
+    "compare_runs.py 对每个数字打印 better、same 或 WORSE。"
+   ]
+  },
   "fail": [
    {
     "en": "A second start while one is running answers 409 “an evaluation is already running”. That is the lock working.",
@@ -312,6 +316,10 @@ Object.assign(window.PROJECTS,{
     "en": "Start with DRY_RUN=1 flask --app app run --port 5000 inside final/ to test with no key. starter/ has the same data files as final/.",
     "zh": "在 final/ 里用 DRY_RUN=1 flask --app app run --port 5000 启动，不需要密钥。starter/ 的数据文件与 final/ 相同。"
    }
+  },
+  "solution": {
+   "en": "The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with scoring.py, scoreboard.py and compare_runs.py. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.",
+   "zh": "完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从scoring.py、scoreboard.py、compare_runs.py看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"
   }
  },
  "15-agent-that-remembers-customers.html": {
@@ -325,24 +333,22 @@ Object.assign(window.PROJECTS,{
   },
   "level": 2,
   "mins": 40,
-  "accept": [
-   {
-    "en": "Three SQLite files exist after a run: claims.db, memory.db and reference.db.",
-    "zh": "运行之后有三个 SQLite 文件：claims.db、memory.db 和 reference.db。"
-   },
-   {
-    "en": "The second claim from the same customer reads the note the first one wrote.",
-    "zh": "同一位客户的第二份理赔会读到第一份留下的笔记。"
-   },
-   {
-    "en": "show_claim prints the decision, the reason and every note the agent read.",
-    "zh": "show_claim 打印决定、理由，以及智能体读过的每条笔记。"
-   },
-   {
-    "en": "Writing to reference.db fails with “attempt to write a readonly database”.",
-    "zh": "写 reference.db 会失败，报“attempt to write a readonly database”。"
-   }
-  ],
+  "accept": {
+   "en": [
+    "After a run, three SQLite files exist: claims.db, memory.db and reference.db.",
+    "The second claim (C042) reads the note the first (C041) wrote, and its reason says a note was used (1 note read).",
+    "show_claim prints the decision, the reason and every note the agent read.",
+    "Writing to reference.db fails with 'attempt to write a readonly database'.",
+    "python reset.py clears the notes so the next demo starts clean."
+   ],
+   "zh": [
+    "运行之后存在三个 SQLite 文件：claims.db、memory.db 和 reference.db。",
+    "第二个理赔（C042）读到了第一个（C041）写下的备注，理由里说明用了备注（读了 1 条）。",
+    "show_claim 打印决定、理由和智能体读过的每条备注。",
+    "写入 reference.db 失败，提示 “attempt to write a readonly database”。",
+    "python reset.py 清除备注，下一次演示从头开始。"
+   ]
+  },
   "fail": [
    {
     "en": "“reference.db is missing”: run make_reference.py once first, because the read-only connection needs the file to exist.",
@@ -384,6 +390,10 @@ Object.assign(window.PROJECTS,{
     "en": "Run python make_reference.py, then DRY_RUN=1 python desk.py inside final/. There is no data folder: the demo claims are in desk.py.",
     "zh": "在 final/ 里先运行 python make_reference.py，再运行 DRY_RUN=1 python desk.py。没有数据文件夹：示例理赔写在 desk.py 里。"
    }
+  },
+  "solution": {
+   "en": "The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with desk.py, make_reference.py and reset.py. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.",
+   "zh": "完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从desk.py、make_reference.py、reset.py看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"
   }
  },
  "18-swarm-with-a-cap.html": {
@@ -397,24 +407,22 @@ Object.assign(window.PROJECTS,{
   },
   "level": 3,
   "mins": 45,
-  "accept": [
-   {
-    "en": "A cap below 1 or above 25 is refused before any agent starts.",
-    "zh": "低于 1 或高于 25 的上限，会在任何智能体启动前被拒绝。"
-   },
-   {
-    "en": "Pressing start twice answers 409 with a clear message.",
-    "zh": "连按两次开始，第二次返回 409 和清楚的提示。"
-   },
-   {
-    "en": "The panel and a page reload show the same rows, and the summary adds up to all claims.",
-    "zh": "面板和刷新后的页面显示同样的行，总结加起来等于全部理赔。"
-   },
-   {
-    "en": "With the service stopped, the saved page disables the button and says why.",
-    "zh": "服务停掉后，保存下来的页面会禁用按钮并说明原因。"
-   }
-  ],
+  "accept": {
+   "en": [
+    "python try_dispatcher.py prints 3 agents, 10 agents and 25 agents with the time falling (about 8.6, 3.2, 1.5 seconds) and {'done': 25} each time.",
+    "A cap below 1 or above 25 (for example {\"n\": 0} or {\"n\": 26}) answers 422 before any agent starts.",
+    "Pressing start twice answers 409 'A dispatch is already running.'",
+    "The panel and a page reload show the same rows, and the five summary groups add up to 25 claims.",
+    "With the service stopped, the saved page disables the button and says why."
+   ],
+   "zh": [
+    "python try_dispatcher.py 打印 3、10、25 个智能体，用时递减（约 8.6、3.2、1.5 秒），每次都是 {'done': 25}。",
+    "上限小于 1 或大于 25（例如 {\"n\": 0}、{\"n\": 26}）时，在任何智能体启动前返回 422。",
+    "连按两次开始，第二次返回 409 “A dispatch is already running.”。",
+    "面板和刷新后的页面显示相同的行，五组汇总加起来是 25 个理赔。",
+    "服务停止后，保存的页面把按钮置灰并说明原因。"
+   ]
+  },
   "fail": [
    {
     "en": "Many claims show failed. You are hitting the provider’s rate limit, so lower the cap.",
@@ -463,6 +471,10 @@ Object.assign(window.PROJECTS,{
     "en": "Run python try_dispatcher.py first (no key), then DRY_RUN=1 uvicorn service:app inside final/. starter/ has the same data files as final/.",
     "zh": "先运行 python try_dispatcher.py（不需要密钥），再在 final/ 里运行 DRY_RUN=1 uvicorn service:app。starter/ 的数据文件与 final/ 相同。"
    }
+  },
+  "solution": {
+   "en": "The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with dispatcher.py, service.py and try_dispatcher.py. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.",
+   "zh": "完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从dispatcher.py、service.py、try_dispatcher.py看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"
   }
  },
  "20-improver-a-human-approves.html": {
@@ -476,24 +488,22 @@ Object.assign(window.PROJECTS,{
   },
   "level": 3,
   "mins": 50,
-  "accept": [
-   {
-    "en": "POST /rounds creates version 2 as “proposed” and the agent keeps running version 1.",
-    "zh": "POST /rounds 创建状态为“proposed”的第 2 版，智能体仍运行第 1 版。"
-   },
-   {
-    "en": "A second POST /rounds while one is open answers 409.",
-    "zh": "已有一轮未结束时再次 POST /rounds，返回 409。"
-   },
-   {
-    "en": "After a named person approves, code runs the held-out claims and marks the version kept or rolled_back.",
-    "zh": "有人署名批准后，由代码跑留出的理赔，并把这一版标为 kept 或 rolled_back。"
-   },
-   {
-    "en": "Rejecting changes nothing, and only a kept version can be put back in use.",
-    "zh": "拒绝不会改变任何东西，而且只有 kept 的版本才能重新启用。"
-   }
-  ],
+  "accept": {
+   "en": [
+    "POST /rounds answers 201 {\"version\": 2}; version 2 shows as 'proposed', one field changed, approved by nobody, and the agent still runs version 1.",
+    "A second POST /rounds while one is open answers 409 'a round is already open'.",
+    "After a named person approves, code runs the held-out claims and the result is kept or rolled_back.",
+    "A version is kept only if it is no worse and better on at least one number.",
+    "POST /versions/2/use on a rolled-back version answers 400; rejecting changes nothing else."
+   ],
+   "zh": [
+    "POST /rounds 返回 201 {\"version\": 2}；版本 2 显示为 “proposed”，改了一个字段，无人批准，智能体仍运行版本 1。",
+    "已有一轮未结束时再 POST /rounds，返回 409 “a round is already open”。",
+    "指定的人批准后，代码在留出的理赔上运行，结果为 kept 或 rolled_back。",
+    "一个版本只有在不更差且至少一个数字更好时才被保留。",
+    "对已回滚的版本调用 POST /versions/2/use 返回 400；拒绝则其余一切不变。"
+   ]
+  },
   "fail": [
    {
     "en": "The improver changed two fields at once. Code must refuse a proposal that is not exactly one of instructions, model or effort.",
@@ -550,6 +560,10 @@ Object.assign(window.PROJECTS,{
     "en": "Run DRY_RUN=1 flask --app config_app run --port 5001 inside final/. In a dry run no change is better, so version 2 is rolled back, which is the rule working. starter/ has the same data files as final/.",
     "zh": "在 final/ 里运行 DRY_RUN=1 flask --app config_app run --port 5001。试运行里没有任何改动会更好，所以第 2 版被退回，这正是规则在起作用。starter/ 的数据文件与 final/ 相同。"
    }
+  },
+  "solution": {
+   "en": "The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with improver.py, versions.py and config_app.py. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.",
+   "zh": "完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从improver.py、versions.py、config_app.py看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"
   }
  },
  "25-the-handover-copilot.html": {
@@ -563,24 +577,22 @@ Object.assign(window.PROJECTS,{
   },
   "level": 3,
   "mins": 60,
-  "accept": [
-   {
-    "en": "“pay C007 300” as Aisha shows a Confirm button and pays only after you press it.",
-    "zh": "以 Aisha 的身份说“pay C007 300”，会出现确认按钮，按下之后才付款。"
-   },
-   {
-    "en": "As the junior handler, “pay C008 1200” is refused and no Confirm button appears.",
-    "zh": "以初级理赔员的身份说“pay C008 1200”会被拒绝，也不会出现确认按钮。"
-   },
-   {
-    "en": "Each tool call shows up as a readable step, and each handler sees only their own history.",
-    "zh": "每次工具调用都显示成可读的一步，每位理赔员只看到自己的历史。"
-   },
-   {
-    "en": "criteria.py reports each goal as met, NOT met or not measured. Not measured is never a pass.",
-    "zh": "criteria.py 把每个目标报告为 met、NOT met 或 not measured。未测量绝不算通过。"
-   }
-  ],
+  "accept": {
+   "en": [
+    "python try_it.py prints False, True, the path for Aisha, a confirm for 'Pay S$300 on C007?', and a refusal line.",
+    "As Aisha, 'pay C007 300' shows a Confirm button and pays only after you press it.",
+    "As the junior handler, 'pay C008 1200' is refused and no Confirm button appears; a hand-made POST to /copilot/confirm is refused too.",
+    "Each tool call shows as a readable step, and each handler sees only their own history.",
+    "python criteria.py prints met, met, not measured; 'not measured' is never counted as a pass."
+   ],
+   "zh": [
+    "python try_it.py 打印 False、True、Aisha 的路径、“Pay S$300 on C007?” 的确认，以及一行拒绝。",
+    "以 Aisha 身份输入 “pay C007 300” 会出现确认按钮，按下之后才付款。",
+    "以初级处理员身份输入 “pay C008 1200” 被拒绝，不出现确认按钮；手工构造的 /copilot/confirm 请求同样被拒绝。",
+    "每次工具调用显示为一个可读的步骤，每位处理员只看到自己的历史。",
+    "python criteria.py 打印 met、met、not measured；“not measured” 从不算通过。"
+   ]
+  },
   "fail": [
    {
     "en": "The copilot can pay by itself because the model could pass confirmed=True. Confirmation must go through a separate route that only the handler’s click calls.",
@@ -643,6 +655,10 @@ Object.assign(window.PROJECTS,{
     "en": "Start mock_gateway.py on port 5001 and DRY_RUN=1 flask --app copilot_api run --port 5000 inside final/. The teardown check needs the AWS command line and is optional. starter/ has the same data files as final/.",
     "zh": "在 final/ 里先在 5001 端口启动 mock_gateway.py，再运行 DRY_RUN=1 flask --app copilot_api run --port 5000。拆除检查需要 AWS 命令行，可选。starter/ 的数据文件与 final/ 相同。"
    }
+  },
+  "solution": {
+   "en": "The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with permissions.py, copilot_tools.py and criteria.py. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.",
+   "zh": "完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从permissions.py、copilot_tools.py、criteria.py看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"
   }
  }
 });
