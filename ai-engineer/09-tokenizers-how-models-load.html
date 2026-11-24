@@ -1,12 +1,14 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tokenizers and how models load | TX Learns</title>
 <meta name="description" content="See how a tokenizer and a model are a matched pair, why chat templates matter, and how 4-bit quantisation fits a big open model on a small GPU."><meta property="og:title" content="Tokenizers and how models load | TX Learns"><meta property="og:description" content="See how a tokenizer and a model are a matched pair, why chat templates matter, and how 4-bit quantisation fits a big open model on a small GPU."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-engineer/09-tokenizers-how-models-load.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
-<meta name="updated" content="2026-11-23">
+<meta name="updated" content="2026-11-24">
 <link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Open-source models · Lesson 2</span><span class="zh">开源模型 · 第 2 课</span></span><h1><span class="en">Tokenizers and how models load</span><span class="zh">分词器与模型加载</span></h1><p class="meta"><span class="en">You will load an open chat model yourself, step by step, and fit it on a small GPU · ~20 min · hands-on</span><span class="zh">你会一步一步亲手加载一个开源聊天模型，并把它塞进小 GPU · 约 20 分钟 · 动手实践</span></p></div>
-<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0"><b>Uncle Raj</b> wants a chatty helper that reads out the lift-maintenance notices in a friendly voice, and he does not want to pay per message. <b>Wei Jie</b> says pipelines hide the details, so today he opens the box: how text becomes numbers, how a chat is laid out, and how a model with billions of numbers fits on a free GPU.</p>
-<p class="zh" style="margin:0"><b>Raj 叔叔</b>想要一个健谈的助手，用友好的口吻念出电梯维修通告，而且不想按条付费。<b>Wei Jie</b> 说 pipeline 把细节藏起来了，所以今天他打开盒子：文字怎么变成数字、对话怎么排版、有几十亿个数字的模型怎么塞进免费 GPU。</p></div>
+<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time pipelines ran small open models for free, but hid how text and chats are handled. Today it fails when a model pairs with the wrong tokenizer, or is too big for the free GPU. We fix it by opening the box: tokenizer, chat template and 4-bit loading.</p>
+<p class="zh" style="margin:0">上回 pipeline 能免费运行小型开源模型，却把文字和对话的处理方式藏了起来。今天它的毛病是模型配错了分词器，或者对免费 GPU 来说太大。解决办法是打开盒子：分词器、对话模板和 4 位加载。</p></div>
+<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en" style="margin:0"><b>Uncle Raj</b> wants a chatty helper that reads out the lift-maintenance notices in a friendly voice, and he does not want to pay per message. <b>Wei Jie</b> says pipelines hide the details, so today he opens the box: how text becomes numbers, how a chat is laid out, and how a model with billions of numbers fits on a free GPU. The lift-notice reader is a side case: the same loading steps put a local model of its own behind the helper.</p>
+<p class="zh" style="margin:0"><b>Raj 叔叔</b>想要一个健谈的助手，用友好的口吻念出电梯维修通告，而且不想按条付费。<b>Wei Jie</b> 说 pipeline 把细节藏起来了，所以今天他打开盒子：文字怎么变成数字、对话怎么排版、有几十亿个数字的模型怎么塞进免费 GPU。 电梯通告播报员是支线案例：同样的加载步骤，能把一个属于自己的本地模型放到助手背后。</p></div>
 
 <h2><span class="en">Step 1 · A tokenizer turns text into numbers</span><span class="zh">第 1 步 · 分词器把文字变成数字</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A model only reads numbers. The tokenizer cuts text into pieces and gives each piece an id from its vocabulary. Every model family has its own tokenizer, so the same sentence becomes different ids and a different count in each. It is like the EZ-Link gate: each system reads only its own card.</p>
@@ -34,6 +36,32 @@ print(text)   # look at the special markers it added</span></div>
 <h2><span class="en">Step 3 · Load the model and generate</span><span class="zh">第 3 步 · 加载模型并生成</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Now pair the tokenizer with its model. Both must come from the same family and name, or you get nonsense. <code>device_map="auto"</code> puts the weights on the GPU. Then encode the chat, call <code>generate</code>, and decode the new ids. Some models need you to accept a licence and use an access token (a key you create on the hub's website) first.</p>
 <p class="zh" style="margin:0 0 8px">现在把分词器和它的模型配成一对。两者必须来自同一个家族、同一个名字，否则会出一堆乱码。<code>device_map="auto"</code> 会把权重放到 GPU 上。然后编码对话、调用 <code>generate</code>、再把新生成的 id 解码。有些模型需要你先接受许可协议，并使用 hub 的访问令牌（你在 hub 网站上生成的一串密钥）。</p></div>
+<figure class="fig"><svg viewBox="0 0 720 150" role="img" aria-label="Loading a local model and generating">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9a9aa8"/></marker></defs>
+<rect class="box soft" x="2" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="69" y="71">Chat messages</text>
+<text class="en sm" x="69" y="92">role + content</text>
+<text class="zh" x="69" y="71">对话消息</text>
+<text class="zh sm" x="69" y="92">角色 + 内容</text>
+<rect class="box new" x="196" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="263" y="71">Chat template</text>
+<text class="en sm" x="263" y="92">adds special tokens</text>
+<text class="zh" x="263" y="71">对话模板</text>
+<text class="zh sm" x="263" y="92">加上特殊标记</text>
+<rect class="box new" x="390" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="457" y="71">4-bit model</text>
+<text class="en sm" x="457" y="92">same family as tokenizer</text>
+<text class="zh" x="457" y="71">4 位模型</text>
+<text class="zh sm" x="457" y="92">与分词器同一系列</text>
+<rect class="box soft" x="584" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="651" y="71">Streamed text</text>
+<text class="en sm" x="651" y="92">tokens back to words</text>
+<text class="zh" x="651" y="71">流式文字</text>
+<text class="zh sm" x="651" y="92">标记还原成文字</text>
+<path class="lnk hot" d="M139,75 L193,75" marker-end="url(#ah)"/>
+<path class="lnk hot" d="M333,75 L387,75" marker-end="url(#ah)"/>
+<path class="lnk" d="M527,75 L581,75" marker-end="url(#ah)"/>
+</svg><figcaption><span class="en">The template and tokenizer prepare the input; the model, loaded in 4 bits, generates tokens that stream back as words.</span><span class="zh">模板和分词器准备输入；以 4 位加载的模型生成标记，再以文字流式返回。</span></figcaption></figure>
 <div class="codebox"><span class="dim">from transformers import AutoModelForCausalLM
 
 </span><span class="chg">model = AutoModelForCausalLM.from_pretrained(name, device_map="auto")
@@ -63,7 +91,7 @@ model.generate(inputs, streamer=streamer, max_new_tokens=80)</span></div>
 
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Tokenise one sentence</b> with two model families and compare the counts.</span><span class="zh"><b>用两个模型家族</b>各切一句话，比较数量。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Load a model in full precision and in 4-bit,</b> then compare memory and speed.</span><span class="zh"><b>分别用全精度和 4 位加载模型，</b>比较内存和速度。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Print the chat-template output</b> for a three-turn conversation.</span><span class="zh"><b>把三轮对话的模板输出打印出来。</b></span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">Back at the void deck</span><span class="zh">回到组屋底层</span></b><span class="en">Uncle Raj's PA (loudspeaker) announcements only work because the speaker and the script follow the same format: the chime, then the message. A tokenizer and its model are the same kind of pair. Quantisation is like writing the notice in shorthand so it fits a smaller board: fewer bits, same message.</span><span class="zh">Raj 叔叔的广播能用，是因为喇叭和稿子遵循同一种格式：先响叮咚，再念内容。分词器和模型也是这样的一对。量化就像把通告写成简写，好贴到更小的告示板上：位数少了，意思还在。</span></div>
+<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the helper has its own local model that reads Uncle Raj's lift-maintenance notice aloud word by word, squeezed to 4 bits like a notice written in shorthand so it fits a smaller board. The next problem is that Wei Jie cannot yet say whether this small model is good enough, so he needs a fair way to measure models before one stays.</span><span class="zh">现在助手有了自己的本地模型，能逐字念出 Raj 叔叔的电梯维修通告，模型被压缩成 4 位，就像把通告写成简写以便贴到更小的告示板上。下一个问题是：Wei Jie 还说不准这个小模型够不够好，所以在留下哪个模型之前，他需要一个公平的衡量办法。</span></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• A tokenizer turns text into ids, and each model family has its own.<br>• The same sentence has different token counts in different families.<br>• The chat template is the layout the model was trained on: never hand-write it.<br>• The tokenizer and the model are a pair and must match.<br>• <code>get_memory_footprint()</code> tells you what the model costs in GPU memory.<br>• 4-bit quantisation cuts memory to about a quarter for a small quality loss.<br>• Memory, not speed, is the first wall. Stream the output so you are not staring at a blank cell.</p><p class="zh" style="margin:0">• 分词器把文字变成 id，每个模型家族都有自己的一套。<br>• 同一句话在不同家族里 token 数量不同。<br>• 对话模板是模型训练时的版式：不要手写。<br>• 分词器和模型是一对，必须匹配。<br>• <code>get_memory_footprint()</code> 告诉你模型占多少 GPU 内存。<br>• 4 位量化把内存砍到约四分之一，质量只损失一点。<br>• 第一堵墙是内存，不是速度。用流式输出，免得盯着空白格子。</p></div>
 

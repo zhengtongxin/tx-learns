@@ -1,16 +1,44 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Pipelines: models in a few lines | TX Learns</title>
 <meta name="description" content="Name a job, get a ready tool: use Hugging Face pipelines to run open models for sentiment, summaries, labels and more on a rented GPU."><meta property="og:title" content="Pipelines: models in a few lines | TX Learns"><meta property="og:description" content="Name a job, get a ready tool: use Hugging Face pipelines to run open models for sentiment, summaries, labels and more on a rented GPU."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-engineer/08-pipelines-models-few-lines.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
-<meta name="updated" content="2026-11-23">
+<meta name="updated" content="2026-11-24">
 <link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Open-source models · Lesson 1</span><span class="zh">开源模型 · 第 1 课</span></span><h1><span class="en">Pipelines: models in a few lines</span><span class="zh">pipeline：几行代码用上模型</span></h1><p class="meta"><span class="en">You will run open models on your own rented GPU by naming the job, with no API bill · ~15 min · hands-on</span><span class="zh">你会只说出任务名，就在自己租的 GPU 上跑开源模型，没有 API 账单 · 约 15 分钟 · 动手实践</span></p></div>
-<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0"><b>Priya</b> has a pile of feedback slips from her tuition students' parents. She wants to know which ones are praise, which are complaints and which are about fees, without sending every slip to a paid API. <b>Wei Jie</b> shows her that open models can do each of these small jobs in a few lines, on a free cloud notebook with a GPU.</p>
-<p class="zh" style="margin:0"><b>Priya</b> 手上有一叠学生家长写的反馈条。她想知道哪些是表扬、哪些是投诉、哪些是关于学费的，又不想把每张条子都发给付费 API。<b>Wei Jie</b> 给她看：开源模型几行代码就能做这些小任务，在带 GPU 的免费云 notebook 上就行。</p></div>
+<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the helper could act through tools, but every message was a paid API call. Today it hurts when neighbours send hundreds of small messages and the bill grows. We fix it by running small open models through pipelines, a few lines each.</p>
+<p class="zh" style="margin:0">上回助手能通过工具办事，但每条消息都是一次付费的 API 调用。今天它的痛点是邻居发来几百条小消息，账单越来越高。解决办法是用 pipeline 运行小型开源模型，每个只要几行代码。</p></div>
+<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en" style="margin:0"><b>Priya</b> has a pile of feedback slips from her tuition students' parents. She wants to know which ones are praise, which are complaints and which are about fees, without sending every slip to a paid API. <b>Wei Jie</b> shows her that open models can do each of these small jobs in a few lines, on a free cloud notebook with a GPU. Priya's feedback slips are a side case: the same few-line pipelines will sort the helper's incoming messages without a per-call bill.</p>
+<p class="zh" style="margin:0"><b>Priya</b> 手上有一叠学生家长写的反馈条。她想知道哪些是表扬、哪些是投诉、哪些是关于学费的，又不想把每张条子都发给付费 API。<b>Wei Jie</b> 给她看：开源模型几行代码就能做这些小任务，在带 GPU 的免费云 notebook 上就行。 Priya 的反馈条是支线案例：同样几行代码的 pipeline，能在没有按次计费的情况下给助手收到的消息分类。</p></div>
 
 <h2><span class="en">Step 1 · Name the job, get a tool</span><span class="zh">第 1 步 · 说出任务名，拿到工具</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Hugging Face is the hub where open models live (models anyone can download and run themselves). Its <code>transformers</code> library has two levels. The high level is <code>pipeline("task")</code>: you say the job, it hands back a ready tool. The low level, tokenizer plus model, comes next lesson. Think of ordering at a hawker stall: you say “chicken rice” and do not explain how to cook it.</p>
 <p class="zh" style="margin:0 0 8px">Hugging Face 是开源模型聚集的地方（任何人都能下载、自己运行的模型）。它的 <code>transformers</code> 库分两层。高层是 <code>pipeline("任务名")</code>：你说出任务，它递给你一个现成的工具。低层是分词器加模型，下一课再讲。就像在小贩中心点餐：你说“鸡饭”，不用解释怎么煮。</p></div>
+<figure class="fig"><svg viewBox="0 0 720 150" role="img" aria-label="A pipeline: name the job, get a ready tool">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9a9aa8"/></marker></defs>
+<rect class="box soft" x="2" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="69" y="71">Task name</text>
+<text class="en sm" x="69" y="92">e.g. summarization</text>
+<text class="zh" x="69" y="71">任务名</text>
+<text class="zh sm" x="69" y="92">如 summarization</text>
+<rect class="box new" x="196" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="263" y="71">pipeline()</text>
+<text class="en sm" x="263" y="92">picks a default model</text>
+<text class="zh" x="263" y="71">pipeline()</text>
+<text class="zh sm" x="263" y="92">选默认模型</text>
+<rect class="box soft" x="390" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="457" y="71">Model files</text>
+<text class="en sm" x="457" y="92">downloaded once</text>
+<text class="zh" x="457" y="71">模型文件</text>
+<text class="zh sm" x="457" y="92">只下载一次</text>
+<rect class="box soft" x="584" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="651" y="71">Result</text>
+<text class="en sm" x="651" y="92">runs on the GPU</text>
+<text class="zh" x="651" y="71">结果</text>
+<text class="zh sm" x="651" y="92">在 GPU 上运行</text>
+<path class="lnk hot" d="M139,75 L193,75" marker-end="url(#ah)"/>
+<path class="lnk" d="M333,75 L387,75" marker-end="url(#ah)"/>
+<path class="lnk" d="M527,75 L581,75" marker-end="url(#ah)"/>
+</svg><figcaption><span class="en">The first call downloads the model; after that the same call runs from your own machine.</span><span class="zh">第一次调用会下载模型；之后同样的调用就在你自己的机器上运行。</span></figcaption></figure>
 <div class="codebox"><span class="chg">from transformers import pipeline
 
 feel = pipeline("sentiment-analysis")
@@ -52,7 +80,7 @@ print(shorten(long_letter, max_length=60)[0]["summary_text"])</span></div>
 
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Classify ten of your own sentences</b> with zero-shot labels you invent.</span><span class="zh"><b>拿十句你自己的话，</b>用自己编的标签做零样本分类。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Compare a pipeline summary</b> with a frontier-model summary of the same text.</span><span class="zh"><b>对比 pipeline 的摘要</b>和云端大模型对同一段文字的摘要。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Pick a different model name</b> from the hub for the same task and see what changes.</span><span class="zh"><b>从 hub 里换一个模型名</b>做同一个任务，看看有什么变化。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">Back at the void deck</span><span class="zh">回到组屋底层</span></b><span class="en">A pipeline is like the little specialist stalls in the heartland mall: one does keys, one does phone screens. You do not need a department store for a key. Just remember the compressor hums and the stall needs its own rent: the GPU.</span><span class="zh">pipeline 就像社区商场里的小专门店：一家配钥匙，一家换手机屏。配把钥匙用不着百货公司。只要记得压缩机会嗡嗡响，这家店也要付自己的租金：那就是 GPU。</span></div>
+<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the helper can sort a pile of neighbours' messages into praise, complaints and fees with a free pipeline on a notebook GPU, like a specialist stall at the heartland mall that only does one job. The next problem is that a pipeline hides the tokenizer and the chat layout, so Wei Jie cannot control how the helper reads a notice or fits a bigger model.</span><span class="zh">现在助手能在 notebook 的 GPU 上用免费的 pipeline，把一堆邻居的消息分成表扬、投诉和学费三类，就像社区商场里只做一件事的专门店。下一个问题是：pipeline 把分词器和对话版式都藏起来了，Wei Jie 没法控制助手怎样读一则通知，也没法装进更大的模型。</span></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• <code>pipeline("task")</code> means: task name in, ready tool out.<br>• Different tasks give different output shapes, so print first.<br>• Zero-shot classification lets you invent the labels.<br>• The first call downloads a default model, sometimes gigabytes.<br>• Use a GPU runtime and set <code>device</code>.<br>• Small specialised models are a real option, cheaper and faster for one job.<br>• You save the API bill but own the setup.</p><p class="zh" style="margin:0">• <code>pipeline("任务名")</code> 的意思是：给任务名，拿到现成工具。<br>• 不同任务的输出形状不同，先打印出来看。<br>• 零样本分类让你自己定标签。<br>• 第一次调用会下载默认模型，有时好几个 GB。<br>• 用 GPU 运行环境，并设置 <code>device</code>。<br>• 小而专的模型是真正的选项，做单个任务更便宜更快。<br>• 省了 API 账单，但环境要自己管。</p></div>
 

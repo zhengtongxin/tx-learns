@@ -1,16 +1,44 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Comparing frontier and local models | TX Learns</title>
 <meta name="description" content="Keep one helper and swap only the base URL, key and model name to compare cloud and local models, and learn the two dials that matter."><meta property="og:title" content="Comparing frontier and local models | TX Learns"><meta property="og:description" content="Keep one helper and swap only the base URL, key and model name to compare cloud and local models, and learn the two dials that matter."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-engineer/04-comparing-frontier-local-models.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
-<meta name="updated" content="2026-11-23">
+<meta name="updated" content="2026-11-24">
 <link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Many models, one app · Lesson 1</span><span class="zh">多个模型，一个应用 · 第 1 课</span></span><h1><span class="en">Comparing frontier and local models</span><span class="zh">对比云端模型与本地模型</span></h1><p class="meta"><span class="en">You will ask several models the same question through one helper and see which dials really change the answer · ~15 min · hands-on</span><span class="zh">你会用同一个辅助函数向多个模型问同一个问题，看看哪些旋钮真正会改变答案 · 约 15 分钟 · 动手实践</span></p></div>
-<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0"><b>Priya</b>, the tuition teacher, sets <b>Wei Jie</b> a challenge: “Which model is best for checking my students' answers?” Wei Jie does not want a separate script per provider. He wants one helper, many models, and a fair look at which one deserves the job.</p>
-<p class="zh" style="margin:0">补习老师 <b>Priya</b> 给 <b>Wei Jie</b> 出了道题：“哪个模型最适合批改我学生的答案？”Wei Jie 不想为每家服务商各写一个脚本。他想要一个辅助函数、许多模型，再公平地看看谁配得上这份活。</p></div>
+<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the helper could chain two calls, but both went to one model. Today it fails when Priya asks which model she can trust to check her students' answers, and an easy prompt shows no difference. We fix it with one helper function for every provider and a harder test.</p>
+<p class="zh" style="margin:0">上回助手能串起两次调用，但两次都交给同一个模型。今天它的毛病是 Priya 问她能信任哪个模型来批改学生的答案，而简单的题看不出差别。解决办法是给所有服务商用同一个辅助函数，再出一道更难的题。</p></div>
+<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en" style="margin:0"><b>Priya</b>, the tuition teacher, sets <b>Wei Jie</b> a challenge: “Which model is best for checking my students' answers?” Wei Jie does not want a separate script per provider. He wants one helper, many models, and a fair look at which one deserves the job. Priya's answer-checking test is a side case: the same fair comparison decides which model the Block 12 helper uses.</p>
+<p class="zh" style="margin:0">补习老师 <b>Priya</b> 给 <b>Wei Jie</b> 出了道题：“哪个模型最适合批改我学生的答案？”Wei Jie 不想为每家服务商各写一个脚本。他想要一个辅助函数、许多模型，再公平地看看谁配得上这份活。 Priya 的批改测试是支线案例：同样公平的比较，决定 Block 12 助手用哪个模型。</p></div>
 
 <h2><span class="en">Step 1 · One helper, many providers</span><span class="zh">第 1 步 · 一个函数，多家服务商</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Most providers copy the same chat-completions shape. So you keep <b>one</b> helper and only swap three things: the <b>base URL</b>, the <b>key</b> and the <b>model name</b>. Some providers, and a local server such as Ollama, offer an OpenAI-compatible address, so the very same <code>OpenAI(...)</code> object works. Think of one plug that fits many wall sockets.</p>
 <p class="zh" style="margin:0 0 8px">大多数服务商都照搬同一种 chat-completions 格式。所以你只留<b>一个</b>辅助函数，只换三样：<b>base URL</b>、<b>密钥</b>和<b>模型名</b>。有些服务商，以及 Ollama 这样的本地服务，提供兼容 OpenAI 的地址，所以同一个 <code>OpenAI(...)</code> 对象就能用。就像一个插头能插进许多插座。</p></div>
+<figure class="fig"><svg viewBox="0 0 720 150" role="img" aria-label="One helper function, many providers">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9a9aa8"/></marker></defs>
+<rect class="box soft" x="2" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="69" y="71">One helper</text>
+<text class="en sm" x="69" y="92">ask(model, prompt)</text>
+<text class="zh" x="69" y="71">一个函数</text>
+<text class="zh sm" x="69" y="92">ask(模型, 提示)</text>
+<rect class="box new" x="196" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="263" y="71">Switch</text>
+<text class="en sm" x="263" y="92">base URL + name</text>
+<text class="zh" x="263" y="71">切换</text>
+<text class="zh sm" x="263" y="92">地址 + 模型名</text>
+<rect class="box soft" x="390" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="457" y="71">Frontier or local</text>
+<text class="en sm" x="457" y="92">same chat format</text>
+<text class="zh" x="457" y="71">云端或本地</text>
+<text class="zh sm" x="457" y="92">同样的对话格式</text>
+<rect class="box soft" x="584" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="651" y="71">Same reply</text>
+<text class="en sm" x="651" y="92">same shape back</text>
+<text class="zh" x="651" y="71">同样的回复</text>
+<text class="zh sm" x="651" y="92">同样的格式返回</text>
+<path class="lnk hot" d="M139,75 L193,75" marker-end="url(#ah)"/>
+<path class="lnk" d="M333,75 L387,75" marker-end="url(#ah)"/>
+<path class="lnk" d="M527,75 L581,75" marker-end="url(#ah)"/>
+</svg><figcaption><span class="en">Only the address and the model name change; the code around them stays the same.</span><span class="zh">只有地址和模型名会变，周围的代码保持不变。</span></figcaption></figure>
 <div class="codebox"><span class="dim">from openai import OpenAI
 
 clients = {
@@ -60,7 +88,7 @@ print(</span><span class="chg">ask("local", "llama3.2", question)</span><span cl
 
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Ask a tricky question twice</b> with a small model: once with no reasoning, once with low effort. Compare the answer, the time and the length.</span><span class="zh"><b>用小模型把一道刁钻的题问两次：</b>一次不推理，一次低力度。比较答案、耗时和长度。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a third provider</b> using only a new base URL and key.</span><span class="zh"><b>加入第三家服务商，</b>只需要新的 base URL 和密钥。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a timer</b> around each call and print a small table: model, seconds, answer length.</span><span class="zh"><b>给每次调用加计时，</b>打印一张小表：模型、秒数、答案长度。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">Back at the void deck</span><span class="zh">回到组屋底层</span></b><span class="en">Mdm Tan keeps a cheap pen for the shopping list and a good pen for signing contracts. Same hand, same paper, different tool for the job. Picking a model works the same way: do not reach for the fanciest pen when the list is only milk and eggs.</span><span class="zh">Tan 太太写购物清单用便宜的笔，签合同才用好笔。同一只手、同一张纸，不同的活用不同的工具。选模型也一样：清单上只有牛奶和鸡蛋，就别去拿最贵的那支笔。</span></div>
+<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the helper can swap between frontier and local models by changing a name, and Priya's hard coin puzzle shows Wei Jie which one is good enough, like Mdm Tan picking the cheap pen for a milk-and-eggs list. The next problem is that only Wei Jie can run any of this, from a terminal; Mdm Tan wants a screen she can just type into.</span><span class="zh">现在助手只要改一个名字，就能在云端大模型和本地模型之间切换，而 Priya 那道难的硬币题让 Wei Jie 看出哪个够用，就像 Tan 太太写牛奶鸡蛋清单用便宜的笔。下一个问题是：这一切只有 Wei Jie 会在终端里跑，Tan 太太想要一个能直接打字的界面。</span></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• One helper, many providers: swap only the base URL, key and model name.<br>• Easy prompts hide differences. Use a hard prompt with a trap.<br>• Two dials: a bigger model, and more thinking before the answer.<br>• More thinking costs more tokens and time.<br>• Cost and speed matter as much as the answer.<br>• Local is free per call and private, but usually weaker.<br>• A few prompts give an opinion, not a benchmark. Proper comparison comes later.</p><p class="zh" style="margin:0">• 一个辅助函数，多家服务商：只换 base URL、密钥和模型名。<br>• 简单的题看不出差别，要用带陷阱的难题。<br>• 两个旋钮：更大的模型，和回答前更多的思考。<br>• 多想会多花 token 和时间。<br>• 成本和速度与答案同样重要。<br>• 本地模型每次调用免费又私密，但通常更弱。<br>• 几道题只是意见，不是基准。正式的对比留到后面。</p></div>
 
