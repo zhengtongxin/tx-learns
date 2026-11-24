@@ -123,11 +123,12 @@
       if(CF.length)whatNext(false,function(a){jr.after(a)},NX&&C.lessons.filter(function(x){return x.file===NX})[0],!NX);
     }
 
-    /* prerequisites + project card + track before/after: data lives in each track's prereqs.js / projects.js (window.PREREQ / window.PROJECTS) and tracks.js */
+    /* prerequisites + project card + track before/after: each lesson carries its own data as <script type="application/json" id="lesson-data"> (scripts/check-pages.mjs --fix writes it from the track's prereqs.js / projects.js and packages folder); the track before/after comes from tracks.js */
     function lessonLink(f){var x=C.lessons.filter(function(l){return l.file===f})[0];return x?'<a href="'+f+'">'+t(x.title)+'</a>':''}
     function li(a){return (a||[]).map(function(x){return '<li>'+t(x)+'</li>'}).join('')}
     function renderMeta(){
-      var P=(window.PREREQ||{})[here],J=(window.PROJECTS||{})[here],hm2=document.querySelector('main .meta'),anchor=hm2&&(hm2.closest('.hero')||hm2),box;
+      var LD={};try{LD=JSON.parse((document.getElementById('lesson-data')||{}).textContent||'{}')}catch(e){}
+      var P=LD.p,J=LD.j,hm2=document.querySelector('main .meta'),anchor=hm2&&(hm2.closest('.hero')||hm2),box;
       /* optional P.changed={en,zh}: what changed last, shown after "Updated" */
       if(P&&P.changed&&P.changed.en&&hm2&&!hm2.querySelector('.changed')){var cs=document.createElement('span');cs.className='changed';cs.innerHTML=' · '+t({en:'Last changed: '+P.changed.en,zh:'最近改动：'+(P.changed.zh||P.changed.en)});hm2.appendChild(cs)}
       /* learning goals: optional P.goals={en:[],zh:[]}; skipped when the lesson body already has its own objectives block */
@@ -145,8 +146,8 @@
         box.innerHTML='<b class="lbl">'+t({en:'Before you start',zh:'开始之前'})+'</b><dl>'+rows.map(function(r){return '<dt>'+t({en:r[0],zh:r[1]})+'</dt><dd>'+r[2]+'</dd>'}).join('')+'</dl>';
         anchor.after(box);anchor=box}
       if(J&&hm2){var pc=document.createElement('aside');pc.className='card prereq proj';pc.setAttribute('aria-label','Project card · 项目卡');
-        var pk=J.pkg,fl=pk&&((window.PKGFILES||{})[pk.dir]||pk.files)||[],files='';
-        /* every file of the package (packages.js is generated), grouped by folder */
+        var pk=J.pkg,fl=LD.f||[],files='';
+        /* every file of the package (listed by --fix from the packages folder), grouped by folder */
         if(fl.length){var gr={};fl.forEach(function(f){var i=f.lastIndexOf('/'),k=i<0?'':f.slice(0,i);(gr[k]=gr[k]||[]).push(f)});
           files=Object.keys(gr).map(function(k){return '<li>'+(k?'<b>'+k+'/</b> ':'')+gr[k].map(function(f){return '<a href="../'+pk.dir+'/'+f+'">'+f.slice(k?k.length+1:0)+'</a>'}).join(' · ')+'</li>'}).join('')}
         /* reference solution: only the files under final/ */
@@ -172,8 +173,7 @@
           ba.innerHTML=(tr.before?'<div><b class="lbl">'+t({en:'Before this track',zh:'学这条路线之前'})+'</b><p>'+t(tr.before)+'</p></div>':'')+(tr.after?'<div><b class="lbl">'+t({en:'After this track',zh:'学完之后'})+'</b><p>'+t(tr.after)+'</p></div>':'');
           document.querySelector('.stage .ringbox').after(ba)}}
     }
-    if(C&&(document.querySelector('.stage .ringbox')||document.querySelector('main .meta'))){var pend=3,fin2=function(){if(--pend===0)renderMeta()};
-      ['prereqs.js','projects.js','packages.js'].forEach(function(f){var sc2=document.createElement('script');sc2.src=f;sc2.onload=sc2.onerror=fin2;document.body.appendChild(sc2)})}
+    if(C&&(document.querySelector('.stage .ringbox')||document.querySelector('main .meta')))renderMeta();
 
     /* hub: topic and lesson counts are never typed by hand. They come from each track's lessons.js
        (scripts/check-counts.mjs fails a PR that types one). Progress is completed / PUBLISHED lessons; planned lessons are shown separately. */

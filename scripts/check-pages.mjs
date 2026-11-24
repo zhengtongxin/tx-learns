@@ -25,6 +25,7 @@ const named = process.argv.slice(2).filter(a => a !== '--fix');
 const pages = named.length ? named : all;
 const problems = [];
 const isLesson = p => /^[\w-]+\/\d\d-[\w-]+\.html$/.test(p);
+const DATA_RE = /<script type="application\/json" id="lesson-data">[\s\S]*?<\/script>\n?/;
 const LESSON_JS = /<script src="(js\/[\w-]+\.js)(?:\?v=[0-9a-f]*)?"><\/script>/;
 // The lesson's own script file text ('' when it has none); `read` gets the path inside the track folder.
 const lessonJs = (html, p, read = f => { try { return readFileSync(new URL(f, root), 'utf8'); } catch { return ''; } }) => { const m = html.match(LESSON_JS); return m ? '\n' + read(p.split('/')[0] + '/' + m[1]) : ''; };
@@ -65,7 +66,7 @@ for (const p of pages) {
 // "Updated" dates on lessons.
 // Text that --fix generates itself (updated date, canonical, JSON-LD, ?v= versions) does not count as a change to the lesson.
 // A lesson's script counts as part of the lesson whether it is inline or in <track>/js/ (moving it is not a change).
-const plain = (h, js = '') => h.replace(LESSON_JS, () => '<script>' + js.replace(/^\n/, '') + '</script>').replace(UPD, '').replace(/<link rel="canonical"[^>]*>/, '').replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, '').replace(/\?v=[0-9a-f]{8}"/g, '"');
+const plain = (h, js = '') => h.replace(LESSON_JS, () => '<script>' + js.replace(/^\n/, '') + '</script>').replace(UPD, '').replace(DATA_RE, '').replace(/<link rel="canonical"[^>]*>/, '').replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, '').replace(/\?v=[0-9a-f]{8}"/g, '"');
 const UPD = /<meta name="updated" content="([^"]*)">\n?/;
 const today = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
 const git = (...a) => { try { return execFileSync('git', a, { cwd: new URL('.', root), encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }); } catch { return null; } };
@@ -94,13 +95,9 @@ const want = {
 const lists = Object.fromEntries(TR.map(t => [t.dir + '/index.html', [/<!-- lessons:start -->[\s\S]*?<!-- lessons:end -->/, '<!-- lessons:start --><noscript><ol>' +
     t.T.topics.flatMap(w => w.items).filter(x => x.file).map(x => `<li><a href="${x.file}">${esc(x.title.en)} · ${esc(x.title.zh)}</a></li>`).join('') + '</ol></noscript><!-- lessons:end -->']]));
 const firstOf = t => { const x = t.T.topics.flatMap(w => w.items).find(i => i.file); return x && x.file; };
-// <track>/packages.js: every file of every project package (packages/<track>/<name>/**), so the project card can never miss one.
+// The files of every project package (packages/<track>/<name>/**) go into each lesson's data block, so the project card can never miss one.
 const walk = (d, pre = '') => { let o = []; try { for (const e of readdirSync(new URL(d, root), { withFileTypes: true })) { if (e.name.startsWith('.')) continue; if (e.isDirectory()) o = o.concat(walk(d + '/' + e.name, pre + e.name + '/')); else o.push(pre + e.name); } } catch {} return o; };
-for (const t of TR) {
-  let dirs = []; try { dirs = readdirSync(new URL('packages/' + t.dir + '/', root), { withFileTypes: true }).filter(e => e.isDirectory() && !e.name.startsWith('.')).map(e => e.name).sort(); } catch {}
-  want[t.dir + '/packages.js'] = '/* Made by node scripts/check-pages.mjs --fix: the files of each project package, shown by assets/site.js. Do not edit by hand. */\nwindow.PKGFILES={\n' +
-    dirs.map(n => ' ' + JSON.stringify('packages/' + t.dir + '/' + n) + ':' + JSON.stringify(walk('packages/' + t.dir + '/' + n).sort())).join(',\n') + '\n};\n';
-}
+const pkgFilesOf = d => { let dirs = []; try { dirs = readdirSync(new URL('packages/' + d + '/', root), { withFileTypes: true }).filter(e => e.isDirectory() && !e.name.startsWith('.')).map(e => e.name).sort(); } catch {} return Object.fromEntries(dirs.map(n => ['packages/' + d + '/' + n, walk('packages/' + d + '/' + n).sort()])); };
 for (const [f, text] of Object.entries(want)) {
   let cur = ''; try { cur = readFileSync(new URL(f, root), 'utf8'); } catch {}
   if (cur !== text) { if (FIX) writeFileSync(new URL(f, root), text); else bad(f, 'out of date with lessons.js (run node scripts/check-pages.mjs --fix)'); }
@@ -154,13 +151,21 @@ const UPD_RE = /<meta name="updated" content="([^"]*)">/;
 const unversioned = [];
 // A script file loaded twice runs twice (double nav, listeners, polling): --fix drops the later copy.
 const dedupeScripts = html => { const seen = new Set(); return html.replace(/<script src="([^"]+)"><\/script>(\r?\n(?=<script src=))?/g, (m, src) => { const k = src.replace(/\?.*$/, ''); if (seen.has(k)) return ''; seen.add(k); return m; }).replace(/\n{2,}(?=<script)/g, '\n').replace(/(<\/script>)\n(?=\n)/g, '$1'); };
+// Each lesson carries its own "Before you start" and project-card data as one small JSON block (no extra requests): the
+// source stays in <track>/prereqs.js and <track>/projects.js, and the package file list is read from the packages folder.
+const loadWin = f => { const ctx = { window: {} }; try { vm.runInNewContext(readFileSync(new URL(f, root), 'utf8'), ctx, { filename: f }); } catch {} return ctx.window; };
+const DATA = {};
+for (const t of TR) { const P = loadWin(t.dir + '/prereqs.js').PREREQ || {}, J = loadWin(t.dir + '/projects.js').PROJECTS || {}, F = pkgFilesOf(t.dir);
+  for (const f of new Set([...Object.keys(P), ...Object.keys(J)])) { const d = {}; if (P[f]) d.p = P[f]; if (J[f]) { d.j = J[f]; if (J[f].pkg) d.f = F[J[f].pkg.dir] || J[f].pkg.files || []; } DATA[t.dir + '/' + f] = d; } }
+const withData = (html, p) => { const d = DATA[p], blk = d ? '<script type="application/json" id="lesson-data">' + JSON.stringify(d).replace(/</g, '\\u003c') + '</script>\n' : '';
+  const bare = html.replace(DATA_RE, ''); return blk && /<script src="\.\.\/tracks\.js/.test(bare) ? bare.replace(/<script src="\.\.\/tracks\.js/, () => blk + '<script src="../tracks.js') : bare; };
 // A page that loads its track's lessons.js needs tracks.js before it (site.js used to document.write it, which blocks the parser).
 const withTracks = html => /<script src="lessons\.js[^"]*"><\/script>/.test(html) && !/<script src="\.\.\/tracks\.js/.test(html) ? html.replace(/<script src="lessons\.js/, '<script src="../tracks.js"></script><script src="lessons.js') : html;
 for (const p of pages) {
   const cur = readFileSync(new URL(p, root), 'utf8');
   const tpl = p === '404.html' || p.split('/').pop().startsWith('_'); // 404.html and _template.html get ?v= versions but no canonical or JSON-LD
   const { url, ld } = tpl ? {} : headFor(p, cur);
-  let next = withTracks(dedupeScripts(cur)).replace(REF, (m, a, ref, v, z) => {
+  let next = withData(withTracks(dedupeScripts(cur)), p).replace(REF, (m, a, ref, v, z) => {
     const target = resolve(p, ref);
     if (!VERSIONED.test(target) || !existsSync(new URL(target, root))) return m;
     return a + ref + '?v=' + hashOf(target) + z;
@@ -170,7 +175,7 @@ for (const p of pages) {
   next = /<link rel="canonical"[^>]*>/.test(next) ? next.replace(/<link rel="canonical"[^>]*>/, canon) : next.replace(/(<link rel="icon")/, canon + '$1');
   next = /<script type="application\/ld\+json">[\s\S]*?<\/script>/.test(next) ? next.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, () => ld) : next.replace('</head>', () => ld + '</head>');
   }
-  if (next !== cur) { if (FIX) writeFileSync(new URL(p, root), next); else bad(p, (dedupeScripts(cur) !== cur ? 'a script file is loaded twice, ' : '') + (withTracks(cur) !== cur ? 'tracks.js is not loaded before lessons.js, ' : '') + 'canonical link, JSON-LD or ?v= asset versions out of date (run node scripts/check-pages.mjs --fix)'); }
+  if (next !== cur) { if (FIX) writeFileSync(new URL(p, root), next); else bad(p, (dedupeScripts(cur) !== cur ? 'a script file is loaded twice, ' : '') + (withTracks(cur) !== cur ? 'tracks.js is not loaded before lessons.js, ' : '') + (withData(withTracks(cur), p) !== withTracks(cur) ? 'the lesson data block is out of date, ' : '') + 'canonical link, JSON-LD or ?v= asset versions out of date (run node scripts/check-pages.mjs --fix)'); }
   // Every use of a file that vercel.json caches as immutable must carry ?v=.
   for (const m of (FIX ? next : cur).matchAll(REF)) { const t = resolve(p, m[2]); if (/^assets\/(site|teach|build-concepts)\.(js|css)$|^[\w-]+\/js\/[\w-]+\.js$/.test(t) && !m[3]) unversioned.push(`${p}: ${m[2]}`); }
 }
