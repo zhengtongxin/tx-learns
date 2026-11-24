@@ -1,0 +1,17 @@
+{
+  "about": "Golden cases for the backend engineer agent's judgement (scripts/run-evals.mjs --llm, run by hand from the Evals workflow). Each case is a short lesson excerpt and the verdict a careful reviewer must give. Cheap: one Haiku call each.",
+  "cases": [
+    { "name": "code uses a function a later step creates", "expect": "fix",
+      "excerpt": "Step 1 · Ask the model\n```python\nanswer = ask_model(\"hello\")\nprint(answer)\n```\nStep 2 · Write the helper\n```python\ndef ask_model(text):\n    return client.responses.create(model=\"gpt-5.4-mini\", input=text).output_text\n```" },
+    { "name": "English and 中文 disagree on a number", "expect": "fix",
+      "excerpt": "EN: Split the file into chunks of about 1000 characters with 200 overlap.\n中文：把文件切成每块约 100 个字符、重叠 500 的块。" },
+    { "name": "await outside async code in a script", "expect": "fix",
+      "excerpt": "```python\nimport asyncio\nfrom agents import Agent, Runner\nagent = Agent(name=\"Helper\", instructions=\"Be brief.\")\nresult = await Runner.run(agent, \"hi\")\nprint(result.final_output)\n```\nRun it with `python helper.py`." },
+    { "name": "names a paid source", "expect": "fix",
+      "excerpt": "Welcome to @@PAID3@@ of the @@PAID1@@. Today the @@PAID4@@ shows the same exercise as the video." },
+    { "name": "clean, correct and bilingual", "expect": "ok",
+      "excerpt": "EN: A model only produces text. Your code runs the tool and sends the result back.\n中文：模型只会生成文字。真正运行工具的是你的代码，再把结果送回模型。\n```python\nimport json\ndef add(a, b):\n    return a + b\nprint(json.dumps({\"sum\": add(2, 3)}))\n```\nPrints {\"sum\": 5}." },
+    { "name": "clean small lesson step", "expect": "ok",
+      "excerpt": "EN: Chunks are small pieces of a document. We keep a little overlap so a sentence cut in two is not lost.\n中文：块是文档的小片段。保留一点重叠，被切断的句子就不会丢。" }
+  ]
+}

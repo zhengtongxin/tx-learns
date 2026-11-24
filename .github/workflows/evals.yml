@@ -1,0 +1,44 @@
+# Evals: golden cases for the agents' checks and judgement (scripts/run-evals.mjs, evals/*.json).
+#   On a pull request that changes a check script, an eval case or the banned-words list: the free, deterministic cases
+#   (does each check still catch what it must, and still pass a clean file?). Not a required check; the result shows on the PR.
+#   By hand (Run workflow, llm = true): also the backend engineer's judgement on evals/review-cases.json, one Haiku call per case.
+name: Evals
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/check-*.mjs'
+      - 'scripts/lib.mjs'
+      - 'scripts/run-evals.mjs'
+      - 'evals/**'
+      - 'banned-words.txt'
+  workflow_dispatch:
+    inputs:
+      llm:
+        description: Also run the reviewer judgement cases with Claude (costs a few cents)
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  evals:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check cases
+        if: ${{ !inputs.llm }}
+        run: node scripts/run-evals.mjs
+      - name: Install Claude Code
+        if: ${{ inputs.llm }}
+        run: npm install -g @anthropic-ai/claude-code
+      - name: Check cases and reviewer judgement
+        if: ${{ inputs.llm }}
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then unset ANTHROPIC_API_KEY; else unset CLAUDE_CODE_OAUTH_TOKEN; fi
+          node scripts/run-evals.mjs --llm
