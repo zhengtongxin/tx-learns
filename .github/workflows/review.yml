@@ -115,6 +115,8 @@ jobs:
              If the pull request changes no lesson, check what it does change (scripts, workflows, pages, docs) for
              bugs, for CLAUDE.md staying true to the workflows, and for the How it works page staying true to them."
           fi
+          # What past reviews keep finding (the authoring memory on the agent-status branch); empty until there is some.
+          curl -fsS -o /tmp/memory.json "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/agent-status/memory/authoring.json" || echo "{}" > /tmp/memory.json
           cat > /tmp/review-prompt.md <<PROMPT
           You are the backend engineer for TX Learns, a bilingual (EN/中文) learning site. Review pull request #$PR.
           Your focus is correctness: every code sample would really run for a reader who copies it, and every fact
@@ -124,6 +126,8 @@ jobs:
 
           1. Read CLAUDE.md and STYLE.md first. They are the rules.
           2. Read the diff in /tmp/pr.diff and open each changed lesson in full.
+          2b. /tmp/memory.json is the authoring memory: how often each kind of mistake was found in earlier reviews, with the latest
+             example, and decisions to keep. It may be empty. Look for those mistakes first.
           3. Read /tmp/copy-check.txt (the copyright scrubber's and the count check's output for this branch).
              Any ✗ in it is a blocker. Read /tmp/code-check.txt too: code boxes in the changed lessons that would not
              parse. A box may be a fragment of an earlier step ("..." as an elided argument is fine); a real syntax
@@ -151,6 +155,10 @@ jobs:
           6. Write a 3 to 5 line plain-text summary to /tmp/review-summary.txt. Its first line must start with the same
              verdict, then the top issues. It is shown publicly: never quote a banned term or source name in it;
              name the file and step instead.
+          7. Write /tmp/review.json: the same review as data, exactly this shape and nothing else:
+             {"verdict":"ok"|"fix","findings":[{"category":"copyright|code|translation|facts|story|structure|style|other","severity":"blocker|nit","file":"path","text":"one plain sentence, 400 characters at most"}]}
+             "ok" only when there is no blocker, "fix" otherwise; a blocker is a real error, a nit is taste. Never quote a banned
+             term or source name in it. After the lesson fixes (if you made any) list only what is still wrong.
           Do not run git.
           PROMPT
           claude --model sonnet --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/review-prompt.md)" --max-turns 40 \
@@ -160,7 +168,7 @@ jobs:
         if: always()
         run: |
           mkdir -p /tmp/out
-          cp /tmp/review-comment.md /tmp/review-summary.txt /tmp/out/ 2>/dev/null || true
+          cp /tmp/review-comment.md /tmp/review-summary.txt /tmp/review.json /tmp/out/ 2>/dev/null || true
           git diff -- '*/[0-9]*.html' > /tmp/out/fix.patch
       - uses: actions/upload-artifact@v4
         if: always()
@@ -198,6 +206,7 @@ jobs:
           path: trusted
           sparse-checkout: |
             scripts
+            schemas
             banned-words.txt
           persist-credentials: false
       - uses: actions/checkout@v4
@@ -220,6 +229,16 @@ jobs:
           test -s /tmp/out/review-comment.md || { echo "The reviewer wrote no comment."; echo "state=fail" >> "$GITHUB_OUTPUT"; exit 1; }
           first=$(grep -m1 . /tmp/out/review-summary.txt 2>/dev/null || grep -m1 . /tmp/out/review-comment.md)
           case "$first" in *⚠️*|*"Fix before"*) state=flag;; *✅*|*"Ready to merge"*) state=ok;; *) state=fail;; esac
+          # The structured review (schemas/review.schema.json) is checked by a trusted script. When it is valid, the stricter
+          # reading wins: a "fix" in the data blocks a comment that says ✅, and it stands in when the comment has no verdict.
+          # What it found is added to the authoring memory, so the writer and the next review see the recurring mistakes.
+          if [ -s /tmp/out/review.json ] && node $T/validate.mjs trusted/schemas/review.schema.json /tmp/out/review.json > /dev/null; then
+            jv=$(node -p 'require("/tmp/out/review.json").verdict')
+            if [ "$jv" = fix ]; then state=flag; elif [ "$state" = fail ]; then state=ok; fi
+            GITHUB_TOKEN="$GH_TOKEN" node $T/memory.mjs learn /tmp/out/review.json || true
+          else
+            echo "::notice::No valid review.json; the verdict comes from the comment."
+          fi
           cp /tmp/out/review-comment.md /tmp/c.md
           pushed=
           if [ "$FIX" = 1 ] && [ -s /tmp/out/fix.patch ]; then
