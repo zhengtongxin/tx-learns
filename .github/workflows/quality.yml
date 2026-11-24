@@ -1,0 +1,159 @@
+# Quality check agent: once a week it opens every page of the site in a headless browser (desktop and phone, EN and 中文) and runs
+# axe-core on it (serious accessibility problems, colour contrast, Tab reaching every control, page weight, image sizes), crawls
+# every internal link, anchor and project file, tries the external links (a dead one is a warning, never a failure) and
+# syntax-checks the lesson code boxes. No AI. It never opens a PR and never commits: when something fails it opens or updates
+# ONE issue titled "Quality check" (and closes it again once a run is clean) and tells TX on Telegram.
+# Not a pull request check and not required for any merge. axe-core is installed here only, never added to the repo.
+name: Quality check
+on:
+  schedule:
+    - cron: '0 2 * * 1'   # Mondays 02:00 UTC
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: quality
+  cancel-in-progress: false
+jobs:
+  # Marks the quality check as working (yellow) on the How it works page while this run goes. Trusted scripts from main only.
+  working:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: scripts
+          persist-credentials: false
+      - name: Show the agent as working
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATE: run
+        run: "[ -f scripts/record-status.mjs ] && node scripts/record-status.mjs quality || true"
+
+  # Read-only job: it runs the scripts of the checked-out commit and writes no token-bearing step.
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    outputs:
+      state: ${{ steps.run.outputs.state }}
+      summary: ${{ steps.run.outputs.summary }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install a headless browser and axe-core
+        run: |
+          npm install --no-save --no-audit --no-fund --prefix "$RUNNER_TEMP/pw" playwright@1.49.1 axe-core@4.10.2
+          "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Run the checks
+        id: run
+        env:
+          PLAYWRIGHT_DIR: ${{ runner.temp }}/pw
+          AXE_DIR: ${{ runner.temp }}/pw
+        run: |
+          mkdir -p quality-out
+          set +e
+          node scripts/check-code.mjs > quality-out/code.txt 2>&1
+          node scripts/check-links.mjs --out quality-out; links=$?
+          node scripts/check-a11y.mjs --out quality-out; a11y=$?
+          set -e
+          code=0
+          [ "$links" = 1 ] || [ "$a11y" = 1 ] && code=1
+          [ "$links" -ge 2 ] || [ "$a11y" -ge 2 ] && code=2
+          # The code check is a note, never a gate: its findings go into the issue but do not fail the run by themselves.
+          node -e '
+            const fs=require("fs"),rd=f=>{try{return JSON.parse(fs.readFileSync("quality-out/"+f,"utf8"))}catch{return null}};
+            const l=rd("links.json"),a=rd("a11y.json"),c=fs.existsSync("quality-out/code.txt")?fs.readFileSync("quality-out/code.txt","utf8").trim().split("\n").pop():"";
+            console.log("summary="+[a?a.summary:"Accessibility check did not finish.",l?l.summary:"Link check did not finish.",c].join(" ").replace(/\n/g," "));
+          ' >> "$GITHUB_OUTPUT" || echo "summary=The quality check could not finish." >> "$GITHUB_OUTPUT"
+          if [ "$code" = 0 ]; then echo "state=ok" >> "$GITHUB_OUTPUT"; elif [ "$code" = 1 ]; then echo "state=flag" >> "$GITHUB_OUTPUT"; else echo "state=fail" >> "$GITHUB_OUTPUT"; fi
+          [ "$code" -le 1 ]
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: quality
+          path: quality-out
+          if-no-files-found: ignore
+
+  # Separate job with the write token and trusted scripts from main: the issue and the Telegram message.
+  report:
+    needs: [check]
+    if: ${{ !cancelled() && needs.check.result != 'skipped' && needs.check.result != 'cancelled' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: scripts
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: quality
+          path: quality-out
+      - name: Open, update or close the Quality check issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATE: ${{ needs.check.outputs.state || 'fail' }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          {
+            echo "The weekly quality check found problems. Run: $RUN"; echo
+            for f in a11y links; do [ -f "quality-out/$f.md" ] && { sed 's/^# /### /; s/^## /#### /' "quality-out/$f.md"; echo; }; done
+            if [ -f quality-out/code.txt ] && grep -q '^✗' quality-out/code.txt; then
+              echo "### Code boxes (a note, not a gate)"; grep '^✗' quality-out/code.txt | head -30 | sed 's/^✗ /- /'; tail -1 quality-out/code.txt; echo
+            fi
+            [ "$STATE" = fail ] && echo "The check itself could not finish, so some results may be missing. See the run logs."
+          } > body.md
+          # GitHub caps an issue body at 65536 characters.
+          head -c 60000 body.md > body-cut.md
+          n=$(gh issue list -R "$GITHUB_REPOSITORY" --state open --search '"Quality check" in:title' --json number,title --jq '[.[]|select(.title=="Quality check")][0].number // empty')
+          if [ "$STATE" = ok ]; then
+            [ -n "$n" ] && gh issue close "$n" -R "$GITHUB_REPOSITORY" --comment "The latest quality check is clean. $RUN" || echo "Clean run, nothing open."
+          elif [ -n "$n" ]; then
+            gh issue edit "$n" -R "$GITHUB_REPOSITORY" --body-file body-cut.md
+            gh issue comment "$n" -R "$GITHUB_REPOSITORY" --body "Checked again, still failing. $RUN"
+          else
+            gh issue create -R "$GITHUB_REPOSITORY" --title "Quality check" --body-file body-cut.md
+          fi
+      - name: Tell TX on Telegram
+        if: ${{ needs.check.outputs.state != 'ok' }}
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SUMMARY: ${{ needs.check.outputs.summary }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          { echo "🔎 Quality check agent: the weekly check found problems"; echo; echo "$SUMMARY"; echo; echo "Details are in the open Quality check issue. Run: $RUN"; } | node scripts/notify-telegram.mjs
+
+  # Separate job: the write token for the status log never shares a job with the checked-out commit.
+  record:
+    needs: [check, report, working]
+    # A cancelled run records nothing, so it never shows as a failure on the How it works page.
+    if: ${{ !cancelled() && needs.check.result != 'skipped' && needs.check.result != 'cancelled' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: |
+            scripts
+            banned-words.txt
+          persist-credentials: false
+      - name: Record status for the Ecosystem page
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATE: ${{ needs.check.outputs.state || 'fail' }}
+          SUMMARY: ${{ needs.check.outputs.summary || 'The quality check could not finish.' }}
+        run: node scripts/record-status.mjs quality
