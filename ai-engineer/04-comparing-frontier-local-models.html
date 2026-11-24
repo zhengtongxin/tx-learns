@@ -54,8 +54,8 @@ def ask(which, model, prompt, **extra):
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 2 · Easy prompts tell you nothing</span><span class="zh">第 2 步 · 简单的题看不出差别</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Wei Jie first asked two providers for a joke. Both answered fine. Easy prompts hide the differences, so a good test is a hard prompt with a trap. A favourite: “Two coins are flipped. One is heads. What is the chance the other is tails?” The tempting answer is one half. A careful one works through the possible pairs.</p>
-<p class="zh" style="margin:0 0 8px">Wei Jie 先让两家服务商讲个笑话，两边都答得不错。简单的题会把差别藏起来，所以好的测试是带陷阱的难题。一个常用的：“抛两枚硬币，其中一枚是正面，另一枚是反面的概率是多少？”诱人的答案是二分之一，仔细的人会把可能的组合一一列出来。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Wei Jie first asked two providers for a joke. Both answered fine. Easy prompts hide the differences, so a good test is a hard prompt with a trap. A favourite: “Two coins are flipped. At least one is heads. What is the chance the other is tails?” The tempting answer is one half. A careful one lists the possible pairs: HH, HT, TH, TT. TT is ruled out, and 2 of the 3 left have a tails, so the answer is 2/3. (The local entry in the code below needs Ollama, which Step 4 sets up; run only the cloud entry until then.)</p>
+<p class="zh" style="margin:0 0 8px">Wei Jie 先让两家服务商讲个笑话，两边都答得不错。简单的题会把差别藏起来，所以好的测试是带陷阱的难题。一个常用的：“抛两枚硬币，至少有一枚是正面，另一枚是反面的概率是多少？”诱人的答案是二分之一，仔细的人会把可能的组合一一列出来：正正、正反、反正、反反。反反被排除，剩下 3 种里有 2 种含反面，所以答案是 2/3。（下面代码里的 local 一项需要 Ollama，第 4 步才会装好；在那之前先只运行云端那一项。）</p></div>
 <div class="codebox" data-file="compare.py" data-lang="python"><span class="dim">question = "Two coins are flipped. At least one is heads. What is the chance the other is tails? Explain briefly."
 
 for which, model in [("cloud-a", "gpt-5-mini"), ("local", "llama3.2")]:
@@ -80,8 +80,8 @@ high 15.6 s, 1450 chars</div>
 <div class="try" id="p3"></div>
 
 <h2><span class="en">Step 4 · Going local, and being honest about it</span><span class="zh">第 4 步 · 用本地模型，并诚实地看待</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A local model runs on your own laptop. Run <code>ollama pull llama3.2</code>, then point the client at <code>localhost</code> (that is the <code>local</code> entry above). It is free per call and private, because your text never leaves the laptop. It is usually weaker too. One rule: never pull a model bigger than your laptop's memory. A 16 GB laptop copes with roughly 20B-sized open models. A small laptop should use a 1B to 3B size.</p>
-<p class="zh" style="margin:0 0 8px">本地模型跑在你自己的笔记本上。运行 <code>ollama pull llama3.2</code>，再让客户端指向 <code>localhost</code>（就是上面的 <code>local</code> 那一项）。它每次调用不花钱，而且私密，因为文字不会离开你的电脑。一般也更弱一些。有一条规矩：别拉取比笔记本内存还大的模型。16 GB 的笔记本大约能跑 20B 左右的开源模型，小笔记本就用 1B 到 3B 的。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A local model runs on your own laptop. Run <code>ollama pull llama3.2</code>, then point the client at <code>localhost</code> (that is the <code>local</code> entry above). It is free per call and private, because your text never leaves the laptop. It is usually weaker too. One rule: never pull a model bigger than your laptop's memory. The B stands for billions of parameters (the numbers a model learns), so a 20B model has 20 billion. A 16 GB laptop copes with roughly 20B-sized open models. A small laptop should use a 1B to 3B size.</p>
+<p class="zh" style="margin:0 0 8px">本地模型跑在你自己的笔记本上。运行 <code>ollama pull llama3.2</code>，再让客户端指向 <code>localhost</code>（就是上面的 <code>local</code> 那一项）。它每次调用不花钱，而且私密，因为文字不会离开你的电脑。一般也更弱一些。有一条规矩：别拉取比笔记本内存还大的模型。B 是十亿个参数（模型学到的数字），所以 20B 就是 200 亿个。16 GB 的笔记本大约能跑 20B 左右的开源模型，小笔记本就用 1B 到 3B 的。</p></div>
 <div class="codebox" data-file="local.sh" data-lang="bash"><span class="dim"># in a terminal, once:
 #   ollama pull llama3.2
 
