@@ -32,7 +32,7 @@
 .panel .nd[data-agent]{cursor:pointer;outline:none}
 .panel .nd[data-agent]:hover rect,.panel .nd[data-agent]:focus-visible rect,.panel .nd.hot rect{stroke:var(--fg);stroke-width:1.6}
 .panel .nd.ag rect{fill:color-mix(in srgb,var(--h) 14%,var(--node));stroke:var(--h);stroke-width:1.5}
-.panel .nd.ag .t{font-size:14px;font-weight:700}
+.panel .nd.ag .t{font-size:13.5px;font-weight:700}
 .panel .nd.ag .code{font:700 10px var(--mono);fill:color-mix(in srgb,var(--h) 75%,var(--fg));letter-spacing:.06em}
 .panel .nd.ag .hx,.olist .hx{font:10.5px var(--mono);fill:color-mix(in srgb,var(--h) 75%,var(--fg));color:color-mix(in srgb,var(--h) 75%,var(--fg))}
 .panel .nd.ag.run rect{filter:drop-shadow(0 0 10px color-mix(in srgb,var(--h) 70%,transparent))}
@@ -61,7 +61,9 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 .panel .nd.tgn rect.bx{stroke:var(--edge);stroke-width:1.4}
 .panel .tgd{stroke-width:1.6}
 .olist .tgl{font:11px var(--mono);color:var(--mut)}
-.key{display:flex;flex-wrap:wrap;gap:8px 20px;justify-content:center;margin:12px 0 4px;font:11.5px var(--mono);color:var(--mut)}
+.key{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin:22px 0 8px;font:11.5px var(--mono);color:var(--mut)}
+.key .kg{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:var(--glass)}
+.key .kg>b{flex:0 0 100%;font:700 10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg)}
 .key span{display:inline-flex;align-items:center;gap:7px}
 .key .ln{display:inline-block;width:24px;border-top:1.5px solid var(--edge)}
 .key .ln.lp{border-top-style:dashed}.key .ln.ck{border-top:2px dotted var(--edge2)}
@@ -103,11 +105,16 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 .eco section{margin-top:84px}.eco section>p{max-width:760px;line-height:1.75}
 .panel{margin-top:28px;padding:22px 18px}
 .panel .e.ck{display:none}
-.guards{grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px;margin-top:22px}
-.guard{padding:22px 24px;gap:14px}.guard p{line-height:1.65}.guard .who{padding-top:14px}
-.gh{margin-top:56px}.key{margin:22px 0 8px;gap:12px 26px}.kb{margin-top:20px}
+.guards{grid-template-columns:1fr;gap:0;margin-top:26px;border-top:2px solid var(--ok)}
+.guard{display:grid;grid-template-columns:200px 1fr;gap:6px 28px;padding:20px 4px;border-radius:0;border-bottom:1px solid var(--line);background:none;box-shadow:none;border-left:0;border-right:0;border-top:0;flex-direction:initial}
+.guard .stat{flex-direction:column;align-items:flex-start;gap:6px;border:0;padding:0}
+.guard .stat b{font-size:34px;color:var(--ok)}.guard .stat span{max-width:200px}
+.guard .gb{display:flex;flex-direction:column;gap:10px;min-width:0}
+.guard h4{display:flex;align-items:baseline;gap:10px}.guard .gn{font:700 11px var(--mono);color:var(--mut)}.guard .gn::before{content:"RULE "}
+.guard p{line-height:1.65}.guard .who{margin-top:0;padding-top:10px}
+.gh{margin-top:56px}.kb{margin-top:20px}
 .feed li{padding:16px 6px}.rule-line{margin-top:64px}
-@media(max-width:760px){.eco section{margin-top:56px}.guards{grid-template-columns:1fr;gap:16px}.guard{padding:18px}}
+@media(max-width:760px){.eco section{margin-top:56px}.guard{grid-template-columns:1fr;padding:18px 2px}.guard .stat{flex-direction:row;align-items:baseline}}
 /* phone: the diagrams become ordered lists */
 .olist{display:none;list-style:none;margin:16px 0 0;padding:0}
 .olist .h{font:11px var(--mono);color:var(--mut);letter-spacing:.14em;text-transform:uppercase;margin:16px 0 4px}
@@ -129,10 +136,10 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 @media(prefers-reduced-motion:reduce){.panel .ring{animation:none}}
 /* concepts used to build the site */
 .cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;margin-top:26px;list-style:none;padding:0}
-.bcn{margin:0;padding:20px 22px;border-radius:8px;background:var(--glass);border:1px solid var(--line);display:flex;flex-direction:column;gap:10px;border-top:3px solid var(--acc)}
-.bcn.soon{border-top-style:dashed;background:transparent}
+.bcn{margin:0;padding:20px 22px;border-radius:18px;background:color-mix(in srgb,var(--acc) 7%,var(--glass));border:1px solid color-mix(in srgb,var(--acc) 35%,var(--line));display:flex;flex-direction:column;gap:10px}
+.bcn.soon{border-style:dashed;background:transparent}
 .bcn h3{margin:0;font-size:16px;line-height:1.3;display:flex;align-items:center;gap:8px}
-.bcn .ic{font-size:18px}
+.bcn .ic{font-size:20px;width:36px;height:36px;flex:none;display:grid;place-items:center;border-radius:10px;background:color-mix(in srgb,var(--acc) 22%,transparent)}
 .bcn .bd{margin-left:auto;font:700 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:3px 6px;border-radius:3px;color:var(--acc2);border:1px solid var(--acc);white-space:nowrap}
 .bcn.soon .bd{border-style:dashed;color:var(--mut);border-color:var(--mut)}
 .bcn p{margin:0;font-size:13.5px;line-height:1.6}
@@ -167,20 +174,23 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 <p class="conn" id="conn"></p>
 <div class="key" id="key"></div>
 <p class="kb" id="kb"></p>
-<div class="gh" id="hood"><h3><span class="en">Guardrails</span><span class="zh">护栏</span></h3>
-<p class="worst"><span class="en">If an agent gets something wrong, the worst it can do is <b>a merge the product engineer agent rolls back</b>.</span><span class="zh">就算 agent 出错，最坏也只是<b>一次被产品工程师 agent 回滚的合并</b>。</span></p></div>
-<div class="guards" id="guards"></div>
 <p class="plumb"><b>record-status.mjs</b> → <b>agent-status</b> branch → <b>/api/status</b> <span class="en">(read-only token)</span><span class="zh">（只读令牌）</span> → <span class="en">this page, every 60 s</span><span class="zh">这一页，每 60 秒</span></p>
 </section>
 
+<section id="guardrails">
+<h2><span class="no">02</span><span class="en">Guardrails: what stops a bad change</span><span class="zh">护栏：什么拦住坏改动</span></h2>
+<p><span class="en">These are the rules the agents cannot break. Each row gives the limit as one number, the mistake it prevents and what happens instead. If an agent still gets something wrong, the worst it can do is <b>a merge the product engineer agent rolls back</b>.</span><span class="zh">这些是 agent 打破不了的规则。每一行用一个数字写出限制、它防止的错误，以及实际会发生什么。就算 agent 仍然出错，最坏也只是<b>一次被产品工程师 agent 回滚的合并</b>。</span></p>
+<div class="guards" id="guards"></div>
+</section>
+
 <section id="concepts">
-<h2><span class="no">02</span><span class="en">The ideas behind it</span><span class="zh">背后用到的概念</span></h2>
-<p><span class="en">This site is built with the same ideas it teaches. Each card says how the site uses the idea, and links to the lessons that explain it. Dashed cards, when there are any, are on their way.</span><span class="zh">这个网站用的，就是它所教的那些想法。每张卡片说明网站怎样用这个概念，并链接到讲解它的课。虚线卡片（如果有）还在路上。</span></p>
+<h2><span class="no">03</span><span class="en">Ideas to learn: what the site is built from</span><span class="zh">可以学的概念：网站用什么搭成</span></h2>
+<p><span class="en">Not rules, just ideas. This site is built with the same AI and engineering ideas it teaches. Each card says how the site uses one, and links to the lessons that explain it. Dashed cards, when there are any, are on their way.</span><span class="zh">这不是规则，只是想法。这个网站用的，就是它所教的 AI 和工程概念。每张卡片说明网站怎样用其中一个，并链接到讲解它的课。虚线卡片（如果有）还在路上。</span></p>
 <ul class="cgrid" id="cgrid"></ul>
 </section>
 
 <section>
-<h2><span class="no">03</span><span class="en">Recent activity</span><span class="zh">最近动态</span></h2>
+<h2><span class="no">04</span><span class="en">Recent activity</span><span class="zh">最近动态</span></h2>
 <ul class="feed" id="feed"></ul>
 <p class="rule-line"><span class="en"><b>The agents check, the checks decide.</b> Every change is one pull request that merges by itself only when every check is green. If a merge breaks the site, it is undone by itself; if something gets stuck, I hear about it once.</span><span class="zh"><b>Agent 负责检查，检查结果说了算。</b>每个改动是一个 pull request，只有全部检查通过才会自动合并。如果某次合并弄坏了网站，它会被自动撤销；如果卡住了，我会收到一次通知。</span></p>
 </section>
@@ -242,7 +252,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
   var DEFS='<defs>'+mk('ah')+AGENTS.filter(function(a){return a.hue}).map(function(a){return mk('ah-'+a.id,a.hue)}).join('')+'</defs>';
 
   // 01 The system: six layers, left to right. Grey boxes are the lesson path (numbered); coloured boxes are the agents.
-  var CW=1100/6,X=function(c){return CW/2+c*CW},NW=144,NH=46,AW=168,AH=70;
+  var CW=1100/6,X=function(c){return CW/2+c*CW},NW=148,NH=46,AW=166,AH=84;
   var RT=108,RA=212,RM=320,RB=428,RP=536;
   var COLS=[['INPUT','输入'],['NOTES','笔记'],['AI AGENTS','AI AGENT'],['GITHUB','GITHUB'],['VERCEL','VERCEL'],['ME & READERS','我和读者']];
   var N={
@@ -251,7 +261,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     writer:{c:2,y:RA,agent:'writer',seq:3},
     test:{c:3,y:RA,en:'Pull request',zh:'Pull request',m:['one per change → main','每个改动一个 → main'],seq:4,lock:1},
     prev:{c:4,y:RA,en:'Preview',zh:'预览',m:['the PR\'s own build','PR 自己的版本'],seq:5},
-    main:{c:3,y:RB,en:'Merge into main',zh:'合并进 main',m:['by itself · all green + ✅','自动 · 全绿 + ✅'],seq:6},
+    main:{c:3,y:RB,en:'Merge into main',zh:'合并进 main',m:['all green + ✅','全绿 + ✅'],seq:6},
     live:{c:4,y:RB,en:'Live site',zh:'线上网站',m:['production','正式环境'],seq:7},
     readers:{c:5,y:RB,en:'Readers',zh:'读者',m:['me · newcomers to AI','我 · AI 新手'],seq:8},
     reader:{c:2,y:RT,agent:'reader'},
@@ -266,19 +276,21 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
   var TG=function(){return AGENTS.filter(function(a){return a.tg})};
   function box(id,S){var n=N[id],g=geo(n),a=n.agent&&NAME[n.agent],s=a&&S[n.agent],st=stOf(s),o;
     if(n.tg){var al=TG().filter(function(a){return a.tga}),pr=TG().filter(function(a){return !a.tga});
-      var dots=function(L,y,hollow){return L.map(function(a,i){return '<circle class="tgd" cx="'+f(g.r-16-(L.length-1-i)*13)+'" cy="'+(y-3.5)+'" r="4" style="stroke:'+a.hue+';fill:'+(hollow?'none':a.hue)+'"><title>'+esc(a.en)+'</title></circle>'}).join('')};
-      return '<g class="nd tgn"><rect class="bx" x="'+f(g.l)+'" y="'+f(g.t)+'" width="'+g.w+'" height="'+g.h+'" rx="6"/>'+plane(g.l+18,g.y-16)+
-        '<text class="t" x="'+f(g.l+30)+'" y="'+(g.y-12)+'">'+ts('Telegram → me','Telegram → 我')+'</text>'+
-        '<text class="m" x="'+f(g.l+12)+'" y="'+(g.y+7)+'">'+ts('every run','每次运行')+'</text>'+dots(al,g.y+7)+
-        '<text class="m" x="'+f(g.l+12)+'" y="'+(g.y+24)+'">'+ts('on a problem','出问题时')+'</text>'+dots(pr,g.y+24,1)+'</g>'}
+      var dots=function(L,y,hollow,right){return L.map(function(a,i){return '<circle class="tgd" cx="'+f(right?g.r-16-(L.length-1-i)*14:g.l+16+i*14)+'" cy="'+(y-3.5)+'" r="4" style="stroke:'+a.hue+';fill:'+(hollow?'none':a.hue)+'"><title>'+esc(a.en)+'</title></circle>'}).join('')};
+      return '<g class="nd tgn"><rect class="bx" x="'+f(g.l)+'" y="'+f(g.t)+'" width="'+g.w+'" height="'+g.h+'" rx="6"/>'+plane(g.l+18,g.y-26)+
+        '<text class="t" x="'+f(g.l+30)+'" y="'+(g.y-22)+'">'+ts('Telegram → me','Telegram → 我')+'</text>'+
+        '<text class="m" x="'+f(g.l+12)+'" y="'+(g.y-5)+'">'+ts('every run','每次运行')+'</text>'+dots(al,g.y-5,0,1)+
+        '<text class="m" x="'+f(g.l+12)+'" y="'+(g.y+14)+'">'+ts('on a problem','出问题时')+'</text>'+dots(pr,g.y+27,1)+'</g>'}
     if(a&&n.short)return '<g class="nd planned" data-agent="'+a.id+'" tabindex="0" role="button" aria-label="'+esc(a.en)+'"><rect x="'+f(g.l)+'" y="'+f(g.t)+'" width="'+g.w+'" height="'+g.h+'" rx="4"/><text class="m" x="'+f(g.x)+'" y="'+(g.y+4)+'" text-anchor="middle">'+ts(n.short[0],n.short[1])+'</text></g>';
     if(a){var run=st==='run',dx=g.l+16,stl=s?[(PP[st]||['?','?'])[0]+' · '+agoP(atOf(s))[0],(PP[st]||['?','?'])[1]+' · '+agoP(atOf(s))[1]]:LIVE?['no runs yet','还没运行']:['status offline','状态离线'];
       o='<g class="nd ag'+(run?' run':'')+'" style="--h:'+a.hue+'" data-agent="'+a.id+'" tabindex="0" role="button" aria-label="'+esc(a.en)+'">';
       o+='<rect x="'+f(g.l)+'" y="'+f(g.t)+'" width="'+g.w+'" height="'+g.h+'" rx="6"/>';
-      o+=(run?'<circle class="ring" cx="'+f(dx)+'" cy="'+(g.y-17)+'" r="4.5"/>':'')+'<circle class="dot '+st+'" cx="'+f(dx)+'" cy="'+(g.y-17)+'" r="4.5"/>';
-      o+='<text class="t" x="'+f(dx+12)+'" y="'+(g.y-12)+'">'+ts(a.en,a.zh)+'</text>';
-      o+='<text class="hx" x="'+f(g.l+12)+'" y="'+(g.y+7)+'">'+ts(a.on[0],a.on[1])+'</text>';
-      o+='<text class="m" x="'+f(g.l+12)+'" y="'+(g.y+24)+'">'+ts(stl[0],stl[1])+'</text>';
+      var ty=g.y-23,dy=g.y-8;
+      o+='<text class="t" x="'+f(g.l+12)+'" y="'+ty+'">'+ts(a.en.replace(/ agent$/,''),a.zh.replace(/ agent$/,''))+'</text>';
+      o+=(run?'<circle class="ring" cx="'+f(g.l+17)+'" cy="'+(dy-3.5)+'" r="4.5"/>':'')+'<circle class="dot '+st+'" cx="'+f(g.l+17)+'" cy="'+(dy-3.5)+'" r="4.5"/>';
+      o+='<text class="hx" x="'+f(g.l+28)+'" y="'+dy+'">agent</text>';
+      o+='<text class="hx" x="'+f(g.l+12)+'" y="'+(g.y+9)+'">'+ts(a.on[0],a.on[1])+'</text>';
+      o+='<text class="m" x="'+f(g.l+12)+'" y="'+(g.y+26)+'">'+ts(stl[0],stl[1])+'</text>';
       if(a.tg)o+=plane(g.r-14,g.b-13,!a.tga,'Telegram: '+a.tg[0])}
     else{o='<g class="nd"><rect x="'+f(g.l)+'" y="'+f(g.t)+'" width="'+g.w+'" height="'+g.h+'" rx="4"/>'+
       '<text class="t" x="'+f(g.x)+'" y="'+(g.y-3)+'" text-anchor="middle">'+ts(n.en,n.zh)+'</text><text class="m" x="'+f(g.x)+'" y="'+(g.y+13)+'" text-anchor="middle">'+ts(n.m[0],n.m[1])+'</text>'}
@@ -313,9 +325,9 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     o+=lab(vx-6,RM+4,'reviews + fixes the lesson PR','审阅并修改课的 PR','end','reviewer');
     // after each merge: the live check agent opens the real site and rolls the merge back if it broke the site;
     // the recall agent quizzes me every Sunday
-    var LV=geo(N.live),LC=geo(N.livecheck),RC=geo(N.recall),RD=geo(N.readers);
-    o+=e('ck','M'+LC.x+','+LC.t+' V'+(LV.b+2),'live-check')+lab(LC.x-8,(LV.b+LC.t)/2+4,'checks every page','检查每一页','end','live-check');
-    o+=e('lp','M'+f(LC.l)+','+LC.y+' H'+f(M.x)+' V'+(M.b+2),'live-check')+lab(LC.l-8,LC.y+16,'rolls back a breaking merge','回滚弄坏网站的合并','end','live-check');
+    var Q=geo(N.quality),LV=geo(N.live),LC=geo(N.livecheck),RC=geo(N.recall),RD=geo(N.readers);
+    o+=e('ck','M'+LC.x+','+LC.t+' V'+(LV.b+2),'live-check')+lab(LC.x-8,LC.t-8,'checks every page','检查每一页','end','live-check');
+    var ry=f(M.b+17),rx=f(M.x+40);o+=e('lp','M'+f(LC.l+24)+','+LC.t+' V'+ry+' H'+rx+' V'+(M.b+2),'live-check')+lab(Q.x-8,LC.t-8,'rolls back a bad merge','回滚坏合并','end','live-check');
     o+=e('ck','M'+RC.x+','+RC.t+' V'+(RD.b+2),'recall')+lab(RC.x-8,(RD.b+RC.t)/2+4,'weekly: what to review','每周：该复习什么','end','recall');
     // the UI check agent clicks through each preview and reports back on the PR
     var U=geo(N.ui);o+=e('ck','M'+f(P.r)+','+P.y+' H'+f(U.l-2),'ui-check')+lab(U.x,U.b+16,'status + comment on the PR','状态 + PR 上的评论','middle','ui-check');
@@ -416,18 +428,16 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
   function who(ids){if(ids.length===ALL.length)return '<i class="all">'+t('All '+ALL.length+' agents','全部 '+ALL.length+' 个 agent')+'</i>';
     return ids.map(function(id){var a=NAME[id];return '<i style="--h:'+a.hue+'">'+t(a.en.replace(/ agent$/,''),a.zh.replace(/ agent$/,''))+'</i>'}).join('')}
   document.getElementById('guards').innerHTML=G.map(function(g,k){
-    return '<article class="card guard"><h4>'+t(g.t[0],g.t[1])+'</h4>'+
-      '<div class="stat"><b>'+g.n+'</b><span>'+t(g.u[0],g.u[1])+'</span></div>'+
+    return '<article class="guard"><div class="stat"><b>'+g.n+'</b><span>'+t(g.u[0],g.u[1])+'</span></div><div class="gb"><h4><span class="gn">'+(k+1)+'</span>'+t(g.t[0],g.t[1])+'</h4>'+
       '<p class="risk"><em>'+t('stops','阻止')+'</em>'+t(g.r[0],g.r[1])+'</p><p class="imp"><em>'+t('so','于是')+'</em>'+t(g.i[0],g.i[1])+'</p>'+
-      '<div class="who"><em>'+t('applies to','适用于')+'</em><span class="tags">'+who(g.ag)+'</span></div></article>'}).join('');
+      '<div class="who"><em>'+t('applies to','适用于')+'</em><span class="tags">'+who(g.ag)+'</span></div></div></article>'}).join('');
 
+  function kg(h,items){return '<div class="kg"><b>'+h+'</b>'+items.join('')+'</div>'}
+  function dt(c,en,zh){return '<span><i class="dt" style="background:'+c+'"></i>'+t(en,zh)+'</span>'}
   document.getElementById('key').innerHTML=
-    AGENTS.filter(function(a){return a.hue}).map(function(a){return '<span><i class="sw" style="--h:'+a.hue+'"></i>'+t(a.en,a.zh)+'</span>'}).join('')+
-    '<span><i class="sq">1</i>'+t('lesson path','一课的路径')+'</span><span><i class="ln lp"></i>'+t('feedback loop','反馈回路')+'</span>'+
-    '<span><svg viewBox="-6 -8 12 16" aria-hidden="true"><g class="lock" style="fill:var(--fg);stroke:var(--fg)">'+LOCK.replace('<path','<path fill="none" stroke-width="1.6"')+'</g></svg>'+t('all green to merge','全绿才合并')+'</span>'+
-    '<span><svg viewBox="-7 -7 14 14" aria-hidden="true" class="kpl">'+PLANE+'</svg>'+t('pings me on Telegram every run','每次运行都发 Telegram 给我')+'</span>'+
-    '<span><svg viewBox="-7 -7 14 14" aria-hidden="true" class="kpl ho">'+PLANE+'</svg>'+t('only on a problem','只在出问题时')+'</span>'+
-    '<span><i class="dt" style="background:var(--run)"></i>'+t('working','运行中')+'</span><span><i class="dt" style="background:var(--ok)"></i>'+t('passed','通过')+'</span><span><i class="dt" style="background:var(--warn)"></i>'+t('flagged','有问题')+'</span><span><i class="dt" style="background:var(--bad)"></i>'+t('failed','失败')+'</span><span><i class="dt"></i>'+t('no runs yet','还没运行')+'</span>';
+    kg(t('Lesson path','一课的路径'),['<span><i class="sq">1</i>'+t('step, in order','按顺序的步骤')+'</span>','<span><i class="ln lp"></i>'+t('feedback loop','反馈回路')+'</span>','<span><svg viewBox="-6 -8 12 16" aria-hidden="true"><g class="lock" style="fill:var(--fg);stroke:var(--fg)">'+LOCK.replace('<path','<path fill="none" stroke-width="1.6"')+'</g></svg>'+t('all green to merge','全绿才合并')+'</span>'])+
+    kg(t('Agent status','agent 状态'),[dt('var(--run)','working','运行中'),dt('var(--ok)','passed','通过'),dt('var(--warn)','flagged','有问题'),dt('var(--bad)','failed','失败'),dt('var(--mut)','no runs yet','还没运行')])+
+    kg(t('Telegram to me','发给我的 Telegram'),['<span><svg viewBox="-7 -7 14 14" aria-hidden="true" class="kpl">'+PLANE+'</svg>'+t('every run','每次运行')+'</span>','<span><svg viewBox="-7 -7 14 14" aria-hidden="true" class="kpl ho">'+PLANE+'</svg>'+t('only on a problem','只在出问题时')+'</span>']);
 
   function drawFeed(S,live){
     var all=[];Object.keys(S).forEach(function(k){(S[k].history||[]).forEach(function(h){all.push({id:k,h:h})})});
