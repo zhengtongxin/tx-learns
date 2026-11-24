@@ -13,7 +13,7 @@
 <h2><span class="en">Step 1 · An agent as a tool</span><span class="zh">第 1 步 · 把智能体当工具</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Fern is good at chatting, but not at diagnosing plants. You could stuff plant knowledge into Fern's prompt, but it gets long and messy. Instead, build a separate <b>Plant Doctor</b> agent and give it to Fern as a tool with <code>.as_tool()</code>. Think of asking a colleague across the desk: you get an answer, then <b>you</b> keep talking to the customer.</p>
 <p class="zh"style="margin:0 0 8px">Fern 擅长聊天，但不擅长给植物看病。你可以把植物知识塞进 Fern 的提示词，但那会又长又乱。更好的做法是单独做一个 <b>Plant Doctor</b> 智能体，再用 <code>.as_tool()</code> 把它当工具交给 Fern。就像问隔壁工位的同事：拿到答案后，还是<b>你</b>继续和顾客说话。</p></div>
-<div class="codebox"><span class="dim">plant_doctor = Agent(
+<div class="codebox" data-file="plant_doctor.py" data-lang="python"><span class="dim">plant_doctor = Agent(
     name="Plant Doctor",
     instructions="Diagnose a houseplant from its symptoms. Two sentences: the likely cause, then one fix.",
     model="gpt-5.4-mini")
@@ -35,7 +35,7 @@ result = await Runner.run(fern, "My monstera has yellow leaves with brown tips")
 <h2><span class="en">Step 2 · A handoff</span><span class="zh">第 2 步 · 交接（handoff）</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Refunds are different. Noor wants <b>Returns Desk</b> to own the whole chat, not have Fern relay messages. List it in <code>handoffs</code>, and when the model picks it, the SDK makes Returns Desk the active agent. This is transferring the phone call, not asking a colleague.</p>
 <p class="zh"style="margin:0 0 8px">退款不一样。Noor 希望 <b>Returns Desk</b> 接管整段对话，而不是让 Fern 在中间传话。把它写进 <code>handoffs</code>，模型选中它时，SDK 就让 Returns Desk 成为当前智能体。这是把电话转过去，而不是问同事。</p></div>
-<div class="codebox"><span class="dim">returns_desk = Agent(
+<div class="codebox" data-file="returns_desk.py" data-lang="python"><span class="dim">returns_desk = Agent(
     name="Returns Desk",
     </span><span class="chg">handoff_description="Handles refunds and returns for damaged or wrong orders",</span><span class="dim">
     instructions="You handle returns. Ask for the order number, then explain the next step.",
@@ -60,7 +60,7 @@ print(</span><span class="chg">result.last_agent.name</span><span class="dim">) 
 <h2><span class="en">Step 4 · Input guardrail: check what comes in</span><span class="zh">第 4 步 · 输入护栏：检查进来的内容</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Some customers paste their full card number into the chat. Fern must never act on it. An <b>input guardrail</b> is a check on the customer's message that can stop the run before Fern replies. It returns <code>GuardrailFunctionOutput</code>, and if <code>tripwire_triggered</code> is true, the SDK stops the run by raising <code>InputGuardrailTripwireTriggered</code>. Like a smoke alarm: it does not cook, it only stops things when it sees trouble.</p>
 <p class="zh"style="margin:0 0 8px">有些顾客会把完整的银行卡号贴进聊天框。Fern 绝不能据此行事。<b>输入护栏</b>是检查顾客消息的一道关卡，能在 Fern 回复之前叫停运行。它返回 <code>GuardrailFunctionOutput</code>；如果 <code>tripwire_triggered</code> 为真，SDK 就抛出 <code>InputGuardrailTripwireTriggered</code> 叫停运行。就像烟雾报警器：它不做饭，只在发现问题时喊停。</p></div>
-<div class="codebox"><span class="dim">import re
+<div class="codebox" data-file="guardrails.py" data-lang="python"><span class="dim">import re
 from agents import input_guardrail, GuardrailFunctionOutput, InputGuardrailTripwireTriggered
 
 </span><span class="chg">@input_guardrail</span><span class="dim">
@@ -79,7 +79,7 @@ try:
 <h2><span class="en">Step 5 · Output guardrail, and where guardrails run</span><span class="zh">第 5 步 · 输出护栏，以及护栏在哪里运行</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Noor also fears Fern inventing a discount. An <b>output guardrail</b> checks the final answer before the customer sees it (this one is deliberately simple; a real check would be smarter). The catch is <b>where</b> guardrails run: input guardrails only on the <b>first</b> agent, output guardrails only on the agent that gives the <b>final</b> answer.</p>
 <p class="zh"style="margin:0 0 8px">Noor 还担心 Fern 自己编出一个折扣。<b>输出护栏</b>在顾客看到最终回答之前检查它（这个例子故意写得很简单，真实的检查会更聪明）。关键在于护栏<b>在哪里</b>运行：输入护栏只在<b>第一个</b>智能体上运行，输出护栏只在给出<b>最终</b>回答的智能体上运行。</p></div>
-<div class="codebox"><span class="dim">from agents import output_guardrail, OutputGuardrailTripwireTriggered
+<div class="codebox" data-file="guardrails.py" data-lang="python"><span class="dim">from agents import output_guardrail, OutputGuardrailTripwireTriggered
 
 </span><span class="chg">@output_guardrail</span><span class="dim">
 async def no_discount_promises(ctx, agent, output):

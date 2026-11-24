@@ -18,7 +18,7 @@
 <p class="zh">所以模型外面要有一层代码，叫<b>外壳（harness）</b>：它构造输入、读取输出、据此行动、必要时重复。接下来四步一块一块把它搭起来：<b>① 上下文</b>、<b>② 记忆</b>、<b>③ 工具</b>、<b>④ 循环</b>。</p><h2><span class="en">① Context: tell it who it is</span><span class="zh">① 上下文：告诉它它是谁</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">The model knows nothing about Alex. Anything it should say about him must be pasted into its <b>system prompt</b>, the instructions sent first on every call. Two files do the job: <code>linkedin.pdf</code> (your profile saved as PDF) and <code>summary.txt</code> (a few lines in your own words). Your code turns them into two text variables:</p>
 <p class="zh"style="margin:0 0 8px">模型对 Alex 一无所知。想让它说关于他的事，就得把内容贴进<b>系统提示词</b>，也就是每次调用最先发送的指令。两个文件就够了：<code>linkedin.pdf</code>（导出的个人资料 PDF）和 <code>summary.txt</code>（用自己的话写的几行介绍）。代码把它们变成两个文本变量：</p></div>
-<div class="codebox"><span class="dim">reader = PdfReader("twin/linkedin.pdf")
+<div class="codebox" data-file="twin.py" data-lang="python"><span class="dim">reader = PdfReader("twin/linkedin.pdf")
 linkedin = ""
 for page in reader.pages:
     text = page.extract_text()
@@ -31,7 +31,7 @@ with open("twin/summary.txt") as f: summary = f.read()
 <h2><span class="en">② Memory: why a chat feels continuous</span><span class="zh">② 记忆：为什么聊天看起来是连续的</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Every call to a model is <b>stateless</b>: it remembers nothing from the last call. A chat feels continuous only because your code sends the <b>whole conversation so far</b> each time. Mei says “My name is Mei”, then later asks “What's my name?”. For the model to answer, the first message must travel again with the second.</p>
 <p class="zh"style="margin:0 0 8px">每次调用模型都是<b>无状态</b>的：它不记得上一次的任何内容。聊天看起来连续，只是因为你的代码每次都把<b>到目前为止的整段对话</b>一起发过去。Mei 先说“我叫 Mei”，之后问“我叫什么？”。模型要答得出来，第一条消息必须和第二条一起再发一遍。</p></div>
-<div class="codebox"><span class="dim">def chat(message, </span><span class="chg">history</span><span class="dim">):
+<div class="codebox" data-file="chat.py" data-lang="python"><span class="dim">def chat(message, </span><span class="chg">history</span><span class="dim">):
     messages = [{"role": "system", "content": system_prompt}] + </span><span class="chg">history</span><span class="dim"> + [{"role": "user", "content": message}]
     response = client.chat.completions.create(model="gpt-5.4-mini", messages=messages)
     return response.choices[0].message.content</span></div>
@@ -41,12 +41,12 @@ with open("twin/summary.txt") as f: summary = f.read()
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Back to Mei's email. The fix is to let the model <b>ask</b>. A tool has three parts: <b>1)</b> a plain Python function you write, <b>2)</b> a description the model can read, and <b>3)</b> your code that runs the function when the model asks. Part 1 saves an email:</p>
 <p class="zh"style="margin:0 0 8px">回到 Mei 的邮箱。办法是让模型<b>提出请求</b>。一个工具有三部分：<b>1)</b> 你写的普通 Python 函数，<b>2)</b> 模型能读懂的描述，<b>3)</b> 当模型请求时运行函数的代码。第 1 部分负责存邮箱：</p></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="Mei's message goes to the model, the model asks your code to run a tool, your code saves the email and sends the result back to the model"><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" fill="#9a9aa8"/></marker></defs><rect class="box soft" x="20" y="55" width="110" height="50" rx="10"/><text class="en" x="75.0" y="85.0">Message</text><text class="zh" x="75.0" y="85.0">消息</text><rect class="box" x="200" y="55" width="110" height="50" rx="10"/><text class="en" x="255.0" y="85.0">Model</text><text class="zh" x="255.0" y="85.0">模型</text><rect class="box new" x="380" y="55" width="110" height="50" rx="10"/><text class="en" x="435.0" y="85.0">Your code</text><text class="zh" x="435.0" y="85.0">你的代码</text><rect class="box soft" x="560" y="55" width="110" height="50" rx="10"/><text class="en" x="615.0" y="85.0">emails.txt</text><text class="zh" x="615.0" y="85.0">emails.txt</text><path class="lnk" d="M130,80 H198" marker-end="url(#ar)"/><path class="lnk hot" d="M310,80 H378" marker-end="url(#ar)"/><path class="lnk hot" d="M490,80 H558" marker-end="url(#ar)"/><text class="en sm" x="344" y="72">asks</text><text class="zh sm" x="344" y="72">请求</text><text class="en sm" x="524" y="72">saves</text><text class="zh sm" x="524" y="72">写入</text><text class="en sm" x="164" y="72">text</text><text class="zh sm" x="164" y="72">文字</text><path class="lnk hot" d="M435,105 V150 H255 V107" marker-end="url(#ar)"/><text class="en sm" x="345" y="170">the result goes back to the model</text><text class="zh sm" x="345" y="170">结果送回模型</text></svg><figcaption><span class="en">The model never saves anything. It asks, your code acts, and the result goes back.</span><span class="zh">模型自己什么也不存。它提出请求，你的代码去执行，结果再送回模型。</span></figcaption></figure>
-<div class="codebox"><span class="dim">def record_email_tool(email):
+<div class="codebox" data-file="tools.py" data-lang="python"><span class="dim">def record_email_tool(email):
     with open("emails.txt", "a") as f:
         f.write(email + "\n")
     return "Email recorded"</span></div>
 <p class="en">The model cannot see your Python. So part 2 describes the tool in <b>JSON</b> (a plain-text format of labels and values that code and models can both read): a name, what it is for, and the inputs it needs.</p>
-<p class="zh">模型看不到你的 Python 代码。所以第 2 部分用 <b>JSON</b>（一种由标签和值组成、代码和模型都能读的纯文本格式）描述这个工具：名字、用途和需要的输入。</p><div class="codebox"><span class="dim">record_email_tool_json = {
+<p class="zh">模型看不到你的 Python 代码。所以第 2 部分用 <b>JSON</b>（一种由标签和值组成、代码和模型都能读的纯文本格式）描述这个工具：名字、用途和需要的输入。</p><div class="codebox" data-file="tools.py" data-lang="python"><span class="dim">record_email_tool_json = {
     "name": "record_email_tool",
     "description": </span><span class="chg">"???"</span><span class="dim">,
     "parameters": {"type": "object", "properties": {"email": {"type": "string", "description": "The email address of this user"}}, "required": ["email"]}
@@ -58,7 +58,7 @@ with open("twin/summary.txt") as f: summary = f.read()
 <h2><span class="en">④ Loop: what if one call is not enough?</span><span class="zh">④ 循环：一次调用不够怎么办？</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">The walk-through handled one request with an <code>if</code>. But Mei might give two emails at once, or the model might need one tool's result before choosing the next. You cannot know how many rounds a task takes, so you <b>keep going while the model keeps asking for tools</b>:</p>
 <p class="zh"style="margin:0 0 8px">上面的演示用一个 <code>if</code> 就处理完了。但 Mei 可能一次给两个邮箱，或者模型要先拿到一个工具的结果才能决定下一步。你无法预知需要几轮，所以只要模型还在请求工具，就<b>一直循环</b>：</p></div>
-<div class="codebox"><span class="dim">def chat(message, history):
+<div class="codebox" data-file="chat.py" data-lang="python"><span class="dim">def chat(message, history):
     messages = [{"role": "system", "content": system_prompt}] + history + [{"role": "user", "content": message}]
     </span><span class="chg">done = False
     while not done:</span><span class="dim">

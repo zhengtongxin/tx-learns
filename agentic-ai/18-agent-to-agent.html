@@ -11,9 +11,10 @@
 <p class="zh" style="margin:0">你在帮 <b>Mei</b>，她在夜市摆饮料摊。隔壁是 <b>Hock 叔</b>，他烤沙爹，不收饮料单；Mei 也不卖吃的。顾客向 Mei 点沙爹时，她不会去学烤沙爹，而是<b>走过去看他的招牌</b>（卖什么、多少钱、在哪里下单），把单子递过去，再把盘子端回来。今天你要把两个摊位都做成智能体，而它们之间的这段路就是 <b>A2A</b>（Agent2Agent）协议。Mei 的夜市是个支线案例：Ah Seng 去问隔壁沙爹档，走的是同一段路。</p></div>
 <h2><span class="en">Step 1 · One agent in Google ADK</span><span class="zh">第 1 步 · 用 Google ADK 做一个智能体</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Before two agents can talk, you need one. In Google's <b>Agent Development Kit (ADK)</b>, an <code>LlmAgent</code> is just a model plus an <code>instruction</code>, the same idea as the agents you already know. <code>run_debug</code> opens a session, sends one message and prints the whole trace (the step-by-step log of what the agent did). It is for experiments only. It reads your Google key (a secret password for the model) from a <code>.env</code> file, so the key never sits inside the code.</p><p class="zh" style="margin:0 0 8px">两个智能体要对话，先得有一个。在 Google 的<b>智能体开发套件（ADK）</b>里，<code>LlmAgent</code> 就是一个模型加一段 <code>instruction</code>，和你已经认识的智能体是同一个概念。<code>run_debug</code> 会新建会话、发一条消息并打印完整过程（逐步的运行记录），只适合做实验。它从 <code>.env</code> 文件里读取你的 Google 密钥（调用模型用的密码），这样密钥就不会写进代码里。</p></div>
-<div class="codebox"><span class="dim">pip install "google-adk[a2a,mcp]" python-dotenv requests
+<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim">pip install "google-adk[a2a,mcp]" python-dotenv requests
 
-from dotenv import load_dotenv
+</span></div>
+<div class="codebox" data-file="drinks_agent.py" data-lang="python"><span class="dim">from dotenv import load_dotenv
 from google.adk.agents import LlmAgent
 from google.adk.runners import InMemoryRunner
 
@@ -27,7 +28,7 @@ await InMemoryRunner(agent=drinks).run_debug("What is iced barley?", verbose=Tru
 <div class="try" id="p1"></div>
 <h2><span class="en">Step 2 · Tools and MCP</span><span class="zh">第 2 步 · 工具与 MCP</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Mei needs to remember orders, so she needs tools. In ADK a tool is a plain typed function with a docstring. No decorator: ADK reads the type hints and the docstring, just like the SDK you met earlier.</p><p class="zh" style="margin:0 0 8px">Mei 要记订单，所以需要工具。在 ADK 里，工具就是带类型标注和文档字符串的普通函数，不需要装饰器：ADK 会读类型标注和文档字符串，和你之前见过的 SDK 一样。</p><p class="en" style="margin:0 0 8px">Tools that someone else wrote plug in through <b>MCP</b>, a standard plug for tools (it gets its own topic later). Scope it to one folder, so the agent cannot touch anything else.</p><p class="zh" style="margin:0 0 8px">别人写好的工具通过 <b>MCP</b> 接入，它是工具的标准插头（之后会有单独的主题）。把它限定在一个文件夹里，智能体就碰不到别的东西。</p></div>
-<div class="codebox"><span class="dim">notepad = []                    # Mei's notepad: a plain list
+<div class="codebox" data-file="order_tools.py" data-lang="python"><span class="dim">notepad = []                    # Mei's notepad: a plain list
 
 def save_order(item: str, qty: int) -> str:
 </span><span class="chg">    """Write one customer order on the notepad. Use it after the customer confirms."""</span><span class="dim">
@@ -50,7 +51,7 @@ drinks = LlmAgent(model="gemini-2.5-flash", name="drinks_stall",
 <div class="try" id="p2"></div>
 <h2><span class="en">Step 3 · The real run loop</span><span class="zh">第 3 步 · 真正的运行循环</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">In real code you own the <b>session</b> and read the stream of <b>events</b>. Each event is one thing that happened: a tool call, a tool result or the final reply. It is the loop you once wrote by hand, now with labels.</p><p class="zh" style="margin:0 0 8px">真实代码里，你自己持有<b>会话</b>并读取<b>事件</b>流。每个事件是发生的一件事：一次工具调用、一个工具结果或最终回复。这就是你曾经手写的循环，只是现在每一步都有标签。</p></div>
-<div class="codebox"><span class="dim">from google.genai import types
+<div class="codebox" data-file="run_agent.py" data-lang="python"><span class="dim">from google.genai import types
 
 runner = InMemoryRunner(agent=drinks)
 session = await runner.session_service.create_session(app_name=runner.app_name, user_id="mei")
@@ -65,7 +66,7 @@ session = await runner.session_service.create_session(app_name=runner.app_name, 
 <div class="callout tip"><b class="lbl"><span class="en">Debug view</span><span class="zh">调试界面</span></b><span class="en">If you put the agent in a folder (<code>agent.py</code> that exposes <code>root_agent</code>, made with <code>adk create my_agent</code>), then <code>adk web</code> shows a visual trace where every tool call lights up. It only lists agents in the folder you start it from.</span><span class="zh">如果把智能体放进一个文件夹（<code>agent.py</code> 里暴露 <code>root_agent</code>，可用 <code>adk create my_agent</code> 生成），运行 <code>adk web</code> 就能看到可视化的过程，每次工具调用都会亮起来。它只会列出你启动时所在文件夹里的智能体。</span></div>
 <h2><span class="en">Step 4 · Put Uncle Hock behind a signboard</span><span class="zh">第 4 步 · 把 Hock 叔放到招牌后面</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Uncle Hock runs in <b>his own process</b>: a separate program with its own door (a <b>port</b>, a numbered entrance on your computer), like a stall with its own street number. <code>to_a2a</code> wraps his agent in a small web app that serves two things: the A2A endpoint, and his <b>agent card</b>. The card is a JSON file at a well-known address that says his name, his skills and where to reach him. That is the signboard. <code>uvicorn</code> is the small server program that opens that port and runs the app.</p><p class="zh" style="margin:0 0 8px">Hock 叔运行在<b>他自己的进程</b>里：一个单独运行的程序，有自己的门（<b>端口</b>，电脑上的一个编号入口），就像有自己门牌号的摊位。<code>to_a2a</code> 把他的智能体包进一个小型网络应用，提供两样东西：A2A 接口，以及他的<b>智能体名片（agent card）</b>。名片是放在固定地址的 JSON 文件，写着他的名字、技能和联系地址，也就是那块招牌。<code>uvicorn</code> 是把这个应用打开端口、运行起来的小型服务程序。</p></div>
-<div class="codebox"><span class="dim"># satay_server.py
+<div class="codebox" data-file="satay_server.py" data-lang="python"><span class="dim"># satay_server.py
 from google.adk.agents import LlmAgent
 from google.adk.a2a.utils.agent_to_a2a import to_a2a
 
@@ -84,7 +85,7 @@ curl http://localhost:8001/.well-known/agent-card.json</span></div>
 <h2><span class="en">Step 5 · Mei walks over</span><span class="zh">第 5 步 · Mei 走过去</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">On Mei's side, Uncle Hock becomes a <code>RemoteA2aAgent</code> and goes into her <code>sub_agents</code> like any local helper. Her instruction says what to do herself and what to hand over. Notice that nothing finds him for you: you point at his card address.</p><p class="zh" style="margin:0 0 8px">在 Mei 这边，Hock 叔变成一个 <code>RemoteA2aAgent</code>，和本地帮手一样放进她的 <code>sub_agents</code>。她的指令写明哪些自己做、哪些交出去。注意没有任何东西会替你去找他：你要把名片地址告诉她。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="Mei's agent reads Hock's agent card, sends him the task and gets the result back"><defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box soft" x="20" y="30" width="200" height="160" rx="12"/><text class="en sm" x="120" y="55">Mei's process</text><text class="zh sm" x="120" y="55">Mei 的进程</text><rect class="box" x="40" y="85" width="160" height="60" rx="12"/><text class="en" x="120.0" y="120.0">Mei agent</text><text class="zh" x="120.0" y="120.0">Mei 的智能体</text><rect class="box new" x="500" y="30" width="200" height="160" rx="12"/><text class="en sm" x="600" y="55">Hock's process</text><text class="zh sm" x="600" y="55">Hock 的进程</text><rect class="box" x="520" y="85" width="160" height="60" rx="12"/><text class="en" x="600.0" y="120.0">Hock agent</text><text class="zh" x="600.0" y="120.0">Hock 的智能体</text><path class="lnk" d="M200 95 L520 95" marker-end="url(#ar)"/><text class="en sm" x="360" y="87">1  read agent card</text><text class="zh sm" x="360" y="87">1  读招牌</text><path class="lnk hot" d="M200 115 L520 115" marker-end="url(#ar)"/><text class="en sm" x="360" y="133">2  send the task</text><text class="zh sm" x="360" y="133">2  递上任务</text><path class="lnk" d="M520 135 L200 135" marker-end="url(#ar)"/><text class="en sm" x="360" y="158">3  plate comes back</text><text class="zh sm" x="360" y="158">3  盘子端回来</text></svg><figcaption><span class="en">Two separate programs: Mei reads the signboard first, then passes the order over the A2A door, and the answer comes back the same way.</span><span class="zh">两个互相独立的程序：Mei 先看招牌，再通过 A2A 的门把单子递过去，结果沿原路回来。</span></figcaption></figure>
-<div class="codebox"><span class="dim">from google.adk.agents.remote_a2a_agent import RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
+<div class="codebox" data-file="remote_agent.py" data-lang="python"><span class="dim">from google.adk.agents.remote_a2a_agent import RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
 
 </span><span class="chg">hock_remote = RemoteA2aAgent(
     name="satay_hock",

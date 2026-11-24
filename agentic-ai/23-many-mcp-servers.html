@@ -12,7 +12,7 @@
 <h2><span class="en">Step 1 · Four kinds of context</span><span class="zh">第 1 步 · 四种背景信息</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><b>Context engineering</b> means choosing what the model gets to see. Auntie's four kinds: <b>memory</b> (facts about people), <b>fresh news</b> (the web), <b>her own notes</b> (a knowledge base she builds) and <b>live systems</b> (payments, stock, prices).</p><p class="zh" style="margin:0 0 8px"><b>背景信息工程</b>就是决定让模型看到什么。阿姨的四种：<b>记忆</b>（关于人的事实）、<b>最新消息</b>（网络）、<b>自己的笔记</b>（她自己建的知识库）和<b>实时系统</b>（付款、库存、价格）。</p><p class="en" style="margin:0 0 8px">Each kind can be its own MCP server, and one agent can use several at once. Steps 2 to 5 below take them one at a time.</p><p class="zh" style="margin:0 0 8px">每一种都可以是单独的 MCP 服务端，一个智能体也可以同时用好几个。下面的第 2 到 5 步会一个一个来。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="One assistant connects to four MCP servers: memory, search, its own notes and a remote live system"><defs><marker id="ah23" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box soft" x="260" y="85" width="200" height="50" rx="10"/><text class="en" x="360.0" y="114.0">The assistant</text><text class="zh" x="360.0" y="114.0">助手</text><rect class="box new" x="20" y="15" width="210" height="46" rx="10"/><text class="en" x="125.0" y="42.0">Memory · local</text><text class="zh" x="125.0" y="42.0">记忆 · 本地</text><rect class="box new" x="20" y="159" width="210" height="46" rx="10"/><text class="en" x="125.0" y="186.0">Own notes · local</text><text class="zh" x="125.0" y="186.0">自己的笔记 · 本地</text><rect class="box new" x="490" y="15" width="210" height="46" rx="10"/><text class="en" x="595.0" y="42.0">Search · filtered</text><text class="zh" x="595.0" y="42.0">搜索 · 过滤后</text><rect class="box new" x="490" y="159" width="210" height="46" rx="10"/><text class="en" x="595.0" y="186.0">Live system · remote</text><text class="zh" x="595.0" y="186.0">实时系统 · 远程</text><path class="lnk" d="M260 100L230 45" marker-end="url(#ah23)"/><path class="lnk" d="M260 120L230 172" marker-end="url(#ah23)"/><path class="lnk" d="M460 100L490 45" marker-end="url(#ah23)"/><path class="lnk" d="M460 120L490 172" marker-end="url(#ah23)"/><text class="en sm" x="360" y="198">each kind of context, its own server</text><text class="zh sm" x="360" y="198">每种背景信息，各有自己的服务端</text></svg><figcaption><span class="en">Four kinds of context, four servers, one agent. Local ones are close and private; the remote one is shared.</span><span class="zh">四种背景信息，四个服务端，一个智能体。本地的近而私密，远程的则是多方共用。</span></figcaption></figure>
-<div class="codebox"><span class="dim">Auntie Suria                      The agent
+<div class="codebox" data-file="diagram" data-lang="text"><span class="dim">Auntie Suria                      The agent
 remembers Uncle Lim          -&gt;    memory server        (knowledge graph, a JSON file)
 hears about the marathon     -&gt;    search server        (the live web)
 flips through her price book -&gt;    vector server        (notes the agent writes itself)
@@ -22,10 +22,11 @@ checks the e-wallet terminal -&gt;    live integration     (a company's own MCP 
 <div class="sc" id="g1"></div>
 <h2><span class="en">Step 2 · Long-term memory</span><span class="zh">第 2 步 · 长期记忆</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Without memory, a new run knows nothing about Uncle Lim. The official <b>memory server</b> stores <b>entities</b> (people), <b>observations</b> about them and <b>relations</b> between them in a JSON file that survives between runs.</p><p class="zh" style="margin:0 0 8px">没有记忆，新的一次运行对 Lim 叔一无所知。官方的<b>记忆服务端</b>把<b>实体</b>（人）、关于他们的<b>观察</b>和它们之间的<b>关系</b>存在一个 JSON 文件里，下次运行还在。</p><p class="en" style="margin:0 0 8px">Settings for a server go in its <code>env</code>, here the file path. The agent only needs a sentence telling it to use those tools as memory.</p><p class="zh" style="margin:0 0 8px">服务端的设置放在它的 <code>env</code> 里，这里是文件路径。智能体只需要一句话，告诉它把这些工具当记忆来用。</p></div>
-<div class="codebox"><span class="dim">pip install openai-agents python-dotenv      # plus Node + npx, uv/uvx
+<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim">pip install openai-agents python-dotenv      # plus Node + npx, uv/uvx
 # keys in .env: OPENAI_API_KEY (and TAVILY_API_KEY in Step 3)
 
-import os
+</span></div>
+<div class="codebox" data-file="memory_agent.py" data-lang="python"><span class="dim">import os
 from agents import Agent, Runner, trace
 from agents.mcp import MCPServerStdio
 from dotenv import load_dotenv
@@ -47,7 +48,7 @@ async with MCPServerStdio(params=memory, client_session_timeout_seconds=60) as m
 <div class="try" id="p2"></div>
 <h2><span class="en">Step 3 · Fresh news, with one tool allowed</span><span class="zh">第 3 步 · 最新消息，只放行一个工具</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A search server keeps the agent current. But many servers offer lots of tools (search, extract, crawl...), and more tools mean more confusion and more tokens. The SDK lets you <b>filter</b> them down to the ones you want.</p><p class="zh" style="margin:0 0 8px">搜索服务端能让智能体与时俱进。但很多服务端提供一大堆工具（搜索、提取、爬取……），工具越多越容易混乱，也越费 token。SDK 可以让你把工具<b>过滤</b>成你想要的那几个。</p><p class="en" style="margin:0 0 8px">Note that the API key goes to the <b>server</b> through its <code>env</code>, not to the agent.</p><p class="zh" style="margin:0 0 8px">注意 API 密钥是通过 <code>env</code> 交给<b>服务端</b>的，不是交给智能体。</p></div>
-<div class="codebox"><span class="dim">from datetime import date
+<div class="codebox" data-file="filters.py" data-lang="python"><span class="dim">from datetime import date
 from agents.mcp import create_static_tool_filter
 
 </span><span class="chg">search = {"command": "npx", "args": ["-y", "tavily-mcp@latest"],
@@ -60,7 +61,7 @@ async with MCPServerStdio(params=search, client_session_timeout_seconds=60, tool
 <div class="try" id="p3"></div>
 <h2><span class="en">Step 4 · Agentic RAG: the agent builds its own notebook</span><span class="zh">第 4 步 · 智能体式 RAG：智能体自己建笔记本</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Normal <b>RAG</b> (retrieval-augmented generation: look things up, then answer) loads documents into a vector store up front. In <b>agentic RAG</b> the agent itself decides what to store and when to search. A vector store finds notes by meaning, not by exact words. It turns each note into an <b>embedding</b>: a list of numbers that stands for what the note means, so a question can find a note that uses different words.</p><p class="zh" style="margin:0 0 8px">普通的 <b>RAG</b>（检索增强生成：先查资料，再回答）会提前把文档装进向量库。在<b>智能体式 RAG</b> 里，存什么、什么时候搜都由智能体自己决定。向量库按意思找笔记，而不是按字面一模一样。它把每条笔记变成一个<b>嵌入</b>（embedding）：一串代表笔记意思的数字，所以问题即使用词不同，也能找到对应的笔记。</p><p class="en" style="margin:0 0 8px">Run 1 searches the web and stores what it finds. Run 2 has no internet, only the notebook. Anything it answers must have come from run 1.</p><p class="zh" style="margin:0 0 8px">第 1 次运行上网搜索，并把找到的存起来。第 2 次运行没有网络，只有笔记本。它回答的任何内容，都一定来自第 1 次。</p></div>
-<div class="codebox"><span class="dim">from pathlib import Path
+<div class="codebox" data-file="files_and_vectors.py" data-lang="python"><span class="dim">from pathlib import Path
 
 </span><span class="chg">vectors = {"command": "uvx", "args": ["mcp-server-qdrant"],
            "env": {"QDRANT_LOCAL_PATH": str(Path("memory/qdrant")), "COLLECTION_NAME": "suppliers"}}</span><span class="dim">
@@ -81,7 +82,7 @@ async with MCPServerStdio(params=vectors, client_session_timeout_seconds=120) as
 <div class="try" id="p4"></div>
 <h2><span class="en">Step 5 · Live systems: local or remote, and optional</span><span class="zh">第 5 步 · 实时系统：本地或远程，而且可有可无</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The fourth kind is a live system: payments, inventory, market data. Many companies now publish an official MCP server. You can run their package <b>locally</b> over stdio, with your API key in <code>env</code>, and you control the version. Or you can use a <b>remote</b> URL: nothing to install, and you trust their uptime and sign-in.</p><p class="zh" style="margin:0 0 8px">第四种是实时系统：付款、库存、行情数据。现在很多公司都发布了官方 MCP 服务端。你可以用 stdio 在<b>本地</b>运行他们的包，把 API 密钥放进 <code>env</code>，版本由你控制；也可以用<b>远程</b>网址：什么都不用装，但要信任对方的稳定性和登录方式。</p><p class="en" style="margin:0 0 8px">Make the code degrade gracefully: if the key is not set, skip that server so the rest of the agent still works. <code>AsyncExitStack</code> opens a list of servers in a loop and closes them all at the end, even if a run fails.</p><p class="zh" style="margin:0 0 8px">让代码能优雅降级：没有设置密钥就跳过这个服务端，智能体的其他部分照常工作。<code>AsyncExitStack</code> 可以用循环打开一批服务端，结束时全部关掉，即使运行失败也一样。</p></div>
-<div class="codebox"><span class="dim">from contextlib import AsyncExitStack
+<div class="codebox" data-file="many_servers.py" data-lang="python"><span class="dim">from contextlib import AsyncExitStack
 from agents.mcp import MCPServerStreamableHttp
 
 # a made-up payments provider, reached by URL

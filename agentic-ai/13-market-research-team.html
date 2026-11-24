@@ -13,7 +13,7 @@
 <h2><span class="en">Step 1 · Give the scout a web search tool</span><span class="zh">第 1 步 · 给侦察员一个联网搜索工具</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">A model only knows what it learnt in the past, and night markets open and close all the time. A <b>tool</b> lets an agent do something outside its own head. CrewAI ships ready-made tools in the <code>crewai_tools</code> package. <code>SerperDevTool</code> searches the web through the Serper service, and it needs a <code>SERPER_API_KEY</code>.</p><p class="en"style="margin:0">Each search counts against your quota, so keep test runs small. Putting today's date into the scout's task helps too: “trending now” means nothing to a model that does not know the date. We pass that date in at kickoff, later.</p>
 <p class="zh"style="margin:0 0 8px">模型只知道过去学到的东西，而夜市随时在开张和关门。<b>工具</b>让智能体能做它“脑子”以外的事。CrewAI 在 <code>crewai_tools</code> 包里自带现成的工具。<code>SerperDevTool</code> 通过 Serper 服务搜索网络，需要一个 <code>SERPER_API_KEY</code>。</p><p class="zh"style="margin:0">每次搜索都会消耗配额，所以测试时要少跑。在侦察员的任务里写上今天的日期也有帮助：不知道日期的模型，没法理解“最近热门”。这个日期我们稍后在启动时传入。</p></div>
-<div class="codebox"><span class="dim"># inside the crew project
+<div class="codebox" data-file="agents.py" data-lang="python"><span class="dim"># inside the crew project
 #   uv add crewai-tools
 # .env needs: OPENAI_API_KEY and SERPER_API_KEY
 
@@ -32,7 +32,7 @@ def scout(self) -> Agent:
 <h2><span class="en">Step 2 · Pass typed lists between agents</span><span class="zh">第 2 步 · 在智能体之间传有类型的列表</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Free text between agents is fragile: the researcher can misread what the scout wrote. Instead, hand the scout a form to fill in. A class built on <code>BaseModel</code> (from the library Pydantic, the same idea as in the structured outputs lesson) is a form with named blanks, and <code>output_pydantic</code> tells the task to answer in that form.</p><p class="en"style="margin:0">Then link the tasks with <code>context</code>. It names which earlier tasks' results a task should read, so the researcher definitely gets the scout's list.</p>
 <p class="zh"style="margin:0 0 8px">智能体之间传自由文本很脆弱：研究员可能读错侦察员写的内容。换个做法：给侦察员一张表格去填。基于 <code>BaseModel</code>（来自 Pydantic 库，和结构化输出那一课是同一个思路）的类就是一张有具名空格的表格，<code>output_pydantic</code> 让任务按这张表格作答。</p><p class="zh"style="margin:0">然后用 <code>context</code> 把任务连起来。它指明某个任务要读哪些前面任务的结果，这样研究员一定能拿到侦察员的名单。</p></div>
-<div class="codebox"><span class="dim">from pydantic import BaseModel, Field
+<div class="codebox" data-file="models.py" data-lang="python"><span class="dim">from pydantic import BaseModel, Field
 from crewai import Task
 
 class Market(BaseModel):
@@ -61,7 +61,8 @@ def find_markets(self) -> Task:
 def study_markets(self) -> Task:
     return Task(config=self.tasks_config["study_markets"], </span><span class="chg">output_pydantic=MarketStudyList</span><span class="dim">)
 
-# config/tasks.yaml
+</span></div>
+<div class="codebox" data-file="tasks.yaml" data-lang="yaml"><span class="dim"># config/tasks.yaml
 study_markets:
   description: >
     For each market found, research crowd, rent and competition for a kuih stall in {state}.
@@ -76,7 +77,7 @@ study_markets:
 <h2><span class="en">Step 3 · Build a tool that pings a phone</span><span class="zh">第 3 步 · 做一个能给手机发提醒的工具</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">The ready-made tools do not cover everything, so you can write your own. It is a plain function with the <code>@tool</code> decorator. The one rule that matters: <b>the docstring is the description the model reads</b>. Write it like instructions to a new colleague, including what each argument means.</p><p class="en"style="margin:0">This one sends a push message through Pushover, a notification service. It needs <code>PUSHOVER_USER</code> and <code>PUSHOVER_TOKEN</code> in <code>.env</code>. Only the picker will get it.</p>
 <p class="zh"style="margin:0 0 8px">现成的工具不能涵盖所有需求，所以你可以自己写。它就是一个带 <code>@tool</code> 装饰器的普通函数。最关键的一条规则：<b>文档字符串（docstring）就是模型读到的说明</b>。要像给新同事写指示一样去写，包括每个参数的含义。</p><p class="zh"style="margin:0">这个工具通过通知服务 Pushover 发送推送消息，需要在 <code>.env</code> 里放 <code>PUSHOVER_USER</code> 和 <code>PUSHOVER_TOKEN</code>。只有挑选员会拿到它。</p></div>
-<div class="codebox"><span class="dim"># tools/notify.py
+<div class="codebox" data-file="tools/notify.py" data-lang="python"><span class="dim"># tools/notify.py
 import os, requests
 from crewai.tools import tool
 
@@ -104,7 +105,7 @@ def picker(self) -> Agent:
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Now the crew goes <b>hierarchical</b> with your own manager agent, like the one in the roles lesson but with a full description. Two rules. The manager needs <code>allow_delegation=True</code> so it may hand work out. And it is passed as <code>manager_agent=</code>, <b>not</b> listed in <code>agents</code>. If you declared it with <code>@agent</code>, the crew would treat it as one more ordinary worker.</p><p class="en"style="margin:0">Start the crew with today's date, so the scout's “trending now” has something to measure against.</p>
 <p class="zh"style="margin:0 0 8px">现在让团队变成<b>层级式</b>，并用你自己的主管智能体，就像角色那一课里讲的，不过这次有完整的设定。有两条规则。主管需要 <code>allow_delegation=True</code>，才能把活分出去。而且它要用 <code>manager_agent=</code> 传入，<b>不能</b>列在 <code>agents</code> 里。如果你用 <code>@agent</code> 声明了它，团队会把它当成又一个普通工人。</p><p class="zh"style="margin:0">启动团队时带上今天的日期，这样侦察员的“最近热门”才有个参照。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="A manager hands work to a scout, a researcher and a picker, and the pick is sent to a phone"><defs><marker id="ah13" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box new" x="185" y="10" width="180" height="60" rx="12"/><text class="en" x="275.0" y="37.0">Manager</text><text class="zh" x="275.0" y="37.0">主管</text><text class="sm en" x="275.0" y="55.0">hands out, checks</text><text class="sm zh" x="275.0" y="55.0">分配并检查</text><rect class="box soft" x="20" y="130" width="150" height="60" rx="12"/><text class="en" x="95.0" y="157.0">Scout</text><text class="zh" x="95.0" y="157.0">侦察员</text><text class="sm en" x="95.0" y="175.0">searches the web</text><text class="sm zh" x="95.0" y="175.0">联网搜索</text><rect class="box soft" x="200" y="130" width="150" height="60" rx="12"/><text class="en" x="275.0" y="157.0">Researcher</text><text class="zh" x="275.0" y="157.0">研究员</text><text class="sm en" x="275.0" y="175.0">crowd, rent</text><text class="sm zh" x="275.0" y="175.0">人流、租金</text><rect class="box soft" x="380" y="130" width="150" height="60" rx="12"/><text class="en" x="455.0" y="157.0">Picker</text><text class="zh" x="455.0" y="157.0">挑选员</text><text class="sm en" x="455.0" y="175.0">one best market</text><text class="sm zh" x="455.0" y="175.0">选出一个夜市</text><rect class="box soft" x="560" y="130" width="140" height="60" rx="12"/><text class="en" x="630.0" y="157.0">Phone ping</text><text class="zh" x="630.0" y="157.0">手机提醒</text><text class="sm en" x="630.0" y="175.0">Mei's aunt</text><text class="sm zh" x="630.0" y="175.0">Mei 的阿姨</text><line class="lnk hot" x1="275" y1="70" x2="95" y2="130" marker-end="url(#ah13)"/><line class="lnk hot" x1="275" y1="70" x2="275" y2="130" marker-end="url(#ah13)"/><line class="lnk hot" x1="275" y1="70" x2="455" y2="130" marker-end="url(#ah13)"/><line class="lnk" x1="170" y1="160" x2="200" y2="160" marker-end="url(#ah13)"/><line class="lnk" x1="350" y1="160" x2="380" y2="160" marker-end="url(#ah13)"/><line class="lnk" x1="530" y1="160" x2="560" y2="160" marker-end="url(#ah13)"/></svg><figcaption><span class="en">The manager sits above the workers; the work moves scout, researcher, picker, then to the phone.</span><span class="zh">主管在工人上面；工作依次经过侦察员、研究员、挑选员，最后到手机。</span></figcaption></figure>
-<div class="codebox"><span class="dim">from datetime import date
+<div class="codebox" data-file="crew.py" data-lang="python"><span class="dim">from datetime import date
 
 @crew
 def crew(self) -> Crew:
@@ -125,7 +126,7 @@ PasarPicker().crew().kickoff(inputs={"state": "Selangor", "today": str(date.toda
 <h2><span class="en">Step 5 · Add memory so the shortlist stays fresh</span><span class="zh">第 5 步 · 加上记忆，让名单保持新鲜</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Run the crew twice and you may get the same three markets twice. <code>memory=True</code> turns on CrewAI's built-in memory. <b>Short-term</b> memory holds what happened earlier in this run. <b>Long-term</b> memory keeps results and lessons from earlier runs on disk. <b>Entity</b> memory keeps facts about named things, such as one market or one town.</p><p class="en"style="margin:0">The neat trick is to pair memory with the prompt. If the scout's task says “find markets you have not suggested before”, long-term memory is what makes that sentence work across runs. Memory needs an embedder (it turns text into numbers so it can be searched), which by default uses the same OpenAI key, so each run costs a little extra.</p>
 <p class="zh"style="margin:0 0 8px">团队跑两次，可能会两次都拿到同样的三个夜市。<code>memory=True</code> 会打开 CrewAI 内置的记忆。<b>短期</b>记忆保存这一次运行里早先发生的事。<b>长期</b>记忆把以前运行的结果和教训存在磁盘上。<b>实体</b>记忆保存有名字的事物的信息，比如某个夜市或某个城镇。</p><p class="zh"style="margin:0">巧妙之处是把记忆和提示词配合起来。如果侦察员的任务写着“找出你以前没推荐过的夜市”，是长期记忆让这句话在多次运行之间真正生效。记忆需要一个嵌入模型（把文字变成数字以便检索），默认用同一个 OpenAI 密钥，所以每次运行会多花一点钱。</p></div>
-<div class="codebox"><span class="dim"># config/tasks.yaml
+<div class="codebox" data-file="tasks.yaml" data-lang="yaml"><span class="dim"># config/tasks.yaml
 find_markets:
   description: >
     Today is {today}. Search for night markets in {state} that people are talking
@@ -134,7 +135,8 @@ find_markets:
     A list of night markets, each with a reason it is trending.
   agent: scout
 
-# crew.py
+</span></div>
+<div class="codebox" data-file="crew.py" data-lang="python"><span class="dim"># crew.py
 return Crew(
     agents=self.agents, tasks=self.tasks,
     process=Process.hierarchical, manager_agent=boss,
