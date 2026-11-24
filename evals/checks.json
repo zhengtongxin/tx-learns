@@ -9,6 +9,9 @@
 
     { "name": "pages: clean lesson passes", "check": "pages", "expect": "pass" },
     { "name": "pages: missing description is caught", "check": "pages", "regex": ["<meta name=\"description\"[^>]*>", ""], "expect": "fail", "match": "description" },
+    { "name": "pages: the same script loaded twice is caught", "check": "pages", "append": "<script src=\"../assets/site.js?v=751eec33\"></script>", "expect": "fail", "match": "loaded twice" },
+    { "name": "pages: a stale canonical link is caught", "check": "pages", "regex": ["<link rel=\"canonical\" href=\"[^\"]*\">", "<link rel=\"canonical\" href=\"https://example.org/old.html\">"], "expect": "fail", "match": "canonical" },
+    { "name": "pages: a stale asset version is caught", "check": "pages", "regex": ["site\\.css\\?v=[0-9a-f]+", "site.css?v=00000000"], "expect": "fail", "match": "out of date" },
     { "name": "pages: image without alt text is caught", "check": "pages", "append": "<img src=\"x.png\">", "expect": "fail", "match": "alt" },
     { "name": "pages: English without its 中文 twin is caught", "check": "pages", "append": "<p class=\"en\">Only English here.</p>", "expect": "fail", "match": "[Zz]h|中文" },
     { "name": "pages: skipped heading level is caught", "check": "pages", "append": "<h5>Jumped</h5>", "expect": "fail", "match": "heading" },
