@@ -135,8 +135,10 @@ jobs:
           $EDIT
           Do not run git.
           PROMPT
+          curl -fsS -o /tmp/runs.json "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/agent-status/trace/runs.json" || true
+          curl -fsS -o /tmp/max-turns.mjs "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/scripts/max-turns.mjs" && TURNS=$(node /tmp/max-turns.mjs reader 50 --floor 20 || echo 50) || TURNS=50
           curl -fsS -o /tmp/claude-run.mjs "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/scripts/claude-run.mjs" && CC="node /tmp/claude-run.mjs reader" || CC=claude
-          $CC --model haiku --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/reader-prompt.md)" --max-turns 50 \
+          $CC --model haiku --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/reader-prompt.md)" --max-turns "$TURNS" \
             --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(node scripts/check-counts.mjs:*),Bash(node scripts/check-pages.mjs:*)" \
             --output-format text | tail -30
       - name: Package the result for the share job

@@ -9,7 +9,7 @@
 //      SITE (live URL), DRY_RUN=1 prints instead of sending, GITHUB_API points it at a test server.
 import { appendFileSync } from 'node:fs';
 import { gh, telegram, scrub } from './lib.mjs';
-import { readRuns, summarize } from './trace.mjs';
+import { readRuns, summarize, weekly } from './trace.mjs';
 
 const SITE = (process.env.SITE || 'https://tx-learns.vercel.app/').replace(/\/?$/, '/');
 const out = (k, v) => process.env.GITHUB_OUTPUT && appendFileSync(process.env.GITHUB_OUTPUT, `${k}<<EOF\n${v}\nEOF\n`);
@@ -72,6 +72,10 @@ async function digest() {
         ...ids.sort((x, y) => by[y].usd - by[x].usd).map(k => `• ${AG[k]}: ${by[k].calls} call${by[k].calls > 1 ? 's' : ''}, $${by[k].usd.toFixed(2)}${by[k].bad ? `, ${by[k].bad} not ok` : ''}`));
     }
   } catch { /* no trace yet */ }
+  // Sundays: the weekly report by model and workflow step, so a change to the agents can be compared with the week before.
+  if (new Date().getUTCDay() === 0 || process.env.WEEKLY === '1') {
+    try { lines.push('', weekly((await readRuns()).runs)); } catch { /* no trace yet */ }
+  }
   lines.push('', `Site: ${SITE}`);
   await telegram(lines.join('\n'));
   out('state', 'ok'); out('summary', `Sent the daily digest: ${live.length} went live, ${open.length} PRs still open.`);

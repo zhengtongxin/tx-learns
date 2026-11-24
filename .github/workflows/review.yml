@@ -107,6 +107,7 @@ jobs:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           FIX: ${{ steps.info.outputs.fix }}
+          STEP: ${{ steps.info.outputs.fix == '1' && 'review-fix' || 'review' }}
         run: |
           set -o pipefail
           if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then unset ANTHROPIC_API_KEY; echo "Auth: Claude subscription"; else unset CLAUDE_CODE_OAUTH_TOKEN; echo "Auth: API key (no CLAUDE_CODE_OAUTH_TOKEN secret)"; fi
@@ -124,6 +125,18 @@ jobs:
           fi
           # What past reviews keep finding (the authoring memory on the agent-status branch); empty until there is some.
           curl -fsS -o /tmp/memory.json "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/agent-status/memory/authoring.json" || echo "{}" > /tmp/memory.json
+          # Deterministic prep before Claude (scripts fetched from main, so the branch under review cannot change them): a short
+          # brief with the diff, only the failing checks and the related passages, and a 2 KB rule packet in place of the full docs.
+          mkdir -p /tmp/main/scripts/rules
+          for f in scripts/agent-context.mjs scripts/max-turns.mjs scripts/rules/reviewer.md; do curl -fsS -o "/tmp/main/$f" "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/$f" || true; done
+          curl -fsS -o /tmp/runs.json "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/agent-status/trace/runs.json" || true
+          if [ -s /tmp/main/scripts/agent-context.mjs ] && [ -s /tmp/main/scripts/rules/reviewer.md ] && node /tmp/main/scripts/agent-context.mjs review --root "$PWD" --diff /tmp/pr.diff --checks /tmp/copy-check.txt --code /tmp/code-check.txt --out /tmp/review-brief.md; then
+            { echo; echo "=== RULE PACKET ==="; cat /tmp/main/scripts/rules/reviewer.md; echo; echo "=== BRIEF ==="; cat /tmp/review-brief.md; } > /tmp/review-extra.md
+          else
+            echo "No brief script on main yet: falling back to the full documents."
+            echo "Read CLAUDE.md and STYLE.md first (they are the rules), then /tmp/pr.diff, /tmp/copy-check.txt and /tmp/code-check.txt, and run node scripts/rag.mjs --related <track>/<file> for each changed lesson." > /tmp/review-extra.md
+          fi
+          TURNS=40; [ -s /tmp/main/scripts/max-turns.mjs ] && TURNS=$(node /tmp/main/scripts/max-turns.mjs reviewer 40 --step "$STEP" --floor 16 || echo 40)
           cat > /tmp/review-prompt.md <<PROMPT
           You are the backend engineer for TX Learns, a bilingual (EN/中文) learning site. Review pull request #$PR.
           Your focus is correctness: every code sample would really run for a reader who copies it, and every fact
@@ -131,17 +144,17 @@ jobs:
           it merges by itself, with no person reading it first. Be strict about real errors, relaxed about taste.
           $MODE
 
-          1. Read CLAUDE.md and STYLE.md first. They are the rules.
-          2. Read the diff in /tmp/pr.diff and open each changed lesson in full.
+          1. Your rules are the rule packet and the brief that follow this prompt. CLAUDE.md and STYLE.md are the full
+             reference: open one only for a real question the packet cannot answer, never to read it through.
+          2. The brief has the changed files, the diff, the failing checks (if any) and related lessons. Open each changed
+             lesson in full. Do not open other files (shared scripts, model lessons, unrelated pages) unless a change clearly affects them.
           2b. /tmp/memory.json is the authoring memory: how often each kind of mistake was found in earlier reviews, with the latest
              example, and decisions to keep. It may be empty. Look for those mistakes first.
-          3. Read /tmp/copy-check.txt (the copyright scrubber's and the count check's output for this branch).
-             Any ✗ in it is a blocker. Read /tmp/code-check.txt too: code boxes in the changed lessons that would not
-             parse. A box may be a fragment of an earlier step ("..." as an elided argument is fine); a real syntax
-             error is a blocker.
-          3b. For each changed lesson, run node scripts/rag.mjs --related <track>/<file> and node scripts/rag.mjs "<its main concept>"
-             (local search over the existing lessons, free). Use it to catch a lesson that contradicts or repeats an
-             existing one, calls the same thing by a different name, or misses a link back to a lesson it builds on.
+          3. The brief's "Check results" are the copyright scrubber, count, page, security and code-box checks, already run
+             for this branch. A problem line in it is a blocker (a code box may be a fragment of an earlier step: "..." as an
+             elided argument is fine; a real syntax error is a blocker). Do not run those checks again to look, only to confirm your own fixes.
+          3b. The brief's related passages are the closest existing lessons (already searched). Use them to catch a lesson that
+             contradicts or repeats an existing one, calls the same thing by a different name, or misses a link back to a lesson it builds on.
           4. Check each changed lesson for:
              - Copyright: any platform, program or instructor name, "course"/课程, week/day/"Project N" numbering,
                or examples, prompts and code comments that look copied from a source rather than written in our own words.
@@ -168,8 +181,9 @@ jobs:
              term or source name in it. After the lesson fixes (if you made any) list only what is still wrong.
           Do not run git.
           PROMPT
+          cat /tmp/review-extra.md >> /tmp/review-prompt.md
           curl -fsS -o /tmp/claude-run.mjs "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/scripts/claude-run.mjs" && CC="node /tmp/claude-run.mjs reviewer" || CC=claude
-          $CC --model sonnet --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/review-prompt.md)" --max-turns 40 \
+          TRACE_STEP="$STEP" $CC --model sonnet --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/review-prompt.md)" --max-turns "$TURNS" \
             --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(node scripts/check-counts.mjs:*),Bash(node scripts/check-pages.mjs:*),Bash(node scripts/rag.mjs:*)" \
             --output-format text | tail -30
       - name: Package the result for the share job
