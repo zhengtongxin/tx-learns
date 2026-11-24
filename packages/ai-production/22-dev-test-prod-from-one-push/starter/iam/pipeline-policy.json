@@ -1,0 +1,70 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "TerraformStateBucket",
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket", "s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
+      "Resource": ["arn:aws:s3:::wharf-tf-state-*", "arn:aws:s3:::wharf-tf-state-*/*"]
+    },
+    {
+      "Sid": "TerraformLockTable",
+      "Effect": "Allow",
+      "Action": ["dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:DeleteItem", "dynamodb:DescribeTable"],
+      "Resource": "arn:aws:dynamodb:*:__ACCOUNT_ID__:table/wharf-tf-locks"
+    },
+    {
+      "Sid": "TwinBuckets",
+      "Effect": "Allow",
+      "Action": "s3:*",
+      "Resource": ["arn:aws:s3:::wharf-twin-*", "arn:aws:s3:::wharf-twin-*/*"]
+    },
+    {
+      "Sid": "ListBucketsForChecks",
+      "Effect": "Allow",
+      "Action": "s3:ListAllMyBuckets",
+      "Resource": "*"
+    },
+    {
+      "Sid": "TwinFunctions",
+      "Effect": "Allow",
+      "Action": "lambda:*",
+      "Resource": "arn:aws:lambda:*:__ACCOUNT_ID__:function:wharf-twin-*"
+    },
+    {
+      "Sid": "TwinRoles",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateRole", "iam:DeleteRole", "iam:GetRole", "iam:PassRole", "iam:TagRole", "iam:UntagRole",
+        "iam:UpdateAssumeRolePolicy", "iam:AttachRolePolicy", "iam:DetachRolePolicy",
+        "iam:PutRolePolicy", "iam:GetRolePolicy", "iam:DeleteRolePolicy",
+        "iam:ListRolePolicies", "iam:ListAttachedRolePolicies", "iam:ListInstanceProfilesForRole"
+      ],
+      "Resource": "arn:aws:iam::__ACCOUNT_ID__:role/wharf-twin-*"
+    },
+    {
+      "Sid": "TwinGateway",
+      "Effect": "Allow",
+      "Action": "apigateway:*",
+      "Resource": ["arn:aws:apigateway:*::/apis", "arn:aws:apigateway:*::/apis/*", "arn:aws:apigateway:*::/tags/*"]
+    },
+    {
+      "Sid": "TwinCdn",
+      "Effect": "Allow",
+      "Action": "cloudfront:*",
+      "Resource": "*"
+    },
+    {
+      "Sid": "TwinLogs",
+      "Effect": "Allow",
+      "Action": "logs:*",
+      "Resource": "arn:aws:logs:*:__ACCOUNT_ID__:log-group:/aws/lambda/wharf-twin-*"
+    },
+    {
+      "Sid": "FindLogGroups",
+      "Effect": "Allow",
+      "Action": ["logs:DescribeLogGroups", "logs:ListTagsForResource"],
+      "Resource": "*"
+    }
+  ]
+}

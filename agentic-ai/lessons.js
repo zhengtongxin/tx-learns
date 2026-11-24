@@ -1,5 +1,5 @@
 /* Lessons grouped by concept. Titles are our own; never copy a source's outline, project names or numbering. */
-window.TRACK={id:'agentic-ai',title:{en:'Agentic AI',zh:'智能体 AI'},topics:[
+window.TRACK={id:'agentic-ai',title:{en:'AI Agentic',zh:'AI 智能体'},topics:[
  {n:1,level:1,title:{en:'Foundations',zh:'基础'},items:[
   {k:'f',file:'01-agentic-workflow.html',title:{en:'Make an agentic workflow',zh:'搭建智能体工作流'}},
   {k:'f',file:'02-agents-and-patterns.html',title:{en:'Agents and agentic patterns',zh:'智能体与智能体模式'}},

@@ -25,9 +25,9 @@ Assume they are smart, busy and have never seen this topic. If a sentence needs 
 
 ## The running setting
 
-Each track has its own setting. Agentic AI uses the kopitiam below; the AI Engineer track uses a Singapore HDB estate (see `ai-engineer/STORY.md`, which has its own cast, props and "Back at the void deck" callout). The AI FDE track uses a Tanjong Pagar shophouse insurer (`ai-fde/STORY.md`, "Back at the shophouse"). Never mix settings.
+Each track has its own setting. AI Agentic uses the kopitiam below; the AI Engineer track uses a Singapore HDB estate (see `ai-engineer/STORY.md`, which has its own cast, props and "Back at the void deck" callout). The AI FDE track uses a Tanjong Pagar shophouse insurer (`ai-fde/STORY.md`, "Back at the shophouse"). Never mix settings.
 
-### The kopitiam thread (Agentic AI)
+### The kopitiam thread (AI Agentic)
 
 Kopi Corner, Uncle Lim's kopitiam in Penang, is the recurring setting. Every lesson ends with one short "Back at the kopitiam" callout (`.callout tip`, EN and 中文) that ties its idea to the shop, just before the takeaways. Keep the cast and props the same:
 
@@ -67,3 +67,12 @@ The site records what TX learnt, in TX's own words. It never reproduces where it
 - [ ] Nothing in the code is used before the step that builds it
 - [ ] Added to the track's `lessons.js` with a `file`
 - [ ] `node scripts/check-copy.mjs`, `node scripts/check-counts.mjs` and `node scripts/check-pages.mjs --fix` pass (the last one also stamps the lesson's "updated" date)
+
+## One story per track
+
+Each track has one artifact that grows (AI Agentic: the Kopi Corner assistant; AI Engineer: the Block 12 helper; AI FDE: the claims desk pilot; AI Production: the wharf product). The plan is in each track's `STORY.md`. A lesson:
+
+- opens with a **Where we left off** box (`<div class="callout thread">`): "Last time ___ could ___. Today it fails when ___. We fix it by ___.";
+- keeps its own scenario as a side case when it is not the main thread, with one line tying it back;
+- closes with a **What changed** box (`<div class="callout tip">`) in place of the old "Back at the ..." callout: "Now ___ can ___. The next problem is ___.", naming a concrete person or prop;
+- shows each key idea as a small diagram (`<figure class="fig">` with inline SVG, `.box`/`.lnk` classes, a `<text class="en">` and `<text class="zh">` per label) where the lesson is mostly code.

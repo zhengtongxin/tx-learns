@@ -1,0 +1,20 @@
+# Copy to .github/workflows/deploy.yml in your repository.
+# TODO: finish it. This workflow deploys dev on every push to main.
+name: deploy-dev
+on:
+  push:
+    branches: [main]
+# TODO 1: permissions: id-token: write (a short-lived identity token) and contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # TODO 2: environment: dev
+    env:
+      STATE_BUCKET: ${{ secrets.STATE_BUCKET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      # TODO 3: aws-actions/configure-aws-credentials@v4 with role-to-assume
+      #         arn:aws:iam::<account id from a secret>:role/wharf-pipeline and aws-region from a variable
+      # TODO 4: terraform init in infra with -backend-config for bucket, region and dynamodb_table=wharf-tf-locks
+      - run: 'echo "TODO - run ./deploy.sh dev"'

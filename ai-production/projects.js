@@ -1,2 +1,97 @@
 /* Project card data for each project lesson, shown by assets/site.js. Shape: window.PROJECTS[file]={goal,deliver,level:1-3,mins,accept:[{en,zh}],fail:[],stretch:[],pkg:{dir:"packages/<track>/<name>",files:[...],note}} (goal, deliver and list items are {en,zh}) */
 window.PROJECTS={};
+window.PROJECTS['06-consultation-notes-assistant.html']={
+ goal:{en:"Turn the product into a tool a clinic nurse would use: one form in, three tidy outputs streamed back.",zh:"把产品变成诊所护士真正会用的工具：一份表单进去，三份整理好的内容流式返回。"},
+ deliver:{en:"A deployed page where a signed-in, paying user submits a form and reads three sections: a records summary, next steps and a patient email.",zh:"一个已部署的页面：已登录并付费的用户提交表单，读到三段内容：记录摘要、后续步骤和给患者的邮件。"},
+ level:1,mins:40,
+ accept:[
+  {en:"Signed out, you see only the sign-in button. Signed in on the free plan, you see the pricing table.",zh:"未登录时只看到登录按钮；登录但在免费方案时，看到价格表。"},
+  {en:"Submitting invented notes streams text bit by bit and ends in three headed sections.",zh:"提交虚构的记录后，文字一点点流出来，最后是三个带标题的部分。"},
+  {en:"The API itself answers 402 for a free-plan token and 422 for a bad date.",zh:"API 自己会对免费方案的令牌返回 402，对错误日期返回 422。"},
+  {en:"A GET request to the route is refused with 405.",zh:"对这个路由发 GET 请求会被拒绝，返回 405。"}],
+ fail:[
+  {en:"\"Method not allowed\": the route is still GET, or the page does not POST. Make both POST.",zh:"“Method not allowed”：路由还是 GET，或页面没有用 POST。两边都改成 POST。"},
+  {en:"The pricing table never goes away after paying: the plan slug in the gate is not the one you bought. Copy the slug, not the long id.",zh:"付费后价格表一直不消失：门上写的方案名和你买的不一样。复制方案名（slug），不要复制那串长 id。"},
+  {en:"Every call is 401: the host has different keys from your laptop, or you did not redeploy after adding them.",zh:"每次调用都是 401：主机上的密钥和本地不同，或加完密钥后没有重新部署。"}],
+ stretch:[
+  {en:"Change the three outputs for another job, such as a teacher.",zh:"把三份输出改成别的工作，比如老师。"},
+  {en:"Add a required visit type to both the form and the API.",zh:"在表单和 API 两边都加一个必填的“就诊类型”。"},
+  {en:"List five things a real deployment needs before it touches private data.",zh:"列出五件真实上线、接触隐私数据之前必须有的东西。"}],
+ pkg:{dir:"packages/ai-production/06-consultation-notes-assistant",files:["README.txt","env.example","final/api/index.py","final/api/requirements.txt","final/pages/index.tsx","final/pages/_app.tsx","final/package.json","final/vercel.json","starter/api/index.py","starter/pages/index.tsx","starter/pages/_app.tsx","starter/package.json"],
+  note:{en:"Runs with test keys from a sign-in service and a model key. Demo only: invented data, never real patient data.",zh:"需要登录服务的测试密钥和一个模型密钥。仅供演示：数据都是虚构的，绝不放真实患者数据。"}}};
+window.PROJECTS['10-product-in-a-container-on-serverless.html']={
+ goal:{en:"Move the signed-in, paid, streaming product onto your own cloud account without changing what it does.",zh:"把已有登录、付费、流式回答的产品搬到你自己的云账号，功能不变。"},
+ deliver:{en:"A container image in your registry, a serverless function made from it, and a public streaming address that works from sign-in to answer.",zh:"你的镜像仓库里的一个容器镜像，一个由它创建的无服务器函数，以及一个从登录到回答都能用的公开流式地址。"},
+ level:2,mins:50,
+ accept:[
+  {en:"The container runs on your laptop and /api/health answers ok before you push anything.",zh:"容器在你的电脑上能跑，推送之前 /api/health 就返回 ok。"},
+  {en:"The function URL opens the page, and a question streams word by word, not all at once.",zh:"打开函数地址能看到页面，提问后文字一个个流出来，而不是一次出现。"},
+  {en:"The log shows a REPORT line with Duration and Billed Duration, and a first call after a quiet spell shows Init Duration.",zh:"日志里有一行 REPORT，含 Duration 和 Billed Duration；安静一阵后的第一次调用还有 Init Duration。"},
+  {en:"After teardown the console shows no function, repository, log group or role with your name.",zh:"拆除之后，控制台里不再有带你名字的函数、仓库、日志组或角色。"}],
+ fail:[
+  {en:"The image was built for the wrong chip type or with extra metadata, so the function will not start. Build for linux/amd64 with --provenance=false.",zh:"镜像是为错误的芯片类型构建的，或带了多余的元数据，函数无法启动。用 linux/amd64 并加 --provenance=false 构建。"},
+  {en:"Sign-in fails on the new address because the sign-in service still lists only the old host. Add the function URL to its allowed addresses.",zh:"新地址上登录失败，因为登录服务只认旧主机。把函数地址加进它的允许地址。"},
+  {en:"The answer arrives in one lump: the invoke mode is buffered, or the Dockerfile lacks the streaming switch. Both must say streaming.",zh:"回答一次性冒出来：调用模式是缓冲的，或 Dockerfile 里没有流式开关。两边都要写成流式。"}],
+ stretch:[
+  {en:"Redeploy after a one-line change and time the whole loop.",zh:"改一行代码后重新部署，给整个流程计时。"},
+  {en:"Lower the memory and watch time and cost change in the REPORT line.",zh:"调低内存，看 REPORT 行里的时间和费用怎么变。"},
+  {en:"Compare the cost line with your previous host.",zh:"把费用和你之前的主机比一比。"}],
+ pkg:{dir:"packages/ai-production/10-product-in-a-container-on-serverless",files:["README.txt","env.example","final/server.py","final/Dockerfile","final/Dockerfile.dockerignore","final/requirements.txt","final/static/index.html","final/scripts/build-static.sh","final/scripts/push-image.sh","final/scripts/create-function.sh","final/scripts/teardown.sh","starter/server.py","starter/Dockerfile","starter/requirements.txt","starter/scripts/push-image.sh","starter/scripts/create-function.sh"],
+  note:{en:"The local container steps need only Docker. The registry and function steps need a real cloud account and cost a little; final is the reference.",zh:"本地容器步骤只需要 Docker。镜像仓库和函数的步骤需要真实云账号，会产生少量费用；final 是参考答案。"}}};
+window.PROJECTS['14-digital-twin-live.html']={
+ goal:{en:"Put the digital twin on one public address, with memory in a bucket and a bill close to nothing when idle.",zh:"把数字分身放到一个公开地址上，记忆存在存储桶里，闲置时账单接近零。"},
+ deliver:{en:"A chat page behind a CDN, an API gateway and function behind it, and a memory bucket that keeps one file per visitor.",zh:"一个放在 CDN 后面的聊天页面，后面是 API 网关和函数，还有一个为每位访客保存一个文件的记忆存储桶。"},
+ level:2,mins:50,
+ accept:[
+  {en:"On your laptop first: the twin answers in her voice, admits what it does not know and refuses to give a home address.",zh:"先在电脑上测：分身用她的口吻回答，不知道的会承认，并且拒绝透露家庭住址。"},
+  {en:"One curl to the gateway returns a reply and creates test-1.json in the memory bucket.",zh:"对网关发一次 curl，会返回回复，并在记忆存储桶里生成 test-1.json。"},
+  {en:"On your phone: say your name, replace the function with a fresh copy, ask again, and it still remembers.",zh:"在手机上：说出你的名字，换上全新的函数副本，再问一次，它仍然记得。"},
+  {en:"The clean-up plan lists the five pieces in the right order.",zh:"清理计划按正确顺序列出这五样东西。"}],
+ fail:[
+  {en:"The browser blocks the calls (a cross-site rule). The gateway must allow the page's address.",zh:"浏览器拦截了请求（跨站规则）。网关必须允许页面所在的地址。"},
+  {en:"Memory vanishes in the cloud because the function has no durable disk. Keep USE_BUCKET set to true.",zh:"云上记忆消失，因为函数没有持久磁盘。要让 USE_BUCKET 保持为 true。"},
+  {en:"The CDN keeps serving the old page. Clear its cache after every upload.",zh:"CDN 一直给出旧页面。每次上传后都要清它的缓存。"}],
+ stretch:[
+  {en:"Give a friend the link and read their conversations, with their permission.",zh:"把链接给朋友，在征得同意后读他们的对话。"},
+  {en:"Remove the function's bucket permission and read the error.",zh:"去掉函数访问存储桶的权限，读一读报错。"},
+  {en:"Write down every console click you used and see how long the list is.",zh:"把你在控制台点过的每一步写下来，看看这张清单有多长。"}],
+ pkg:{dir:"packages/ai-production/14-digital-twin-live",files:["README.txt","env.example","final/backend/server.py","final/backend/memory.py","final/backend/context.py","final/backend/resources.py","final/backend/requirements.txt","final/backend/data/facts.txt","final/frontend/app/twin/page.tsx","final/frontend/package.json","final/iam/memory-policy.json","final/scripts/package.sh","final/scripts/create-backend.sh","final/scripts/publish-site.sh","final/scripts/teardown.sh","starter/backend/server.py","starter/backend/memory.py","starter/frontend/app/twin/page.tsx"],
+  note:{en:"The laptop part needs only a model key. The cloud part needs a real account, costs cents and creates the CDN in the console.",zh:"电脑上的部分只需要一个模型密钥。云上的部分需要真实账号，花费几分钱，CDN 要在控制台里创建。"}}};
+window.PROJECTS['22-dev-test-prod-from-one-push.html']={
+ goal:{en:"Show one push becoming a working twin, then test and prod with a signature before prod, then all of it gone.",zh:"演示一次推送变成可用的分身，再得到测试和生产环境（生产前要签字批准），最后全部拆除。"},
+ deliver:{en:"A repository whose pipeline deploys dev on every push, deploys or destroys test and prod by hand with approval for prod, and a one-page runbook.",zh:"一个代码仓库：每次推送自动部署开发环境，测试和生产手动部署或拆除（生产需批准），再加一页运行手册。"},
+ level:3,mins:60,
+ accept:[
+  {en:"A push to main turns the dev run green and prints a site and an api address.",zh:"推送到 main 后，开发环境的运行变绿，并打印出网站和 API 地址。"},
+  {en:"The prod run waits for approval; you read its plan in the log before you approve.",zh:"生产环境的运行会等待批准；批准之前你先在日志里读过计划。"},
+  {en:"Running terraform plan twice in a row says No changes.",zh:"连续运行两次 terraform plan，第二次显示 No changes。"},
+  {en:"After the destroy runs, the state list, the command line and the console all show nothing named wharf-twin.",zh:"拆除运行之后，状态列表、命令行和控制台里都看不到叫 wharf-twin 的东西。"}],
+ fail:[
+  {en:"\"Not authorized to assume role\": the trust policy names the wrong repository, or the run started from a branch other than main.",zh:"“Not authorized to assume role”：信任策略里写错了仓库，或运行不是从 main 分支发起的。"},
+  {en:"The state lock is held after a killed run. Check nobody is running, then force-unlock with the lock ID.",zh:"运行被中断后状态锁还在。确认没人在运行，再用锁 ID 强制解锁。"},
+  {en:"The pipeline is green but the site shows old files, because the CDN cache was not cleared.",zh:"流水线是绿的，但网站仍是旧文件，因为 CDN 缓存没清。"}],
+ stretch:[
+  {en:"Make a deliberate typo in a resource type and watch it fail safely in dev.",zh:"故意在资源类型里打错一个字，看它在开发环境安全地失败。"},
+  {en:"Roll back by pushing a revert and watch dev return to how it was.",zh:"推送一次回退提交，看开发环境恢复原样。"},
+  {en:"Tighten the pipeline role's permissions until it can do only what it needs.",zh:"一步步收紧流水线角色的权限，直到它只能做必要的事。"}],
+ pkg:{dir:"packages/ai-production/22-dev-test-prod-from-one-push",files:["README.txt","env.example","final/infra/providers.tf","final/infra/variables.tf","final/infra/main.tf","final/infra/outputs.tf","final/infra/backend.hcl.example","final/deploy.sh","final/destroy.sh","final/scripts/bootstrap-state.sh","final/scripts/bootstrap-pipeline.sh","final/scripts/set-github-config.sh","final/scripts/ensure-zip.sh","final/workflows/deploy.yml","final/workflows/manual.yml","final/iam/pipeline-policy.json","final/iam/pipeline-trust-policy.json","final/backend/server.py","final/frontend/package.json","final/frontend/src/main.js","starter/infra/main.tf","starter/deploy.sh","starter/destroy.sh","starter/workflows/deploy.yml","starter/workflows/manual.yml"],
+  note:{en:"This is a real cloud and GitHub setup. It cannot run without an account and a repository, so use final as the reference if you cannot create them.",zh:"这是真实的云和 GitHub 配置。没有账号和仓库就无法运行，如果你无法创建，就把 final 当作参考。"}}};
+window.PROJECTS['25-planning-agent-that-checks-itself.html']={
+ goal:{en:"Build a cloud agent that plans, solves, then proves its own answer by running code in a sealed sandbox.",zh:"做一个云端智能体：先规划、再解题，然后在封闭的沙箱里运行代码来验证自己的答案。"},
+ deliver:{en:"A deployed agent whose plan shows a required check step, a correct answer to the puzzle, and a trace you can read.",zh:"一个已部署的智能体：计划里有必需的验证步骤，谜题答案正确，并留有可以查看的运行记录。"},
+ level:3,mins:50,
+ accept:[
+  {en:"The plan lists a step that starts with Write Python code, shown in cyan.",zh:"计划里有一步以 Write Python code 开头，并以青色显示。"},
+  {en:"For four people who must not keep their own place, the answer is 9, and the sandbox check prints 9 too.",zh:"四个人都不能留在自己原来的位置，答案是 9，沙箱验证也打印出 9。"},
+  {en:"With observability switched on first, the trace shows each tool call and run_python as the slowest step.",zh:"先打开可观测性，运行记录里能看到每次工具调用，其中 run_python 最慢。"},
+  {en:"After clean-up the agent, its image, roles and log groups are gone.",zh:"清理之后，智能体、它的镜像、角色和日志组都不在了。"}],
+ fail:[
+  {en:"The first check fails because the sandbox is in a different region from the agent. Use one region everywhere.",zh:"第一次验证失败，因为沙箱和智能体不在同一个地区。所有地方都用同一个地区。"},
+  {en:"The agent skips the check when the prompt only says it may use code. Make the check a required to-do.",zh:"提示词只说“可以用代码”时，智能体会跳过验证。把验证写成必做的待办项。"},
+  {en:"The trace is empty because observability was switched on after the run, not before.",zh:"运行记录是空的，因为可观测性是在运行之后才打开，而不是之前。"}],
+ stretch:[
+  {en:"Ask something where the first answer tends to be wrong and see if the check catches it.",zh:"问一个第一次答案容易出错的问题，看验证能不能发现。"},
+  {en:"Find the slowest step in the trace.",zh:"在运行记录里找出最慢的一步。"},
+  {en:"Compare the cost with and without the code check.",zh:"比较有验证和没有验证时的费用。"}],
+ pkg:{dir:"packages/ai-production/25-planning-agent-that-checks-itself",files:["README.txt","env.example","final/agent.py","final/requirements.txt","final/examples/derangements.py","final/scripts/cleanup-check.sh","starter/agent.py","starter/requirements.txt","starter/examples/derangements.py","starter/scripts/cleanup-check.sh"],
+  note:{en:"Needs a real cloud account with model access and a managed agent runtime. Only the plan tools and the example check run offline; final is the reference for the rest.",zh:"需要一个有模型访问权限和托管智能体运行时的真实云账号。只有计划工具和示例验证能离线运行，其余部分以 final 为参考。"}}};
