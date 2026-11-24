@@ -71,7 +71,7 @@ customer's next claim. Never save card or passport numbers, and never save a gue
 
 claim1 = {"id": "C041", "customer_id": "K-0412", "customer": "Mr Tan",
           "story": "My checked bag never arrived. Receipts for everything inside are attached.", "amount": 420}
-print(asyncio.run(run_claim(claim1, BASE + SAVE)))</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">{'action': 'approve', 'payout': 420, 'reason': 'first bag claim, receipts match'}</div>
+print(asyncio.run(run_claim(claim1, BASE + SAVE)))</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">{'action': 'approve', 'payout': 420, 'reason': 'First bag claim, receipts match.'}</div>
 <p class="en">Which of these should the agent save?</p>
 <p class="zh">下面哪些该让智能体存起来？</p><div class="sc" id="g1"></div>
 
@@ -82,7 +82,7 @@ print(asyncio.run(run_claim(claim1, BASE + SAVE)))</span></div><p class="en" sty
 
 claim2 = {"id": "C042", "customer_id": "K-0412", "customer": "Mr Tan",
           "story": "My bag was lost again on the flight home. Receipts attached.", "amount": 380}
-print(asyncio.run(run_claim(claim2, BASE + LOOK + SAVE)))</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">{'action': 'refer', 'payout': 0, 'reason': 'second lost-bag claim in a short time; earlier note says 1 prior claim, C041'}</div>
+print(asyncio.run(run_claim(claim2, BASE + LOOK + SAVE)))</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">{'action': 'refer', 'payout': 0, 'reason': 'Second lost-bag claim in a short time; the earlier note says one prior claim, C041.'}</div>
 <div class="try" id="p3"></div>
 
 <h2><span class="en">Step 5 · Facts only, with a source and a date</span><span class="zh">第 5 步 · 只存事实，带出处和日期</span></h2>

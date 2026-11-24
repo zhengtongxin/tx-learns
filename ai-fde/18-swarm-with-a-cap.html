@@ -144,7 +144,7 @@ def health():
 fetch("/health").then(r =&gt; r.json()).catch(() =&gt; null).then(h =&gt; {
   if (!h) { go.disabled = true; msg.textContent = "The agent service is not running. Ask Kumar to start it."; }
   else if (h.busy) { msg.textContent = "A dispatch is already running."; }
-});</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">$ uvicorn service:app --port 8000
+});</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">$ uvicorn service:app --port 8000
 INFO:     Started server process [4121]
 INFO:     Uvicorn running on http://127.0.0.1:8000</div>
 <div class="try" id="p5"></div>

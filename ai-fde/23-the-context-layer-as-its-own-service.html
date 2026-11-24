@@ -24,8 +24,9 @@
 }
 
 for name, s in SOURCES.items():
-    print(name, "| owner:", s["owner"], "| agent may:", s["agent may"])</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">context layer | owner: data governance | agent may: read
-memory | owner: the agent | agent may: read and write</div>
+    print(name, "| owner:", s["owner"], "| agent may:", s["agent may"])</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">context layer | owner: data governance | agent may: read
+memory | owner: the agent | agent may: read and write
+database | owner: the backend | agent may: only through the gateway’s tools</div>
 <p class="en">Which source does each fact belong to? Sort them.</p>
 <p class="zh">下面每个事实属于哪个来源？来分一分。</p><div class="sc" id="g1"></div>
 
@@ -52,7 +53,7 @@ for name, (source, content) in FILES.items():
     (root / (name + ".json")).write_text(json.dumps(content, indent=2))
     manifest[name] = {"source": source, "owner": "data governance", "reviewed": "2026-11-02"}
 (root / "manifest.json").write_text(json.dumps(manifest, indent=2))
-print(len(manifest), "files written")</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">4 files written</div>
+print(len(manifest), "files written")</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">7 files written</div>
 <div class="try" id="p2"></div>
 
 <h2><span class="en">Step 3 · Serve them as a small service with its own sign-in</span><span class="zh">第 3 步 · 做成有自己登录的小服务</span></h2>
@@ -96,7 +97,7 @@ def one(name):
 # from context_service import app
 # client, key = app.test_client(), {"X-API-Key": os.environ["CONTEXT_KEY"]}
 # print(client.get("/context/glossary", headers=key).status_code)                # 200
-# print(client.post("/context/glossary", json={"excess": "x"}, headers=key).status_code)   # 405: no write route</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">200
+# print(client.post("/context/glossary", json={"excess": "x"}, headers=key).status_code)   # 405: no write route</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">200
 405</div>
 <div class="try" id="p3"></div>
 

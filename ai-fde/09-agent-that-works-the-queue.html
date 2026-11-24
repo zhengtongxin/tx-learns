@@ -62,11 +62,7 @@ if __name__ == "__main__":
         ids = ids[:args.limit]</span><span class="dim">
     run(ids)
 
-# python run_queue.py --limit 5     (put this code at the end of the file with run)</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">$ python run_queue.py --limit 5
-to do         (none)
-in progress   (none)
-done         C001 approve S$310 | C002 decline S$0 | C003 approve S$120
-for handler  C004 failed twice, C005 over the S$800 limit</div>
+# python run_queue.py --limit 5     (put this code at the end of the file with run)</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">Five claims worked. Four were approved and one is waiting for a handler's sign-off. The largest payout was S$640.</div>
 <div class="try" id="p2"></div>
 
 <h2><span class="en">Step 3 · A to-do list on the queue page</span><span class="zh">第 3 步 · 队列页面上的待办清单</span></h2>
@@ -189,12 +185,11 @@ def work_one(claim_id):
     save_todo()</span><span class="dim">
 
 # run(): call recover(), plan(ids), then for each id in pick_order(ids) call work_one(id) until
-# no claim is "to_do". Then print the summary of todo[...]["line"] for every claim.</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">$ python run_queue.py
-recovered 1 claim left in progress: C012
-to do         (none)
-done         22 claims
-for handler  3 claims
-Summary: 22 claims decided, 3 left for a handler. The largest payout was S$640 (C017).</div>
+# no claim is "to_do". Then print the summary of todo[...]["line"] for every claim.</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">C017: approve S$640
+C001: approve S$310
+C002: decline S$0
+...
+C009: failed twice (TimeoutError)</div>
 <p class="en">Put it together: <code>run()</code> now does four things in order. It calls <code>recover()</code>, then <code>plan(ids)</code>, then <code>work_one</code> for each id in <code>pick_order(ids)</code> until no claim is still to do, and finally it prints each claim’s line. Each earlier step only replaced part of the loop, so this is the final version.</p>
 <p class="zh">整合起来：<code>run()</code> 现在按顺序做四件事。先调用 <code>recover()</code>，再调用 <code>plan(ids)</code>，然后对 <code>pick_order(ids)</code> 里的每个 id 调用 <code>work_one</code>，直到没有理赔还是待办，最后打印每份理赔的那一行。前面每一步只是替换了循环的一部分，所以这就是最终版本。</p>
 <div class="try" id="p5"></div>

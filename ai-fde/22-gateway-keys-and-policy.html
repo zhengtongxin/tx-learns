@@ -207,9 +207,9 @@ key = os.environ["AGENT_KEY"]
 print("direct to backend:", post("http://127.0.0.1:5000/claims/C007/pay", key, {"amount": 300}))
 print("gateway, S$300:", post("http://127.0.0.1:5001/tools/pay_claim", key, {"claim_id": "C007", "amount": 300}))
 print("gateway, S$1,200:", post("http://127.0.0.1:5001/tools/pay_claim", key, {"claim_id": "C007", "amount": 1200}))
-# expected: 401 (backend: not a key it knows) / 200 / 403 (the policy)</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">direct to backend: 401
-gateway, S$300: 200
-gateway, S$1,200: 403</div>
+# expected: 401 (backend: not a key it knows) / 200 / 403 (the policy)</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">direct to backend: (401, '{"error":"missing or wrong key"}\n')
+gateway, S$300: (200, '{"paid":300}\n')
+gateway, S$1,200: (403, '{"error":"Payments over S$800 need a handler’s signature.","rule":"pay-limit"}\n')</div>
 <p class="en">Which layer says no in each case? Sort them.</p>
 <p class="zh">每种情况是哪一层说了不？来分一分。</p><div class="sc" id="g1"></div>
 
@@ -243,8 +243,8 @@ lines = [json.loads(line) for line in open("decisions.log")]
 would_refuse = [l for l in lines if not l["allowed"]]
 print(len(lines), "calls;", len(would_refuse), "would have been refused")
 for l in would_refuse:
-    print(l["caller"], l["tool"], l["args"], l["rule"])</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">agent pay_claim {'claim_id': 'C007', 'amount': 1200} limit-800
-1 calls; 1 would have been refused</div>
+    print(l["caller"], l["tool"], l["args"], l["rule"])</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">2 calls; 1 would have been refused
+agent pay_claim {'claim_id': 'C007', 'amount': 1200} pay-limit</div>
 <div class="try" id="p7"></div>
 
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我当时想错了</span></b><span class="en">I had the policy in place and felt safe, but the agent’s tools still called the backend directly with its own key, which the backend accepted. The policy protected nothing, because it never saw a single call. The fix was to give the agent only a gateway key and move it onto the gateway’s tools.</span><span class="zh">我把策略装好了，心里踏实，可智能体的工具还拿着它自己的密钥直接调用后端，后端照单全收。策略什么也没保护，因为它一次调用都没看到过。解决办法是只给智能体一把网关的密钥，并把它换到网关的工具上。</span></div>

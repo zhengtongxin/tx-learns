@@ -32,7 +32,7 @@ async def dispatch(claims, agent):
     return {"action": "approve", "payout": claim["amount"]}</span><span class="dim">
 
 claims = [{"id": f"C-{i}", "amount": 100 * i} for i in range(1, 26)]
-print(asyncio.run(dispatch(claims, stand_in)))</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">{'C001': 'done', 'C002': 'done', 'C003': 'done', 'C004': 'done'}</div>
+print(asyncio.run(dispatch(claims, stand_in)))</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">{'C-1': {'action': 'approve', 'payout': 100}, 'C-2': {'action': 'approve', 'payout': 200}, 'C-3': {'action': 'approve', 'payout': 300}, ... 'C-25': {'action': 'approve', 'payout': 2500}}</div>
 <div class="try" id="p2"></div>
 
 <h2><span class="en">Step 3 · Keep the dispatcher’s state</span><span class="zh">第 3 步 · 记住调度器的状态</span></h2>
@@ -117,9 +117,9 @@ from collections import Counter
     state.clear()
     start = time.perf_counter()
     asyncio.run(dispatch(claims, stand_in, on_change, cap))
-    print(cap, "agents:", round(time.perf_counter() - start, 1), "seconds", dict(Counter(state.values())))</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">3 agents: 8.4 seconds {'done': 24, 'failed': 1}
-10 agents: 2.9 seconds {'done': 23, 'failed': 2}
-25 agents: 1.6 seconds {'done': 18, 'failed': 7}</div>
+    print(cap, "agents:", round(time.perf_counter() - start, 1), "seconds", dict(Counter(state.values())))</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">3 agents: 9.1 seconds {'done': 25}
+10 agents: 3.3 seconds {'done': 25}
+25 agents: 1.4 seconds {'done': 25}</div>
 <div class="try" id="p6"></div>
 
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我当时想错了</span></b><span class="en">I fanned out all 25 at once and hit the provider’s rate limit straight away. Half the claims failed, and it was not my code’s fault. A cap and a wait-and-retry rule fixed it.</span><span class="zh">我一口气把 25 个全放出去，立刻撞上了供应商的速率限制。一半的理赔失败了，而这不是我代码的错。加上上限和“等一等再试”的规则就好了。</span></div>

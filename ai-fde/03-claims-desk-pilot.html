@@ -120,9 +120,9 @@ show_queue()
 # It is the ONLY code that opens the answer key.
 key = json.load(open("answer_key/handler_decisions.json"))   # {claim id: handler's action}, e.g. {"C007": "approve"}; Lesson 4 turns each into a dict
 agree = sum(1 for cid, item in queue.items() if item["decision"]["action"] == key[cid])
-</span><span class="chg">print(f"agrees with handlers on {agree} of {len(key)} claims")</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">C001  done  approve  S$310  flight delayed 7 hours, receipts match
-C002  done  decline  S$0  strike announced before booking
-C003  for_handler  approve  S$1200  over S$800, needs a sign-off
+</span><span class="chg">print(f"agrees with handlers on {agree} of {len(key)} claims")</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">C001  decided         approve  S$310  Flight delayed 7 hours, receipts match.
+C002  decided         decline  S$0  Strike announced before booking.
+C003  waiting_signoff approve  S$1200  Over S$800, needs a handler.
 ...
 agrees with handlers on 21 of 25 claims</div>
 <p class="en">Which claims will the pilot most likely get wrong? Sort them.</p>

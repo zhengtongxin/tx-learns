@@ -100,8 +100,8 @@ c1 = {"id": "C041", "customer_id": "K-0412", "policy_id": "P003",
 c2 = {"id": "C042", "customer_id": "K-0412", "policy_id": "P003",
       "story": "My bag was lost again on the flight home. Receipts attached.", "amount": 380}
 print(process(c1))
-print(process(c2))</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">{'claim': 'C041', 'action': 'approve', 'payout': 420}
-{'claim': 'C042', 'action': 'refer', 'payout': 0}</div>
+print(process(c2))</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">{'action': 'approve', 'payout': 420, 'reason': 'Bag never arrived and receipts match the policy cover.'}
+{'action': 'refer', 'payout': 0, 'reason': 'The note shows a lost-bag claim, C041, only days ago. A handler should check.'}</div>
 <div class="try" id="p4"></div>
 
 <h2><span class="en">Step 5 · Show the handler what the agent used</span><span class="zh">第 5 步 · 让理赔员看到智能体用了什么</span></h2>
@@ -116,10 +116,10 @@ print(process(c2))</span></div><p class="en" style="margin:10px 0 2px"><b>Expect
     for note in json.loads(used) or ["(none)"]:
         print("   -", note)
 
-show_claim("C042")</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">C042  refer  S$0
-  why: second lost-bag claim by K-0412 in 9 days
+show_claim("C042")</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">C042  refer  S$0
+  why: The note shows a lost-bag claim, C041, only days ago. A handler should check.
   notes the agent read:
-   - C041: bag lost on outbound flight, S$420 approved</div>
+   - Lost-bag claim C041, S$420 approved (claim C041, saved 2026-11-24)</div>
 <div class="try" id="p5"></div>
 
 <h2><span class="en">Step 6 · Three sources, three owners</span><span class="zh">第 6 步 · 三个数据源，三个主人</span></h2>
@@ -128,7 +128,7 @@ show_claim("C042")</span></div><p class="en" style="margin:10px 0 2px"><b>Expect
 <div class="codebox" data-file="memory_guard.py" data-lang="python"><span class="chg">try:
     ref.execute("UPDATE policies SET limit_amt = 99999 WHERE id = 'P003'")
 except sqlite3.OperationalError as e:
-    print("blocked:", e)          # attempt to write a readonly database</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">blocked: attempt to write a readonly database</div>
+    print("blocked:", e)          # attempt to write a readonly database</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">blocked: attempt to write a readonly database</div>
 <p class="en">Who owns each of these?</p>
 <p class="zh">下面这些各归谁？</p><div class="sc" id="g1"></div>
 <div class="try" id="p6"></div>

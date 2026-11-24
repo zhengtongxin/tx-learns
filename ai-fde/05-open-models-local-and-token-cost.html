@@ -43,7 +43,7 @@ JSON only: {{"action": "approve" or "decline" or "refer", "payout": number in S$
 
 full = sum(rough_tokens(build_prompt(c)) for c in claims) / len(claims)
 small = sum(rough_tokens(small_prompt(c)) for c in claims) / len(claims)
-</span><span class="chg">print(f"full {full:.0f} tokens, small {small:.0f} tokens, saved {1 - small / full:.0%}")</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">full 612 tokens, small 188 tokens, saved 69%</div>
+</span><span class="chg">print(f"full {full:.0f} tokens, small {small:.0f} tokens, saved {1 - small / full:.0%}")</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">full 612 tokens, small 188 tokens, saved 69%</div>
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 3 · Open models on a hosting service</span><span class="zh">第 3 步 · 托管服务上的开放模型</span></h2>
@@ -94,14 +94,14 @@ results = run_all(local, LOCAL_MODELS[0])      # same function, now running on y
     print(f"{name:42} {right}/{len(results)} right  US${cost:.2f} per 1,000  {secs:.1f}s per claim")</span><span class="dim">
 
 # local models cost nothing per token, so their price is (0, 0)
-summary("llama3.2 (local)", (0, 0), results)</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">llama3.2 (local)                           17/25 right  US$0.00 per 1,000  6.8s per claim</div>
+summary("llama3.2 (local)", (0, 0), results)</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">llama3.2 (local)                           17/25 right  US$0.00 per 1,000  6.8s per claim</div>
 <div class="try" id="p3"></div>
 
 <h2><span class="en">Step 6 · Check the lazy baseline</span><span class="zh">第 6 步 · 对照偷懒的基线</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>baseline</b> is the score of a trivial answer. If most claims are approvals, a “model” that approves everything already looks decent. Your real model is only worth something by how much it adds on top. Always print the baseline next to the scores.</p>
 <p class="zh" style="margin:0 0 8px"><b>基线</b>就是一个偷懒答案的得分。如果大多数理赔都是批准，一个“全部批准”的模型看上去就已经不差。你的真模型值多少，只看它在这之上多加了多少。分数旁边永远要印出基线。</p></div>
 <div class="codebox" data-file="bench.py" data-lang="python"><span class="chg">approve_share = sum(1 for want in key.values() if want["action"] == "approve") / len(key)
-print(f"approving everything scores {approve_share:.0%}")</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">approving everything scores 56%</div>
+print(f"approving everything scores {approve_share:.0%}")</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">approving everything scores 56%</div>
 <div class="try" id="p4"></div>
 
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我当时想错了</span></b><span class="en">I forgot the “approve everything” baseline. About 60% of our claims are approvals, so a lazy model looked decent until I compared it with the trivial answer. Now the baseline is always the first line I print.</span><span class="zh">我忘了“全部批准”这条基线。我们大约 60% 的理赔是批准的，所以一个偷懒的模型看起来还不错，直到我拿它和最简单的答案比。现在基线永远是我打印的第一行。</span></div>

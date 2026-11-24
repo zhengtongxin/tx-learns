@@ -108,9 +108,9 @@ def cost_per_1000(model, run):
 
 for model, two in runs.items():
     rights = [sum(right for right, _ in score(run).values()) for run in two]
-    print(model, "right per run:", rights, f"US${cost_per_1000(model, two[0]):.2f} per 1,000 claims")</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">model-a right per run: [21, 22] US$3.40 per 1,000 claims
-model-b right per run: [19, 19] US$0.85 per 1,000 claims
-model-c right per run: [17, 20] US$0.30 per 1,000 claims</div>
+    print(model, "right per run:", rights, f"US${cost_per_1000(model, two[0]):.2f} per 1,000 claims")</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">openai/gpt-5.4-mini right per run: [19, 19] US$0.85 per 1,000 claims
+anthropic/claude-haiku-5-5 right per run: [20, 20] US$1.90 per 1,000 claims
+anthropic/claude-sonnet-5-5 right per run: [22, 21] US$5.70 per 1,000 claims</div>
 <p class="en">Each model was run twice on 25 claims. Is each gap real, or just noise?</p>
 <p class="zh">每个模型在 25 份理赔上跑了两遍。每个差距是真的，还是只是噪声？</p><div class="sc" id="g2"></div>
 

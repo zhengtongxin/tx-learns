@@ -232,7 +232,7 @@ def roll_back_to(n):
     state["active"] = n
     state["log"].append({"handler": request.get_json()["handler"], "put_back": n})
     save(state)
-    return jsonify(active=n)</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">{"active": 2}</div>
+    return jsonify(active=n)</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">{"active": 2}</div>
 <div class="try" id="p6"></div>
 
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我当时想错了</span></b><span class="en">My first improver changed three things at once, and tuned itself to the sample claims it could see. The practice score went up. Then the held-out claims showed the agent was no better, and worse on one costly kind of mistake. One change at a time, and a test the improver cannot see, fixed both problems.</span><span class="zh">我的第一版改进者一次改了三样东西，还把自己调得只适合它看得到的样本理赔。练习分数涨了。但留出的理赔显示，智能体并没有更好，在一种代价很高的错误上还更差。一次只改一样，再加一个改进者看不到的测试，两个问题都解决了。</span></div>
