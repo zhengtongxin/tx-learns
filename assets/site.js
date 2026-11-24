@@ -4,6 +4,8 @@
   function set(k,v){try{localStorage.setItem(k,v)}catch(e){}}
   function t(o){return '<span class="en">'+o.en+'</span><span class="zh">'+o.zh+'</span>'}
   function done(){try{return JSON.parse(get(DONE,'{}'))}catch(e){return {}}}
+  var LAST='learn-last',REC='learn-recent';
+  function jget(k,d){try{var v=JSON.parse(get(k,''));return v==null?d:v}catch(e){return d}}
   var L0=get(KEY,(navigator.language||'').toLowerCase().indexOf('zh')===0?'zh':'en');if(L0!=='zh')L0='en';
   /* The page language follows EN/中文, so screen readers and search engines read it right. */
   function setLang(l){root.setAttribute('data-lang',l);root.lang=l==='zh'?'zh-Hans':'en'}setLang(L0);
@@ -22,9 +24,20 @@
     var C=window.TRACK,here=location.pathname.split('/').pop()||'index.html',d=done();
     if(C){C.all=[];C.topics.forEach(function(w){w.items.forEach(function(it,i){it.w=w.n;it.i=i+1;it.g=C.all.length+1;C.all.push(it)})});C.lessons=C.all.filter(function(x){return x.file});C.total=C.all.length}
     function countUp(el){var to=+el.dataset.count,s=performance.now();if(calm){el.textContent=to;return}(function tick(n){var k=Math.min(1,(n-s)/1200);el.textContent=Math.round(to*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(tick)})(s)}
-    function count(c){var n=0;for(var k in d)if(k.indexOf(c+'/')===0)n++;return n}
+    /* Progress counts only keys that still match a published lesson (files = that track's lesson files), so old or renamed lessons never inflate it. */
+    function count(c,files){var n=0;for(var k in d)if(k.indexOf(c+'/')===0&&d[k]&&(!files||files.indexOf(k.slice(c.length+1))>-1))n++;return n}
+    var CF=C?C.lessons.map(function(x){return x.file}):[];
+    /* The lesson to open next: the one you were on if unfinished, else the first unfinished one after it, else the first unfinished one. */
+    function nextOf(id,files,from){var last=jget(LAST,null),i,s0=-1;
+      if(last&&last.t===id&&files.indexOf(last.f)>-1){if(!d[id+'/'+last.f])return last.f;s0=files.indexOf(last.f)}
+      else if(from)s0=files.indexOf(from);
+      for(i=s0+1;i<files.length;i++)if(!d[id+'/'+files[i]])return files[i];
+      for(i=0;i<files.length;i++)if(!d[id+'/'+files[i]])return files[i];return null}
 
-    var bar=document.createElement('div');bar.className='prog';document.body.prepend(bar);
+    var bar=document.createElement('div');bar.className='prog';bar.setAttribute('aria-hidden','true');document.body.prepend(bar);
+    /* Skip link: the first Tab stop, so keyboard users can jump past the top bar, the menu and the dock. */
+    var mn=document.querySelector('main');
+    if(mn){if(!mn.id)mn.id='main';mn.setAttribute('tabindex','-1');var sk=document.createElement('a');sk.className='skip';sk.href='#'+mn.id;sk.innerHTML=t({en:'Skip to content',zh:'跳到正文'});sk.onclick=function(){setTimeout(function(){mn.focus()},0)};document.body.prepend(sk)}
     var top=document.createElement('div');top.className='top';
     top.innerHTML='<a class="brand" href="'+(C?'../index.html':'index.html')+'"><b></b>TX Learns</a>'+(C?'<button class="icon-btn menu-btn" aria-expanded="false" aria-controls="topics-nav">☰ <span class="en">Topics</span><span class="zh">主题</span></button>':'')+'<span class="sp"></span>'+'<a class="icon-btn eco-btn" href="'+(C?'../':'')+'ecosystem.html" title="How it works · 运作方式" aria-label="How it works · 运作方式">🌐<span class="lbl"> <span class="en">How it works</span><span class="zh">运作方式</span></span></a>'+
       '<div class="seg" role="group" aria-label="Language · 语言"><button data-l="en" lang="en">EN</button><button data-l="zh" lang="zh-Hans">中文</button></div><button class="icon-btn th" aria-label="theme"></button>';
@@ -34,36 +47,47 @@
     top.querySelector('.th').onclick=function(){var n=root.getAttribute('data-theme')==='dark'?'light':'dark';root.setAttribute('data-theme',n);set(TH,n);mark()};
     mark();
 
-    var side=document.querySelector('.side'),scrim;if(side){side.id='topics-nav';side.setAttribute('aria-label','Topics · 主题')}
+    var side=document.querySelector('.side'),scrim;if(side){side.id='topics-nav';side.setAttribute('aria-label','Topics · 主题');side.inert=true}
     if(C&&side){
       var NK='learn-nav',ns={};try{ns=JSON.parse(localStorage.getItem(NK)||'{}')}catch(e){}
       var list=(window.TRACKS&&window.TRACKS.length)?window.TRACKS:[{id:C.id,icon:'',title:C.title,href:'agentic-ai/index.html'}];
-      side.innerHTML=list.map(function(c){
+      side.innerHTML='<div class="side-top"><a class="side-all" href="../index.html">← '+t({en:'All tracks',zh:'所有路线'})+'</a><button type="button" class="side-close" aria-label="Close topics menu · 关闭主题菜单">✕</button></div>'+list.map(function(c){
         var cur=c.id===C.id,open=ns[c.id]!==undefined?ns[c.id]:cur,body;
         if(cur)body='<a href="index.html" class="'+(here==='index.html'?'cur':'')+'">⌂ '+t({en:'Overview',zh:'总览'})+'</a>'+
           C.topics.map(function(w){return '<h5>'+t(w.title)+'</h5>'+w.items.map(function(l){
-            return l.file?'<a href="'+l.file+'" class="'+(l.file===here?'cur ':'')+(d[C.id+'/'+l.file]?'done':'')+'">'+t(l.title)+'</a>':'<span class="soon">'+t(l.title)+'</span>'}).join('')}).join('');
+            return l.file?'<a href="'+l.file+'" class="'+(l.file===here?'cur ':'')+(d[C.id+'/'+l.file]?'done':'')+'"'+(l.file===here?' aria-current="page"':'')+'>'+t(l.title)+'</a>':'<span class="soon">'+t(l.title)+'</span>'}).join('')}).join('');
         else body='<a href="../'+c.href+'">⌂ '+t({en:'Overview',zh:'总览'})+'</a>';
-        return '<div class="cg'+(open?' open':'')+(cur?' cur':'')+'" data-c="'+c.id+'"><button class="cg-h" aria-expanded="'+open+'"><span class="ic">'+(c.icon||'')+'</span><span class="tt">'+t(c.title)+'</span><span class="pg">'+count(c.id)+'/'+(cur?C.total:c.total||'')+'</span><i class="chev"></i></button><div class="cg-b"><div>'+body+'</div></div></div>'}).join('');
-      side.querySelectorAll('.cg-h').forEach(function(h){h.onclick=function(){var g=h.parentNode,o=!g.classList.contains('open');g.classList.toggle('open',o);h.setAttribute('aria-expanded',o);ns[g.dataset.c]=o;try{localStorage.setItem(NK,JSON.stringify(ns))}catch(e){}}});
+        return '<div class="cg'+(open?' open':'')+(cur?' cur':'')+'" data-c="'+c.id+'"><button class="cg-h" aria-expanded="'+open+'" aria-controls="cgb-'+c.id+'"><span class="ic">'+(c.icon||'')+'</span><span class="tt">'+t(c.title)+'</span>'+(cur?'<span class="pg">'+count(c.id,CF)+'/'+CF.length+'</span>':'')+'<i class="chev"></i></button><div class="cg-b" id="cgb-'+c.id+'"'+(open?'':' inert')+'><div>'+body+'</div></div></div>'}).join('');
+      side.querySelectorAll('.cg-h').forEach(function(h){h.onclick=function(){var g=h.parentNode,o=!g.classList.contains('open');g.classList.toggle('open',o);h.setAttribute('aria-expanded',o);g.querySelector('.cg-b').inert=!o;ns[g.dataset.c]=o;try{localStorage.setItem(NK,JSON.stringify(ns))}catch(e){}}});
       scrim=document.createElement('div');scrim.className='scrim';scrim.setAttribute('aria-hidden','true');document.body.appendChild(scrim);
       document.body.appendChild(side);
-      var tg=function(on){var o=on===undefined?!side.classList.contains('open'):on;side.classList.toggle('open',o);scrim.classList.toggle('on',o);var mb=top.querySelector('.menu-btn');mb.setAttribute('aria-expanded',o);
-        if(o){var fa=side.querySelector('a,button');if(fa)fa.focus()}else if(side.contains(document.activeElement))mb.focus()};
-      top.querySelector('.menu-btn').onclick=function(){tg()};scrim.onclick=function(){tg(false)};
-      document.addEventListener('keydown',function(e){if(e.key==='Escape'&&side.classList.contains('open'))tg(false)});
+      var opener=null;
+      var tg=function(on){var o=on===undefined?!side.classList.contains('open'):on,mb=top.querySelector('.menu-btn');
+        if(o)opener=document.activeElement;
+        var inside=side.contains(document.activeElement);
+        side.inert=!o;side.classList.toggle('open',o);scrim.classList.toggle('on',o);mb.setAttribute('aria-expanded',o);
+        if(o){var fa=side.querySelector('.side-close');if(fa)fa.focus()}
+        else if(inside){var back=opener&&document.contains(opener)&&!opener.closest('.side')?opener:mb;back.focus()}};
+      top.querySelector('.menu-btn').onclick=function(){tg()};scrim.onclick=function(){tg(false)};side.querySelector('.side-close').onclick=function(){tg(false)};
+      /* Escape closes the drawer; Tab stays inside it while it is open. */
+      document.addEventListener('keydown',function(e){if(!side.classList.contains('open'))return;
+        if(e.key==='Escape'){tg(false);return}
+        if(e.key==='Tab'){var f=[].filter.call(side.querySelectorAll('a[href],button'),function(x){return !x.closest('[inert]')});if(!f.length)return;var a=f[0],z=f[f.length-1];
+          if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}}});
       window.TX.menu=tg;
     }
 
     /* stage progress ring */
     var rb=document.querySelector('.ringbox');
-    if(C&&rb){var n=count(C.id),R=36,L=2*Math.PI*R,p=n/C.total;
-      rb.innerHTML='<div class="bigring"><svg width="84" height="84" viewBox="0 0 84 84"><defs><linearGradient id="rg"><stop offset="0" stop-color="#ffb703"/><stop offset="1" stop-color="#ffe066"/></linearGradient></defs><circle class="bg" cx="42" cy="42" r="'+R+'"/><circle class="fg" cx="42" cy="42" r="'+R+'" stroke-dasharray="'+L+'" stroke-dashoffset="'+L+'"/></svg><b>'+Math.round(p*100)+'%</b></div><div style="text-align:left"><div style="font-weight:700">'+t({en:n+' of '+C.total+' lessons completed',zh:'已完成 '+n+' / '+C.total+' 课'})+'</div><div class="meta">'+t({en:C.lessons.length+' available now',zh:'当前已发布 '+C.lessons.length+' 课'})+'</div></div>';
+    if(C&&rb){var n=count(C.id,CF),pub=CF.length,R=36,L=2*Math.PI*R,p=pub?n/pub:0;
+      rb.innerHTML='<div class="bigring"><svg width="84" height="84" viewBox="0 0 84 84"><defs><linearGradient id="rg"><stop offset="0" stop-color="#ffb703"/><stop offset="1" stop-color="#ffe066"/></linearGradient></defs><circle class="bg" cx="42" cy="42" r="'+R+'"/><circle class="fg" cx="42" cy="42" r="'+R+'" stroke-dasharray="'+L+'" stroke-dashoffset="'+L+'"/></svg><b>'+Math.round(p*100)+'%</b></div><div style="text-align:left"><div style="font-weight:700">'+t({en:n+' of '+pub+' published lessons completed',zh:'已完成 '+n+' / '+pub+' 课（已发布）'})+'</div><div class="meta">'+t({en:pub+' of '+C.total+' planned lessons are published',zh:'规划 '+C.total+' 课，已发布 '+pub+' 课'})+'</div></div>';
+      var br=rb.querySelector('.bigring');br.setAttribute('role','progressbar');br.setAttribute('aria-valuemin','0');br.setAttribute('aria-valuemax',pub);br.setAttribute('aria-valuenow',n);br.setAttribute('aria-valuetext',n+' of '+pub+' published lessons completed · 已完成 '+n+' / '+pub+' 课');br.setAttribute('aria-label','Track progress · 路线进度');
       setTimeout(function(){rb.querySelector('.fg').style.strokeDashoffset=L*(1-p)},200)}
     var tm=document.querySelector('.track-meta');
     if(C&&tm)tm.innerHTML=t({en:C.topics.length+' topics · '+C.total+' lessons',zh:C.topics.length+' 个主题 · '+C.total+' 课'});
     var sb=document.querySelector('.startbtn');
-    if(C&&sb&&C.lessons.length){sb.href=C.lessons[0].file;sb.innerHTML=t({en:'Start learning →',zh:'开始学习 →'})}
+    var NX=C&&CF.length?nextOf(C.id,CF):null,started=C&&(count(C.id,CF)>0||(jget(LAST,{}).t===C.id));
+    if(C&&sb&&CF.length){sb.href=NX||CF[0];sb.innerHTML=!NX?t({en:'All done: review from the start →',zh:'全部完成：从头复习 →'}):started?t({en:'Continue where you left off →',zh:'继续上次的进度 →'}):t({en:'Start learning →',zh:'开始学习 →'})}
 
     /* lesson: "Updated" date from <meta name="updated"> (set by node scripts/check-pages.mjs --fix, never typed) */
     var um=document.querySelector('meta[name="updated"]'),hm=document.querySelector('main .meta');
@@ -74,10 +98,10 @@
     /* journey: topic tabs + lesson cards */
     var jr=document.querySelector('.journey');
     if(C&&jr){
-      var cur=0;for(var wi=0;wi<C.topics.length;wi++){if(C.topics[wi].items.some(function(x){return x.file})){cur=wi;break}}
+      var cur=0,tf=NX||CF[0];for(var wi=0;wi<C.topics.length;wi++){if(C.topics[wi].items.some(function(x){return x.file&&x.file===tf})){cur=wi;break}}
       var draw=function(){
         var w=C.topics[cur],rd=w.items.filter(function(x){return x.file}).length;
-        jr.innerHTML='<div class="wtabs">'+C.topics.map(function(x,i){return '<button class="wtab'+(i===cur?' on':'')+'" data-i="'+i+'">'+t(x.title)+'</button>'}).join('')+'</div>'+
+        jr.innerHTML='<div class="wtabs">'+C.topics.map(function(x,i){return '<button class="wtab'+(i===cur?' on':'')+'"'+(i===cur?' aria-current="true"':'')+' data-i="'+i+'">'+t(x.title)+'</button>'}).join('')+'</div>'+
           '<div class="wph"><div><div class="ey">'+t({en:'Topic '+w.n,zh:'主题 '+w.n})+(w.level?' · '+t(LV[w.level]):'')+'</div><h3>'+t(w.title)+'</h3></div><div class="meta">'+t({en:rd+' of '+w.items.length+' lessons available',zh:'已发布 '+rd+' / '+w.items.length+' 课'})+'</div></div>'+
           '<div class="lgrid">'+w.items.map(function(l){
             var no=('0'+l.g).slice(-2),chip='<span class="chip '+l.k+'">'+t(TYPE[l.k])+'</span>';
@@ -88,24 +112,88 @@
       draw();
     }
 
+    /* prerequisites + project card + track before/after: data lives in each track's prereqs.js / projects.js (window.PREREQ / window.PROJECTS) and tracks.js */
+    function lessonLink(f){var x=C.lessons.filter(function(l){return l.file===f})[0];return x?'<a href="'+f+'">'+t(x.title)+'</a>':''}
+    function li(a){return (a||[]).map(function(x){return '<li>'+t(x)+'</li>'}).join('')}
+    function renderMeta(){
+      var P=(window.PREREQ||{})[here],J=(window.PROJECTS||{})[here],hm2=document.querySelector('main .meta'),anchor=hm2&&(hm2.closest('.hero')||hm2),box;
+      if(P&&hm2){box=document.createElement('aside');box.className='card prereq';box.setAttribute('aria-label','Before you start · 开始之前');
+        var rows=[];
+        if(P.prev&&P.prev.length)rows.push(['Recommended first','建议先学','<ul>'+P.prev.map(function(f){var a=lessonLink(f);return a?'<li>'+a+(d[C.id+'/'+f]?' ✓':'')+'</li>':''}).join('')+'</ul>']);
+        if(P.tools)rows.push(['Tools and accounts','工具与账号',t(P.tools)]);
+        if(P.know)rows.push(['What you should already know','需要的基础',t(P.know)]);
+        if(P.mins)rows.push(['Hands-on time','动手时间',t({en:'about '+P.mins+' minutes',zh:'约 '+P.mins+' 分钟'})]);
+        if(P.offline!==undefined)rows.push(['Works offline','能否离线',t(P.offline?{en:'Yes, once the packages are installed',zh:'可以（装好依赖之后）'}:{en:'No, it needs an internet connection',zh:'不行，需要联网'})]);
+        box.innerHTML='<b class="lbl">'+t({en:'Before you start',zh:'开始之前'})+'</b><dl>'+rows.map(function(r){return '<dt>'+t({en:r[0],zh:r[1]})+'</dt><dd>'+r[2]+'</dd>'}).join('')+'</dl>';
+        anchor.after(box);anchor=box}
+      if(J&&hm2){var pc=document.createElement('aside');pc.className='card prereq proj';pc.setAttribute('aria-label','Project card · 项目卡');
+        var pk=J.pkg,files=pk&&pk.files?pk.files.map(function(f){return '<li><a href="../'+pk.dir+'/'+f+'">'+f+'</a></li>'}).join(''):'';
+        pc.innerHTML='<b class="lbl">'+t({en:'Project card',zh:'项目卡'})+'</b><dl>'+
+          (J.goal?'<dt>'+t({en:'Goal',zh:'目标'})+'</dt><dd>'+t(J.goal)+'</dd>':'')+(J.deliver?'<dt>'+t({en:'Deliverable',zh:'交付物'})+'</dt><dd>'+t(J.deliver)+'</dd>':'')+
+          (J.level?'<dt>'+t({en:'Difficulty',zh:'难度'})+'</dt><dd>'+t(LV[J.level])+'</dd>':'')+(J.mins?'<dt>'+t({en:'Time',zh:'时间'})+'</dt><dd>'+t({en:'about '+J.mins+' minutes',zh:'约 '+J.mins+' 分钟'})+'</dd>':'')+
+          (J.accept?'<dt>'+t({en:'You are done when',zh:'完成标准'})+'</dt><dd><ul>'+li(J.accept)+'</ul></dd>':'')+
+          (J.fail?'<dt>'+t({en:'Common problems',zh:'常见问题'})+'</dt><dd><ul>'+li(J.fail)+'</ul></dd>':'')+
+          (J.stretch?'<dt>'+t({en:'Stretch goals',zh:'进阶挑战'})+'</dt><dd><ul>'+li(J.stretch)+'</ul></dd>':'')+
+          (files?'<dt>'+t({en:'Starter and final code',zh:'起步与完成代码'})+'</dt><dd><ul class="pkg">'+files+'</ul>'+(pk.note?'<p class="meta">'+t(pk.note)+'</p>':'')+'</dd>':'')+'</dl>';
+        anchor.after(pc)}
+      var ba=document.querySelector('.stage .track-ba');
+      if(!ba&&window.TRACKS&&document.querySelector('.stage .ringbox')){var tr=window.TRACKS.filter(function(x){return x.id===C.id})[0];
+        if(tr&&(tr.before||tr.after)){ba=document.createElement('div');ba.className='track-ba';
+          ba.innerHTML=(tr.before?'<div><b class="lbl">'+t({en:'Before this track',zh:'学这条路线之前'})+'</b><p>'+t(tr.before)+'</p></div>':'')+(tr.after?'<div><b class="lbl">'+t({en:'After this track',zh:'学完之后'})+'</b><p>'+t(tr.after)+'</p></div>':'');
+          document.querySelector('.stage .ringbox').after(ba)}}
+    }
+    if(C&&(document.querySelector('.stage .ringbox')||document.querySelector('main .meta'))){var pend=2,fin2=function(){if(--pend===0)renderMeta()};
+      ['prereqs.js','projects.js'].forEach(function(f){var sc2=document.createElement('script');sc2.src=f;sc2.onload=sc2.onerror=fin2;document.body.appendChild(sc2)})}
+
     /* hub: topic and lesson counts are never typed by hand. They come from each track's lessons.js
-       (scripts/check-counts.mjs fails a PR that types one). */
-    var hub=document.querySelector('.track-list'),sums=document.querySelectorAll('[data-sum]');
-    function drawHub(){if(hub)hub.innerHTML=window.TRACKS.map(function(c,ci){var n=count(c.id),ok=c.total>0;
-      return '<a class="cc spot" href="'+c.href+'"><div class="orbi">'+c.icon+'</div><div><h3>'+t(c.title)+'</h3><div class="meta" style="margin-top:4px">'+t(c.desc)+'</div><div class="chips"><span class="chip">'+t({en:'Step '+(ci+1),zh:'第 '+(ci+1)+' 步'})+(c.level?' · '+t(LV[c.level]):'')+'</span>'+(ok?'<span class="chip">'+t({en:c.topics+' topics',zh:c.topics+' 个主题'})+'</span><span class="chip">'+t({en:c.total+' lessons',zh:c.total+' 课'})+'</span>':'')+'<span class="chip">'+t({en:'Bilingual',zh:'双语'})+'</span></div><div class="mini"><i style="width:'+(ok?n/c.total*100:0)+'%"></i></div></div><div class="go">→</div></a>'}).join('')}
-    if(window.TRACKS&&(hub||sums.length)){var q=window.TRACKS.slice();
+       (scripts/check-counts.mjs fails a PR that types one). Progress is completed / PUBLISHED lessons; planned lessons are shown separately. */
+    var hub=document.querySelector('.track-list'),sums=document.querySelectorAll('[data-sum]'),rsm=document.getElementById('resume');
+    function pbar(n,tot,label){return '<div class="mini" role="progressbar" aria-label="'+label+'" aria-valuemin="0" aria-valuemax="'+tot+'" aria-valuenow="'+n+'" aria-valuetext="'+n+' / '+tot+'"><i style="width:'+(tot?n/tot*100:0)+'%"></i></div>'}
+    function drawHub(){if(hub)hub.innerHTML=window.TRACKS.map(function(c,ci){var n=count(c.id,c.files),ok=c.total>0;
+      return '<a class="cc spot" href="'+c.href+'"><div class="orbi">'+c.icon+'</div><div><h3>'+t(c.title)+'</h3><div class="meta" style="margin-top:4px">'+t(c.desc)+'</div><div class="chips"><span class="chip">'+t({en:'Step '+(ci+1),zh:'第 '+(ci+1)+' 步'})+(c.level?' · '+t(LV[c.level]):'')+'</span>'+(ok?'<span class="chip">'+t({en:c.topics+' topics',zh:c.topics+' 个主题'})+'</span><span class="chip">'+t({en:c.published+' lessons',zh:c.published+' 课'})+'</span>'+(c.published<c.total?'<span class="chip">'+t({en:(c.total-c.published)+' coming soon',zh:'另有 '+(c.total-c.published)+' 课即将发布'})+'</span>':'')+(n?'<span class="chip">'+t({en:n+' done',zh:'已完成 '+n})+'</span>':''):'')+'<span class="chip">'+t({en:'Bilingual',zh:'双语'})+'</span></div>'+pbar(n,c.published||0,'Progress in '+c.title.en+' · '+c.title.zh)+'</div><div class="go">→</div></a>'}).join('')}
+    function canStore(){try{localStorage.setItem('learn-t','1');localStorage.removeItem('learn-t');return true}catch(e){return false}}
+    function drawResume(){
+      var T=window.TRACKS,tot=0,fin=0,hasP=false,lookup={};
+      T.forEach(function(c){tot+=c.published||0;var k=count(c.id,c.files);fin+=k;if(k)hasP=true;(c.files||[]).forEach(function(f,i){lookup[c.id+'/'+f]={c:c,f:f,t:c.titles[f]}})});
+      /* where to continue: the lesson you were on, else the next unfinished one in that track, else the first unfinished one anywhere */
+      var last=jget(LAST,null),go=null,ci=-1;
+      if(last){T.forEach(function(c,i){if(c.id===last.t)ci=i})}
+      if(ci>-1){var nf=nextOf(T[ci].id,T[ci].files||[]);if(nf)go={c:T[ci],f:nf}}
+      if(!go)T.some(function(c){var nf=c.files&&nextOf(c.id,c.files);if(nf){go={c:c,f:nf};return true}});
+      var started=hasP||!!last,hs=document.querySelector('[data-start]');
+      if(hs&&go&&started){hs.href=go.c.href.replace(/[^\/]*$/,'')+go.f;hs.innerHTML=t({en:'Continue where you left off →',zh:'继续上次的进度 →'})}
+      if(!rsm)return;
+      if(!started){rsm.hidden=false;rsm.innerHTML='<p class="meta">'+t({en:'No saved progress yet. Your progress is kept only in this browser; open any lesson to begin.',zh:'还没有学习记录。进度只保存在这个浏览器里，打开任意一课就开始了。'})+'</p>'+(canStore()?'':'<p class="meta warn">'+t({en:'This browser is blocking saved progress, so your place cannot be remembered.',zh:'这个浏览器禁止保存数据，所以无法记住你的进度。'})+'</p>');return}
+      var rec=jget(REC,[]).filter(function(k){return lookup[k]}).slice(0,5);
+      rsm.hidden=false;
+      rsm.innerHTML='<h2>'+t({en:'Your learning',zh:'我的学习'})+'</h2><div class="rs-grid">'+
+        (go?'<a class="cc spot rs-go" href="'+go.c.href.replace(/[^\/]*$/,'')+go.f+'"><div><div class="ey">'+t({en:'Continue',zh:'继续学习'})+' · '+t(go.c.title)+'</div><h3>'+t(go.c.titles[go.f])+'</h3></div><div class="go">→</div></a>':'<div class="cc rs-go"><div><h3>'+t({en:'You have finished every published lesson. 🎉',zh:'所有已发布的课你都学完了。🎉'})+'</h3></div></div>')+
+        '<div class="cc rs-all"><div><div class="ey">'+t({en:'All tracks',zh:'全部路线'})+'</div><div style="font-weight:700">'+t({en:fin+' of '+tot+' published lessons completed',zh:'已完成 '+fin+' / '+tot+' 课（已发布）'})+'</div>'+pbar(fin,tot,'Overall progress · 总进度')+'</div></div></div>'+
+        (rec.length?'<div class="rs-rec"><h3>'+t({en:'Recent lessons',zh:'最近学过'})+'</h3><ul>'+rec.map(function(k){var x=lookup[k];return '<li><a href="'+x.c.href.replace(/[^\/]*$/,'')+x.f+'">'+t(x.t)+'</a> <span class="meta">'+t(x.c.title)+(d[k]?' ✓':'')+'</span></li>'}).join('')+'</ul></div>':'')+
+        '<div class="rs-tools"><button type="button" class="btn" data-a="x">'+t({en:'Export progress',zh:'导出进度'})+'</button><label class="btn" tabindex="0" data-a="i">'+t({en:'Import progress',zh:'导入进度'})+'<input type="file" accept="application/json,.json" hidden></label><button type="button" class="btn" data-a="r">'+t({en:'Reset progress',zh:'清除进度'})+'</button></div><p class="meta rs-msg" role="status" aria-live="polite"></p>'+(canStore()?'':'<p class="meta warn">'+t({en:'This browser is blocking saved progress.',zh:'这个浏览器禁止保存数据。'})+'</p>');
+      var msg=rsm.querySelector('.rs-msg'),say=function(o){msg.innerHTML=t(o)};
+      rsm.querySelector('[data-a=x]').onclick=function(){var blob=new Blob([JSON.stringify({app:'tx-learns',done:done(),last:jget(LAST,null),recent:jget(REC,[]),exported:new Date().toISOString()},null,1)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='tx-learns-progress.json';document.body.appendChild(a);a.click();a.remove();say({en:'Progress saved to a file.',zh:'进度已保存为文件。'})};
+      var inp=rsm.querySelector('input[type=file]');rsm.querySelector('[data-a=i]').onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();inp.click()}};
+      inp.onchange=function(){var f=inp.files[0];if(!f)return;var fr=new FileReader();fr.onload=function(){try{var o=JSON.parse(fr.result);if(!o||o.app!=='tx-learns'||typeof o.done!=='object')throw 0;var m=done();for(var k in o.done)if(lookup[k]&&o.done[k])m[k]=1;set(DONE,JSON.stringify(m));if(o.last&&lookup[o.last.t+'/'+o.last.f])set(LAST,JSON.stringify({t:o.last.t,f:o.last.f}));if(o.recent&&o.recent.filter)set(REC,JSON.stringify(o.recent.filter(function(k){return lookup[k]}).slice(0,6)));d=done();drawHub();drawResume();rsm.querySelector('.rs-msg').innerHTML=t({en:'Progress imported.',zh:'进度已导入。'})}catch(e){say({en:'That file is not a TX Learns progress file.',zh:'这不是 TX Learns 的进度文件。'})}};fr.readAsText(f)};
+      var rb2=rsm.querySelector('[data-a=r]'),armed=false;rb2.onclick=function(){if(!armed){armed=true;rb2.innerHTML=t({en:'Click again to erase all progress',zh:'再点一次确认清除全部进度'});setTimeout(function(){armed=false;rb2.innerHTML=t({en:'Reset progress',zh:'清除进度'})},5000);return}
+        try{localStorage.removeItem(DONE);localStorage.removeItem(LAST);localStorage.removeItem(REC)}catch(e){}d=done();drawHub();drawResume();var m2=rsm.querySelector('.rs-msg');if(m2)m2.innerHTML=t({en:'Progress erased.',zh:'进度已清除。'})}}
+    if(window.TRACKS&&(hub||sums.length||rsm)){var q=window.TRACKS.slice();
       (function next(){var c=q.shift();
         if(!c){var tot={topics:0,lessons:0,published:0};window.TRACKS.forEach(function(x){tot.topics+=x.topics||0;tot.lessons+=x.total||0;tot.published+=x.published||0});
-          sums.forEach(function(el){el.dataset.count=tot[el.dataset.sum];countUp(el)});drawHub();return}
+          sums.forEach(function(el){el.dataset.count=tot[el.dataset.sum];countUp(el)});drawHub();drawResume();return}
         var sc=document.createElement('script');sc.src=c.href.replace(/[^\/]*$/,'')+'lessons.js';
         sc.onload=sc.onerror=function(){var T=window.TRACK;try{delete window.TRACK}catch(e){window.TRACK=undefined}
-          if(T&&T.topics){c.topics=T.topics.length;c.total=0;c.published=0;T.topics.forEach(function(w){c.total+=w.items.length;w.items.forEach(function(x){if(x.file)c.published++})})}
+          if(T&&T.topics){c.topics=T.topics.length;c.total=0;c.published=0;c.files=[];c.titles={};T.topics.forEach(function(w){c.total+=w.items.length;w.items.forEach(function(x){if(x.file){c.published++;c.files.push(x.file);c.titles[x.file]=x.title}})})}
           next()};
         document.body.appendChild(sc)})()}
 
     /* lesson: prev/next + done + dock */
     var db=document.querySelector('.mark-done'),idx=C?C.lessons.findIndex(function(l){return l.file===here}):-1;
     if(C&&idx>-1){
+      var lk=C.id+'/'+here,rc=jget(REC,[]).filter(function(x){return x!==lk});rc.unshift(lk);set(LAST,JSON.stringify({t:C.id,f:here}));set(REC,JSON.stringify(rc.slice(0,6)));
+      var cl=C.lessons[idx],tp=C.topics.filter(function(w){return w.n===cl.w})[0],tag0=document.querySelector('main .tag');
+      if(tag0&&tp){var bc=document.createElement('nav');bc.className='crumbs';bc.setAttribute('aria-label','Breadcrumb · 面包屑');
+        bc.innerHTML='<a href="../index.html">'+t({en:'Home',zh:'首页'})+'</a> › <a href="index.html">'+t(C.title)+'</a> › <span>'+t(tp.title)+'</span>';tag0.before(bc)}
       var pg=document.querySelector('.pager'),p=C.lessons[idx-1],n=C.lessons[idx+1];
       if(pg)pg.innerHTML=(p?'<a href="'+p.file+'"><small>← '+t({en:'Previous',zh:'上一课'})+'</small>'+t(p.title)+'</a>':'')+(n?'<a class="next" href="'+n.file+'"><small>'+t({en:'Next',zh:'下一课'})+' →</small>'+t(n.title)+'</a>':'');
       if(db){var key=C.id+'/'+here;
@@ -113,7 +201,7 @@
         db.onclick=function(e){var x=done();if(x[key])delete x[key];else{x[key]=1;burst(e.clientX,e.clientY)}set(DONE,JSON.stringify(x));lbl()};lbl()}
       var dock=document.createElement('div');dock.className='dock';var RR=18,LL=2*Math.PI*RR;
       dock.innerHTML='<button class="dk" data-a="m" title="Menu" aria-label="Open topics menu · 打开主题菜单">☰</button>'+(p?'<a class="dk" href="'+p.file+'" title="Previous" aria-label="Previous lesson · 上一课">‹</a>':'<span class="dk off" aria-hidden="true">‹</span>')+
-        '<div class="dk ring"><svg width="44" height="44" viewBox="0 0 44 44"><circle class="bg" cx="22" cy="22" r="'+RR+'"/><circle class="fg" cx="22" cy="22" r="'+RR+'" stroke-dasharray="'+LL+'" stroke-dashoffset="'+LL+'"/></svg><b>0</b></div>'+
+        '<div class="dk ring" role="progressbar" aria-label="Reading progress · 阅读进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><svg width="44" height="44" viewBox="0 0 44 44"><circle class="bg" cx="22" cy="22" r="'+RR+'"/><circle class="fg" cx="22" cy="22" r="'+RR+'" stroke-dasharray="'+LL+'" stroke-dashoffset="'+LL+'"/></svg><b>0</b></div>'+
         (n?'<a class="dk" href="'+n.file+'" title="Next" aria-label="Next lesson · 下一课">›</a>':'<span class="dk off" aria-hidden="true">›</span>')+'<button class="dk" data-a="t" title="Top" aria-label="Back to top · 回到顶部">↑</button>';
       document.body.appendChild(dock);
       dock.querySelector('[data-a=m]').onclick=function(){window.TX.menu()};
@@ -121,7 +209,7 @@
     }
     var fg=document.querySelector('.dock .fg'),rn=document.querySelector('.dock .ring b');
     function onScroll(){var h=document.documentElement,pr=h.scrollTop/(h.scrollHeight-h.clientHeight||1);bar.style.width=(pr*100)+'%';
-      if(fg){fg.style.strokeDashoffset=2*Math.PI*18*(1-pr);rn.textContent=Math.round(pr*100)}}
+      if(fg){fg.style.strokeDashoffset=2*Math.PI*18*(1-pr);rn.textContent=Math.round(pr*100);rn.parentNode.setAttribute('aria-valuenow',Math.round(pr*100))}}
     window.addEventListener('scroll',onScroll,{passive:true});onScroll();
 
     /* components */
@@ -135,6 +223,8 @@
     qs.forEach(function(q){q.classList.add('spot');q.querySelectorAll('.opt').forEach(function(o){o.onclick=function(e){
       if(q.classList.contains('done'))return;q.classList.add('done');answered++;
       var ok=o.dataset.k===q.dataset.answer;if(ok){right++;burst(e.clientX,e.clientY)}
+      var st=q.querySelector('.sr-st');if(!st){st=document.createElement('div');st.className='sr';st.setAttribute('role','status');st.setAttribute('aria-live','polite');st.classList.add('sr-st');q.appendChild(st)}
+      st.textContent=ok?'Correct · 答对了':'Not quite, the right answer is now marked · 不太对，已标出正确答案';
       o.classList.add(ok?'ok':'bad');q.querySelector('.opt[data-k="'+q.dataset.answer+'"]').classList.add('ok');
       if(answered===qs.length)sc.innerHTML=t({en:'Score: '+right+' / '+qs.length+(right===qs.length?' 🏆':''),zh:'得分：'+right+' / '+qs.length+(right===qs.length?' 🏆':'')})}})});
     document.querySelectorAll('.stepper').forEach(function(s){

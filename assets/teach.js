@@ -6,23 +6,24 @@ function game(el,items,opts,unit){
   if(i>=items.length){el.innerHTML='<div class="cnt">'+T({en:'Done',zh:'完成'})+'</div><p class="job">'+T({en:'You got '+sc+' of '+items.length+' on the first try.',zh:'你一次答对了 '+sc+' / '+items.length+' 题。'})+'</p><button class="btn" id="re_'+el.id+'">'+T({en:'Play again',zh:'再玩一次'})+'</button>';
    $('re_'+el.id).onclick=function(){i=0;sc=0;draw()};return}
   var j=items[i],tries=0;
-  el.innerHTML='<div class="cnt">'+T({en:unit.en+' '+(i+1)+' of '+items.length,zh:unit.zh+' '+(i+1)+' / '+items.length})+'</div><p class="job">'+T(j)+'</p><div class="pills">'+opts.map(function(o){return '<button class="pill" data-k="'+o.k+'">'+T(o)+'</button>'}).join('')+'</div><div class="fb"></div>';
+  el.innerHTML='<div class="cnt">'+T({en:unit.en+' '+(i+1)+' of '+items.length,zh:unit.zh+' '+(i+1)+' / '+items.length})+'</div><p class="job">'+T(j)+'</p><div class="pills">'+opts.map(function(o){return '<button class="pill" data-k="'+o.k+'">'+T(o)+'</button>'}).join('')+'</div><div class="fb" role="status" aria-live="polite"></div>';
   var done=false;
-  el.querySelectorAll('.pill').forEach(function(b){b.onclick=function(e){if(done)return;tries++;
+  if(i>0){var jp=el.querySelector('.job');if(jp){jp.tabIndex=-1;jp.focus({preventScroll:true})}}
+  el.querySelectorAll('.pill').forEach(function(b){b.onclick=function(e){if(done||b.getAttribute('aria-disabled')==='true')return;tries++;
    var ok=b.dataset.k===j.a,fb=el.querySelector('.fb');
    if(ok){done=true;if(tries===1){sc++;TX.burst(e.clientX,e.clientY)}b.classList.add('ok');fb.className='fb show good';
     fb.innerHTML='<b>'+T({en:'Right. ',zh:'答对了。'})+'</b>'+T(j.ex)+'<br><button class="btn pri" id="n_'+el.id+'" style="margin-top:10px">'+T({en:'Next →',zh:'下一题 →'})+'</button>';
     $('n_'+el.id).onclick=function(){i++;draw()}}
-   else{b.classList.add('no');b.disabled=true;fb.className='fb show no';fb.innerHTML='<b>'+T({en:'Not quite, try again. ',zh:'不太对，再试一次。'})+'</b>'+T(j.hint||{en:'Look at the explanation above again.',zh:'再看看上面的讲解。'})}}});
+   else{b.classList.add('no');b.setAttribute('aria-disabled','true');fb.className='fb show no';fb.innerHTML='<b>'+T({en:'Not quite, try again. ',zh:'不太对，再试一次。'})+'</b>'+T(j.hint||{en:'Look at the explanation above again.',zh:'再看看上面的讲解。'})}}});
  }
  draw()}
 function predict(el,o){
  var tries=0,done=false;
- el.innerHTML='<b class="lbl">'+T({en:'Your turn',zh:'轮到你'})+'</b><p style="margin:0 0 8px;font-weight:600">'+T(o.q)+'</p><div class="pills">'+o.opts.map(function(x){return '<button class="pill" data-k="'+x.k+'">'+T(x)+'</button>'}).join('')+'</div><div class="fb"></div>';
- el.querySelectorAll('.pill').forEach(function(b){b.onclick=function(e){if(done)return;
+ el.innerHTML='<b class="lbl">'+T({en:'Your turn',zh:'轮到你'})+'</b><p style="margin:0 0 8px;font-weight:600">'+T(o.q)+'</p><div class="pills">'+o.opts.map(function(x){return '<button class="pill" data-k="'+x.k+'">'+T(x)+'</button>'}).join('')+'</div><div class="fb" role="status" aria-live="polite"></div>';
+ el.querySelectorAll('.pill').forEach(function(b){b.onclick=function(e){if(done||b.getAttribute('aria-disabled')==='true')return;
   var ok=b.dataset.k===o.a,fb=el.querySelector('.fb');
   if(ok){done=true;b.classList.add('ok');TX.burst(e.clientX,e.clientY);fb.className='fb show good';fb.innerHTML=(o.out?'<div class="io">'+T(o.out)+'</div>':'')+'<b>'+T({en:'Right. ',zh:'答对了。'})+'</b>'+T(o.ex)}
-  else{b.classList.add('no');b.disabled=true;fb.className='fb show no';fb.innerHTML='<b>'+T({en:'Not quite. ',zh:'不太对。'})+'</b>'+T(o.hint||{en:'Re-read the explanation above and try again.',zh:'再读一遍上面的讲解，然后再试。'})}}});
+  else{b.classList.add('no');b.setAttribute('aria-disabled','true');fb.className='fb show no';fb.innerHTML='<b>'+T({en:'Not quite. ',zh:'不太对。'})+'</b>'+T(o.hint||{en:'Re-read the explanation above and try again.',zh:'再读一遍上面的讲解，然后再试。'})}}});
 }
 function trace(el,steps){
  var n=0;
