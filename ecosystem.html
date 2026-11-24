@@ -415,7 +415,6 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     ['The live site is checked','线上网站会被检查','1','check per merge','次检查／每次合并','Every live page and link, once Vercel has deployed.','Vercel 部署后检查每一页和每个链接。'],
     ['Agents never push to the site','agent 从不直接推送到网站','0','pushes to main','次直接推送到 main','Everything goes through a pull request.','一切都走 pull request。'],
     ['No silent failures, no noise','不会悄悄失败，也不吵','1','digest a day','条每日汇总','A failure, stuck PR or rollback messages me at once.','失败、PR 卡住或回滚会马上通知我。']];
-  var ALL=AGENTS.map(function(a){return a.id});
   document.getElementById('guards').innerHTML=G.map(function(g,k){
     return '<li class="guard"><span class="gn">'+(k+1)+'</span><span class="gt"><b>'+t(g[0],g[1])+'</b> <span class="gl">'+t(g[5],g[6])+'</span></span><span class="stat"><b>'+g[2]+'</b> <span>'+t(g[3],g[4])+'</span></span></li>'}).join('');
 
