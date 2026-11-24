@@ -108,6 +108,8 @@ jobs:
         run: |
           set -o pipefail
           if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then unset ANTHROPIC_API_KEY; echo "Auth: Claude subscription"; else unset CLAUDE_CODE_OAUTH_TOKEN; echo "Auth: API key (no CLAUDE_CODE_OAUTH_TOKEN secret)"; fi
+          # What past reviews keep finding (the authoring memory on the agent-status branch); empty until there is some.
+          curl -fsS -o /tmp/memory.json "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/agent-status/memory/authoring.json" || echo "{}" > /tmp/memory.json
           cat > /tmp/writer-prompt.md <<'PROMPT'
           You are the content creator for TX Learns, a bilingual (EN/中文) interactive learning site about AI.
           Your reader is a smart newcomer to AI. Your job: turn TX's raw notes into one lesson they enjoy and can
@@ -126,6 +128,8 @@ jobs:
           3. Study agentic-ai/07-agents-sdk-basics.html (and the last lessons already in <track>/) and assets/teach.js as the model for structure and widgets
              (.story, .teach, .codebox with .dim/.chg, TX2.predict, TX2.game, .cl checklist, .card takeaways).
              Reuse those widgets; do not invent new CSS unless needed.
+          3c. /tmp/memory.json is the authoring memory: how often each kind of mistake was found in earlier reviews (with the
+             latest example), and decisions to keep. It may be empty. Read it before you write and avoid those mistakes.
           4. Read <track>/lessons.js. If a planned item (no file) matches the concept, use it; otherwise add a new
              item under the best-fitting topic. Name the file <track>/NN-slug.html with the next free NN in that track,
              and add file:'NN-slug.html'. Tag: a project item (k:'p') gets "<Topic> · Project"; any other item gets
