@@ -128,6 +128,11 @@
     function li(a){return (a||[]).map(function(x){return '<li>'+t(x)+'</li>'}).join('')}
     function renderMeta(){
       var P=(window.PREREQ||{})[here],J=(window.PROJECTS||{})[here],hm2=document.querySelector('main .meta'),anchor=hm2&&(hm2.closest('.hero')||hm2),box;
+      /* learning goals: optional P.goals={en:[],zh:[]}; skipped when the lesson body already has its own objectives block */
+      if(P&&P.goals&&P.goals.en&&P.goals.en.length&&hm2&&!document.querySelector('main .objectives,main .goals')&&!Array.prototype.some.call(document.querySelectorAll('main h2,main h3,main .lbl'),function(h){return /learning objectives|学习目标/i.test(h.textContent)})){
+        var gb=document.createElement('aside');gb.className='card goals';gb.setAttribute('aria-label','You will be able to · 学完你能');
+        gb.innerHTML='<b class="lbl">'+t({en:'You will be able to',zh:'学完你能'})+'</b><ul>'+P.goals.en.map(function(e,i){return '<li>'+t({en:e,zh:P.goals.zh[i]||e})+'</li>'}).join('')+'</ul>';
+        anchor.after(gb);anchor=gb}
       if(P&&hm2){box=document.createElement('aside');box.className='card prereq';box.setAttribute('aria-label','Before you start · 开始之前');
         var rows=[];
         if(P.prev&&P.prev.length)rows.push(['Recommended first','建议先学','<ul>'+P.prev.map(function(f){var a=lessonLink(f);return a?'<li>'+a+(d[C.id+'/'+f]?' ✓':'')+'</li>':''}).join('')+'</ul>']);
