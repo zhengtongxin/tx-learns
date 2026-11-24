@@ -1,0 +1,26 @@
+# config/tasks.yaml: the roles chained with context.
+# Blanks used here: {module_name} (and {requirements} in agents.yaml). main.py supplies both.
+design_task:
+  description: Write the design for {module_name}. Markdown only, no code.
+  expected_output: A design with class name, methods and signatures.
+  agent: lead
+  output_file: sandbox/design.md
+
+code_task:
+  description: Implement the design and save it as {module_name}.py.
+  expected_output: Confirmation the file was saved and runs.
+  agent: backend_dev
+  context: [design_task]
+
+ui_task:
+  description: Build app.py, a minimal Gradio screen that imports {module_name}.
+  expected_output: app.py saved in the sandbox.
+  agent: frontend_dev
+  context: [code_task]
+
+test_task:
+  description: Write a test file for {module_name}, run it and summarise pass or fail.
+  expected_output: A short test report.
+  agent: tester
+  context: [code_task]
+  output_file: sandbox/test_report.md
