@@ -14,7 +14,7 @@ import { loadTracks } from './lib.mjs';
 const root = new URL('..', import.meta.url);
 const FIX = process.argv.includes('--fix');
 const TR = loadTracks(new URL('.', root).pathname);
-const all = ['index.html', 'ecosystem.html', '404.html', ...TR.flatMap(t => readdirSync(new URL(t.dir + '/', root)).filter(f => f.endsWith('.html')).map(f => t.dir + '/' + f))];
+const all = ['index.html', 'ecosystem.html', 'glossary.html', '404.html', ...TR.flatMap(t => readdirSync(new URL(t.dir + '/', root)).filter(f => f.endsWith('.html')).map(f => t.dir + '/' + f))];
 const named = process.argv.slice(2).filter(a => a !== '--fix');
 const pages = named.length ? named : all;
 const problems = [];
@@ -74,7 +74,7 @@ const live = TR.flatMap(t => t.T.topics.flatMap(w => w.items).filter(x => x.file
 const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 const want = {
   'sitemap.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<!-- Made by node scripts/check-pages.mjs --fix from lessons.js. Do not edit by hand. -->\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-    ['', 'ecosystem.html', ...TR.map(t => t.dir + '/index.html'), ...live.map(x => x.path)].map(u => `<url><loc>${SITE}${u}</loc></url>`).join('\n') + '\n</urlset>\n',
+    ['', 'ecosystem.html', 'glossary.html', ...TR.map(t => t.dir + '/index.html'), ...live.map(x => x.path)].map(u => `<url><loc>${SITE}${u}</loc></url>`).join('\n') + '\n</urlset>\n',
 };
 const lists = Object.fromEntries(TR.map(t => [t.dir + '/index.html', [/<!-- lessons:start -->[\s\S]*?<!-- lessons:end -->/, '<!-- lessons:start --><noscript><ol>' +
     t.T.topics.flatMap(w => w.items).filter(x => x.file).map(x => `<li><a href="${x.file}">${esc(x.title.en)} · ${esc(x.title.zh)}</a></li>`).join('') + '</ol></noscript><!-- lessons:end -->']]));
@@ -99,5 +99,14 @@ for (const f of ['index.html', ...TR.map(t => t.dir + '/index.html')]) {
   if (next !== cur) { if (FIX) writeFileSync(new URL(f, root), next); else bad(f, 'lesson list or start link out of date with lessons.js (run node scripts/check-pages.mjs --fix)'); }
 }
 
+// The concept cards on ecosystem.html (assets/build-concepts.js): every lesson link is a published lesson with the titles in lessons.js.
+try {
+  const w = {}; new Function('window', readFileSync(new URL('assets/build-concepts.js', root), 'utf8'))(w);
+  for (const c of w.BUILD_CONCEPTS || []) for (const l of c.lessons) {
+    const hit = live.find(x => x.path === l.d + '/' + l.f);
+    if (!hit) bad('assets/build-concepts.js', `${c.id}: ${l.d}/${l.f} is not a published lesson`);
+    else if (hit.title.en !== l.en || hit.title.zh !== l.zh) bad('assets/build-concepts.js', `${c.id}: title of ${l.f} differs from lessons.js`);
+  }
+} catch (e) { bad('assets/build-concepts.js', 'cannot read: ' + e.message); }
 if (problems.length) { console.log(`✗ Page check failed (${problems.length}):\n` + problems.map(x => '  - ' + x).join('\n')); process.exit(1); }
 console.log(`✓ Page check passed: ${pages.length} pages have lang, title, description, link previews, favicon, alt text, heading order, EN/中文 twins and an updated date on each lesson; sitemap, lesson list and start links match lessons.js.`);

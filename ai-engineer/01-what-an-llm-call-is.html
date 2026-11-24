@@ -39,8 +39,10 @@
 <path class="lnk" d="M333,75 L387,75" marker-end="url(#ah)"/>
 <path class="lnk" d="M527,75 L581,75" marker-end="url(#ah)"/>
 </svg><figcaption><span class="en">A call is one request out and one reply back; the key rides in the header.</span><span class="zh">一次调用就是发出一次请求、收回一次回复；密钥放在请求头里。</span></figcaption></figure>
-<div class="codebox"><span class="dim">import os, requests
-
+<div class="codebox"><span class="dim"># one-time setup: pip install requests python-dotenv
+import os, requests
+from dotenv import load_dotenv
+load_dotenv()   # reads OPENAI_API_KEY from your .env file
 </span><span class="chg">headers = {"Authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}", "Content-Type": "application/json"}</span><span class="dim">
 payload = {
     "model": "gpt-5-mini",
@@ -76,8 +78,8 @@ print(reply.choices[0].message.content)</span></div>
 <div class="try" id="p4"></div>
 
 <h2><span class="en">Step 5 · When the call will not work</span><span class="zh">第 5 步 · 调用跑不通的时候</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Check the key before you blame the code. Common causes: no key found, a stray space or newline at either end of the key, or the notebook ran before the <code>.env</code> file was loaded. Run notebook cells top to bottom, or you get a <code>NameError</code>. Models are also retired every few months, so use a current one from the same provider when a name stops working. And a key is a password: keep it in <code>.env</code>, never in the notebook, never in git.</p>
-<p class="zh" style="margin:0 0 8px">先查密钥，再怀疑代码。常见原因：没找到密钥、密钥首尾多了空格或换行、笔记本在加载 <code>.env</code> 之前就运行了。笔记本的单元格要从上到下运行，否则会 <code>NameError</code>。模型也每隔几个月就会下线，名字失效时换成同一家提供商的新模型。另外，密钥就是密码：放在 <code>.env</code> 里，别写进笔记本，别提交到 git。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Check the key before you blame the code. Common causes: no key found, a stray space or newline at either end of the key, or the notebook ran before the <code>.env</code> file was loaded. Run notebook cells top to bottom, or you get a <code>NameError</code>. Models are also retired every few months, so use a current one from the same provider when a name stops working. And a key is a password: keep it in <code>.env</code>, never in the notebook (the file where you run code cell by cell, such as Jupyter), never in git.</p>
+<p class="zh" style="margin:0 0 8px">先查密钥，再怀疑代码。常见原因：没找到密钥、密钥首尾多了空格或换行、笔记本在加载 <code>.env</code> 之前就运行了。笔记本的单元格要从上到下运行，否则会 <code>NameError</code>。模型也每隔几个月就会下线，名字失效时换成同一家提供商的新模型。另外，密钥就是密码：放在 <code>.env</code> 里，别写进笔记本（一格一格运行代码的文件，例如 Jupyter），别提交到 git。</p></div>
 <p class="en">Good habit or bad habit?</p>
 <p class="zh">这些做法，哪个好，哪个不好？</p><div class="sc" id="g5"></div>
 

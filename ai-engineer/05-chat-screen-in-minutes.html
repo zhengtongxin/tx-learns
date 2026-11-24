@@ -25,6 +25,8 @@ def ask_once(text):
     reply = client.chat.completions.create(model=MODEL, messages=[{"role": "user", "content": text}])
     return reply.choices[0].message.content
 
+# first try: gr.Interface(fn=shout, inputs="text", outputs="text").launch()
+# then swap in the model call:
 </span><span class="chg">gr.Interface(fn=ask_once, inputs="text", outputs="text").launch(inbrowser=True)</span></div>
 <div class="try" id="p1"></div>
 
@@ -104,7 +106,9 @@ You: Yes! 5 kg bags are on sale this week, a good deal."""</span><span class="di
     </span><span class="chg">with gr.Row():
         chatbot = gr.Chatbot(type="messages")
         picture = gr.Image()</span><span class="dim">
-    box = gr.Textbox(label="Ask the shop helper")</span></div>
+    box = gr.Textbox(label="Ask the shop helper")</span><span class="dim">
+
+screen.launch()   # without this, nothing shows</span></div>
 <p class="en">Which level of Gradio fits each need?</p>
 <p class="zh">每种需求适合 Gradio 的哪一档？</p><div class="sc" id="g5"></div>
 
