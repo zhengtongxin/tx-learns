@@ -145,9 +145,9 @@ const headFor = (p, html) => {
 };
 const UPD_RE = /<meta name="updated" content="([^"]*)">/;
 const unversioned = [];
-for (const p of all.filter(p => p !== '404.html')) {
+for (const p of all) {
   const cur = readFileSync(new URL(p, root), 'utf8');
-  const tpl = p.split('/').pop().startsWith('_'); // _template.html: copied into new lessons, so it carries no canonical or JSON-LD
+  const tpl = p === '404.html' || p.split('/').pop().startsWith('_'); // 404.html and _template.html get ?v= versions but no canonical or JSON-LD
   const { url, ld } = tpl ? {} : headFor(p, cur);
   let next = cur.replace(REF, (m, a, ref, v, z) => {
     const target = resolve(p, ref);
