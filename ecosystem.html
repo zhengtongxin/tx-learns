@@ -340,14 +340,15 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     var TGN=geo(N.tg);o+=e('ck','M'+U.x+','+U.t+' V'+(TGN.b+2),'ui-check');
     Object.keys(N).forEach(function(k){o+=box(k,S)});
     o+='<text class="foot" x="1084" y="592" text-anchor="end">'+ts('every run → this page','每次运行 → 这一页')+'</text>';
-    var svg=document.getElementById('ov');svg.innerHTML=o;
+    var svg=document.getElementById('ov');
+    if(o!==LASTO){LASTO=o;svg.innerHTML=o;
     // One popup for the whole page. Hover or focus shows it, click pins it, Escape or a click elsewhere closes it.
     svg.querySelectorAll('[data-agent]').forEach(function(el){
       el.onmouseenter=function(){showTip(el,S,false)};el.onmouseleave=function(){if(!PIN)hideTip()};
       el.onfocus=function(){showTip(el,S,false)};el.onblur=function(){if(!PIN)hideTip()};
       var go=function(){if(PIN===el.dataset.agent){hideTip()}else showTip(el,S,true)};
       el.onclick=function(ev){ev.stopPropagation();go()};el.onkeydown=function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();go()}}});
-    if(PIN){var pe=svg.querySelector('[data-agent="'+PIN+'"]');if(pe)showTip(pe,S,true);else hideTip()}
+    if(PIN){var pe=svg.querySelector('[data-agent="'+PIN+'"]');if(pe)showTip(pe,S,true);else hideTip()}}
     // phone version: the same layers as an ordered list
     var L=[[0,['src']],[1,['notes']],[2,['writer','reader','reviewer']],[3,['test','cc','main','quality']],[4,['prev','live','livecheck']],[5,['ui','tg','readers','recall']]];
     function li(id){var n=N[id],a=n.agent&&NAME[n.agent],s=a&&S[a.id],st=stOf(s);
@@ -355,13 +356,14 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
         return '<li class="it">'+t('Telegram → me','Telegram → 我')+'<small>'+t('every run: '+nm(al),'每次运行：'+nz(al))+'</small><small>'+t('only on a problem: '+nm(pr),'只在出问题时：'+nz(pr))+'</small></li>'}
       if(a)return '<li class="it ag'+(OPEN===a.id?' open':'')+'" style="--h:'+a.hue+'" data-agent="'+a.id+'"'+(n.seq?' data-n="'+n.seq+'"':'')+'><button class="ob" aria-expanded="'+(OPEN===a.id)+'"><span class="st '+st+'"></span>'+t(a.en,a.zh)+'</button><small class="hx">'+t(a.on[0],a.on[1])+'</small><small>'+(s?(PILL[st]||'')+' · '+ago(atOf(s))+runsOf(s):LIVE?t('no runs yet','还没运行'):t('status offline','状态离线'))+'</small>'+(a.tg?'<small class="tgl">✈ '+t('Telegram: '+a.tg[0],'Telegram：'+a.tg[1])+'</small>':'')+'<div class="more"><p>'+t(a.den,a.dzh)+'</p>'+specOf(a)+lastOf(s)+'</div></li>';
       return '<li class="it"'+(n.seq?' data-n="'+n.seq+'"':'')+'>'+t(esc(n.en),esc(n.zh))+(n.lock?'<span class="lk">'+t('ALL GREEN','全绿')+'</span>':'')+'<small>'+t(esc(n.m[0]),esc(n.m[1]))+'</small></li>'}
-    document.getElementById('ov-list').innerHTML=L.map(function(l){return '<li class="h">0'+(l[0]+1)+' · '+t(COLS[l[0]][0],COLS[l[0]][1])+'</li>'+l[1].map(li).join('')}).join('');
+    var lh=L.map(function(l){return '<li class="h">0'+(l[0]+1)+' · '+t(COLS[l[0]][0],COLS[l[0]][1])+'</li>'+l[1].map(li).join('')}).join('');
+    if(lh===LASTL)return;LASTL=lh;document.getElementById('ov-list').innerHTML=lh;
     // Phone: tapping an agent opens its details in place and closes any other.
     document.querySelectorAll('#ov-list .ob').forEach(function(b){b.onclick=function(){var it=b.parentNode,was=it.classList.contains('open');
       document.querySelectorAll('#ov-list .it.open').forEach(function(x){x.classList.remove('open');x.querySelector('.ob').setAttribute('aria-expanded','false')});
       OPEN=was?'':it.dataset.agent;if(!was){it.classList.add('open');b.setAttribute('aria-expanded','true')}}})}
 
-  var PIN='',OPEN='',TIP=document.getElementById('tip');
+  var LASTO='',LASTL='',LASTF='',LASTB='',PIN='',OPEN='',TIP=document.getElementById('tip');
   function runsOf(s){return s&&s.runs?' · '+t(s.runs+' runs',s.runs+' 次'):''}
   function showTip(el,S,pin){var a=NAME[el.dataset.agent],s=S[a.id];
     document.querySelectorAll('#ov .hot').forEach(function(x){x.classList.remove('hot')});
@@ -451,15 +453,15 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     var all=[];Object.keys(S).forEach(function(k){(S[k].history||[]).forEach(function(h){all.push({id:k,h:h})})});
     all.sort(function(a,b){return new Date(b.h.at)-new Date(a.h.at)});
     var el=document.getElementById('feed');
-    if(!all.length){el.innerHTML='<li class="empty">'+(live?t('Nothing yet. The first agent run will show up here.','还没有动态。第一次运行后会显示在这里。'):t('Live activity shows on the published site.','实时动态只在线上网站显示。'))+'</li>';return}
-    el.innerHTML=all.slice(0,6).map(function(x){var a=NAME[x.id]||{ic:'··',en:x.id,zh:x.id};
-      return '<li><span class="dot '+(PILL[x.h.state]?x.h.state:'')+'"></span><span class="tx"><span class="code" style="color:'+(a.hue||'var(--mut)')+'">'+a.ic+'</span> <b>'+t(a.en,a.zh)+'</b> · '+esc(x.h.summary)+'</span><span class="tm">'+ago(x.h.at)+'</span></li>'}).join('')}
+    if(!all.length){LASTF='';el.innerHTML='<li class="empty">'+(live?t('Nothing yet. The first agent run will show up here.','还没有动态。第一次运行后会显示在这里。'):t('Live activity shows on the published site.','实时动态只在线上网站显示。'))+'</li>';return}
+    var fh=all.slice(0,6).map(function(x){var a=NAME[x.id]||{ic:'··',en:x.id,zh:x.id};
+      return '<li><span class="dot '+(PILL[x.h.state]?x.h.state:'')+'"></span><span class="tx"><span class="code" style="color:'+(a.hue||'var(--mut)')+'">'+a.ic+'</span> <b>'+t(a.en,a.zh)+'</b> · '+esc(x.h.summary)+'</span><span class="tm">'+ago(x.h.at)+'</span></li>'}).join('');if(fh!==LASTF){LASTF=fh;el.innerHTML=fh}}
 
   function drawBar(S,live){var act=AGENTS.filter(function(a){return !a.later}),ran=act.filter(function(a){return S[a.id]}),last=0;
     ran.forEach(function(a){var x=+new Date(S[a.id].at);if(x>last)last=x});
     var runs=ran.reduce(function(n,a){return n+(S[a.id].runs||0)},0);
-    document.getElementById('sbar').innerHTML='<span>status: <b class="'+(live?'on':'off')+'">'+(live?'● live':'○ offline')+'</b></span><span>agents: <b>'+act.length+'</b> '+t('active','在线')+(AGENTS.length>act.length?' · <b>'+(AGENTS.length-act.length)+'</b> '+t('planned','计划中'):'')+'</span>'+
-      '<span>runs: <b>'+runs+'</b></span>'+(last?'<span>'+t('last run','上次运行')+': <b>'+ago(new Date(last).toISOString())+'</b></span>':'')+'<span>gate: <b>all green</b></span>'}
+    var bh='<span>status: <b class="'+(live?'on':'off')+'">'+(live?'● live':'○ offline')+'</b></span><span>agents: <b>'+act.length+'</b> '+t('active','在线')+(AGENTS.length>act.length?' · <b>'+(AGENTS.length-act.length)+'</b> '+t('planned','计划中'):'')+'</span>'+
+      '<span>runs: <b>'+runs+'</b></span>'+(last?'<span>'+t('last run','上次运行')+': <b>'+ago(new Date(last).toISOString())+'</b></span>':'')+'<span>gate: <b>all green</b></span>';if(bh!==LASTB){LASTB=bh;document.getElementById('sbar').innerHTML=bh}}
 
   (function(){var g=document.getElementById('cgrid'),C=window.BUILD_CONCEPTS||[];
     g.innerHTML=C.map(function(c){var soon=c.status==='soon';
