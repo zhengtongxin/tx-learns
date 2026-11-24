@@ -20,12 +20,7 @@
   function row(d){return '<li><a href="'+ROOT+d.id+'">'+span({en:esc(d.t.en),zh:esc(d.t.zh)})+'</a><small>'+span({en:esc(d.tp.en),zh:esc(d.tp.zh)})+'</small></li>'}
   function css(){var s=document.createElement('style');s.textContent='.srch{margin:1.2em 0}.srch input{width:100%;box-sizing:border-box;padding:12px 16px;font:inherit;color:var(--fg);background:var(--glass);border:1px solid var(--line);border-radius:16px}.srch input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}.srch ul,.rel ul{list-style:none;margin:.6em 0 0;padding:0}.srch li,.rel li{padding:7px 0;border-top:1px solid var(--line)}.srch li small,.rel li small{display:block;color:var(--mut)}.srch .none{color:var(--mut);margin:.6em 0 0}';document.head.appendChild(s)}
   function ready(f){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',f);else f()}
-  function box(){var home=document.getElementById('topics');
-    if(home&&!document.querySelector('.srch')){var w=document.createElement('section');w.className='srch';w.setAttribute('role','search');
-      w.innerHTML='<label for="srchq" class="lbl"><b>'+span({en:'Find a lesson',zh:'找一节课'})+'</b></label><input id="srchq" type="search" autocomplete="off" placeholder="retrieval · 评估 · tools · memory" aria-controls="srchr"><div id="srchr" aria-live="polite"></div>';
-      home.parentNode.insertBefore(w,home);var inp=w.querySelector('input'),out=w.querySelector('#srchr'),tm;
-      inp.addEventListener('input',function(){clearTimeout(tm);tm=setTimeout(function(){var q=inp.value.trim();if(!q){out.innerHTML='';return}
-        var r=search(q,8);out.innerHTML=r.length?'<ul>'+r.map(row).join('')+'</ul>':'<p class="none">'+span({en:'No lesson matches that yet. Try another word.',zh:'还没有匹配的课。换个词试试。'})+'</p>'},120)})}
+  function box(){
     var me2=location.pathname.split('/').slice(-2).join('/'),rel=ix.related[me2],pg=document.querySelector('main .pager');
     if(rel&&rel.length&&pg&&!document.querySelector('.rel')){var a=document.createElement('aside');a.className='card rel';a.setAttribute('aria-label','Related lessons · 相关的课');
       a.innerHTML='<b class="lbl">'+span({en:'Related lessons',zh:'相关的课'})+'</b><ul>'+rel.map(function(id){return ix.byId[id]?row(ix.byId[id]):''}).join('')+'</ul>';pg.parentNode.insertBefore(a,pg)}}
