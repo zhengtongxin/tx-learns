@@ -2,7 +2,7 @@
 <title>Agents as tools, handoffs and guardrails | TX Learns</title>
 <meta name="description" content="One agent becomes a small team, with checks at the door."><meta property="og:title" content="Agents as tools, handoffs and guardrails | TX Learns"><meta property="og:description" content="One agent becomes a small team, with checks at the door."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/agentic-ai/08-agents-tools-handoffs.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
 <meta name="updated" content="2026-11-24">
-<link rel="canonical" href="https://tx-learns.vercel.app/agentic-ai/08-agents-tools-handoffs.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=4ee0731a"><link rel="stylesheet" href="../assets/teach.css?v=348efa72"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/agentic-ai/08-agents-tools-handoffs.html","url":"https://tx-learns.vercel.app/agentic-ai/08-agents-tools-handoffs.html","name":"Agents as tools, handoffs and guardrails","alternateName":"智能体当工具、交接与护栏","description":"One agent becomes a small team, with checks at the door.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Agent SDKs","dateModified":"2026-11-24","isPartOf":{"@type":"CollectionPage","name":"AI Agentic","url":"https://tx-learns.vercel.app/agentic-ai/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Agentic","item":"https://tx-learns.vercel.app/agentic-ai/index.html"},{"@type":"ListItem","position":3,"name":"Agents as tools, handoffs and guardrails","item":"https://tx-learns.vercel.app/agentic-ai/08-agents-tools-handoffs.html"}]}]}</script></head><body>
+<link rel="canonical" href="https://tx-learns.vercel.app/agentic-ai/08-agents-tools-handoffs.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=01ea5a80"><link rel="stylesheet" href="../assets/teach.css?v=348efa72"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/agentic-ai/08-agents-tools-handoffs.html","url":"https://tx-learns.vercel.app/agentic-ai/08-agents-tools-handoffs.html","name":"Agents as tools, handoffs and guardrails","alternateName":"智能体当工具、交接与护栏","description":"One agent becomes a small team, with checks at the door.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Agent SDKs","dateModified":"2026-11-24","isPartOf":{"@type":"CollectionPage","name":"AI Agentic","url":"https://tx-learns.vercel.app/agentic-ai/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Agentic","item":"https://tx-learns.vercel.app/agentic-ai/index.html"},{"@type":"ListItem","position":3,"name":"Agents as tools, handoffs and guardrails","item":"https://tx-learns.vercel.app/agentic-ai/08-agents-tools-handoffs.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Agent SDKs · Lesson 2</span><span class="zh">智能体 SDK · 第 2 课</span></span><h1><span class="en">Agents as tools, handoffs and guardrails</span><span class="zh">智能体当工具、交接与护栏</span></h1><p class="meta"><span class="en">One agent becomes a small team, with checks at the door · ~25 min · hands-on</span><span class="zh">一个智能体变成一支小团队，门口还有安检 · 约 25 分钟 · 动手实践</span></p></div>
 <div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time one agent on the SDK took every order, drinks and noodles alike. Today it fails when a regular orders mee goreng and asks for a refund in the same chat: one agent does all of it, badly. We fix it with specialist agents, handoffs and guardrails.</p>
@@ -13,7 +13,7 @@
 <h2><span class="en">Step 1 · An agent as a tool</span><span class="zh">第 1 步 · 把智能体当工具</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Fern is good at chatting, but not at diagnosing plants. You could stuff plant knowledge into Fern's prompt, but it gets long and messy. Instead, build a separate <b>Plant Doctor</b> agent and give it to Fern as a tool with <code>.as_tool()</code>. Think of asking a colleague across the desk: you get an answer, then <b>you</b> keep talking to the customer.</p>
 <p class="zh"style="margin:0 0 8px">Fern 擅长聊天，但不擅长给植物看病。你可以把植物知识塞进 Fern 的提示词，但那会又长又乱。更好的做法是单独做一个 <b>Plant Doctor</b> 智能体，再用 <code>.as_tool()</code> 把它当工具交给 Fern。就像问隔壁工位的同事：拿到答案后，还是<b>你</b>继续和顾客说话。</p></div>
-<div class="codebox"><span class="dim">plant_doctor = Agent(
+<div class="codebox" data-file="plant_doctor.py" data-lang="python"><span class="dim">plant_doctor = Agent(
     name="Plant Doctor",
     instructions="Diagnose a houseplant from its symptoms. Two sentences: the likely cause, then one fix.",
     model="gpt-5.4-mini")
@@ -27,6 +27,10 @@ fern = Agent(
         tool_description="Diagnose a sick houseplant from a description of its symptoms")</span><span class="dim">])
 
 result = await Runner.run(fern, "My monstera has yellow leaves with brown tips")</span></div>
+<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
+<div class="codebox" data-file="output" data-lang="text">Yellow leaves with brown tips usually mean overwatering or dry air.
+Check that the pot drains, let the top 3 cm of soil dry out, and keep the
+plant away from the aircon vent.</div>
 <p class="en">Step through what happens inside that one run.</p>
 <p class="zh">一步步看看这一次运行里发生了什么。</p>
 <div id="t1"></div>
@@ -35,7 +39,7 @@ result = await Runner.run(fern, "My monstera has yellow leaves with brown tips")
 <h2><span class="en">Step 2 · A handoff</span><span class="zh">第 2 步 · 交接（handoff）</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Refunds are different. Noor wants <b>Returns Desk</b> to own the whole chat, not have Fern relay messages. List it in <code>handoffs</code>, and when the model picks it, the SDK makes Returns Desk the active agent. This is transferring the phone call, not asking a colleague.</p>
 <p class="zh"style="margin:0 0 8px">退款不一样。Noor 希望 <b>Returns Desk</b> 接管整段对话，而不是让 Fern 在中间传话。把它写进 <code>handoffs</code>，模型选中它时，SDK 就让 Returns Desk 成为当前智能体。这是把电话转过去，而不是问同事。</p></div>
-<div class="codebox"><span class="dim">returns_desk = Agent(
+<div class="codebox" data-file="returns_desk.py" data-lang="python"><span class="dim">returns_desk = Agent(
     name="Returns Desk",
     </span><span class="chg">handoff_description="Handles refunds and returns for damaged or wrong orders",</span><span class="dim">
     instructions="You handle returns. Ask for the order number, then explain the next step.",
@@ -45,6 +49,8 @@ fern = Agent(name="Fern", ..., tools=[...], </span><span class="chg">handoffs=[r
 
 result = await Runner.run(fern, "My pot arrived cracked. I want my money back.")
 print(</span><span class="chg">result.last_agent.name</span><span class="dim">)   # who gave the final answer</span></div>
+<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
+<div class="codebox" data-file="output" data-lang="text">Returns Desk</div>
 <div id="t2"></div>
 <div class="try" id="p2"></div>
 
@@ -60,7 +66,7 @@ print(</span><span class="chg">result.last_agent.name</span><span class="dim">) 
 <h2><span class="en">Step 4 · Input guardrail: check what comes in</span><span class="zh">第 4 步 · 输入护栏：检查进来的内容</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Some customers paste their full card number into the chat. Fern must never act on it. An <b>input guardrail</b> is a check on the customer's message that can stop the run before Fern replies. It returns <code>GuardrailFunctionOutput</code>, and if <code>tripwire_triggered</code> is true, the SDK stops the run by raising <code>InputGuardrailTripwireTriggered</code>. Like a smoke alarm: it does not cook, it only stops things when it sees trouble.</p>
 <p class="zh"style="margin:0 0 8px">有些顾客会把完整的银行卡号贴进聊天框。Fern 绝不能据此行事。<b>输入护栏</b>是检查顾客消息的一道关卡，能在 Fern 回复之前叫停运行。它返回 <code>GuardrailFunctionOutput</code>；如果 <code>tripwire_triggered</code> 为真，SDK 就抛出 <code>InputGuardrailTripwireTriggered</code> 叫停运行。就像烟雾报警器：它不做饭，只在发现问题时喊停。</p></div>
-<div class="codebox"><span class="dim">import re
+<div class="codebox" data-file="guardrails.py" data-lang="python"><span class="dim">import re
 from agents import input_guardrail, GuardrailFunctionOutput, InputGuardrailTripwireTriggered
 
 </span><span class="chg">@input_guardrail</span><span class="dim">
@@ -74,12 +80,14 @@ try:
     result = await Runner.run(fern, "Charge 4111 1111 1111 1111 for two ferns")
 </span><span class="chg">except InputGuardrailTripwireTriggered:</span><span class="dim">
     print("Please never share card numbers in chat. Use the checkout page.")</span></div>
+<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
+<div class="codebox" data-file="output" data-lang="text">Please never share card numbers in chat. Use the checkout page.</div>
 <div class="try" id="p4"></div>
 
 <h2><span class="en">Step 5 · Output guardrail, and where guardrails run</span><span class="zh">第 5 步 · 输出护栏，以及护栏在哪里运行</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Noor also fears Fern inventing a discount. An <b>output guardrail</b> checks the final answer before the customer sees it (this one is deliberately simple; a real check would be smarter). The catch is <b>where</b> guardrails run: input guardrails only on the <b>first</b> agent, output guardrails only on the agent that gives the <b>final</b> answer.</p>
 <p class="zh"style="margin:0 0 8px">Noor 还担心 Fern 自己编出一个折扣。<b>输出护栏</b>在顾客看到最终回答之前检查它（这个例子故意写得很简单，真实的检查会更聪明）。关键在于护栏<b>在哪里</b>运行：输入护栏只在<b>第一个</b>智能体上运行，输出护栏只在给出<b>最终</b>回答的智能体上运行。</p></div>
-<div class="codebox"><span class="dim">from agents import output_guardrail, OutputGuardrailTripwireTriggered
+<div class="codebox" data-file="guardrails.py" data-lang="python"><span class="dim">from agents import output_guardrail, OutputGuardrailTripwireTriggered
 
 </span><span class="chg">@output_guardrail</span><span class="dim">
 async def no_discount_promises(ctx, agent, output):
@@ -98,13 +106,16 @@ fern = Agent(name="Fern", ..., input_guardrails=[no_card_numbers],
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Give your agent a specialist.</b> Pick one thing your agent is bad at, build a small agent for it, and add it with <code>.as_tool()</code>. Open the trace and find the nested call.</span><span class="zh"><b>给你的智能体配一位专家。</b>挑一件它不擅长的事，为此做一个小智能体，用 <code>.as_tool()</code> 加进去。打开 trace，找到那次嵌套调用。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add one handoff.</b> Print <code>result.last_agent.name</code> for a few messages and see when the model chooses to transfer.</span><span class="zh"><b>加一个交接。</b>对几条不同的消息打印 <code>result.last_agent.name</code>，看看模型什么时候选择转交。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Trip your own wire.</b> Write an input guardrail, send a message that should trip it, and catch the exception with a friendly reply.</span><span class="zh"><b>亲手触发护栏。</b>写一个输入护栏，发一条应该触发它的消息，然后捕获异常并回一句友好的话。</span></span></label></div>
 
 <div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the counter agent hands mee goreng orders to Kak Ros's agent and drinks to Ah Seng's, and a guardrail stops it promising a free kopi Uncle Lim never agreed to. The next problem is that it only answers customers; the monthly note to regulars is still written by hand.</span><span class="zh">现在柜台智能体会把炒面单交给 Kak Ros 的智能体，把饮料单交给 Ah Seng 的智能体，还有护栏拦住它，不让它许诺 Lim 叔叔没同意的免费咖啡。下一个问题是：它只会回答顾客，给熟客的月度通知还得手写。</span></div>
+<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
+<div class="card"><p class="en" style="margin:0">• <b><code>agents.exceptions.InputGuardrailTripwireTriggered: Guardrail tripped</code></b>: Not a bug: the guardrail worked and raised an <code>InputGuardrailTripwireTriggered</code> exception, but nothing caught it. Fix: wrap <code>Runner.run</code> in <code>try / except</code> and print a friendly line.<br>• <b><code>agents.exceptions.MaxTurnsExceeded: Max turns (10) exceeded</code></b>: Two agents keep calling each other or a tool. Fix: tighten the instructions so one agent clearly finishes, or pass a larger <code>max_turns</code> on purpose.<br>• <b>No error, but <code>result.last_agent.name</code> is still Fern</b>: The handoff never fired because the target's purpose is vague. Fix: give it a clear <code>handoff_description</code> such as "refunds and cracked pots".</p>
+<p class="zh" style="margin:0">• <b><code>agents.exceptions.InputGuardrailTripwireTriggered: Guardrail tripped</code></b>：不是故障：护栏起作用并抛出了 <code>InputGuardrailTripwireTriggered</code> 异常，只是没人接住它。解决：用 <code>try / except</code> 包住 <code>Runner.run</code>，再打印一句友好的话。<br>• <b><code>agents.exceptions.MaxTurnsExceeded: Max turns (10) exceeded</code></b>：两个智能体在互相调用，或反复调用工具。解决：把指令写清楚，让其中一个明确收尾；或有意识地调大 <code>max_turns</code>。<br>• <b>没有报错，但 <code>result.last_agent.name</code> 还是 Fern</b>：交接没触发，因为目标的用途写得太含糊。解决：给它一个清楚的 <code>handoff_description</code>，比如“退款与破损花盆”。</p></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• <code>agent.as_tool(tool_name, tool_description)</code> turns an agent into a tool. The caller gets the answer and stays in charge.<br>• <code>handoffs=[other]</code> lets the model pass the whole conversation on. The other agent replies from then on.<br>• Tool or handoff? Ask <b>who talks to the user next</b>.<br>• <code>handoff_description</code> tells the model when a handoff fits. <code>result.last_agent</code> tells you who answered.<br>• Guardrails return <code>GuardrailFunctionOutput</code>. When <code>tripwire_triggered</code> is true, the SDK raises an exception you catch.<br>• Input guardrails run only on the first agent. Output guardrails run only on the agent with the final answer.<br>• Put guardrails on the front door, not on helpers.</p><p class="zh" style="margin:0">• <code>agent.as_tool(tool_name, tool_description)</code> 把智能体变成工具，调用者拿到答案后继续掌控。<br>• <code>handoffs=[other]</code> 让模型把整段对话交出去，之后由另一个智能体回复。<br>• 工具还是交接？问一句：<b>接下来谁和用户说话</b>。<br>• <code>handoff_description</code> 告诉模型何时该交接，<code>result.last_agent</code> 告诉你最后是谁回答的。<br>• 护栏返回 <code>GuardrailFunctionOutput</code>；<code>tripwire_triggered</code> 为真时，SDK 抛出异常，由你捕获。<br>• 输入护栏只在第一个智能体上运行，输出护栏只在给出最终回答的智能体上运行。<br>• 护栏装在前台，别装在辅助智能体上。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Agentic</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
-<script src="lessons.js?v=40b1397f"></script><script src="../assets/site.js?v=f699e6c7"></script><script src="../assets/teach.js?v=ede6f40f"></script>
+<script src="lessons.js?v=40b1397f"></script><script src="../assets/site.js?v=a288ec54"></script><script src="../assets/teach.js?v=ede6f40f"></script>
 <script>
 document.addEventListener('DOMContentLoaded',function(){
  var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict,trace=TX2.trace;TX2.init();
