@@ -18,7 +18,10 @@
 <p class="zh">所以模型外面要有一层代码，叫<b>外壳（harness）</b>：它构造输入、读取输出、据此行动、必要时重复。接下来四步一块一块把它搭起来：<b>① 上下文</b>、<b>② 记忆</b>、<b>③ 工具</b>、<b>④ 循环</b>。</p><h2><span class="en">① Context: tell it who it is</span><span class="zh">① 上下文：告诉它它是谁</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">The model knows nothing about Alex. Anything it should say about him must be pasted into its <b>system prompt</b>, the instructions sent first on every call. Two files do the job: <code>linkedin.pdf</code> (your profile saved as PDF) and <code>summary.txt</code> (a few lines in your own words). Your code turns them into two text variables:</p>
 <p class="zh"style="margin:0 0 8px">模型对 Alex 一无所知。想让它说关于他的事，就得把内容贴进<b>系统提示词</b>，也就是每次调用最先发送的指令。两个文件就够了：<code>linkedin.pdf</code>（导出的个人资料 PDF）和 <code>summary.txt</code>（用自己的话写的几行介绍）。代码把它们变成两个文本变量：</p></div>
-<div class="codebox" data-file="twin.py" data-lang="python"><span class="dim">reader = PdfReader("twin/linkedin.pdf")
+<div class="codebox" data-file="twin.py" data-lang="python"><span class="dim"># once, in a terminal: pip install pypdf
+from pypdf import PdfReader
+
+reader = PdfReader("twin/linkedin.pdf")
 linkedin = ""
 for page in reader.pages:
     text = page.extract_text()
@@ -85,17 +88,16 @@ def handle_tool_calls(tool_calls):
         else:
             </span><span class="chg">done = True</span><span class="dim">
     return response.choices[0].message.content</span></div>
-<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
-<div class="codebox" data-file="output" data-lang="text">Reply: Thanks, Mei! I have saved both addresses.
+<p class="meta"><span class="en">Example only: wording will differ</span><span class="zh">仅为示例：实际措辞会不同</span></p>
+<div class="codebox" data-file="output" data-lang="text">Reply: Thanks, Mei! I have saved your email.
 
 $ cat emails.txt
-mei@example.com
-mei@acme.example</div>
+mei@example.com</div>
 <p class="en"><b>Choose the simplest version that works.</b></p><p class="zh"><b>选一个够用的最简单版本。</b></p>
 <div class="sc" id="g4"></div>
 <div class="callout tip"><b class="lbl"><span class="en">You just wrote an agent loop</span><span class="zh">你刚写出了一个智能体循环</span></b><span class="en">An LLM, tools, and a <code>while</code> loop that runs until the model stops asking for tools. That is the core of every agent. A framework only hides these lines behind a neat name.</span><span class="zh">一个大模型、几个工具，加一个 <code>while</code> 循环，直到模型不再请求工具为止。这就是所有智能体的核心。框架只是把这些代码藏在了漂亮的名字后面。</span></div>
 <div class="try" id="p4"></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the assistant can call tools: it saves an order on Aina's order pad and notes that Auntie Suria's regular takes kopi-o kosong. Like the chalkboard menu, it can only do what is on its tool list. The next problem is that this tool loop has only met tidy messages; real customers ask messy things.</span><span class="zh">现在助手会调用工具了：它能把订单记到 Aina 的点单本上，并记下 Suria 阿姨的熟客喝 kopi-o kosong。就像墙上的黑板菜单，它只能做工具清单上有的事。下一个问题是：这个工具循环只见过整齐的消息，真实的顾客会问各种乱七八糟的事。</span></div>
+<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the assistant can call tools: when a regular leaves an email address, it asks for record_email_tool and the address is saved to a file, the way Aina's order pad keeps a note. A similar tool could note that Auntie Suria's regular takes kopi-o kosong. Like the chalkboard menu, it can only do what is on its tool list. The next problem is that this tool loop has only met tidy messages; real customers ask messy things.</span><span class="zh">现在助手会调用工具了：熟客留下邮箱时，它会请求 record_email_tool，邮箱就被存进一个文件，就像 Aina 的点单本记下一条备注。类似的工具还能记下 Suria 阿姨的熟客喝 kopi-o kosong。就像墙上的黑板菜单，它只能做工具清单上有的事。下一个问题是：这个工具循环只见过整齐的消息，真实的顾客会问各种乱七八糟的事。</span></div>
 <h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
 <div class="card"><p class="en" style="margin:0">• <b><code>openai.AuthenticationError: Error code: 401 - Incorrect API key provided</code></b>: The key is missing, mistyped or <code>.env</code> was not loaded. Fix: check <code>OPENAI_API_KEY</code>, call <code>load_dotenv(override=True)</code> first and restart the notebook.<br>• <b><code>NameError: name 'handle_tool_calls' is not defined</code></b>: The loop calls a helper you have not built yet. Fix: define <code>handle_tool_calls</code> (and <code>tools</code>) from step ④ before you run <code>chat</code>.<br>• <b><code>openai.BadRequestError: Invalid parameter: messages with role 'tool' must be a response to a preceeding message with 'tool_calls'</code></b>: You sent the tool results without first adding the model's own tool request to <code>messages</code>. Fix: <code>messages.append(response.choices[0].message)</code> before extending with the results.<br>• <b><code>The loop never ends (no error, the cell just keeps running)</code></b>: The model keeps asking for a tool because your function returned nothing useful. Fix: always return a short result string, and cap the rounds with a counter.</p>
 <p class="zh" style="margin:0">• <b><code>openai.AuthenticationError: Error code: 401 - Incorrect API key provided</code></b>：密钥没填、填错，或 <code>.env</code> 没加载。解决：检查 <code>OPENAI_API_KEY</code>，先调用 <code>load_dotenv(override=True)</code>，再重启 notebook。<br>• <b><code>NameError: name 'handle_tool_calls' is not defined</code></b>：循环调用了你还没写的辅助函数。解决：先定义第 ④ 步里的 <code>handle_tool_calls</code> 和 <code>tools</code>，再运行 <code>chat</code>。<br>• <b><code>openai.BadRequestError: Invalid parameter: messages with role 'tool' must be a response to a preceeding message with 'tool_calls'</code></b>：你发回了工具结果，却没有先把模型自己的工具请求加进 <code>messages</code>。解决：先 <code>messages.append(response.choices[0].message)</code>，再追加工具结果。<br>• <b><code>The loop never ends (no error, the cell just keeps running)</code></b>：模型一直请求工具，因为你的函数没返回有用的东西。解决：总是返回一个简短的结果字符串，并用计数器限制轮数。</p></div>
