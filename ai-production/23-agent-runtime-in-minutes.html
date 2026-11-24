@@ -1,0 +1,79 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>An agent runtime in minutes | TX Learns</title>
+<meta name="description" content="See how much of the earlier work a managed agent runtime does for you: containers, registry, roles and a running endpoint from one command."><meta property="og:title" content="An agent runtime in minutes | TX Learns"><meta property="og:description" content="See how much of the earlier work a managed agent runtime does for you: containers, registry, roles and a running endpoint from one command."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-production/23-agent-runtime-in-minutes.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-24">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Agents as a managed service · Lesson 1</span><span class="zh">托管的智能体服务 · 第 1 课</span></span><h1><span class="en">An agent runtime in minutes</span><span class="zh">几分钟上线一个智能体运行时</span></h1><p class="meta"><span class="en">See how much of the earlier plumbing a managed agent runtime does for you, from one command · ~30 min · hands-on</span><span class="zh">看看托管的智能体运行时能替你做掉多少之前的管道活，一条命令就够 · 约 30 分钟 · 动手</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">Over the last topics, <b>Mei Ling</b> packed a product in a container, pushed it somewhere, made roles and opened an address. It worked, but it took many steps. Now <b>Kumar</b> asks: "Can the whole thing be one button?" She tries a <b>managed agent runtime</b>: a cloud service that hosts an agent for you and does that plumbing itself. <b>Sergeant Lee</b> reminds her that the gate pass still has to be right first.</p>
+<p class="zh" style="margin:0">前面几个主题里，<b>Mei Ling</b> 把产品装进容器、推到某处、建角色、开地址。能跑，但步骤很多。现在 <b>Kumar</b> 问：“能不能整件事就一个按钮？”她试了试<b>托管的智能体运行时</b>：一个替你托管智能体的云服务，那些管道活它自己做。<b>Lee 警长</b>提醒她，通行证（权限）得先弄对。</p></div>
+<h2><span class="en">Step 1 · Permissions and region first</span><span class="zh">第 1 步 · 先弄权限和区域</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A managed service still needs a pass at the gate. Put your user in a group that may use three things: the <b>model service</b> (the models), the <b>build service</b> (it makes the container) and the <b>agent runtime</b> itself. Then ask for access to the model you want, in one specific <b>region</b> (a geographic location of the provider's data centres). Last, switch on observability in the runtime's console. The service then keeps a record of each call, called a <b>trace</b>, that you can read later.</p>
+<p class="zh" style="margin:0 0 8px">托管服务也要在闸口出示通行证。把你的用户放进一个用户组，让它能用三样东西：<b>模型服务</b>（提供模型）、<b>构建服务</b>（负责做出容器）和<b>智能体运行时</b>本身。然后在某一个<b>区域</b>（服务商数据中心所在的地理位置）里申请你要用的模型的访问权。最后，在运行时的控制台里打开可观测性。服务会记下每次调用的过程，这份记录叫<b>轨迹</b>，之后可以读。</p></div>
+<div class="codebox"><span class="dim">Group "wharf-agents" may use:
+  [ ] model service      (call models)
+  [ ] build service      (build the container)
+  [ ] agent runtime      (host the agent)
+Model access:  request it in </span><span class="chg">ap-southeast-1</span><span class="dim">   (the region you will also launch in)
+Console:       turn on observability once</span></div>
+<div class="try" id="t1"></div>
+<h2><span class="en">Step 2 · Install the small project</span><span class="zh">第 2 步 · 装好小项目</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Read the runtime's docs and its starter kit first, so you know what it expects. Then make a tiny project with four packages: the runtime's SDK (the code that lets your file be hosted), an agent library, the runtime's toolkit (the launch command) and a data-models library (pydantic, which checks that your data has the right shape). Keep it in its own folder with its own virtual environment (a private set of packages for this one project, so projects do not mix).</p>
+<p class="zh" style="margin:0 0 8px">先读运行时的文档和它的入门套件，知道它期待什么。然后建一个只有四个包的小项目：运行时的 SDK（让你的文件能被托管的代码）、一个智能体库、运行时的工具包（启动命令）和一个数据模型库（pydantic，检查你的数据形状对不对）。放在自己的文件夹里，用独立的虚拟环境（一套只属于这个项目的包，项目之间不会混在一起）。</p></div>
+<div class="codebox"><span class="dim">mkdir wharf-agent &amp;&amp; cd wharf-agent
+python -m venv .venv &amp;&amp; source .venv/bin/activate
+</span><span class="chg">pip install bedrock-agentcore strands-agents bedrock-agentcore-starter-toolkit pydantic</span></div>
+<div class="sc" id="t2"></div>
+<h2><span class="en">Step 3 · Write the first agent file</span><span class="zh">第 3 步 · 写第一个智能体文件</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The file has three parts. An <b>app object</b> that the runtime hosts. An <b>agent</b> with a system prompt (the standing instructions that tell it who it is and how to answer). And one <b>entry point</b>: a function that takes the request, runs the agent on the prompt and returns text. The <code>@app.entrypoint</code> line above that function is a <b>decorator</b>: a label that tells the runtime which function to call. Only one entry-point file is allowed per project, so keep everything the runtime must start in that file.</p>
+<p class="zh" style="margin:0 0 8px">这个文件有三部分。一个运行时来托管的<b>应用对象</b>；一个带系统提示词（先给它的一段固定指示，告诉它是谁、该怎么回答）的<b>智能体</b>；还有唯一一个<b>入口</b>：接收请求、让智能体处理提示词、返回文字的函数。代码里函数上面的 <code>@app.entrypoint</code> 是一个<b>装饰器</b>，就是一行标签，告诉运行时该调用哪个函数。每个项目只允许一个入口文件，所以运行时要启动的东西都放在这个文件里。</p></div>
+<div class="codebox"><span class="dim"># agent.py
+from bedrock_agentcore.runtime import BedrockAgentCoreApp
+from strands import Agent
+
+app = BedrockAgentCoreApp()
+
+helper = Agent(
+    system_prompt="You are a short, friendly helper for the wharf IT desk.",
+)
+
+</span><span class="chg">@app.entrypoint
+def handle(payload):
+    reply = helper(payload.get("prompt", "Hello"))
+    return str(reply)</span><span class="dim">
+
+if __name__ == "__main__":
+    app.run()</span></div>
+<div class="try" id="t3"></div>
+<h2><span class="en">Step 4 · Configure, launch, invoke</span><span class="zh">第 4 步 · 配置、启动、调用</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Three commands. <b>Configure</b> tells the toolkit which file is the entry point and which region to use. <b>Launch</b> builds the container, pushes it to a registry, creates the roles and starts the service. <b>Invoke</b> sends it a JSON prompt and prints the reply. Compare that with the many hand steps you did before.</p>
+<p class="zh" style="margin:0 0 8px">三条命令。<b>配置</b>告诉工具包哪个文件是入口、用哪个区域。<b>启动</b>会构建容器、推到镜像仓库、创建角色并启动服务。<b>调用</b>发一个 JSON 提示词给它，并打印回复。拿它和你之前手工做的那么多步骤比一比。</p></div>
+<div class="codebox"><span class="dim">agentcore configure -e agent.py --region </span><span class="chg">ap-southeast-1</span><span class="dim">
+</span><span class="chg">agentcore launch</span><span class="dim">      # container + registry + roles + running service
+</span><span class="chg">agentcore invoke '{"prompt": "Which berth do I ask about a late pass?"}'</span></div>
+<div class="try" id="t4"></div>
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en"><b>Three slips.</b> My default region was not the region where I had model access, so every call errored; I now pass the region when I configure. I put helper code in a second entry-point file, and the runtime allows only one. And I forgot to delete the deployed agent afterwards, which is a small bill for nothing.</span><span class="zh"><b>三个失误。</b>我的默认区域和申请到模型权限的区域不一样，所以每次调用都报错；现在配置时我会明确传入区域。我把辅助代码放进了第二个入口文件，而运行时只允许一个。我还忘了事后删掉已部署的智能体，白白花了一点钱。</span></div>
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Invoke it three times</b> and watch the logs each time.</span><span class="zh"><b>调用它三次</b>，每次都看一下日志。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Change the system prompt</b>, launch again and compare the answers.</span><span class="zh"><b>改一下系统提示词</b>，再启动一次，比较回答。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Write a list</b> of what you did by hand in earlier topics that the runtime did for you.</span><span class="zh"><b>列一张清单</b>：前面主题里你手工做过、这次由运行时代劳的事。</span></span></label></div>
+<div class="callout tip"><b class="lbl"><span class="en">At the wharf</span><span class="zh">在码头</span></b><span class="en">It is like hiring a berth with the cranes and crew included. You no longer lay the rails yourself. But you still tell the terminal which ship is coming, and Sergeant Lee still checks your pass.</span><span class="zh">这像是租一个连吊机和工人都包含在内的泊位。铁轨不用你自己铺了，但仍然要由你告诉码头哪艘船要来，Lee 警长仍然会查你的通行证。</span></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A managed agent runtime hosts your agent and does the plumbing for you.<br>• Permissions come first: model service, build service and the runtime.<br>• Ask for model access in one region, and use that same region everywhere.<br>• An agent file needs an app object, an agent and one entry point.<br>• Configure, launch and invoke replace the container, registry and role work.<br>• Delete what you deployed when you are done.<br>• Managed runtimes remove the plumbing, not the thinking.</p><p class="zh" style="margin:0">• 托管的智能体运行时替你托管智能体，并代办管道活。<br>• 权限先行：模型服务、构建服务和运行时。<br>• 在一个区域申请模型权限，并且处处使用同一个区域。<br>• 智能体文件需要应用对象、智能体和唯一的入口。<br>• 配置、启动、调用，取代了容器、镜像仓库和角色的手工活。<br>• 用完之后，把部署的东西删掉。<br>• 托管运行时去掉的是管道，不是思考。</p></div>
+
+<button class="btn mark-done" style="margin-top:20px"></button>
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Production</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('t1'),{q:{en:'Every call fails with "model not available". Your runtime is in one region and your model access was granted in another. What is the fix?',zh:'每次调用都报“模型不可用”。你的运行时在一个区域，而模型权限是在另一个区域申请的。怎么修？'},opts:[{k:'a',en:'Use the same region for both: pass it when you configure',zh:'两边用同一个区域：配置时把它传进去'},{k:'b',en:'Rewrite the agent code',zh:'重写智能体代码'},{k:'c',en:'Turn observability off',zh:'关掉可观测性'}],a:'a',ex:{en:'Model access belongs to a region. The runtime must call the model from where you were granted it.',zh:'模型权限是跟区域绑定的。运行时必须在你获批的那个区域里调用模型。'},hint:{en:'Where was the model access granted?',zh:'权限是在哪里批下来的？'}});
+ game($('t2'),[
+  {en:'The runtime SDK',zh:'运行时 SDK',a:'r',ex:{en:'Your file needs it to be hosted.',zh:'你的文件需要它才能被托管。'},hint:{en:'Does the hosting code need it?',zh:'托管需要它吗？'}},
+  {en:'The toolkit with the launch command',zh:'带启动命令的工具包',a:'r',ex:{en:'Without it there is no configure or launch.',zh:'没有它就没有配置和启动命令。'},hint:{en:'Where does the launch command come from?',zh:'启动命令从哪来？'}},
+  {en:'A photo editing library',zh:'一个修图库',a:'n',ex:{en:'Nothing in this agent edits photos.',zh:'这个智能体里没有任何修图的事。'},hint:{en:'Does the agent use it?',zh:'智能体用得到吗？'}},
+  {en:'The agent library',zh:'智能体库',a:'r',ex:{en:'It gives you the agent object.',zh:'它提供智能体对象。'},hint:{en:'Where does the agent come from?',zh:'智能体从哪来？'}}],
+  [{k:'r',en:'Needed',zh:'需要'},{k:'n',en:'Not needed',zh:'不需要'}],{en:'Package',zh:'包'});
+ predict($('t3'),{q:{en:'You want to share a helper in a second file that also has <code>@app.entrypoint</code>. What happens?',zh:'你想把一个辅助函数放进第二个同样带 <code>@app.entrypoint</code> 的文件里共用。会怎样？'},opts:[{k:'a',en:'It breaks: only one entry-point file is allowed per project',zh:'会出问题：每个项目只允许一个入口文件'},{k:'b',en:'The runtime merges both files',zh:'运行时把两个文件合并'},{k:'c',en:'It runs twice as fast',zh:'它的速度翻倍'}],a:'a',ex:{en:'The runtime starts one file. Plain helper code can be imported, but only one file is the entry point.',zh:'运行时只启动一个文件。普通的辅助代码可以导入，但入口只能有一个文件。'},hint:{en:'How many entry points did we say?',zh:'前面说入口有几个？'}});
+ predict($('t4'),{q:{en:'Which of these did <code>agentcore launch</code> do for you?',zh:'下面哪件事是 <code>agentcore launch</code> 替你做的？'},opts:[{k:'a',en:'Built the container, pushed it, made the roles and started the service',zh:'构建容器、推送、建角色并启动服务'},{k:'b',en:'Thought of the system prompt for you',zh:'替你想出系统提示词'},{k:'c',en:'Picked your region and asked for model access',zh:'替你选区域并申请模型权限'}],a:'a',ex:{en:'That is the plumbing. The prompt, the region and the permissions are still yours.',zh:'那就是管道活。提示词、区域和权限仍然归你。'},hint:{en:'Plumbing or thinking?',zh:'是管道还是思考？'}});
+});
+</script></body></html>

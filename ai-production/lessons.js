@@ -30,7 +30,7 @@ window.TRACK={id:'ai-production',title:{en:'AI Production',zh:'AI 上线实战'}
   {k:'c',file:'21-push-to-deploy-github-actions.html',title:{en:"Push to deploy with GitHub Actions",zh:"用 GitHub Actions 一推就部署"}},
   {k:'p',file:'22-dev-test-prod-from-one-push.html',title:{en:"Project: dev, test and prod from one push",zh:"项目：一次推送，开发、测试、生产三套环境"}}]},
  {n:8,title:{en:"Agents as a managed service",zh:"托管的智能体服务"},items:[
-  {k:'c',title:{en:"An agent runtime in minutes",zh:"几分钟上线一个智能体运行时"}},
-  {k:'c',title:{en:"Tools and a planning loop",zh:"工具与规划循环"}},
-  {k:'p',title:{en:"Project: a planning agent that checks itself",zh:"项目：会自我验证的规划智能体"}}]}
+  {k:'c',file:'23-agent-runtime-in-minutes.html',title:{en:"An agent runtime in minutes",zh:"几分钟上线一个智能体运行时"}},
+  {k:'c',file:'24-tools-and-a-planning-loop.html',title:{en:"Tools and a planning loop",zh:"工具与规划循环"}},
+  {k:'p',file:'25-planning-agent-that-checks-itself.html',title:{en:"Project: a planning agent that checks itself",zh:"项目：会自我验证的规划智能体"}}]}
 ]};
