@@ -113,3 +113,21 @@ WHAT CHANGED SINCE THE PREVIOUS LESSON
   in one place, and the project adds: a bar agreed before the scores, two runs
   per model, a table, a rule that a model must pass every line, the cheapest
   pick with a stronger fallback, and the memo.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- python bench.py prints two lines, such as 'full 377 tokens, small 225 tokens, saved 40%' and 'approving everything scores 56%'.
+- The bar is written as numbers in the code before any model runs.
+- choose_model.py gives each candidate one row: accuracy by difficulty, cost per 1,000 claims, seconds per claim and wrong big approvals.
+- A model clears the bar only if it passes every line of it.
+- It prints the cheapest model that clears the bar, a fallback, and a memo with real numbers filled in.
+
+Compare your work with final/ afterwards, starting with choose_model.py, bench.py and the bar definition.
+
+验收标准（中文）
+- python bench.py 打印两行，例如 “full 377 tokens, small 225 tokens, saved 40%” 和 “approving everything scores 56%”。
+- 及格线在任何模型运行之前，就以数字写在代码里。
+- choose_model.py 为每个候选模型一行：按难度的准确率、每 1,000 个理赔成本、每个理赔秒数和错误的大额批准数。
+- 只有通过全部条件的模型才算达标。
+- 它打印达标中最便宜的模型、一个备选，以及填入真实数字的备忘。

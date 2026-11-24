@@ -2,7 +2,7 @@
 <title>Pipelines: models in a few lines | TX Learns</title>
 <meta name="description" content="Name a job, get a ready tool: use Hugging Face pipelines to run open models for sentiment, summaries, labels and more on a rented GPU."><meta property="og:title" content="Pipelines: models in a few lines | TX Learns"><meta property="og:description" content="Name a job, get a ready tool: use Hugging Face pipelines to run open models for sentiment, summaries, labels and more on a rented GPU."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-engineer/08-pipelines-models-few-lines.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
 <meta name="updated" content="2026-11-24">
-<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<link rel="canonical" href="https://tx-learns.vercel.app/ai-engineer/08-pipelines-models-few-lines.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=01ea5a80"><link rel="stylesheet" href="../assets/teach.css?v=348efa72"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-engineer/08-pipelines-models-few-lines.html","url":"https://tx-learns.vercel.app/ai-engineer/08-pipelines-models-few-lines.html","name":"Pipelines: models in a few lines","alternateName":"pipeline：几行代码用上模型","description":"Name a job, get a ready tool: use Hugging Face pipelines to run open models for sentiment, summaries, labels and more on a rented GPU.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Open-source models","dateModified":"2026-11-24","isPartOf":{"@type":"CollectionPage","name":"AI Engineer","url":"https://tx-learns.vercel.app/ai-engineer/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Engineer","item":"https://tx-learns.vercel.app/ai-engineer/index.html"},{"@type":"ListItem","position":3,"name":"Pipelines: models in a few lines","item":"https://tx-learns.vercel.app/ai-engineer/08-pipelines-models-few-lines.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Open-source models · Lesson 1</span><span class="zh">开源模型 · 第 1 课</span></span><h1><span class="en">Pipelines: models in a few lines</span><span class="zh">pipeline：几行代码用上模型</span></h1><p class="meta"><span class="en">You will run open models on your own rented GPU by naming the job, with no API bill · ~15 min · hands-on</span><span class="zh">你会只说出任务名，就在自己租的 GPU 上跑开源模型，没有 API 账单 · 约 15 分钟 · 动手实践</span></p></div>
 <div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the helper could act through tools, but every message was a paid API call. Today it hurts when neighbours send hundreds of small messages and the bill grows. We fix it by running small open models through pipelines, a few lines each.</p>
@@ -39,35 +39,38 @@
 <path class="lnk" d="M333,75 L387,75" marker-end="url(#ah)"/>
 <path class="lnk" d="M527,75 L581,75" marker-end="url(#ah)"/>
 </svg><figcaption><span class="en">The first call downloads the model; after that the same call runs from your own machine.</span><span class="zh">第一次调用会下载模型；之后同样的调用就在你自己的机器上运行。</span></figcaption></figure>
-<div class="codebox"><span class="chg">from transformers import pipeline
+<div class="codebox" data-file="sentiment.py" data-lang="python"><span class="chg">from transformers import pipeline
 
 feel = pipeline("sentiment-analysis")
 print(feel("Teacher Priya explains slowly and my son finally gets fractions"))</span><span class="dim">
 # [{'label': 'POSITIVE', 'score': 0.99...}]</span></div>
+<div class="codebox" data-file="output" data-lang="text">[{'label': 'POSITIVE', 'score': 0.9981}]</div>
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 2 · One job per pipeline</span><span class="zh">第 2 步 · 一个任务一条 pipeline</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Each task name gives a different tool: summarising, translating, answering a question from a passage, pulling out names, or sorting text into labels you invent. The last one, <code>zero-shot-classification</code>, is perfect for Priya: she makes up the labels and needs no training data. The output shape changes with the task, so print it first and look.</p>
 <p class="zh" style="margin:0 0 8px">每个任务名对应不同的工具：做摘要、翻译、从一段文字里回答问题、抽出人名地名，或者把文字分到你自己定的标签里。最后一个 <code>zero-shot-classification</code> 正适合 Priya：标签自己编，不需要训练数据。输出的形状随任务而变，所以先打印出来看看。</p></div>
-<div class="codebox"><span class="dim">from transformers import pipeline
+<div class="codebox" data-file="zero_shot.py" data-lang="python"><span class="dim">from transformers import pipeline
 
 sorter = pipeline("zero-shot-classification")
 slip = "Please tell me when the next term payment is due."
 </span><span class="chg">result = sorter(slip, candidate_labels=["praise", "complaint", "fees"])
 print(result["labels"][0], result["scores"][0])</span><span class="dim">
 # fees 0.9...</span></div>
+<div class="codebox" data-file="output" data-lang="text">fees 0.87</div>
 <div class="try" id="p2"></div>
 
 <h2><span class="en">Step 3 · Where it runs, and the first-call download</span><span class="zh">第 3 步 · 在哪里运行，以及第一次调用的下载</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The first call to a pipeline downloads a default model, which can be gigabytes. After that it is cached. Then comes the device: on a CPU a big model crawls, so switch the notebook runtime to a GPU and pass <code>device="cuda"</code>. Think of the aircon compressor at the void deck: the GPU is the loud machine that does the heavy lifting. You can also choose a different model from the hub for the same task, by name.</p>
 <p class="zh" style="margin:0 0 8px">第一次调用 pipeline 会下载一个默认模型，可能有好几个 GB，之后就有缓存了。然后是设备：CPU 跑大模型慢得像爬，所以把 notebook 的运行环境切到 GPU，并传 <code>device="cuda"</code>。想想组屋底层嗡嗡响的冷气压缩机：GPU 就是干重活的那台响机器。你也可以按名字从 hub 里换一个别的模型来做同一个任务。</p></div>
-<div class="codebox"><span class="dim">from transformers import pipeline
+<div class="codebox" data-file="summary.py" data-lang="python"><span class="dim">from transformers import pipeline
 long_letter = open("parent_letter.txt").read()
 
 </span><span class="chg">shorten = pipeline("summarization", device="cuda")
 # or pick the model yourself:
 # shorten = pipeline("summarization", model="some-org/some-summary-model", device="cuda")</span><span class="dim">
 print(shorten(long_letter, max_length=60)[0]["summary_text"])</span></div>
+<div class="codebox" data-file="output" data-lang="text">The school will close on Friday for staff training. Lessons resume on Monday.</div>
 <div class="try" id="p3"></div>
 
 <h2><span class="en">Step 4 · Why bother, when an API exists?</span><span class="zh">第 4 步 · 有 API 了，为什么还要自己跑？</span></h2>
@@ -78,6 +81,8 @@ print(shorten(long_letter, max_length=60)[0]["summary_text"])</span></div>
 
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I ran it on a CPU runtime and waited ages, then wondered if it was broken. It just needed a GPU runtime. I also forgot that the first call downloads gigabytes, so I thought the notebook had frozen.</span><span class="zh">我在 CPU 运行环境下跑，等了很久，还以为坏了。其实只要换成 GPU 环境。我还忘了第一次调用会下载好几个 GB，以为 notebook 卡死了。</span></div>
 
+<h2><span class="en">Common errors</span><span class="zh">常见报错</span></h2>
+<div class="card"><p class="en" style="margin:0">• <code>OSError: ... can't load model</code> or a very slow first run. The first call downloads the model. Wait for it, check the internet, and keep the disk space free.<br>• <code>ValueError: Cannot use device 'cuda'</code> or no GPU found. Remove <code>device="cuda"</code> to run on the CPU, slower but it works.<br>• <code>Token indices sequence length is longer than the specified maximum</code>. The text is longer than the model reads. Split it into parts and summarise each.</p><p class="zh" style="margin:0">• <code>OSError: ... can't load model</code>，或第一次运行特别慢：第一次调用要下载模型。等它下完，检查网络并留够磁盘空间。<br>• <code>ValueError</code> 提示找不到 cuda 或没有显卡：去掉 <code>device="cuda"</code>，在 CPU 上运行，慢一点但能用。<br>• <code>Token indices sequence length is longer than the specified maximum</code>：文本比模型能读的更长。切成几段，各自总结。</p></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Classify ten of your own sentences</b> with zero-shot labels you invent.</span><span class="zh"><b>拿十句你自己的话，</b>用自己编的标签做零样本分类。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Compare a pipeline summary</b> with a frontier-model summary of the same text.</span><span class="zh"><b>对比 pipeline 的摘要</b>和云端大模型对同一段文字的摘要。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Pick a different model name</b> from the hub for the same task and see what changes.</span><span class="zh"><b>从 hub 里换一个模型名</b>做同一个任务，看看有什么变化。</span></span></label></div>
 <div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the helper can sort a pile of neighbours' messages into praise, complaints and fees with a free pipeline on a notebook GPU, like a specialist stall at the heartland mall that only does one job. The next problem is that a pipeline hides the tokenizer and the chat layout, so Wei Jie cannot control how the helper reads a notice or fits a bigger model.</span><span class="zh">现在助手能在 notebook 的 GPU 上用免费的 pipeline，把一堆邻居的消息分成表扬、投诉和学费三类，就像社区商场里只做一件事的专门店。下一个问题是：pipeline 把分词器和对话版式都藏起来了，Wei Jie 没法控制助手怎样读一则通知，也没法装进更大的模型。</span></div>
@@ -87,7 +92,7 @@ print(shorten(long_letter, max_length=60)[0]["summary_text"])</span></div>
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
-<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script src="lessons.js?v=0ada53e6"></script><script src="../assets/site.js?v=a288ec54"></script><script src="../assets/teach.js?v=ede6f40f"></script>
 <script>
 document.addEventListener('DOMContentLoaded',function(){
  var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();

@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>What changed | TX Learns</title>
+<meta name="description" content="A short, dated list of what changed on the site: new lesson features, tracks, tools and checks, newest first."><meta property="og:title" content="What changed | TX Learns"><meta property="og:description" content="A short, dated list of what changed on the site: new lesson features, tracks, tools and checks, newest first."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/changelog.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<link rel="canonical" href="https://tx-learns.vercel.app/changelog.html"><link rel="icon" href="assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><link rel="stylesheet" href="assets/site.css?v=01ea5a80">
+<style>
+.cl-hero .mega{font-size:clamp(2.2rem,6.4vw,4.2rem)}
+.cl-sec{margin-top:36px}
+.cl-day{margin:26px 0 8px;font-size:15px;letter-spacing:.06em;color:var(--mut);border-bottom:1px solid var(--line);padding-bottom:4px}
+.cl-list{list-style:none;margin:0;padding:0}
+.cl-it{margin:8px 0;padding:12px 16px;border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:10px;background:var(--glass);font-size:15.5px;line-height:1.55}
+.cl-it a{font-weight:600;margin-left:10px;white-space:nowrap}
+.cl-none{padding:18px;border:1px dashed var(--line);border-radius:10px;color:var(--mut);text-align:center}
+</style><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://tx-learns.vercel.app/changelog.html","url":"https://tx-learns.vercel.app/changelog.html","name":"What changed","description":"A short, dated list of what changed on the site: new lesson features, tracks, tools and checks, newest first.","inLanguage":["en","zh"],"isPartOf":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"What changed","item":"https://tx-learns.vercel.app/changelog.html"}]}]}</script></head><body>
+<main class="wide">
+<header class="stage compact cl-hero"><div class="orb"></div>
+<span class="eyebrow"><span class="en">Changelog · newest first</span><span class="zh">更新记录 · 最新在前</span></span>
+<h1 class="mega"><span class="en">What changed<br>on the site.</span><span class="zh">网站<br>有什么新变化。</span></h1>
+<p class="sub"><span class="en">Short notes on what was added or improved. Each lesson also shows when it was last updated.</span><span class="zh">简短记录新增和改进了什么。每节课也会显示它最后更新的日期。</span></p>
+</header>
+<section class="cl-sec" id="log" aria-labelledby="log-h">
+<h2 id="log-h"><span class="en">All changes</span><span class="zh">全部更新</span></h2>
+<div id="list"></div>
+<noscript><p class="cl-none"><span class="en">The list needs JavaScript. Without it, open the lessons from the home page.</span><span class="zh">这份列表需要 JavaScript。没有的话，请从首页进入各课。</span></p></noscript>
+</section>
+</main>
+<script src="changelog.js"></script><script src="assets/site.js?v=a288ec54"></script>
+<script>
+(function(){
+  try{
+    var L=(window.CHANGELOG||[]).slice(),el=document.getElementById('list');
+    if(!el)return;
+    function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+    var MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    function day(d){var p=d.split('-');return '<span class="en">'+(+p[2])+' '+MO[p[1]-1]+' '+p[0]+'</span><span class="zh">'+p[0]+' 年 '+(+p[1])+' 月 '+(+p[2])+' 日</span>'}
+    L.sort(function(a,b){return a.date<b.date?1:a.date>b.date?-1:0});
+    var out='',cur='';
+    L.forEach(function(x){
+      if(x.date!==cur){if(cur)out+='</ul>';cur=x.date;out+='<h3 class="cl-day">'+day(x.date)+'</h3><ul class="cl-list">'}
+      out+='<li class="cl-it"><span class="en">'+esc(x.en)+'</span><span class="zh">'+esc(x.zh)+'</span>'+(x.files||[]).map(function(f){return '<a href="'+esc(f)+'"><span class="en">See it →</span><span class="zh">去看看 →</span></a>'}).join('')+'</li>'});
+    if(cur)out+='</ul>';
+    el.innerHTML=out||'<p class="cl-none"><span class="en">Nothing here yet.</span><span class="zh">还没有记录。</span></p>';
+  }catch(err){try{console.warn('changelog',err)}catch(e2){}}
+})();
+</script></body></html>

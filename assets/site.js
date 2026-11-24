@@ -21,7 +21,7 @@
 
   if(window.TRACK&&!window.TRACKS)document.write('<script src="../tracks.js"><\/script>');
   /* learner search + related lessons live in their own file (scripts/search-index.mjs builds its index) */
-  (function(m){if(m&&m.src){var q=document.createElement('script');q.src=m.src.replace(/site\.js.*$/,'search.js');q.defer=true;document.head.appendChild(q)}})(document.currentScript);
+  (function(m){if(m&&m.src){var q=document.createElement('script');q.src=m.src.replace(/site\.js.*$/,'search.js'+(m.src.match(/\?.*$/)||[''])[0]);q.defer=true;document.head.appendChild(q)}})(document.currentScript);
   document.addEventListener('DOMContentLoaded',function(){
     var C=window.TRACK,here=location.pathname.split('/').pop()||'index.html',d=done();
     if(C){C.all=[];C.topics.forEach(function(w){w.items.forEach(function(it,i){it.w=w.n;it.i=i+1;it.g=C.all.length+1;C.all.push(it)})});C.lessons=C.all.filter(function(x){return x.file});C.total=C.all.length}
@@ -41,7 +41,7 @@
     var mn=document.querySelector('main');
     if(mn){if(!mn.id)mn.id='main';mn.setAttribute('tabindex','-1');var sk=document.createElement('a');sk.className='skip';sk.href='#'+mn.id;sk.innerHTML=t({en:'Skip to content',zh:'跳到正文'});sk.onclick=function(){setTimeout(function(){mn.focus()},0)};document.body.prepend(sk)}
     var top=document.createElement('div');top.className='top';
-    top.innerHTML='<a class="brand" href="'+(C?'../index.html':'index.html')+'"><b></b>TX Learns</a>'+(C?'<button class="icon-btn menu-btn" aria-expanded="false" aria-controls="topics-nav">☰ <span class="en">Topics</span><span class="zh">主题</span></button>':'')+'<span class="sp"></span>'+'<a class="icon-btn eco-btn" href="'+(C?'../':'')+'ecosystem.html" title="How it works · 运作方式" aria-label="How it works · 运作方式">🌐<span class="lbl"> <span class="en">How it works</span><span class="zh">运作方式</span></span></a>'+'<a class="icon-btn eco-btn" href="'+(C?'../':'')+'glossary.html" title="Glossary · 词汇表" aria-label="Glossary · 词汇表">📖<span class="lbl"> <span class="en">Glossary</span><span class="zh">词汇表</span></span></a>'+
+    top.innerHTML='<a class="brand" href="'+(C?'../index.html':'index.html')+'"><b></b>TX Learns</a>'+(C?'<button class="icon-btn menu-btn" aria-expanded="false" aria-controls="topics-nav">☰ <span class="en">Topics</span><span class="zh">主题</span></button>':'')+'<span class="sp"></span>'+'<a class="icon-btn eco-btn" href="'+(C?'../':'')+'ecosystem.html" title="How it works · 运作方式" aria-label="How it works · 运作方式">🌐<span class="lbl"> <span class="en">How it works</span><span class="zh">运作方式</span></span></a>'+'<a class="icon-btn eco-btn" href="'+(C?'../':'')+'glossary.html" title="Glossary · 词汇表" aria-label="Glossary · 词汇表">📖<span class="lbl"> <span class="en">Glossary</span><span class="zh">词汇表</span></span></a>'+'<a class="icon-btn eco-btn cl-btn" href="'+(C?'../':'')+'changelog.html" title="What changed · 更新记录" aria-label="What changed · 更新记录">🆕<span class="lbl"> <span class="en">What changed</span><span class="zh">更新记录</span></span></a>'+
       '<div class="seg" role="group" aria-label="Language · 语言"><button data-l="en" lang="en">EN</button><button data-l="zh" lang="zh-Hans">中文</button></div><button class="icon-btn th" aria-label="theme"></button>';
     document.body.insertBefore(top,bar.nextSibling);
     function mark(){top.querySelectorAll('[data-l]').forEach(function(b){var on=b.dataset.l===root.getAttribute('data-lang');b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});var dk=root.getAttribute('data-theme')==='dark',th=top.querySelector('.th');th.textContent=dk?'☀︎':'☾';th.setAttribute('aria-label',dk?'Switch to light theme · 切换到浅色':'Switch to dark theme · 切换到深色')}
@@ -121,6 +121,7 @@
         jr.querySelectorAll('.wtab').forEach(function(b){b.onclick=function(){cur=+b.dataset.i;draw()}});
       };
       draw();
+      if(CF.length)whatNext(false,function(a){jr.after(a)},NX&&C.lessons.filter(function(x){return x.file===NX})[0],!NX);
     }
 
     /* prerequisites + project card + track before/after: data lives in each track's prereqs.js / projects.js (window.PREREQ / window.PROJECTS) and tracks.js */
@@ -128,6 +129,8 @@
     function li(a){return (a||[]).map(function(x){return '<li>'+t(x)+'</li>'}).join('')}
     function renderMeta(){
       var P=(window.PREREQ||{})[here],J=(window.PROJECTS||{})[here],hm2=document.querySelector('main .meta'),anchor=hm2&&(hm2.closest('.hero')||hm2),box;
+      /* optional P.changed={en,zh}: what changed last, shown after "Updated" */
+      if(P&&P.changed&&P.changed.en&&hm2&&!hm2.querySelector('.changed')){var cs=document.createElement('span');cs.className='changed';cs.innerHTML=' · '+t({en:'Last changed: '+P.changed.en,zh:'最近改动：'+(P.changed.zh||P.changed.en)});hm2.appendChild(cs)}
       /* learning goals: optional P.goals={en:[],zh:[]}; skipped when the lesson body already has its own objectives block */
       if(P&&P.goals&&P.goals.en&&P.goals.en.length&&hm2&&!document.querySelector('main .objectives,main .goals')&&!Array.prototype.some.call(document.querySelectorAll('main h2,main h3,main .lbl'),function(h){return /learning objectives|学习目标/i.test(h.textContent)})){
         var gb=document.createElement('aside');gb.className='card goals';gb.setAttribute('aria-label','You will be able to · 学完你能');
@@ -147,13 +150,22 @@
         /* every file of the package (packages.js is generated), grouped by folder */
         if(fl.length){var gr={};fl.forEach(function(f){var i=f.lastIndexOf('/'),k=i<0?'':f.slice(0,i);(gr[k]=gr[k]||[]).push(f)});
           files=Object.keys(gr).map(function(k){return '<li>'+(k?'<b>'+k+'/</b> ':'')+gr[k].map(function(f){return '<a href="../'+pk.dir+'/'+f+'">'+f.slice(k?k.length+1:0)+'</a>'}).join(' · ')+'</li>'}).join('')}
+        /* reference solution: only the files under final/ */
+        var refs=fl.filter(function(f){return f.indexOf('final/')===0}).map(function(f){return '<li><a href="../'+pk.dir+'/'+f+'">'+f+'</a></li>'}).join('');
+        /* "Done when" checklist: ticks are kept per lesson in the browser (learn-accept), never required */
+        function esc(x){return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+        function acceptList(a){var AK='learn-accept',m=jget(AK,{}),ck=m[here]||[];
+          return '<ul class="accept">'+(a.en||[]).map(function(e,i){return '<li><label><input type="checkbox" data-i="'+i+'"'+(ck.indexOf(i)>-1?' checked':'')+'> '+t({en:esc(e),zh:esc((a.zh||[])[i]||e)})+'</label></li>'}).join('')+'</ul>'}
         pc.innerHTML='<b class="lbl">'+t({en:'Project card',zh:'项目卡'})+'</b><dl>'+
           (J.goal?'<dt>'+t({en:'Goal',zh:'目标'})+'</dt><dd>'+t(J.goal)+'</dd>':'')+(J.deliver?'<dt>'+t({en:'Deliverable',zh:'交付物'})+'</dt><dd>'+t(J.deliver)+'</dd>':'')+
           (J.level?'<dt>'+t({en:'Difficulty',zh:'难度'})+'</dt><dd>'+t(LV[J.level])+'</dd>':'')+(J.mins?'<dt>'+t({en:'Time',zh:'时间'})+'</dt><dd>'+t({en:'about '+J.mins+' minutes',zh:'约 '+J.mins+' 分钟'})+'</dd>':'')+
-          (J.accept?'<dt>'+t({en:'You are done when',zh:'完成标准'})+'</dt><dd><ul>'+li(J.accept)+'</ul></dd>':'')+
+          (J.accept?'<dt>'+t({en:'Done when…',zh:'完成标准'})+'</dt><dd>'+(Array.isArray(J.accept)?'<ul>'+li(J.accept)+'</ul>':acceptList(J.accept))+'</dd>':'')+
           (J.fail?'<dt>'+t({en:'Common problems',zh:'常见问题'})+'</dt><dd><ul>'+li(J.fail)+'</ul></dd>':'')+
           (J.stretch?'<dt>'+t({en:'Stretch goals',zh:'进阶挑战'})+'</dt><dd><ul>'+li(J.stretch)+'</ul></dd>':'')+
+          (J.solution&&refs?'<dt>'+t({en:'Reference solution',zh:'参考答案'})+'</dt><dd><p>'+t({en:esc(J.solution.en),zh:esc(J.solution.zh)})+'</p><ul class="pkg">'+refs+'</ul></dd>':'')+
           (files?'<dt>'+t({en:'Starter and final code',zh:'起步与完成代码'})+'</dt><dd><ul class="pkg">'+files+'</ul>'+(pk.note?'<p class="meta">'+t(pk.note)+'</p>':'')+'<p class="meta">'+t({en:'Download every file and keep the folder layout.',zh:'下载全部文件，并保持文件夹结构。'})+'</p></dd>':'')+'</dl>';
+        pc.addEventListener('change',function(ev){var c=ev.target;if(!c||c.type!=='checkbox'||!c.closest('.accept'))return;
+          var AK='learn-accept',m=jget(AK,{}),ck=[];pc.querySelectorAll('.accept input').forEach(function(x){if(x.checked)ck.push(+x.dataset.i)});m[here]=ck;set(AK,JSON.stringify(m))});
         anchor.after(pc)}
       var ba=document.querySelector('.stage .track-ba');
       if(!ba&&window.TRACKS&&document.querySelector('.stage .ringbox')){var tr=window.TRACKS.filter(function(x){return x.id===C.id})[0];
@@ -195,7 +207,7 @@
       var inp=rsm.querySelector('input[type=file]');rsm.querySelector('[data-a=i]').onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();inp.click()}};
       inp.onchange=function(){var f=inp.files[0];if(!f)return;var fr=new FileReader();fr.onload=function(){try{var o=JSON.parse(fr.result);if(!o||o.app!=='tx-learns'||typeof o.done!=='object')throw 0;var m=done();for(var k in o.done)if(lookup[k]&&o.done[k])m[k]=1;set(DONE,JSON.stringify(m));if(o.last&&lookup[o.last.t+'/'+o.last.f])set(LAST,JSON.stringify({t:o.last.t,f:o.last.f}));if(o.recent&&o.recent.filter)set(REC,JSON.stringify(o.recent.filter(function(k){return lookup[k]}).slice(0,6)));d=done();drawHub();drawResume();rsm.querySelector('.rs-msg').innerHTML=t({en:'Progress imported.',zh:'进度已导入。'})}catch(e){say({en:'That file is not a TX Learns progress file.',zh:'这不是 TX Learns 的进度文件。'})}};fr.readAsText(f)};
       var rb2=rsm.querySelector('[data-a=r]'),armed=false;rb2.onclick=function(){if(!armed){armed=true;rb2.innerHTML=t({en:'Click again to erase all progress',zh:'再点一次确认清除全部进度'});setTimeout(function(){armed=false;rb2.innerHTML=t({en:'Reset progress',zh:'清除进度'})},5000);return}
-        try{localStorage.removeItem(DONE);localStorage.removeItem(LAST);localStorage.removeItem(REC)}catch(e){}d=done();drawHub();drawResume();var m2=rsm.querySelector('.rs-msg');if(m2)m2.innerHTML=t({en:'Progress erased.',zh:'进度已清除。'})}}
+        try{localStorage.removeItem(DONE);localStorage.removeItem(LAST);localStorage.removeItem(REC);localStorage.removeItem('learn-accept')}catch(e){}d=done();drawHub();drawResume();var m2=rsm.querySelector('.rs-msg');if(m2)m2.innerHTML=t({en:'Progress erased.',zh:'进度已清除。'})}}
     if(window.TRACKS&&(hub||sums.length||rsm)){var q=window.TRACKS.slice();
       (function next(){var c=q.shift();
         if(!c){var tot={topics:0,lessons:0,published:0};window.TRACKS.forEach(function(x){tot.topics+=x.topics||0;tot.lessons+=x.total||0;tot.published+=x.published||0});
@@ -206,6 +218,24 @@
           next()};
         document.body.appendChild(sc)})()}
 
+    /* What next: a card pointing to the next lesson in this track or, when the track is finished, to the next track in tracks.js order. Links come from lessons.js and tracks.js. */
+    function nextTrack(cb){var TS=window.TRACKS||[],i=-1;TS.forEach(function(c,k){if(C&&c.id===C.id)i=k});
+      (function step(k){var c=TS[k];if(i<0||!c)return cb(null);
+        fetch('../'+c.id+'/lessons.js').then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(src){
+          var w={};new Function('window',src)(w);var f=null;((w.TRACK||{}).topics||[]).forEach(function(tp){tp.items.forEach(function(l){if(l.file&&!f)f=l})});
+          if(f)cb({c:c,l:f});else step(k+1)}).catch(function(){cb(null)})})(i+1)}
+    function whatNext(host,place,nl,fin){
+      var cur=C&&window.TRACKS?window.TRACKS.filter(function(x){return x.id===C.id})[0]:null;
+      function show(h,why){var a=document.createElement('aside');a.className='card whatnext';a.setAttribute('aria-label','What next · 下一步');
+        a.innerHTML='<b class="lbl">'+t({en:'What next',zh:'下一步'})+'</b>'+why+h;place(a)}
+      if(nl){var tp=C.topics.filter(function(w){return w.n===nl.w})[0],cw=C.lessons[C.lessons.indexOf(nl)-1];
+        var why=(host&&tp&&cw&&cw.w!==nl.w)?'<p>'+t({en:'You have finished this topic. Next topic: ',zh:'这个主题学完了。下一个主题：'})+t(tp.title)+'</p>':'';
+        show('<a class="btn pri wn-go" href="'+nl.file+'"><small>'+t({en:'Next lesson',zh:'下一课'})+'</small> '+t(nl.title)+' →</a>',why);return}
+      if(!fin)return;
+      nextTrack(function(r){if(!r)return;
+        var base='../'+r.c.id+'/',after=cur&&cur.after?'<p>'+t(cur.after)+'</p>':'<p>'+t({en:'You have finished this track.',zh:'这条路线学完了。'})+'</p>',
+          pre=r.c.before?'<p class="meta">'+t({en:'Before you start it: ',zh:'开始之前：'})+t(r.c.before)+'</p>':'';
+        show('<a class="btn pri wn-go" href="'+base+r.l.file+'"><small>'+t({en:'Next track',zh:'下一条路线'})+' · '+t(r.c.title)+'</small> '+t(r.l.title)+' →</a> <a class="btn" href="../'+r.c.href+'">'+t({en:'Track overview',zh:'路线总览'})+'</a>'+pre,after)})}
     /* lesson: prev/next + done + dock */
     var db=document.querySelector('.mark-done'),idx=C?C.lessons.findIndex(function(l){return l.file===here}):-1;
     if(C&&idx>-1){
@@ -215,6 +245,9 @@
         bc.innerHTML='<a href="../index.html">'+t({en:'Home',zh:'首页'})+'</a> › <a href="index.html">'+t(C.title)+'</a> › <span>'+t(tp.title)+'</span>';tag0.before(bc)}
       var pg=document.querySelector('.pager'),p=C.lessons[idx-1],n=C.lessons[idx+1];
       if(pg)pg.innerHTML=(p?'<a href="'+p.file+'"><small>← '+t({en:'Previous',zh:'上一课'})+'</small>'+t(p.title)+'</a>':'')+(n?'<a class="next" href="'+n.file+'"><small>'+t({en:'Next',zh:'下一课'})+' →</small>'+t(n.title)+'</a>':'');
+      /* last published lesson of its topic: the What next card */
+      var lastIn=C.lessons.filter(function(x){return x.w===cl.w}).pop()===cl;
+      if(lastIn)whatNext(true,function(a){if(pg)pg.before(a);else{var m3=document.querySelector('main');if(m3)m3.appendChild(a)}},n,!n);
       if(db){var key=C.id+'/'+here;
         var lbl=function(){db.className='btn big mark-done'+(done()[key]?'':' pri');db.innerHTML=done()[key]?t({en:'✓ Completed — click to undo',zh:'✓ 已完成（点击撤销）'}):t({en:'Mark lesson as completed',zh:'标记本课已完成'})};
         db.onclick=function(e){var x=done();if(x[key])delete x[key];else{x[key]=1;burst(e.clientX,e.clientY)}set(DONE,JSON.stringify(x));lbl()};lbl()}

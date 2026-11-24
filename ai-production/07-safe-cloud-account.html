@@ -2,7 +2,7 @@
 <title>A safe cloud account: roots, users and budget alarms | TX Learns</title>
 <meta name="description" content="Open a cloud account the safe way, before you deploy anything."><meta property="og:title" content="A safe cloud account: roots, users and budget alarms | TX Learns"><meta property="og:description" content="Open a cloud account the safe way, before you deploy anything."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-production/07-safe-cloud-account.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
 <meta name="updated" content="2026-11-24">
-<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<link rel="canonical" href="https://tx-learns.vercel.app/ai-production/07-safe-cloud-account.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=01ea5a80"><link rel="stylesheet" href="../assets/teach.css?v=348efa72"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-production/07-safe-cloud-account.html","url":"https://tx-learns.vercel.app/ai-production/07-safe-cloud-account.html","name":"A safe cloud account: roots, users and budget alarms","alternateName":"安全的云账号：根用户、普通用户与预算警报","description":"Open a cloud account the safe way, before you deploy anything.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Containers and a safe cloud account","dateModified":"2026-11-24","isPartOf":{"@type":"CollectionPage","name":"AI Production","url":"https://tx-learns.vercel.app/ai-production/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Production","item":"https://tx-learns.vercel.app/ai-production/index.html"},{"@type":"ListItem","position":3,"name":"A safe cloud account: roots, users and budget alarms","item":"https://tx-learns.vercel.app/ai-production/07-safe-cloud-account.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Containers and a safe cloud account · Lesson 1</span><span class="zh">容器与安全的云账号 · 第 1 课</span></span><h1><span class="en">A safe cloud account: roots, users and budget alarms</span><span class="zh">安全的云账号：根用户、普通用户与预算警报</span></h1><p class="meta"><span class="en">Open a cloud account the safe way, before you deploy anything · ~20 min · hands-on</span><span class="zh">在部署任何东西之前，先用安全的方式开好云账号 · 约 20 分钟 · 动手实践</span></p></div>
 <div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the product had a real job, but it ran on a hosting service. Today Mr Ong asks "who pays if this goes wrong?" before Mei Ling touches any cloud. We fix it by setting up the account first: root login locked away, a limited daily user and a budget alarm.</p>
@@ -12,7 +12,7 @@
 <h2><span class="en">Step 1 · Lock the root login away</span><span class="zh">第 1 步 · 把根用户锁起来</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">When you sign up, you get a <b>root user</b>: the login that can do everything, including closing the account and changing the bill. Protect it at once with <b>multi-factor authentication</b> (MFA): a password plus a one-time code from an app on your phone. Then stop using it. Root is for rare emergencies only, like the master key kept in Mr Ong's safe.</p>
 <p class="zh" style="margin:0 0 8px">注册时你会得到一个<b>根用户（root）</b>：它什么都能做，包括关闭账号和修改账单。马上用<b>多因素认证（MFA）</b>保护它：密码加上手机应用里的一次性验证码。然后就不要再用它了。根用户只用于罕见的紧急情况，就像锁在 Ong 主管保险柜里的那把总钥匙。</p></div>
-<div class="codebox"><span class="dim">1. Sign up with an email you control
+<div class="codebox" data-file="checklist"><span class="dim">1. Sign up with an email you control
 2. </span><span class="chg">Turn on MFA for the root user (authenticator app)</span><span class="dim">
 3. Log out of root
 4. Keep the root password and recovery codes somewhere offline</span></div>
@@ -20,7 +20,7 @@
 <h2><span class="en">Step 2 · Set budget alarms before any resource</span><span class="zh">第 2 步 · 先设预算警报，再建任何资源</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>budget alert</b> sends you an email when your spending reaches a number you chose. Set it <i>before</i> you create anything, because the alarm is the whole point: it tells you the day a nearly free project stops being free. An alert only sends email. It does not stop the spending, so you still have to turn things off yourself. Use several levels, so the first is a nudge and the last is a shout.</p>
 <p class="zh" style="margin:0 0 8px"><b>预算警报</b>会在花费达到你设定的数字时给你发邮件。要在创建任何东西<i>之前</i>设好，因为警报才是重点：它会告诉你，一个几乎免费的项目是哪一天不再免费的。警报只会发邮件，不会停止花费，所以你还得自己把东西关掉。多设几档，第一档是提醒，最后一档是大喊。</p></div>
-<div class="codebox"><span class="dim">Budget name   Amount (USD)   Email when spend reaches
+<div class="codebox" data-file="budgets"><span class="dim">Budget name   Amount (USD)   Email when spend reaches
 </span><span class="chg">wharf-nudge    1              50% of the amount
 wharf-warn     5              80% of the amount
 wharf-shout    10             100% of the amount</span><span class="dim">
@@ -30,7 +30,7 @@ wharf-shout    10             100% of the amount</span><span class="dim">
 <h2><span class="en">Step 3 · A limited user, and a group that holds the permissions</span><span class="zh">第 3 步 · 权限有限的用户，和存放权限的用户组</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Now create a daily user for yourself. Do not attach permissions to the person. Make a <b>user group</b>, give the group the permissions, and let people join the group. When a new teammate arrives, you add one name to the group instead of ticking twenty boxes. Think of a gate pass: Sergeant Lee issues the pass type "builder", not a custom pass for each person.</p>
 <p class="zh" style="margin:0 0 8px">现在给自己建一个日常用户。不要把权限直接挂在人身上，而是建一个<b>用户组</b>，把权限给用户组，让人加入用户组。新同事来了，你只需往组里加一个名字，而不用再勾二十个选项。就像通行证：Lee 警官发的是“建设者”这一类通行证，而不是给每个人单做一张。</p></div>
-<div class="codebox"><span class="dim">Group: wharf-builders
+<div class="codebox" data-file="permissions"><span class="dim">Group: wharf-builders
   permissions:
 </span><span class="chg">    container registry   (store images)
     serverless functions (run code)
@@ -44,7 +44,7 @@ User: mei-ling  →  member of wharf-builders</span></div>
 <h2><span class="en">Step 4 · Sign in as the daily user and pick a region</span><span class="zh">第 4 步 · 用日常用户登录，并选好区域</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Sign in as your new user from now on. The <b>console</b> is the cloud's web page where you click through everything. Choose a default <b>region</b>: the part of the world where your resources physically live. Pick one close to your users and keep it the same. Many services exist per region, so something you created in one region is invisible in another. If you cannot find something you made, check the region first.</p>
 <p class="zh" style="margin:0 0 8px">从现在起用新用户登录。<b>控制台（console）</b>是云的网页，所有操作都在那里点选。再选一个默认<b>区域（region）</b>：你的资源实际所在的地理位置。选离用户近的，并保持不变。很多服务是按区域分开的，在一个区域里创建的东西，在另一个区域里是看不见的。找不到自己建的东西时，先看区域。</p></div>
-<div class="codebox"><span class="dim">Console sign-in:  account id + user "mei-ling" + password + MFA code
+<div class="codebox" data-file="checklist"><span class="dim">Console sign-in:  account id + user "mei-ling" + password + MFA code
 Default region:   </span><span class="chg">Asia Pacific (Singapore)</span><span class="dim">   (top-right corner of the console)
 
 The region must match in the console, in your commands and in your config.</span></div>
@@ -63,7 +63,7 @@ The region must match in the console, in your commands and in your config.</span
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Production</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
-<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script src="lessons.js?v=9e5fd147"></script><script src="../assets/site.js?v=a288ec54"></script><script src="../assets/teach.js?v=ede6f40f"></script>
 <script>
 document.addEventListener('DOMContentLoaded',function(){
  var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();

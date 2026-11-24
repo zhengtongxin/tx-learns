@@ -2,7 +2,7 @@
 <title>Agents and agentic patterns | TX Learns</title>
 <meta name="description" content="Learn by doing: play the agent, step through the patterns, make the call yourself."><meta property="og:title" content="Agents and agentic patterns | TX Learns"><meta property="og:description" content="Learn by doing: play the agent, step through the patterns, make the call yourself."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/agentic-ai/02-agents-and-patterns.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
 <meta name="updated" content="2026-11-24">
-<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<link rel="canonical" href="https://tx-learns.vercel.app/agentic-ai/02-agents-and-patterns.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=01ea5a80"><link rel="stylesheet" href="../assets/teach.css?v=348efa72"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/agentic-ai/02-agents-and-patterns.html","url":"https://tx-learns.vercel.app/agentic-ai/02-agents-and-patterns.html","name":"Agents and agentic patterns","alternateName":"智能体与智能体模式","description":"Learn by doing: play the agent, step through the patterns, make the call yourself.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Foundations","dateModified":"2026-11-24","isPartOf":{"@type":"CollectionPage","name":"AI Agentic","url":"https://tx-learns.vercel.app/agentic-ai/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Agentic","item":"https://tx-learns.vercel.app/agentic-ai/index.html"},{"@type":"ListItem","position":3,"name":"Agents and agentic patterns","item":"https://tx-learns.vercel.app/agentic-ai/02-agents-and-patterns.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Foundations · Lesson 2</span><span class="zh">基础 · 第 2 课</span></span><h1><span class="en">Agents and agentic patterns</span><span class="zh">智能体与智能体模式</span></h1><p class="meta"><span class="en">Learn by doing: play the agent, step through the patterns, make the call yourself · ~18 min · hands-on</span><span class="zh">边做边学：亲自扮演智能体、逐步拆解模式、自己做判断 · 约 18 分钟 · 动手实践</span></p></div>
 <div class="callout"><b class="lbl"><span class="en">By the end you can</span><span class="zh">学完你能做到</span></b><p class="en" style="margin:0">• Play the agent loop: read a log and pick the next tool until a goal is met.<br>• Match five situations to the five workflow patterns without looking.<br>• Choose between a single call, a workflow and an agent by answering three questions.</p><p class="zh" style="margin:0">• 玩一遍智能体循环：读日志、选下一个工具，直到目标完成。<br>• 不看资料，把五种情景对应到五种工作流模式。<br>• 回答三个问题，在单次调用、工作流和智能体之间做出选择。</p></div>
@@ -27,7 +27,7 @@
 <p class="en">In code, the only difference between the two shapes is <b>who picks the next step</b>. Here a workflow first. Your code fixes the order, and the LLM only writes the words:</p>
 <p class="zh">写成代码，两种形态的唯一区别就是<b>谁来选下一步</b>。先看工作流：顺序由你的代码定死，大模型只负责写文字：</p>
 <span class="lab">Python · workflow.py</span>
-<div class="codebox"><span class="dim"># sketch: search_price, get_rate, send_email are plain functions you wrote; ask_llm(text) sends one prompt to the model and returns its reply
+<div class="codebox" data-file="sketch.py" data-lang="python"><span class="dim"># sketch: search_price, get_rate, send_email are plain functions you wrote; ask_llm(text) sends one prompt to the model and returns its reply
 </span><span class="chg">price = search_price("KL to Tokyo")
 rate = get_rate("USD", "SGD")
 total = 2 * price * rate</span><span class="dim">
@@ -36,7 +36,7 @@ send_email(body)</span></div>
 <p class="en">And the agent. Nothing fixes the order: the LLM reads the log and picks the next tool, again and again, until it asks to stop.</p>
 <p class="zh">再看智能体。顺序没有写死：大模型读日志、选下一个工具，一轮又一轮，直到它自己要求停下。</p>
 <span class="lab">Python · agent.py</span>
-<div class="codebox"><span class="dim"># sketch: ask_model and run_tool are stand-ins, not a real library
+<div class="codebox" data-file="sketch.py" data-lang="python"><span class="dim"># sketch: ask_model and run_tool are stand-ins, not a real library
 goal = "KL to Tokyo: total for 2 tickets in SGD, email it, then answer"   # what Uncle Lim asked for
 tools = ["search_price", "get_rate", "calculate", "send_email", "final_answer"]   # the menu the model picks from
 history = [goal]                          # the log the LLM reads
@@ -118,7 +118,7 @@ history = [goal]                          # the log the LLM reads
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Agentic</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
-<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script src="lessons.js?v=40b1397f"></script><script src="../assets/site.js?v=a288ec54"></script><script src="../assets/teach.js?v=ede6f40f"></script>
 <script>
 document.addEventListener('DOMContentLoaded',function(){
  var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict,trace=TX2.trace;TX2.init();
