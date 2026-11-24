@@ -230,7 +230,7 @@ async function main() {
           const ok = 'a[href],button,input,select,textarea,summary,[tabindex]:not([tabindex="-1"])';
           const out = [];
           for (const el of document.querySelectorAll('body *')) {
-            if (el.closest(ok) || el.closest('[aria-hidden="true"],[inert]')) continue;
+            if (el.closest(ok) || el.querySelector(ok) || el.closest('[aria-hidden="true"],[inert]')) continue;
             const r = el.getBoundingClientRect();
             if (!r.width || !r.height || getComputedStyle(el).visibility === 'hidden') continue;
             const clicky = typeof el.onclick === 'function' || (getComputedStyle(el).cursor === 'pointer' && getComputedStyle(el.parentElement || el).cursor !== 'pointer');

@@ -63,7 +63,7 @@ async function checkOne(browser, base, p, vp, lang) {
 
     // 2. Focus order: everything a person can click or type in must be reachable with Tab.
     const want = await page.evaluate(() => {
-      const vis = e => { const r = e.getBoundingClientRect(), s = getComputedStyle(e); return r.width > 0 && r.height > 0 && s.visibility !== 'hidden' && s.display !== 'none' && !e.closest('[inert],[hidden],[aria-hidden="true"]'); };
+      const vis = e => { const r = e.getBoundingClientRect(), s = getComputedStyle(e); return r.width > 0 && r.height > 0 && s.visibility !== 'hidden' && s.display !== 'none' && !e.closest('[inert],[hidden],[aria-hidden="true"]') && !(e.closest('details:not([open])') && !(e.tagName === 'SUMMARY' && e.parentElement.matches('details:not([open])'))); };
       const sel = 'a[href],button,input:not([type=hidden]),select,textarea,summary,[tabindex]:not([tabindex="-1"])';
       const els = [...document.querySelectorAll(sel)].filter(e => !e.disabled && vis(e) && !e.closest('[data-uicheck-skip]'));
       els.forEach((e, i) => e.setAttribute('data-q-id', i));
