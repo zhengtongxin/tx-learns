@@ -1,173 +1,111 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Many models, one API | TX Learns</title>
 <meta name="description" content="Choose the right model, call any provider with the same code, let a model judge the rest."><meta property="og:title" content="Many models, one API | TX Learns"><meta property="og:description" content="Choose the right model, call any provider with the same code, let a model judge the rest."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/agentic-ai/04-many-models.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
-<meta name="updated" content="2026-11-23">
-<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css">
-<style>
-.r3{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:12px 0}
-.r3 div{border:1px solid var(--acc2);border-radius:14px;padding:10px 14px;background:color-mix(in srgb,var(--acc2) 8%,transparent)}
-.r3 b{display:block;font-size:.95rem}.r3 small{color:var(--mut)}
-.sr{margin:8px 0}.sr .row{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap}
-.sl{flex:1 1 320px;background:#0b0b10;color:#e8e8f0;border:1px solid var(--line);border-radius:12px;padding:10px 14px;font:13.5px/1.5 ui-monospace,"SF Mono",Menlo,monospace;white-space:pre-wrap;word-break:break-word}
-.sk{display:flex;gap:6px;align-items:center}
-.sk button{border:1px solid var(--line);background:var(--glass);color:var(--fg);border-radius:999px;padding:7px 16px;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer;transition:.2s}
-.sk button:hover{border-color:var(--acc)}.sk button.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
-.sr.ok .sl{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,#0b0b10)}
-.sr.bad .sl{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 14%,#0b0b10)}
-.sr .why{display:none;font-size:.92rem;color:var(--mut);margin:4px 2px 0}.sr.done .why{display:block}
-.codeln{display:block;width:100%;text-align:left;border:1px solid var(--line);background:#0b0b10;color:#e8e8f0;border-radius:12px;padding:10px 14px;margin:6px 0;cursor:pointer;font:13.5px/1.5 ui-monospace,"SF Mono",Menlo,monospace;transition:.2s;white-space:pre-wrap;word-break:break-word}
-.codeln:hover{border-color:var(--acc);transform:translateX(4px)}
-.codeln.sel{border-color:var(--acc2);box-shadow:0 0 0 1px var(--acc2),0 8px 30px var(--glow)}
-.codeln.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,#0b0b10)}
-.codeln.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 14%,#0b0b10);animation:shake .35s}
-.codeln.miss{border-color:var(--warn);border-style:dashed}
-.codebox{background:#0b0b10;color:#e8e8f0;border:1px solid var(--line);border-radius:18px;padding:16px 18px;font:13.5px/1.75 ui-monospace,"SF Mono",Menlo,monospace;white-space:pre-wrap;word-break:break-word;overflow:auto}
-.codebox .dim{opacity:.45}
-.codebox .chg{color:#fff;background:linear-gradient(135deg,rgba(255,183,3,.5),rgba(255,138,0,.4));border-radius:6px;padding:1px 5px}
-.pills{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
-.pill{border:1px solid var(--line);background:var(--glass);color:var(--fg);border-radius:999px;padding:8px 16px;cursor:pointer;font:inherit;font-size:13.5px;font-weight:600;transition:.2s}
-.pill:hover{border-color:var(--acc)}.pill.on{background:var(--fg);color:var(--bg)}
-.map{display:grid;grid-template-columns:110px repeat(3,1fr);gap:6px;margin:1.2em 0;font-size:13px}
-.map>div{border:1px solid var(--line);background:var(--glass);border-radius:12px;padding:9px 8px;text-align:center;transition:.3s;display:flex;align-items:center;justify-content:center;min-height:42px}
-.map .h{background:none;border:0;color:var(--mut);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
-.map .p{justify-content:flex-start;font-weight:700;background:none;border:0}
-.map .span3{grid-column:span 3}
-.map .hit{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 18%,transparent);box-shadow:0 0 22px color-mix(in srgb,var(--ok) 40%,transparent);transform:translateY(-2px)}
-.sc{border:1px solid var(--line);background:var(--glass);border-radius:20px;padding:18px 20px;margin:1.2em 0}
-.sc .job{font-weight:700;font-size:1.05rem;margin:0 0 4px}
-.sc .cnt{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--acc2);font-weight:700}
-.sc .fb{margin-top:12px;padding:12px 16px;border-radius:14px;background:color-mix(in srgb,var(--acc) 12%,transparent);display:none}
-.sc .fb.show{display:block;animation:fade .3s}
-.sc .fb.good{background:color-mix(in srgb,var(--ok) 14%,transparent)}
-.sc .fb.no{background:color-mix(in srgb,var(--bad) 12%,transparent)}
-.ord{display:grid;gap:8px;margin:14px 0}
-.oc{display:flex;gap:12px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--glass);color:var(--fg);border-radius:16px;padding:12px 16px;cursor:pointer;font:inherit;transition:.25s}
-.oc:hover{border-color:var(--acc);transform:translateX(5px)}
-.oc .no{width:28px;height:28px;border-radius:50%;border:1px dashed var(--line);display:grid;place-items:center;font-weight:800;font-size:13px;flex:none;color:var(--mut)}
-.oc.in{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,transparent);cursor:default;transform:none}
-.oc.in .no{background:var(--ok);color:#fff;border:0}
-.oc.bad{border-color:var(--bad);animation:shake .35s}
-.ans{border:1px solid var(--line);background:var(--glass);border-radius:16px;padding:12px 16px;margin:8px 0;display:flex;gap:12px;align-items:flex-start;cursor:pointer;transition:.25s;text-align:left;width:100%;color:var(--fg);font:inherit}
-.ans:hover{border-color:var(--acc)}
-.ans b.n{flex:none;font:800 12px ui-monospace,monospace;letter-spacing:.1em;color:var(--acc2);padding-top:3px}
-.ans .rk{flex:none;margin-left:auto;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;border:1px dashed var(--line);color:var(--mut)}
-.ans.ranked{border-color:var(--acc);cursor:default}.ans.ranked .rk{background:var(--grad);color:#fff;border:0}
-.pm{display:grid;gap:10px;margin:1.2em 0}
-.pm .row{border:1px solid var(--line);background:var(--glass);border-radius:18px;padding:14px 16px}
-.pm .row p{margin:0 0 10px;font-weight:600}
-.pm .fb{display:none;margin-top:10px;font-size:14px}.pm .fb.show{display:block}
-.pm .pill.ok{background:color-mix(in srgb,var(--ok) 20%,transparent);border-color:var(--ok);color:var(--fg)}
-.pm .pill.no{border-color:var(--bad);animation:shake .35s}
-.lab{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin:12px 0 6px;display:block}
-@media(max-width:720px){.map{grid-template-columns:78px repeat(3,1fr);font-size:11.5px}}
-</style></head><body>
+<meta name="updated" content="2026-11-24">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 
-<div class="hero">
-<span class="tag"><span class="en">Foundations · Lesson 4</span><span class="zh">基础 · 第 4 课</span></span>
-<h1><span class="en">Many models, one API</span><span class="zh">多个模型，同一套 API</span></h1>
-<p class="meta"><span class="en">Choose the right model, call any provider with the same code, let a model judge the rest · ~12 min · hands-on</span><span class="zh">选对模型，用同一套代码调用任何厂商，再让模型当裁判 · 约 12 分钟 · 动手实操</span></p>
-</div>
+<div class="hero"><span class="tag"><span class="en">Foundations · Lesson 4</span><span class="zh">基础 · 第 4 课</span></span><h1><span class="en">Many models, one API</span><span class="zh">多个模型，同一套 API</span></h1><p class="meta"><span class="en">Choose the right model, call any provider with the same code, let a model judge the rest · ~12 min · hands-on</span><span class="zh">选对模型，用同一套代码调用任何厂商，再让模型当裁判 · 约 12 分钟 · 动手实操</span></p></div>
 
-<p class="en">Last lesson you called one model. Today you call six kinds one after another, make them answer the same question, and let a seventh model rank them. You will also learn why this takes almost no new code.</p>
-<p class="zh">上一课你只调用了一个模型。今天你会依次调用六类模型，让它们回答同一个问题，再让另一个模型给它们排名。你还会明白为什么这几乎不需要新代码。</p>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">Uncle Lim wants a helper that answers customers' questions for Kopi Corner. His niece <b>Aina</b> builds it. Last lesson she called one model. Now she must choose the right model for each job, try other providers without rewriting her code, and let a model rank the answers so she can see which one is best.</p>
+<p class="zh" style="margin:0">Lim 叔叔想要一个替 Kopi Corner 回答顾客问题的助手，由他的侄女 <b>Aina</b> 来做。上一课她只调用了一个模型。现在她要为每项任务选对模型，换别的厂商时不重写代码，还要让一个模型给回答排名，看看哪个最好。</p></div>
 
-<h2><span class="en">Pick the right model</span><span class="zh">选对模型</span></h2>
-<p class="en">Providers sell models in sizes. Small ones are fast and cheap, big ones think harder. Three more options sit outside that ladder.</p>
-<p class="zh">厂商按大小出售模型：小的又快又便宜，大的思考更深入。另外还有三种不在这个阶梯里的选择。</p>
-<div class="map" id="map"></div>
-<p class="en"><b>Your turn.</b> Pick the best option for each job. The matching cells light up above.</p>
-<p class="zh"><b>轮到你了。</b>为每项任务选最合适的选项，上方对应的格子会亮起来。</p>
-<div class="sc" id="game"></div>
+<div class="callout"><b class="lbl"><span class="en">By the end you can</span><span class="zh">学完你能</span></b><span class="en">• Pick a small, mid, large, Groq or local model for a given job.<br>• Switch an OpenAI-client call to another provider by changing exactly three values.<br>• Run a model on your own machine with Ollama and call it with the same client.<br>• Read a judge model's JSON ranking and name the model that came first.</span><span class="zh">• 为给定任务选出小、中、大、Groq 或本地模型。<br>• 只改三个值，就把一次 OpenAI 客户端调用切换到另一家厂商。<br>• 用 Ollama 在自己电脑上运行模型，并用同一个客户端调用它。<br>• 读懂裁判模型返回的 JSON 排名，并说出排第一的模型。</span></div>
 
-<h2><span class="en">One code shape, three swaps</span><span class="zh">同一种代码，只换三样</span></h2>
-<p class="en">Almost every provider offers an <b>endpoint</b> (the web address your code sends its requests to) that speaks the same language as OpenAI. So you reuse the same <code>OpenAI</code> client and only change where it points. Click a provider.</p>
-<p class="zh">几乎每家厂商都提供与 OpenAI 说同一种“语言”的<b>接口</b>（endpoint，也就是你的代码发送请求的网址）。所以你可以复用同一个 <code>OpenAI</code> 客户端，只改它指向的地址。点一个厂商看看。</p>
-<div class="pills" id="prov"></div>
-<div class="codebox" id="code"></div>
-<p class="meta" id="pnote" style="margin-top:8px"></p>
+<h2><span class="en">Step 1 · Pick the right model</span><span class="zh">第 1 步 · 选对模型</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Providers sell models in sizes. Small ones are fast and cheap, big ones think harder. Three more options sit outside that ladder: DeepSeek (strong and cheap), Groq (open-source models on very fast hardware) and Ollama (open-source models on your own machine).</p>
+<p class="zh" style="margin:0">厂商按大小出售模型：小的又快又便宜，大的思考更深入。另外还有三种不在这个阶梯里的选择：DeepSeek（强而便宜）、Groq（在极快硬件上运行开源模型）和 Ollama（在你自己电脑上运行开源模型）。</p></div>
+<table><thead><tr><th><span class="en">Provider</span><span class="zh">厂商</span></th><th><span class="en">Small · fast</span><span class="zh">小 · 快</span></th><th><span class="en">Mid · balanced</span><span class="zh">中 · 均衡</span></th><th><span class="en">Large · smartest</span><span class="zh">大 · 最强</span></th></tr></thead><tbody>
+<tr><td>OpenAI</td><td>gpt nano</td><td>gpt mini</td><td>gpt</td></tr>
+<tr><td>Anthropic</td><td>Claude Haiku</td><td>Claude Sonnet</td><td>Claude Opus</td></tr>
+<tr><td>Google</td><td>Gemini Flash-Lite</td><td>Gemini Flash</td><td>Gemini Pro</td></tr></tbody></table>
+<p class="meta"><span class="en">Outside the ladder: DeepSeek V4 (strong and cheap), Groq (open-source models on very fast hardware), Ollama (open-source models on your own machine).</span><span class="zh">阶梯之外：DeepSeek V4（强而便宜）、Groq（在极快硬件上运行的开源模型）、Ollama（在你自己电脑上运行的开源模型）。</span></p>
+<p class="en"><b>Your turn.</b> Pick the best option for each job.</p>
+<p class="zh"><b>轮到你了。</b>为每项任务选最合适的选项。</p>
+<div class="sc" id="g1"></div>
 
-<h3><span class="en">Spot the lines that change</span><span class="zh">找出需要修改的行</span></h3>
-<p class="en">Rule first: to switch provider you change only <b>three values</b>. Everything else stays exactly the same.</p>
-<p class="zh">先记规则：换厂商只需要改<b>三个值</b>，其余全部保持不变。</p>
-<div class="r3">
-  <div><b>🔑 <span class="en">Key</span><span class="zh">密钥</span></b><small><span class="en">whose account pays</span><span class="zh">用谁的账户付费</span></small></div>
-  <div><b>🌐 <span class="en">Address</span><span class="zh">地址</span> <code>base_url</code></b><small><span class="en">where the request is sent</span><span class="zh">请求发往哪里</span></small></div>
-  <div><b>🏷️ <span class="en">Model name</span><span class="zh">模型名</span></b><small><span class="en">which brain answers</span><span class="zh">由哪个模型回答</span></small></div>
-</div>
-<p class="en">Below is working <b>OpenAI</b> code. You want it to use <b>Groq</b> instead. For each line, choose <b>Keep</b> or <b>Edit</b>, then press Check.</p>
-<p class="zh">下面是能正常运行的 <b>OpenAI</b> 代码，你想改成用 <b>Groq</b>。对每一行选择<b>保持</b>或<b>修改</b>，然后点检查。</p>
-<div id="spot"></div>
-<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px"><button class="btn pri" id="spotgo"></button><span class="meta" id="spotfb"></span></div>
-<div id="spotex"></div>
+<h2><span class="en">Step 2 · One code shape, three swaps</span><span class="zh">第 2 步 · 同一种代码，只换三样</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Almost every provider offers an <b>endpoint</b> (the web address your code sends its requests to) that speaks the same language as OpenAI. So you reuse the same <code>OpenAI</code> client and only change where it points. To switch provider you change only <b>three values</b>: the <b>key</b> (whose account pays), the <b>address</b> <code>base_url</code> (where the request is sent) and the <b>model name</b> (which brain answers). Everything else stays exactly the same.</p>
+<p class="zh" style="margin:0 0 8px">几乎每家厂商都提供与 OpenAI 说同一种“语言”的<b>接口</b>（endpoint，也就是你的代码发送请求的网址）。所以你可以复用同一个 <code>OpenAI</code> 客户端，只改它指向的地址。换厂商只需要改<b>三个值</b>：<b>密钥</b>（用谁的账户付费）、<b>地址</b> <code>base_url</code>（请求发往哪里）和<b>模型名</b>（由哪个模型回答）。其余全部保持不变。</p></div>
+<span class="lab"><span class="en">Python · compare.py (OpenAI)</span><span class="zh">Python · compare.py（OpenAI）</span></span>
+<div class="codebox"><span class="dim">from openai import OpenAI
 
-<div class="quiz" data-answer="b">
-  <p class="q"><span class="en">Why can one <code>OpenAI</code> client talk to Anthropic, Gemini, DeepSeek and Groq?</span><span class="zh">为什么同一个 <code>OpenAI</code> 客户端能调用 Anthropic、Gemini、DeepSeek 和 Groq？</span></p>
-  <button class="opt" data-k="a"><span class="en">They all use OpenAI's models inside</span><span class="zh">它们内部都用 OpenAI 的模型</span></button>
-  <button class="opt" data-k="b"><span class="en">They offer an OpenAI-compatible endpoint, so only <code>base_url</code> and key differ</span><span class="zh">它们都提供与 OpenAI 兼容的接口，只有 <code>base_url</code> 和密钥不同</span></button>
-  <button class="opt" data-k="c"><span class="en">The client downloads each provider's SDK automatically</span><span class="zh">客户端会自动下载各厂商的 SDK</span></button>
-  <div class="explain"><span class="en">The request format is the same, so the address, the key and the model name are the only things you swap.</span><span class="zh">请求格式相同，所以只需替换地址、密钥和模型名。</span></div>
-</div>
+</span><span class="chg">client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))</span><span class="dim">
 
-<h2><span class="en">Run a model on your own machine</span><span class="zh">在自己的电脑上运行模型</span></h2>
-<p class="en">Ollama is the same trick with the server on your laptop: free, private and offline. Step through the setup.</p>
-<p class="zh">Ollama 用的是同样的办法，只是服务器就在你的笔记本上：免费、私密、可离线。逐步看一遍安装流程。</p>
-<div class="stepper">
-  <div class="step"><span class="role">1</span><h3 style="margin-top:0"><span class="en">Install Ollama</span><span class="zh">安装 Ollama</span></h3><p class="en">Download it from ollama.com and run the installer.</p><p class="zh">从 ollama.com 下载并运行安装程序。</p></div>
-  <div class="step"><span class="role">2</span><h3 style="margin-top:0"><span class="en">Download a small model</span><span class="zh">下载一个小模型</span></h3><pre><code>ollama pull llama3.2</code></pre><p class="en">Other handy commands: <code>ollama ls</code> lists your models, <code>ollama rm &lt;name&gt;</code> deletes one.</p><p class="zh">其他常用命令：<code>ollama ls</code> 列出已有模型，<code>ollama rm &lt;名称&gt;</code> 删除模型。</p></div>
-  <div class="step"><span class="role">3</span><h3 style="margin-top:0"><span class="en">Check it is running</span><span class="zh">确认它在运行</span></h3><p class="en">Open <code>http://localhost:11434</code>. You should see “Ollama is running”. If not, run <code>ollama serve</code> in a terminal.</p><p class="zh">打开 <code>http://localhost:11434</code>，应当看到 “Ollama is running”。如果没有，在终端运行 <code>ollama serve</code>。</p></div>
-  <div class="step"><span class="role">4</span><h3 style="margin-top:0"><span class="en">Call it like any other provider</span><span class="zh">像调用其他厂商一样调用它</span></h3><pre><code>ollama = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
-ollama.chat.completions.create(model="llama3.2", messages=messages)</code></pre></div>
-</div>
+response = client.chat.completions.create(
+    </span><span class="chg">model="gpt-5.4-nano"</span><span class="dim">,
+    messages=messages)
+answer = response.choices[0].message.content</span></div>
+<p class="en">These are the three values for each provider. Only the highlighted values above ever change.</p>
+<p class="zh">下面是各家厂商的三个值。上面的代码里只有高亮的部分会变。</p>
+<div style="overflow-x:auto"><table><thead><tr><th><span class="en">Provider</span><span class="zh">厂商</span></th><th><span class="en">Key</span><span class="zh">密钥</span></th><th><code>base_url</code></th><th><span class="en">Model name</span><span class="zh">模型名</span></th></tr></thead><tbody>
+<tr><td>OpenAI</td><td><code>OPENAI_API_KEY</code></td><td><span class="en">none (the default)</span><span class="zh">不需要（默认）</span></td><td><code>gpt-5.4-nano</code></td></tr>
+<tr><td>Anthropic</td><td><code>ANTHROPIC_API_KEY</code></td><td><code>https://api.anthropic.com/v1/</code></td><td><code>claude-sonnet-4-6</code></td></tr>
+<tr><td>Gemini</td><td><code>GOOGLE_API_KEY</code></td><td><code>https://generativelanguage.googleapis.com/v1beta/openai/</code></td><td><code>gemini-3.1-flash-lite</code></td></tr>
+<tr><td>DeepSeek</td><td><code>DEEPSEEK_API_KEY</code></td><td><code>https://api.deepseek.com/v1</code></td><td><code>deepseek-v4-flash</code></td></tr>
+<tr><td>Groq</td><td><code>GROQ_API_KEY</code></td><td><code>https://api.groq.com/openai/v1</code></td><td><code>openai/gpt-oss-120b</code></td></tr>
+<tr><td>Ollama</td><td><span class="en">any placeholder</span><span class="zh">任意占位值</span></td><td><code>http://localhost:11434/v1</code></td><td><code>llama3.2</code></td></tr></tbody></table></div>
+<p class="meta"><span class="en">Google's key is named GOOGLE_API_KEY. Open-source model names can contain a slash.</span><span class="zh">Google 的密钥名为 GOOGLE_API_KEY。开源模型的名称可能含有斜杠。</span></p>
+<p class="en">Aina wants to move the code above from <b>OpenAI</b> to <b>Groq</b>. For each line, choose <b>Keep</b> or <b>Edit</b>.</p>
+<p class="zh">Aina 想把上面的代码从 <b>OpenAI</b> 改成 <b>Groq</b>。对每一行选择<b>保持</b>或<b>修改</b>。</p>
+<div class="sc" id="g2"></div>
+<span class="lab"><span class="en">Python · compare.py (Groq)</span><span class="zh">Python · compare.py（Groq）</span></span>
+<div class="codebox"><span class="dim">from openai import OpenAI
+
+client = OpenAI(
+    </span><span class="chg">api_key=os.getenv("GROQ_API_KEY")</span><span class="dim">,
+    </span><span class="chg">base_url="https://api.groq.com/openai/v1"</span><span class="dim">)
+
+response = client.chat.completions.create(
+    </span><span class="chg">model="openai/gpt-oss-120b"</span><span class="dim">,
+    messages=messages)
+answer = response.choices[0].message.content</span></div>
+<p class="meta"><span class="en">The finished Groq version. Highlighted = the three values you changed.</span><span class="zh">改好的 Groq 版本。高亮 = 你改的三个值。</span></p>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Run a model on your own machine</span><span class="zh">第 3 步 · 在自己的电脑上运行模型</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Ollama is the same trick with the server on your laptop: free, private and offline. The setup is a short checklist, then the call looks like any other provider.</p>
+<p class="zh" style="margin:0">Ollama 用的是同样的办法，只是服务器就在你的笔记本上：免费、私密、可离线。安装只是一份简短清单，之后的调用和其他厂商一样。</p></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en">Install Ollama: download it from ollama.com and run the installer.</span><span class="zh">安装 Ollama：从 ollama.com 下载并运行安装程序。</span></span></label><label><input type="checkbox"><span><span class="en">Download a small model with the command below. Other handy commands: <code>ollama ls</code> lists your models, <code>ollama rm &lt;name&gt;</code> deletes one.</span><span class="zh">用下面的命令下载一个小模型。其他常用命令：<code>ollama ls</code> 列出已有模型，<code>ollama rm &lt;名称&gt;</code> 删除模型。</span></span></label><label><input type="checkbox"><span><span class="en">Check it is running: open <code>http://localhost:11434</code>. You should see “Ollama is running”. If not, run <code>ollama serve</code> in a terminal.</span><span class="zh">确认它在运行：打开 <code>http://localhost:11434</code>，应当看到 “Ollama is running”。如果没有，在终端运行 <code>ollama serve</code>。</span></span></label><label><input type="checkbox"><span><span class="en">Call it like any other provider, with the code below.</span><span class="zh">像调用其他厂商一样调用它，用下面的代码。</span></span></label></div>
+<span class="lab"><span class="en">Shell · terminal</span><span class="zh">Shell · 终端</span></span>
+<div class="codebox">ollama pull llama3.2</div>
+<span class="lab"><span class="en">Python · compare.py (Ollama)</span><span class="zh">Python · compare.py（Ollama）</span></span>
+<div class="codebox"><span class="chg">ollama = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")</span>
+<span class="dim">ollama.chat.completions.create(model="llama3.2", messages=messages)</span></div>
 <div class="callout warn"><b class="lbl"><span class="en">Mind the size</span><span class="zh">注意大小</span></b><span class="en">Many Ollama models are far too big for a home computer. Start with ones around 3 GB or less, such as llama3.2. Avoid names ending in <code>:cloud</code>, which are a hosted service, not local.</span><span class="zh">很多 Ollama 模型对家用电脑来说太大。先从 3 GB 左右或更小的开始，例如 llama3.2。避开以 <code>:cloud</code> 结尾的名称，那是托管服务，不是本地运行。</span></div>
-<div class="quiz" data-answer="c">
-  <p class="q"><span class="en">Ollama is local, so why does the code still pass <code>api_key="ollama"</code>?</span><span class="zh">Ollama 在本地运行，为什么代码里仍然传 <code>api_key="ollama"</code>？</span></p>
-  <button class="opt" data-k="a"><span class="en">Ollama checks that exact password</span><span class="zh">Ollama 会校验这个密码</span></button>
-  <button class="opt" data-k="b"><span class="en">It is a real paid key</span><span class="zh">这是一个真实的付费密钥</span></button>
-  <button class="opt" data-k="c"><span class="en">The client requires some value, but a local server ignores it</span><span class="zh">客户端要求必须有个值，但本地服务器会忽略它</span></button>
-  <div class="explain"><span class="en">Any placeholder works. Nothing leaves your machine.</span><span class="zh">任何占位值都可以，数据不会离开你的电脑。</span></div>
-</div>
+<div class="try" id="p3"></div>
 
-<h2><span class="en">Build the competition</span><span class="zh">搭建模型擂台</span></h2>
-<p class="en">The script does six things in a fixed order. Tap the cards in the order the code runs them.</p>
-<p class="zh">这段脚本按固定顺序做六件事。按代码执行的顺序依次点击卡片。</p>
-<div class="ord" id="ord"></div>
-<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn" id="ordreset"></button><span class="meta" id="ordfb"></span></div>
+<h2><span class="en">Step 4 · Build the competition</span><span class="zh">第 4 步 · 搭建模型擂台</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Aina's script does six things in a fixed order. Each step needs something the step before it made, so the order cannot change. Walk through it one step at a time.</p>
+<p class="zh" style="margin:0">Aina 的脚本按固定顺序做六件事。每一步都要用到前一步产生的东西，所以顺序不能换。一步一步走一遍。</p></div>
+<div id="t4"></div>
+<div class="try" id="p4"></div>
 
-<h2><span class="en">Be the judge</span><span class="zh">当一次裁判</span></h2>
-<p class="en">The question was: <i>“Which matters more to a society, truth or trust? Answer in two sentences.”</i> Rank these three answers from best to worst on <b>clarity and strength of argument</b>. Tap best first.</p>
-<p class="zh">问题是：<i>“对一个社会来说，真相和信任哪个更重要？用两句话回答。”</i>按<b>表达清晰度和论证力度</b>给这三个回答排名，先点最好的。</p>
-<div id="judge"></div>
-<div class="io-wrap" id="jres" style="display:none"></div>
-
-<h3><span class="en">Read the judge's verdict</span><span class="zh">读懂裁判的结论</span></h3>
-<p class="en">A judge model must reply in strict <b>JSON</b> (a plain-text format of labels and values, like <code>{"best": 2}</code>) so code can read it. Then the code maps numbers back to names.</p>
-<p class="zh">裁判模型必须返回严格的 <b>JSON</b>（一种由标签和值组成的纯文本格式，比如 <code>{"best": 2}</code>），代码才能读取。然后代码把编号映射回模型名称。</p>
-<div class="codebox">competitors = ["model-A", "model-B", "model-C"]
-results = ["3", "1", "2"]          <span class="dim"># judge's reply, best first</span>
-competitor = competitors[int(results[0]) - 1]</div>
+<h2><span class="en">Step 5 · Be the judge</span><span class="zh">第 5 步 · 当一次裁判</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The question Aina sent was: <i>“Which matters more to a society, truth or trust? Answer in two sentences.”</i> A judge model must reply in strict <b>JSON</b> (a plain-text format of labels and values, like <code>{"best": 2}</code>) so code can read it. Then the code maps numbers back to names.</p>
+<p class="zh" style="margin:0 0 8px">Aina 发出的问题是：<i>“对一个社会来说，真相和信任哪个更重要？用两句话回答。”</i>裁判模型必须返回严格的 <b>JSON</b>（一种由标签和值组成的纯文本格式，比如 <code>{"best": 2}</code>），代码才能读取。然后代码把编号映射回模型名称。</p></div>
+<p class="en">First, be the judge yourself, using <b>clarity and strength of argument</b>. Three answers came back:</p>
+<p class="zh">先自己当裁判，标准是<b>表达清晰度和论证力度</b>。回来了三个回答：</p>
+<div class="card"><p class="en" style="margin:0"><b>#1</b> Both matter and it really depends on the situation and many factors.<br><b>#2</b> Trust. A truth nobody believes changes nothing, while trust lets a society keep finding and correcting its mistakes.<br><b>#3</b> Truth, because trust built on lies eventually collapses.</p><p class="zh" style="margin:0"><b>#1</b> 两者都重要，这真的取决于具体情况和许多因素。<br><b>#2</b> 信任。没人相信的真相改变不了什么，而信任能让社会不断发现并纠正自己的错误。<br><b>#3</b> 真相，因为建立在谎言上的信任终将崩塌。</p></div>
+<div class="try" id="p5"></div>
+<p class="en">A judge using that rubric would reply <code>{"results": ["2", "3", "1"]}</code>. Now read a verdict in code.</p>
+<p class="zh">按这个标准，裁判会返回 <code>{"results": ["2", "3", "1"]}</code>。现在来读代码里的裁判结论。</p>
+<span class="lab"><span class="en">Python · compare.py (reading the verdict)</span><span class="zh">Python · compare.py（读取结论）</span></span>
+<div class="codebox"><span class="dim">competitors = ["model-A", "model-B", "model-C"]
+</span>results = ["3", "1", "2"]          <span class="dim"># judge's reply, best first</span>
+<span class="chg">competitor = competitors[int(results[0]) - 1]</span></div>
+<div class="try" id="p5b"></div>
 <div class="callout"><b class="lbl"><span class="en">One after another</span><span class="zh">逐个运行</span></b><span class="en">A plain <code>for</code> loop calls the models one at a time, so total time is the sum. Truly parallel calls need <code>async</code>. The pattern “parallelization” is about the idea, independent calls, not how this loop is written.</span><span class="zh">普通的 <code>for</code> 循环一次只调用一个模型，总耗时是各次之和。真正并行需要 <code>async</code>。“并行”模式讲的是思路：彼此独立的调用，而不是这个循环的写法。</span></div>
-<div class="quiz" data-answer="c">
-  <p class="q"><span class="en">Who is rank 1?</span><span class="zh">谁是第 1 名？</span></p>
-  <button class="opt" data-k="a"><span class="en">model-A</span><span class="zh">model-A</span></button>
-  <button class="opt" data-k="b"><span class="en">model-B</span><span class="zh">model-B</span></button>
-  <button class="opt" data-k="c"><span class="en">model-C</span><span class="zh">model-C</span></button>
-  <div class="explain"><span class="en">The judge numbers competitors from 1, Python lists start at 0, hence the <code>- 1</code>. “3” means <code>competitors[2]</code>.</span><span class="zh">裁判从 1 开始编号，而 Python 列表从 0 开始，所以要 <code>- 1</code>。“3” 对应 <code>competitors[2]</code>。</span></div>
-</div>
-<div class="callout"><b class="lbl"><span class="en">Know the limits</span><span class="zh">了解局限</span></b><span class="en">A judge is one more model, so its ranking is an opinion. Use a strong model, hide who wrote what, and spot-check the result.</span><span class="zh">裁判也是一个模型，所以它的排名只是一种意见。请用强模型，隐藏回答者身份，并抽查结果。</span></div>
+<div class="callout warn"><b class="lbl"><span class="en">Know the limits</span><span class="zh">了解局限</span></b><span class="en">A judge is one more model, so its ranking is an opinion. Use a strong model, hide who wrote what, and spot-check the result.</span><span class="zh">裁判也是一个模型，所以它的排名只是一种意见。请用强模型，隐藏回答者身份，并抽查结果。</span></div>
 
-<h2><span class="en">Name the patterns</span><span class="zh">认出其中的模式</span></h2>
-<p class="en">You met five workflow patterns in Lesson 2. Which one does each part of this script use?</p>
-<p class="zh">第 2 课你认识了五种工作流模式。这段脚本的每个部分用的是哪一种？</p>
-<div class="pm" id="pm"></div>
-<div class="callout tip"><b class="lbl"><span class="en">Why it matters</span><span class="zh">意义何在</span></b><span class="en">Sending one task to several models and evaluating the results is a common way to raise quality where accuracy is critical.</span><span class="zh">把同一个任务发给多个模型再评估结果，是在准确性至关重要的场景下提升质量的常用办法。</span></div>
-<div class="quiz" data-answer="b">
-  <p class="q"><span class="en">Challenge: feed the judge's ranking back so the weakest model tries again with feedback. Which pattern is that?</span><span class="zh">挑战：把裁判的排名反馈给最弱的模型，让它带着反馈重试。这是哪种模式？</span></p>
-  <button class="opt" data-k="a"><span class="en">Routing</span><span class="zh">路由</span></button>
-  <button class="opt" data-k="b"><span class="en">Evaluator-optimizer</span><span class="zh">评估者-优化者</span></button>
-  <button class="opt" data-k="c"><span class="en">Prompt chaining</span><span class="zh">提示链</span></button>
-  <div class="explain"><span class="en">One model produces, another evaluates, and the feedback loops back to improve the output.</span><span class="zh">一个模型生成，另一个评估，反馈再回流以改进输出。</span></div>
-</div>
+<h2><span class="en">Step 6 · Name the patterns</span><span class="zh">第 6 步 · 认出其中的模式</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">You met five workflow patterns in Lesson 2. Sending one task to several models and evaluating the results is a common way to raise quality where accuracy is critical. Which pattern does each part of this script use?</p>
+<p class="zh" style="margin:0">第 2 课你认识了五种工作流模式。把同一个任务发给多个模型再评估结果，是在准确性至关重要的场景下提升质量的常用办法。这段脚本的每个部分用的是哪一种模式？</p></div>
+<div class="sc" id="g6"></div>
+<div class="try" id="p6"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en">Take your Lesson 3 script and switch it to a second provider by changing only the three values.</span><span class="zh">拿上一课的脚本，只改三个值，把它切换到第二家厂商。</span></span></label><label><input type="checkbox"><span><span class="en">Send one question to two or three models and print each answer next to its model name.</span><span class="zh">把同一个问题发给两三个模型，并把每个回答和模型名一起打印出来。</span></span></label><label><input type="checkbox"><span><span class="en">Ask a stronger model to rank the answers as JSON, then print the name of the winner.</span><span class="zh">让一个更强的模型以 JSON 给回答排名，然后打印赢家的名字。</span></span></label><label><input type="checkbox"><span><span class="en">Optional: install Ollama and add a local model to the competition. One key is enough to practise; you do not need every provider.</span><span class="zh">可选：安装 Ollama，把一个本地模型加进擂台。一个密钥就足够练习，不需要用遍所有厂商。</span></span></label></div>
 
 <div class="callout tip"><b class="lbl"><span class="en">Back at the kopitiam</span><span class="zh">回到 kopitiam</span></b><span class="en">Kopi Corner keeps different helpers for different jobs: a quick junior for “kopi O, one”, and Auntie Suria for a tricky catering order. Picking a model is the same call: cheap and fast for easy orders, careful and slow for hard ones.</span><span class="zh">Kopi Corner 针对不同的活安排不同的人：一句“咖啡乌一杯”交给手脚快的新手，复杂的外烩订单就交给 Suria 阿姨。选模型也是这样：简单的单用便宜又快的，难的单用细心又慢的。</span></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
@@ -176,118 +114,52 @@ competitor = competitors[int(results[0]) - 1]</div>
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Agentic AI</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
-<script src="lessons.js"></script><script src="../assets/site.js"></script>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded',function(){
- var T=TX.t,$=function(i){return document.getElementById(i)};
- function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var x=a[i];a[i]=a[j];a[j]=x}return a}
+ var $=TX2.$,game=TX2.game,predict=TX2.predict,trace=TX2.trace;TX2.init();
 
- /* ---- model map ---- */
- var map=$('map');
- map.innerHTML='<div class="h"></div><div class="h">'+T({en:'Small · fast',zh:'小 · 快'})+'</div><div class="h">'+T({en:'Mid · balanced',zh:'中 · 均衡'})+'</div><div class="h">'+T({en:'Large · smartest',zh:'大 · 最强'})+'</div>'+
- [['OpenAI','gpt nano','gpt mini','gpt'],['Anthropic','Claude Haiku','Claude Sonnet','Claude Opus'],['Google','Gemini Flash-Lite','Gemini Flash','Gemini Pro']].map(function(r){return '<div class="p">'+r[0]+'</div><div data-t="s">'+r[1]+'</div><div data-t="m">'+r[2]+'</div><div data-t="l">'+r[3]+'</div>'}).join('')+
- '<div class="p">DeepSeek</div><div class="span3" data-t="d"><span>DeepSeek V4 · '+T({en:'strong and cheap',zh:'强而便宜'})+'</span></div>'+
- '<div class="p">Groq</div><div class="span3" data-t="g"><span>'+T({en:'Open-source models on very fast hardware',zh:'在极快硬件上运行的开源模型'})+'</span></div>'+
- '<div class="p">Ollama</div><div class="span3" data-t="o"><span>'+T({en:'Open-source models on your own machine',zh:'在你自己电脑上运行的开源模型'})+'</span></div>';
- function lit(k){map.querySelectorAll('[data-t]').forEach(function(c){c.classList.toggle('hit',!!k&&k.indexOf(c.dataset.t)>-1)})}
+ game($('g1'),[
+  {en:'Label 10,000 support emails by topic.',zh:'给 10,000 封客服邮件按主题打标签。',a:'s',ex:{en:'A simple task at high volume. A small model is fast, cheap and good enough.',zh:'任务简单但量大，小模型又快又便宜，也足够好。'},hint:{en:'Simple task, huge volume: what matters most, speed and cost or depth?',zh:'任务简单、量很大：最重要的是速度和成本，还是深度？'}},
+  {en:'Summarise the risks in a 40-page contract for a lawyer.',zh:'为律师总结一份 40 页合同中的风险。',a:'l',ex:{en:'Subtle reading where mistakes are costly. Pay for the largest model.',zh:'需要细致阅读，出错代价高。选最大的模型。'},hint:{en:'Mistakes are costly here. Which tier thinks hardest?',zh:'这里出错代价高。哪一档思考得最深入？'}},
+  {en:'A general customer chat assistant that must be decent and affordable.',zh:'通用客服聊天助手，要求质量不错且成本可控。',a:'m',ex:{en:'The middle tier balances quality and cost for everyday work.',zh:'中型号在质量与成本间取得平衡，适合日常工作。'},hint:{en:'It must be decent and affordable: not the cheapest, not the biggest.',zh:'要求质量不错又不贵：既不是最便宜的，也不是最大的。'}},
+  {en:'Company data may never leave the laptop.',zh:'公司数据绝不能离开这台笔记本。',a:'o',ex:{en:'Only a local model keeps data on your machine.',zh:'只有本地模型才能让数据留在你的电脑上。'},hint:{en:'Which option runs on your own machine?',zh:'哪个选项在你自己的电脑上运行？'}},
+  {en:'A live demo where an open-source model is fine but replies must feel instant.',zh:'现场演示：开源模型就行，但回复必须几乎即时。',a:'g',ex:{en:'Groq runs open-source models on very fast hardware.',zh:'Groq 在极快的硬件上运行开源模型。'},hint:{en:'Which option is about open-source models on very fast hardware?',zh:'哪个选项讲的是在极快硬件上运行开源模型？'}}],
+  [{k:'s',en:'Small tier',zh:'小型号'},{k:'m',en:'Mid tier',zh:'中型号'},{k:'l',en:'Large tier',zh:'大型号'},{k:'g',en:'Groq',zh:'Groq'},{k:'o',en:'Ollama (local)',zh:'Ollama（本地）'}],{en:'Job',zh:'任务'});
 
- /* ---- pick-the-model game ---- */
- var OPT=[{k:'s',en:'Small tier',zh:'小型号'},{k:'m',en:'Mid tier',zh:'中型号'},{k:'l',en:'Large tier',zh:'大型号'},{k:'g',en:'Groq',zh:'Groq'},{k:'o',en:'Ollama (local)',zh:'Ollama（本地）'}];
- var JOBS=[
-  {en:'Label 10,000 support emails by topic.',zh:'给 10,000 封客服邮件按主题打标签。',a:'s',ex:{en:'A simple task at high volume. A small model is fast, cheap and good enough.',zh:'任务简单但量大，小模型又快又便宜，也足够好。'}},
-  {en:'Summarise the risks in a 40-page contract for a lawyer.',zh:'为律师总结一份 40 页合同中的风险。',a:'l',ex:{en:'Subtle reading where mistakes are costly. Pay for the largest model.',zh:'需要细致阅读，出错代价高。选最大的模型。'}},
-  {en:'A general customer chat assistant that must be decent and affordable.',zh:'通用客服聊天助手，要求质量不错且成本可控。',a:'m',ex:{en:'The middle tier balances quality and cost for everyday work.',zh:'中型号在质量与成本间取得平衡，适合日常工作。'}},
-  {en:'Company data may never leave the laptop.',zh:'公司数据绝不能离开这台笔记本。',a:'o',ex:{en:'Only a local model keeps data on your machine.',zh:'只有本地模型才能让数据留在你的电脑上。'}},
-  {en:'A live demo where an open-source model is fine but replies must feel instant.',zh:'现场演示：开源模型就行，但回复必须几乎即时。',a:'g',ex:{en:'Groq runs open-source models on very fast hardware.',zh:'Groq 在极快的硬件上运行开源模型。'}}];
- var gi=0,gsc=0,gm=$('game');
- function gdraw(){
-  if(gi>=JOBS.length){lit(null);gm.innerHTML='<div class="cnt">'+T({en:'Done',zh:'完成'})+'</div><p class="job">'+T({en:'You got '+gsc+' of '+JOBS.length+'.',zh:'你答对了 '+gsc+' / '+JOBS.length+' 题。'})+'</p><button class="btn" id="gre">'+T({en:'Play again',zh:'再玩一次'})+'</button>';
-   $('gre').onclick=function(){gi=0;gsc=0;gdraw()};return}
-  var j=JOBS[gi];
-  gm.innerHTML='<div class="cnt">'+T({en:'Job '+(gi+1)+' of '+JOBS.length,zh:'第 '+(gi+1)+' / '+JOBS.length+' 题'})+'</div><p class="job">'+T(j)+'</p><div class="pills">'+OPT.map(function(o){return '<button class="pill" data-k="'+o.k+'">'+T(o)+'</button>'}).join('')+'</div><div class="fb"></div>';
-  var done=false;
-  gm.querySelectorAll('.pill').forEach(function(b){b.onclick=function(e){if(done)return;done=true;var ok=b.dataset.k===j.a;if(ok){gsc++;TX.burst(e.clientX,e.clientY)}
-   lit(j.a);if(ok)b.classList.add('on');var fb=gm.querySelector('.fb');fb.className='fb show '+(ok?'good':'no');
-   fb.innerHTML='<b>'+(ok?T({en:'Right. ',zh:'答对了。'}):T({en:'Not quite. ',zh:'不太对。'}))+'</b>'+T(j.ex)+'<br><button class="btn pri" id="gn" style="margin-top:10px">'+T({en:'Next →',zh:'下一题 →'})+'</button>';
-   $('gn').onclick=function(){gi++;gdraw()}}})}
- gdraw();
+ game($('g2'),[
+  {en:'<code>from openai import OpenAI</code>',zh:'<code>from openai import OpenAI</code>',a:'k',ex:{en:'Keep. Groq speaks OpenAI’s language, so the same library works.',zh:'保持。Groq 说的是 OpenAI 那套“语言”，所以同一个库就能用。'},hint:{en:'Is a different library needed, or the same one pointed elsewhere?',zh:'需要另一个库，还是同一个库指向别处？'}},
+  {en:'<code>client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))</code>',zh:'<code>client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))</code>',a:'e',ex:{en:'Edit. Two of the three values live here: the key becomes GROQ_API_KEY, and you add base_url="https://api.groq.com/openai/v1".',zh:'修改。三个值里有两个在这一行：密钥换成 GROQ_API_KEY，并加上 base_url="https://api.groq.com/openai/v1"。'},hint:{en:'Whose account pays, and where is the request sent? Both are set on this line.',zh:'用谁的账户付费、请求发往哪里？这两样都在这一行设置。'}},
+  {en:'<code>response = client.chat.completions.create(</code>',zh:'<code>response = client.chat.completions.create(</code>',a:'k',ex:{en:'Keep. The call itself is identical on every provider.',zh:'保持。调用本身在每个厂商上都一样。'},hint:{en:'Is this one of the three values (key, address, model name)?',zh:'这是三个值（密钥、地址、模型名）之一吗？'}},
+  {en:'<code>    model="gpt-5.4-nano",</code>',zh:'<code>    model="gpt-5.4-nano",</code>',a:'e',ex:{en:'Edit. This is the third value: use a Groq model name such as "openai/gpt-oss-120b".',zh:'修改。这是第三个值：换成 Groq 的模型名，例如 "openai/gpt-oss-120b"。'},hint:{en:'Which brain answers? A Groq-hosted model has its own name.',zh:'由哪个模型回答？Groq 上的模型有自己的名字。'}},
+  {en:'<code>    messages=messages)</code>',zh:'<code>    messages=messages)</code>',a:'k',ex:{en:'Keep. Your messages are unchanged.',zh:'保持。你的 messages 不变。'},hint:{en:'Do your messages depend on the provider?',zh:'你的 messages 和厂商有关吗？'}},
+  {en:'<code>answer = response.choices[0].message.content</code>',zh:'<code>answer = response.choices[0].message.content</code>',a:'k',ex:{en:'Keep. The reply comes back in the same shape.',zh:'保持。回复的格式也一样。'},hint:{en:'Does the reply come back in a different shape?',zh:'回复的格式会不一样吗？'}}],
+  [{k:'k',en:'Keep',zh:'保持'},{k:'e',en:'Edit',zh:'修改'}],{en:'Line',zh:'第'});
 
- /* ---- provider tabs ---- */
- var PR=[
-  {n:'OpenAI',key:'OPENAI_API_KEY',url:null,model:'gpt-5.4-nano',note:{en:'The default. No base_url needed.',zh:'默认选项，不需要 base_url。'}},
-  {n:'Anthropic',key:'ANTHROPIC_API_KEY',url:'https://api.anthropic.com/v1/',model:'claude-sonnet-4-6',note:{en:'Claude models through the compatible endpoint.',zh:'通过兼容接口调用 Claude 模型。'}},
-  {n:'Gemini',key:'GOOGLE_API_KEY',url:'https://generativelanguage.googleapis.com/v1beta/openai/',model:'gemini-3.1-flash-lite',note:{en:'Google’s key is named GOOGLE_API_KEY.',zh:'Google 的密钥名为 GOOGLE_API_KEY。'}},
-  {n:'DeepSeek',key:'DEEPSEEK_API_KEY',url:'https://api.deepseek.com/v1',model:'deepseek-v4-flash',note:{en:'Same shape, different address.',zh:'形状相同，地址不同。'}},
-  {n:'Groq',key:'GROQ_API_KEY',url:'https://api.groq.com/openai/v1',model:'openai/gpt-oss-120b',note:{en:'Open-source model names can contain a slash.',zh:'开源模型的名称可能含有斜杠。'}},
-  {n:'Ollama',key:null,url:'http://localhost:11434/v1',model:'llama3.2',note:{en:'Local server: the key is just a placeholder.',zh:'本地服务器：密钥只是个占位值。'}}];
- var pv=$('prov'),cb=$('code'),pn=$('pnote');
- pv.innerHTML=PR.map(function(p,i){return '<button class="pill" data-i="'+i+'">'+p.n+'</button>'}).join('');
- function pshow(i){var p=PR[i];pv.querySelectorAll('.pill').forEach(function(b,k){b.classList.toggle('on',k===i)});
-  var key=p.key?'os.getenv("'+p.key+'")':'"ollama"';
-  cb.innerHTML='<span class="dim">client = OpenAI(</span>\n    <span class="chg">api_key='+key+'</span>'+(p.url?'<span class="dim">,</span>\n    <span class="chg">base_url="'+p.url+'"</span>':'')+'<span class="dim">)</span>\n\n'+
-   '<span class="dim">response = client.chat.completions.create(</span>\n    <span class="chg">model="'+p.model+'"</span><span class="dim">,\n    messages=messages)\nanswer = response.choices[0].message.content</span>';
-  pn.innerHTML=T(p.note)+' '+T({en:'Highlighted = what changes. The dim lines never change.',zh:'高亮部分会变，暗色的行永远不变。'})}
- pv.querySelectorAll('.pill').forEach(function(b){b.onclick=function(){pshow(+b.dataset.i)}});pshow(0);
+ predict($('p2'),{q:{en:'Why can one <code>OpenAI</code> client talk to Anthropic, Gemini, DeepSeek and Groq?',zh:'为什么同一个 <code>OpenAI</code> 客户端能调用 Anthropic、Gemini、DeepSeek 和 Groq？'},opts:[{k:'a',en:'They all use OpenAI\'s models inside',zh:'它们内部都用 OpenAI 的模型'},{k:'b',en:'They offer an OpenAI-compatible endpoint, so only <code>base_url</code> and key differ',zh:'它们都提供与 OpenAI 兼容的接口，只有 <code>base_url</code> 和密钥不同'},{k:'c',en:'The client downloads each provider\'s SDK automatically',zh:'客户端会自动下载各厂商的 SDK'}],a:'b',ex:{en:'The request format is the same, so the address, the key and the model name are the only things you swap.',zh:'请求格式相同，所以只需替换地址、密钥和模型名。'},hint:{en:'What do the providers share that lets the same request work?',zh:'这些厂商有什么共同点，让同一种请求能用？'}});
 
- /* ---- spot the lines ---- */
- var LN=[
-  ['from openai import OpenAI',0,{en:'Keep. Groq speaks OpenAI’s language, so the same library works.',zh:'保持。Groq 说的是 OpenAI 那套“语言”，所以同一个库就能用。'}],
-  ['client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))',1,{en:'Edit. Two of the three values live here: the key becomes GROQ_API_KEY, and you add base_url="https://api.groq.com/openai/v1".',zh:'修改。三个值里有两个在这一行：密钥换成 GROQ_API_KEY，并加上 base_url="https://api.groq.com/openai/v1"。'}],
-  ['response = client.chat.completions.create(',0,{en:'Keep. The call itself is identical on every provider.',zh:'保持。调用本身在每个厂商上都一样。'}],
-  ['    model="gpt-5.4-nano",',1,{en:'Edit. This is the third value: use a Groq model name such as "openai/gpt-oss-120b".',zh:'修改。这是第三个值：换成 Groq 的模型名，例如 "openai/gpt-oss-120b"。'}],
-  ['    messages=messages)',0,{en:'Keep. Your messages are unchanged.',zh:'保持。你的 messages 不变。'}],
-  ['answer = response.choices[0].message.content',0,{en:'Keep. The reply comes back in the same shape.',zh:'保持。回复的格式也一样。'}]];
- var sp=$('spot'),sg=$('spotgo'),sf=$('spotfb'),sx=$('spotex'),spDone=false,pick={};
- function spUpd(){var n=Object.keys(pick).length;if(!spDone){sg.disabled=n<LN.length;sf.textContent=n+' / '+LN.length}}
- function spBuild(){spDone=false;pick={};sx.innerHTML='';sg.innerHTML=T({en:'Check',zh:'检查'});
-  sp.innerHTML=LN.map(function(l,i){return '<div class="sr" data-i="'+i+'"><div class="row"><div class="sl">'+l[0].replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</div><div class="sk"><button data-v="0">'+T({en:'Keep',zh:'保持'})+'</button><button data-v="1">'+T({en:'Edit',zh:'修改'})+'</button></div></div><div class="why">'+T(l[2])+'</div></div>'}).join('');
-  sp.querySelectorAll('.sr').forEach(function(r){var i=+r.dataset.i;r.querySelectorAll('.sk button').forEach(function(b){b.onclick=function(){if(spDone)return;pick[i]=+b.dataset.v;r.querySelectorAll('.sk button').forEach(function(x){x.classList.toggle('on',x===b)});spUpd()}})});spUpd()}
- spBuild();
- sg.onclick=function(ev){
-  if(spDone){spBuild();return}
-  var wrong=0;
-  sp.querySelectorAll('.sr').forEach(function(r,i){var good=pick[i]===LN[i][1];if(!good)wrong++;r.classList.add('done',good?'ok':'bad')});
-  spDone=true;sg.disabled=false;sg.innerHTML=T({en:'Try again',zh:'重试'});
-  sf.innerHTML=wrong?T({en:'Missed '+wrong+'. Read the note under each line.',zh:'错了 '+wrong+' 行。看每一行下面的说明。'}):T({en:'Perfect. Only the key, the address and the model name change.',zh:'完美。只有密钥、地址和模型名需要改。'});
-  sx.innerHTML='<div class="codebox" style="margin-top:12px"><span class="dim">from openai import OpenAI\n</span>client = OpenAI(\n    <span class="chg">api_key=os.getenv("GROQ_API_KEY")</span>,\n    <span class="chg">base_url="https://api.groq.com/openai/v1"</span>)\n<span class="dim">response = client.chat.completions.create(</span>\n    <span class="chg">model="openai/gpt-oss-120b"</span><span class="dim">,\n    messages=messages)\nanswer = response.choices[0].message.content</span></div><p class="meta" style="margin-top:6px">'+T({en:'The finished Groq version. Highlighted = the three values you changed.',zh:'改好的 Groq 版本。高亮 = 你改的三个值。'})+'</p>';
-  if(!wrong)TX.burst(ev.clientX,ev.clientY)};
+ predict($('p3'),{q:{en:'Ollama is local, so why does the code still pass <code>api_key="ollama"</code>?',zh:'Ollama 在本地运行，为什么代码里仍然传 <code>api_key="ollama"</code>？'},opts:[{k:'a',en:'Ollama checks that exact password',zh:'Ollama 会校验这个密码'},{k:'b',en:'It is a real paid key',zh:'这是一个真实的付费密钥'},{k:'c',en:'The client requires some value, but a local server ignores it',zh:'客户端要求必须有个值，但本地服务器会忽略它'}],a:'c',ex:{en:'Any placeholder works. Nothing leaves your machine.',zh:'任何占位值都可以，数据不会离开你的电脑。'},hint:{en:'Who pays for a model running on your own laptop?',zh:'跑在你自己笔记本上的模型，谁来付费？'}});
 
- /* ---- ordering ---- */
- var OS=[
-  {en:'Ask one model to write a hard question',zh:'让一个模型写出一道难题'},
-  {en:'Send that same question to every competitor',zh:'把同一个问题发给每个参赛模型'},
-  {en:'Save each model name and answer in two lists',zh:'把每个模型名和回答存进两个列表'},
-  {en:'Glue the answers into “Response from competitor N”',zh:'把回答拼成“Response from competitor N”'},
-  {en:'Ask a judge model to rank them as JSON',zh:'让裁判模型以 JSON 给它们排名'},
-  {en:'Parse the JSON and map numbers back to model names',zh:'解析 JSON，把编号映射回模型名'}];
- var od=$('ord'),ofb=$('ordfb'),on_=0;
- function odraw(){on_=0;ofb.textContent='';od.innerHTML='';shuffle(OS.map(function(_,i){return i})).forEach(function(i){var b=document.createElement('button');b.className='oc';b.dataset.i=i;b.innerHTML='<span class="no">?</span><span>'+T(OS[i])+'</span>';
-   b.onclick=function(e){if(b.classList.contains('in'))return;if(+b.dataset.i===on_){on_++;b.classList.add('in');b.querySelector('.no').textContent=on_;
-     if(on_===OS.length){ofb.innerHTML=T({en:'Correct. Notice step 1 feeds step 2: that is prompt chaining.',zh:'正确。注意第 1 步的输出是第 2 步的输入，这就是提示链。'});TX.burst(e.clientX,e.clientY)}}
-    else{b.classList.remove('bad');void b.offsetWidth;b.classList.add('bad');ofb.innerHTML=T({en:'Not yet. What must exist before this step can run?',zh:'还不对。这一步执行之前，必须先有什么？'})}};
-   od.appendChild(b)})}
- $('ordreset').innerHTML=T({en:'Shuffle again',zh:'重新打乱'});$('ordreset').onclick=odraw;odraw();
+ trace($('t4'),[
+  {k:'code',en:'Asks one model to write a hard question',zh:'让一个模型写出一道难题',why:{en:'Everything after this needs a question to send.',zh:'后面所有步骤都需要一个问题可发。'}},
+  {k:'llm',en:'Returns the question',zh:'返回这个问题'},
+  {k:'code',en:'Sends that same question to every competitor',zh:'把同一个问题发给每个参赛模型',why:{en:'The output of step 1 is the input of step 2. That is prompt chaining.',zh:'第 1 步的输出是第 2 步的输入，这就是提示链。'}},
+  {k:'code',en:'Saves each model name and answer in two lists',zh:'把每个模型名和回答存进两个列表',why:{en:'Two lists, same order, so answer number N belongs to model number N.',zh:'两个列表顺序一致，所以第 N 个回答属于第 N 个模型。'}},
+  {k:'code',en:'Glues the answers into “Response from competitor N”',zh:'把回答拼成“Response from competitor N”',why:{en:'The judge needs one block of text with every answer numbered.',zh:'裁判需要一整段文字，里面每个回答都有编号。'}},
+  {k:'llm',en:'The judge ranks them and replies as JSON',zh:'裁判排名，并以 JSON 回复',why:{en:'JSON, so the next step can read it with code.',zh:'用 JSON，下一步才能用代码读取。'}},
+  {k:'code',en:'Parses the JSON and maps numbers back to model names',zh:'解析 JSON，把编号映射回模型名',why:{en:'Now the winner has a name.',zh:'现在赢家有了名字。'}}]);
+ predict($('p4'),{q:{en:'Why can the script not glue the answers together before it saves them in the lists?',zh:'为什么脚本不能在把回答存进列表之前就拼接它们？'},opts:[{k:'a',en:'There would be nothing to glue yet: the answers only exist after the models reply',zh:'那时还没有东西可拼：回答要等模型回复后才存在'},{k:'b',en:'Python forbids gluing text',zh:'Python 不允许拼接文字'},{k:'c',en:'The judge does not need the answers',zh:'裁判不需要这些回答'}],a:'a',ex:{en:'Each step needs something the step before it made, so the order is fixed.',zh:'每一步都要用到前一步产生的东西，所以顺序是固定的。'},hint:{en:'What must exist before you can put it into a list?',zh:'要放进列表之前，必须先有什么？'}});
 
- /* ---- be the judge ---- */
- var AN=[{t:{en:'Both matter and it really depends on the situation and many factors.',zh:'两者都重要，这真的取决于具体情况和许多因素。'}},
-  {t:{en:'Trust. A truth nobody believes changes nothing, while trust lets a society keep finding and correcting its mistakes.',zh:'信任。没人相信的真相改变不了什么，而信任能让社会不断发现并纠正自己的错误。'}},
-  {t:{en:'Truth, because trust built on lies eventually collapses.',zh:'真相，因为建立在谎言上的信任终将崩塌。'}}];
- var BEST=[1,2,0],jd=$('judge'),jr=$('jres'),rk=[];
- jd.innerHTML=AN.map(function(a,i){return '<button class="ans" data-i="'+i+'"><b class="n">#'+(i+1)+'</b><span>'+T(a.t)+'</span><span class="rk">?</span></button>'}).join('');
- jd.querySelectorAll('.ans').forEach(function(b){b.onclick=function(e){if(b.classList.contains('ranked'))return;rk.push(+b.dataset.i);b.classList.add('ranked');b.querySelector('.rk').textContent=rk.length;
-  if(rk.length===3){var same=rk.join()===BEST.join();jr.style.display='block';
-   jr.innerHTML='<div class="callout '+(same?'tip':'')+'"><b class="lbl">'+T({en:'Your ranking: '+rk.map(function(x){return '#'+(x+1)}).join(' > '),zh:'你的排名：'+rk.map(function(x){return '#'+(x+1)}).join(' > ')})+'</b>'+
-   T({en:(same?'Matches the rubric’s ranking. ':'Different from the rubric’s ranking (#2 > #3 > #1). ')+'#2 gives a reason and a mechanism. #3 states a claim with a thin reason. #1 sidesteps the question. A judge using “clarity and strength of argument” would reply <code>{"results": ["2", "3", "1"]}</code>.',
-      zh:(same?'与常见结论一致。':'与常见结论（#2 > #3 > #1）不同。')+'#2 给出了理由和机制，#3 只有观点和很薄的理由，#1 回避了问题。按“表达清晰度和论证力度”评判，裁判会返回 <code>{"results": ["2", "3", "1"]}</code>。'})+'</div>';
-   if(same)TX.burst(e.clientX,e.clientY)}}});
+ predict($('p5'),{q:{en:'On clarity and strength of argument, which answer is best?',zh:'按表达清晰度和论证力度，哪个回答最好？'},opts:[{k:'1',en:'#1',zh:'#1'},{k:'2',en:'#2',zh:'#2'},{k:'3',en:'#3',zh:'#3'}],a:'2',ex:{en:'#2 gives a reason and a mechanism. #3 states a claim with a thin reason. #1 sidesteps the question.',zh:'#2 给出了理由和机制，#3 只有观点和很薄的理由，#1 回避了问题。'},hint:{en:'Which answer actually picks a side and explains how it works?',zh:'哪个回答真正选了一边，并解释了原因？'}});
 
- /* ---- pattern match ---- */
- var PT=[{k:'c',en:'Prompt chaining',zh:'提示链'},{k:'r',en:'Routing',zh:'路由'},{k:'p',en:'Parallelization',zh:'并行'},{k:'o',en:'Orchestrator-worker',zh:'编排者-工作者'},{k:'e',en:'Evaluator-optimizer',zh:'评估者-优化者'}];
- var PQ=[{en:'One model writes the question, then that question is sent to the others.',zh:'一个模型写出问题，再把这个问题发给其他模型。',a:'c',ex:{en:'The output of one call becomes the input of the next.',zh:'一次调用的输出成为下一次调用的输入。'}},
-  {en:'The same question goes to many models, each call independent of the others.',zh:'同一个问题分别发给许多模型，各次调用互不依赖。',a:'p',ex:{en:'Independent calls on the same task, then the results are combined.',zh:'对同一任务做相互独立的调用，再合并结果。'}},
-  {en:'A judge model ranks the answers.',zh:'裁判模型给回答排名。',a:'e',ex:{en:'One model evaluates another’s output. Add a loop back and it becomes an optimizer.',zh:'一个模型评估另一个的输出。再加一条回路，就成了优化器。'}}];
- $('pm').innerHTML=PQ.map(function(q,i){return '<div class="row" data-a="'+q.a+'"><p>'+T(q)+'</p><div class="pills" style="margin:0">'+PT.map(function(p){return '<button class="pill" data-k="'+p.k+'">'+T(p)+'</button>'}).join('')+'</div><div class="fb">'+T(q.ex)+'</div></div>'}).join('');
- $('pm').querySelectorAll('.row').forEach(function(r){r.querySelectorAll('.pill').forEach(function(b){b.onclick=function(e){if(r.classList.contains('done'))return;
-  if(b.dataset.k===r.dataset.a){r.classList.add('done');b.classList.add('ok');r.querySelector('.fb').classList.add('show');TX.burst(e.clientX,e.clientY)}else{b.classList.remove('no');void b.offsetWidth;b.classList.add('no')}}})});
+ predict($('p5b'),{q:{en:'With <code>results = ["3", "1", "2"]</code>, who is rank 1?',zh:'当 <code>results = ["3", "1", "2"]</code> 时，谁是第 1 名？'},opts:[{k:'a',en:'model-A',zh:'model-A'},{k:'b',en:'model-B',zh:'model-B'},{k:'c',en:'model-C',zh:'model-C'}],a:'c',ex:{en:'The judge numbers competitors from 1, Python lists start at 0, hence the <code>- 1</code>. “3” means <code>competitors[2]</code>.',zh:'裁判从 1 开始编号，而 Python 列表从 0 开始，所以要 <code>- 1</code>。“3” 对应 <code>competitors[2]</code>。'},hint:{en:'The first item of <code>results</code> is "3". Which list position is that, counting from 0?',zh:'<code>results</code> 的第一项是 "3"。从 0 数起，它对应列表的哪个位置？'}});
+
+ game($('g6'),[
+  {en:'One model writes the question, then that question is sent to the others.',zh:'一个模型写出问题，再把这个问题发给其他模型。',a:'c',ex:{en:'The output of one call becomes the input of the next.',zh:'一次调用的输出成为下一次调用的输入。'},hint:{en:'One call feeds the next call.',zh:'一次调用喂给下一次调用。'}},
+  {en:'The same question goes to many models, each call independent of the others.',zh:'同一个问题分别发给许多模型，各次调用互不依赖。',a:'p',ex:{en:'Independent calls on the same task, then the results are combined.',zh:'对同一任务做相互独立的调用，再合并结果。'},hint:{en:'The calls do not depend on each other.',zh:'这些调用彼此不依赖。'}},
+  {en:'A judge model ranks the answers.',zh:'裁判模型给回答排名。',a:'e',ex:{en:'One model evaluates another’s output. Add a loop back and it becomes an optimizer.',zh:'一个模型评估另一个的输出。再加一条回路，就成了优化器。'},hint:{en:'One model checks the work of others.',zh:'一个模型检查其他模型的成果。'}}],
+  [{k:'c',en:'Prompt chaining',zh:'提示链'},{k:'r',en:'Routing',zh:'路由'},{k:'p',en:'Parallelization',zh:'并行'},{k:'o',en:'Orchestrator-worker',zh:'编排者-工作者'},{k:'e',en:'Evaluator-optimizer',zh:'评估者-优化者'}],{en:'Part',zh:'部分'});
+
+ predict($('p6'),{q:{en:'Challenge: feed the judge\'s ranking back so the weakest model tries again with feedback. Which pattern is that?',zh:'挑战：把裁判的排名反馈给最弱的模型，让它带着反馈重试。这是哪种模式？'},opts:[{k:'a',en:'Routing',zh:'路由'},{k:'b',en:'Evaluator-optimizer',zh:'评估者-优化者'},{k:'c',en:'Prompt chaining',zh:'提示链'}],a:'b',ex:{en:'One model produces, another evaluates, and the feedback loops back to improve the output.',zh:'一个模型生成，另一个评估，反馈再回流以改进输出。'},hint:{en:'Which pattern has a loop back from the judge to the producer?',zh:'哪种模式有一条从裁判回到生成者的回路？'}});
 });
 </script></body></html>
