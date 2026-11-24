@@ -12,7 +12,7 @@
 <h2><span class="en">Step 1 · Local first</span><span class="zh">第 1 步 · 先在本地做好</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Do not touch the cloud until it all works on your laptop: the chat, the persona, and the file memory (with <code>USE_BUCKET</code> off). If it is broken locally, the cloud only adds more places to look. Test the three things that matter.</p>
 <p class="zh" style="margin:0 0 8px">在笔记本上全部跑通之前，不要碰云：聊天、人设，以及文件记忆（<code>USE_BUCKET</code> 关闭）。如果本地就是坏的，云只会多出更多要查的地方。测试这三件要紧的事。</p></div>
-<div class="codebox"><span class="dim">Local checklist  (server and page both running on your laptop)
+<div class="codebox" data-file="checklist"><span class="dim">Local checklist  (server and page both running on your laptop)
   [ ] </span><span class="chg">it answers in her voice</span><span class="dim">
   [ ] </span><span class="chg">it admits what it does not know</span><span class="dim">
   [ ] </span><span class="chg">I say my name, ask again in the next message, and it remembers</span></div>
@@ -20,7 +20,7 @@
 <h2><span class="en">Step 2 · List the cloud pieces</span><span class="zh">第 2 步 · 列出云上的零件</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Write down every piece before you create any. It is five small, boring things: a bucket for memory, a function with the packaged backend, an API gateway in front of it, a bucket for the static site, and a CDN in front of that. Each one is easy. The work is in how they connect.</p>
 <p class="zh" style="margin:0 0 8px">在创建任何东西之前，先把每一块写下来。一共是五个小而无聊的零件：一个存放记忆的存储桶、一个装着打包后端的函数、它前面的 API 网关、一个存放静态网站的存储桶，以及它前面的 CDN。每一个都很简单，难的是它们怎么连起来。</p></div>
-<div class="codebox"><span class="dim">1. memory bucket       wharf-twin-memory
+<div class="codebox" data-file="checklist"><span class="dim">1. memory bucket       wharf-twin-memory
 2. function            wharf-twin   (zip from the last lesson, MEMORY_BUCKET + USE_BUCKET=true)
 3. API gateway         → function
 4. site bucket         wharf-twin-site
@@ -30,27 +30,32 @@
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Go from the back to the front: memory bucket, then the function, then the gateway, then the site, then the CDN. After each piece, test it by itself before adding the next. The function and gateway can be tested with one command, before any page exists. That way, when something breaks, you know it is the newest piece. Set <code>API</code> to your gateway address first.</p>
 <p class="zh" style="margin:0 0 8px">从后往前做：先存储桶，再函数，再网关，再网站，最后 CDN。每做完一块，先单独测它，再加下一块。函数和网关可以在页面存在之前，用一条命令来测。这样出了问题，你就知道是最新加的那一块。先把 <code>API</code> 设成你的网关地址。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 150" role="img" aria-label="Five cloud pieces wired back to front: memory bucket, function, API gateway, site bucket, CDN, each tested before the next"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box" x="0.0" y="50" width="120.0" height="64" rx="12"/><text class="en" x="60.0" y="78.0">Memory bucket</text><text class="zh" x="60.0" y="78.0">记忆桶</text><text class="en sm" x="60.0" y="96.0">1 · test alone</text><text class="zh sm" x="60.0" y="96.0">1 · 先单测</text><path class="lnk" d="M122.0 82.0 L147.0 82.0" marker-end="url(#ah)"/><rect class="box" x="150.0" y="50" width="120.0" height="64" rx="12"/><text class="en" x="210.0" y="78.0">Function</text><text class="zh" x="210.0" y="78.0">函数</text><text class="en sm" x="210.0" y="96.0">2 · test alone</text><text class="zh sm" x="210.0" y="96.0">2 · 先单测</text><path class="lnk" d="M272.0 82.0 L297.0 82.0" marker-end="url(#ah)"/><rect class="box" x="300.0" y="50" width="120.0" height="64" rx="12"/><text class="en" x="360.0" y="78.0">API gateway</text><text class="zh" x="360.0" y="78.0">API 网关</text><text class="en sm" x="360.0" y="96.0">3 · test alone</text><text class="zh sm" x="360.0" y="96.0">3 · 先单测</text><path class="lnk" d="M422.0 82.0 L447.0 82.0" marker-end="url(#ah)"/><rect class="box" x="450.0" y="50" width="120.0" height="64" rx="12"/><text class="en" x="510.0" y="78.0">Site bucket</text><text class="zh" x="510.0" y="78.0">站点桶</text><text class="en sm" x="510.0" y="96.0">4 · upload</text><text class="zh sm" x="510.0" y="96.0">4 · 上传</text><path class="lnk hot" d="M572.0 82.0 L597.0 82.0" marker-end="url(#ah)"/><rect class="box new" x="600.0" y="50" width="120.0" height="64" rx="12"/><text class="en" x="660.0" y="78.0">CDN</text><text class="zh" x="660.0" y="78.0">CDN</text><text class="en sm" x="660.0" y="96.0">5 · public address</text><text class="zh sm" x="660.0" y="96.0">5 · 公开地址</text></svg><figcaption><span class="en">Wire back to front. Each piece is tested by itself before the next one goes on, so a break is always in the newest piece.</span><span class="zh">从后往前连。每一块先单独测好，再接下一块，出问题就一定在最新接上的那一块。</span></figcaption></figure>
-<div class="codebox"><span class="dim">API=https://abc123.execute-api.ap-southeast-1.amazonaws.com    # your gateway address
+<div class="codebox" data-file="smoke_test.sh" data-lang="bash"><span class="dim">API=https://abc123.execute-api.ap-southeast-1.amazonaws.com    # your gateway address
 
 </span><span class="chg">curl -s -X POST "$API/api/chat" \
   -H "Content-Type: application/json" \
   -d '{"session_id": "test-1", "message": "Hi, what do you work on?"}'</span><span class="dim">
 
 # expect:  {"reply": "..."}   and a new object "test-1.json" in the memory bucket</span></div>
+<div class="codebox" data-file="output">{"reply":"I keep the gate-pass system running at the wharf."}
+$ aws s3 ls s3://wharf-twin-memory
+2026-05-04 09:30:12        214 test-1.json</div>
 <div class="try" id="t2"></div>
 <h2><span class="en">Step 4 · Point the front end at the API, rebuild, upload</span><span class="zh">第 4 步 · 让前端指向 API，重新构建，上传</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Do not hard-code the API address in the page. Read it from an environment variable at build time (in Next.js, names starting with <code>NEXT_PUBLIC_</code> reach the browser), so each environment gets its own. Rebuild the static files, upload them to the site bucket, and then tell the CDN to forget its old copies. If you skip that last step, it keeps serving the old page for minutes.</p>
 <p class="zh" style="margin:0 0 8px">不要把 API 地址写死在页面里。在构建时从环境变量里读（在 Next.js 里，以 <code>NEXT_PUBLIC_</code> 开头的名字才会进到浏览器），这样每个环境都有各自的地址。重新构建静态文件，上传到网站存储桶，然后让 CDN 忘掉旧副本。如果跳过最后一步，它会继续把旧页面发给人好几分钟。</p></div>
-<div class="codebox"><span class="dim"># in the page:  fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/chat`, ...)
+<div class="codebox" data-file="publish.sh" data-lang="bash"><span class="dim"># in the page:  fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/chat`, ...)
 
 </span><span class="chg">NEXT_PUBLIC_API_BASE=$API npm run build        # static export → "out"
 aws s3 sync out/ s3://wharf-twin-site --delete
 aws cloudfront create-invalidation --distribution-id YOUR_DISTRIBUTION_ID --paths "/*"</span></div>
+<div class="codebox" data-file="output">upload: out/index.html to s3://wharf-twin-site/index.html
+{ "Invalidation": { "Status": "InProgress" } }</div>
 <div class="sc" id="t3"></div>
 <h2><span class="en">Step 5 · Test the whole thing, including a restart</span><span class="zh">第 5 步 · 测试全部，包括重启</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Open the CDN address on your phone. Send a first message and say your name. Send a second message that tests memory. Then force a fresh copy of the function (upload the zip again, or wait until it has been idle) and ask once more. The name must still be there, because it lives in the bucket and not in the function.</p>
 <p class="zh" style="margin:0 0 8px">在手机上打开 CDN 地址。发第一条消息，说出你的名字。再发第二条消息来测试记忆。然后强制换一个新的函数副本（重新上传 zip，或者等它闲置一阵），再问一次。名字必须还在，因为它存在存储桶里，而不是函数里。</p></div>
-<div class="codebox"><span class="dim">1. "Hi, I am Siti."                    → twin greets her
+<div class="codebox" data-file="checklist"><span class="dim">1. "Hi, I am Siti."                    → twin greets her
 2. "What is my name?"                  → </span><span class="chg">Siti</span><span class="dim">
 3. (upload the function zip again, so a fresh copy starts)
 4. "Do you still remember my name?"    → </span><span class="chg">Siti</span><span class="dim">   (memory is in the bucket)</span></div>
@@ -63,6 +68,9 @@ aws cloudfront create-invalidation --distribution-id YOUR_DISTRIBUTION_ID --path
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Give a friend the link</b> and read their conversations (with their permission).</span><span class="zh"><b>把链接给朋友</b>，然后（经过他们同意）读他们的对话。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Break it on purpose</b> by deleting the function's bucket permission, and read the error.</span><span class="zh"><b>故意弄坏它</b>：删掉函数对存储桶的权限，然后读读报错。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Write down the exact click steps you used.</b> Notice how long the list is.</span><span class="zh"><b>写下你用过的确切点击步骤。</b>留意这份清单有多长。</span></span></label></div>
 <div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the product has a public address: Auntie Siti opens it on her phone at the canteen, and the twin still knows her name after a restart. The next problem is that Mei Ling got there by clicking from memory, and Kumar wants the berth plan written down so anyone can repeat it.</span><span class="zh">现在产品有了公开地址：Auntie Siti 在食堂用手机就能打开，分身重启之后仍然记得她的名字。下一个问题是 Mei Ling 全靠凭记忆点控制台才做到这一步，Kumar 想把泊位计划写下来，让谁都能重复。</span></div>
+<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
+<div class="card"><p class="en" style="margin:0">• <code>{"message":"Internal Server Error"}</code> The function crashed; the reason is in its log. <b>Fix:</b> Run <code>aws logs tail</code> on the function log group and fix the first exception.<br>• <code>The page still shows the old version</code> The CDN keeps a saved copy. <b>Fix:</b> Run the <code>create-invalidation</code> line and wait a minute.<br>• <code>Failed to fetch</code> <code>NEXT_PUBLIC_API_BASE</code> was empty when the page was built. <b>Fix:</b> Set it on the same line as <code>npm run build</code> and rebuild.</p><p class="zh" style="margin:0">• <code>{"message":"Internal Server Error"}</code> 函数崩溃了，原因在它的日志里。 <b>解决：</b>对函数日志组运行 <code>aws logs tail</code>，修复第一条异常。<br>• <code>The page still shows the old version</code> CDN 保存着旧副本。 <b>解决：</b>运行 <code>create-invalidation</code> 那一行，等一分钟。<br>• <code>Failed to fetch</code> 构建页面时 <code>NEXT_PUBLIC_API_BASE</code> 是空的。 <b>解决：</b>在 <code>npm run build</code> 同一行设置它，再重新构建。</p></div>
+<div class="callout tip"><b class="lbl"><span class="en">Recap</span><span class="zh">小结</span></b><span class="en">Test locally first, then build the cloud pieces in order, from memory to the CDN.<br>Call the gateway with curl before you blame the page.<br>Prove memory by restarting the function and asking again.</span><span class="zh">先在本地测试，再按顺序搭云上的部分，从记忆桶到 CDN。<br>怀疑页面之前，先用 curl 调用网关。<br>重启函数后再问一次，来证明记忆有效。</span></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• Get it all working locally before touching the cloud.<br>• Five small pieces: memory bucket, function, gateway, site bucket, CDN.<br>• Wire back to front and test each piece before adding the next.<br>• Read the API address from a variable at build time, never hard-code it.<br>• Invalidate the CDN cache after every upload.<br>• Test memory across a fresh copy of the function.<br>• The pieces are boring. The work is wiring them in a safe order, and having a clean-up plan.</p><p class="zh" style="margin:0">• 先在本地全部跑通，再碰云。<br>• 五个小零件：记忆存储桶、函数、网关、网站存储桶、CDN。<br>• 从后往前连，每加一块之前先测上一块。<br>• 构建时从变量读 API 地址，绝不写死。<br>• 每次上传后都要让 CDN 缓存失效。<br>• 用一个全新的函数副本来测试记忆。<br>• 零件都很无聊，难的是按安全的顺序把它们连起来，并且备好清理计划。</p></div>
 

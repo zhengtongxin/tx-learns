@@ -12,7 +12,7 @@
 <h2><span class="en">Step 1 · Take the hand-made twin apart</span><span class="zh">第 1 步 · 先把手工搭的分身拆掉</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Before the fix, feel the problem. Delete the whole hand-made twin on purpose, in the <b>console</b> (the cloud company's web page where you click). You will see how many parts there were, and that they depend on each other: a thing that points at another thing must go first, or you hit "still in use" errors. Buckets must also be emptied before they can be deleted.</p>
 <p class="zh" style="margin:0">解法之前，先感受问题。有意把手工搭的整个分身删掉（在<b>控制台</b>里，也就是云服务商那个你用来点击的网页）。你会看到原来有这么多部件，而且它们互相依赖：指向别的东西的部件要先删，否则会撞上“仍在使用中”的错误。存储桶也要先清空才能删。</p></div>
-<div class="codebox"><span class="dim">1. </span><span class="chg">CDN</span><span class="dim">            disable it, wait a few minutes, then delete (it points at the site bucket)
+<div class="codebox" data-file="teardown-order"><span class="dim">1. </span><span class="chg">CDN</span><span class="dim">            disable it, wait a few minutes, then delete (it points at the site bucket)
 2. </span><span class="chg">API gateway</span><span class="dim">    it points at the function
 3. </span><span class="chg">function</span><span class="dim">       it uses the role
 4. </span><span class="chg">function's role</span><span class="dim">   detach its policies, then delete
@@ -23,13 +23,13 @@
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0"><b>Infrastructure as code</b> means the setup is text in files, not a memory of clicks. Text can be <b>reviewed</b> (someone reads it before it changes), <b>versioned</b> (every change is in git history; git is the tool that records every change to a folder of files, and a diff is the list of lines that changed), <b>repeated</b> (run it again for a second copy) and <b>shared</b> (a teammate gets the same setup). Think of the berth plan pinned to the wall: anyone can read what goes where, and a change must be written on the plan first.</p>
 <p class="zh" style="margin:0"><b>基础设施即代码</b>的意思是：搭建本身就是文件里的文字，而不是一堆点击的记忆。文字可以被<b>审阅</b>（改动前有人先读）、被<b>版本管理</b>（每次改动都在 git 历史里；git 是一个记录文件夹里每次改动的工具，diff 是改动的行列表）、被<b>重复</b>（再跑一遍就得到第二份）、被<b>共享</b>（队友拿到的搭建是一样的）。就像贴在墙上的泊位图：谁都能读出什么放哪儿，要改也得先改在图上。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 150" role="img" aria-label="Terraform reads config files, shows a plan, applies it to the cloud, and records what exists in state"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box" x="0.0" y="50" width="157.5" height="64" rx="12"/><text class="en" x="78.75" y="78.0">Config files</text><text class="zh" x="78.75" y="78.0">配置文件</text><text class="en sm" x="78.75" y="96.0">what you want</text><text class="zh sm" x="78.75" y="96.0">你想要的样子</text><path class="lnk" d="M159.5 82.0 L184.5 82.0" marker-end="url(#ah)"/><rect class="box" x="187.5" y="50" width="157.5" height="64" rx="12"/><text class="en" x="266.25" y="78.0">plan</text><text class="zh" x="266.25" y="78.0">plan 预演</text><text class="en sm" x="266.25" y="96.0">preview only</text><text class="zh sm" x="266.25" y="96.0">只预览不动手</text><path class="lnk" d="M347.0 82.0 L372.0 82.0" marker-end="url(#ah)"/><rect class="box" x="375.0" y="50" width="157.5" height="64" rx="12"/><text class="en" x="453.75" y="78.0">apply</text><text class="zh" x="453.75" y="78.0">apply 执行</text><text class="en sm" x="453.75" y="96.0">makes the changes</text><text class="zh sm" x="453.75" y="96.0">真正动手改</text><path class="lnk hot" d="M534.5 82.0 L559.5 82.0" marker-end="url(#ah)"/><rect class="box new" x="562.5" y="50" width="157.5" height="64" rx="12"/><text class="en" x="641.25" y="78.0">Cloud + state</text><text class="zh" x="641.25" y="78.0">云和状态</text><text class="en sm" x="641.25" y="96.0">what exists</text><text class="zh sm" x="641.25" y="96.0">现在有什么</text></svg><figcaption><span class="en">You edit the file, not the console. The plan shows what would change, and apply makes it so.</span><span class="zh">你改的是文件，不是控制台。plan 先给你看会有什么变化，apply 再把它变成现实。</span></figcaption></figure>
-<div class="codebox"><span class="dim">clicking:   remember → click → hope → forget what you did
+<div class="codebox" data-file="diagram"><span class="dim">clicking:   remember → click → hope → forget what you did
 </span><span class="chg">as code:    write it → plan (read the diff) → apply → it is in git</span></div>
 <div class="sc" id="t1"></div>
 <h2><span class="en">Step 3 · Five Terraform ideas</span><span class="zh">第 3 步 · Terraform 的五个概念</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0"><b>Terraform</b> is a popular tool for infrastructure as code. It has five ideas. A <b>resource</b> is a thing to create, like a bucket. A <b>provider</b> is the plugin that knows how to talk to one cloud. A <b>variable</b> is a knob you set per run. The <b>state</b> is Terraform's record of what really exists. A <b>workspace</b> is a separate copy of the state, so one set of files can drive several environments.</p>
 <p class="zh" style="margin:0"><b>Terraform</b> 是一个常用的基础设施即代码工具。它有五个概念。<b>资源（resource）</b>是要创建的东西，比如一个存储桶。<b>提供者（provider）</b>是懂得和某个云打交道的插件。<b>变量（variable）</b>是每次运行时设置的旋钮。<b>状态（state）</b>是 Terraform 对“实际存在什么”的记录。<b>工作区（workspace）</b>是状态的一份独立副本，所以同一套文件可以驱动多个环境。</p></div>
-<div class="codebox"><span class="chg">resource</span><span class="dim">   what to make                       aws_s3_bucket "memory"
+<div class="codebox" data-file="terms"><span class="chg">resource</span><span class="dim">   what to make                       aws_s3_bucket "memory"
 </span><span class="chg">provider</span><span class="dim">   which cloud's plugin               aws
 </span><span class="chg">variable</span><span class="dim">   a knob                             var.environment
 </span><span class="chg">state</span><span class="dim">      what exists right now              terraform.tfstate
@@ -38,21 +38,24 @@
 <h2><span class="en">Step 4 · Install it, and keep its local files out of git</span><span class="zh">第 4 步 · 安装它，并让它的本地文件远离 git</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Install Terraform from its official download page or your system's package manager, then check it with <code>terraform -version</code>. It uses the same AWS login as the AWS command line, so if <code>aws</code> already works on your laptop, Terraform will too. Before the first commit, write a <code>.gitignore</code>. Terraform downloads provider plugins into a folder, and it writes the <b>state</b> to a file that can hold passwords and keys in plain text. Neither belongs in git. (The small <code>.terraform.lock.hcl</code> file, which pins plugin versions, should be committed.)</p>
 <p class="zh" style="margin:0">从官方下载页或你系统的包管理器安装 Terraform，然后用 <code>terraform -version</code> 检查。它使用和 AWS 命令行相同的 AWS 登录，所以你笔记本上的 <code>aws</code> 能用，它也能用。第一次提交之前，先写好 <code>.gitignore</code>。Terraform 会把提供者插件下载到一个文件夹里，还会把<b>状态</b>写进一个文件，这个文件里可能以明文存着密码和密钥。这两样都不该进 git。（记录插件版本的小文件 <code>.terraform.lock.hcl</code> 则应该提交。）</p></div>
-<div class="codebox"><span class="dim">$ terraform -version
-
-# .gitignore
+<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim">$ terraform -version
+</span></div>
+<div class="codebox" data-file=".gitignore"><span class="dim"># .gitignore
 </span><span class="chg">.terraform/
 *.tfstate
 *.tfstate.*
 *.tfvars
 crash.log</span></div>
+<div class="codebox" data-file="output">$ terraform -version
+Terraform v1.9.8
+on linux_amd64</div>
 <div class="try" id="t3"></div>
 <h2><span class="en">Step 5 · Read one small config, line by line</span><span class="zh">第 5 步 · 一行一行读一份小配置</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Start with one bucket, and understand every line before you make more. The first block says which provider to download. The second sets its region. The third is the resource: its type, a local name (<code>memory</code>), and its settings. Then run the four commands: <code>init</code> downloads plugins, <code>plan</code> shows what <i>would</i> change without changing anything, <code>apply</code> does it, <code>destroy</code> removes it.</p>
 <p class="zh" style="margin:0 0 8px">先从一个存储桶开始，每一行都弄懂了再去建更多。第一块说明要下载哪个提供者。第二块设置它的区域。第三块是资源：它的类型、一个本地名字（<code>memory</code>）和它的设置。然后运行四条命令：<code>init</code> 下载插件，<code>plan</code> 显示<i>将会</i>改什么、但不真的改，<code>apply</code> 去执行，<code>destroy</code> 把它移除。</p>
 <p class="en" style="margin:0">Bucket names are shared by everyone in the cloud, so change the name below to one of your own.</p>
 <p class="zh" style="margin:0">存储桶的名字是全云共用的，所以请把下面的名字换成你自己的。</p></div>
-<div class="codebox"><span class="dim"># main.tf
+<div class="codebox" data-file="main.tf" data-lang="hcl"><span class="dim"># main.tf
 terraform {
   required_providers {
     aws = { source = "hashicorp/aws", version = "~> 5.0" }
@@ -67,17 +70,24 @@ provider "aws" {
   bucket = "wharf-twin-practice-ml-2026"
   tags   = { Project = "twin" }
 }</span><span class="dim">
-
-# then, in the same folder:
+</span></div>
+<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim"># then, in the same folder:
 terraform init
 terraform plan
 terraform apply
 terraform destroy</span></div>
+<div class="codebox" data-file="output">Plan: 1 to add, 0 to change, 0 to destroy.
+aws_s3_bucket.memory: Creation complete after 2s
+Apply complete! Resources: 1 added, 0 changed, 0 destroyed.</div>
 <div class="try" id="t4"></div>
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en"><b>Three slips.</b> I thought code for infrastructure would be harder than clicking. The first time it is; by the tenth time it is far easier. I deleted things in the wrong order and hit dependency errors. And I almost committed the state file, which can hold secrets.</span><span class="zh"><b>三个失误。</b>我以为用代码管基础设施比点鼠标难。第一次确实难；到第十次就容易多了。我删东西的顺序不对，撞上了依赖错误。我还差点把状态文件提交上去，而它里面可能有秘密。</span></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Write a config for one bucket,</b> plan it, apply it, then destroy it.</span><span class="zh"><b>写一份只有一个存储桶的配置，</b>plan、apply，再 destroy。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Change a tag</b> and read the plan's diff before you apply.</span><span class="zh"><b>改一个标签</b>，apply 之前先读 plan 的差异。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Count the clicks</b> you made building the twin in the last topic.</span><span class="zh"><b>数一数</b>上一个主题里搭分身时你点了多少下。</span></span></label></div>
 <div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the product exists as a small Terraform file Mei Ling can read, preview with a plan and rebuild: the berth plan pinned on the wall. The next problem is that one file must make three copies (dev, test, prod) without them drifting apart, and Kumar's logbook, the state, has to keep them straight.</span><span class="zh">现在产品有了一份 Mei Ling 能读、能用 plan 预演、能重建的小型 Terraform 文件：就像钉在墙上的泊位图。下一个问题是同一份文件要造出三份副本（开发、测试、生产）而不互相走样，Kumar 的工作日志，也就是状态，要负责把它们理清楚。</span></div>
+<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
+<div class="card"><p class="en" style="margin:0">• <code>Error: Failed to install provider</code> No internet from the terminal, or the version rule matches nothing. <b>Fix:</b> Check your network, then run <code>terraform init -upgrade</code>.<br>• <code>BucketAlreadyExists</code> S3 bucket names are shared by everyone, and yours is taken. <b>Fix:</b> Add your initials or account id to the name.<br>• <code>Error: No valid credential sources found</code> Terraform cannot find your cloud sign-in. <b>Fix:</b> Configure your command line sign-in again, then repeat <code>terraform plan</code>.</p><p class="zh" style="margin:0">• <code>Error: Failed to install provider</code> 终端没有联网，或版本规则没有匹配的版本。 <b>解决：</b>检查网络，再运行 <code>terraform init -upgrade</code>。<br>• <code>BucketAlreadyExists</code> S3 桶名全球唯一，你的名字已被占用。 <b>解决：</b>在名字里加上你的缩写或账号 id。<br>• <code>Error: No valid credential sources found</code> Terraform 找不到你的云登录信息。 <b>解决：</b>重新配置命令行登录，再重复 <code>terraform plan</code>。</p></div>
+<div class="callout tip"><b class="lbl"><span class="en">Recap</span><span class="zh">小结</span></b><span class="en">Code beats clicking: it is repeatable, reviewable and kept in git.<br>Four moves: <code>init</code>, <code>plan</code>, <code>apply</code>, <code>destroy</code>; always read the plan.<br>Never commit the state file or secrets.</span><span class="zh">代码胜过点击：可重复、可审查、存在 git 里。<br>四个动作：<code>init</code>、<code>plan</code>、<code>apply</code>、<code>destroy</code>；一定要读计划。<br>不要提交状态文件和密钥。</span></div>
+<div class="callout tip"><b class="lbl"><span class="en">Plain words</span><span class="zh">白话词汇</span></b><span class="en"><b>Terraform</b>: a tool that reads files describing your cloud and makes the cloud match them. <b>State</b>: its notebook of what it has already made. <b>Plan</b>: a preview of changes before they happen.</span><span class="zh"><b>Terraform</b>：读取描述云环境的文件，并让云与之一致的工具。<b>状态（state）</b>：它记录已创建内容的笔记本。<b>计划（plan）</b>：改动发生前的预览。</span></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• Hand-built infrastructure is hard to remember, repeat or share; deleting it shows how many parts there were.<br>• Delete in dependency order: whatever points at something goes first, and buckets are emptied before they go.<br>• Infrastructure as code means the setup is text that can be reviewed, versioned, repeated and shared.<br>• Terraform's five ideas: resources, providers, variables, state and workspaces.<br>• Keep <code>.terraform/</code> and state files out of git, because state can hold secrets.<br>• <code>plan</code> shows what will change before anything changes.<br>• Anything I can click, I should be able to rebuild from a file.</p><p class="zh" style="margin:0">• 手工搭的基础设施难记、难重复、难共享；把它删掉就能看出原来有多少部件。<br>• 按依赖顺序删除：指向别的东西的先删，存储桶先清空再删。<br>• 基础设施即代码，就是让搭建成为可审阅、可版本管理、可重复、可共享的文字。<br>• Terraform 的五个概念：资源、提供者、变量、状态和工作区。<br>• 把 <code>.terraform/</code> 和状态文件挡在 git 之外，因为状态里可能有秘密。<br>• <code>plan</code> 在任何东西改变之前，先显示将会改什么。<br>• 凡是我能点出来的，我都应该能从一份文件里重建出来。</p></div>
 

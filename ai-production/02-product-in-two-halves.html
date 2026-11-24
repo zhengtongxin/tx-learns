@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>A product in two halves: front end and API | TX Learns</title>
 <meta name="description" content="See how a page and a Python API deploy together under one web address."><meta property="og:title" content="A product in two halves: front end and API | TX Learns"><meta property="og:description" content="See how a page and a Python API deploy together under one web address."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-production/02-product-in-two-halves.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
-<meta name="updated" content="2026-11-23">
+<meta name="updated" content="2026-11-24">
 <link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">From laptop to live · Lesson 2</span><span class="zh">从笔记本到上线 · 第 2 课</span></span><h1><span class="en">A product in two halves: front end and API</span><span class="zh">产品的两半：前端和 API</span></h1><p class="meta"><span class="en">See how a page and a Python API deploy together under one web address · ~25 min · hands-on</span><span class="zh">看懂一个页面和一个 Python API 如何在同一个网址下一起上线 · 约 25 分钟 · 动手实践</span></p></div>
@@ -10,7 +10,7 @@
 <h2><span class="en">Step 1 · Two halves, one address</span><span class="zh">第 1 步 · 两半，一个地址</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The <b>front end</b> is the part people see. It is just files that your browser downloads and runs, so it can never keep a secret. The <b>API</b> is the part that runs on the host. It holds the model key and does the real work. Picture a restaurant: the dining room is the front end, the kitchen is the API, and the doorway between them is one address.</p>
 <p class="zh" style="margin:0 0 8px"><b>前端</b>是人们看到的部分。它只是浏览器下载并运行的文件，所以永远保不住秘密。<b>API</b> 则运行在托管平台上，持有模型密钥，做真正的工作。想象一家餐厅：餐厅大堂是前端，厨房是 API，两者之间的传菜口就是同一个地址。</p></div>
-<div class="codebox"><span class="dim">browser  ──►  yourproduct.app/      ──►  Next.js page  (front end)
+<div class="codebox" data-file="diagram"><span class="dim">browser  ──►  yourproduct.app/      ──►  Next.js page  (front end)
 browser  ──►  yourproduct.app/api   ──►  Python API    (holds the key)
                                               │
                                               ▼
@@ -19,14 +19,16 @@ browser  ──►  yourproduct.app/api   ──►  Python API    (holds the ke
 <h2><span class="en">Step 2 · Start the front end</span><span class="zh">第 2 步 · 搭起前端</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><b>React</b> is a way to write a page as small reusable pieces. <b>Next.js</b> is a toolkit for React pages. One command (<code>npx</code> runs a tool without installing it first) makes a project. Its flags answer the setup questions for you: TypeScript, Tailwind, and the older "pages" layout (<code>--no-app</code>). Then empty the sample page. <b>Tailwind</b> is just short class names for styling: <code>p-8</code> means "padding", <code>text-xl</code> means "big text". Its <b>typography plugin</b> later makes rendered markdown look decent.</p>
 <p class="zh" style="margin:0 0 8px"><b>React</b> 是把页面写成一块块可以反复使用的小部件的方式。<b>Next.js</b> 是做 React 页面的工具包。一条命令（<code>npx</code> 不用先安装就能直接运行一个工具）就能建好项目。参数替你回答了设置问题：TypeScript、Tailwind，以及较旧的 “pages” 目录结构（<code>--no-app</code>）。然后清空示例页面。<b>Tailwind</b> 就是一堆简短的样式类名：<code>p-8</code> 表示“内边距”，<code>text-xl</code> 表示“大字”。它的<b>排版插件（typography plugin）</b>之后能让渲染出的 markdown 好看一些。</p></div>
-<div class="codebox"><span class="chg">npx create-next-app@latest wharf-helper --typescript --tailwind --no-app</span><span class="dim">
+<div class="codebox" data-file="terminal" data-lang="bash"><span class="chg">npx create-next-app@latest wharf-helper --typescript --tailwind --no-app</span><span class="dim">
 cd wharf-helper
 # delete the sample content in pages/index.tsx</span></div>
+<div class="codebox" data-file="output">✔ Creating a new Next.js app in ./wharf-helper
+Success! Created wharf-helper</div>
 <div class="try" id="t1"></div>
 <h2><span class="en">Step 3 · Add the Python half</span><span class="zh">第 3 步 · 加上 Python 那一半</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Put a Python file in a folder named <code>api</code>, next to your Next.js files. It is the same FastAPI route as before. It needs its own <b>requirements file</b>, placed beside it in the <code>api</code> folder as the code below shows, because the Python half installs its own packages. Skip it and the page will look fine while the API quietly fails.</p>
 <p class="zh" style="margin:0 0 8px">在 Next.js 文件旁边建一个叫 <code>api</code> 的文件夹，里面放一个 Python 文件，和之前一样是 FastAPI 路由。它需要自己的 <b>requirements 文件</b>，和它一起放在 <code>api</code> 文件夹里（如下面的代码所示），因为 Python 这一半要安装自己的包。漏了它，页面看起来一切正常，API 却悄悄失败。</p></div>
-<div class="codebox"><span class="dim"># api/index.py
+<div class="codebox" data-file="api/index.py" data-lang="python"><span class="dim"># api/index.py
 </span><span class="chg">from fastapi import FastAPI
 from openai import OpenAI</span><span class="dim">
 
@@ -40,8 +42,8 @@ def hello():
         messages=[{"role": "user", "content": "Write a one-line welcome for the wharf canteen."}],
     )
     return {"message": reply.choices[0].message.content}
-
-# api/requirements.txt  (beside index.py)
+</span></div>
+<div class="codebox" data-file="api/requirements.txt"><span class="dim"># api/requirements.txt  (beside index.py)
 </span><span class="chg">fastapi
 uvicorn
 openai</span></div>
@@ -49,10 +51,10 @@ openai</span></div>
 <h2><span class="en">Step 4 · Join them with one address</span><span class="zh">第 4 步 · 用同一个地址把它们连起来</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Two things connect the halves. First, a host config that sends <code>/api/...</code> to Python and everything else to Next.js. Its <code>rewrites</code> rule means "send this address to that file", and this file replaces the <code>builds</code> and <code>routes</code> config from lesson 1. The browser sees one site, so the browser's cross-site safety rules (CORS) never get in the way. Second, the page calls a <b>relative</b> path, <code>/api</code>, not a full address. A relative path means "same site as this page", so it works on your laptop (run it with <code>vercel dev</code>) and in production.</p>
 <p class="zh" style="margin:0 0 8px">有两样东西把两半连起来。第一，一个托管平台配置：把 <code>/api/...</code> 交给 Python，其余交给 Next.js。它的 <code>rewrites</code> 规则意思是“把这个地址交给那个文件”，这个文件取代第 1 课里的 <code>builds</code> 和 <code>routes</code> 配置。浏览器看到的是同一个网站，所以浏览器的跨站安全规则（CORS）不会来捣乱。第二，页面调用的是<b>相对</b>路径 <code>/api</code>，而不是完整地址。相对路径的意思是“和当前页面同一个网站”，所以在你的笔记本和线上都能用。</p></div>
-<div class="codebox"><span class="dim">// vercel.json
+<div class="codebox" data-file="vercel.json" data-lang="json"><span class="dim">// vercel.json
 { "rewrites": [{ "source": </span><span class="chg">"/api/:path*"</span><span class="dim">, "destination": </span><span class="chg">"/api/index.py"</span><span class="dim"> }] }
-
-// pages/index.tsx
+</span></div>
+<div class="codebox" data-file="pages/index.tsx" data-lang="js"><span class="dim">// pages/index.tsx
 import { useEffect, useState } from "react";
 
 export default function Home() {
@@ -70,15 +72,21 @@ export default function Home() {
 <h2><span class="en">Step 5 · Deploy: preview, then production</span><span class="zh">第 5 步 · 部署：先预览，再上线</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Link the folder to a host project once, then set the model key as an environment variable, exactly as before. A plain deploy makes a <b>preview</b>. <code>--prod</code> promotes it to <b>production</b>. These are two separate deployments with two addresses, so check the preview first and only then go live.</p>
 <p class="zh" style="margin:0 0 8px">先把文件夹关联到托管平台的一个项目，再像之前一样把模型密钥设为环境变量。普通的部署会得到一个<b>预览</b>版；加上 <code>--prod</code> 才升级为<b>生产</b>版。它们是两个独立的部署、两个地址，所以先在预览里检查，再正式上线。</p></div>
-<div class="codebox"><span class="chg">vercel link</span><span class="dim">
+<div class="codebox" data-file="terminal" data-lang="bash"><span class="chg">vercel link</span><span class="dim">
 </span><span class="chg">vercel env add OPENAI_API_KEY</span><span class="dim">
 vercel          # preview: open the printed address and test
 </span><span class="chg">vercel --prod</span><span class="dim">   # production</span></div>
+<div class="codebox" data-file="output">? Set up and deploy? yes
+Linked to wharf-helper (created .vercel)
+Added Environment Variable OPENAI_API_KEY to Project wharf-helper
+Production: https://wharf-helper.vercel.app [38s]</div>
 <div class="try" id="t4"></div>
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en"><b>I called the API with a full address locally, and it broke in production.</b> A relative <code>/api</code> path works in both places. I also <b>forgot the Python requirements file</b>, so the API half failed while the page looked perfectly fine. The page is only the shell: when something is missing, look at the API's build log.</span><span class="zh"><b>我在本地用完整地址调用 API，上线后就坏了。</b>相对路径 <code>/api</code> 在两个地方都能用。我还<b>忘了 Python 的 requirements 文件</b>，结果页面看起来完全正常，API 那一半却失败了。页面只是外壳：缺了什么，就去看 API 的构建日志。</span></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Add a second route <code>/api/hello</code></b> that returns a different message, and show it on the page.</span><span class="zh"><b>再加一个路由 <code>/api/hello</code></b>，返回另一条消息，并显示在页面上。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Open the preview address and the production address.</b> Notice they are separate deployments.</span><span class="zh"><b>分别打开预览地址和生产地址。</b>留意它们是两个独立的部署。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Draw the request path on paper</b>, from the browser to the model and back.</span><span class="zh"><b>在纸上画出请求路径</b>，从浏览器到模型再回来。</span></span></label></div>
 <div class="callout tip"><b class="lbl"><span class="en">At the wharf</span><span class="zh">在码头</span></b><span class="en">The wharf has a public gate and a back office. Trucks and visitors only ever see the one gate (one address). Inside, the office holds the keys and the paperwork (the API). Mei Ling never hangs the office keys on the gate.</span><span class="zh">码头有对外的大门，也有后台办公室。卡车和访客只会看到同一个大门（同一个地址）。里面的办公室保管着钥匙和文件（API）。Mei Ling 绝不会把办公室的钥匙挂在大门上。</span></div>
+<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
+<div class="card"><p class="en" style="margin:0">• <code>Failed to fetch</code> The page called <code>/api</code> but the rewrite is missing or the API did not deploy. <b>Fix:</b> Check <code>vercel.json</code> is at the project root and that <code>api/index.py</code> exists; open <code>/api</code> in the browser.<br>• <code>Error: Command "npm run build" exited with 1</code> A TypeScript or import error in <code>pages/index.tsx</code>. <b>Fix:</b> Run <code>npm run build</code> on your laptop first and fix the first error it prints.</p><p class="zh" style="margin:0">• <code>Failed to fetch</code> 页面请求了 <code>/api</code>，但重写规则缺失，或 API 没有部署成功。 <b>解决：</b>确认 <code>vercel.json</code> 在项目根目录、<code>api/index.py</code> 存在，并在浏览器里直接打开 <code>/api</code>。<br>• <code>Error: Command "npm run build" exited with 1</code> <code>pages/index.tsx</code> 里有 TypeScript 或导入错误。 <b>解决：</b>先在自己电脑上运行 <code>npm run build</code>，修好打印出的第一个错误。</p></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• A product has two halves: a front end in the browser and an API on the host.<br>• The front end is just files the visitor downloads, so it cannot keep secrets. The API holds them.<br>• A host rule sends <code>/api/...</code> to Python and the rest to Next.js. One address, no CORS trouble.<br>• Call <code>/api</code>, not a full address, so it works locally and live.<br>• The Python half needs its own requirements file.<br>• Preview and production are two deployments. Test the first, then promote.</p><p class="zh" style="margin:0">• 一个产品有两半：浏览器里的前端，和托管平台上的 API。<br>• 前端只是访问者下载的文件，保不住秘密；秘密由 API 保管。<br>• 平台规则把 <code>/api/...</code> 交给 Python，其余交给 Next.js。一个地址，没有 CORS 麻烦。<br>• 调用 <code>/api</code> 而不是完整地址，本地和线上才都能用。<br>• Python 那一半需要自己的 requirements 文件。<br>• 预览和生产是两个部署：先测前者，再升级。</p></div>
 

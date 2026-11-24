@@ -10,14 +10,14 @@
 <h2><span class="en">Step 1 · The request path, piece by piece</span><span class="zh">第 1 步 · 请求的路径，一块一块看</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>bucket</b> is a cloud folder for files (objects) with no server attached. A <b>CDN</b> (content delivery network) is a fast front door that caches your pages near the visitor and gives them HTTPS. An <b>API gateway</b> is the public door for your backend. Here is the whole path: the browser asks the CDN; the CDN fetches the front end from a bucket; the page calls the gateway; the gateway runs the function; the function calls the model service and reads or writes the memory bucket.</p>
 <p class="zh" style="margin:0 0 8px"><b>存储桶（bucket）</b>是云上存放文件（对象）的文件夹，不挂任何服务器。<b>CDN</b>（内容分发网络）是一扇很快的前门，它把页面缓存在离访客近的地方，并提供 HTTPS。<b>API 网关</b>是后端对外的公开入口。整条路径是这样：浏览器问 CDN；CDN 从一个存储桶取前端页面；页面调用网关；网关运行函数；函数调用模型服务，并读写记忆存储桶。</p></div>
-<div class="codebox"><span class="dim">browser → </span><span class="chg">CDN</span><span class="dim"> → site bucket          (the front end files)
+<div class="codebox" data-file="diagram"><span class="dim">browser → </span><span class="chg">CDN</span><span class="dim"> → site bucket          (the front end files)
 browser → </span><span class="chg">API gateway</span><span class="dim"> → function → model service
                               └→ </span><span class="chg">memory bucket</span><span class="dim">   (one object per session)</span></div>
 <div class="sc" id="t0"></div>
 <h2><span class="en">Step 2 · Memory becomes objects in a bucket</span><span class="zh">第 2 步 · 记忆变成存储桶里的对象</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A serverless function has <b>no durable disk</b>. Anything it writes to a file can vanish between calls, and two copies of the function never share files. So the memory moves to a bucket, one object per session, named after the session id. The code below uses <code>boto3</code>, the Python library for the cloud (<code>pip install boto3</code>). The bucket name comes from an environment variable.</p>
 <p class="zh" style="margin:0 0 8px">无服务器函数<b>没有持久的磁盘</b>。它写进文件的任何东西，都可能在两次调用之间消失，而且函数的两个副本之间不共享文件。所以记忆搬到存储桶里，每个会话一个对象，名字用会话 id。下面的代码用 <code>boto3</code>，也就是操作云的 Python 库（<code>pip install boto3</code>）。存储桶的名字来自环境变量。</p></div>
-<div class="codebox"><span class="dim">import json
+<div class="codebox" data-file="memory_bucket.py" data-lang="python"><span class="dim">import json
 import os
 import boto3
 from botocore.exceptions import ClientError
@@ -41,7 +41,7 @@ def save_to_bucket(session_id: str, history: list) -> None:
 <h2><span class="en">Step 3 · One codebase, local or cloud</span><span class="zh">第 3 步 · 一份代码，本地或云上都能跑</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">You still want to run everything on your laptop while building. So let one environment variable choose where memory goes: local files or the bucket. The rest of the server calls the same two function names either way. Keep the session id check from the first lesson of this topic: only safe characters, so nobody can aim at other files or objects. (The boto3 functions from step 2 are renamed <code>load_from_bucket</code> and <code>save_to_bucket</code> here.)</p>
 <p class="zh" style="margin:0 0 8px">开发时你仍然想在笔记本上运行所有东西。所以让一个环境变量来选记忆放哪里：本地文件还是存储桶。服务器的其余部分无论哪种都调用同样的两个函数名。别忘了本主题第一课里的会话 id 检查：只允许安全字符，这样没人能指向别的文件或对象。（第 2 步里的 boto3 函数在这里改名叫 <code>load_from_bucket</code> 和 <code>save_to_bucket</code>。）</p></div>
-<div class="codebox"><span class="dim">import json
+<div class="codebox" data-file="memory.py" data-lang="python"><span class="dim">import json
 import os
 import re
 from pathlib import Path
@@ -70,16 +70,16 @@ def save_history(session_id: str, history: list) -> None:
 <h2><span class="en">Step 4 · Package the function and give it permission</span><span class="zh">第 4 步 · 打包函数，并给它权限</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">For a zip-based function, install the libraries into a folder, add your code and zip it. Install for the chip type the cloud uses, not your laptop's. A small adapter library (<code>mangum</code>) lets the FastAPI app answer function calls. Then set the environment variables and give the function a role that allows only what it needs: read and write objects in the memory bucket, plus list it (without the list permission, a missing object is answered "access denied" instead of "not found", and a new visitor would crash the code in step 2). Nothing else. This is <b>least privilege</b>.</p>
 <p class="zh" style="margin:0 0 8px">对基于 zip 的函数，要把库安装到一个文件夹里，加上你的代码再打成 zip。安装时要按云使用的芯片类型，而不是你笔记本的。一个小的适配库（<code>mangum</code>）让 FastAPI 应用能回应函数调用。然后设置环境变量，再给函数一个只允许它需要的事的角色：只能读写记忆存储桶里的对象，外加能列出它的内容（没有列出权限的话，对象不存在时返回的是“拒绝访问”而不是“找不到”，新访客会让第 2 步的代码崩溃）。别的都不行。这就是<b>最小权限</b>。</p></div>
-<div class="codebox"><span class="dim"># in server.py, after   app = FastAPI()   and your routes:
+<div class="codebox" data-file="server.py" data-lang="python"><span class="dim"># in server.py, after   app = FastAPI()   and your routes:
 from mangum import Mangum
 </span><span class="chg">handler = Mangum(app)            # the function's entry point: server.handler</span><span class="dim">
-
-# build the zip
+</span></div>
+<div class="codebox" data-file="build.sh" data-lang="bash"><span class="dim"># build the zip
 pip install --platform manylinux2014_x86_64 --target package --only-binary=:all: -r requirements.txt
 cp *.py package/ &amp;&amp; cp -r data package/
 cd package &amp;&amp; zip -r ../twin.zip . &amp;&amp; cd ..
-
-# the function's role: this and nothing more
+</span></div>
+<div class="codebox" data-file="role-policy.json" data-lang="json"><span class="dim"># the function's role: this and nothing more
 </span><span class="chg">{"Version": "2012-10-17",
  "Statement": [{"Effect": "Allow",
                 "Action": ["s3:GetObject", "s3:PutObject"],
@@ -87,11 +87,16 @@ cd package &amp;&amp; zip -r ../twin.zip . &amp;&amp; cd ..
                {"Effect": "Allow",
                 "Action": "s3:ListBucket",
                 "Resource": "arn:aws:s3:::wharf-twin-memory"}]}</span></div>
+<div class="codebox" data-file="output">$ cd package &amp;&amp; zip -r ../twin.zip . &amp;&amp; cd ..
+  adding: server.py (deflated 61%)
+  ...
+$ ls -lh twin.zip
+-rw-r--r-- 1 mei staff 24M twin.zip</div>
 <div class="try" id="t3"></div>
 <h2><span class="en">Step 5 · The static front end, the CDN and CORS</span><span class="zh">第 5 步 · 静态前端、CDN 和 CORS</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The static front end goes into its own bucket, and the CDN sits in front of it. But now the page comes from one address and the API from another. The browser blocks that unless the gateway answers with <b>CORS</b> headers naming the page's address as allowed. Set that on the gateway, or you will see the calls fail in the browser console while the function itself is fine.</p>
 <p class="zh" style="margin:0 0 8px">静态前端放进它自己的存储桶，CDN 放在它前面。但现在页面来自一个地址，API 来自另一个地址。除非网关用 <b>CORS</b> 头回应、并把页面的地址列为允许，否则浏览器会拦下。要在网关上设置，不然你会看到调用在浏览器控制台里失败，而函数本身其实没事。</p></div>
-<div class="codebox"><span class="dim">API gateway → CORS
+<div class="codebox" data-file="cors-settings"><span class="dim">API gateway → CORS
   Allowed origins:  </span><span class="chg">https://twin.example.com</span><span class="dim">     (the CDN address of the page)
   Allowed methods:  POST, OPTIONS
   Allowed headers:  content-type</span></div>
@@ -104,6 +109,9 @@ cd package &amp;&amp; zip -r ../twin.zip . &amp;&amp; cd ..
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Send a chat and find its object in the bucket.</b></span><span class="zh"><b>发一次聊天，在存储桶里找到它的对象。</b></span></span></label><label><input type="checkbox"><span><span class="en"><b>Remove the function's bucket permission</b> and read the error.</span><span class="zh"><b>去掉函数对存储桶的权限</b>，读一读报错。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Draw the whole path</b> and mark where each secret lives.</span><span class="zh"><b>画出整条路径</b>，标出每个密钥放在哪里。</span></span></label></div>
 <div class="callout tip"><b class="lbl"><span class="en">At the wharf</span><span class="zh">在码头</span></b><span class="en">The handover book cannot sit on a crane operator's desk, because shifts change and desks are cleared. It goes in the control room archive, and each person gets a key to only the shelf they need. No server disk means storage is a service, and every piece gets the least access it needs.</span><span class="zh">交接簿不能放在吊机操作员的桌上，因为班次会换，桌子会清空。它要放进控制室的档案柜，每个人只拿到自己需要的那一格的钥匙。没有服务器磁盘，存储就是一项服务，每一块只拿到它需要的最小权限。</span></div>
+<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
+<div class="card"><p class="en" style="margin:0">• <code>botocore.exceptions.ClientError: AccessDenied</code> The function role may not read or write the memory bucket. <b>Fix:</b> Check the role policy lists the bucket name exactly, with <code>/*</code> for objects.<br>• <code>KeyError: 'MEMORY_BUCKET'</code> The function has no such environment variable. <b>Fix:</b> Add <code>MEMORY_BUCKET</code> and <code>USE_BUCKET=true</code> in the function settings.<br>• <code>Runtime.ImportModuleError: Unable to import module 'server'</code> The zip holds the wrong files or libraries built for another system. <b>Fix:</b> Rebuild with the <code>--platform manylinux2014_x86_64</code> line and zip from inside <code>package/</code>.<br>• <code>CORS error in the browser console</code> The gateway does not allow the page address. <b>Fix:</b> Add the CDN address under allowed origins, with <code>POST, OPTIONS</code>.</p><p class="zh" style="margin:0">• <code>botocore.exceptions.ClientError: AccessDenied</code> 函数的角色没有读写记忆桶的权限。 <b>解决：</b>检查角色策略里的桶名是否完全一致，对象部分要带 <code>/*</code>。<br>• <code>KeyError: 'MEMORY_BUCKET'</code> 函数里没有这个环境变量。 <b>解决：</b>在函数设置里添加 <code>MEMORY_BUCKET</code> 和 <code>USE_BUCKET=true</code>。<br>• <code>Runtime.ImportModuleError: Unable to import module 'server'</code> 压缩包里的文件不对，或库是为别的系统构建的。 <b>解决：</b>用带 <code>--platform manylinux2014_x86_64</code> 的命令重新构建，并在 <code>package/</code> 里面打包。<br>• <code>CORS error in the browser console</code> 网关没有允许页面所在的地址。 <b>解决：</b>在允许的来源里加入 CDN 地址，方法包括 <code>POST, OPTIONS</code>。</p></div>
+<div class="callout tip"><b class="lbl"><span class="en">Recap</span><span class="zh">小结</span></b><span class="en">Memory moves from a laptop folder to a bucket, one object per session.<br>The function only gets the two rights it needs, on that one bucket.<br>A zip, a gateway and a CORS rule turn the local server into a cloud one.</span><span class="zh">记忆从笔记本上的文件夹搬到桶里，每个会话一个对象。<br>函数只拿到它需要的两项权限，且只针对那一个桶。<br>压缩包、网关和 CORS 规则把本地服务器变成云上的服务器。</span></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• The path: browser, CDN, site bucket, API gateway, function, model service and memory bucket.<br>• A serverless function has no durable disk, so storage is a service.<br>• Memory becomes one object per session in a bucket.<br>• An environment variable can switch the same code between local files and the bucket.<br>• Package the function for the cloud's chip type, and give it only the permissions it needs.<br>• The gateway needs CORS, or the browser blocks the calls.<br>• Know the cost levers: small memory, short logs, delete what is unused.</p><p class="zh" style="margin:0">• 路径：浏览器、CDN、网站存储桶、API 网关、函数、模型服务和记忆存储桶。<br>• 无服务器函数没有持久磁盘，所以存储就是一项服务。<br>• 记忆变成存储桶里每个会话一个对象。<br>• 用一个环境变量，就能让同一份代码在本地文件和存储桶之间切换。<br>• 按云的芯片类型打包函数，只给它需要的权限。<br>• 网关需要 CORS，否则浏览器会拦下调用。<br>• 了解成本杠杆：小内存、短日志、删掉不用的东西。</p></div>
 
