@@ -32,6 +32,9 @@ const OUT = resolve(arg('out', 'ui-check-out'));
 const req = createRequire(process.env.PLAYWRIGHT_DIR ? join(resolve(process.env.PLAYWRIGHT_DIR), 'node_modules/') : import.meta.url);
 const { chromium } = req('playwright');
 
+// --fit: the cheap merge-blocking mode. Phone only, no screenshots and no Tab walk, and only two kinds count:
+// content wider than the screen and a popup running off the side. Everything else stays with the full check.
+const FIT = process.argv.includes('--fit'), FIT_KINDS = new Set(['overflow', 'popup-offscreen']);
 const VIEWPORTS = [
   { name: 'desktop', viewport: { width: 1280, height: 800 }, hover: true },
   { name: 'phone', viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, hover: false },
@@ -186,7 +189,7 @@ async function main() {
   const browser = await chromium.launch();
   const results = [];
   // Desktop and phone run side by side to keep the job short.
-  await Promise.all(VIEWPORTS.map(async vp => {
+  await Promise.all(VIEWPORTS.filter(v => !FIT || v.name === 'phone').map(async vp => {
     const { name, hover, ...opts } = vp;
     const ctx = await browser.newContext({ ...opts, reducedMotion: 'reduce' });
     // The bypass header goes only to the preview itself, never to font or CDN hosts.
@@ -196,7 +199,7 @@ async function main() {
     await ctx.addInitScript(`(${pageHelpers})(${JSON.stringify(SKIP)})`);
     const testPage = async path => {
       const res = { page: path, viewport: name, issues: [], shots: [] }, seen = new Set();
-      const add = i => { const k = i.kind + '|' + (i.key || i.msg); if (!seen.has(k)) { seen.add(k); res.issues.push(i); } };
+      const add = i => { if (FIT && !FIT_KINDS.has(i.kind)) return; const k = i.kind + '|' + (i.key || i.msg); if (!seen.has(k)) { seen.add(k); res.issues.push(i); } };
       const page = await ctx.newPage();
       // A page that hangs is closed after 2 minutes (it then shows up as "could not open or test the page"), so one stuck page cannot hold the whole run.
       const hang = setTimeout(() => page.close().catch(() => {}), 120000);
@@ -226,6 +229,7 @@ async function main() {
         const ov = await page.evaluate(() => window.__uic.overflow());
         if (ov) add({ kind: 'overflow', msg: `Content is ${ov.by}px wider than the screen, so it is cut off or the page scrolls sideways. Sticking out: ${ov.culprits.join('; ') || 'unknown'}.` });
         // Keyboard: everything a mouse can click must also be reachable with Tab.
+        if (!FIT)
         (await page.evaluate(() => {
           const ok = 'a[href],button,input,select,textarea,summary,[tabindex]:not([tabindex="-1"])';
           const out = [];
@@ -240,8 +244,7 @@ async function main() {
           }
           return [...new Set(out)].slice(0, 8);
         })).forEach(d => add({ kind: 'keyboard', key: d, msg: `Clickable but not reachable with Tab: ${d}. Use a <button> or <a>, or add tabindex="0", a role and Enter/Space handling.` }));
-        if (shots.has(path)) res.shots = await tiles(page, path, name);
-        await page.screenshot({ path: join(OUT, 'shots', `${slug(path)}-${name}.png`) });
+        if (!FIT) { if (shots.has(path)) res.shots = await tiles(page, path, name); await page.screenshot({ path: join(OUT, 'shots', `${slug(path)}-${name}.png`) }); }
 
         // Hover, then click, each element in turn. A popup left open by the last one shows up as an overlap.
         for (const t of targets) {
@@ -256,8 +259,8 @@ async function main() {
           (await page.evaluate(s => window.__uic.check(s), hover ? 'clicked ' + t.desc : step)).forEach(add);
         }
         // Keyboard: Tab through the page from the top.
-        await open();
-        for (let n = 1; n <= MAX_TABS; n++) {
+        if (!FIT) await open();
+        for (let n = 1; !FIT && n <= MAX_TABS; n++) {
           await page.keyboard.press('Tab');
           await page.waitForTimeout(60);
           const where = await page.evaluate(() => { const a = document.activeElement; return a && a !== document.body ? (a.innerText || a.getAttribute('aria-label') || a.tagName).replace(/\s+/g, ' ').trim().slice(0, 40) : ''; });
