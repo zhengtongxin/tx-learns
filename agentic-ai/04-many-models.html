@@ -88,8 +88,8 @@ answer = response.choices[0].message.content</span></div>
 <div class="try" id="p4"></div>
 
 <h2><span class="en">Step 5 · Be the judge</span><span class="zh">第 5 步 · 当一次裁判</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The question was written by the model in step 1, because Aina asked it for a hard, open question to stress-test her customer helper. It came back as: <i>“Which matters more to a society, truth or trust? Answer in two sentences.”</i> Real customers will ask easier things, but the same ranking works for them. A judge model must reply in strict <b>JSON</b> (a plain-text format of labels and values, like <code>{"best": 2}</code>) so code can read it. Then the code maps numbers back to names.</p>
-<p class="zh" style="margin:0 0 8px">这个问题是第 1 步里的模型写的，因为 Aina 让它出一道难的开放题，用来给顾客助手做压力测试。它给出的是：<i>“对一个社会来说，真相和信任哪个更重要？用两句话回答。”</i>真实顾客问的会简单些，但同样的排名办法照样适用。裁判模型必须返回严格的 <b>JSON</b>（一种由标签和值组成的纯文本格式，比如 <code>{"best": 2}</code>），代码才能读取。然后代码把编号映射回模型名称。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The question was written by the model in the first step of the Step 4 walk-through, because Aina asked it for a hard, open question to stress-test her customer helper. It came back as: <i>“Which matters more to a society, truth or trust? Answer in two sentences.”</i> Real customers will ask easier things, but the same ranking works for them. A judge model must reply in strict <b>JSON</b> (a plain-text format of labels and values, like <code>{"best": 2}</code>) so code can read it. Then the code maps numbers back to names.</p>
+<p class="zh" style="margin:0 0 8px">这个问题是第 4 步走读里第一步的模型写的，因为 Aina 让它出一道难的开放题，用来给顾客助手做压力测试。它给出的是：<i>“对一个社会来说，真相和信任哪个更重要？用两句话回答。”</i>真实顾客问的会简单些，但同样的排名办法照样适用。裁判模型必须返回严格的 <b>JSON</b>（一种由标签和值组成的纯文本格式，比如 <code>{"best": 2}</code>），代码才能读取。然后代码把编号映射回模型名称。</p></div>
 <p class="en">First, be the judge yourself, using <b>clarity and strength of argument</b>. Three answers came back:</p>
 <p class="zh">先自己当裁判，标准是<b>表达清晰度和论证力度</b>。回来了三个回答：</p>
 <div class="card"><p class="en" style="margin:0"><b>#1</b> Both matter and it really depends on the situation and many factors.<br><b>#2</b> Trust. A truth nobody believes changes nothing, while trust lets a society keep finding and correcting its mistakes.<br><b>#3</b> Truth, because trust built on lies eventually collapses.</p><p class="zh" style="margin:0"><b>#1</b> 两者都重要，这真的取决于具体情况和许多因素。<br><b>#2</b> 信任。没人相信的真相改变不了什么，而信任能让社会不断发现并纠正自己的错误。<br><b>#3</b> 真相，因为建立在谎言上的信任终将崩塌。</p></div>
@@ -97,8 +97,16 @@ answer = response.choices[0].message.content</span></div>
 <p class="en">A judge using that rubric would reply <code>{"results": ["2", "3", "1"]}</code>. The judge only does that because the prompt tells it to. Here is the prompt, with the answers already glued in as “Response from competitor N”:</p>
 <p class="zh">按这个标准，裁判会返回 <code>{"results": ["2", "3", "1"]}</code>。裁判之所以这样回复，是因为提示词要求它这样做。下面是提示词，各回答已经拼成“Response from competitor N”放在里面：</p>
 <span class="lab"><span class="en">Python · compare.py (the judge prompt)</span><span class="zh">Python · compare.py（裁判提示词）</span></span>
-<div class="codebox" data-file="judge.py" data-lang="python"><span class="dim"># together = the numbered answers glued into one string (see Step 4)
-# competitors = the list of model names
+<div class="codebox" data-file="judge.py" data-lang="python"><span class="dim"># the setup the Step 4 walk-through built, shortened to run on its own
+competitors = ["model-A", "model-B", "model-C"]
+question = "Which matters more to a society, truth or trust? Answer in two sentences."
+answers = ["Both matter and it really depends on the situation and many factors.",
+           "Trust. A truth nobody believes changes nothing, while trust lets a society keep finding and correcting its mistakes.",
+           "Truth, because trust built on lies eventually collapses."]
+together = ""
+for number, answer in enumerate(answers, start=1):
+    together += f"# Response from competitor {number}\n\n{answer}\n\n"
+
 judge = f"""You are judging a competition between {len(competitors)} competitors.
 Rank them by clarity and strength of argument for this question:
 {question}
@@ -111,7 +119,7 @@ Reply only with JSON, best first, like {{"results": ["2", "3", "1"]}}.
 <p class="zh">现在来读代码里的裁判结论。</p>
 <span class="lab"><span class="en">Python · compare.py (reading the verdict)</span><span class="zh">Python · compare.py（读取结论）</span></span>
 <div class="codebox" data-file="judge_loop.py" data-lang="python"><span class="dim">import json
-competitors = ["model-A", "model-B", "model-C"]
+# competitors is the list from the cell above
 reply = '{"results": ["2", "3", "1"]}'     # the judge's reply: text in JSON form, best first
 </span><span class="chg">results = json.loads(reply)["results"]       # JSON text -> a Python list: ["2", "3", "1"]
 competitor = competitors[int(results[0]) - 1]</span></div>
@@ -120,8 +128,8 @@ competitor = competitors[int(results[0]) - 1]</span></div>
 <div class="callout warn"><b class="lbl"><span class="en">Know the limits</span><span class="zh">了解局限</span></b><span class="en">A judge is one more model, so its ranking is an opinion. Use a strong model, hide who wrote what, and spot-check the result.</span><span class="zh">裁判也是一个模型，所以它的排名只是一种意见。请用强模型，隐藏回答者身份，并抽查结果。</span></div>
 
 <h2><span class="en">Step 6 · Name the patterns</span><span class="zh">第 6 步 · 认出其中的模式</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">You met five workflow patterns in Lesson 2: prompt chaining, routing, parallelization, orchestrator-worker and evaluator-optimizer. Sending one task to several models and evaluating the results is a common way to raise quality where accuracy is critical. Which pattern does each part of this script use?</p>
-<p class="zh" style="margin:0">第 2 课你认识了五种工作流模式：提示链、路由、并行化、编排者-工作者和评估-优化。把同一个任务发给多个模型再评估结果，是在准确性至关重要的场景下提升质量的常用办法。这段脚本的每个部分用的是哪一种模式？</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">You met five workflow patterns in Lesson 2: prompt chaining, routing, parallelization, orchestrator-worker and evaluator-optimizer. Sending one task to several models and evaluating the results is a common way to raise quality where accuracy is critical. Careful: a judge that ranks the answers once is only the evaluator half of evaluator-optimizer. The full pattern needs a loop that sends the feedback back to the producer. Which pattern does each part of this script use?</p>
+<p class="zh" style="margin:0">第 2 课你认识了五种工作流模式：提示链、路由、并行化、编排者-工作者和评估者-优化者。把同一个任务发给多个模型再评估结果，是在准确性至关重要的场景下提升质量的常用办法。注意：裁判只排一次名，只是评估者-优化者里“评估者”那一半。完整的模式还需要一条把反馈送回生成者的回路。这段脚本的每个部分用的是哪一种模式？</p></div>
 <div class="sc" id="g6"></div>
 <div class="try" id="p6"></div>
 
@@ -136,4 +144,4 @@ competitor = competitors[int(results[0]) - 1]</span></div>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Agentic</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script src="lessons.js?v=40b1397f"></script><script src="../assets/site.js?v=5acebb39"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/04-many-models.js?v=ed55c243"></script></body></html>
+<script src="js/04-many-models.js?v=5e30ef1f"></script></body></html>
