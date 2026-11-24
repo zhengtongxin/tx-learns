@@ -182,11 +182,8 @@ if __name__ == "__main__":
     asyncio.run(floor())</span></div>
 <p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
 <div class="codebox" data-file="output" data-lang="text">$ uv run -m floor.trading_floor
-Wong   buy 5 KOPI @ RM10.12  cash RM9,949.40
-Muthu  buy 3 ROTI @ RM5.21   cash RM9,984.37
-AhKow  hold
-Hamid  sell 2 NASI @ RM11.84 cash RM10,023.68
-(next round in 10 minutes)</div>
+(no text appears here: the uncles' trades and logs go to the database;
+ open the dashboard or call the API below to see them)</div>
 <div class="try" id="p4"></div>
 <h2><span class="en">Step 5 · See inside with your own tracer</span><span class="zh">第 5 步 · 用自己的追踪器看清内部</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Four uncles running at once make a messy log. The SDK lets you plug in a <code>TracingProcessor</code>: it is called for every <b>span</b> (an agent step, a tool call or a model call). Yours writes each span to a database with the uncle's name, and the dashboard reads those rows as a live, colour-coded log.</p><p class="zh" style="margin:0 0 8px">四位大叔同时运行，日志会乱成一团。SDK 允许你接入一个 <code>TracingProcessor</code>：每一个 <b>span</b>（智能体的一步、一次工具调用或一次模型调用）都会交给它。你的追踪器把每个 span 连同大叔的名字写进数据库，仪表盘把这些记录读成实时的彩色日志。</p><p class="en" style="margin:0 0 8px">The trick is the name inside <code>trace_id</code>, which <code>make_trace_id</code> put in front. Every span can then be traced back to its owner. <code>_who</code> reads the name back out: the text between the first underscore and the <code>0</code>. In each method, <code>w</code> holds the name, and the row is written only <code>if</code> there is a name.</p><p class="zh" style="margin:0 0 8px">关键在 <code>trace_id</code> 里的名字，也就是 <code>make_trace_id</code> 放在最前面的那部分。这样每个 span 都能追回它的主人。<code>_who</code> 把名字读回来：取第一个下划线和 <code>0</code> 之间的文字。每个方法里，<code>w</code> 存着名字，只有 <code>if</code> 有名字，才写这一行记录。</p></div>

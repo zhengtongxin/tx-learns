@@ -43,9 +43,6 @@ checker = Agent(name="Checker", instructions="You check shop emails before they 
 result = await Runner.run(checker, draft)
 check = </span><span class="chg">result.final_output</span><span class="dim">        # an EmailCheck object, not a string
 if check.has_placeholders: ...</span></div>
-<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
-<div class="codebox" data-file="output" data-lang="text">EmailCheck(is_friendly=True, has_placeholders=True, price_mentioned='RM5.50')
-Not sending, fix the draft first</div>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Two details matter. The <code>Field(description=...)</code> text is what the model reads to know what goes in each box, so write it like an instruction. And <code>EmailCheck.model_json_schema()</code> prints the exact schema the model sees; look at it once. Some providers go further and force the answer to match the form, so it can never come back broken. Not every provider supports structured outputs, so keep the checker on one that does.</p>
 <p class="zh"style="margin:0 0 8px">有两个细节很重要。<code>Field(description=...)</code> 里的文字是模型用来理解每个格子该填什么的，所以要像写指令一样写。<code>EmailCheck.model_json_schema()</code> 会打印模型实际看到的 schema，值得看一次。有些提供商更进一步，强制答案必须符合这张表，所以永远不会返回坏掉的结果。但不是每家都支持结构化输出，所以检查员要放在支持的模型上。</p></div>
 <div class="try" id="p2"></div>
@@ -61,6 +58,8 @@ check = (await Runner.run(checker, draft)).final_output
     print("Not sending, fix the draft first")
 else:
     send_message("This month's breakfast set", draft)   # a plain helper that sends the email (not the agent tool from Step 1); see the outreach helper lesson</span></div>
+<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
+<div class="codebox" data-file="output" data-lang="text">Not sending, fix the draft first</div>
 <div class="try" id="p3"></div>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Optional, once the <code>if</code> works: a <b>guardrail</b> is a check the SDK runs for you around an agent, and an output guardrail checks the agent's answer. It returns <code>tripwire_triggered=True</code> when something is wrong, like a trip wire across a doorway, and the SDK then stops the run with <code>OutputGuardrailTripwireTriggered</code>, an error you catch. Keep the whole <code>EmailCheck</code> in <code>output_info</code> so you can see why it tripped. The rule from the guardrails lesson still holds: an output guardrail only runs on the agent that gives the <i>final</i> answer. A writer used as a tool inside the manager never triggers its own.</p>
 <p class="zh"style="margin:0 0 8px">可选内容，等 <code>if</code> 跑通后再看：<b>护栏</b>是 SDK 在智能体周围替你运行的检查，输出护栏检查的是智能体的回答。发现问题时它返回 <code>tripwire_triggered=True</code>，就像门口拉了一根绊线；SDK 随即用 <code>OutputGuardrailTripwireTriggered</code> 叫停运行，这是一个由你捕获的错误。把完整的 <code>EmailCheck</code> 放进 <code>output_info</code>，就能看到为什么被拦下。护栏那一课的规则依然成立：输出护栏只在给出<i>最终</i>答案的智能体上运行；被当作工具放在主管里的写手，不会触发它自己的护栏。</p></div>
