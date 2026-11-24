@@ -43,7 +43,7 @@ const SKIP = '.top, .side, .prog, [data-uicheck-skip]';
 function defaultPages() {
   const dirs = readdirSync(ROOT).filter(d => existsSync(join(ROOT, d, 'lessons.js')));
   const lessons = dirs.flatMap(d => readdirSync(join(ROOT, d)).filter(f => /^\d+.*\.html$/.test(f)).sort().map(f => d + '/' + f));
-  return ['index.html', 'ecosystem.html', 'glossary.html', ...dirs.map(d => d + '/index.html'), ...lessons].filter(p => existsSync(join(ROOT, p)));
+  return ['index.html', 'ecosystem.html', 'glossary.html', 'changelog.html', ...dirs.map(d => d + '/index.html'), ...lessons].filter(p => existsSync(join(ROOT, p)));
 }
 
 // A tiny static server for the repo folder, so the check works without reaching Vercel.
