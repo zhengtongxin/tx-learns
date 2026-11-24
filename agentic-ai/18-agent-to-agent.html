@@ -62,6 +62,9 @@ session = await runner.session_service.create_session(app_name=runner.app_name, 
         print("tool:", call.name, call.args)
     if ev.is_final_response():
         print(ev.content.parts[0].text)</span></div>
+<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
+<div class="codebox" data-file="output" data-lang="text">tool: save_order {'item': 'kopi-o', 'qty': 2}
+Saved 2 x kopi-o. Anything else?</div>
 <div class="try" id="p3"></div>
 <div class="callout tip"><b class="lbl"><span class="en">Debug view</span><span class="zh">调试界面</span></b><span class="en">If you put the agent in a folder (<code>agent.py</code> that exposes <code>root_agent</code>, made with <code>adk create my_agent</code>), then <code>adk web</code> shows a visual trace where every tool call lights up. It only lists agents in the folder you start it from.</span><span class="zh">如果把智能体放进一个文件夹（<code>agent.py</code> 里暴露 <code>root_agent</code>，可用 <code>adk create my_agent</code> 生成），运行 <code>adk web</code> 就能看到可视化的过程，每次工具调用都会亮起来。它只会列出你启动时所在文件夹里的智能体。</span></div>
 <h2><span class="en">Step 4 · Put Uncle Hock behind a signboard</span><span class="zh">第 4 步 · 把 Hock 叔放到招牌后面</span></h2>
@@ -81,6 +84,9 @@ hock = LlmAgent(
 # in a terminal (curl just fetches the card and prints it):
 </span><span class="chg">uvicorn satay_server:a2a_app --host localhost --port 8001
 curl http://localhost:8001/.well-known/agent-card.json</span></div>
+<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
+<div class="codebox" data-file="output" data-lang="text">{"name":"satay_hock","description":"...","url":"http://localhost:8001/...",
+ "skills":[...],"version":"..."}</div>
 <div class="try" id="p4"></div>
 <h2><span class="en">Step 5 · Mei walks over</span><span class="zh">第 5 步 · Mei 走过去</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">On Mei's side, Uncle Hock becomes a <code>RemoteA2aAgent</code> and goes into her <code>sub_agents</code> like any local helper. Her instruction says what to do herself and what to hand over. Notice that nothing finds him for you: you point at his card address.</p><p class="zh" style="margin:0 0 8px">在 Mei 这边，Hock 叔变成一个 <code>RemoteA2aAgent</code>，和本地帮手一样放进她的 <code>sub_agents</code>。她的指令写明哪些自己做、哪些交出去。注意没有任何东西会替你去找他：你要把名片地址告诉她。</p></div>
@@ -106,9 +112,15 @@ root_agent = LlmAgent(
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Read a signboard.</b> Start the satay server and open its agent card in a browser. Find the name, the description and the address.</span><span class="zh"><b>读一次招牌。</b>启动沙爹服务，在浏览器里打开它的名片，找到名字、描述和地址。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Break the port on purpose.</b> Run uvicorn on 8002 while the card says 8001, and watch what the failure looks like. Then you will recognise it.</span><span class="zh"><b>故意弄错端口。</b>让 uvicorn 跑在 8002 而名片写 8001，看看失败是什么样子，以后就认得出来。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a third stall.</b> A dessert agent on port 8003, and teach Mei to hand over dessert orders.</span><span class="zh"><b>再加一个摊位。</b>在 8003 端口做一个甜品智能体，让 Mei 学会把甜品单交给它。</span></span></label></div>
 <div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the Kopi Corner assistant can ask the satay stall's agent next door for a plate, as Ah Seng walks over to ask, by reading its agent card first. The next problem is which framework to stay on.</span><span class="zh">现在 Kopi Corner 助手能向隔壁沙爹档的智能体要一盘沙爹，就像 Ah Seng 走过去问，先看对方的智能体名片。下一个问题是：到底留在哪个框架上。</span></div>
+<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
+<div class="card"><p class="en" style="margin:0">• <b><code>google.genai.errors.ClientError: 403 PERMISSION_DENIED / API key not valid</code></b>: <code>GOOGLE_API_KEY</code> is missing or wrong. Fix: put it in <code>.env</code> and call <code>load_dotenv(override=True)</code>.<br>• <b><code>httpx.ConnectError: All connection attempts failed</code></b>: The satay server is not running yet. Fix: start <code>satay_server.py</code> in its own terminal first, and check the port.<br>• <b><code>curl: (7) Failed to connect to localhost port 8001</code></b>: Same cause, wrong port or server stopped. Fix: use the port you gave <code>uvicorn</code> or the server file.</p>
+<p class="zh" style="margin:0">• <b><code>google.genai.errors.ClientError: 403 PERMISSION_DENIED / API key not valid</code></b>：<code>GOOGLE_API_KEY</code> 缺失或不对。解决：写进 <code>.env</code>，并调用 <code>load_dotenv(override=True)</code>。<br>• <b><code>httpx.ConnectError: All connection attempts failed</code></b>：沙爹摊的服务还没启动。解决：先在另一个终端启动 <code>satay_server.py</code>，并确认端口。<br>• <b><code>curl: (7) Failed to connect to localhost port 8001</code></b>：原因相同，或端口不对、服务已停。解决：用你启动服务时指定的端口。</p></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• An ADK <b>LlmAgent</b> is a model plus an instruction. <code>run_debug</code> is only for experiments.<br>• A tool is a typed function with a docstring. ADK reads both. No decorator.<br>• Scope MCP file tools to one folder.<br>• <code>run_async</code> gives you events: tool calls, results, the final reply. <code>InMemoryRunner</code> forgets when the process stops.<br>• A2A lets an agent in <b>another process</b> (or another company) act like a local sub-agent.<br>• The <b>agent card</b> is the signboard: name, skills, address, at a well-known URL.<br>• No auto-discovery: you give the full card URL, and the advertised port must match the real one.</p><p class="zh" style="margin:0">• ADK 的 <b>LlmAgent</b> 就是模型加 instruction。<code>run_debug</code> 只适合做实验。<br>• 工具就是带类型标注和文档字符串的函数，ADK 两样都会读，不需要装饰器。<br>• 把 MCP 文件工具限定在一个文件夹里。<br>• <code>run_async</code> 给你事件：工具调用、结果、最终回复。<code>InMemoryRunner</code> 在进程结束后就忘了一切。<br>• A2A 让<b>另一个进程</b>（甚至另一家公司）里的智能体，像本地子智能体一样工作。<br>• <b>智能体名片</b>就是招牌：名字、技能、地址，放在固定的 URL。<br>• 没有自动发现：你要给出完整的名片 URL，而且声明的端口必须和实际端口一致。</p></div>
 
+<h3><span class="en">Recap</span><span class="zh">三句回顾</span></h3>
+<div class="card"><p class="en" style="margin:0">• An agent card is a public description of what a remote agent can do.<br>• A remote agent is used like a local one, but the call crosses the network.<br>• Check the card first, then wire it in as a sub-agent.</p>
+<p class="zh" style="margin:0">• 智能体名片是对远程智能体能力的公开说明。<br>• 远程智能体用起来和本地的一样，只是调用要经过网络。<br>• 先看名片，再把它接成子智能体。</p></div>
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Agentic</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>

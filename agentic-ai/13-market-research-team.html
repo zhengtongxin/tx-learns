@@ -119,6 +119,14 @@ def crew(self) -> Crew:
     )
 
 PasarPicker().crew().kickoff(inputs={"state": "Selangor", "today": str(date.today())})</span></div>
+<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
+<div class="codebox" data-file="output" data-lang="text">$ crewai run
+...
+Task find_markets completed: 6 night markets found
+Task study_markets completed
+
+$ ls output
+markets.json  studies.json  report.md</div>
 <div class="try" id="p4"></div>
 <p class="en">Which team member does each job? Sort them.</p><p class="zh">每项工作该由哪位队员来做？请分类。</p>
 <div class="sc" id="g1"></div>
@@ -151,6 +159,9 @@ return Crew(
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Pick your own question.</b> Best café to open in your town, a supplier to try, an event to attend. Rename the scout, researcher and picker to fit.</span><span class="zh"><b>换成你自己的问题。</b>在你的城镇开哪家咖啡馆最好、试哪个供应商、去哪个活动。把侦察员、研究员、挑选员改成合适的名字。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Run it twice</b> with memory on, and check that the second shortlist is different.</span><span class="zh"><b>开着记忆跑两次</b>，确认第二次的名单不一样。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Try sequential</b> with <code>context</code> instead of a manager and compare cost and reliability.</span><span class="zh"><b>试试用带 <code>context</code> 的顺序式</b>代替主管，比较成本和可靠性。</span></span></label></div>
 <div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the assistant can research a market question as a team: a scout, a researcher and a picker, with a manager above, send Uncle Lim one pick for the second Kopi Corner straight to his phone. The next problem is that the shop's own software needs maintaining, and no one on the team writes code.</span><span class="zh">现在助手能以团队研究一个市场问题：侦察员、研究员和挑选员，上面有主管，把第二间 Kopi Corner 的唯一推荐直接推送到 Lim 叔叔的手机。下一个问题是：店里自己的软件需要维护，而团队里没有人会写代码。</span></div>
+<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
+<div class="card"><p class="en" style="margin:0">• <b><code>pydantic.ValidationError: 1 validation error for MarketList</code></b>: The task's answer did not match <code>output_pydantic</code>. Fix: make <code>expected_output</code> in the YAML describe the same list shape.<br>• <b><code>KeyError: 'today'</code></b>: The YAML mentions <code>{today}</code> but you did not pass it. Fix: add <code>"today": str(date.today())</code> to <code>inputs</code>.<br>• <b><code>Search tool returns nothing / 403 from the search service</code></b>: <code>SERPER_API_KEY</code> is missing in <code>.env</code>. Fix: add it and restart <code>crewai run</code>.</p>
+<p class="zh" style="margin:0">• <b><code>pydantic.ValidationError: 1 validation error for MarketList</code></b>：任务的回答和 <code>output_pydantic</code> 不匹配。解决：让 YAML 里的 <code>expected_output</code> 描述同样的列表结构。<br>• <b><code>KeyError: 'today'</code></b>：YAML 里用了 <code>{today}</code>，但你没传。解决：在 <code>inputs</code> 里加上 <code>"today": str(date.today())</code>。<br>• <b><code>Search tool returns nothing / 403 from the search service</code></b>：<code>.env</code> 里没有 <code>SERPER_API_KEY</code>。解决：补上它，再重新运行 <code>crewai run</code>。</p></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• A tool like <code>SerperDevTool</code> lets an agent reach the live web. Each call costs quota.<br>• Pass a Pydantic form with <code>output_pydantic</code> so the next agent reads a typed list, not loose text.<br>• <code>context</code> names which earlier results a task reads.<br>• In a custom tool, the docstring is the description the model reads.<br>• A manager is passed as <code>manager_agent=</code>, with <code>allow_delegation=True</code>, and is not in <code>agents</code>.<br>• Hierarchical is flexible but chatty. Clear expected outputs keep it in line.<br>• <code>memory=True</code> plus a prompt like “not suggested before” gives a fresh shortlist each run.<br>• Put today's date in the task so “trending now” means something.</p><p class="zh" style="margin:0">• <code>SerperDevTool</code> 这样的工具让智能体能访问实时网络，每次调用都消耗配额。<br>• 用 <code>output_pydantic</code> 传一张 Pydantic 表格，下一个智能体读到的就是有类型的列表，而不是零散文字。<br>• <code>context</code> 指明任务要读哪些前面的结果。<br>• 自定义工具里，文档字符串就是模型读到的说明。<br>• 主管用 <code>manager_agent=</code> 传入，带 <code>allow_delegation=True</code>，不在 <code>agents</code> 里。<br>• 层级式灵活但啰嗦，写清预期输出能让它守规矩。<br>• <code>memory=True</code> 加上“以前没推荐过”这样的提示，每次运行都有新名单。<br>• 在任务里写上今天的日期，“最近热门”才有意义。</p></div>
 

@@ -37,6 +37,9 @@ def footfall(hour: int) -> str:
 )</span><span class="dim">
 out = helper.invoke({"messages": [{"role": "user", "content": "Is 7:30am busy, and what does nasi lemak go for?"}]})
 print(out["messages"][-1].content)</span></div>
+<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
+<div class="codebox" data-file="output" data-lang="text">Yes, 7:30am is busy: about 120 parents pass the shop then.
+Nasi lemak goes for around RM3.50 nearby.</div>
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 2 · Memory and structured output</span><span class="zh">第 2 步 · 记忆与结构化输出</span></h2>
@@ -68,6 +71,8 @@ def spy(request, handler):
     return handler(request)</span><span class="dim">
 
 watched = create_agent(model="openai:gpt-5.4-mini", tools=[stall_price], middleware=[spy])</span></div>
+<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
+<div class="codebox" data-file="output" data-lang="text">tool -&gt; stall_price {'item': 'nasi lemak'}</div>
 <div class="sc" id="g3"></div>
 
 <h2><span class="en">Step 4 · Tools someone else wrote: MCP and a real browser</span><span class="zh">第 4 步 · 别人写好的工具：MCP 与真正的浏览器</span></h2>
@@ -123,9 +128,15 @@ lead.invoke({"messages": [{"role": "user", "content":
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Spy on your agent.</b> Add the <code>spy</code> middleware and watch which tools your agent calls, and with what arguments.</span><span class="zh"><b>监视你的智能体。</b>加上 <code>spy</code> 中间件，看它调用了哪些工具、参数是什么。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Ask a small question, then a big one.</b> Try <code>create_agent</code> first. Only move to a deep agent when it clearly runs out of room.</span><span class="zh"><b>先问小问题，再问大问题。</b>先试 <code>create_agent</code>，只有明显不够用时再换成深度智能体。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Find the file.</b> Run the deep agent and open your <code>workspace</code> folder to find where <code>/breakfast.md</code> really is.</span><span class="zh"><b>找到那个文件。</b>运行深度智能体，打开 <code>workspace</code> 文件夹，找出 <code>/breakfast.md</code> 实际在哪里。</span></span></label></div>
 <div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the Kopi Corner assistant keeps memory per thread, calls tools and searches the web inside the graph, so Auntie Suria's “kopi-C kurang manis” survives to the next morning. The next problem is that it needs one helper that truly remembers a person.</span><span class="zh">现在 Kopi Corner 助手在图里按线程保存记忆、调用工具并联网搜索，Suria 阿姨记下的“少甜咖啡 C”第二天还在。下一个问题是：它需要一个真正记得住某个人的助手。</span></div>
+<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
+<div class="card"><p class="en" style="margin:0">• <b><code>openai.AuthenticationError: Error code: 401</code></b>: <code>OPENAI_API_KEY</code> is not set in this process. Fix: load <code>.env</code> before you create the agent.<br>• <b><code>ValueError: Unable to infer model provider for gpt-5.4-mini</code></b>: The model name has no provider prefix. Fix: write <code>"openai:gpt-5.4-mini"</code>.<br>• <b><code>RuntimeError: This event loop is already running / 'coroutine' was never awaited</code></b>: MCP tools are async. Fix: use <code>await agent.ainvoke(...)</code> instead of <code>invoke</code> for them.</p>
+<p class="zh" style="margin:0">• <b><code>openai.AuthenticationError: Error code: 401</code></b>：这个进程里没有 <code>OPENAI_API_KEY</code>。解决：创建智能体之前先加载 <code>.env</code>。<br>• <b><code>ValueError: Unable to infer model provider for gpt-5.4-mini</code></b>：模型名没有服务商前缀。解决：写成 <code>"openai:gpt-5.4-mini"</code>。<br>• <b><code>RuntimeError: This event loop is already running / 'coroutine' was never awaited</code></b>：MCP 工具是异步的。解决：对它们用 <code>await agent.ainvoke(...)</code>，不要用 <code>invoke</code>。</p></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• <code>create_agent</code> is the model-and-tools loop in one line. Underneath it is still a graph.<br>• Memory is a checkpointer plus a <code>thread_id</code>. <code>response_format</code> gives you data back as <code>structured_response</code>.<br>• <b>Middleware</b> runs at fixed points in the loop: spy, summarise, hide personal data, limit, retry.<br>• MCP tools come from someone else's server. They are async, so use <code>await ainvoke</code>.<br>• A <b>deep agent</b> adds a todo list, files and sub-agents. It is for big jobs, not small questions.<br>• Sub-agents start with a fresh context. Skills load their full text only when needed.<br>• Deep agent file paths are virtual: they live inside the folder you chose.</p><p class="zh" style="margin:0">• <code>create_agent</code> 一行就是“模型加工具”的循环，底下仍然是一张图。<br>• 记忆就是检查点加 <code>thread_id</code>。<code>response_format</code> 让你以 <code>structured_response</code> 拿回数据。<br>• <b>中间件</b>在循环的固定位置运行：监视、总结、隐藏个人信息、限制、重试。<br>• MCP 工具来自别人的服务，是异步的，所以要用 <code>await ainvoke</code>。<br>• <b>深度智能体</b>多了待办清单、文件和子智能体，适合大任务，不适合小问题。<br>• 子智能体从全新上下文开始。技能只有在需要时才载入完整内容。<br>• 深度智能体的文件路径是虚拟的：实际都在你选定的文件夹里。</p></div>
 
+<h3><span class="en">Recap</span><span class="zh">三句回顾</span></h3>
+<div class="card"><p class="en" style="margin:0">• <code>create_agent</code> gives you a tool-calling loop; the tools are plain functions with a docstring.<br>• Middleware watches or changes every model and tool call without touching the tools.<br>• Memory is a checkpointer per thread; MCP servers plug in more tools.</p>
+<p class="zh" style="margin:0">• <code>create_agent</code> 给你一个会调用工具的循环；工具就是带说明文字的普通函数。<br>• 中间件可以观察或修改每一次模型和工具调用，而不用改工具本身。<br>• 记忆是按会话保存的存档器；MCP 服务可以接入更多工具。</p></div>
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Agentic</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>

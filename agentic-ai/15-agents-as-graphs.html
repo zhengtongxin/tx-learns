@@ -33,6 +33,9 @@ class Order(BaseModel):
 
 </span><span class="chg">parser = llm.with_structured_output(Order)</span><span class="dim">
 print(parser.invoke("Boss, bagi tiga roti canai"))   # Order(item='roti canai', qty=3)</span></div>
+<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
+<div class="codebox" data-file="output" data-lang="text">A kopitiam is a traditional coffee shop in Malaysia and Singapore.
+Order(item='roti canai', qty=3)</div>
 <div class="try" id="p0"></div>
 
 <h2><span class="en">Step 1 · State and reducers: the order pad</span><span class="zh">第 1 步 · 状态与 reducer：订单板</span></h2>
@@ -65,6 +68,8 @@ app = g.compile()                    # compile</span><span class="dim">
 
 out = app.invoke({"messages": [{"role": "user", "content": "order"}]})
 print(out["messages"][-1].content)</span></div>
+<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
+<div class="codebox" data-file="output" data-lang="text">One roti canai, coming right up. Anything to drink?</div>
 <div class="sc" id="g2"></div>
 
 <h2><span class="en">Step 3 · A fork and a loop: conditional edges</span><span class="zh">第 3 步 · 分叉与回环：条件边</span></h2>
@@ -117,15 +122,23 @@ old = history[len(history) // 2]
 cfg = {"configurable": {"thread_id": "table-5",
                         "checkpoint_id": old.config["configurable"]["checkpoint_id"]}}
 app.invoke(None, cfg)                              # resume from that earlier moment</span></div>
+<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
+<div class="codebox" data-file="output" data-lang="text">Welcome back, Mei Ling! Kopi kosong, as usual?</div>
 <div class="try" id="p4"></div>
 <div class="try" id="p4b"></div>
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I thought: “the state has <code>messages</code>, so why does it forget?” The reducer only combines updates <i>inside one run</i>. Remembering across runs is the checkpointer's job, keyed by <code>thread_id</code>. Another time <code>malay</code> was never set: I had forgotten the mapping on the conditional edge, so “no tools” went straight to END.</span><span class="zh">我当时的想法是：“状态里明明有 <code>messages</code>，为什么还会忘？”其实 reducer 只在<i>一次运行内部</i>合并更新，跨次运行的记忆是检查点的工作，靠 <code>thread_id</code> 区分。还有一次 <code>malay</code> 一直没被设置：我忘了给条件边写映射，“不用工具”直接去了 END。</span></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Draw your own kitchen.</b> Pick a place with stations (a clinic, a school office) and sketch it as state, nodes and edges before you code anything.</span><span class="zh"><b>画你自己的厨房。</b>选一个有好几个档口的地方（诊所、学校办公室），先画成状态、节点和边，再写代码。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Print the picture.</b> Run <code>app.get_graph().draw_mermaid_png()</code> and check that your arrows match what you meant.</span><span class="zh"><b>把图画出来。</b>运行 <code>app.get_graph().draw_mermaid_png()</code>，检查箭头和你想的一样。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Break the memory on purpose.</b> Use two different <code>thread_id</code> values and watch the second table forget.</span><span class="zh"><b>故意弄断记忆。</b>用两个不同的 <code>thread_id</code>，看第二张桌子怎么忘记。</span></span></label></div>
 <div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the Kopi Corner assistant runs its flow as a graph: Ah Seng's drinks and Kak Ros's noodles hang off one shared order pad, like Auntie Suria's pad at the counter. The next problem is that the graph forgets everything between runs.</span><span class="zh">现在 Kopi Corner 助手把流程跑成了图：Ah Seng 的饮料和 Ros 姐的面都挂在同一块订单板上，就像 Suria 阿姨柜台上的那块。下一个问题是：图在两次运行之间什么都不记得。</span></div>
+<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
+<div class="card"><p class="en" style="margin:0">• <b><code>ModuleNotFoundError: No module named 'langgraph.checkpoint.sqlite'</code></b>: The SQLite saver is a separate package. Fix: <code>pip install langgraph-checkpoint-sqlite</code>.<br>• <b><code>langgraph.errors.GraphRecursionError: Recursion limit of 25 reached</code></b>: The graph keeps looping between nodes. Fix: check the condition that should lead to <code>END</code>, or raise <code>recursion_limit</code> on purpose.<br>• <b><code>ValueError: Checkpointer requires one or more of the following 'configurable' keys: thread_id</code></b>: You compiled with memory but called the graph without a thread. Fix: pass <code>{"configurable": {"thread_id": "..."}}</code>.</p>
+<p class="zh" style="margin:0">• <b><code>ModuleNotFoundError: No module named 'langgraph.checkpoint.sqlite'</code></b>：SQLite 存档器是单独的包。解决：<code>pip install langgraph-checkpoint-sqlite</code>。<br>• <b><code>langgraph.errors.GraphRecursionError: Recursion limit of 25 reached</code></b>：图在节点之间一直打转。解决：检查通向 <code>END</code> 的条件，或有意调大 <code>recursion_limit</code>。<br>• <b><code>ValueError: Checkpointer requires one or more of the following 'configurable' keys: thread_id</code></b>：你编译时加了记忆，调用时却没给会话编号。解决：传入 <code>{"configurable": {"thread_id": "..."}}</code>。</p></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• A graph is just <b>functions on a shared pad</b>, joined by arrows.<br>• <b>State</b> is the pad. A <b>reducer</b> decides how old and new combine: <code>add_messages</code> appends, a plain field is replaced.<br>• A <b>node</b> returns only the keys it changes. An <b>edge</b> says who goes next.<br>• A <b>conditional edge</b> chooses the next node. An edge back to an earlier node makes a <b>loop</b>.<br>• <code>tools_condition</code> answers <code>"tools"</code> or <code>END</code>. Pass a mapping to send “no tools” elsewhere.<br>• The reducer works inside one run. A <b>checkpointer</b> plus <code>thread_id</code> remembers across runs.<br>• <code>MemorySaver</code> vanishes on restart. <code>SqliteSaver</code> keeps a file.</p><p class="zh" style="margin:0">• 图只是<b>读写同一块板子的函数</b>，用箭头连起来。<br>• <b>状态</b>就是订单板。<b>reducer</b> 决定新旧内容怎么合并：<code>add_messages</code> 追加，普通字段被覆盖。<br>• <b>节点</b>只返回它改动的键。<b>边</b>说明下一个轮到谁。<br>• <b>条件边</b>选择下一个节点。指回前面节点的边就形成<b>回环</b>。<br>• <code>tools_condition</code> 回答 <code>"tools"</code> 或 <code>END</code>。想把“不用工具”送去别处，就要传映射。<br>• reducer 只在一次运行内部有效。<b>检查点</b>加 <code>thread_id</code> 才能跨次记住。<br>• <code>MemorySaver</code> 重启就没了，<code>SqliteSaver</code> 会存成文件。</p></div>
 
+<h3><span class="en">Recap</span><span class="zh">三句回顾</span></h3>
+<div class="card"><p class="en" style="margin:0">• A graph is state + nodes + edges: nodes change the state, edges decide what runs next.<br>• Tools and loops are just a node and a conditional edge back to the model.<br>• A checkpointer plus a <code>thread_id</code> gives the graph memory you can resume.</p>
+<p class="zh" style="margin:0">• 图 = 状态 + 节点 + 边：节点修改状态，边决定下一步运行谁。<br>• 工具和循环只是一个节点，加一条条件边回到模型。<br>• 存档器加上 <code>thread_id</code>，就给了图可以恢复的记忆。</p></div>
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Agentic</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>

@@ -31,7 +31,7 @@
 <p class="zh" style="margin:0 0 8px">几乎每家厂商都提供与 OpenAI 说同一种“语言”的<b>接口</b>（endpoint，也就是你的代码发送请求的网址）。所以你可以复用同一个 <code>OpenAI</code> 客户端，只改它指向的地址。换厂商只需要改<b>三个值</b>：<b>密钥</b>（用谁的账户付费）、<b>地址</b> <code>base_url</code>（请求发往哪里）和<b>模型名</b>（由哪个模型回答）。其余全部保持不变。代码里的 <code>os.getenv("OPENAI_API_KEY")</code> 从<b>环境变量</b>（保存在代码之外、带名字的设置）里读取密钥（第 3 课已用 <code>.env</code> 加载），所以密钥本身不会写进脚本。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="One OpenAI client sends the same request to OpenAI, Groq or a local Ollama by swapping three values"><defs><marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box new" x="10" y="70" width="200" height="80" rx="10"/><text class="en" x="110" y="106">Same OpenAI client</text><text class="zh" x="110" y="106">同一个 OpenAI 客户端</text><text class="en sm" x="110" y="130">one code shape</text><text class="zh sm" x="110" y="130">同一种代码形状</text><text class="en sm" x="110" y="184">swap key, base_url, model</text><text class="zh sm" x="110" y="184">只换密钥、地址、模型名</text><path class="lnk" d="M210 110L478 36" marker-end="url(#a4)"/><rect class="box soft" x="480" y="14" width="230" height="44" rx="10"/><text class="en" x="595" y="41">OpenAI (cloud)</text><text class="zh" x="595" y="41">OpenAI（云端）</text><path class="lnk hot" d="M210 110L478 109" marker-end="url(#a4)"/><rect class="box soft" x="480" y="87" width="230" height="44" rx="10"/><text class="en" x="595" y="114">Groq (fast open models)</text><text class="zh" x="595" y="114">Groq（极速开源模型）</text><path class="lnk" d="M210 110L478 182" marker-end="url(#a4)"/><rect class="box soft" x="480" y="160" width="230" height="44" rx="10"/><text class="en" x="595" y="187">Ollama (your machine)</text><text class="zh" x="595" y="187">Ollama（你的电脑）</text></svg><figcaption><span class="en">Switching provider changes where the request goes, not how your code is written.</span><span class="zh">换厂商只改请求发往哪里，不改代码怎么写。</span></figcaption></figure>
 <span class="lab"><span class="en">Python · compare.py (OpenAI)</span><span class="zh">Python · compare.py（OpenAI）</span></span>
-<div class="codebox"><span class="dim">import os
+<div class="codebox" data-file="compare.py" data-lang="python"><span class="dim">import os
 from openai import OpenAI
 
 </span><span class="chg">client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))</span><span class="dim">
@@ -54,7 +54,7 @@ answer = response.choices[0].message.content</span></div>
 <p class="zh">Aina 想把上面的代码从 <b>OpenAI</b> 改成 <b>Groq</b>。对每一行选择<b>保持</b>或<b>修改</b>。</p>
 <div class="sc" id="g2"></div>
 <span class="lab"><span class="en">Python · compare.py (Groq)</span><span class="zh">Python · compare.py（Groq）</span></span>
-<div class="codebox"><span class="dim">import os
+<div class="codebox" data-file="other_provider.py" data-lang="python"><span class="dim">import os
 from openai import OpenAI
 
 client = OpenAI(
@@ -73,9 +73,9 @@ answer = response.choices[0].message.content</span></div>
 <p class="zh" style="margin:0">Ollama 用的是同样的办法，只是服务器就在你的笔记本上：免费、私密、可离线。<b>服务器</b>是一个等着接收请求并作答的程序。<code>localhost</code> 的意思是“这台电脑”，<code>11434</code> 是 Ollama 监听的<b>端口</b>（电脑上带编号的“门”），所以 <code>http://localhost:11434</code> 指向你自己电脑上的 Ollama。安装只是一份简短清单，之后的调用和其他厂商一样。</p></div>
 <div class="cl"><label><input type="checkbox"><span><span class="en">Install Ollama: download it from ollama.com and run the installer.</span><span class="zh">安装 Ollama：从 ollama.com 下载并运行安装程序。</span></span></label><label><input type="checkbox"><span><span class="en">Download a small model with the command below. Other handy commands: <code>ollama ls</code> lists your models, <code>ollama rm &lt;name&gt;</code> deletes one.</span><span class="zh">用下面的命令下载一个小模型。其他常用命令：<code>ollama ls</code> 列出已有模型，<code>ollama rm &lt;名称&gt;</code> 删除模型。</span></span></label><label><input type="checkbox"><span><span class="en">Check it is running: open <code>http://localhost:11434</code>. You should see “Ollama is running”. If not, run <code>ollama serve</code> in a terminal.</span><span class="zh">确认它在运行：打开 <code>http://localhost:11434</code>，应当看到 “Ollama is running”。如果没有，在终端运行 <code>ollama serve</code>。</span></span></label><label><input type="checkbox"><span><span class="en">Call it like any other provider, with the code below.</span><span class="zh">像调用其他厂商一样调用它，用下面的代码。</span></span></label></div>
 <span class="lab"><span class="en">Shell · terminal</span><span class="zh">Shell · 终端</span></span>
-<div class="codebox">ollama pull llama3.2</div>
+<div class="codebox" data-file="terminal" data-lang="bash">ollama pull llama3.2</div>
 <span class="lab"><span class="en">Python · compare.py (Ollama)</span><span class="zh">Python · compare.py（Ollama）</span></span>
-<div class="codebox"><span class="dim"># same compare.py: it reuses the OpenAI import and the messages list from above
+<div class="codebox" data-file="compare.py" data-lang="python"><span class="dim"># same compare.py: it reuses the OpenAI import and the messages list from above
 </span><span class="chg">ollama = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")</span>
 <span class="dim">ollama.chat.completions.create(model="llama3.2", messages=messages)</span></div>
 <div class="callout warn"><b class="lbl"><span class="en">Mind the size</span><span class="zh">注意大小</span></b><span class="en">Many Ollama models are far too big for a home computer. Start with ones around 3 GB (gigabytes of disk space) or less, such as llama3.2. Avoid names ending in <code>:cloud</code>, which are a hosted service, not local.</span><span class="zh">很多 Ollama 模型对家用电脑来说太大。先从 3 GB（千兆字节的磁盘空间）左右或更小的开始，例如 llama3.2。避开以 <code>:cloud</code> 结尾的名称，那是托管服务，不是本地运行。</span></div>
@@ -97,7 +97,7 @@ answer = response.choices[0].message.content</span></div>
 <p class="en">A judge using that rubric would reply <code>{"results": ["2", "3", "1"]}</code>. The judge only does that because the prompt tells it to. Here is the prompt, with the answers already glued in as “Response from competitor N”:</p>
 <p class="zh">按这个标准，裁判会返回 <code>{"results": ["2", "3", "1"]}</code>。裁判之所以这样回复，是因为提示词要求它这样做。下面是提示词，各回答已经拼成“Response from competitor N”放在里面：</p>
 <span class="lab"><span class="en">Python · compare.py (the judge prompt)</span><span class="zh">Python · compare.py（裁判提示词）</span></span>
-<div class="codebox"><span class="dim"># together = the numbered answers glued into one string (see Step 4)
+<div class="codebox" data-file="judge.py" data-lang="python"><span class="dim"># together = the numbered answers glued into one string (see Step 4)
 # competitors = the list of model names
 judge = f"""You are judging a competition between {len(competitors)} competitors.
 Rank them by clarity and strength of argument for this question:
@@ -110,7 +110,7 @@ Reply only with JSON, best first, like {{"results": ["2", "3", "1"]}}.
 <p class="en">Now read a verdict in code.</p>
 <p class="zh">现在来读代码里的裁判结论。</p>
 <span class="lab"><span class="en">Python · compare.py (reading the verdict)</span><span class="zh">Python · compare.py（读取结论）</span></span>
-<div class="codebox"><span class="dim">import json
+<div class="codebox" data-file="judge_loop.py" data-lang="python"><span class="dim">import json
 competitors = ["model-A", "model-B", "model-C"]
 reply = '{"results": ["2", "3", "1"]}'     # the judge's reply: text in JSON form, best first
 </span><span class="chg">results = json.loads(reply)["results"]       # JSON text -> a Python list: ["2", "3", "1"]

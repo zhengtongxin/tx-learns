@@ -100,6 +100,11 @@ res = await worker.ainvoke({"messages": [{"role": "user", "content": errand}]}, 
     res = await worker.ainvoke(Command(resume={"decisions": [{"type": "approve"}] * len(asks)}), cfg)
     # or: {"type": "reject", "message": "Don't ping me after 10pm"}
     # or: {"type": "edit", ...} to change the arguments first</span></div>
+<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
+<div class="codebox" data-file="output" data-lang="text">Kaki wants to: Tool execution requires approval
+
+Tool: write_file
+Args: {'path': 'kopi.md', 'content': '...'}</div>
 <div class="try" id="p3"></div>
 
 <h2><span class="en">Step 4 · The checker: does “done” mean done?</span><span class="zh">第 4 步 · 检查员：“做完了”真的做完了吗？</span></h2>
@@ -138,9 +143,15 @@ async def run_errand(errand: str, done_means: str, cfg: dict, tries: int = 3):
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Write your own errand.</b> Pick something small you do each week and write its “done means” line first. Run it through <code>run_errand</code>.</span><span class="zh"><b>写你自己的差事。</b>选一件你每周都做的小事，先写好它的“完成标准”，再交给 <code>run_errand</code>。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Reject once.</b> Reject the ping with a message like “not before 8am” and watch Kaki change its plan.</span><span class="zh"><b>拒绝一次。</b>用“8 点前不要推送”之类的留言拒绝那次推送，看 Kaki 怎么改计划。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Give it a face.</b> Put a small Gradio screen on top: an errand box, a “done means” box, the todo list and an Approve button.</span><span class="zh"><b>给它一个界面。</b>在上面加一个简单的 Gradio 界面：差事输入框、“完成标准”输入框、待办清单和一个批准按钮。</span></span></label></div>
 <div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the Kopi Corner assistant remembers each regular across visits, like Auntie Suria greeting a customer with “the usual”, and asks Uncle Lim before it does anything outside the shop. The next problem is that it cannot talk to the supplier's own agent.</span><span class="zh">现在 Kopi Corner 助手能跨次记住每位熟客，就像 Suria 阿姨一句“老样子”招呼客人，而且在做任何店外的事之前先问林叔。下一个问题是：它没法和供应商自己的智能体对话。</span></div>
+<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
+<div class="card"><p class="en" style="margin:0">• <b><code>ValueError: ... thread_id ... checkpointer</code></b>: Pausing for approval needs a checkpointer and the same <code>thread_id</code> on resume. Fix: reuse the same <code>cfg</code> in both calls.<br>• <b><code>KeyError: '__interrupt__'</code></b>: You read the pause before checking it exists. Fix: test <code>if "__interrupt__" in res</code> first, as the lesson does.<br>• <b><code>The phone never buzzes after approval</code></b>: <code>PUSHOVER_USER</code> or <code>PUSHOVER_TOKEN</code> is missing. Fix: add both to <code>.env</code>.</p>
+<p class="zh" style="margin:0">• <b><code>ValueError: ... thread_id ... checkpointer</code></b>：暂停等待批准需要存档器，恢复时也要用同一个 <code>thread_id</code>。解决：两次调用用同一个 <code>cfg</code>。<br>• <b><code>KeyError: '__interrupt__'</code></b>：你没检查就去读暂停信息。解决：像课里那样，先判断 <code>if "__interrupt__" in res</code>。<br>• <b><code>The phone never buzzes after approval</code></b>：没有 <code>PUSHOVER_USER</code> 或 <code>PUSHOVER_TOKEN</code>。解决：把两个都加进 <code>.env</code>。</p></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• Give a helper an errand <b>and</b> a “done means” line. It makes finishing checkable.<br>• Build the toolbox first. Keep MCP sessions open when a browser must remember its state.<br>• The worker is one <code>create_agent</code> with middleware: plan, hide personal data, limit calls, pause before risky tools.<br>• <b>Human-in-the-loop</b> pauses before a listed tool. Resume with one decision per paused call: approve, reject or edit.<br>• The checker is a structured-output model. Show it the tools actually called, so “I sent it” needs proof.<br>• Always cap the loop: <code>tries</code> and a model-call limit.<br>• A stdio MCP session must be opened and closed in the same asyncio task.</p><p class="zh" style="margin:0">• 给助手一件差事，<b>再加</b>一句“完成标准”，完成与否才能被检查。<br>• 先备好工具箱。浏览器需要记住状态时，让 MCP 会话一直开着。<br>• 跑腿的就是一个带中间件的 <code>create_agent</code>：计划、隐藏个人信息、限制调用、危险工具前暂停。<br>• <b>人在回路中</b>会在列出的工具前暂停。恢复时每个暂停的调用一个决定：批准、拒绝或修改。<br>• 检查员是一个结构化输出的模型。把实际调用过的工具给它看，“我发了”才需要证据。<br>• 循环一定要设上限：<code>tries</code> 和模型调用次数限制。<br>• stdio 的 MCP 会话必须在同一个 asyncio 任务里打开和关闭。</p></div>
 
+<h3><span class="en">Recap</span><span class="zh">三句回顾</span></h3>
+<div class="card"><p class="en" style="margin:0">• A worker agent is a model, a toolbox and middleware that sets the limits.<br>• Human-in-the-loop pauses before risky tools and resumes with approve, reject or edit.<br>• A checker agent reads the result before you trust it.</p>
+<p class="zh" style="margin:0">• 跑腿的智能体 = 模型 + 工具箱 + 设定边界的中间件。<br>• 人在回路会在危险工具之前暂停，再以批准、拒绝或修改继续。<br>• 结果交给你之前，先让检查员智能体读一遍。</p></div>
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Agentic</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
