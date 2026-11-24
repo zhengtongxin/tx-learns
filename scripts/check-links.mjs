@@ -4,7 +4,7 @@
 //              on the target page matches; a file a project card lists in pkg.files that does not exist
 //   warns on   external links that do not answer within a short time (one retry): the other site may be down, so never a failure
 // Usage: node scripts/check-links.mjs [--out DIR] [--no-external] [--timeout MS]
-// Exit code: 0 nothing failed (warnings are fine), 1 something failed.
+// Exit code: 0 nothing failed (warnings are fine), 1 something failed. An unexpected crash exits 1 as well (node's default).
 import { readFileSync, existsSync, statSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve, dirname, posix } from 'node:path';
 import { ROOT, arg, allPages, loadWindow, tracks } from './lib-quality.mjs';
