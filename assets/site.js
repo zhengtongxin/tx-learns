@@ -41,7 +41,7 @@
     var mn=document.querySelector('main');
     if(mn){if(!mn.id)mn.id='main';mn.setAttribute('tabindex','-1');var sk=document.createElement('a');sk.className='skip';sk.href='#'+mn.id;sk.innerHTML=t({en:'Skip to content',zh:'跳到正文'});sk.onclick=function(){setTimeout(function(){mn.focus()},0)};document.body.prepend(sk)}
     var top=document.createElement('div');top.className='top';
-    top.innerHTML='<a class="brand" href="'+(C?'../index.html':'index.html')+'"><b></b>TX Learns</a>'+(C?'<button class="icon-btn menu-btn" aria-expanded="false" aria-controls="topics-nav">☰ <span class="en">Topics</span><span class="zh">主题</span></button>':'')+'<span class="sp"></span>'+'<a class="icon-btn eco-btn" href="'+(C?'../':'')+'ecosystem.html" title="How it works · 运作方式" aria-label="How it works · 运作方式">🌐<span class="lbl"> <span class="en">How it works</span><span class="zh">运作方式</span></span></a>'+
+    top.innerHTML='<a class="brand" href="'+(C?'../index.html':'index.html')+'"><b></b>TX Learns</a>'+(C?'<button class="icon-btn menu-btn" aria-expanded="false" aria-controls="topics-nav">☰ <span class="en">Topics</span><span class="zh">主题</span></button>':'')+'<span class="sp"></span>'+'<a class="icon-btn eco-btn" href="'+(C?'../':'')+'ecosystem.html" title="How it works · 运作方式" aria-label="How it works · 运作方式">🌐<span class="lbl"> <span class="en">How it works</span><span class="zh">运作方式</span></span></a>'+'<a class="icon-btn eco-btn" href="'+(C?'../':'')+'glossary.html" title="Glossary · 词汇表" aria-label="Glossary · 词汇表">📖<span class="lbl"> <span class="en">Glossary</span><span class="zh">词汇表</span></span></a>'+
       '<div class="seg" role="group" aria-label="Language · 语言"><button data-l="en" lang="en">EN</button><button data-l="zh" lang="zh-Hans">中文</button></div><button class="icon-btn th" aria-label="theme"></button>';
     document.body.insertBefore(top,bar.nextSibling);
     function mark(){top.querySelectorAll('[data-l]').forEach(function(b){var on=b.dataset.l===root.getAttribute('data-lang');b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});var dk=root.getAttribute('data-theme')==='dark',th=top.querySelector('.th');th.textContent=dk?'☀︎':'☾';th.setAttribute('aria-label',dk?'Switch to light theme · 切换到浅色':'Switch to dark theme · 切换到深色')}
@@ -128,6 +128,11 @@
     function li(a){return (a||[]).map(function(x){return '<li>'+t(x)+'</li>'}).join('')}
     function renderMeta(){
       var P=(window.PREREQ||{})[here],J=(window.PROJECTS||{})[here],hm2=document.querySelector('main .meta'),anchor=hm2&&(hm2.closest('.hero')||hm2),box;
+      /* learning goals: optional P.goals={en:[],zh:[]}; skipped when the lesson body already has its own objectives block */
+      if(P&&P.goals&&P.goals.en&&P.goals.en.length&&hm2&&!document.querySelector('main .objectives,main .goals')&&!Array.prototype.some.call(document.querySelectorAll('main h2,main h3,main .lbl'),function(h){return /learning objectives|学习目标/i.test(h.textContent)})){
+        var gb=document.createElement('aside');gb.className='card goals';gb.setAttribute('aria-label','You will be able to · 学完你能');
+        gb.innerHTML='<b class="lbl">'+t({en:'You will be able to',zh:'学完你能'})+'</b><ul>'+P.goals.en.map(function(e,i){return '<li>'+t({en:e,zh:P.goals.zh[i]||e})+'</li>'}).join('')+'</ul>';
+        anchor.after(gb);anchor=gb}
       if(P&&hm2){box=document.createElement('aside');box.className='card prereq';box.setAttribute('aria-label','Before you start · 开始之前');
         var rows=[];
         if(P.prev&&P.prev.length)rows.push(['Recommended first','建议先学','<ul>'+P.prev.map(function(f){var a=lessonLink(f);return a?'<li>'+a+(d[C.id+'/'+f]?' ✓':'')+'</li>':''}).join('')+'</ul>']);

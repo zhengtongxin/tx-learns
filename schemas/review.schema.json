@@ -1,0 +1,22 @@
+{
+  "$comment": "What the backend engineer agent writes to review.json next to its comment (scripts/validate.mjs checks it). The verdict and the findings are data, so the required check and the memory never depend on parsing prose.",
+  "type": "object",
+  "required": ["verdict", "findings"],
+  "properties": {
+    "verdict": { "type": "string", "enum": ["ok", "fix"] },
+    "findings": {
+      "type": "array",
+      "maxItems": 30,
+      "items": {
+        "type": "object",
+        "required": ["category", "severity", "text"],
+        "properties": {
+          "category": { "type": "string", "enum": ["copyright", "code", "translation", "facts", "story", "structure", "style", "other"] },
+          "severity": { "type": "string", "enum": ["blocker", "nit"] },
+          "file": { "type": "string", "maxLength": 200 },
+          "text": { "type": "string", "maxLength": 400 }
+        }
+      }
+    }
+  }
+}
