@@ -142,7 +142,8 @@ jobs:
           At most 6 issues, most visible first. Answer {"issues":[]} if you see none.
           PROMPT
           # Claude can only read. Its answer is captured from the output instead of giving it a write tool.
-          claude --model haiku --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/ui-prompt.md)" --max-turns 30 --add-dir /tmp/out --allowedTools "Read" --output-format text > /tmp/out/visual.txt || true
+          curl -fsS -o /tmp/claude-run.mjs "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/scripts/claude-run.mjs" && CC="node /tmp/claude-run.mjs ui-check" || CC=claude
+          $CC --model haiku --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/ui-prompt.md)" --max-turns 30 --add-dir /tmp/out --allowedTools "Read" --output-format text > /tmp/out/visual.txt || true
           tail -20 /tmp/out/visual.txt
           node -e 'const fs=require("fs"),t=fs.readFileSync("/tmp/out/visual.txt","utf8"),v=JSON.parse(t.slice(t.indexOf("{"),t.lastIndexOf("}")+1));if(!Array.isArray(v.issues))throw new Error("no issues list");fs.writeFileSync("/tmp/out/visual.json",JSON.stringify({issues:v.issues.slice(0,6)}))' \
             && echo "Visual notes saved." || echo "::warning::The visual pass gave no readable result."
@@ -189,6 +190,11 @@ jobs:
         with:
           name: ui-check
           path: /tmp/out
+      - name: Record what the agent used (tokens and estimated cost)
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: "[ -f $T/trace.mjs ] && node $T/trace.mjs push ui-check /tmp/out || true"
       - name: Comment and set the status
         id: share
         run: |
