@@ -12,7 +12,7 @@
 <h2><span class="en">Step 1 · A fresh start</span><span class="zh">第 1 步 · 从头开始</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Begin from nothing, so the pipeline makes everything and the state matches the files exactly. Destroy the environments you built by hand, then delete their workspaces. You cannot delete the workspace you are standing in, so move to <code>default</code> first.</p>
 <p class="zh" style="margin:0">从零开始，这样一切都由流水线创建，状态也和文件完全吻合。先销毁你手工建的那些环境，再删掉它们的工作区。你没法删除自己正站着的工作区，所以先切到 <code>default</code>。</p></div>
-<div class="codebox"><span class="dim">./destroy.sh dev
+<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim">./destroy.sh dev
 ./destroy.sh test
 
 cd infra
@@ -20,11 +20,12 @@ cd infra
 terraform workspace delete dev
 terraform workspace delete test
 terraform workspace list          # only default is left</span></div>
+<div class="codebox" data-file="output">* default</div>
 <div class="try" id="t0"></div>
 <h2><span class="en">Step 2 · The one-time setup</span><span class="zh">第 2 步 · 只做一次的准备</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Some things are made once; others happen on every run. The once-only list is: the state bucket and lock table, the OIDC provider and the pipeline role, the repository secrets and variables, and the GitHub environments with a required reviewer on prod. Everything else belongs to the pipeline.</p>
 <p class="zh" style="margin:0">有些东西只做一次；有些在每次运行时发生。只做一次的清单是：状态存储桶和锁表、OIDC 提供者和流水线角色、仓库的密钥和变量，以及 GitHub 环境（prod 上设必需的审批人）。其余的都归流水线。</p></div>
-<div class="codebox"><span class="dim">once, by hand (from the last two lessons):
+<div class="codebox" data-file="checklist"><span class="dim">once, by hand (from the last two lessons):
   1. state bucket + lock table          (shared state and stale locks)
   2. OIDC provider + role "wharf-pipeline"
   3. gh secret set AWS_ACCOUNT_ID / STATE_BUCKET ; gh variable set AWS_REGION
@@ -37,26 +38,29 @@ on every run, by the robot:
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Commit and push to <code>main</code>: dev deploys by itself. Then start the manual workflow for test, and for prod. The prod run pauses at the approval. Before you approve, open the plan job's log. A fresh environment should show only things to add. If the plan says something is going to be destroyed and you did not expect that, stop.</p>
 <p class="zh" style="margin:0">提交并推送到 <code>main</code>：dev 会自己部署。然后给 test 启动手动工作流，再给 prod 启动。prod 的运行会停在审批那里。批准之前，先打开 plan 任务的日志。一个全新的环境应该只有要新增的东西。如果 plan 说有东西要被销毁，而你没料到，就停下来。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 150" role="img" aria-label="One push deploys dev automatically, test is started by hand, and prod waits for Mr Ong approval"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box" x="0.0" y="50" width="120.0" height="64" rx="12"/><text class="en" x="60.0" y="78.0">git push</text><text class="zh" x="60.0" y="78.0">推送代码</text><text class="en sm" x="60.0" y="96.0">main branch</text><text class="zh sm" x="60.0" y="96.0">主分支</text><path class="lnk" d="M122.0 82.0 L147.0 82.0" marker-end="url(#ah)"/><rect class="box" x="150.0" y="50" width="120.0" height="64" rx="12"/><text class="en" x="210.0" y="78.0">Deploy dev</text><text class="zh" x="210.0" y="78.0">部署 dev</text><text class="en sm" x="210.0" y="96.0">automatic</text><text class="zh sm" x="210.0" y="96.0">自动</text><path class="lnk" d="M272.0 82.0 L297.0 82.0" marker-end="url(#ah)"/><rect class="box" x="300.0" y="50" width="120.0" height="64" rx="12"/><text class="en" x="360.0" y="78.0">Run test</text><text class="zh" x="360.0" y="78.0">运行 test</text><text class="en sm" x="360.0" y="96.0">manual start</text><text class="zh sm" x="360.0" y="96.0">手动启动</text><path class="lnk hot" d="M422.0 82.0 L447.0 82.0" marker-end="url(#ah)"/><rect class="box new" x="450.0" y="50" width="120.0" height="64" rx="12"/><text class="en" x="510.0" y="78.0">Ong signs</text><text class="zh" x="510.0" y="78.0">Ong 签字</text><text class="en sm" x="510.0" y="96.0">approval gate</text><text class="zh sm" x="510.0" y="96.0">审批关卡</text><path class="lnk" d="M572.0 82.0 L597.0 82.0" marker-end="url(#ah)"/><rect class="box" x="600.0" y="50" width="120.0" height="64" rx="12"/><text class="en" x="660.0" y="78.0">Run prod</text><text class="zh" x="660.0" y="78.0">运行 prod</text><text class="en sm" x="660.0" y="96.0">after approval</text><text class="zh sm" x="660.0" y="96.0">批准之后</text></svg><figcaption><span class="en">One push, three environments: dev is automatic, test is one click, prod waits for a signature.</span><span class="zh">一次推送，三套环境：dev 自动，test 点一下，prod 等签字。</span></figcaption></figure>
-<div class="codebox"><span class="chg">git add . &amp;&amp; git commit -m "twin: first pipeline run" &amp;&amp; git push origin main
+<div class="codebox" data-file="terminal" data-lang="bash"><span class="chg">git add . &amp;&amp; git commit -m "twin: first pipeline run" &amp;&amp; git push origin main
 gh run watch                                   # dev deploys on its own
 
 gh workflow run manual.yml -f environment=test -f action=deploy
 gh workflow run manual.yml -f environment=prod -f action=deploy
 gh run list --workflow manual.yml              # prod shows "waiting": read the plan, then approve</span></div>
+<div class="codebox" data-file="output">✓ Run deploy-dev completed with success
+STATUS  NAME         WORKFLOW  EVENT
+*       twin: first  manual    workflow_dispatch   (prod: waiting)</div>
 <div class="try" id="t2"></div>
 <h2><span class="en">Step 4 · Test each twin, and beat the cache</span><span class="zh">第 4 步 · 测试每一个分身，并对付缓存</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Open each printed address and chat with it twice: does it answer, and does it remember? A green pipeline only means the steps ran. If the site still shows old files, the CDN is serving its cached copies. Tell it to drop them with an <b>invalidation</b> after the upload, and give the pipeline role permission to do that (<code>cloudfront:CreateInvalidation</code>).</p>
 <p class="zh" style="margin:0">打开每个打印出来的地址，各聊两次：它能回答吗？它记得吗？流水线是绿的，只说明步骤跑完了。如果网站仍显示旧文件，是 CDN 在提供它缓存的副本。上传之后用一次<b>失效（invalidation）</b>告诉它丢掉缓存，并给流水线角色这样做的权限（<code>cloudfront:CreateInvalidation</code>）。</p></div>
-<div class="codebox"><span class="dim"># outputs.tf: one more output, next to site_url
+<div class="codebox" data-file="outputs.tf" data-lang="hcl"><span class="dim"># outputs.tf: one more output, next to site_url
 </span><span class="chg">output "cdn_id" { value = aws_cloudfront_distribution.site.id }</span><span class="dim">
-
-# deploy.sh: after the "aws s3 sync" line
+</span></div>
+<div class="codebox" data-file="deploy.sh" data-lang="bash"><span class="dim"># deploy.sh: after the "aws s3 sync" line
 </span><span class="chg">aws cloudfront create-invalidation --distribution-id "$(terraform output -raw cdn_id)" --paths "/*"</span></div>
 <div class="try" id="t3"></div>
 <h2><span class="en">Step 5 · Ship a real change through the pipeline</span><span class="zh">第 5 步 · 让一个真实的改动走一遍流水线</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Auntie Siti reports a bug: after she sends a message, the chat box loses focus, so she cannot type the next one. The cause is that the box is disabled while the twin thinks, and nobody gives the cursor back. Fix it in the front end, then ship it exactly as a real change: push, watch dev, check it, run test, then prod.</p>
 <p class="zh" style="margin:0">Siti 阿姨报告了一个 bug：她发完一条消息后，聊天框失去焦点，没法输入下一条。原因是分身思考时输入框被禁用了，而没人把光标还回去。在前端修好它，然后像真实的改动那样发布：推送、看 dev、检查、运行 test，再运行 prod。</p></div>
-<div class="codebox"><span class="dim">const API_URL = "https://abc123.execute-api.ap-southeast-1.amazonaws.com";   // the api address deploy.sh prints
+<div class="codebox" data-file="chat.js" data-lang="js"><span class="dim">const API_URL = "https://abc123.execute-api.ap-southeast-1.amazonaws.com";   // the api address deploy.sh prints
 const input = document.querySelector("#chat-input");
 const log = document.querySelector("#chat-log");
 
@@ -90,23 +94,31 @@ async function send() {
 <h2><span class="en">Step 6 · Read what the pipeline did</span><span class="zh">第 6 步 · 读一读流水线做了什么</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Automation is only trustworthy if you can look back at it. Three places keep the record. The <b>Actions run page</b> shows every step, the plan, and who approved prod. The <b>cloud console</b> shows what exists now: the function and its settings. The <b>logs service</b> shows what the twin did when real visitors chatted.</p>
 <p class="zh" style="margin:0">自动化只有在你能回头查看时才值得信任。有三个地方保存着记录。<b>Actions 运行页面</b>显示每一步、plan，以及谁批准了 prod。<b>云控制台</b>显示现在存在什么：函数和它的设置。<b>日志服务</b>显示真实访客聊天时分身做了什么。</p></div>
-<div class="codebox"><span class="chg">gh run list --limit 5                                  # the pipeline's own history
+<div class="codebox" data-file="terminal" data-lang="bash"><span class="chg">gh run list --limit 5                                  # the pipeline's own history
 aws logs tail /aws/lambda/wharf-twin-dev-twin --since 1h    # the twin's own log lines</span></div>
+<div class="codebox" data-file="output">completed  success  twin: first pipeline run  deploy-dev  main  push  1m12s
+2026-05-04T10:02:11 START RequestId: 8a7e...</div>
 <div class="sc" id="t5"></div>
 <h2><span class="en">Step 7 · Tear it all down, by pipeline</span><span class="zh">第 7 步 · 用流水线把它们全拆掉</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">The project is only finished when the teardown is automated too. Run the same manual workflow with the action <code>destroy</code> for each environment, prod included (it waits for approval again). Then check, the way you did before: empty state list, nothing in the command line, nothing in the console. Look at the cost page a day later, since charges appear with a delay.</p>
 <p class="zh" style="margin:0">拆除也自动化了，项目才算完成。对每个环境运行同一个手动工作流，动作选 <code>destroy</code>，prod 也不例外（它会再次等待批准）。然后像之前那样检查：状态清单为空、命令行里什么都没有、控制台里什么都没有。过一天再去看费用页面，因为费用是有延迟才出现的。</p></div>
-<div class="codebox"><span class="chg">gh workflow run manual.yml -f environment=dev  -f action=destroy
+<div class="codebox" data-file="terminal" data-lang="bash"><span class="chg">gh workflow run manual.yml -f environment=dev  -f action=destroy
 gh workflow run manual.yml -f environment=test -f action=destroy
 gh workflow run manual.yml -f environment=prod -f action=destroy      # waits for approval</span><span class="dim">
 
 aws s3 ls | grep wharf-twin          # should print nothing
 aws lambda list-functions --query "Functions[?starts_with(FunctionName, 'wharf-twin')].FunctionName"   # []</span></div>
+<div class="codebox" data-file="output">(nothing printed)
+[]</div>
 <div class="try" id="t6"></div>
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en"><b>Three slips.</b> The pipeline passed, but the site still showed old files, because the CDN cache needed clearing. I left prod running over a weekend. And I approved prod without reading the plan in the log first.</span><span class="zh"><b>三个失误。</b>流水线通过了，网站却仍显示旧文件，因为 CDN 缓存需要清除。我把 prod 开着过了一个周末。我还在没读日志里 plan 的情况下就批准了 prod。</span></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Make a deliberate bad change</b> (a typo in a resource type) and watch it fail safely in dev.</span><span class="zh"><b>故意做一个坏改动</b>（把资源类型写错一个字），看它在 dev 里安全地失败。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Roll back by pushing a revert,</b> and watch dev return to how it was.</span><span class="zh"><b>推送一个回退提交来回滚，</b>看 dev 回到原来的样子。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Write a one-page runbook:</b> how to deploy, how to roll back, how to destroy.</span><span class="zh"><b>写一页运行手册：</b>怎么部署、怎么回滚、怎么销毁。</span></span></label></div>
 <div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now one push builds dev, test and prod. Prod waits for Mr Ong's signature, Auntie Siti checks each copy, and the same pipeline takes it all away. The next problem is that this took many pieces to wire, and Kumar asks whether the whole product could be hosted as one button.</span><span class="zh">现在一次推送就能建出 dev、test 和 prod，prod 要等 Ong 先生签字，Auntie Siti 逐个检查，同一条流水线还能把一切拆走。下一个问题是这要接的零件太多，Kumar 问整个产品能不能托管成一个按钮。</span></div>
+<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
+<div class="card"><p class="en" style="margin:0">• <code>Error: Workspace "dev" is not empty</code> You tried to delete a workspace that still holds resources. <b>Fix:</b> Destroy first, then delete the workspace.<br>• <code>A prod run sits at "waiting" forever</code> Nobody approved the environment. <b>Fix:</b> Open the run, read the plan, then press Approve.<br>• <code>The page still shows the old site</code> The CDN kept its saved copy. <b>Fix:</b> Add the <code>create-invalidation</code> line to <code>deploy.sh</code>.</p><p class="zh" style="margin:0">• <code>Error: Workspace "dev" is not empty</code> 你想删除的工作区里还有资源。 <b>解决：</b>先 destroy，再删除工作区。<br>• <code>A prod run sits at "waiting" forever</code> 没有人批准这个环境。 <b>解决：</b>打开这次运行，读完计划，再点批准。<br>• <code>The page still shows the old site</code> CDN 保存了旧副本。 <b>解决：</b>把 <code>create-invalidation</code> 那一行加进 <code>deploy.sh</code>。</p></div>
+<div class="callout tip"><b class="lbl"><span class="en">Recap</span><span class="zh">小结</span></b><span class="en">The same files make dev, test and prod; the pipeline only chooses the name.<br>Dev deploys on push, test on request, prod after a person approves.<br>Tear everything down with the same pipeline, then check nothing is left.</span><span class="zh">同一套文件建出 dev、test、prod，流水线只负责选名字。<br>dev 推送即部署，test 按需，prod 经人批准后才部署。<br>用同一条流水线全部拆除，再检查有没有残留。</span></div>
+<div class="callout tip"><b class="lbl"><span class="en">Plain words</span><span class="zh">白话词汇</span></b><span class="en"><b>Environment</b>: one full copy of the product (dev, test, prod). <b>Approval</b>: a pause where a person must say yes before a job runs.</span><span class="zh"><b>环境（environment）</b>：产品的一份完整副本（dev、test、prod）。<b>批准（approval）</b>：任务运行前必须有人点头的停顿。</span></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• Start fresh: destroy hand-made environments and delete old workspaces, so state matches the files.<br>• Do the one-time setup once: shared state, the pipeline role, secrets and environments.<br>• A push deploys dev; a manual run gives test and prod, with approval before prod.<br>• Read the plan in the log before you approve anything.<br>• A green pipeline is not proof: open each twin, and clear the CDN cache after an upload.<br>• Ship real changes the same way, through the same door.<br>• Automation is only done when teardown is automated too.</p><p class="zh" style="margin:0">• 从头开始：销毁手工建的环境，删掉旧工作区，让状态和文件吻合。<br>• 只做一次的准备只做一次：共享状态、流水线角色、密钥和环境。<br>• 推送部署 dev；手动运行得到 test 和 prod，prod 之前要批准。<br>• 批准任何东西之前，先读日志里的 plan。<br>• 流水线是绿的不算证据：打开每个分身看看，上传之后要清 CDN 缓存。<br>• 真实的改动也走同一条路、同一扇门。<br>• 拆除也自动化了，自动化才算完成。</p></div>
 
