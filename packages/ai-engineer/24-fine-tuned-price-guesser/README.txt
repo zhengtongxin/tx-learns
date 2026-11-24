@@ -120,3 +120,21 @@ guess function (top-token average, or digit reading when numbers are split), and
 a table that prices the tuned model by GPU time. Added to make it run on its
 own: invented price tags, local data files instead of the hub, saving the
 adapter locally, and a command line.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- python test_offline.py in final/ prints an ok line with no GPU and no key.
+- python make_tags.py writes 3000 invented tags and prepare_data.py writes train, validation and test .jsonl files in data/.
+- Running prepare_data.py again gives the same split.
+- On a GPU, python train.py --subset 2000 finishes and the loss lines go down.
+- python compare.py prints one row each for average, forest and tuned, scored on the same test set.
+
+Compare your work with final/ afterwards, starting with prepare_data.py, train.py and compare.py.
+
+验收标准（中文）
+- 在 final/ 里运行 python test_offline.py，打印 ok 行，不需要 GPU，也不需要密钥。
+- python make_tags.py 写出 3000 条虚构标签，prepare_data.py 在 data/ 写出 train、validation、test 三个 .jsonl。
+- 再次运行 prepare_data.py 得到相同的划分。
+- 有 GPU 时，python train.py --subset 2000 能跑完，loss 逐行下降。
+- python compare.py 为平均值、随机森林和微调模型各打印一行，用同一个测试集打分。

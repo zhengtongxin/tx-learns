@@ -2,7 +2,7 @@
 <title>Your first LLM calls | TX Learns</title>
 <meta name="description" content="Set up an API key, ask a model a question, chain three calls."><meta property="og:title" content="Your first LLM calls | TX Learns"><meta property="og:description" content="Set up an API key, ask a model a question, chain three calls."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/agentic-ai/03-first-api-calls.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
 <meta name="updated" content="2026-11-24">
-<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<link rel="canonical" href="https://tx-learns.vercel.app/agentic-ai/03-first-api-calls.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=aef15752"><link rel="stylesheet" href="../assets/teach.css?v=348efa72"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/agentic-ai/03-first-api-calls.html","url":"https://tx-learns.vercel.app/agentic-ai/03-first-api-calls.html","name":"Your first LLM calls","alternateName":"你的第一次大模型调用","description":"Set up an API key, ask a model a question, chain three calls.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Foundations","dateModified":"2026-11-24","isPartOf":{"@type":"CollectionPage","name":"AI Agentic","url":"https://tx-learns.vercel.app/agentic-ai/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Agentic","item":"https://tx-learns.vercel.app/agentic-ai/index.html"},{"@type":"ListItem","position":3,"name":"Your first LLM calls","item":"https://tx-learns.vercel.app/agentic-ai/03-first-api-calls.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Foundations · Lesson 3</span><span class="zh">基础 · 第 3 课</span></span><h1><span class="en">Your first LLM calls</span><span class="zh">你的第一次大模型调用</span></h1><p class="meta"><span class="en">Set up an API key, ask a model a question, chain three calls · ~10 min · hands-on</span><span class="zh">配置 API 密钥，向模型提问，串联三次调用 · 约 10 分钟 · 动手实操</span></p></div>
 <div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the Kopi Corner assistant could pick a pattern for a request, but only on paper. Today it fails because it cannot answer anyone: no code of ours calls a model. We fix it by Aina keeping her key safe and making her first calls from her laptop.</p>
@@ -25,7 +25,8 @@
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">This is the entire program for Aina's first call. Four lines do the real work: load the key, create a <b>client</b> (your connection to the model), send the messages, and dig the text out of the reply. <code>import os</code> and <code>os.getenv</code> read the key back, and the <code>if</code> check stops with a clear message when it is missing (<code>None</code>). The <code>print</code> line shows only its first 8 characters so you can check it exists without exposing it. <code>from openai import OpenAI</code> brings in the official client library, which many other providers also accept.</p>
 <p class="zh"style="margin:0 0 8px">这就是 Aina 第一次调用的完整程序。真正干活的是四行：加载密钥、创建<b>客户端</b>（你与模型的连接）、发送消息、从回复里取出文字。<code>import os</code> 和 <code>os.getenv</code> 把密钥读回来，<code>if</code> 检查在密钥缺失（<code>None</code>）时用一句清楚的话停下来。<code>print</code> 那一行只显示前 8 个字符，让你确认它存在又不暴露它。<code>from openai import OpenAI</code> 引入官方客户端库，许多其他服务商也兼容它。</p></div>
 <p class="meta"><span class="en">Python · notebook cells (<code>first_call.ipynb</code>)</span><span class="zh">Python · 笔记本单元格（<code>first_call.ipynb</code>）</span></p>
-<div class="codebox"><span class="dim">from dotenv import load_dotenv
+<div class="codebox"><span class="dim"># once, in a terminal: pip install openai python-dotenv
+from dotenv import load_dotenv
 </span><span class="chg">load_dotenv(override=True)</span><span class="dim">
 
 import os
@@ -119,7 +120,7 @@ print(solution)</div></details>
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Agentic</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
-<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script src="lessons.js?v=40b1397f"></script><script src="../assets/site.js?v=f0800996"></script><script src="../assets/teach.js?v=ede6f40f"></script>
 <script>
 document.addEventListener('DOMContentLoaded',function(){
  var $=TX2.$,game=TX2.game,predict=TX2.predict,trace=TX2.trace;TX2.init();

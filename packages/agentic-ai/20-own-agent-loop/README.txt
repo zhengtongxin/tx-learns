@@ -105,3 +105,21 @@ shared board as the only channel, tools for the brittle mechanics, bounds on eve
 front page. Added beyond the lesson's code: the board, team, runner and one runnable worker
 (the lesson only described them), a local web server for the inspector, a --plan flag, and a
 shared style.css so the pages look alike.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- python main.py --plan prints the team and the five booths without spending anything.
+- The live board shows five goals moving from pending to working to done.
+- The coordinator inspects each page and sends a broken one back at most once.
+- At the end 'Coordinator says: ...' lists which pages work.
+- final/site/index.html always exists, even if every builder fails, and the folder holds one folder per builder.
+
+Compare your work with final/ afterwards, starting with coordinator.py, team.py and board.py.
+
+验收标准（中文）
+- python main.py --plan 打印团队和五个摊位，且不花任何费用。
+- 实时看板上的五个目标从 pending 变为 working 再变为 done。
+- 协调者检查每个页面，有问题的页面最多退回一次。
+- 结束时 “Coordinator says: ...” 列出哪些页面可用。
+- 即使所有建造者都失败，final/site/index.html 也始终存在，且每个建造者各有一个文件夹。

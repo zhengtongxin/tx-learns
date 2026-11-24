@@ -102,3 +102,21 @@ them in one file and adds the four fixes (model-made chunks, rerank, rewrite,
 sources). Added to make it run on its own: invented council files and a test
 set, a command line, models created on first use, and the files saved as .txt
 instead of .md so they can be hosted next to the code.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- python test_offline.py in final/ prints an ok line with no key and no model download.
+- After python helper.py build, asking who is in charge of lift repairs names Hafiz Rahman and ends with a Sources line.
+- In chat, the follow-up 'And her manager?' works after a question about a person, because the question is rewritten first.
+- python helper.py eval prints MRR and coverage per category for both the basic chain and the full pipeline.
+- tests.jsonl is the question set that eval reads; the full pipeline scores at least as well as the basic chain.
+
+Compare your work with final/ afterwards, starting with helper.py, tests.jsonl and test_offline.py.
+
+验收标准（中文）
+- 在 final/ 里运行 python test_offline.py，打印 ok 行，不需要密钥，也不下载模型。
+- python helper.py build 之后，问谁负责电梯维修，回答点出 Hafiz Rahman，并以 Sources 行结尾。
+- 聊天时，问过某个人之后再问 “And her manager?” 也能答对，因为问题会先被改写。
+- python helper.py eval 为基础链和完整流程分别按类别打印 MRR 和覆盖率。
+- tests.jsonl 是 eval 读取的问题集；完整流程的得分不低于基础链。
