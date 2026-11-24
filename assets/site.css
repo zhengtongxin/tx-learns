@@ -218,3 +218,37 @@ html{scroll-behavior:auto}
 .orb,body::before{animation:none!important}
 }
 .dk.off,.dk.ring{cursor:default}
+/* Release 1: keyboard + resume + prerequisites */
+.skip{position:fixed;left:12px;top:-60px;z-index:100;padding:10px 16px;border-radius:12px;background:var(--fg);color:var(--bg);font-weight:700;text-decoration:none;transition:top .15s}
+.skip:focus{top:10px}
+main:focus{outline:none}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+/* closed drawer and closed accordions are also hidden from Tab and screen readers (the page sets inert too) */
+.side{transition:transform .45s cubic-bezier(.2,.8,.2,1),visibility 0s linear .45s;visibility:hidden}
+.side.open{visibility:visible;transition-delay:0s}
+.cg-b{transition:grid-template-rows .35s cubic-bezier(.2,.8,.2,1),visibility 0s linear .35s;visibility:hidden}
+.cg.open .cg-b{visibility:inherit;transition-delay:0s}
+.side-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.side .side-all{display:inline-block;font-size:13.5px;font-weight:600;margin:0}
+.side-close{border:1px solid var(--line);background:var(--glass);color:var(--fg);border-radius:50%;width:34px;height:34px;cursor:pointer;font-size:15px}
+.side-close:hover{border-color:var(--acc)}
+.crumbs{font-size:13px;color:var(--mut);margin:0 0 10px}.crumbs a{color:var(--mut)}.crumbs a:hover{color:var(--fg)}
+@media(prefers-reduced-motion:reduce){.side,.cg-b{transition:none}}
+/* resume panel (home) */
+.resume{margin-top:34px}.resume[hidden]{display:none}
+.rs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:14px}
+.rs-grid .cc{margin:0;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.rs-go h3{margin:4px 0 0}
+.ey{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--acc2)}
+.rs-rec ul{list-style:none;padding:0;margin:0}.rs-rec li{padding:6px 0}
+.rs-tools{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}.rs-tools .btn{cursor:pointer}
+.warn{color:var(--bad)}
+/* prerequisites + project card */
+.prereq{padding:18px 22px;margin:18px 0}
+.prereq .lbl{display:block;margin-bottom:8px}
+.prereq dl{margin:0;display:grid;grid-template-columns:minmax(120px,max-content) 1fr;gap:6px 18px}
+.prereq dt{font-weight:700;font-size:.92rem}.prereq dd{margin:0;font-size:.95rem;line-height:1.6}
+.prereq ul{margin:0;padding-left:1.1em}
+@media(max-width:560px){.prereq dl{grid-template-columns:1fr}.prereq dt{margin-top:8px}}
+.track-ba{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:22px auto 0;max-width:720px;text-align:left}
+.track-ba p{margin:4px 0 0;font-size:.95rem;line-height:1.6}
