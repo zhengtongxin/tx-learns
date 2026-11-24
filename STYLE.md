@@ -70,7 +70,7 @@ The site records what TX learnt, in TX's own words. It never reproduces where it
 
 ## One story per track
 
-Each track has one artifact that grows (Agentic AI: the Kopi Corner assistant; AI Engineer: the Block 12 helper; AI FDE: the claims desk pilot; AI Production: the wharf product). The plan is in each track's `STORY.md`. A lesson:
+Each track has one artifact that grows (AI Agentic: the Kopi Corner assistant; AI Engineer: the Block 12 helper; AI FDE: the claims desk pilot; AI Production: the wharf product). The plan is in each track's `STORY.md`. A lesson:
 
 - opens with a **Where we left off** box (`<div class="callout thread">`): "Last time ___ could ___. Today it fails when ___. We fix it by ___.";
 - keeps its own scenario as a side case when it is not the main thread, with one line tying it back;

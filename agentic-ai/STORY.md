@@ -1,4 +1,4 @@
-# Story for the Agentic AI track
+# Story for the AI Agentic track
 
 One thread, one artifact: **the Kopi Corner assistant**. Aina (Uncle Lim's niece) builds it for Uncle Lim's kopitiam in Penang. Every lesson adds one capability to the same assistant. The lesson's own scenario (Alex's twin, a plant shop, a tuition centre, a night market...) stays as a **side case**: the same pattern, tried somewhere else. The kopitiam assistant is the main line.
 
