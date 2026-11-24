@@ -13,7 +13,9 @@
 <h2><span class="en">Step 1 · Measure first, then cut into chunks</span><span class="zh">第 1 步 · 先量一量，再切成块</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">First count what you have: files, characters and tokens (the small pieces a model reads and is billed by). If everything fits in the context window (the most text a model can read at once), ask whether you need RAG at all. If not, cut each file into chunks of about 1000 characters with a 200-character overlap. The overlap means a sentence cut at the edge still appears whole in the neighbour. The recursive splitter tries paragraph breaks first, then sentences, then single characters. Each chunk keeps metadata, such as the folder it came from.</p>
 <p class="zh" style="margin:0 0 8px">先数一数手上有什么：多少个文件、多少字符、多少 token（模型读写的小片段，也是计费的单位）。如果全部放得进上下文窗口（模型一次能读的最多文字），就先问问自己到底要不要 RAG。放不下，就把每个文件切成约 1000 字符的块，前后重叠 200 字符。重叠的意思是：在边缘被切断的句子，会在相邻的那块里完整出现。递归切分器先试段落分隔，再试句子，最后才按单个字符切。每个块都保留元数据，比如它来自哪个文件夹。</p></div>
-<div class="codebox"><span class="dim">from pathlib import Path
+<div class="codebox"><span class="dim"># pip install langchain-core langchain-text-splitters langchain-openai langchain-chroma tiktoken
+# (LangChain is a library that joins models, splitters and stores)
+from pathlib import Path
 import tiktoken
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -67,8 +69,8 @@ for hit in store.similarity_search("Who fixes a stuck lift?", k=3):
 <div class="try" id="p3"></div>
 
 <h2><span class="en">Step 4 · Seeing meaning as location</span><span class="zh">第 4 步 · 看见“意思就是位置”</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A vector with hundreds of numbers cannot be drawn. t-SNE (a common tool for drawing many-number points on a flat page) squashes them into 2D (or 3D) while trying to keep neighbours together. Wei Jie coloured each point by folder. Chunks about the same topic formed clusters, with fuzzy overlaps between related folders. That picture made "meaning is location" click for him.</p>
-<p class="zh" style="margin:0 0 8px">几百个数字的向量没法直接画出来。t-SNE（一种把很多数字的点画到平面上的常用方法）会把它们压成 2D（或 3D），同时尽量让邻居还是邻居。Wei Jie 按文件夹给每个点上色。同一话题的块聚成一团，相关的文件夹之间有模糊的重叠。这张图让他一下子懂了“意思就是位置”。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A vector with hundreds of numbers cannot be drawn. t-SNE (a common tool for drawing many-number points on a flat page) squashes them into 2D (or 3D) while trying to keep neighbours together. Wei Jie coloured each point by folder. Chunks about the same topic formed clusters, with fuzzy overlaps between related folders. Only the clusters mean something: the exact distances are rough, so do not read them as measurements. That picture made "meaning is location" click for him.</p>
+<p class="zh" style="margin:0 0 8px">几百个数字的向量没法直接画出来。t-SNE（一种把很多数字的点画到平面上的常用方法）会把它们压成 2D（或 3D），同时尽量让邻居还是邻居。Wei Jie 按文件夹给每个点上色。同一话题的块聚成一团，相关的文件夹之间有模糊的重叠。只有成团这件事有意义：具体的距离并不精确，别当成测量值。这张图让他一下子懂了“意思就是位置”。</p></div>
 <div class="codebox"><span class="dim">import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE

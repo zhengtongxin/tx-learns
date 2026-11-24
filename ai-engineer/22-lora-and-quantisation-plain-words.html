@@ -11,8 +11,8 @@
 <p class="zh" style="margin:0"><b>Ah Boy</b> 凭手感给二手电子产品定价，想要一个能做到同样水准的模型。<b>Wei Jie</b> 说：我们拿你以前的价签去微调一个小的开源模型。问题是他只有云端笔记本里一块小小的免费 GPU。要更新一个有几十亿个数字的模型，根本装不下，于是他学了两个技巧。这是帮手不靠大机器也能学会 Ah Boy 眼光的办法。</p></div>
 
 <h2><span class="en">Step 1 · Why not train everything</span><span class="zh">第 1 步 · 为什么不全部训练</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A model is billions of numbers, called weights. Full fine-tuning updates all of them, and for every one you need space for the number itself plus the extra bookkeeping that training keeps. That is several times the size of the model, far beyond a free GPU. We need to train less, and store less.</p>
-<p class="zh" style="margin:0 0 8px">模型就是几十亿个数字，叫权重。完整微调会更新全部权重，每个数字除了本身，还要为训练的额外记录留空间，总共是模型体积的好几倍，远超免费 GPU。所以我们要训练得少一点，存得少一点。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A model is billions of numbers, called weights. Each one is stored in 16 bits (a bit is one 0-or-1 slot, and 8 bits make a byte), so 2 bytes per weight: 3 billion weights is about 6 GB. Full fine-tuning updates all of them, and for every one you need space for the number itself plus the extra bookkeeping that training keeps. That is several times the size of the model, far beyond a free GPU. We need to train less, and store less.</p>
+<p class="zh" style="margin:0 0 8px">模型就是几十亿个数字，叫权重。每个权重用 16 位存（一位就是一个 0 或 1 的格子，8 位是一个字节），也就是每个 2 字节：30 亿个权重大约 6 GB。完整微调会更新全部权重，每个数字除了本身，还要为训练的额外记录留空间，总共是模型体积的好几倍，远超免费 GPU。所以我们要训练得少一点，存得少一点。</p></div>
 <div class="codebox"><span class="dim">rough memory for a 3-billion-weight model
 store the weights, 16 bits each ......... about 6 GB
 full fine-tuning also keeps extra copies . several times that
@@ -20,8 +20,8 @@ the free notebook GPU ................... 16 GB at most (often less usable)</spa
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 2 · LoRA: freeze the book, add sticky notes</span><span class="zh">第 2 步 · LoRA：冻住课本，贴便利贴</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">LoRA (low-rank adaptation) freezes the original weights and trains only a small add-on beside some layers. Think of a printed textbook: you do not reprint it, you stick notes in the margin. The add-on is two thin matrices, and at run time their product is added to the original weights. The base model is never changed, and the add-on is a small file you can share.</p>
-<p class="zh" style="margin:0 0 8px">LoRA（低秩适配）冻住原来的权重，只在部分层旁边训练一个小小的附加件。就像一本印好的课本：你不会重印，而是在页边贴便利贴。附加件是两个很“瘦”的矩阵，运行时把它们的乘积加到原权重上。基础模型从不被改动，附加件是一个可以分享的小文件。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">LoRA (low-rank adaptation) freezes the original weights and trains only a small add-on beside some layers. Think of a printed textbook: you do not reprint it, you stick notes in the margin. The add-on is two thin matrices (a matrix is just a grid of numbers, and r, the rank, says how thin the two grids are), and at run time their product is added to the original weights. The base model is never changed, and the add-on is a small file you can share.</p>
+<p class="zh" style="margin:0 0 8px">LoRA（低秩适配）冻住原来的权重，只在部分层旁边训练一个小小的附加件。就像一本印好的课本：你不会重印，而是在页边贴便利贴。附加件是两个很“瘦”的矩阵（矩阵就是一格格数字，r 叫秩，决定这两张表有多“瘦”），运行时把它们的乘积加到原权重上。基础模型从不被改动，附加件是一个可以分享的小文件。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="Frozen base weights packed to 4 bits feed a small trainable LoRA adapter whose output is added"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9a9aa8"/></marker></defs><rect class="box soft" x="20" y="50" width="230" height="90" rx="12"/><text class="en" x="135.0" y="91.0">Base model, frozen</text><text class="zh" x="135.0" y="91.0">底座模型（冻结）</text><text class="en sm" x="135.0" y="109.0">packed to 4 bits</text><text class="zh sm" x="135.0" y="109.0">压成 4 位</text><rect class="box new" x="20" y="160" width="230" height="40" rx="12"/><text class="en" x="135.0" y="185.0">LoRA adapter, small</text><text class="zh" x="135.0" y="185.0">LoRA 附加层（很小）</text><line class="lnk" x1="250" y1="95" x2="330" y2="100" marker-end="url(#ah)"/><line class="lnk hot" x1="250" y1="180" x2="360" y2="140" marker-end="url(#ah)"/><rect class="box " x="330" y="60" width="60" height="80" rx="12"/><text class="en" x="360.0" y="105.0">Add</text><text class="zh" x="360.0" y="105.0">相加</text><line class="lnk" x1="390" y1="100" x2="450" y2="100" marker-end="url(#ah)"/><rect class="box " x="450" y="60" width="150" height="80" rx="12"/><text class="en" x="525.0" y="96.0">Price answer</text><text class="zh" x="525.0" y="96.0">估价结果</text><text class="en sm" x="525.0" y="114.0">Ah Boy style</text><text class="zh sm" x="525.0" y="114.0">Ah Boy 风格</text></svg><figcaption><span class="en">Only the small adapter is trained; the packed base stays as it is.</span><span class="zh">只训练那层小小的附加层，压缩过的底座保持不动。</span></figcaption></figure>
 <div class="codebox"><span class="dim">one layer is 4096 x 4096 numbers ....... 16.8 million weights (frozen)
 </span><span class="chg">LoRA with r = 8: two thin matrices
@@ -30,8 +30,8 @@ the free notebook GPU ................... 16 GB at most (often less usable)</spa
 <div class="try" id="p2"></div>
 
 <h2><span class="en">Step 3 · The four LoRA settings</span><span class="zh">第 3 步 · LoRA 的四个设置</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">You will meet four settings. <b>r</b> is the thickness, usually 8 to 32. <b>alpha</b> scales how loudly the add-on speaks; a common choice is alpha equal to r, or twice r. <b>target modules</b> says which layers get an add-on, and the attention projections are the usual start. <b>dropout</b> randomly switches off a little of the add-on during training to avoid memorising.</p>
-<p class="zh" style="margin:0 0 8px">你会遇到四个设置。<b>r</b> 是厚度，通常 8 到 32。<b>alpha</b> 决定附加件“说话的音量”，常见选择是 alpha 等于 r，或 r 的两倍。<b>target modules</b> 指定哪些层加附加件，一般从注意力投影层开始。<b>dropout</b> 在训练时随机关掉一小部分附加件，避免死记硬背。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">You will meet four settings. <b>r</b> is the thickness, usually 8 to 32. <b>alpha</b> scales how loudly the add-on speaks; a common choice is alpha equal to r, or twice r. <b>target modules</b> says which layers get an add-on, and the attention layers (the parts that decide which words to look at) are the usual start. <b>dropout</b> randomly switches off a little of the add-on during training to avoid memorising.</p>
+<p class="zh" style="margin:0 0 8px">你会遇到四个设置。<b>r</b> 是厚度，通常 8 到 32。<b>alpha</b> 决定附加件“说话的音量”，常见选择是 alpha 等于 r，或 r 的两倍。<b>target modules</b> 指定哪些层加附加件，一般从注意力层（决定该看哪些词的部分）开始。<b>dropout</b> 在训练时随机关掉一小部分附加件，避免死记硬背。</p></div>
 <div class="codebox"><span class="dim">from peft import LoraConfig
 
 </span><span class="chg">lora = LoraConfig(
@@ -54,7 +54,7 @@ from transformers import AutoModelForCausalLM, BitsAndBytesConfig
     load_in_4bit=True,
     bnb_4bit_quant_type="nf4",
     bnb_4bit_compute_dtype=torch.bfloat16,
-    bnb_4bit_use_double_quant=True,   # squeeze the packing notes too
+    bnb_4bit_use_double_quant=True,   # also compress the small scaling numbers quantisation keeps
 )
 model = AutoModelForCausalLM.from_pretrained(
     "your-small-open-model", quantization_config=pack, device_map="auto")
@@ -62,8 +62,8 @@ print(model.get_memory_footprint() / 1e9, "GB")</span></div>
 <div class="try" id="p4"></div>
 
 <h2><span class="en">Step 5 · Pick a base, shape the data</span><span class="zh">第 5 步 · 选底座模型，整理数据</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Pick a size your GPU can hold: 3 to 8 billion weights is fine on a cheap one. Choose a family with a good tokenizer and a licence you can live with, and check how it splits numbers, because families that read each digit on its own make price guessing easier. Then shape each example as a prompt plus a short completion such as "Price is $123". Cut long descriptions at a token limit, and compute the loss on the answer only, so the model learns to produce the price instead of repeating the description.</p>
-<p class="zh" style="margin:0 0 8px">选一个你的 GPU 装得下的大小，30 到 80 亿权重在便宜的 GPU 上就可以。选分词器好、许可证能接受的模型家族，并看看它怎么切数字：把每个数字单独读的家族，让猜价格更容易。然后把每个例子整理成“提示 + 一个短的回答”，比如 “Price is $123”。长描述按 token 上限截断，并且只在答案部分计算损失，这样模型学的是给出价格，而不是复述描述。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Pick a size your GPU can hold: 3 to 8 billion weights is fine on a cheap one. Choose a family with a good tokenizer (the splitter that cuts text into tokens, the small pieces a model reads) and a licence you can live with, and check how it splits numbers, because families that read each digit on its own make price guessing easier. Then shape each example as a prompt plus a short completion such as "Price is $123". Cut long descriptions at a token limit, and compute the loss on the answer only, so the model learns to produce the price instead of repeating the description.</p>
+<p class="zh" style="margin:0 0 8px">选一个你的 GPU 装得下的大小，30 到 80 亿权重在便宜的 GPU 上就可以。选分词器（把文字切成 token 这种小片段的工具）好、许可证能接受的模型家族，并看看它怎么切数字：把每个数字单独读的家族，让猜价格更容易。然后把每个例子整理成“提示 + 一个短的回答”，比如 “Price is $123”。长描述按 token 上限截断，并且只在答案部分计算损失，这样模型学的是给出价格，而不是复述描述。</p></div>
 <div class="codebox"><span class="dim">example = {
     "prompt": "Used phone, 128 GB, cracked corner, battery 82 percent. Price is $",
     "completion": "145",
