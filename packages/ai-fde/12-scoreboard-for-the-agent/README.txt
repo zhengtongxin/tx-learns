@@ -116,3 +116,21 @@ WHAT CHANGED SINCE THE PREVIOUS LESSON
   fixed held-out set, a saved report per run, a lock so only one runs at a
   time, and a comparison you run after every change so a regression shows up
   the same day. The scoring maths is unchanged.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- data/held_out_ids.json lists 10 claim ids and stays the same on every run.
+- POST /evaluations answers 201 with agreement, mistake_cost_sgd, straight_through, kappa, and cost and seconds per claim.
+- Every run is its own file in runs/, and GET /evaluations lists them.
+- A second POST while one runs answers 409 'an evaluation is already running'.
+- compare_runs.py prints better, same or WORSE for each number.
+
+Compare your work with final/ afterwards, starting with scoring.py, scoreboard.py and compare_runs.py.
+
+验收标准（中文）
+- data/held_out_ids.json 列出 10 个理赔编号，每次运行都不变。
+- POST /evaluations 返回 201，含 agreement、mistake_cost_sgd、straight_through、kappa，以及每个理赔的成本和秒数。
+- 每次运行各有一个 runs/ 文件，GET /evaluations 把它们列出来。
+- 运行期间再次 POST 返回 409 “an evaluation is already running”。
+- compare_runs.py 对每个数字打印 better、same 或 WORSE。

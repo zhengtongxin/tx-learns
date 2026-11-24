@@ -97,3 +97,21 @@ chains two of them: a speech pipeline feeds the chat model. New: the minutes
 prompt, a streamer for the output, the chunk-then-summarise helper and the
 names list. Added to make it run on its own: model names read from .env, a
 load function instead of loading at import time, and a small command line.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- python test_split.py in final/ prints an ok line with no GPU and no download.
+- python minutes.py --text sample_transcript.txt streams minutes with a summary, decisions and action items with owners.
+- Names listed in the prompt come out spelled correctly in the minutes.
+- With --long, a long transcript is split into chunks, each chunk is summarised, then the summaries are summarised.
+- Every action item names an owner from the transcript.
+
+Compare your work with final/ afterwards, starting with minutes.py, test_split.py and the chunking function.
+
+验收标准（中文）
+- 在 final/ 里运行 python test_split.py，打印 ok 行，不需要 GPU，也不用下载。
+- python minutes.py --text sample_transcript.txt 流式输出纪要：摘要、决定，以及带负责人的待办事项。
+- 提示词里列出的人名，在纪要中拼写正确。
+- 加上 --long，长文字稿被切成多段，每段先摘要，再对这些摘要做摘要。
+- 每个待办事项都写明文字稿里出现过的负责人。
