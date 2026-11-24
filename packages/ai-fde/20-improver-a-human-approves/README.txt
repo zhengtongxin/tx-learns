@@ -125,3 +125,21 @@ WHAT CHANGED SINCE THE PREVIOUS LESSON
   a named person's approval, and code (not the improver) decides on the
   held-out claims whether the change stays. The scoreboard's held-out set and
   scoring maths are reused.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- POST /rounds answers 201 {"version": 2}; version 2 shows as 'proposed', one field changed, approved by nobody, and the agent still runs version 1.
+- A second POST /rounds while one is open answers 409 'a round is already open'.
+- After a named person approves, code runs the held-out claims and the result is kept or rolled_back.
+- A version is kept only if it is no worse and better on at least one number.
+- POST /versions/2/use on a rolled-back version answers 400; rejecting changes nothing else.
+
+Compare your work with final/ afterwards, starting with improver.py, versions.py and config_app.py.
+
+验收标准（中文）
+- POST /rounds 返回 201 {"version": 2}；版本 2 显示为 “proposed”，改了一个字段，无人批准，智能体仍运行版本 1。
+- 已有一轮未结束时再 POST /rounds，返回 409 “a round is already open”。
+- 指定的人批准后，代码在留出的理赔上运行，结果为 kept 或 rolled_back。
+- 一个版本只有在不更差且至少一个数字更好时才被保留。
+- 对已回滚的版本调用 POST /versions/2/use 返回 400；拒绝则其余一切不变。

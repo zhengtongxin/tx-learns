@@ -21,7 +21,7 @@
 
   if(window.TRACK&&!window.TRACKS)document.write('<script src="../tracks.js"><\/script>');
   /* learner search + related lessons live in their own file (scripts/search-index.mjs builds its index) */
-  (function(m){if(m&&m.src){var q=document.createElement('script');q.src=m.src.replace(/site\.js.*$/,'search.js');q.defer=true;document.head.appendChild(q)}})(document.currentScript);
+  (function(m){if(m&&m.src){var q=document.createElement('script');q.src=m.src.replace(/site\.js.*$/,'search.js'+(m.src.match(/\?.*$/)||[''])[0]);q.defer=true;document.head.appendChild(q)}})(document.currentScript);
   document.addEventListener('DOMContentLoaded',function(){
     var C=window.TRACK,here=location.pathname.split('/').pop()||'index.html',d=done();
     if(C){C.all=[];C.topics.forEach(function(w){w.items.forEach(function(it,i){it.w=w.n;it.i=i+1;it.g=C.all.length+1;C.all.push(it)})});C.lessons=C.all.filter(function(x){return x.file});C.total=C.all.length}
@@ -147,13 +147,22 @@
         /* every file of the package (packages.js is generated), grouped by folder */
         if(fl.length){var gr={};fl.forEach(function(f){var i=f.lastIndexOf('/'),k=i<0?'':f.slice(0,i);(gr[k]=gr[k]||[]).push(f)});
           files=Object.keys(gr).map(function(k){return '<li>'+(k?'<b>'+k+'/</b> ':'')+gr[k].map(function(f){return '<a href="../'+pk.dir+'/'+f+'">'+f.slice(k?k.length+1:0)+'</a>'}).join(' · ')+'</li>'}).join('')}
+        /* reference solution: only the files under final/ */
+        var refs=fl.filter(function(f){return f.indexOf('final/')===0}).map(function(f){return '<li><a href="../'+pk.dir+'/'+f+'">'+f+'</a></li>'}).join('');
+        /* "Done when" checklist: ticks are kept per lesson in the browser (learn-accept), never required */
+        function esc(x){return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+        function acceptList(a){var AK='learn-accept',m=jget(AK,{}),ck=m[here]||[];
+          return '<ul class="accept">'+(a.en||[]).map(function(e,i){return '<li><label><input type="checkbox" data-i="'+i+'"'+(ck.indexOf(i)>-1?' checked':'')+'> '+t({en:esc(e),zh:esc((a.zh||[])[i]||e)})+'</label></li>'}).join('')+'</ul>'}
         pc.innerHTML='<b class="lbl">'+t({en:'Project card',zh:'项目卡'})+'</b><dl>'+
           (J.goal?'<dt>'+t({en:'Goal',zh:'目标'})+'</dt><dd>'+t(J.goal)+'</dd>':'')+(J.deliver?'<dt>'+t({en:'Deliverable',zh:'交付物'})+'</dt><dd>'+t(J.deliver)+'</dd>':'')+
           (J.level?'<dt>'+t({en:'Difficulty',zh:'难度'})+'</dt><dd>'+t(LV[J.level])+'</dd>':'')+(J.mins?'<dt>'+t({en:'Time',zh:'时间'})+'</dt><dd>'+t({en:'about '+J.mins+' minutes',zh:'约 '+J.mins+' 分钟'})+'</dd>':'')+
-          (J.accept?'<dt>'+t({en:'You are done when',zh:'完成标准'})+'</dt><dd><ul>'+li(J.accept)+'</ul></dd>':'')+
+          (J.accept?'<dt>'+t({en:'Done when…',zh:'完成标准'})+'</dt><dd>'+(Array.isArray(J.accept)?'<ul>'+li(J.accept)+'</ul>':acceptList(J.accept))+'</dd>':'')+
           (J.fail?'<dt>'+t({en:'Common problems',zh:'常见问题'})+'</dt><dd><ul>'+li(J.fail)+'</ul></dd>':'')+
           (J.stretch?'<dt>'+t({en:'Stretch goals',zh:'进阶挑战'})+'</dt><dd><ul>'+li(J.stretch)+'</ul></dd>':'')+
+          (J.solution&&refs?'<dt>'+t({en:'Reference solution',zh:'参考答案'})+'</dt><dd><p>'+t({en:esc(J.solution.en),zh:esc(J.solution.zh)})+'</p><ul class="pkg">'+refs+'</ul></dd>':'')+
           (files?'<dt>'+t({en:'Starter and final code',zh:'起步与完成代码'})+'</dt><dd><ul class="pkg">'+files+'</ul>'+(pk.note?'<p class="meta">'+t(pk.note)+'</p>':'')+'<p class="meta">'+t({en:'Download every file and keep the folder layout.',zh:'下载全部文件，并保持文件夹结构。'})+'</p></dd>':'')+'</dl>';
+        pc.addEventListener('change',function(ev){var c=ev.target;if(!c||c.type!=='checkbox'||!c.closest('.accept'))return;
+          var AK='learn-accept',m=jget(AK,{}),ck=[];pc.querySelectorAll('.accept input').forEach(function(x){if(x.checked)ck.push(+x.dataset.i)});m[here]=ck;set(AK,JSON.stringify(m))});
         anchor.after(pc)}
       var ba=document.querySelector('.stage .track-ba');
       if(!ba&&window.TRACKS&&document.querySelector('.stage .ringbox')){var tr=window.TRACKS.filter(function(x){return x.id===C.id})[0];
@@ -195,7 +204,7 @@
       var inp=rsm.querySelector('input[type=file]');rsm.querySelector('[data-a=i]').onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();inp.click()}};
       inp.onchange=function(){var f=inp.files[0];if(!f)return;var fr=new FileReader();fr.onload=function(){try{var o=JSON.parse(fr.result);if(!o||o.app!=='tx-learns'||typeof o.done!=='object')throw 0;var m=done();for(var k in o.done)if(lookup[k]&&o.done[k])m[k]=1;set(DONE,JSON.stringify(m));if(o.last&&lookup[o.last.t+'/'+o.last.f])set(LAST,JSON.stringify({t:o.last.t,f:o.last.f}));if(o.recent&&o.recent.filter)set(REC,JSON.stringify(o.recent.filter(function(k){return lookup[k]}).slice(0,6)));d=done();drawHub();drawResume();rsm.querySelector('.rs-msg').innerHTML=t({en:'Progress imported.',zh:'进度已导入。'})}catch(e){say({en:'That file is not a TX Learns progress file.',zh:'这不是 TX Learns 的进度文件。'})}};fr.readAsText(f)};
       var rb2=rsm.querySelector('[data-a=r]'),armed=false;rb2.onclick=function(){if(!armed){armed=true;rb2.innerHTML=t({en:'Click again to erase all progress',zh:'再点一次确认清除全部进度'});setTimeout(function(){armed=false;rb2.innerHTML=t({en:'Reset progress',zh:'清除进度'})},5000);return}
-        try{localStorage.removeItem(DONE);localStorage.removeItem(LAST);localStorage.removeItem(REC)}catch(e){}d=done();drawHub();drawResume();var m2=rsm.querySelector('.rs-msg');if(m2)m2.innerHTML=t({en:'Progress erased.',zh:'进度已清除。'})}}
+        try{localStorage.removeItem(DONE);localStorage.removeItem(LAST);localStorage.removeItem(REC);localStorage.removeItem('learn-accept')}catch(e){}d=done();drawHub();drawResume();var m2=rsm.querySelector('.rs-msg');if(m2)m2.innerHTML=t({en:'Progress erased.',zh:'进度已清除。'})}}
     if(window.TRACKS&&(hub||sums.length||rsm)){var q=window.TRACKS.slice();
       (function next(){var c=q.shift();
         if(!c){var tot={topics:0,lessons:0,published:0};window.TRACKS.forEach(function(x){tot.topics+=x.topics||0;tot.lessons+=x.total||0;tot.published+=x.published||0});
