@@ -2,92 +2,57 @@
 <title>Your first LLM calls | TX Learns</title>
 <meta name="description" content="Set up an API key, ask a model a question, chain three calls."><meta property="og:title" content="Your first LLM calls | TX Learns"><meta property="og:description" content="Set up an API key, ask a model a question, chain three calls."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/agentic-ai/03-first-api-calls.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
 <meta name="updated" content="2026-11-24">
-<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css">
-<style>
-.codeln{display:block;width:100%;text-align:left;border:1px solid var(--line);background:#0b0b10;color:#e8e8f0;border-radius:12px;padding:10px 14px;margin:6px 0;cursor:pointer;font:13.5px/1.5 ui-monospace,"SF Mono",Menlo,monospace;transition:.2s;white-space:pre-wrap;word-break:break-word}
-.codeln:hover{border-color:var(--acc);transform:translateX(4px)}
-.codeln.sel{border-color:var(--acc2);box-shadow:0 0 0 1px var(--acc2),0 8px 30px var(--glow)}
-.chain{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:8px;align-items:stretch;margin:14px 0}
-.cn{border:1px solid var(--line);background:var(--glass);border-radius:18px;padding:14px;text-align:center;cursor:pointer;transition:.3s}
-.cn b{display:block;font-size:13px}.cn small{color:var(--mut);display:block;margin-top:4px}
-.cn .m{display:inline-block;margin-top:8px;font:700 11px ui-monospace,monospace;padding:3px 9px;border-radius:99px;background:var(--glass);border:1px solid var(--line)}
-.cn.on{border-color:var(--ok);box-shadow:0 0 28px color-mix(in srgb,var(--ok) 45%,transparent);transform:translateY(-4px)}
-.cn.sel{border-color:var(--acc)}
-.ca{display:grid;place-items:center;color:var(--mut);font-size:12px;text-align:center}
-.ca i{font:700 11px ui-monospace,monospace;color:var(--acc2);font-style:normal}
-.ca.on i{color:var(--ok)}
-.io{background:#0b0b10;color:#e8e8f0;border:1px solid var(--line);border-radius:14px;padding:12px 14px;font:13px/1.55 ui-monospace,"SF Mono",Menlo,monospace;white-space:pre-wrap;word-break:break-word;min-height:70px}
-.io.re{background:color-mix(in srgb,var(--bg) 60%,transparent);color:var(--fg);font-family:inherit;font-size:14px}
-.io mark{background:color-mix(in srgb,var(--acc2) 30%,transparent);color:inherit;border-radius:4px;padding:0 3px}
-.lab{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin:12px 0 6px;display:block}
-.tier{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:1.3em 0}
-.tier div{border:1px solid var(--line);border-radius:18px;padding:14px;background:var(--glass);text-align:center}
-.tier b{display:block}.tier code{display:inline-block;margin:6px 0}
-@media(max-width:720px){.chain{grid-template-columns:1fr}.ca{transform:rotate(90deg);padding:4px}.tier{grid-template-columns:1fr}}
-</style></head><body>
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
 <div class="wrap"><nav class="side"></nav><main>
-
-<div class="hero">
-<span class="tag"><span class="en">Foundations · Lesson 3</span><span class="zh">基础 · 第 3 课</span></span>
-<h1><span class="en">Your first LLM calls</span><span class="zh">你的第一次大模型调用</span></h1>
-<p class="meta"><span class="en">Set up an API key, ask a model a question, chain three calls · ~10 min · hands-on</span><span class="zh">配置 API 密钥，向模型提问，串联三次调用 · 约 10 分钟 · 动手实操</span></p>
-</div>
-
-<h2><span class="en">The big picture</span><span class="zh">整体思路</span></h2>
-<p class="en">An <b>LLM API</b> is a function you call over the internet: you send a list of <b>messages</b>, you get text back. An agent is built from many such calls, so this tiny skill is the foundation of everything that follows.</p>
-<p class="zh"><b>LLM API</b> 就是一个通过网络调用的函数：你发送一组<b>消息</b>，它返回文本。智能体由许多次这样的调用组成，所以这个小技能是后面一切的基础。</p>
-<div class="flow">
-  <span class="n">🔑 <span class="en">API key</span><span class="zh">API 密钥</span></span><span class="a">→</span>
-  <span class="n">📨 <span class="en">messages</span><span class="zh">消息列表</span></span><span class="a">→</span>
-  <span class="n">🧠 <span class="en">model</span><span class="zh">模型</span></span><span class="a">→</span>
-  <span class="n">💬 <span class="en">reply text</span><span class="zh">回复文本</span></span>
-</div>
-
+<div class="hero"><span class="tag"><span class="en">Foundations · Lesson 3</span><span class="zh">基础 · 第 3 课</span></span><h1><span class="en">Your first LLM calls</span><span class="zh">你的第一次大模型调用</span></h1><p class="meta"><span class="en">Set up an API key, ask a model a question, chain three calls · ~10 min · hands-on</span><span class="zh">配置 API 密钥，向模型提问，串联三次调用 · 约 10 分钟 · 动手实操</span></p></div>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en"style="margin:0">Aina, Uncle Lim's niece, wants to try a model from her laptop before she builds anything for Kopi Corner. She will keep her key safe, ask one question, then chain three calls so that each one uses the last reply. An <b>LLM API</b> is just a function you call over the internet: you send a list of <b>messages</b>, you get text back. An agent is built from many such calls, so this small skill is the foundation of everything that follows.</p>
+<p class="zh"style="margin:0">Uncle Lim 的侄女 Aina 想先在自己的电脑上试一试模型，再给 Kopi Corner 做东西。她要先把密钥保管好，再问一个问题，最后串联三次调用，让每一次都用上一次的回复。<b>LLM API</b> 就是一个通过网络调用的函数：你发送一组<b>消息</b>，它返回文本。智能体由许多次这样的调用组成，所以这个小技能是后面一切的基础。</p></div>
+<div class="callout"><b class="lbl"><span class="en">By the end you can</span><span class="zh">学完你能做到</span></b><span class="en">1. Keep an API key in a <code>.env</code> file and load it without printing it.<br>2. Make one model call and pull the reply text out of the response.<br>3. Run a three-step chain of model calls, each one using the last reply.<br>4. Pick a model size (nano, mini or full) for each step.</span><span class="zh">1. 把 API 密钥放进 <code>.env</code> 文件并加载，而不把它打印出来。<br>2. 完成一次模型调用，并从响应里取出回复文本。<br>3. 运行一条三步的调用链，每一步都用上一步的回复。<br>4. 为每一步选择模型大小（nano、mini 或 full）。</span></div>
 <div class="callout tip"><b class="lbl"><span class="en">What you need</span><span class="zh">你需要准备</span></b><span class="en">Python and a <b>notebook</b> (Jupyter, or the notebook view in VS Code or Cursor). A notebook is a page of small code boxes called <b>cells</b>. You run one cell at a time, top to bottom, and its output shows right under it. The running Python behind the page is the <b>kernel</b>; restart it if things get stuck. In the code, a <b>dictionary</b> is labelled values in curly braces, a <b>list</b> is items in square brackets, and an <b>f-string</b> like <code>f"Hi {name}"</code> drops a variable into text.</span><span class="zh">Python 和一个<b>笔记本</b>（Jupyter，或 VS Code、Cursor 里的笔记本视图）。笔记本是一页小代码框，每个框叫一个<b>单元格</b>（cell）。你从上到下一次运行一个单元格，输出就显示在它下面。页面背后正在运行的 Python 叫<b>内核</b>（kernel），卡住时重启它就好。代码里，<b>字典</b>是放在花括号里、带标签的值，<b>列表</b>是放在方括号里的一串项目，<b>f-string</b> 比如 <code>f"Hi {name}"</code> 能把变量填进文字里。</span></div>
+
 <h2><span class="en">Step 1 · Keep your key safe</span><span class="zh">第 1 步 · 安全保管密钥</span></h2>
-<p class="en">Your API key is like a password that also bills your credit card. Never paste it into code. Put it in a file named <code>.env</code> in your project folder, and let Python read it from there.</p>
-<p class="zh">API 密钥就像一个会扣你信用卡的密码。不要把它写进代码里，而是放在项目文件夹的 <code>.env</code> 文件中，让 Python 从那里读取。</p>
-<pre><code># .env  (a plain text file, saved in the project root)
-OPENAI_API_KEY=sk-...your-key...</code></pre>
-<div class="stepper">
-  <div class="step"><b><span class="en">1. Create the key</span><span class="zh">1. 创建密钥</span></b><p class="en">Create a key in your OpenAI account and add a small amount of credit. These lessons cost only cents.</p><p class="zh">在 OpenAI 账户中创建密钥并充入少量额度。这些练习只需几美分。</p></div>
-  <div class="step"><b><span class="en">2. Make the .env file</span><span class="zh">2. 新建 .env 文件</span></b><p class="en">Name it exactly <code>.env</code> (with the dot) in the project root, add the line above, and <b>save</b> the file.</p><p class="zh">在项目根目录新建名为 <code>.env</code>（带点）的文件，写入上面那一行，并<b>保存</b>。</p></div>
-  <div class="step"><b><span class="en">3. Load it</span><span class="zh">3. 加载它</span></b><p class="en">Run <code>load_dotenv(override=True)</code>. It should print <code>True</code>.</p><p class="zh">运行 <code>load_dotenv(override=True)</code>，应当输出 <code>True</code>。</p></div>
-  <div class="step"><b><span class="en">4. Check it</span><span class="zh">4. 检查</span></b><p class="en">Read the key back and print only its first few characters, never the whole thing.</p><p class="zh">把密钥读出来，只打印前几个字符，永远不要打印全部。</p></div>
-</div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Your API key is like a password that also bills your credit card. Never paste it into code. Put it in a file named <code>.env</code> in your project folder, and let Python read it from there.</p>
+<p class="zh"style="margin:0 0 8px">API 密钥就像一个会扣你信用卡的密码。不要把它写进代码里，而是放在项目文件夹的 <code>.env</code> 文件中，让 Python 从那里读取。</p></div>
+<p class="meta"><span class="en">Text file · <code>.env</code> (saved in the project root)</span><span class="zh">纯文本文件 · <code>.env</code>（保存在项目根目录）</span></p>
+<div class="codebox"><span class="chg">OPENAI_API_KEY=sk-...your-key...</span></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Create the key</b> in your OpenAI account and add a small amount of credit. These lessons cost only cents.</span><span class="zh"><b>创建密钥</b>：在 OpenAI 账户中创建密钥并充入少量额度。这些练习只需几美分。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Make the .env file.</b> Name it exactly <code>.env</code> (with the dot) in the project root, add the line above, and <b>save</b> the file.</span><span class="zh"><b>新建 .env 文件</b>：在项目根目录新建名为 <code>.env</code>（带点）的文件，写入上面那一行，并<b>保存</b>。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Load it</b> with <code>load_dotenv(override=True)</code>. It should print <code>True</code>.</span><span class="zh"><b>加载它</b>：运行 <code>load_dotenv(override=True)</code>，应当输出 <code>True</code>。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it.</b> Read the key back and print only its first few characters, never the whole thing.</span><span class="zh"><b>检查</b>：把密钥读出来，只打印前几个字符，永远不要打印全部。</span></span></label></div>
 <div class="callout warn"><b class="lbl"><span class="en">Never share your key</span><span class="zh">不要泄露密钥</span></b><span class="en">Don't commit <code>.env</code> to Git, paste it in chat, or put it in a screenshot. If it leaks, delete it in your account and make a new one.</span><span class="zh">不要把 <code>.env</code> 提交到 Git、贴到聊天里或放进截图。一旦泄露，立刻在账户里删除并重新创建。</span></div>
+<div class="try" id="p1"></div>
 
-<h2><span class="en">Step 2 · Read the code, line by line</span><span class="zh">第 2 步 · 逐行读代码</span></h2>
-<p class="en">This is the entire program for your first call. <b>Click any line</b> to see what it does.</p>
-<p class="zh">这就是第一次调用的完整程序。<b>点击任意一行</b>，查看它的作用。</p>
-<div class="wfwrap">
-  <div id="code"></div>
-  <div class="card" id="why" style="margin:12px 0 0;box-shadow:none"></div>
-</div>
-<div class="callout tip"><b class="lbl"><span class="en">Digging out the reply</span><span class="zh">取出回复</span></b>
-<span class="en"><code>response.choices[0].message.content</code> reads as: the response → its list of <b>choices</b> → the first one → its <b>message</b> → the <b>content</b> (your text).</span>
-<span class="zh"><code>response.choices[0].message.content</code> 的意思是：响应 → 其 <b>choices</b> 列表 → 第一项 → 它的 <b>message</b> → 其中的 <b>content</b>（你要的文字）。</span></div>
+<h2><span class="en">Step 2 · Make your first call</span><span class="zh">第 2 步 · 完成第一次调用</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">This is the entire program for Aina's first call. Four lines do the real work: load the key, create a <b>client</b> (your connection to the model), send the messages, and dig the text out of the reply. <code>import os</code> and <code>os.getenv</code> read the key back so you can check it exists. <code>from openai import OpenAI</code> brings in the official client library, which many other providers also accept.</p>
+<p class="zh"style="margin:0 0 8px">这就是 Aina 第一次调用的完整程序。真正干活的是四行：加载密钥、创建<b>客户端</b>（你与模型的连接）、发送消息、从回复里取出文字。<code>import os</code> 和 <code>os.getenv</code> 把密钥读回来，让你确认它存在。<code>from openai import OpenAI</code> 引入官方客户端库，许多其他服务商也兼容它。</p></div>
+<p class="meta"><span class="en">Python · notebook cells (<code>first_call.ipynb</code>)</span><span class="zh">Python · 笔记本单元格（<code>first_call.ipynb</code>）</span></p>
+<div class="codebox"><span class="dim">from dotenv import load_dotenv
+</span><span class="chg">load_dotenv(override=True)</span><span class="dim">
 
-<h2><span class="en">Messages are a list</span><span class="zh">消息是一个列表</span></h2>
-<p class="en">Each message is a small dictionary with a <b>role</b> and some <b>content</b>. Today you only need the <code>user</code> role (that's you speaking).</p>
-<p class="zh">每条消息都是一个带有<b>角色</b>和<b>内容</b>的小字典。今天只需要 <code>user</code> 角色（也就是你在说话）。</p>
-<pre><code>messages = [{"role": "user", "content": "Tell me a fun fact"}]</code></pre>
-<div class="callout"><b class="lbl"><span class="en">Each call starts fresh</span><span class="zh">每次调用都从零开始</span></b><span class="en">The model remembers nothing between calls. Anything it should know must be inside the messages you send. That's why, in the chain below, we paste earlier results into the next prompt.</span><span class="zh">模型在两次调用之间什么都不记得。它需要知道的内容，必须写在你发送的消息里。这就是为什么在下面的调用链里，要把上一步的结果粘贴进下一个提示词。</span></div>
+import os
+openai_api_key = os.getenv("OPENAI_API_KEY")
+
+from openai import OpenAI
+</span><span class="chg">client = OpenAI()</span><span class="dim">
+
+messages = [{"role": "user", "content": "Tell me a fun fact"}]
+</span><span class="chg">response = client.chat.completions.create(model="gpt-5.4-nano", messages=messages)
+print(response.choices[0].message.content)</span></div>
+<p class="en">Match each line to what it does.</p>
+<p class="zh">把每一行和它的作用配起来。</p>
+<div class="sc" id="g2"></div>
+<div class="callout tip"><b class="lbl"><span class="en">Digging out the reply</span><span class="zh">取出回复</span></b><span class="en"><code>response.choices[0].message.content</code> reads as: the response → its list of <b>choices</b> → the first one → its <b>message</b> → the <b>content</b> (your text).</span><span class="zh"><code>response.choices[0].message.content</code> 的意思是：响应 → 其 <b>choices</b> 列表 → 第一项 → 它的 <b>message</b> → 其中的 <b>content</b>（你要的文字）。</span></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Messages are a list. Each message is a small dictionary with a <b>role</b> and some <b>content</b>. Today you only need the <code>user</code> role (that's you speaking). And each call starts fresh: the model remembers nothing between calls, so anything it should know must be inside the messages you send.</p>
+<p class="zh"style="margin:0 0 8px">消息是一个列表。每条消息都是一个带有<b>角色</b>和<b>内容</b>的小字典。今天只需要 <code>user</code> 角色（也就是你在说话）。而且每次调用都从零开始：模型在两次调用之间什么都不记得，它需要知道的内容，必须写在你发送的消息里。</p></div>
+<div class="try" id="p2"></div>
 
 <h2><span class="en">Step 3 · Chain three calls</span><span class="zh">第 3 步 · 串联三次调用</span></h2>
-<p class="en">One call is a question. A <b>chain</b> feeds the output of one call into the next. Here, one model invents a question, a second answers it, and a third judges the answer. Press <b>Next</b> to move one small step at a time. Nothing runs by itself, so read at your own pace.</p>
-<p class="zh">一次调用就是一个问题。<b>调用链</b>把上一次的输出喂给下一次。这里，第一个模型出题，第二个回答，第三个评判答案。点<b>下一步</b>，一次只走一小步。没有任何东西会自动运行，你可以按自己的节奏阅读。</p>
-<div class="wfwrap">
-  <div class="chain" id="chain"></div>
-  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn pri" id="go"></button><span class="meta"><span class="en">Simulated example — real replies will differ.</span><span class="zh">模拟示例——真实回复会不同。</span></span></div>
-  <span class="lab"><span class="en">Sent to the model</span><span class="zh">发送给模型</span></span>
-  <div class="io" id="inp"></div>
-  <span class="lab"><span class="en">Model reply</span><span class="zh">模型回复</span></span>
-  <div class="io re" id="out"></div>
-</div>
-<pre><code>question = response.choices[0].message.content        # keep call 1's reply in a variable
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">One call is a question. A <b>chain</b> feeds the output of one call into the next. Aina's chain: one model invents a question, a second answers it, and a third judges the answer. Press the button to move one small step at a time. Nothing runs by itself, so read at your own pace. (It is a simulated example, and real replies will differ.)</p>
+<p class="zh"style="margin:0 0 8px">一次调用就是一个问题。<b>调用链</b>把上一次的输出喂给下一次。Aina 的调用链：第一个模型出题，第二个回答，第三个评判答案。点按钮，一次只走一小步。没有任何东西会自动运行，你可以按自己的节奏阅读。（这是模拟示例，真实回复会不同。）</p></div>
+<div id="t3"></div>
+<p class="meta"><span class="en">Python · notebook cells (<code>first_call.ipynb</code>). Call 1 and call 2 are made the same way as in step 2, with the new prompt in <code>messages</code>.</span><span class="zh">Python · 笔记本单元格（<code>first_call.ipynb</code>）。第 1、2 次调用的写法和第 2 步一样，只是 <code>messages</code> 里换成新的提示词。</span></p>
+<div class="codebox"><span class="chg">question = response.choices[0].message.content</span><span class="dim">        # keep call 1's reply in a variable
+# ... call 2 sends `question`, and its reply is kept the same way:
+</span><span class="chg">answer = response.choices[0].message.content</span><span class="dim">
 
-message = f"""
+</span><span class="chg">message = f"""
 Here is a question:
 {question}
 
@@ -95,17 +60,14 @@ And here is a possible answer that might be correct or incorrect:
 {answer}
 
 Please evaluate if the answer is correct or incorrect.
-"""</code></pre>
+"""</span></div>
 <div class="callout tip"><b class="lbl"><span class="en">The key trick</span><span class="zh">关键技巧</span></b><span class="en">Store each reply in a variable, then drop it into the next prompt with an f-string (<code>{question}</code>). That's all "chaining" is.</span><span class="zh">把每次的回复存进变量，再用 f-string（<code>{question}</code>）放进下一个提示词。这就是“串联”的全部含义。</span></div>
+<div class="try" id="p3"></div>
 
-<h2><span class="en">Pick the right model size</span><span class="zh">选对模型大小</span></h2>
-<p class="en">Bigger models are smarter but slower and pricier. Use small ones for easy steps and a strong one where judgment matters.</p>
-<p class="zh">模型越大越聪明，但更慢也更贵。简单步骤用小模型，需要判断力的地方用强模型。</p>
-<div class="tier">
-  <div><b>nano</b><code>gpt-5.4-nano</code><br><span class="meta"><span class="en">Cheapest. Quick facts, simple tasks.</span><span class="zh">最便宜。简单问答与任务。</span></span></div>
-  <div><b>mini</b><code>gpt-5.4-mini</code><br><span class="meta"><span class="en">Balanced. Writing the question and answer.</span><span class="zh">均衡。负责出题与作答。</span></span></div>
-  <div><b>full</b><code>gpt-5.4</code><br><span class="meta"><span class="en">Strongest. The final judge.</span><span class="zh">最强。担任最终评判。</span></span></div>
-</div>
+<h2><span class="en">Step 4 · Pick the right model size</span><span class="zh">第 4 步 · 选对模型大小</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Bigger models are smarter but slower and pricier. Use small ones for easy steps and a strong one where judgment matters. <b>nano</b> (<code>gpt-5.4-nano</code>) is cheapest, for quick facts and simple tasks. <b>mini</b> (<code>gpt-5.4-mini</code>) is balanced, good for writing the question and answer. <b>full</b> (<code>gpt-5.4</code>) is strongest, the final judge.</p>
+<p class="zh"style="margin:0 0 8px">模型越大越聪明，但更慢也更贵。简单步骤用小模型，需要判断力的地方用强模型。<b>nano</b>（<code>gpt-5.4-nano</code>）最便宜，适合简单问答与任务。<b>mini</b>（<code>gpt-5.4-mini</code>）均衡，适合出题与作答。<b>full</b>（<code>gpt-5.4</code>）最强，担任最终评判。</p></div>
+<div class="sc" id="g4"></div>
 
 <h2><span class="en">If something breaks</span><span class="zh">遇到问题时</span></h2>
 <details><summary><span class="en"><code>load_dotenv</code> printed <code>False</code></span><span class="zh"><code>load_dotenv</code> 输出了 <code>False</code></span></summary>
@@ -119,11 +81,13 @@ Please evaluate if the answer is correct or incorrect.
 <details><summary><span class="en">Using another provider?</span><span class="zh">想用别的模型服务商？</span></summary>
 <p class="en">Many providers (Gemini, DeepSeek, local Ollama) accept the same <code>OpenAI</code> client. You only change the base URL, the key and the model name.</p><p class="zh">许多服务商（Gemini、DeepSeek、本地 Ollama）都兼容同一个 <code>OpenAI</code> 客户端，只需更换 base URL、密钥和模型名。</p></details>
 
-<h2><span class="en">Your turn</span><span class="zh">轮到你了</span></h2>
-<p class="en">Build a three-call chain for a business idea: (1) ask for a business area worth exploring with agentic AI, (2) ask for a pain point in that area, (3) ask for an agentic AI solution to that pain point. Each prompt must include the previous reply.</p>
-<p class="zh">为一个商业点子搭建三次调用的调用链：（1）让模型选一个适合用AI 智能体 探索的行业；（2）让它指出该行业的一个痛点；（3）让它提出针对该痛点的AI 智能体 方案。每个提示词都要包含上一步的回复。</p>
+<h2><span class="en">Now make it yours</span><span class="zh">现在做成你的</span></h2>
+<p class="en">Build a three-call chain for a business idea. Each prompt must include the previous reply.</p>
+<p class="zh">为一个商业点子搭建三次调用的调用链。每个提示词都要包含上一步的回复。</p>
+<div class="cl"><label><input type="checkbox"><span><span class="en">Call 1: ask for a business area worth exploring with agentic AI.</span><span class="zh">第 1 次调用：让模型选一个适合用AI 智能体 探索的行业。</span></span></label><label><input type="checkbox"><span><span class="en">Call 2: ask for a pain point in that area.</span><span class="zh">第 2 次调用：让它指出该行业的一个痛点。</span></span></label><label><input type="checkbox"><span><span class="en">Call 3: ask for an agentic AI solution to that pain point.</span><span class="zh">第 3 次调用：让它提出针对该痛点的AI 智能体 方案。</span></span></label></div>
 <details><summary><span class="en">Show a hint</span><span class="zh">查看提示</span></summary>
-<pre><code>def ask(prompt, model="gpt-5.4-mini"):
+<p class="meta"><span class="en">Python · notebook cell (<code>first_call.ipynb</code>)</span><span class="zh">Python · 笔记本单元格（<code>first_call.ipynb</code>）</span></p>
+<div class="codebox">def ask(prompt, model="gpt-5.4-mini"):
     messages = [{"role": "user", "content": prompt}]
     response = client.chat.completions.create(model=model, messages=messages)
     return response.choices[0].message.content
@@ -131,94 +95,45 @@ Please evaluate if the answer is correct or incorrect.
 business_area = ask("Pick a business area worth exploring for an agentic AI opportunity. Respond only with the area.")
 pain_point = ask(f"Present a pain-point in the {business_area} industry that an agentic solution could solve. Respond only with the pain-point.")
 solution = ask(f"Propose an agentic AI solution for this pain-point in {business_area}: {pain_point}")
-print(solution)</code></pre></details>
+print(solution)</div></details>
 
 <div class="callout tip"><b class="lbl"><span class="en">Back at the kopitiam</span><span class="zh">回到 kopitiam</span></b><span class="en">Calling a model is like shouting an order across the counter to Ah Seng at the drinks station. You say it, he answers once, and he forgets you the moment the cup leaves. Chaining calls is passing the cup from one station to the next.</span><span class="zh">调用模型就像隔着柜台向饮料站的 Ah Seng 喊一单。你喊一次，他答一次，杯子一出手他就忘了你。串联调用，就是把杯子一站一站传下去。</span></div>
-<h2><span class="en">Quick check</span><span class="zh">小测验</span></h2>
-<div class="quiz" data-answer="b">
-  <p class="q"><span class="en">What does <code>load_dotenv()</code> do?</span><span class="zh"><code>load_dotenv()</code> 的作用是什么？</span></p>
-  <button class="opt" data-k="a"><span class="en">Sends your question to the model</span><span class="zh">把问题发送给模型</span></button>
-  <button class="opt" data-k="b"><span class="en">Loads values from <code>.env</code> into environment variables</span><span class="zh">把 <code>.env</code> 中的值加载为环境变量</span></button>
-  <button class="opt" data-k="c"><span class="en">Installs the OpenAI package</span><span class="zh">安装 OpenAI 包</span></button>
-  <div class="explain"><span class="en">That's how <code>OpenAI()</code> later finds your key without it being written in your code.</span><span class="zh">这样 <code>OpenAI()</code> 之后就能找到密钥，而不必把密钥写在代码里。</span></div>
-</div>
-<div class="quiz" data-answer="c">
-  <p class="q"><span class="en">Where is the model's reply text?</span><span class="zh">模型的回复文本在哪里？</span></p>
-  <button class="opt" data-k="a"><span class="en"><code>response.text</code></span><span class="zh"><code>response.text</code></span></button>
-  <button class="opt" data-k="b"><span class="en"><code>messages[0]</code></span><span class="zh"><code>messages[0]</code></span></button>
-  <button class="opt" data-k="c"><span class="en"><code>response.choices[0].message.content</code></span><span class="zh"><code>response.choices[0].message.content</code></span></button>
-  <div class="explain"><span class="en">The response holds a list of choices; the first one's message has the content.</span><span class="zh">响应里有一个 choices 列表，第一项的 message 里就是 content。</span></div>
-</div>
-<div class="quiz" data-answer="a">
-  <p class="q"><span class="en">Why do we paste the question and answer into the third call?</span><span class="zh">为什么要把问题和答案粘贴进第三次调用？</span></p>
-  <button class="opt" data-k="a"><span class="en">Each call is independent; the model only knows what's in the messages</span><span class="zh">每次调用相互独立，模型只知道消息里有的内容</span></button>
-  <button class="opt" data-k="b"><span class="en">The model remembers everything, but it's faster this way</span><span class="zh">模型什么都记得，只是这样更快</span></button>
-  <button class="opt" data-k="c"><span class="en">It makes the model cheaper</span><span class="zh">这样模型更便宜</span></button>
-  <div class="explain"><span class="en">No memory between calls, so you carry information forward yourself. That's the heart of chaining.</span><span class="zh">调用之间没有记忆，所以信息要由你自己带到下一步。这正是串联的核心。</span></div>
-</div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• An LLM API is a function: messages in, text out.<br>• Keep the key in <code>.env</code>, load it with <code>load_dotenv</code>, and never print or share it.<br>• The reply text is at <code>response.choices[0].message.content</code>.<br>• Each call starts fresh, so you carry information forward yourself.<br>• Chaining is: store a reply in a variable, drop it into the next prompt with an f-string.<br>• Small models for easy steps, a strong one for the final judgment.</p><p class="zh" style="margin:0">• LLM API 就是一个函数：输入消息，输出文本。<br>• 密钥放在 <code>.env</code>，用 <code>load_dotenv</code> 加载，绝不打印或分享。<br>• 回复文字在 <code>response.choices[0].message.content</code>。<br>• 每次调用都从零开始，信息要由你自己带到下一步。<br>• 串联就是：把回复存进变量，再用 f-string 放进下一个提示词。<br>• 简单步骤用小模型，最后的判断用强模型。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Agentic</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
-<script src="lessons.js"></script><script src="../assets/site.js"></script>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
 <script>
-(function(){
- var t=TX.t;
- /* annotated code */
- var L=[
-  {c:'from dotenv import load_dotenv',en:'Bring in the small helper that knows how to read a .env file.',zh:'引入能读取 .env 文件的小工具。'},
-  {c:'load_dotenv(override=True)',en:'Reads .env and puts each line into environment variables. It prints True if the file was found, False if not. override=True means the file wins over any older value.',zh:'读取 .env，并把每一行放进环境变量。找到文件输出 True，否则输出 False。override=True 表示以文件中的值为准。'},
-  {c:'import os\nopenai_api_key = os.getenv("OPENAI_API_KEY")',en:'Reads the key back from the environment so you can check it exists. Print only the first few characters, never the whole key.',zh:'从环境变量里把密钥读回来，确认它存在。只打印前几个字符，不要打印整个密钥。'},
-  {c:'from openai import OpenAI',en:'Import the official client library. Many other providers use this same library too.',zh:'引入官方客户端库。许多其他服务商也使用同一个库。'},
-  {c:'client = OpenAI()',en:'Creates your client. It quietly picks up OPENAI_API_KEY from the environment, so the key never appears in your code.',zh:'创建你的客户端。它会自动从环境变量读取 OPENAI_API_KEY，所以密钥不会出现在代码里。'},
-  {c:'messages = [{"role": "user", "content": "Tell me a fun fact"}]',en:'Your input: a list with one message from the user. You can add more messages later to build a conversation.',zh:'你的输入：一个只含一条用户消息的列表。以后可以添加更多消息来构成对话。'},
-  {c:'response = client.chat.completions.create(\n    model="gpt-5.4-nano", messages=messages)',en:'The actual call. You choose the model and hand over the messages; the response comes back as an object.',zh:'真正的调用。你选择模型并传入消息，返回的是一个响应对象。'},
-  {c:'print(response.choices[0].message.content)',en:'Dig the text out of the response object and print it.',zh:'从响应对象中取出文字并打印。'}
- ];
- var box=document.getElementById('code'),why=document.getElementById('why');
- L.forEach(function(l,i){var b=document.createElement('button');b.className='codeln';b.textContent=l.c;b.onclick=function(){
-  box.querySelectorAll('.codeln').forEach(function(x){x.classList.remove('sel')});b.classList.add('sel');
-  why.innerHTML='<span class="role">'+(i+1)+' / '+L.length+'</span><p style="margin:.4em 0 0" class="en">'+l.en+'</p><p style="margin:.4em 0 0" class="zh">'+l.zh+'</p>'};box.appendChild(b)});
- box.firstChild.click();
+document.addEventListener('DOMContentLoaded',function(){
+ var $=TX2.$,game=TX2.game,predict=TX2.predict,trace=TX2.trace;TX2.init();
 
- /* chain: manual, half-step at a time */
- var q='If it takes 5 machines 5 minutes to make 5 widgets, how long would it take 100 machines to make 100 widgets?';
- var a='5 minutes. Each machine makes one widget every 5 minutes, so 100 machines make 100 widgets in the same 5 minutes.';
- var ev='Correct. The rate is 1 widget per machine per 5 minutes, so the time stays 5 minutes however many machines you add.';
- function esc(x){return x.replace(/&/g,'&amp;').replace(/</g,'&lt;')}
- function mk(x){return '<mark>'+esc(x)+'</mark>'}
- var S=[
-  {n:{en:'Ask for a question',zh:'出题'},m:'gpt-5.4-mini',
-   ih:esc('messages = [{"role": "user", "content":\n  "Please propose a hard, challenging question to assess someone\'s IQ. Respond only with the question."}]'),out:q,
-   pn:{en:'This is the whole prompt. The model sees nothing else.',zh:'这就是完整的提示词，模型看不到任何别的内容。'},
-   rn:{en:'We save this reply in a variable called <b>question</b>. Next call will use it.',zh:'把这条回复存进名为 <b>question</b> 的变量，下一次调用要用它。'}},
-  {n:{en:'Answer it',zh:'作答'},m:'gpt-5.4-mini',
-   ih:esc('messages = [{"role": "user", "content":\n  ')+mk(q)+esc(' }]'),out:a,
-   pn:{en:'The highlighted text is call 1\'s reply, now pasted into call 2. The model has no memory, so we hand it over.',zh:'高亮部分是第 1 次调用的回复，现在被粘贴进第 2 次调用。模型没有记忆，所以要由我们递过去。'},
-   rn:{en:'Saved as <b>answer</b>. Next call needs both <b>question</b> and <b>answer</b>.',zh:'存为 <b>answer</b>。下一次调用需要同时用到 <b>question</b> 和 <b>answer</b>。'}},
-  {n:{en:'Judge the answer',zh:'评判'},m:'gpt-5.4',
-   ih:esc('messages = [{"role": "user", "content": f"""\nHere is a question:\n')+mk(q)+esc('\n\nAnd here is a possible answer:\n')+mk(a)+esc('\n\nPlease evaluate if the answer is correct or incorrect."""}]'),out:ev,
-   pn:{en:'Two earlier results are pasted in (highlighted). This is what chaining means.',zh:'前两次的结果都被粘贴进来了（高亮）。这就是“串联”。'},
-   rn:{en:'Done: three calls, each one fed by the previous reply.',zh:'完成：三次调用，每一次都由上一次的回复喂进去。'}}
- ];
- var ch=document.getElementById('chain'),inp=document.getElementById('inp'),out=document.getElementById('out'),go=document.getElementById('go'),nodes=[],arrows=[],pos=0;
- S.forEach(function(s,i){
-  var d=document.createElement('div');d.className='cn';d.innerHTML='<b>'+(i+1)+'. '+t(s.n)+'</b><span class="m">'+s.m+'</span>';d.onclick=function(){pos=2*i+2;draw()};ch.appendChild(d);nodes.push(d);
-  if(i<S.length-1){var ar=document.createElement('div');ar.className='ca';ar.innerHTML='<div>→<br><i>'+(i===0?'question':'answer')+'</i></div>';ch.appendChild(ar);arrows.push(ar)}});
- var note=document.createElement('div');note.className='callout tip';note.style.margin='12px 0 0';go.parentNode.parentNode.insertBefore(note,go.parentNode.nextSibling);
- var rs=document.createElement('button');rs.className='btn';rs.style.display='none';go.parentNode.insertBefore(rs,go.nextSibling);
- function draw(){
-  var k=pos?Math.floor((pos-1)/2):-1,reply=pos>0&&pos%2===0;
-  nodes.forEach(function(n,j){n.classList.toggle('on',j===k);n.classList.toggle('sel',j===k)});
-  arrows.forEach(function(x,j){x.classList.toggle('on',k>0&&j===k-1)});
-  if(pos===0){inp.textContent='';inp.innerHTML='<span style="opacity:.5">'+t({en:'Press Next to prepare call 1.',zh:'点“下一步”准备第 1 次调用。'})+'</span>';out.innerHTML='<span style="opacity:.5">—</span>';note.innerHTML=t({en:'Three calls, three steps each: prepare, send, read the reply.',zh:'三次调用，每次三个动作：准备、发送、读取回复。'})}
-  else{inp.innerHTML=S[k].ih;out.innerHTML=reply?esc(S[k].out):'<span style="opacity:.5">'+t({en:'Not sent yet. Press Send.',zh:'还没发送。点“发送”。'})+'</span>';note.innerHTML='<b>'+t({en:'Call '+(k+1)+' of 3',zh:'第 '+(k+1)+' / 3 次调用'})+'</b> · '+t(reply?S[k].rn:S[k].pn)}
-  if(pos>=6){go.innerHTML=t({en:'↻ Start over',zh:'↻ 重新开始'});rs.style.display='none'}
-  else{var nx=pos+1,nk=Math.floor((nx-1)/2)+1;go.innerHTML=(nx%2?t({en:'Next: prepare call '+nk+' →',zh:'下一步：准备第 '+nk+' 次调用 →'}):t({en:'Send call '+nk+' ▶',zh:'发送第 '+nk+' 次调用 ▶'}));rs.style.display=pos>0?'':'none'}
-  rs.innerHTML=t({en:'↺ Restart',zh:'↺ 重来'})}
- function lb(){draw()}
- go.onclick=function(){pos=pos>=6?0:pos+1;draw()};rs.onclick=function(){pos=0;draw()};
- draw();
- new MutationObserver(lb).observe(document.documentElement,{attributes:true,attributeFilter:['data-lang']});
-})();
+ predict($('p1'),{q:{en:'You run <code>load_dotenv(override=True)</code> and it prints <code>False</code>. What does that tell you?',zh:'你运行 <code>load_dotenv(override=True)</code>，输出了 <code>False</code>。这说明什么？'},opts:[{k:'a',en:'The key is wrong',zh:'密钥错了'},{k:'b',en:'It did not find your .env file',zh:'它没找到你的 .env 文件'},{k:'c',en:'The model is offline',zh:'模型离线了'}],a:'b',ex:{en:'<code>load_dotenv</code> only loads values from <code>.env</code> into environment variables, so that <code>OpenAI()</code> can find your key later. <code>False</code> means the file was not found.',zh:'<code>load_dotenv</code> 只负责把 <code>.env</code> 里的值加载成环境变量，好让 <code>OpenAI()</code> 之后找到密钥。输出 <code>False</code> 表示没找到文件。'},hint:{en:'It has not talked to the model yet. Check the file name, folder and that you saved it.',zh:'它还没有和模型对话。检查文件名、所在文件夹，以及是否保存。'}});
+
+ game($('g2'),[
+  {en:'<code>load_dotenv(override=True)</code>',zh:'<code>load_dotenv(override=True)</code>',a:'key',ex:{en:'It reads <code>.env</code> into environment variables, and <code>override=True</code> means the file wins over any older value.',zh:'它把 <code>.env</code> 读进环境变量，<code>override=True</code> 表示以文件中的值为准。'},hint:{en:'Which line deals with the file?',zh:'哪一行和文件有关？'}},
+  {en:'<code>client = OpenAI()</code>',zh:'<code>client = OpenAI()</code>',a:'cl',ex:{en:'It creates your client and quietly picks up <code>OPENAI_API_KEY</code> from the environment, so the key never appears in your code.',zh:'它创建你的客户端，并自动从环境变量读取 <code>OPENAI_API_KEY</code>，所以密钥不会出现在代码里。'},hint:{en:'Which line makes the connection object?',zh:'哪一行创建连接对象？'}},
+  {en:'<code>client.chat.completions.create(model=..., messages=messages)</code>',zh:'<code>client.chat.completions.create(model=..., messages=messages)</code>',a:'call',ex:{en:'This is the actual call. You choose the model and hand over the messages; the response comes back as an object.',zh:'这是真正的调用。你选择模型并传入消息，返回的是一个响应对象。'},hint:{en:'Which line picks the model?',zh:'哪一行选了模型？'}},
+  {en:'<code>print(response.choices[0].message.content)</code>',zh:'<code>print(response.choices[0].message.content)</code>',a:'rd',ex:{en:'It digs the text out of the response object and prints it.',zh:'它从响应对象中取出文字并打印。'},hint:{en:'Which line only reads what came back?',zh:'哪一行只是读取返回的内容？'}}],
+  [{k:'key',en:'Loads the key',zh:'加载密钥'},{k:'cl',en:'Makes the client',zh:'创建客户端'},{k:'call',en:'Sends the call',zh:'发送调用'},{k:'rd',en:'Reads the reply',zh:'读取回复'}],{en:'Line',zh:'代码行'});
+
+ predict($('p2'),{q:{en:'Call 1 is “My name is Aina.” Call 2, sent on its own, is “What is my name?”. What can the model do?',zh:'第 1 次调用是“我叫 Aina。”，第 2 次单独发送“我叫什么？”。模型能做到什么？'},opts:[{k:'a',en:'Answer “Aina”',zh:'答出“Aina”'},{k:'b',en:'Not know, because call 1 is not in the messages',zh:'不知道，因为第 1 次调用不在消息里'}],a:'b',ex:{en:'The model remembers nothing between calls. Anything it should know must be inside the messages you send.',zh:'模型在两次调用之间什么都不记得。它需要知道的内容，必须写在你发送的消息里。'},hint:{en:'Does the second call contain the first message?',zh:'第二次调用里包含第一条消息吗？'}});
+
+ trace($('t3'),[
+  {k:'code',en:'Call 1 (<code>gpt-5.4-mini</code>): sends “Please propose a hard, challenging question to assess someone\'s IQ. Respond only with the question.”',zh:'第 1 次调用（<code>gpt-5.4-mini</code>）：发送“请出一道有难度的智商测试题，只回复题目。”',why:{en:'This is the whole prompt. The model sees nothing else.',zh:'这就是完整的提示词，模型看不到任何别的内容。'}},
+  {k:'llm',en:'If it takes 5 machines 5 minutes to make 5 widgets, how long would it take 100 machines to make 100 widgets?',zh:'如果 5 台机器用 5 分钟做 5 个零件，100 台机器做 100 个零件要多久？',why:{en:'We save this reply in a variable called <b>question</b>. The next call will use it.',zh:'把这条回复存进名为 <b>question</b> 的变量，下一次调用要用它。'}},
+  {k:'code',en:'Call 2 (<code>gpt-5.4-mini</code>): sends the <b>question</b> text and nothing else',zh:'第 2 次调用（<code>gpt-5.4-mini</code>）：只发送 <b>question</b> 的文字',why:{en:'Call 1\'s reply is now pasted into call 2. The model has no memory, so we hand it over.',zh:'第 1 次调用的回复现在被粘贴进第 2 次调用。模型没有记忆，所以要由我们递过去。'}},
+  {k:'llm',en:'5 minutes. Each machine makes one widget every 5 minutes, so 100 machines make 100 widgets in the same 5 minutes.',zh:'5 分钟。每台机器每 5 分钟做一个零件，所以 100 台机器做 100 个零件仍是 5 分钟。',why:{en:'Saved as <b>answer</b>. The next call needs both <b>question</b> and <b>answer</b>.',zh:'存为 <b>answer</b>。下一次调用需要同时用到 <b>question</b> 和 <b>answer</b>。'}},
+  {k:'code',en:'Call 3 (<code>gpt-5.4</code>): sends an f-string with <b>question</b> and <b>answer</b> pasted in',zh:'第 3 次调用（<code>gpt-5.4</code>）：发送用 f-string 填入 <b>question</b> 和 <b>answer</b> 的提示词',why:{en:'Two earlier results are pasted in. This is what chaining means.',zh:'前两次的结果都被粘贴进来了。这就是“串联”。'}},
+  {k:'llm',en:'Correct. The rate is 1 widget per machine per 5 minutes, so the time stays 5 minutes however many machines you add.',zh:'正确。速率是每台机器每 5 分钟 1 个零件，所以无论加多少台机器，时间都是 5 分钟。',why:{en:'Done: three calls, each one fed by the previous reply.',zh:'完成：三次调用，每一次都由上一次的回复喂进去。'}}]);
+
+ predict($('p3'),{q:{en:'Why do we paste the question and the answer into the third call?',zh:'为什么要把问题和答案粘贴进第三次调用？'},opts:[{k:'a',en:'Each call is independent; the model only knows what is in the messages',zh:'每次调用相互独立，模型只知道消息里有的内容'},{k:'b',en:'The model remembers everything, but it is faster this way',zh:'模型什么都记得，只是这样更快'},{k:'c',en:'It makes the model cheaper',zh:'这样模型更便宜'}],a:'a',ex:{en:'No memory between calls, so you carry information forward yourself. That is the heart of chaining.',zh:'调用之间没有记忆，所以信息要由你自己带到下一步。这正是串联的核心。'},hint:{en:'Look at the call 3 step in the log: where does the judge get the question from?',zh:'看日志里第 3 次调用那一步：评判者从哪里拿到题目？'}});
+
+ game($('g4'),[
+  {en:'Answer a quick, simple fact.',zh:'回答一个简单的小事实。',a:'nano',ex:{en:'nano is cheapest and fine for quick facts and simple tasks.',zh:'nano 最便宜，简单问答和任务够用。'},hint:{en:'Which size is the cheapest?',zh:'哪个尺寸最便宜？'}},
+  {en:'Write the question and the answer.',zh:'负责出题与作答。',a:'mini',ex:{en:'mini is balanced, a good fit for writing the question and answer.',zh:'mini 均衡，适合出题与作答。'},hint:{en:'A balanced middle size fits.',zh:'选均衡的中间档。'}},
+  {en:'Judge whether the answer is correct, the step where judgment matters.',zh:'评判答案是否正确，这一步需要判断力。',a:'full',ex:{en:'full is the strongest, so it is used where judgment matters.',zh:'full 最强，用在需要判断力的地方。'},hint:{en:'Which size is strongest?',zh:'哪个尺寸最强？'}}],
+  [{k:'nano',en:'nano',zh:'nano'},{k:'mini',en:'mini',zh:'mini'},{k:'full',en:'full',zh:'full'}],{en:'Step',zh:'步骤'});
+});
 </script></body></html>
