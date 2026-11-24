@@ -14,10 +14,10 @@ import { gh, scrub, REPO, arg } from './lib.mjs';
 
 const BRANCH = 'agent-status', COOLDOWN_DAYS = 7, LOW = 8;
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const short = (s, n) => scrub(String(s || '')).replace(/\s+/g, ' ').trim().slice(0, n);
+export const short = (s, n) => scrub(String(s || '')).replace(/\s+/g, ' ').trim().slice(0, n);
 const out = (k, v) => process.env.GITHUB_OUTPUT && appendFileSync(process.env.GITHUB_OUTPUT, `${k}=${v}\n`);
 
-async function rawFile(path) {
+export async function rawFile(path) {
   try { const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/${path}`); return r.ok ? await r.json() : {}; } catch { return {}; }
 }
 
@@ -26,7 +26,7 @@ async function api(method, path, body) {
   return { status: r.status, json: await r.json().catch(() => ({})) };
 }
 // Read-modify-write one JSON file on the agent-status branch, retrying when another agent wrote at the same time.
-async function update(path, change) {
+export async function update(path, change) {
   if (!process.env.GITHUB_TOKEN) return console.log('::warning::signals: no GITHUB_TOKEN');
   if ((await api('GET', `/git/ref/heads/${BRANCH}`)).status !== 200) return console.log('::warning::signals: no agent-status branch yet');
   for (let attempt = 1; attempt <= 5; attempt++) {
@@ -50,6 +50,9 @@ export function mergeReader(data, reader, at = new Date().toISOString()) {
   return data;
 }
 
+// Ideas the role scouts left in the backlog (scripts/scout.mjs), best first.
+export const pendingIdeas = (state = {}) => (state.ideas || []).filter(i => existsSync(join(ROOT, i.file))).sort((a, b) => a.priority - b.priority || Date.parse(a.at) - Date.parse(b.at));
+
 // Pick the one thing to fix. Returns {kind, key, files, text} or null.
 export async function pick() {
   const attempts = (await rawFile('signals/improver.json')).attempts || {};
@@ -71,6 +74,11 @@ export async function pick() {
     const js = file.replace(/^([^/]+)\/(\d\d-[^.]+)\.html$/, '$1/js/$2.js');
     return { kind: 'reader', key: `reader:${file}`, files: [file, ...(existsSync(join(ROOT, js)) ? [js] : [])], text: `The intern agent (reads lessons as a newcomer to AI) scored ${file} ${v.score}/10 and found these confusing parts:\n${v.confusing.map(c => `- ${c.where}: ${c.why}`).join('\n')}\n\nFix only those parts: small wording changes, a missing step or an unexplained term, in both English and 中文. Keep the story, the structure and the lesson's own voice. Do not touch what was not flagged.` };
   }
+  const idea = pendingIdeas(await rawFile('signals/ideas.json'))[0];
+  if (idea) {
+    const js = idea.file.replace(/^([^/]+)\/(\d\d-[^.]+)\.html$/, '$1/js/$2.js');
+    return { kind: 'idea', key: `idea:${idea.id}`, files: [idea.file, ...(js !== idea.file && existsSync(join(ROOT, js)) ? [js] : [])], text: `The ${idea.role.replace(/-/g, ' ')} agent looked at ${idea.file} and suggests: ${idea.title}\nWhy: ${idea.why}\n\nCheck it on closer reading first. If it is not real, or not clearly better, change nothing. Otherwise make just that one focused change, in both English and 中文 where text is involved.` };
+  }
   return null;
 }
 
@@ -82,10 +90,11 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   } else if (mode === 'attempt') {
     const key = process.argv[3];
     await update('signals/improver.json', d => { d.attempts ||= {}; d.attempts[key] = new Date().toISOString(); for (const k of Object.keys(d.attempts)) if (Date.now() - Date.parse(d.attempts[k]) > 30 * 864e5) delete d.attempts[k]; return d; });
+    if (key.startsWith('idea:')) await update('signals/ideas.json', d => { const i = (d.ideas || []).find(x => 'idea:' + x.id === key); if (i) (d.done ||= []).push({ file: i.file, title: i.title, at: new Date().toISOString() }); d.ideas = (d.ideas || []).filter(x => 'idea:' + x.id !== key); d.done = (d.done || []).slice(-60); return d; });
   } else if (mode === 'brief') {
     const dir = arg('out', '/tmp/improver'); mkdirSync(dir, { recursive: true });
     const p = await pick();
-    if (!p) { console.log('Nothing to fix: no open quality problem and no lesson the intern scored under 8.'); out('actionable', 'false'); }
+    if (!p) { console.log('Nothing to fix: no open quality problem, no lesson the intern scored under 8 and no idea waiting.'); out('actionable', 'false'); }
     else {
       writeFileSync(join(dir, 'brief.md'), `${p.text}\n\nFiles you may change: ${p.files.join(', ')}\n`);
       console.log(`Target (${p.kind}): ${p.key}\nFiles: ${p.files.join(' ')}`);
