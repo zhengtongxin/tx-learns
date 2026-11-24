@@ -19,8 +19,7 @@
   window.TX={t:t,burst:burst};
   var TYPE={f:{en:'Foundations',zh:'基础'},c:{en:'Concept',zh:'概念'},p:{en:'Project',zh:'项目'}};
 
-  if(window.TRACK&&!window.TRACKS)document.write('<script src="../tracks.js"><\/script>');
-  /* learner search + related lessons live in their own file (scripts/search-index.mjs builds its index) */
+  /* the "Related lessons" card lives in its own file (scripts/search-index.mjs builds assets/related.json) */
   (function(m){if(m&&m.src){var q=document.createElement('script');q.src=m.src.replace(/site\.js.*$/,'search.js'+(m.src.match(/\?.*$/)||[''])[0]);q.defer=true;document.head.appendChild(q)}})(document.currentScript);
   document.addEventListener('DOMContentLoaded',function(){
     var C=window.TRACK,here=location.pathname.split('/').pop()||'index.html',d=done();

@@ -67,7 +67,7 @@ jobs:
           PLAYWRIGHT_DIR="$RUNNER_TEMP/pw" node scripts/ui-check.mjs --fit --out "$RUNNER_TEMP/fit" --pages "$pages" | tee fit.txt; exit ${PIPESTATUS[0]}
       - name: Search index (a note, never a gate)
         if: success() || failure()
-        run: "[ -f scripts/search-index.mjs ] && { node scripts/search-index.mjs --check || echo '::notice::The learner search index is behind. The writer agent rebuilds it; or run node scripts/search-index.mjs.'; }; exit 0"
+        run: "[ -f scripts/search-index.mjs ] && { node scripts/search-index.mjs --check || echo '::notice::The related-lessons file is behind. The writer agent rebuilds it; or run node scripts/search-index.mjs.'; }; exit 0"
       - name: Tell TX on Telegram
         if: failure()
         env:

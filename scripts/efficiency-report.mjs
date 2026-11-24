@@ -48,7 +48,6 @@ const uiCheck = readFileSync(join(ROOT, 'scripts/ui-check.mjs'), 'utf8');
 const findings = [];
 if (/document\.write/.test(siteJs)) findings.push('Remove the parser-blocking `document.write` bootstrap in `assets/site.js`.');
 if (/history:\s*\(a\.history \|\| \[\]\)/.test(statusJs)) findings.push('Bound `/api/status` history instead of returning every retained run.');
-if (files.some(f => f.path === 'assets/search-index.json') && siteJs.includes('search.js')) findings.push('Lazy-load the full search index; keep only related-lesson metadata on the initial page path.');
 if (siteJs.includes("['prereqs.js','projects.js','packages.js']")) findings.push('Replace three sequential/dynamic data loads with one generated lesson manifest or explicit deferred modules.');
 if (/waitUntil:\s*'networkidle'/.test(uiCheck)) findings.push('Replace `networkidle` and fixed browser waits with a readiness signal and deterministic settling.');
 if (count(/innerHTML\s*=/g) > 25) findings.push('Reduce large `innerHTML` renderers by extracting shared DOM/HTML helpers.');
