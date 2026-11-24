@@ -24,6 +24,10 @@ const all = [...rootPages, ...TR.flatMap(t => readdirSync(new URL(t.dir + '/', r
 const named = process.argv.slice(2).filter(a => a !== '--fix');
 const pages = named.length ? named : all;
 const problems = [];
+const isLesson = p => /^[\w-]+\/\d\d-[\w-]+\.html$/.test(p);
+const LESSON_JS = /<script src="(js\/[\w-]+\.js)(?:\?v=[0-9a-f]*)?"><\/script>/;
+// The lesson's own script file text ('' when it has none); `read` gets the path inside the track folder.
+const lessonJs = (html, p, read = f => { try { return readFileSync(new URL(f, root), 'utf8'); } catch { return ''; } }) => { const m = html.match(LESSON_JS); return m ? '\n' + read(p.split('/')[0] + '/' + m[1]) : ''; };
 const bad = (p, m) => problems.push(`${p}: ${m}`);
 const count = (s, re) => (s.match(re) || []).length;
 
@@ -31,7 +35,8 @@ for (const p of pages) {
   let html;
   try { html = readFileSync(new URL(p, root), 'utf8'); } catch { bad(p, 'file not found'); continue; }
   const markup = html.replace(/<(script|style)\b[\s\S]*?<\/\1>/gi, '').replace(/<!--[\s\S]*?-->/g, '');
-  const scripts = (html.match(/<script\b[^>]*>[\s\S]*?<\/script>/gi) || []).join('\n');
+  // A lesson's own script lives in <track>/js/NN-slug.js: its {en,zh} strings count as if it were inline.
+  const scripts = (html.match(/<script\b[^>]*>[\s\S]*?<\/script>/gi) || []).join('\n') + (isLesson(p) ? lessonJs(html, p) : '');
 
   if (!/<html[^>]*\blang="[a-z-]+"/i.test(html)) bad(p, '<html> has no lang');
   if (!/<title>\s*[^<\s][^<]*<\/title>/i.test(html)) bad(p, 'no <title>');
@@ -58,9 +63,9 @@ for (const p of pages) {
 }
 
 // "Updated" dates on lessons.
-const isLesson = p => /^[\w-]+\/\d\d-[\w-]+\.html$/.test(p);
 // Text that --fix generates itself (updated date, canonical, JSON-LD, ?v= versions) does not count as a change to the lesson.
-const plain = h => h.replace(UPD, '').replace(/<link rel="canonical"[^>]*>/, '').replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, '').replace(/\?v=[0-9a-f]{8}"/g, '"');
+// A lesson's script counts as part of the lesson whether it is inline or in <track>/js/ (moving it is not a change).
+const plain = (h, js = '') => h.replace(LESSON_JS, () => '<script>' + js.replace(/^\n/, '') + '</script>').replace(UPD, '').replace(/<link rel="canonical"[^>]*>/, '').replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, '').replace(/\?v=[0-9a-f]{8}"/g, '"');
 const UPD = /<meta name="updated" content="([^"]*)">\n?/;
 const today = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
 const git = (...a) => { try { return execFileSync('git', a, { cwd: new URL('.', root), encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }); } catch { return null; } };
@@ -68,7 +73,9 @@ for (const p of all.filter(isLesson)) {
   const cur = readFileSync(new URL(p, root), 'utf8'), m = cur.match(UPD);
   if (FIX) {
     const head = git('show', `HEAD:${p}`);
-    const changed = head === null || plain(head) !== plain(cur);
+    const jsOf = (html, ref) => { const m = html.match(LESSON_JS); return m ? (git('show', `${ref}:${p.split('/')[0]}/${m[1]}`) ?? '') : ''; };
+    const jsNow = (() => { const m = cur.match(LESSON_JS); try { return m ? readFileSync(new URL(p.split('/')[0] + '/' + m[1], root), 'utf8') : ''; } catch { return ''; } })();
+    const changed = head === null || plain(head, jsOf(head, 'HEAD')) !== plain(cur, jsNow);
     const date = changed ? today : (m && m[1]) || (git('log', '-1', '--format=%cs', '--', p) || '').trim() || today;
     const tag = `<meta name="updated" content="${date}">\n`;
     const next = m ? cur.replace(UPD, tag) : cur.replace(/(<meta name="theme-color"[^>]*>)\n?/, `$1\n${tag}`);
@@ -114,7 +121,7 @@ const trackMeta = Object.fromEntries(tracksCtx.window.TRACKS.map(t => [t.id, t])
 const LEVELS = { 1: 'Beginner', 2: 'Intermediate', 3: 'Advanced' };
 const sha = (...fs) => createHash('sha1').update(fs.map(f => readFileSync(new URL(f, root))).reduce((a, b) => Buffer.concat([a, b]), Buffer.alloc(0))).digest('hex').slice(0, 8);
 const hashOf = f => f === 'assets/site.js' ? sha('assets/site.js', 'assets/search.js') : sha(f); // site.js hands its version on to search.js
-const VERSIONED = /^assets\/(site|teach|build-concepts)\.(js|css)$|^tracks\.js$|^[\w-]+\/lessons\.js$/;
+const VERSIONED = /^assets\/(site|teach|build-concepts)\.(js|css)$|^tracks\.js$|^[\w-]+\/lessons\.js$|^[\w-]+\/js\/[\w-]+\.js$/;
 const REF = /(\b(?:src|href)=")([^"?#]*)(\?v=[0-9a-f]*)?(")/g;
 const resolve = (page, ref) => { const parts = page.split('/').slice(0, -1); for (const seg of ref.split('/')) { if (seg === '..') parts.pop(); else if (seg !== '.' && seg) parts.push(seg); } return parts.join('/'); };
 const jsonLd = o => '<script type="application/ld+json">' + JSON.stringify(o).replace(/</g, '\\u003c') + '</script>';
@@ -161,7 +168,7 @@ for (const p of all) {
   }
   if (next !== cur) { if (FIX) writeFileSync(new URL(p, root), next); else bad(p, 'canonical link, JSON-LD or ?v= asset versions out of date (run node scripts/check-pages.mjs --fix)'); }
   // Every use of a file that vercel.json caches as immutable must carry ?v=.
-  for (const m of (FIX ? next : cur).matchAll(REF)) { const t = resolve(p, m[2]); if (/^assets\/(site|teach|build-concepts)\.(js|css)$/.test(t) && !m[3]) unversioned.push(`${p}: ${m[2]}`); }
+  for (const m of (FIX ? next : cur).matchAll(REF)) { const t = resolve(p, m[2]); if (/^assets\/(site|teach|build-concepts)\.(js|css)$|^[\w-]+\/js\/[\w-]+\.js$/.test(t) && !m[3]) unversioned.push(`${p}: ${m[2]}`); }
 }
 for (const u of unversioned) bad(u.split(':')[0], 'asset cached as immutable has no ?v= version: ' + u.split(': ')[1]);
 // assets/site.js loads assets/search.js itself and must pass its own ?v= on, because search.js is cached as immutable too.
@@ -195,6 +202,8 @@ for (const m of moves) {
     h('/(.*)\\.html', 'public, max-age=0, must-revalidate'),
     // only the files every page references with ?v=<hash> (checked above) are immutable
     h('/assets/(site\\.js|site\\.css|teach\\.js|teach\\.css|build-concepts\\.js|search\\.js)', 'public, max-age=31536000, immutable'),
+    // each lesson's own script (<track>/js/NN-slug.js) is versioned the same way
+    h('/(' + TR.map(t => t.dir).join('|') + ')/js/(.+\\.js)', 'public, max-age=31536000, immutable'),
     h('/assets/(.+\\.(?:svg|png|jpg|ico|webp))', 'public, max-age=3600, stale-while-revalidate=86400'),
   ], redirects: moves.filter(m => m && m.from && m.to).map(m => ({ source: m.from, destination: m.to, permanent: true })) };
   if (!want.redirects.length) delete want.redirects;
