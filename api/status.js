@@ -3,7 +3,7 @@
 // The repo is public, so it reads the file from raw.githubusercontent.com with no token.
 // This endpoint is public, so it only passes on what the page needs: each known agent's state, time, run count and
 // plain-language summary. No links, branch names or error details; retired agents and blank entries are dropped.
-const AGENTS = ['writer', 'copy-check', 'reader', 'reviewer', 'scope-guard', 'ui-check', 'live-check', 'optimizer', 'improver', 'quality', 'recall'];
+const AGENTS = ['writer', 'copy-check', 'reader', 'reviewer', 'scope-guard', 'ui-check', 'live-check', 'optimizer', 'improver', 'news', 'quality', 'recall'];
 const STATES = ['ok', 'flag', 'fail', 'skip'];
 const HISTORY = 12; // newest runs per agent the page can show; keeps the public answer small
 const clean = t => String(t || '').replace(/\bOn [\w./-]+: /g, '').replace(/https?:\/\/\S+/g, '').slice(0, 300);
