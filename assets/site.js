@@ -264,6 +264,7 @@
       if(fg){fg.style.strokeDashoffset=2*Math.PI*18*(1-pr);rn.textContent=Math.round(pr*100);rn.parentNode.setAttribute('aria-valuenow',Math.round(pr*100))}}
     window.addEventListener('scroll',onScroll,{passive:true});onScroll();
 
+    var codeN=0;
     /* code boxes: a Copy button, an optional file/language label (data-file, data-lang on the <pre>), and a keyboard-scrollable region */
     document.querySelectorAll('main pre, main .codebox').forEach(function(pre){
       if(pre.closest('.codewrap'))return;
@@ -272,7 +273,7 @@
       var lab=[pre.getAttribute('data-file'),pre.getAttribute('data-lang')].filter(Boolean).join(' · ');
       bar.innerHTML='<span class="codelab">'+lab+'</span><button type="button" class="codecopy">'+t({en:'Copy',zh:'复制'})+'</button>';
       w.appendChild(bar);w.appendChild(pre);
-      pre.tabIndex=0;pre.setAttribute('role','region');pre.setAttribute('aria-label',(lab?lab+' · ':'')+'Code · 代码');
+      pre.tabIndex=0;pre.setAttribute('role','region');pre.setAttribute('aria-label',(lab?lab+' · ':'')+'Code '+(++codeN)+' · 代码 '+codeN);
       var b=bar.querySelector('.codecopy');
       b.onclick=function(){var txt=pre.innerText.replace(/\n+$/,'');
         function ok(){b.innerHTML=t({en:'Copied ✓',zh:'已复制 ✓'});setTimeout(function(){b.innerHTML=t({en:'Copy',zh:'复制'})},1800)}
@@ -307,15 +308,24 @@
        Enter or Space click it, so nothing is mouse-only (the frontend engineer agent flags anything still missed). */
     var FOC='a[href],button,input,select,textarea,summary,[tabindex]:not([tabindex="-1"])';
     function kb(){[].forEach.call(document.querySelectorAll('main *,.side *'),function(el){
-      if(el.hasAttribute('data-kb')||el.closest(FOC))return;
+      if(el.hasAttribute('data-kb')||el.closest(FOC)||el.querySelector(FOC))return;
       var cs=getComputedStyle(el),pc=el.parentElement&&getComputedStyle(el.parentElement).cursor;
       if(typeof el.onclick!=='function'&&!(cs.cursor==='pointer'&&pc!=='pointer'))return;
       el.setAttribute('data-kb','');el.setAttribute('tabindex','0');if(!el.getAttribute('role'))el.setAttribute('role','button')})}
     document.addEventListener('keydown',function(e){var el=e.target;
       if((e.key==='Enter'||e.key===' ')&&el&&el.hasAttribute&&el.hasAttribute('data-kb')){e.preventDefault();el.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true}))}});
-    var kbt;function kbLater(){clearTimeout(kbt);kbt=setTimeout(kb,150)}
+    /* any box that scrolls sideways or down (wide figures, tables, code) must be reachable with the keyboard too */
+    var scN=0;
+    function scrollers(){[].forEach.call(document.querySelectorAll('main *'),function(el){
+      if(el.hasAttribute('tabindex')||el.hasAttribute('data-sc')||el.closest('[hidden]'))return;
+      var ox=getComputedStyle(el).overflowX,oy=getComputedStyle(el).overflowY;
+      if(!/(auto|scroll)/.test(ox+oy)||(el.scrollWidth<=el.clientWidth+1&&el.scrollHeight<=el.clientHeight+1))return;
+      if(el.querySelector(FOC))return;
+      el.setAttribute('data-sc','');el.tabIndex=0;el.setAttribute('role','region');
+      if(!el.getAttribute('aria-label'))el.setAttribute('aria-label','Scrollable content '+(++scN)+' · 可滚动内容 '+scN)})}
+    var kbt;function kbLater(){clearTimeout(kbt);kbt=setTimeout(function(){kb();scrollers()},150)}
     if(window.MutationObserver)new MutationObserver(kbLater).observe(document.body,{childList:true,subtree:true});
-    window.addEventListener('load',kb);kbLater();
+    window.addEventListener('load',kbLater);window.addEventListener('resize',kbLater);kbLater();
 
     /* effects: spotlight, tilt, count-up, reveal */
     document.addEventListener('mousemove',function(e){var s=e.target.closest&&e.target.closest('.spot');if(s){var r=s.getBoundingClientRect();s.style.setProperty('--mx',(e.clientX-r.left)+'px');s.style.setProperty('--my',(e.clientY-r.top)+'px')}

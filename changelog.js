@@ -1,6 +1,7 @@
 /* What changed on the site, newest first. Hand-written highlights; shown by changelog.html.
    Shape: {date:'YYYY-MM-DD', en, zh, files?:[page paths that exist]}. Never type a lesson or topic count here. */
 window.CHANGELOG=[
+ {date:'2026-11-24',en:'A weekly quality agent checks every page for accessibility, weight and broken links, and the How it works page shows it. Text contrast, keyboard access to code boxes and wide figures, and quiz-style checklists are fixed across the site.',zh:'每周一次的质量 agent 会检查每个页面的无障碍、体积和失效链接，“运作方式”页也展示了它。全站修正了文字对比度，代码框和宽图可以用键盘访问，清单题的结构也已修好。',files:['ecosystem.html']},
  {date:'2026-11-24',en:'A "What next" card closes each topic and each track, and this changelog page arrives.',zh:'每个主题和每条路线的末尾多了“下一步”卡片，并新增了这个更新记录页。',files:['changelog.html']},
  {date:'2026-11-24',en:'The glossary and concept map group the AI terms by theme and link each to the lesson that teaches it.',zh:'词汇表和概念图按主题整理 AI 术语，并链接到讲解它的那一课。',files:['glossary.html']},
  {date:'2026-11-24',en:'The How it works page shows the concepts the site itself is built from.',zh:'“运作方式”页展示了这个网站本身用到的概念。',files:['ecosystem.html']},
