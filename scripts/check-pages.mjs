@@ -79,6 +79,13 @@ const want = {
 const lists = Object.fromEntries(TR.map(t => [t.dir + '/index.html', [/<!-- lessons:start -->[\s\S]*?<!-- lessons:end -->/, '<!-- lessons:start --><noscript><ol>' +
     t.T.topics.flatMap(w => w.items).filter(x => x.file).map(x => `<li><a href="${x.file}">${esc(x.title.en)} · ${esc(x.title.zh)}</a></li>`).join('') + '</ol></noscript><!-- lessons:end -->']]));
 const firstOf = t => { const x = t.T.topics.flatMap(w => w.items).find(i => i.file); return x && x.file; };
+// <track>/packages.js: every file of every project package (packages/<track>/<name>/**), so the project card can never miss one.
+const walk = (d, pre = '') => { let o = []; try { for (const e of readdirSync(new URL(d, root), { withFileTypes: true })) { if (e.name.startsWith('.')) continue; if (e.isDirectory()) o = o.concat(walk(d + '/' + e.name, pre + e.name + '/')); else o.push(pre + e.name); } } catch {} return o; };
+for (const t of TR) {
+  let dirs = []; try { dirs = readdirSync(new URL('packages/' + t.dir + '/', root), { withFileTypes: true }).filter(e => e.isDirectory() && !e.name.startsWith('.')).map(e => e.name).sort(); } catch {}
+  want[t.dir + '/packages.js'] = '/* Made by node scripts/check-pages.mjs --fix: the files of each project package, shown by assets/site.js. Do not edit by hand. */\nwindow.PKGFILES={\n' +
+    dirs.map(n => ' ' + JSON.stringify('packages/' + t.dir + '/' + n) + ':' + JSON.stringify(walk('packages/' + t.dir + '/' + n).sort())).join(',\n') + '\n};\n';
+}
 for (const [f, text] of Object.entries(want)) {
   let cur = ''; try { cur = readFileSync(new URL(f, root), 'utf8'); } catch {}
   if (cur !== text) { if (FIX) writeFileSync(new URL(f, root), text); else bad(f, 'out of date with lessons.js (run node scripts/check-pages.mjs --fix)'); }
