@@ -28,7 +28,7 @@ function predict(el,o){
 function trace(el,steps){
  var n=0;
  function draw(){
-  var h='<div class="log">'+steps.slice(0,n).map(function(s){return '<div class="'+s.k+'"><i>'+T({en:{you:'You',llm:'Model',code:'Your code',tool:'Tool'}[s.k],zh:{you:'访客',llm:'模型',code:'你的代码',tool:'工具'}[s.k]})+'</i>'+T(s)+'</div>'}).join('')+(n===0?'<div style="opacity:.5">'+T({en:'Press the button to start.',zh:'点按钮开始。'})+'</div>':'')+'</div>';
+  var h='<div class="log">'+steps.slice(0,n).map(function(s){return '<div class="'+s.k+'"><i>'+T(s.lbl||{en:{you:'You',llm:'Model',code:'Your code',tool:'Tool'}[s.k],zh:{you:'访客',llm:'模型',code:'你的代码',tool:'工具'}[s.k]})+'</i>'+T(s)+'</div>'}).join('')+(n===0?'<div style="opacity:.5">'+T({en:'Press the button to start.',zh:'点按钮开始。'})+'</div>':'')+'</div>';
   h+='<button class="btn pri" id="tb_'+el.id+'">'+(n>=steps.length?T({en:'Restart',zh:'重来'}):n===0?T({en:'Start →',zh:'开始 →'}):T({en:'Next step →',zh:'下一步 →'}))+'</button>';
   if(n>0&&steps[n-1].why)h+='<div class="note" style="margin-top:10px">'+T(steps[n-1].why)+'</div>';
   el.innerHTML=h;
