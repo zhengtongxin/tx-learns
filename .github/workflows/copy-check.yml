@@ -55,10 +55,10 @@ jobs:
         run: |
           git fetch --depth=1 origin main >/dev/null 2>&1 || true
           changed=$(git diff --name-only origin/main HEAD 2>/dev/null || true)
-          pages=$(echo "$changed" | grep -E '\.html$' | grep -vE '^(inbox/|scripts/|\.github/)|_template\.html$|^404\.html$' | while read -r f; do [ -f "$f" ] && echo "$f"; done)
+          pages=$(echo "$changed" | grep -E '\.html$' | grep -vE '^(inbox/|scripts/|\.github/)|_template\.html$|^404\.html$' | while read -r f; do if [ -f "$f" ]; then echo "$f"; fi; done)
           # Shared layout files change every page: test a small sample (home, How it works, glossary, each track's page and first lesson) instead of all of them.
           if echo "$changed" | grep -qE '^assets/(site|teach)\.(css|js)$|^tracks\.js$'; then
-            pages="index.html ecosystem.html glossary.html $(for d in $(ls -d */ | tr -d /); do [ -f "$d/lessons.js" ] && { echo "$d/index.html"; ls "$d" | grep -E '^[0-9]+.*\.html$' | sort | head -1 | sed "s#^#$d/#"; }; done)"
+            pages="index.html ecosystem.html glossary.html $(for d in $(ls -d */ | tr -d /); do if [ -f "$d/lessons.js" ]; then echo "$d/index.html"; ls "$d" | grep -E '^[0-9]+.*\.html$' | sort | head -1 | sed "s#^#$d/#"; fi; done)"
           fi
           pages=$(echo $pages | tr ' ' '\n' | sort -u | head -12 | xargs)
           if [ -z "$pages" ]; then echo "No served page changed: nothing to fit-check." | tee fit.txt; exit 0; fi
