@@ -213,14 +213,21 @@ async function main() {
       });
       const url = base + path;
       const open = async () => {
-        const r = await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
+        const r = await page.goto(url, { waitUntil: 'load', timeout: 30000 });
         if (!r || r.status() >= 400) throw new Error(`HTTP ${r ? r.status() : 'no response'}`);
         // Scroll to the bottom and back so sections that fade in on scroll are on screen, like for a reader.
         await page.evaluate(async () => {
           for (let y = 0; y < document.documentElement.scrollHeight; y += innerHeight / 2) { scrollTo(0, y); await new Promise(r => setTimeout(r, 40)); }
           scrollTo(0, 0);
         });
-        await page.waitForTimeout(900);
+        // Page-ready signal instead of a fixed wait: fonts loaded, two frames drawn, and the page has stopped changing for 150 ms (at most 1.5 s).
+        await page.evaluate(() => new Promise(done => {
+          let last = performance.now(), end = last + 1500;
+          const mo = new MutationObserver(() => { last = performance.now(); });
+          mo.observe(document.documentElement, { subtree: true, childList: true, attributes: true, characterData: true });
+          const tick = () => { const n = performance.now(); if (n - last > 150 || n > end) { mo.disconnect(); done(); } else setTimeout(tick, 30); };
+          (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => requestAnimationFrame(() => requestAnimationFrame(tick)));
+        }));
         await page.evaluate(() => window.__uic.init());
         return page.evaluate(n => window.__uic.mark(n), MAX_TARGETS);
       };
