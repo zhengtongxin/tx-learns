@@ -50,14 +50,6 @@ jobs:
       - name: Check pages (lang, title, previews, alt text, headings, EN/中文 twins)
         if: success() || failure()
         run: "[ -f scripts/check-pages.mjs ] || { echo 'No page check on this branch yet.' > pages.txt; exit 0; }; node scripts/check-pages.mjs | tee pages.txt; exit ${PIPESTATUS[0]}"
-      - name: Cache the headless browser
-        if: (success() || failure()) && github.event_name == 'pull_request'
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/ms-playwright
-            ${{ runner.temp }}/pw
-          key: pw-1.49.1-${{ runner.os }}
       - name: Phone fit (changed pages only; content wider than a 390px phone or a popup off the side blocks the merge)
         if: (success() || failure()) && github.event_name == 'pull_request'
         run: |
@@ -70,8 +62,7 @@ jobs:
           fi
           pages=$(echo $pages | tr ' ' '\n' | sort -u | head -12 | xargs)
           if [ -z "$pages" ]; then echo "No served page changed: nothing to fit-check." | tee fit.txt; exit 0; fi
-          { { [ -x "$RUNNER_TEMP/pw/node_modules/.bin/playwright" ] || npm install --no-save --no-audit --no-fund --prefix "$RUNNER_TEMP/pw" playwright@1.49.1 >/dev/null; } \
-            && { node -e "require(process.argv[1]+'/node_modules/playwright').chromium.launch().then(b=>b.close())" "$RUNNER_TEMP/pw" 2>/dev/null || "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium >/dev/null; }; } \
+          { npm install --no-save --no-audit --no-fund --prefix "$RUNNER_TEMP/pw" playwright@1.49.1 >/dev/null && "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium >/dev/null; } \
             || { echo "::notice::The browser could not be installed, so the phone fit was skipped on this run."; exit 0; }
           PLAYWRIGHT_DIR="$RUNNER_TEMP/pw" node scripts/ui-check.mjs --fit --out "$RUNNER_TEMP/fit" --pages "$pages" | tee fit.txt; exit ${PIPESTATUS[0]}
       - name: Search index (a note, never a gate)
