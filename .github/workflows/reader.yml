@@ -196,6 +196,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: "[ -f $T/trace.mjs ] && node $T/trace.mjs push reader /tmp/out || true"
+      - name: Keep the scores for the improvement agent (latest score per lesson)
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: "[ -s /tmp/out/reader.json ] && [ -f $T/signals.mjs ] && node $T/signals.mjs record-reader /tmp/out/reader.json || true"
       - name: Share the result
         id: share
         run: |

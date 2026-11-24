@@ -10,7 +10,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const BRANCH = 'agent-status', PATH = 'trace/runs.json', KEEP = 400;
-const AGENTS = ['writer', 'reader', 'reviewer', 'scope-guard', 'ui-check', 'optimizer', 'recall'];
+const AGENTS = ['writer', 'reader', 'reviewer', 'scope-guard', 'ui-check', 'optimizer', 'improver', 'recall'];
 const n = v => (Number.isFinite(+v) ? +v : 0);
 
 export function clean(line, agent) {

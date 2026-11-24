@@ -1,0 +1,178 @@
+# Improvement agent: the loop that acts on what the other agents already found. Four times a day it looks, without any AI,
+# for the one thing most worth fixing for readers: a broken page or link from the weekly quality check, or the lowest-scored
+# lesson the intern agent flagged (scripts/signals.mjs). Only when there is something does it start Claude (Sonnet, at most
+# 30 turns) on that one item and open ONE small pull request. At most one improver pull request is open at a time, an item is
+# not retried for 7 days, and it never touches workflows, scripts, the rules or project code. The normal copy check, the
+# scope guard, the backend review, auto-merge and the live rollback all apply, so it never pushes to main.
+name: Improvement agent
+on:
+  schedule:
+    - cron: '41 3,9,15,21 * * *'   # 4 times a day, offset from the efficiency engineer
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Pick the item and prepare the change without opening a pull request
+        required: false
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: improver
+  cancel-in-progress: false
+jobs:
+  # Marks the improver as working (yellow) on the How it works page. Trusted scripts from main only.
+  working:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: scripts
+          persist-credentials: false
+      - name: Show the agent as working
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATE: run
+        run: "[ -f scripts/record-status.mjs ] && node scripts/record-status.mjs improver || true"
+
+  improve:
+    needs: working
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    outputs:
+      pr: ${{ steps.finish.outputs.pr }}
+      state: ${{ steps.finish.outputs.state }}
+      summary: ${{ steps.finish.outputs.summary }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Is one of my pull requests still open?
+        id: open
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          n=$(gh pr list -R "$GITHUB_REPOSITORY" --state open --json headRefName --jq '[.[]|select(.headRefName|startswith("improver/"))]|length')
+          echo "open=$n" >> "$GITHUB_OUTPUT"; echo "Open improver pull requests: $n"
+      - name: Pick the one thing worth fixing (no AI)
+        id: brief
+        if: steps.open.outputs.open == '0'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/signals.mjs brief --out /tmp/improver
+      - name: Install Claude Code
+        if: steps.brief.outputs.actionable == 'true'
+        run: npm install -g @anthropic-ai/claude-code
+      - name: Remember that this item was tried
+        if: steps.brief.outputs.actionable == 'true' && !inputs.dry_run
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          KEY: ${{ steps.brief.outputs.key }}
+        run: node scripts/signals.mjs attempt "$KEY" || true
+      - name: Make the one fix
+        if: steps.brief.outputs.actionable == 'true'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FILES: ${{ steps.brief.outputs.files }}
+        run: |
+          set -o pipefail
+          if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then unset ANTHROPIC_API_KEY; echo "Auth: Claude subscription"; else unset CLAUDE_CODE_OAUTH_TOKEN; echo "Auth: API key (no CLAUDE_CODE_OAUTH_TOKEN secret)"; fi
+          { cat <<'PROMPT'
+          You are the improvement agent for TX Learns, a bilingual (EN/中文), static, no-build learning site for people new to AI.
+          Other agents already found a problem that hurts readers. Fix exactly that one problem, as small as possible.
+
+          Rules:
+          1. Read CLAUDE.md and STYLE.md first. Keep the story, the voice, the structure, EN and 中文 in step (every .en has its .zh).
+          2. Change only the files listed below. Never edit workflows, scripts, CLAUDE.md, STYLE.md, banned-words.txt, packages/ or lessons.js.
+          3. Do not add features, dependencies or rewrites. If the problem is not real on closer reading, or you cannot fix it safely, change nothing.
+          4. Run `node scripts/check-copy.mjs`, `node scripts/check-counts.mjs`, `node scripts/check-pages.mjs --fix` and `node scripts/check-security.mjs`; fix anything they report.
+          5. Do not run git and do not open a pull request; the workflow does that.
+          6. Write /tmp/improver-summary.md: first line a short pull-request title, then "Problem:", "Change:" (list exactly what you changed, file by file, in plain words) and "Check:". The reviewer compares this text with the code, so it must say everything you changed and nothing more.
+
+          PROMPT
+            cat /tmp/improver/brief.md; } > /tmp/improver-prompt.md
+          curl -fsS -o /tmp/claude-run.mjs "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/scripts/claude-run.mjs" && CC="node /tmp/claude-run.mjs improver" || CC=claude
+          $CC --model sonnet --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/improver-prompt.md)" --max-turns 30 \
+            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(node scripts/check-counts.mjs:*),Bash(node scripts/check-pages.mjs:*),Bash(node scripts/check-security.mjs:*)" \
+            --output-format text | tail -30
+      - name: Guard and open the pull request
+        id: finish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
+          ACTIONABLE: ${{ steps.brief.outputs.actionable }}
+          ALLOWED: ${{ steps.brief.outputs.files }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/out
+          if [ "$ACTIONABLE" != true ]; then
+            echo "state=ok" >> "$GITHUB_OUTPUT"; echo "pr=" >> "$GITHUB_OUTPUT"
+            if [ "${{ steps.open.outputs.open }}" != 0 ]; then echo "summary=Waiting: one of my pull requests is still open." >> "$GITHUB_OUTPUT"; else echo "summary=Nothing to fix: no open quality problem and no lesson the intern scored under 8." >> "$GITHUB_OUTPUT"; fi
+            exit 0
+          fi
+          { git diff --name-only; git ls-files --others --exclude-standard; } | sort -u > /tmp/changed.txt
+          # Only the listed files, plus what check-pages --fix generates.
+          bad=$(node -e 'const ok=new Set(process.env.ALLOWED.split(" "));const gen=/^(sitemap\.xml|vercel\.json|assets\/search-index\.json|[a-z0-9-]+\/index\.html)$/;console.log(require("fs").readFileSync("/tmp/changed.txt","utf8").split("\n").filter(f=>f&&!ok.has(f)&&!gen.test(f)).join("\n"))')
+          if [ -n "$bad" ]; then echo "The improver changed files it was not given:"; echo "$bad"; exit 1; fi
+          if [ ! -s /tmp/changed.txt ]; then
+            echo "state=ok" >> "$GITHUB_OUTPUT"; echo "pr=" >> "$GITHUB_OUTPUT"
+            echo "summary=Looked at the problem and changed nothing: it was not real or not safe to fix." >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          test -s /tmp/improver-summary.md || { echo "No summary written."; exit 1; }
+          git add -A
+          node scripts/check-copy.mjs; node scripts/check-counts.mjs; node scripts/check-pages.mjs; node scripts/check-security.mjs
+          if [ "$DRY_RUN" = true ]; then
+            echo "state=ok" >> "$GITHUB_OUTPUT"; echo "pr=" >> "$GITHUB_OUTPUT"
+            echo "summary=Prepared a fix in dry-run mode; no pull request was opened." >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          branch="improver/${GITHUB_RUN_NUMBER}-${GITHUB_RUN_ATTEMPT}"
+          git config user.name "TX Learns improvement agent"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git commit -m "Improve: one fix from what the agents found" -m "Made by the improvement agent (Claude); see the pull request for what and why."
+          auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          git -c "http.https://github.com/.extraheader=$auth" push -u origin "$branch"
+          title=$(head -1 /tmp/improver-summary.md | sed 's/^#* *//' | cut -c1-70)
+          [ -n "$title" ] || title="Improve: one fix from what the agents found"
+          { cat /tmp/improver-summary.md; echo; echo "---"; echo "Found by the quality check or the intern agent, fixed by the improvement agent. The scope guard compares this description with the code, the backend engineer agent reviews it, and auto-merge and the live rollback apply as usual."; } > /tmp/pr-body.md
+          url=$(gh pr create --base main --head "$branch" --title "$title" --body-file /tmp/pr-body.md)
+          pr=${url##*/}
+          gh pr edit "$url" --add-assignee "${{ github.repository_owner }}" || true
+          gh workflow run copy-check.yml --ref "$branch" -R "$GITHUB_REPOSITORY" || echo "::warning::Could not start the copy check."
+          gh workflow run review.yml -R "$GITHUB_REPOSITORY" -f pr="$pr" || echo "::warning::Could not start the backend engineer review."
+          echo "pr=$url" >> "$GITHUB_OUTPUT"; echo "state=ok" >> "$GITHUB_OUTPUT"
+          echo "summary=Opened one small fix in pull request #$pr." >> "$GITHUB_OUTPUT"
+      - name: Record what the agent used
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: "[ -f scripts/trace.mjs ] && node scripts/trace.mjs push improver /tmp/out || true"
+      - name: Tell TX on Telegram when it cannot finish
+        if: ${{ failure() }}
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          node scripts/notify-telegram.mjs "⚠️ The improvement agent could not finish safely. Logs: $RUN"
+      - name: Record status for the Ecosystem page
+        if: ${{ !cancelled() }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATE: ${{ steps.finish.outputs.state || 'fail' }}
+          SUMMARY: ${{ steps.finish.outputs.summary || 'Could not finish a safe fix.' }}
+          LINK: ${{ steps.finish.outputs.pr }}
+        run: node scripts/record-status.mjs improver
