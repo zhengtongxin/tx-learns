@@ -82,3 +82,21 @@ What changed since the previous lesson
 This is the first project, so there is no earlier package. New here compared
 with the single call in lesson 1: a page fetcher, a second call that returns
 JSON (parsed with json.loads), a length cut, and streaming.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- python test_offline.py in final/ prints an ok line ('page_text keeps words and drops scripts and styles') and needs no key.
+- python brochure.py <a small shop site with an About page> prints a markdown brochure with a heading and a short body.
+- If the site has a careers page, the brochure ends with a careers line.
+- Changing one word in the brochure prompt (warm to funny) visibly changes the tone.
+- With --stream the words appear as they arrive, not all at once.
+
+Compare your work with final/ afterwards, starting with: brochure.py, test_offline.py, the page_text function.
+
+验收标准（中文）
+- 在 final/ 里运行 python test_offline.py，打印 ok 行（“page_text keeps words and drops scripts and styles”），不需要密钥。
+- 对一个有“关于我们”页面的小店网站运行 python brochure.py，打印带标题和简短正文的 markdown 宣传册。
+- 如果网站有招聘页，宣传册末尾有一句招聘说明。
+- 把宣传册提示词里的一个词（warm 改成 funny），语气会明显改变。
+- 加上 --stream，文字逐步出现，而不是一次全部出现。

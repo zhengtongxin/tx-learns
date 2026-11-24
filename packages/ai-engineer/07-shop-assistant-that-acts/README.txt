@@ -89,3 +89,21 @@ one file. New: a dispatch table that maps tool names to functions, the
 looked_up list that decides whether to draw, and two chained callbacks on the
 screen (add the user message, then get the answer). Added to make it run on
 its own: loading .env and a database connection that works across threads.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- python test_tools.py in final/ prints an ok line (get_price and set_price work) and needs no key.
+- Asking 'How much is Ipoh and Genting?' prints two 'tool call: get_price' lines in the terminal.
+- The reply gives Ipoh S$62 and Genting S$55, taken from the database, not guessed.
+- A picture appears only after a lookup; a message like 'Say hello' draws nothing.
+- The reply is also spoken aloud.
+
+Compare your work with final/ afterwards, starting with: assistant.py, test_tools.py, the tool functions it registers.
+
+验收标准（中文）
+- 在 final/ 里运行 python test_tools.py，打印 ok 行（get_price 和 set_price 正常），不需要密钥。
+- 问 “How much is Ipoh and Genting?”，终端打印两行 “tool call: get_price”。
+- 回复给出 Ipoh S$62 和 Genting S$55，来自数据库而不是猜测。
+- 只有查询之后才会出现图片；像 “Say hello” 这样的消息不画图。
+- 回复同时用语音读出。

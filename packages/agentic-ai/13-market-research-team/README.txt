@@ -96,3 +96,21 @@ written with @tool, a hierarchical crew with your own manager passed as manager_
 and memory=True with today's date in the prompt. Added beyond the lesson's code: the
 researcher agent, the pick_market task, the YAML for all four agents, a print fallback
 when there are no Pushover keys, and the flat layout so it runs with `python main.py`.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- python main.py shows the manager delegating in order to the scout, researcher and picker.
+- final/output/studies.json holds one study per market the scout suggested.
+- final/output/pick.md names one market and why.
+- Exactly one notification is sent, or '[notify skipped, no Pushover keys]' is printed once.
+- A second run suggests markets the scout did not suggest the first time (memory on).
+
+Compare your work with final/ afterwards, starting with: crew.py, the config YAML files, main.py.
+
+验收标准（中文）
+- python main.py 显示管理者依次把任务交给侦察员、研究员和挑选者。
+- final/output/studies.json 为侦察员建议的每个市场各存一份研究。
+- final/output/pick.md 写明选出的一个市场及原因。
+- 只发出一条通知，或只打印一次 “[notify skipped, no Pushover keys]”。
+- 第二次运行时，侦察员建议的市场与第一次不同（开启记忆）。

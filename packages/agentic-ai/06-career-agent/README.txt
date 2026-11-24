@@ -94,3 +94,21 @@ picks the right one, add a push() helper to buzz your phone, write the behaviour
 the system prompt, and split the code into context.py, tools.py and app.py so it can be
 deployed. Things added that the lesson only described: a plain-text profile fallback, an
 explicit dictionary of allowed tools instead of globals(), and an hourly cap on pushes.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- Send: I'm a recruiter, Alex can call me at maya@corp.com. The terminal shows 'Recording interest from ... maya@corp.com' (or your phone buzzes).
+- Ask: What was Alex's thesis topic? The twin says it does not know, and the terminal shows 'Recording question I could not answer'.
+- Ask for a poem about the sea: the twin steers back to career topics in one short reply.
+- Ask: Are you a real person? The twin says it is an AI digital twin.
+- Two tools exist in tools.py and each one fires exactly once per matching message, not twice.
+
+Compare your work with final/ afterwards, starting with: tools.py, context.py, app.py.
+
+验收标准（中文）
+- 发送“我是招聘人员，请让 Alex 打给我 maya@corp.com”：终端出现 “Recording interest from ... maya@corp.com”（或手机震动）。
+- 问“Alex 的论文题目是什么？”：分身说不知道，终端出现 “Recording question I could not answer”。
+- 要求写一首关于海的诗：分身用一句简短的话把话题拉回职业。
+- 问“你是真人吗？”：分身说明自己是 AI 数字分身。
+- tools.py 里有两个工具，每条符合的消息各触发一次，不会触发两次。

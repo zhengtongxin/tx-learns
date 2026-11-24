@@ -90,3 +90,21 @@ examples are programs, not messages. The scoring is objective: compile,
 run, compare the output with Python's, and time it. Added to make it run on
 its own: .env loading, a command line, a MODELS shortlist and a hard test
 program with a deliberate overflow trap.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- python test_offline.py in final/ prints an ok line (fences stripped; python reference printed 'best run: ...') and needs no key.
+- python translate.py hard_program.py prints one line per model: failed to compile, WRONG OUTPUT, or ok with a speedup.
+- A correct translation prints exactly the same two lines as hard_program.py.
+- Removing the optimisation flags from COMPILE shrinks the speedup a lot.
+- A model that returns a reply wrapped in code fences still compiles, because the fences are stripped.
+
+Compare your work with final/ afterwards, starting with: translate.py, hard_program.py, test_offline.py.
+
+验收标准（中文）
+- 在 final/ 里运行 python test_offline.py，打印 ok 行（去掉代码围栏；python 参考版打印 “best run: ...”），不需要密钥。
+- python translate.py hard_program.py 每个模型一行：编译失败、WRONG OUTPUT，或 ok 加加速倍数。
+- 正确的翻译输出的两行与 hard_program.py 完全相同。
+- 去掉 COMPILE 里的优化选项，加速倍数明显变小。
+- 模型把回复包在代码围栏里也能编译，因为围栏会被去掉。

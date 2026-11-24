@@ -120,3 +120,21 @@ read-only API plus dashboard. Added beyond the lesson's code: the Account class 
 SQLite helper, sell_shares / get_holdings / get_transactions tools, key pass-through for
 the push server, skipping optional servers when keys are missing, one uncle failing without
 stopping the others, a --once switch, and the dashboard files.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- python -m floor.trading_floor Wong runs one round and Wong's cash or holdings change in final/floor.db.
+- /api/portfolio/Wong returns value, cash, holdings and profit.
+- The dashboard shows four cards that refresh every few seconds, plus a live log with each uncle's name.
+- An order larger than the cash is refused with a clear message.
+- Only the tickers KOPI, ROTI, TEHT and NASI exist; any other gives 'unknown ticker'.
+
+Compare your work with final/ afterwards, starting with: the floor package (trading floor and accounts), the API routes, the frontend folder.
+
+验收标准（中文）
+- python -m floor.trading_floor Wong 运行一轮后，Wong 的现金或持仓在 final/floor.db 中发生变化。
+- /api/portfolio/Wong 返回总值、现金、持仓和盈亏。
+- 面板显示四张每隔几秒刷新的卡片，以及带每位大叔名字的实时日志。
+- 超出现金的订单会被清楚地拒绝。
+- 只有 KOPI、ROTI、TEHT 和 NASI 四个代码，其他代码会提示 “unknown ticker”。

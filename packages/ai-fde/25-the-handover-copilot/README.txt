@@ -140,3 +140,21 @@ WHAT CHANGED SINCE THE PREVIOUS LESSON
   borrows each handler's permissions, asks before it pays, shows every step,
   and ends with a handover check and a teardown. mock_gateway.py stands in for
   the earlier lessons' gateway so you can run it without them.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- python try_it.py prints False, True, the path for Aisha, a confirm for 'Pay S$300 on C007?', and a refusal line.
+- As Aisha, 'pay C007 300' shows a Confirm button and pays only after you press it.
+- As the junior handler, 'pay C008 1200' is refused and no Confirm button appears; a hand-made POST to /copilot/confirm is refused too.
+- Each tool call shows as a readable step, and each handler sees only their own history.
+- python criteria.py prints met, met, not measured; 'not measured' is never counted as a pass.
+
+Compare your work with final/ afterwards, starting with: permissions.py, copilot_tools.py, criteria.py.
+
+验收标准（中文）
+- python try_it.py 打印 False、True、Aisha 的路径、“Pay S$300 on C007?” 的确认，以及一行拒绝。
+- 以 Aisha 身份输入 “pay C007 300” 会出现确认按钮，按下之后才付款。
+- 以初级处理员身份输入 “pay C008 1200” 被拒绝，不出现确认按钮；手工构造的 /copilot/confirm 请求同样被拒绝。
+- 每次工具调用显示为一个可读的步骤，每位处理员只看到自己的历史。
+- python criteria.py 打印 met、met、not measured；“not measured” 从不算通过。

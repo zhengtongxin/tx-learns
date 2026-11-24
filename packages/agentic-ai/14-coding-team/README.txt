@@ -104,3 +104,21 @@ plugs in live library docs through MCP (mcps=). Added beyond the lesson's code: 
 layout, the yaml for the roles the lesson only described, the warm-up script, a sandbox
 clear before each run, plain error messages when Docker is missing or a script hangs,
 and the USE_DOCS_MCP switch.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- python warmup.py ends with the number 6000 (1,000 cups x RM1.80 / RM0.30 per coin).
+- After python main.py, final/sandbox holds design.md, tabs.py, app.py, a test file and test_report.md.
+- test_report.md says which checks passed and which failed.
+- In the tab screen, topping up RM5 and ordering a teh_tarik (RM2.00) leaves RM3.00.
+- An order larger than the balance is refused.
+
+Compare your work with final/ afterwards, starting with: crew.py, the tools folder, warmup.py.
+
+验收标准（中文）
+- python warmup.py 以数字 6000 结束（1,000 杯 x RM1.80 / 每枚代币 RM0.30）。
+- 运行 python main.py 后，final/sandbox 里有 design.md、tabs.py、app.py、一个测试文件和 test_report.md。
+- test_report.md 写明哪些检查通过、哪些失败。
+- 在账单界面充值 RM5 再点一杯 teh_tarik（RM2.00），余额为 RM3.00。
+- 超过余额的订单会被拒绝。

@@ -139,3 +139,21 @@ Added to make it run on its own: the demo mode and invented data, local helpers
 the lessons only named (build_ensemble, fetch_feed, the vector store), a neural
 net agent, safe push-alert and parsing fallbacks, a lock around run(), and a
 command line.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- python test_offline.py in final/ (demo mode) prints an ok line with no key and no GPU.
+- python app.py once finds the 3 planted bargains in the sample feed.
+- Running it again finds nothing new, because the memory file remembers what was already sent.
+- On the screen the table fills and coloured log lines from several agents appear in order.
+- The log names the scanner, the price guesser and the messenger as separate agents.
+
+Compare your work with final/ afterwards, starting with: deal_system.py, agents.py, logbus.py.
+
+验收标准（中文）
+- 在 final/ 里（演示模式）运行 python test_offline.py，打印 ok 行，不需要密钥和 GPU。
+- python app.py once 在样例信息流里找到 3 个预先埋好的特价。
+- 再次运行什么也找不到，因为记忆文件记住了已发送的内容。
+- 界面上的表格逐渐填满，多个智能体的彩色日志按顺序出现。
+- 日志里扫描、估价和通知分别是不同的智能体。

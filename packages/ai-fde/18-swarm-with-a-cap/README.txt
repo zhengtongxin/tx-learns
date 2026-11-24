@@ -114,3 +114,21 @@ WHAT CHANGED SINCE THE PREVIOUS LESSON
   behind a web service: a validated cap, one dispatch at a time, every status
   written to a table, a summary counted from records, a health check and cost
   and time per claim. The dispatcher itself is unchanged.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- python try_dispatcher.py prints 3 agents, 10 agents and 25 agents with the time falling (about 8.6, 3.2, 1.5 seconds) and {'done': 25} each time.
+- A cap below 1 or above 25 (for example {"n": 0} or {"n": 26}) answers 422 before any agent starts.
+- Pressing start twice answers 409 'A dispatch is already running.'
+- The panel and a page reload show the same rows, and the five summary groups add up to 25 claims.
+- With the service stopped, the saved page disables the button and says why.
+
+Compare your work with final/ afterwards, starting with: dispatcher.py, service.py, try_dispatcher.py.
+
+验收标准（中文）
+- python try_dispatcher.py 打印 3、10、25 个智能体，用时递减（约 8.6、3.2、1.5 秒），每次都是 {'done': 25}。
+- 上限小于 1 或大于 25（例如 {"n": 0}、{"n": 26}）时，在任何智能体启动前返回 422。
+- 连按两次开始，第二次返回 409 “A dispatch is already running.”。
+- 面板和刷新后的页面显示相同的行，五组汇总加起来是 25 个理赔。
+- 服务停止后，保存的页面把按钮置灰并说明原因。

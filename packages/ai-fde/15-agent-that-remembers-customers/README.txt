@@ -100,3 +100,21 @@ WHAT CHANGED SINCE THE PREVIOUS LESSON
   read-only reference data. Notes are written by the code after each claim,
   read before the next one, shown to the handler, and the read-only store is
   enforced by permissions instead of by an instruction.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- After a run, three SQLite files exist: claims.db, memory.db and reference.db.
+- The second claim (C042) reads the note the first (C041) wrote, and its reason says a note was used (1 note read).
+- show_claim prints the decision, the reason and every note the agent read.
+- Writing to reference.db fails with 'attempt to write a readonly database'.
+- python reset.py clears the notes so the next demo starts clean.
+
+Compare your work with final/ afterwards, starting with: desk.py, make_reference.py, reset.py.
+
+验收标准（中文）
+- 运行之后存在三个 SQLite 文件：claims.db、memory.db 和 reference.db。
+- 第二个理赔（C042）读到了第一个（C041）写下的备注，理由里说明用了备注（读了 1 条）。
+- show_claim 打印决定、理由和智能体读过的每条备注。
+- 写入 reference.db 失败，提示 “attempt to write a readonly database”。
+- python reset.py 清除备注，下一次演示从头开始。

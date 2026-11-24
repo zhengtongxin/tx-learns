@@ -112,3 +112,21 @@ type. Here they are one tool on plain text. New: evaluate also reports a hit
 rate; the frontier parser is defensive (fallback plus a failure count); a table
 adds cost and speed; and a Gradio screen. Added to make it run on its own: an
 invented local dataset (instead of one on the model hub) and a command line.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- python test_offline.py in final/ prints an ok line and needs no key.
+- python price_guesser.py table prints one row per guesser with average error, hit rate, cost and seconds.
+- The order from worst to best is average, then linear, then forest.
+- A reply like 'About $120 maybe' is parsed to 120.
+- Unreadable replies are counted separately and not scored as zero.
+
+Compare your work with final/ afterwards, starting with: price_guesser.py, make_data.py, test_offline.py.
+
+验收标准（中文）
+- 在 final/ 里运行 python test_offline.py，打印 ok 行，不需要密钥。
+- python price_guesser.py table 每个估价器一行，含平均误差、命中率、成本和秒数。
+- 从差到好的顺序是：平均值、线性、随机森林。
+- 像 “About $120 maybe” 这样的回复会被解析成 120。
+- 读不懂的回复单独计数，不当作零分。

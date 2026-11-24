@@ -147,3 +147,21 @@ one working project. New here: the full main.tf (gateway, CDN and the function's
 permissions were "left out" in the lessons), the five outputs, config.js (the page
 learns the API address after apply), the CDN cache clear, ensure-zip.sh, and the
 three bootstrap scripts that do the one-time setup.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- A push to main turns the dev run green, and the log ends with a 'site:' and an 'api:' address.
+- Open the site, say 'Hi, I am Siti.' then 'What is my name?': the twin says Siti.
+- The prod run waits for approval, and you read its plan in the log before you approve.
+- terraform plan run twice in a row says 'No changes' the second time.
+- After the three destroy runs, the state list, the command line and the console all show nothing named wharf-twin.
+
+Compare your work with final/ afterwards, starting with: the infra folder, the workflows folder, deploy.sh.
+
+验收标准（中文）
+- 推送到 main 后 dev 运行变绿，日志末尾有 “site:” 和 “api:” 两个地址。
+- 打开网站，说 “Hi, I am Siti.” 再问 “What is my name?”：分身答 Siti。
+- prod 运行等待批准，你在批准前先在日志里读过它的计划。
+- 连续运行两次 terraform plan，第二次显示 “No changes”。
+- 三个销毁运行结束后，状态列表、命令行和控制台里都没有叫 wharf-twin 的东西。

@@ -124,3 +124,21 @@ the exported page, an extra /api/health route is added, and a Dockerfile plus
 four scripts pack and ship it. Added here and not in the lessons: the scripts
 (the lesson used the console for the function), --provenance=false, and an
 optional ALLOWED_ORIGINS setting for CORS.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- The container runs on your laptop and http://localhost:8000/api/health shows {"ok":true} before you push anything.
+- The function URL opens the page and a question streams word by word, not all at once.
+- The first request after a quiet spell takes a few seconds (cold start); the next is quick.
+- The log shows a REPORT line with Duration and Billed Duration, and Init Duration on a cold start.
+- After teardown the console shows no function, repository, log group or role with your name.
+
+Compare your work with final/ afterwards, starting with: server.py, Dockerfile, the scripts folder.
+
+验收标准（中文）
+- 容器在你的电脑上运行，推送任何东西之前 http://localhost:8000/api/health 显示 {"ok":true}。
+- 函数地址能打开页面，提问后答案逐字流出，而不是一次出现。
+- 安静一段时间后的第一次请求要几秒（冷启动），下一次就很快。
+- 日志里有带 Duration 和 Billed Duration 的 REPORT 行，冷启动时还有 Init Duration。
+- 清理之后，控制台里没有带你名字的函数、镜像仓库、日志组或角色。

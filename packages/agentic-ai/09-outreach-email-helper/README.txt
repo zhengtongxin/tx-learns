@@ -89,3 +89,21 @@ into a tool with @function_tool, force real tool use with tool_choice="required"
 both ways of letting an LLM be the manager: agents as tools and a handoff. Added beyond
 what the lesson showed: a small working push() helper, a print fallback when nothing is
 set up, and a command-line switch between the three modes.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- python main.py code prints one invitation email (subject plus short body) after 4 model calls, about the Saturday coding club for ages 9 to 12.
+- With no mail or push settings you see '[nothing sent: no mail or push settings]' before the email.
+- python main.py manager sends exactly one email, not two, and prints the Coordinator's final reply.
+- python main.py handoff prints 'Last agent: Mailroom'.
+- The Traces page of your provider dashboard shows each run as one entry.
+
+Compare your work with final/ afterwards, starting with: team.py, mail.py, main.py.
+
+验收标准（中文）
+- python main.py code 经 4 次模型调用后打印一封邀请邮件（主题加简短正文），内容是面向 9 至 12 岁孩子的周六编程社。
+- 没有邮件或推送设置时，邮件之前会出现 “[nothing sent: no mail or push settings]”。
+- python main.py manager 只发出一封邮件，不是两封，并打印协调者的最终回复。
+- python main.py handoff 打印 “Last agent: Mailroom”。
+- 服务商控制台的 Traces 页面把每次运行显示为一条记录。

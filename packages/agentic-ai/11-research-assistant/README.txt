@@ -83,3 +83,21 @@ planner and the writer (Pydantic forms), and a fixed recipe run by plain Python:
 plan, search in parallel, write, deliver. Added beyond the lesson's code: the report form
 asks for 800 to 1200 words (the lesson's "what I got wrong" fix), and the code is split
 into research.py and mailer.py.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- python research.py ends with 'Not sent: <subject>' while SEND_EMAIL is False.
+- Below it is a summary of 2 to 3 sentences that answers the question.
+- The Traces page shows one run named 'Kopitiam payments research' with 4 agents and 3 web searches inside it.
+- The planner returns a list your code loops over (three search items), not a paragraph.
+- Three searches take about as long as one, because they run together.
+
+Compare your work with final/ afterwards, starting with: research.py, mailer.py, the planner and searcher definitions.
+
+验收标准（中文）
+- SEND_EMAIL 为 False 时，python research.py 以 “Not sent: <主题>” 结束。
+- 其下是 2 至 3 句、回答该问题的摘要。
+- Traces 页面显示一次名为 “Kopitiam payments research” 的运行，含 4 个智能体和 3 次网络搜索。
+- 规划者返回的是代码可以循环处理的列表（三个搜索项），而不是一段话。
+- 三次搜索耗时和一次差不多，因为它们并行运行。

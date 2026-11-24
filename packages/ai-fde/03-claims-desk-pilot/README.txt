@@ -107,3 +107,21 @@ WHAT CHANGED SINCE THE PREVIOUS LESSON
   lessons gave you the brief and a plan; here the plan becomes code:
   a queue with states, a rule enforced in code instead of in the prompt, one
   agent call per claim, and a score from an answer key the agent never sees.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- Running the pilot from final/ prints one line per claim (25 claims) and ends with 'agrees with handlers on N of M claims'.
+- Every claim ends in exactly one state: waiting, in progress, waiting for sign-off or decided.
+- Any approval over S$800 (C008, C009, C014, C017, C024) and every refer shows waiting_signoff, never decided.
+- Only the scoring code opens the answer_key folder; the agent never does.
+- The dry-run score proves the plumbing only; a real model struggles most on C012, C013, C019 and C025.
+
+Compare your work with final/ afterwards, starting with: desk_queue.py, agent.py, run_pilot.py.
+
+验收标准（中文）
+- 在 final/ 里运行试点，每个理赔（共 25 个）打印一行，最后是 “agrees with handlers on N of M claims”。
+- 每个理赔最后只处于一个状态：等待、处理中、等待签批或已决定。
+- 任何超过 S$800 的批准（C008、C009、C014、C017、C024）和每个转交，都显示 waiting_signoff，绝不是 decided。
+- 只有评分代码会打开 answer_key 文件夹，智能体从不打开。
+- 试运行的分数只证明流程接通；真实模型在 C012、C013、C019 和 C025 上最吃力。
