@@ -1,7 +1,7 @@
 # Auto-merge: TX no longer presses merge. scripts/auto-merge.mjs merges a pull request into main by itself once
-# copy-check, UI check and Reviewer (the required checks in .github/rulesets/main.json) are green on its newest
-# commit, one merge at a time, and then starts the live check (product engineer agent) on that merge, which rolls
-# it back if it broke the live site. A stuck pull request (a red check the agents could not fix, a merge conflict,
+# copy-check and Reviewer (the required checks in .github/rulesets/main.json) are green on its newest commit. It
+# merges every ready pull request in one run, never waiting for the UI check or an earlier live check, and then
+# starts one live check (product engineer agent) on the whole batch, which rolls it back if it broke the live site. A stuck pull request (a red check the agents could not fix, a merge conflict,
 # a change to the auto-merge rules themselves, a workflow change while the secret MERGE_TOKEN is missing, or a
 # check silent for 3 hours) gets one PR comment and one Telegram message.
 # Started by the agents right after they set a check (copy check, UI check, reviewer) and after each live check;

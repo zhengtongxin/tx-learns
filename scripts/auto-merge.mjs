@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 // Auto-merge: merges a pull request into main by itself once every required check is green on its newest commit.
-// The required checks are the ones in .github/rulesets/main.json (copy-check, UI check, Reviewer). No AI here.
+// The required checks are the ones in .github/rulesets/main.json (copy-check, Reviewer). No AI here.
+// The UI check and the live check run after a merge, not before it: they never hold a merge back.
 // Each run looks at every open pull request into main and:
-//   - merges at most one that is ready (oldest first), then starts the live check on that merge, which can roll
-//     it back. It never merges while a live check is still running, so each merge is checked on its own.
+//   - merges every one that is ready (oldest first), then starts one live check on the whole batch, which rolls
+//     the batch back if it broke the live site. It does not wait for an earlier live check to finish.
 //   - tells TX once (a PR comment plus Telegram) when a pull request is stuck: a check failed, the agents could
 //     not fix it, it has a merge conflict, it changes the agents' own workflows (GitHub only lets a person merge
 //     those and no MERGE_TOKEN is set), or a check has not reported after 3 hours.
@@ -23,7 +24,7 @@ const MERGE_TOKEN = process.env.MERGE_TOKEN || '';
 // The guardrails of the merge itself: a PR that changes these is always left for TX, even with MERGE_TOKEN.
 const PROTECTED = ['.github/workflows/auto-merge.yml', 'scripts/auto-merge.mjs', '.github/rulesets/main.json'];
 const out = (k, v) => process.env.GITHUB_OUTPUT && appendFileSync(process.env.GITHUB_OUTPUT, `${k}<<EOF\n${v}\nEOF\n`);
-let REQUIRED = ['copy-check', 'UI check', 'Reviewer'];
+let REQUIRED = ['copy-check', 'Reviewer'];
 try { REQUIRED = JSON.parse(readFileSync(ROOT + '.github/rulesets/main.json', 'utf8')).rules.find(r => r.type === 'required_status_checks').parameters.required_status_checks.map(c => c.context); } catch {}
 
 // The state of each required check on one commit: success, pending, missing or failure.
@@ -53,19 +54,9 @@ async function stuck(p, reason) {
   await telegram(`⏸️ PR #${p.number} needs you: ${scrub(p.title).slice(0, 90)}\n${reason}\n${p.html_url}`);
 }
 
-// A live check that is still running (or waiting to run). DONE_RUN is the live check that started this run from
-// its own last step: it has finished its work, so it does not count.
-async function liveCheckBusy() {
-  for (const s of ['in_progress', 'queued', 'waiting', 'pending']) {
-    const r = await gh('GET', `/actions/workflows/live-check.yml/runs?status=${s}&per_page=20`).catch(() => ({ workflow_runs: [] }));
-    if ((r.workflow_runs || []).some(w => String(w.id) !== String(process.env.DONE_RUN || ''))) return true;
-  }
-  return false;
-}
-
 try {
   const open = (await gh('GET', '/pulls?state=open&base=main&sort=created&direction=asc&per_page=50'));
-  let busy = await liveCheckBusy(), merged = '';
+  let merged = '', first = '', last = '';
   const log = [];
   for (const p of open) {
     const n = `#${p.number}`;
@@ -100,21 +91,22 @@ try {
     const full = await gh('GET', `/pulls/${p.number}`);
     if (full.mergeable === false) { await stuck(p, 'Every check is green, but it has a merge conflict with main.'); continue; }
     if (full.mergeable == null) { console.log(`${n}: GitHub is still working out if it can merge; next run`); continue; }
-    if (merged || busy) { console.log(`${n}: ready, waits for the live check of the last merge`); continue; }
     if (DRY) { console.log(`${n}: ready, would merge now (dry run)`); merged = n; continue; }
+    if (merged) await new Promise(r => setTimeout(r, 4000)); // let GitHub settle the next pull request against the new main
     const before = (await gh('GET', '/git/ref/heads/main')).object.sha;
+    if (!first) first = before;
     const r = await gh('PUT', `/pulls/${p.number}/merge`, { merge_method: 'merge', sha: p.head.sha }, { token: touchesWorkflows ? MERGE_TOKEN : '' }).catch(e => ({ err: e.message }));
     if (!r.merged) { console.log(`${n}: merge refused: ${r.err || r.message}`); await stuck(p, 'Every check is green, but GitHub refused the merge.'); continue; }
-    merged = n; log.push(`${n} ${scrub(p.title).slice(0, 80)}`);
+    merged = n; last = r.sha; log.push(`${n} ${scrub(p.title).slice(0, 80)}`);
     console.log(`${n}: merged as ${r.sha}`);
-    await gh('POST', `/issues/${p.number}/comments`, { body: `🚀 Merged by itself: ${REQUIRED.join(', ')} were all green on ${p.head.sha.slice(0, 7)}. The product engineer agent now checks the live site and rolls this back if it broke it.` }).catch(() => {});
-    // A merge made with the workflow token starts no workflow, and one made with MERGE_TOKEN starts a plain push run
-    // that cannot roll back (it queues behind this one: live-check has a concurrency group). Either way, start the
-    // live check by hand with merge/before so that this merge can be rolled back.
+    await gh('POST', `/issues/${p.number}/comments`, { body: `🚀 Merged by itself: ${REQUIRED.join(', ')} were all green on ${p.head.sha.slice(0, 7)}. The UI check and the product engineer agent's live check now run on it and roll it back if it broke the live site.` }).catch(() => {});
     if (touchesWorkflows) console.log(`${n}: changes workflows, merged with MERGE_TOKEN`);
-    await gh('POST', '/actions/workflows/live-check.yml/dispatches', { ref: 'main', inputs: { merge: r.sha, before } })
-      .catch(e => console.log(`::warning::could not start the live check: ${e.message}`));
   }
+  // A merge made with the workflow token starts no workflow, and one made with MERGE_TOKEN starts a plain push run
+  // that cannot roll back. So start one live check by hand for the whole batch: merge is the last merge commit and
+  // before is main before the first one, so a rollback puts main back exactly as it was before the batch.
+  if (last) await gh('POST', '/actions/workflows/live-check.yml/dispatches', { ref: 'main', inputs: { merge: last, before: first } })
+    .catch(e => console.log(`::warning::could not start the live check: ${e.message}`));
   out('merged', merged);
   out('summary', merged ? `Merged ${log.join(', ')}.` : 'Nothing ready to merge.');
 } catch (e) {

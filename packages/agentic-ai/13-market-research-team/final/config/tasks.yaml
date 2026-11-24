@@ -1,0 +1,31 @@
+# config/tasks.yaml: the order slips.
+# Every {blank} here (state, today) needs a key in main.py.
+find_markets:
+  description: >
+    Today is {today}. Search for night markets in {state} that people are talking
+    about right now. Find markets you have not suggested before.
+  expected_output: >
+    A list of night markets, each with a reason it is trending.
+  agent: scout
+
+study_markets:
+  description: >
+    For each market found, research crowd, rent and competition for a kuih stall in {state}.
+  expected_output: >
+    A study of each market.
+  agent: researcher
+  context:
+    - find_markets
+  output_file: output/studies.json
+
+# added: the lesson did not show this slip; the picker needs one to run
+pick_market:
+  description: >
+    Read the studies and choose the single best market for a kuih stall in {state}.
+    Then send exactly one short notification with the pick and the main reason.
+  expected_output: >
+    The chosen market, the reason in two sentences, and a note that the notification was sent.
+  agent: picker
+  context:
+    - study_markets
+  output_file: output/pick.md

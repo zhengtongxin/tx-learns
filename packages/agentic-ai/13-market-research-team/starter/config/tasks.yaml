@@ -1,0 +1,30 @@
+# config/tasks.yaml: the order slips.
+# TODO: write a description and an expected_output for each. Every {blank} needs a key in main.py.
+# The description is the order. The expected_output is the finish line.
+find_markets:
+  description: >
+    TODO: say today's date ({today}), ask for markets in {state} people are talking about,
+    and ask for ones you have not suggested before (this is what memory=True makes work)
+  expected_output: >
+    TODO
+  agent: scout
+
+study_markets:
+  description: >
+    TODO: for each market found, research crowd, rent and competition in {state}
+  expected_output: >
+    TODO
+  agent: researcher
+  context:
+    - find_markets          # the researcher reads the scout's list
+  output_file: output/studies.json
+
+pick_market:
+  description: >
+    TODO: choose the single best market and send exactly one short notification
+  expected_output: >
+    TODO
+  agent: picker
+  context:
+    - study_markets
+  output_file: output/pick.md

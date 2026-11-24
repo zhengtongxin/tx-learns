@@ -1,0 +1,26 @@
+# config/tasks.yaml: chain the roles with context.
+# The design feeds the code. The code feeds both the screen and the tests.
+design_task:
+  description: TODO (write the design for {module_name}: markdown only, no code)
+  expected_output: TODO
+  agent: lead
+  output_file: sandbox/design.md
+
+code_task:
+  description: TODO
+  expected_output: TODO
+  agent: backend_dev
+  context: [design_task]
+
+ui_task:
+  description: TODO
+  expected_output: TODO
+  agent: frontend_dev
+  context: []          # TODO: which earlier task does the screen need?
+
+test_task:
+  description: TODO
+  expected_output: TODO
+  agent: tester
+  context: []          # TODO: which earlier task does the tester need?
+  output_file: sandbox/test_report.md
