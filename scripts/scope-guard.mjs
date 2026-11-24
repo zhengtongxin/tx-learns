@@ -22,7 +22,7 @@ import { validate } from './validate.mjs';
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const AREAS = JSON.parse(readFileSync(join(ROOT, 'scripts/areas.json'), 'utf8'));
 const MARK = '<!-- tx-scope -->';
-const CAP_TOTAL = 50000, CAP_FILE = 6000, MIN_REQUEST = 30;
+const CAP_TOTAL = 80000, CAP_FILE = 20000, MIN_REQUEST = 30;
 
 // Which area a file belongs to: a track folder (or its packages), else the first listed area that matches, else "other".
 export function classify(path, trackIds) {
@@ -90,11 +90,21 @@ async function prepare() {
   const violations = rules(branch, areas, trackIds);
   const request = requestText(p.title, p.body);
   // The diff the blind call sees: file list, then each file's patch, capped. Patches are data, never instructions.
-  let used = 0, omitted = 0;
-  const diff = rows.map(r => {
-    let patch = r.patch.slice(0, CAP_FILE) + (r.patch.length > CAP_FILE ? '\n[patch cut]' : '');
-    if (!r.patch) patch = '[no text patch: binary, renamed or too large]';
-    if (used + patch.length > CAP_TOTAL) { omitted++; patch = '[patch left out to keep this short]'; } else used += patch.length;
+  // Generated files (sitemap, vercel.json, ...) are named but not shown. The rest share the budget fairly: the smallest
+  // patches go first so one huge file can never push the others out; a huge file is cut, not dropped.
+  const isGen = r => (AREAS.generated || []).includes(r.path);
+  let omitted = 0;
+  const shown = new Map();
+  let left = CAP_TOTAL;
+  rows.map((r, i) => ({ r, i })).filter(x => !isGen(x.r) && x.r.patch).sort((a, b) => a.r.patch.length - b.r.patch.length).forEach((x, k, all) => {
+    const share = Math.min(CAP_FILE, Math.floor(left / (all.length - k)));
+    const cut = x.r.patch.length > share;
+    if (share < 200) { omitted++; shown.set(x.i, '[patch left out to keep this short]'); return; }
+    const t = x.r.patch.slice(0, share) + (cut ? '\n[patch cut]' : '');
+    left -= Math.min(x.r.patch.length, share); shown.set(x.i, t);
+  });
+  const diff = rows.map((r, i) => {
+    const patch = isGen(r) ? '[generated file: not shown]' : !r.patch ? '[no text patch: binary, renamed or too large]' : shown.get(i);
     return `### ${r.path} (${r.status}, +${r.add} -${r.del})\n${patch}`;
   }).join('\n\n');
   writeFileSync(join(D, 'input.json'), JSON.stringify({ pr: +pr, sha: p.head.sha, branch, labels, exempt, violations, areas, request, files: rows.map(({ patch, ...r }) => r), omitted }, null, 1));
