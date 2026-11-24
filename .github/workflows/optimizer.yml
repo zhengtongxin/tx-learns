@@ -1,0 +1,191 @@
+# Efficiency engineer agent: every six hours it looks for one safe, measurable way to make the site or its maintenance
+# pipeline cheaper, faster, smaller, quieter or less fragile. It opens at most one focused pull request per run and never
+# pushes to main. The normal copy check, backend review, preview UI check, automatic merge and live rollback all apply.
+# It may not change the merge guardrails, agent runners, status recording, lesson prose or project starter/reference code.
+name: Efficiency engineer (optimizer)
+on:
+  schedule:
+    - cron: '23 */6 * * *'   # 00:23, 06:23, 12:23 and 18:23 UTC
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Let the agent prepare and measure a change without opening a pull request
+        required: false
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: optimizer
+  cancel-in-progress: false
+jobs:
+  # Marks the optimizer as working (yellow) on the How it works page. Trusted scripts from main only.
+  working:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: scripts
+          persist-credentials: false
+      - name: Show the agent as working
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATE: run
+        run: "[ -f scripts/record-status.mjs ] && node scripts/record-status.mjs optimizer || true"
+
+  improve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    outputs:
+      pr: ${{ steps.finish.outputs.pr }}
+      state: ${{ steps.finish.outputs.state }}
+      summary: ${{ steps.finish.outputs.summary }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Measure the repository
+        run: node scripts/efficiency-report.mjs --out /tmp/efficiency-report.md
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+      - name: Find and make one focused improvement
+        env:
+          # Prefer TX's Claude subscription (CLAUDE_CODE_OAUTH_TOKEN from `claude setup-token`); the API key is only a fallback.
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set -o pipefail
+          if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then unset ANTHROPIC_API_KEY; echo "Auth: Claude subscription"; else unset CLAUDE_CODE_OAUTH_TOKEN; echo "Auth: API key (no CLAUDE_CODE_OAUTH_TOKEN secret)"; fi
+          cat > /tmp/optimizer-prompt.md <<'PROMPT'
+          You are the efficiency engineer for TX Learns, a bilingual (EN/中文), static, no-build learning site.
+          Your job is continuous improvement: reduce transferred bytes, request count, blocking work, duplicated source,
+          CI time, noisy failures and silent-failure risk without changing what learners receive.
+
+          Read /tmp/efficiency-report.md first, then inspect the smallest relevant part of the repository. Choose at most
+          ONE coherent improvement that is safe to prove with the existing checks. Prefer a quick root-cause fix over a
+          broad refactor. If no change is both worthwhile and safe, change nothing and say why.
+
+          Rules:
+          1. Read CLAUDE.md and STYLE.md first. Preserve the bilingual behavior, stories, lesson ordering, progress
+             storage, SEO, accessibility, links, project packages and deployment on Vercel.
+          2. Do not edit lesson prose, project starter/reference code, `packages/**`, `banned-words.txt`, `CLAUDE.md`,
+             `STYLE.md`, `.github/**`, `scripts/auto-merge.mjs`, `scripts/claude-run.mjs`, `scripts/record-status.mjs`
+             or `scripts/trace.mjs`.
+          3. Keep source changes small: at most six non-generated source files. Generated HTML/list/cache-version updates
+             made by `node scripts/check-pages.mjs --fix` may accompany them.
+          4. Make the benefit measurable. State the before and after bytes, request count, blocking operations, repeated
+             source count, CI work or failure mode in `/tmp/optimizer-summary.md`.
+          5. Do not add a framework, package manager, dependency or build step unless the repository already uses it.
+          6. Run `node scripts/check-copy.mjs`, `node scripts/check-counts.mjs`,
+             `node scripts/check-pages.mjs --fix`, `node scripts/check-security.mjs` and fix regressions.
+          7. Use `Edit` and `Write` only inside the checkout, plus `Write` for `/tmp/optimizer-summary.md`.
+             Do not run git, do not commit and do not open a pull request; the workflow does that.
+
+          `/tmp/optimizer-summary.md` must begin with one short pull-request title line, then:
+          - Problem: the wasted work or failure mode.
+          - Change: what you changed and why this is the root cause.
+          - Measure: a concrete before/after comparison.
+          - Check: which deterministic checks passed.
+          PROMPT
+          curl -fsS -o /tmp/claude-run.mjs "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/scripts/claude-run.mjs" && CC="node /tmp/claude-run.mjs optimizer" || CC=claude
+          $CC --model sonnet --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/optimizer-prompt.md)" --max-turns 40 \
+            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(node scripts/check-counts.mjs:*),Bash(node scripts/check-pages.mjs:*),Bash(node scripts/check-security.mjs:*)" \
+            --output-format text | tail -40
+      - name: Guard and verify the change
+        id: finish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/out
+          test -s /tmp/optimizer-summary.md || echo "Efficiency improvement with no written summary." > /tmp/optimizer-summary.md
+          {
+            git diff --name-only
+            git ls-files --others --exclude-standard
+          } | sort -u > /tmp/changed.txt
+          if grep -Eq '^(\.github/|packages/|CLAUDE\.md$|STYLE\.md$|banned-words\.txt$|scripts/(auto-merge|claude-run|record-status|trace)\.mjs$)' /tmp/changed.txt; then
+            echo "The optimizer touched a protected file:"; grep -E '^(\.github/|packages/|CLAUDE\.md$|STYLE\.md$|banned-words\.txt$|scripts/(auto-merge|claude-run|record-status|trace)\.mjs$)' /tmp/changed.txt; exit 1
+          fi
+          grep -Ev '^(sitemap\.xml|vercel\.json|[^/]+\.html|[^/]+/index\.html|[^/]+/[0-9][0-9]-[^/]*\.html|[^/]+/packages\.js)$' /tmp/changed.txt > /tmp/source-changed.txt || true
+          if [ "$(wc -l < /tmp/source-changed.txt)" -gt 6 ]; then
+            echo "The optimizer changed more than six non-generated source files:"; cat /tmp/source-changed.txt; exit 1
+          fi
+          git add -A
+          node scripts/check-copy.mjs | tee /tmp/copy-check.txt
+          node scripts/check-counts.mjs
+          node scripts/check-pages.mjs --fix
+          node scripts/check-security.mjs
+          git add -A
+          {
+            git diff HEAD --name-only
+            git ls-files --others --exclude-standard
+          } | sort -u > /tmp/changed-final.txt
+          if [ "$DRY_RUN" = true ]; then
+            echo "state=ok" >> "$GITHUB_OUTPUT"
+            echo "summary=Prepared a measured efficiency change in dry-run mode; no pull request was opened." >> "$GITHUB_OUTPUT"
+            echo "pr=" >> "$GITHUB_OUTPUT"
+            echo "Dry run; leaving without a pull request."
+            exit 0
+          fi
+          if [ ! -s /tmp/source-changed.txt ] && [ ! -s /tmp/changed-final.txt ]; then
+            echo "state=ok" >> "$GITHUB_OUTPUT"
+            echo "summary=Found no safe efficiency improvement worth changing this run." >> "$GITHUB_OUTPUT"
+            echo "pr=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          branch="optimizer/${GITHUB_RUN_NUMBER}-${GITHUB_RUN_ATTEMPT}"
+          git config user.name "TX Learns efficiency engineer"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git commit -m "Efficiency: focused site improvement" -m "Made by the efficiency engineer agent (Claude); see the pull request for before/after measurements."
+          git push -u origin "$branch"
+          title=$(head -1 /tmp/optimizer-summary.md | sed 's/^#* *//' | cut -c1-70)
+          [ -n "$title" ] || title="Efficiency: focused site improvement"
+          {
+            cat /tmp/optimizer-summary.md
+            echo
+            echo "---"
+            echo "Automated guardrails: the change is limited to source files and generated page metadata, and copy, count, page and security checks pass. The backend engineer agent reviews it next; the preview UI check and live rollback still apply."
+          } > /tmp/pr-body.md
+          url=$(gh pr create --base main --head "$branch" --title "$title" --body-file /tmp/pr-body.md)
+          pr=${url##*/}
+          gh pr edit "$url" --add-assignee "${{ github.repository_owner }}" || true
+          gh workflow run copy-check.yml --ref "$branch" -R "$GITHUB_REPOSITORY" || echo "::warning::Could not start the copy check."
+          gh workflow run review.yml -R "$GITHUB_REPOSITORY" -f pr="$pr" || echo "::warning::Could not start the backend engineer review."
+          echo "pr=$url" >> "$GITHUB_OUTPUT"
+          echo "state=ok" >> "$GITHUB_OUTPUT"
+          echo "summary=Opened one measured efficiency improvement in pull request #$pr." >> "$GITHUB_OUTPUT"
+      - name: Record what the agent used
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: "[ -f scripts/trace.mjs ] && node scripts/trace.mjs push optimizer /tmp/out || true"
+      - name: Tell TX on Telegram when it cannot finish
+        if: ${{ failure() }}
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          node scripts/notify-telegram.mjs "⚠️ The efficiency engineer agent could not finish safely. Logs: $RUN"
+      - name: Record status for the Ecosystem page
+        if: ${{ !cancelled() }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATE: ${{ steps.finish.outputs.state || 'fail' }}
+          SUMMARY: ${{ steps.finish.outputs.summary || 'Could not finish a safe efficiency improvement.' }}
+          LINK: ${{ steps.finish.outputs.pr }}
+        run: node scripts/record-status.mjs optimizer
