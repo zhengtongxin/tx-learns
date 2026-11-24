@@ -1,0 +1,25 @@
+# Copy to .github/workflows/deploy.yml in your repository.
+name: deploy-dev
+on:
+  push:
+    branches: [main]
+permissions:
+  id-token: write # lets the job ask GitHub for a short-lived identity token
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: dev
+    env:
+      STATE_BUCKET: ${{ secrets.STATE_BUCKET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/wharf-pipeline
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Connect to the shared state
+        working-directory: infra
+        run: terraform init -backend-config="bucket=$STATE_BUCKET" -backend-config="region=$AWS_REGION" -backend-config="dynamodb_table=wharf-tf-locks"
+      - run: ./deploy.sh dev

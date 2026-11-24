@@ -132,6 +132,9 @@ jobs:
              Any ✗ in it is a blocker. Read /tmp/code-check.txt too: code boxes in the changed lessons that would not
              parse. A box may be a fragment of an earlier step ("..." as an elided argument is fine); a real syntax
              error is a blocker.
+          3b. For each changed lesson, run node scripts/rag.mjs --related <track>/<file> and node scripts/rag.mjs "<its main concept>"
+             (local search over the existing lessons, free). Use it to catch a lesson that contradicts or repeats an
+             existing one, calls the same thing by a different name, or misses a link back to a lesson it builds on.
           4. Check each changed lesson for:
              - Copyright: any platform, program or instructor name, "course"/课程, week/day/"Project N" numbering,
                or examples, prompts and code comments that look copied from a source rather than written in our own words.
@@ -159,7 +162,7 @@ jobs:
           Do not run git.
           PROMPT
           claude --model sonnet --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/review-prompt.md)" --max-turns 40 \
-            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(node scripts/check-counts.mjs:*),Bash(node scripts/check-pages.mjs:*)" \
+            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(node scripts/check-counts.mjs:*),Bash(node scripts/check-pages.mjs:*),Bash(node scripts/rag.mjs:*)" \
             --output-format text | tail -30
       - name: Package the result for the share job
         if: always()
