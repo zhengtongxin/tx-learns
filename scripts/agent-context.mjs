@@ -11,7 +11,8 @@ import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { arg } from './lib.mjs';
+// Self-contained on purpose: workflows download this one file from main and run it, so it imports nothing from the repo.
+const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
 
 const ROOT = resolve(arg('root', resolve(dirname(fileURLToPath(import.meta.url)), '..')));
 const [mode] = process.argv.slice(2);

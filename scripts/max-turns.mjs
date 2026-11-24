@@ -5,7 +5,8 @@
 // The ceiling is the old fixed limit: the answer never goes above it. With fewer than 15 successful calls, or no file,
 // the ceiling is used, so a new agent is never starved. Margin: 25% plus 3 turns.
 import { readFileSync } from 'node:fs';
-import { arg } from './lib.mjs';
+// Self-contained on purpose: workflows download this one file from main and run it, so it imports nothing from the repo.
+const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
 
 const [agent, ceilingRaw] = process.argv.slice(2).filter(a => !a.startsWith('--'));
 const ceiling = Math.max(1, +ceilingRaw || 30), floor = +arg('floor', 12), step = arg('step', '');
