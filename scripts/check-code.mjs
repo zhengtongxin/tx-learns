@@ -2,9 +2,9 @@
 // Code sample check (for the backend engineer agent). No AI, no network, nothing is run.
 // It takes every code box (.codebox) in the given lessons and checks that the code would at least parse:
 // Python with ast (top-level await allowed), JavaScript with node --check. Shell lines and program output
-// are skipped. A code box may be a fragment that builds on an earlier step, so names it uses can be missing;
+// are skipped, as is any box whose data-lang is not python or js. A code box may be a fragment that builds on an earlier step, so names it uses can be missing;
 // only real syntax errors are listed. The result is a note for the reviewer, not a hard fail.
-// Usage: node scripts/check-code.mjs <lesson.html>...   (no files = every lesson)
+// Usage: node scripts/check-code.mjs <lesson.html>...   (no files, or the word "lessons" = every lesson)
 import { readFileSync, writeFileSync, mkdtempSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -12,7 +12,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 
 const root = new URL('..', import.meta.url).pathname;
 let files = process.argv.slice(2).filter(f => /\/\d\d-[\w-]+\.html$/.test(f));
-if (!process.argv[2]) {
+if (!process.argv[2] || process.argv[2] === 'lessons') {
   try { files = execFileSync('git', ['ls-files', '*/[0-9][0-9]-*.html'], { cwd: root, encoding: 'utf8' }).split('\n').filter(Boolean); }
   catch { files = readdirSync(root, { withFileTypes: true }).filter(d => d.isDirectory()).flatMap(d => { try { return readdirSync(join(root, d.name)).filter(n => /^\d\d-.*\.html$/.test(n)).map(n => d.name + '/' + n); } catch { return []; } }); }
 }
@@ -37,9 +37,12 @@ let boxes = 0, notes = [];
 for (const f of files) {
   let html; try { html = readFileSync(join(root, f), 'utf8'); } catch { continue; }
   let n = 0;
-  for (const m of html.matchAll(/<div class="codebox[^"]*"[^>]*>([\s\S]*?)<\/div>/g)) {
+  for (const m of html.matchAll(/<div class="codebox[^"]*"([^>]*)>([\s\S]*?)<\/div>/g)) {
     n++; boxes++;
-    const code = decode(m[1]).replace(/\u00a0/g, ' ');
+    // A box that names its language as anything but python or js (bash, text, json, ...) is not syntax-checked.
+    const lang = (m[1].match(/data-lang="([^"]*)"/) || [])[1];
+    if (lang && !/^(python|py|js|javascript|mjs)$/i.test(lang)) continue;
+    const code = decode(m[2]).replace(/\u00a0/g, ' ');
     const k = kind(code);
     let err = '';
     if (k === 'python') {
