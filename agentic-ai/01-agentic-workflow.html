@@ -13,8 +13,8 @@
 
 <div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">The Kopi Corner assistant starts here: Aina wants Auntie Suria's order pad to move from step to step without anyone copying orders by hand. Before that, she needs to know what a workflow and an agent are made of. So today she builds a small agent in n8n, boxes on a canvas, no code.</p>
 <p class="zh" style="margin:0">Kopi Corner 助手从这里开始：Aina 想让 Suria 阿姨的点单本自己一步步往下走，不必再有人手抄订单。在那之前，她得先弄清工作流和智能体由什么组成。所以今天她在 n8n 里用方块搭一个小智能体，不用写代码。</p></div>
-<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en" style="margin:0">Uncle Lim keeps some savings in a broad bond ETF and asks his niece <b>Aina</b>: <i>“Check yesterday's closing price and write it down for me.”</i> Aina does not want to open a price site every morning. We follow her as she builds a small agent in n8n that does it by itself. The same pieces (a trigger, an agent, tools) will carry Kopi Corner's orders next.</p>
-<p class="zh" style="margin:0">Lim 叔叔把一部分积蓄放在一只宽基债券 ETF 里，他请侄女 <b>Aina</b> 帮忙：<i>“查一下昨天的收盘价，记下来给我。”</i> Aina 不想每天早上都去打开行情网站。我们跟着她，在 n8n 里搭一个小智能体，让它自己完成。这些部件（触发器、智能体、工具）接下来会用来处理 Kopi Corner 的订单。</p></div>
+<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en" style="margin:0">Uncle Lim keeps some savings in a broad bond ETF (a fund you buy like a share, holding many bonds) and asks his niece <b>Aina</b>: <i>“Check yesterday's closing price and write it down for me.”</i> Aina does not want to open a price site every morning. We follow her as she builds a small agent in n8n that does it by itself. The same pieces (a trigger, an agent, tools) will carry Kopi Corner's orders next.</p>
+<p class="zh" style="margin:0">Lim 叔叔把一部分积蓄放在一只宽基债券 ETF（像股票一样买卖、里面装着很多债券的基金）里，他请侄女 <b>Aina</b> 帮忙：<i>“查一下昨天的收盘价，记下来给我。”</i> Aina 不想每天早上都去打开行情网站。我们跟着她，在 n8n 里搭一个小智能体，让它自己完成。这些部件（触发器、智能体、工具）接下来会用来处理 Kopi Corner 的订单。</p></div>
 
 <div class="callout tip"><b class="lbl"><span class="en">After this lesson you can</span><span class="zh">学完你能做到</span></b>
 <span class="en">• Name the three parts an agent is built from (model, tools, memory) and the node that loops them.<br>• Read an execution log and point to which steps used the model and which used a tool.<br>• Build a six-part n8n workflow: chat trigger, AI Agent, chat model, memory and two tools.</span>
@@ -33,7 +33,7 @@
   <div class="flip"><div class="front"><div class="ic">🗒️</div><b><span class="en">Notebook</span><span class="zh">笔记本</span></b><small><span class="en">tap to flip</span><span class="zh">点击翻转</span></small></div>
     <div class="back"><span class="en"><b>Simple Memory</b><br>Keeps recent messages so follow-ups make sense.</span><span class="zh"><b>Simple Memory</b><br>保存最近的消息，让追问有上下文。</span></div></div>
 </div>
-<div class="callout tip"><b class="lbl"><span class="en">Key idea</span><span class="zh">核心思想</span></b><span class="en">Agent = LLM + tools + a loop. The AI Agent node is the loop.</span><span class="zh">智能体 = 大模型 + 工具 + 循环。AI Agent 节点就是那个循环。</span></div>
+<div class="callout tip"><b class="lbl"><span class="en">Key idea</span><span class="zh">核心思想</span></b><span class="en">Agent = LLM (large language model) + tools + a loop. The AI Agent node is the loop.</span><span class="zh">智能体 = 大模型 + 工具 + 循环。AI Agent 节点就是那个循环。</span></div>
 
 <div class="sc" id="g1"></div>
 
@@ -56,7 +56,7 @@
   <div class="step"><b><span class="en">2. Add the trigger</span><span class="zh">2. 添加触发器</span></b><p class="en">Add “When chat message received” so you can chat with it.</p><p class="zh">添加“When chat message received”，这样就能和它聊天。</p></div>
   <div class="step"><b><span class="en">3. Add the AI Agent node</span><span class="zh">3. 添加 AI Agent 节点</span></b><p class="en">Connect the trigger to an AI Agent node.</p><p class="zh">把触发器连接到 AI Agent 节点。</p></div>
   <div class="step"><b><span class="en">4. Attach model + memory</span><span class="zh">4. 接上模型和记忆</span></b><p class="en">Chat Model: OpenAI. Memory: Simple Memory.</p><p class="zh">Chat Model 选 OpenAI；Memory 选 Simple Memory。</p></div>
-  <div class="step"><b><span class="en">5. Add tools</span><span class="zh">5. 添加工具</span></b><p class="en">Marketstack (market data) and Google Sheets (read / append rows).</p><p class="zh">添加 Marketstack（行情数据）和 Google Sheets（读取 / 追加行）。</p></div>
+  <div class="step"><b><span class="en">5. Add tools</span><span class="zh">5. 添加工具</span></b><p class="en">Marketstack (market data) and Google Sheets (read / append rows). Each needs its own account and API key (a private password for a service, covered in Lesson 3); n8n has a credentials box to paste them in.</p><p class="zh">添加 Marketstack（行情数据）和 Google Sheets（读取 / 追加行）。两者都需要各自的账号和 API 密钥（服务用的私人密码，第 3 课会讲）；n8n 有凭据框可以粘贴进去。</p></div>
   <div class="step"><b><span class="en">6. Chat and inspect</span><span class="zh">6. 聊天并检查</span></b><p class="en">Send a message, then open the Logs to see which tools it called.</p><p class="zh">发一条消息，再打开 Logs，看它调用了哪些工具。</p></div>
 </div>
 <div class="callout warn"><b class="lbl"><span class="en">Good to know</span><span class="zh">注意</span></b><span class="en">Simple Memory keeps recent chat inside n8n itself. That is fine for learning; use database-backed memory for real use.</span><span class="zh">Simple Memory 把最近的对话保存在 n8n 内部。学习够用，正式使用请换成基于数据库的记忆。</span></div>
