@@ -1,7 +1,9 @@
 # Improvement agent: the loop that acts on what the other agents already found. Four times a day it looks, without any AI,
 # for the one thing most worth fixing for readers: a broken page or link from the weekly quality check, or the lowest-scored
-# lesson the intern agent flagged (scripts/signals.mjs). Only when there is something does it start Claude (Sonnet, at most
-# 30 turns) on that one item and open ONE small pull request. At most one improver pull request is open at a time, an item is
+# lesson the intern agent flagged, then the best idea in the backlog (scripts/signals.mjs). When none of those exist, one
+# agent role (content creator, backend engineer, frontend engineer, ...) scouts ONE file with Haiku, read-only, and leaves
+# at most 2 ideas in the backlog (scripts/scout.mjs; a file is looked at again only after it changed). Only when there is
+# something does it start Claude (Sonnet, at most 30 turns) on that one item and open ONE small pull request. At most one improver pull request is open at a time, an item is
 # not retried for 7 days, and it never touches workflows, scripts, the rules or project code. The normal copy check, the
 # scope guard, the backend review, auto-merge and the live rollback all apply, so it never pushes to main.
 name: Improvement agent
@@ -65,6 +67,31 @@ jobs:
         run: |
           n=$(gh pr list -R "$GITHUB_REPOSITORY" --state open --json headRefName --jq '[.[]|select(.headRefName|startswith("improver/"))]|length')
           echo "open=$n" >> "$GITHUB_OUTPUT"; echo "Open improver pull requests: $n"
+      - name: Does a role need to scout for ideas? (no AI)
+        id: scout
+        if: steps.open.outputs.open == '0'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/scout.mjs plan --out /tmp/scout
+      - name: Install Claude Code for the scout
+        if: steps.scout.outputs.scout == 'true'
+        run: npm install -g @anthropic-ai/claude-code
+      - name: Scout one file for improvements (read-only)
+        if: steps.scout.outputs.scout == 'true'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
+        run: |
+          set -o pipefail
+          if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then unset ANTHROPIC_API_KEY; else unset CLAUDE_CODE_OAUTH_TOKEN; fi
+          mkdir -p /tmp/out
+          curl -fsS -o /tmp/claude-run.mjs "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/scripts/claude-run.mjs" && CC="node /tmp/claude-run.mjs improver" || CC=claude
+          TRACE_STEP=scout $CC --model haiku --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/scout/prompt.md)" --max-turns 10 \
+            --allowedTools "Read,Glob,Grep,Bash(node scripts/rag.mjs:*)" --output-format text > /tmp/scout/answer.txt || true
+          cat /tmp/scout/answer.txt | tail -20
+          if [ "$DRY_RUN" = true ]; then echo "Dry run: ideas not stored."; else node scripts/scout.mjs add /tmp/scout/answer.txt /tmp/scout/plan.json; fi
       - name: Pick the one thing worth fixing (no AI)
         id: brief
         if: steps.open.outputs.open == '0'
@@ -72,7 +99,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/signals.mjs brief --out /tmp/improver
       - name: Install Claude Code
-        if: steps.brief.outputs.actionable == 'true'
+        if: steps.brief.outputs.actionable == 'true' && steps.scout.outputs.scout != 'true'
         run: npm install -g @anthropic-ai/claude-code
       - name: Remember that this item was tried
         if: steps.brief.outputs.actionable == 'true' && !inputs.dry_run
@@ -119,7 +146,7 @@ jobs:
           mkdir -p /tmp/out
           if [ "$ACTIONABLE" != true ]; then
             echo "state=ok" >> "$GITHUB_OUTPUT"; echo "pr=" >> "$GITHUB_OUTPUT"
-            if [ "${{ steps.open.outputs.open }}" != 0 ]; then echo "summary=Waiting: one of my pull requests is still open." >> "$GITHUB_OUTPUT"; else echo "summary=Nothing to fix: no open quality problem and no lesson the intern scored under 8." >> "$GITHUB_OUTPUT"; fi
+            if [ "${{ steps.open.outputs.open }}" != 0 ]; then echo "summary=Waiting: one of my pull requests is still open." >> "$GITHUB_OUTPUT"; else echo "summary=Nothing to fix: no open quality problem, no low-scored lesson and no idea waiting." >> "$GITHUB_OUTPUT"; fi
             exit 0
           fi
           { git diff --name-only; git ls-files --others --exclude-standard; } | sort -u > /tmp/changed.txt
