@@ -47,6 +47,16 @@ for (const c of ds.cases) {
   writeFileSync(join(tmp, file), orig);
 }
 
+// ── 1b. The scope guard's path rules (scripts/areas.json): which area a file is in, and what a branch may change ──
+{
+  const { classify, rules } = await import('./scope-guard.mjs');
+  const sc = JSON.parse(readFileSync(join(ROOT, 'evals/scope-cases.json'), 'utf8'));
+  for (const c of sc.cases) {
+    const got = c.kind === 'area' ? classify(c.path, sc.tracks) : rules(c.branch, c.areas, sc.tracks).length ? 'block' : 'ok';
+    report(`scope: ${c.name}`, got === c.expect, got === c.expect ? '' : `expected ${c.expect}, got ${got}`);
+  }
+}
+
 // ── 2. The reviewer's judgement (optional, uses Claude) ──
 if (LLM) {
   const rv = JSON.parse(readFileSync(join(ROOT, 'evals/review-cases.json'), 'utf8'));

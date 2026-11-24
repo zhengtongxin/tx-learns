@@ -1,0 +1,145 @@
+# Scope guard agent: does what a pull request changes match what it was asked to change?
+# A separate agent reads ONLY the diff (not the request) and says what the change does. A second call compares that with the
+# request (the PR title and description). A mismatch, or a broken path rule (scripts/areas.json: a lesson draft may change one
+# track and nothing else), sets the "Scope guard" status and the required "Reviewer" status to failure, so auto-merge waits
+# and tells TX once. A match changes nothing. Cheap: two Haiku calls with no tools, a few thousand tokens.
+# The AI job is read-only and runs no code from the pull request (it never checks the branch out); a separate write job with
+# trusted scripts from main sets the statuses, the area labels and the one comment. Label "scope-ok" = TX said it is fine.
+# Started on every pull request into main, and by the backend engineer's review (pull requests opened with the workflow token
+# start no workflows on their own).
+name: Scope guard
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review, edited, labeled, unlabeled]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Pull request number
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: scope-guard-${{ github.event.pull_request.number || inputs.pr }}-${{ (github.event.action == 'labeled' || github.event.action == 'unlabeled') && github.event.label.name != 'scope-ok' && 'label' || 'main' }}
+  cancel-in-progress: true
+jobs:
+  # Marks the agent as working (yellow) on the How it works page, and the "Scope guard" status as pending. Trusted scripts from main only.
+  working:
+    if: ${{ github.event_name != 'pull_request' || (github.event.action != 'labeled' && github.event.action != 'unlabeled') || github.event.label.name == 'scope-ok' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      statuses: write
+      pull-requests: read
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PR: ${{ github.event.pull_request.number || inputs.pr }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: |
+            scripts
+            banned-words.txt
+            tracks.js
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: STATE=run node scripts/record-status.mjs scope-guard || true
+      - run: node scripts/scope-guard.mjs pending --pr "$PR" || true
+
+  # Read-only: reads the pull request through the API (the branch is never checked out) and asks Claude, with no tools.
+  look:
+    needs: working
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
+    env:
+      PR: ${{ github.event.pull_request.number || inputs.pr }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      # Scripts from main only: nothing from the branch under review runs here.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Read the pull request and apply the path rules
+        run: node scripts/scope-guard.mjs prepare --pr "$PR" --dir /tmp/scope
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+      - name: Ask Claude, twice, with no tools
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then unset ANTHROPIC_API_KEY; echo "Auth: Claude subscription"; else unset CLAUDE_CODE_OAUTH_TOKEN; echo "Auth: API key (no CLAUDE_CODE_OAUTH_TOKEN secret)"; fi
+          mkdir -p /tmp/out
+          CC="node scripts/claude-run.mjs scope-guard"
+          # Nothing to ask when the pull request is exempt, breaks a path rule already, or has no files.
+          if node -e 'const i=require("/tmp/scope/input.json");process.exit(i.exempt||i.violations.length||!i.files.length?0:1)'; then echo "No AI needed."; else
+            # Call 1: the diff alone. It has not seen the request.
+            $CC --model haiku --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/scope/blind-prompt.md)" --max-turns 1 --allowedTools "" --output-format text > /tmp/scope/blind.out.txt || echo "::warning::The first call failed."
+            rm -f /tmp/scope/compare-prompt.md
+            node scripts/scope-guard.mjs compare --dir /tmp/scope
+            # Call 2: the inferred description against the request (skipped when the first call gave no usable answer).
+            if [ -s /tmp/scope/compare-prompt.md ]; then $CC --model haiku --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/scope/compare-prompt.md)" --max-turns 1 --allowedTools "" --output-format text > /tmp/scope/verdict.out.txt || echo "::warning::The second call failed."; fi
+          fi
+          node scripts/scope-guard.mjs decide --dir /tmp/scope
+          cp /tmp/scope/result.json /tmp/out/ || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: scope
+          path: /tmp/out/
+          if-no-files-found: ignore
+
+  # Write job: only trusted scripts from the default branch run here. It sets the statuses, the area labels and the one comment.
+  share:
+    needs: [look, working]
+    if: ${{ !cancelled() && needs.look.result != 'cancelled' && needs.look.result != 'skipped' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      statuses: write
+      actions: write
+    env:
+      PR: ${{ github.event.pull_request.number || inputs.pr }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: |
+            scripts
+            schemas
+            banned-words.txt
+            tracks.js
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: scope
+          path: /tmp/out
+      - name: Record what the agent used
+        continue-on-error: true
+        run: "[ -f scripts/trace.mjs ] && node scripts/trace.mjs push scope-guard /tmp/out || true"
+      - name: Set the statuses, area labels and the comment
+        run: |
+          mkdir -p /tmp/scope && cp /tmp/out/result.json /tmp/scope/result.json || true
+          node scripts/scope-guard.mjs post --pr "$PR" --dir /tmp/scope
+      - name: Record status for the Ecosystem page
+        if: ${{ !cancelled() }}
+        run: |
+          r=$(node -p 'try{const x=require("/tmp/scope/result.json");(x.state==="block"?"flag":"ok")+"|"+(x.state==="block"?x.reason:(x.note||"The changes match the request."))}catch(e){"fail|Could not finish."}')
+          STATE="${r%%|*}" SUMMARY="PR #$PR: ${r#*|}" LINK="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/pull/$PR" node scripts/record-status.mjs scope-guard

@@ -1,0 +1,11 @@
+{
+  "$comment": "What the scope guard's second call writes (scripts/scope-guard.mjs): does what the diff does match what was asked for? scripts/validate.mjs checks it.",
+  "type": "object",
+  "required": ["verdict", "reason"],
+  "properties": {
+    "verdict": { "type": "string", "enum": ["match", "mismatch"] },
+    "reason": { "type": "string", "maxLength": 400 },
+    "extra": { "type": "array", "maxItems": 10, "items": { "type": "string", "maxLength": 200 } },
+    "missing": { "type": "array", "maxItems": 10, "items": { "type": "string", "maxLength": 200 } }
+  }
+}

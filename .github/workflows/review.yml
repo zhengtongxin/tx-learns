@@ -31,6 +31,7 @@ jobs:
       contents: write
       statuses: write
       pull-requests: read
+      actions: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -42,6 +43,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           STATE: run
         run: "[ -f scripts/record-status.mjs ] && node scripts/record-status.mjs reviewer || true"
+      - name: Start the scope guard (pull requests opened by an agent start no workflow on their own)
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ inputs.pr }}
+        run: gh workflow run scope-guard.yml --ref main -R "$GITHUB_REPOSITORY" -f pr="$PR" || echo "::warning::Could not start the scope guard."
       - name: Show the Reviewer status as pending on the pull request
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -267,7 +274,14 @@ jobs:
           echo "<!-- tx-review sha=$SHA -->" >> /tmp/c.md
           gh pr comment "$PR" -R "$GITHUB_REPOSITORY" --body-file /tmp/c.md
           # The required "Reviewer" status: green only for ✅, on the reviewed commit and on the fix commit it pushed.
+          # The scope guard (scope-guard.yml) says whether the change stays within what was asked. It needs a minute or two;
+          # wait for it, and if it found the change goes beyond the request the review cannot be green.
+          for i in 1 2 3 4 5 6; do
+            sg=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/status?per_page=100" --jq '[.statuses[]|select(.context=="Scope guard")][0].state // "none"' 2>/dev/null || echo none)
+            [ "$sg" = pending ] || break; sleep 20
+          done
           case "$state" in ok) st=success; d="Backend engineer agent: ready to merge";; flag) st=failure; d="Backend engineer agent: fix before merging";; *) st=error; d="Backend engineer agent could not finish";; esac
+          if [ "$sg" = failure ]; then st=failure; d="Scope guard: the change goes beyond what was asked"; fi
           for c in "$SHA" $pushed; do
             gh api -X POST "repos/$GITHUB_REPOSITORY/statuses/$c" -f state=$st -f context=Reviewer -f description="$d" -f target_url="$URL" > /dev/null || echo "::warning::Could not set the Reviewer status on $c"
           done
