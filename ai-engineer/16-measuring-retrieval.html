@@ -2,7 +2,7 @@
 <title>Measuring whether retrieval works | TX Learns</title>
 <meta name="description" content="Build a small test set, score retrieval and answers separately, and change one thing at a time so a number tells you what helped."><meta property="og:title" content="Measuring whether retrieval works | TX Learns"><meta property="og:description" content="Build a small test set, score retrieval and answers separately, and change one thing at a time so a number tells you what helped."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-engineer/16-measuring-retrieval.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
 <meta name="updated" content="2026-11-24">
-<link rel="canonical" href="https://tx-learns.vercel.app/ai-engineer/16-measuring-retrieval.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=aef15752"><link rel="stylesheet" href="../assets/teach.css?v=348efa72"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-engineer/16-measuring-retrieval.html","url":"https://tx-learns.vercel.app/ai-engineer/16-measuring-retrieval.html","name":"Measuring whether retrieval works","alternateName":"怎么衡量检索好不好","description":"Build a small test set, score retrieval and answers separately, and change one thing at a time so a number tells you what helped.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Retrieval (RAG)","dateModified":"2026-11-24","isPartOf":{"@type":"CollectionPage","name":"AI Engineer","url":"https://tx-learns.vercel.app/ai-engineer/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Engineer","item":"https://tx-learns.vercel.app/ai-engineer/index.html"},{"@type":"ListItem","position":3,"name":"Measuring whether retrieval works","item":"https://tx-learns.vercel.app/ai-engineer/16-measuring-retrieval.html"}]}]}</script></head><body>
+<link rel="canonical" href="https://tx-learns.vercel.app/ai-engineer/16-measuring-retrieval.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=ad5bc6ac"><link rel="stylesheet" href="../assets/teach.css?v=348efa72"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-engineer/16-measuring-retrieval.html","url":"https://tx-learns.vercel.app/ai-engineer/16-measuring-retrieval.html","name":"Measuring whether retrieval works","alternateName":"怎么衡量检索好不好","description":"Build a small test set, score retrieval and answers separately, and change one thing at a time so a number tells you what helped.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Retrieval (RAG)","dateModified":"2026-11-24","isPartOf":{"@type":"CollectionPage","name":"AI Engineer","url":"https://tx-learns.vercel.app/ai-engineer/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Engineer","item":"https://tx-learns.vercel.app/ai-engineer/index.html"},{"@type":"ListItem","position":3,"name":"Measuring whether retrieval works","item":"https://tx-learns.vercel.app/ai-engineer/16-measuring-retrieval.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Retrieval (RAG) · Lesson 4</span><span class="zh">检索增强（RAG） · 第 4 课</span></span><h1><span class="en">Measuring whether retrieval works</span><span class="zh">怎么衡量检索好不好</span></h1><p class="meta"><span class="en">You will replace "looks good in the chat" with numbers that move when you improve things · ~20 min · concept</span><span class="zh">你会用会随改进而变化的数字，取代“聊天里看起来不错” · 约 20 分钟 · 概念课</span></p></div>
 <div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the helper answered Auntie Lim's three test questions well. Today Priya asks, "How would you know if it got worse?" and Wei Jie has no answer. We fix it with a test set, a retrieval score and a judge model.</p>
@@ -13,8 +13,7 @@
 <h2><span class="en">Step 1 · A test set of questions with known answers</span><span class="zh">第 1 步 · 带标准答案的测试集</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">"Looks good in the chat" is a feeling, not evidence. You want a number that moves when you improve things. For that you need a test set: one JSON object per line, in a file (JSON is plain text that writes a record as named fields, like the lines below). Each has a question, a few keywords that must appear in the right chunks, a reference answer and a category: a direct fact, a relationship, a comparison, or a holistic question that spans many documents. A few dozen questions across the categories is enough to start.</p>
 <p class="zh" style="margin:0 0 8px">“聊天里看起来不错”只是感觉，不是证据。你需要一个会随改进而变化的数字。为此要有测试集：一个文件，每行一个 JSON 对象（JSON 是一种纯文本格式，用带名字的字段来写一条记录，就像下面的几行）。每条有问题、几个必须出现在正确块里的关键词、标准答案，以及类别：直接事实、关系、比较，或是跨很多文档的整体性问题。每个类别有几十道题，就足够起步了。</p></div>
-<div class="codebox" data-file="tests.jsonl" data-lang="json"><span class="dim"># tests.jsonl  (one question per line, made-up examples)
-</span><span class="chg">{"question": "Who is in charge of lift repairs?", "keywords": ["lift", "Hafiz"], "reference": "Hafiz Rahman handles lift repairs.", "category": "direct"}
+<div class="codebox" data-file="tests.jsonl" data-lang="json"><span class="chg">{"question": "Who is in charge of lift repairs?", "keywords": ["lift", "Hafiz"], "reference": "Hafiz Rahman handles lift repairs.", "category": "direct"}
 {"question": "Which officer reports to the estate manager?", "keywords": ["estate manager", "reports"], "reference": "The lift officer reports to her.", "category": "relationship"}
 {"question": "Which services have a fee?", "keywords": ["fee", "bulky waste", "hall booking"], "reference": "Bulky waste pickup and hall booking.", "category": "holistic"}</span></div>
 <div class="try" id="p1"></div>
@@ -77,9 +76,18 @@ def score_answer(test):
 
 for k in (3, 5, 10):          # change one thing: k
     print("k =", k); report(k)</span></div>
-<div class="codebox" data-file="output" data-lang="text">k = 10
-facts MRR 0.82 coverage 0.90
-fees MRR 0.60 coverage 0.70</div>
+<div class="codebox" data-file="output" data-lang="text">k = 3
+direct MRR 0.80 coverage 0.85
+relationship MRR 0.55 coverage 0.65
+holistic MRR 0.40 coverage 0.50
+k = 5
+direct MRR 0.85 coverage 0.92
+relationship MRR 0.60 coverage 0.75
+holistic MRR 0.50 coverage 0.65
+k = 10
+direct MRR 0.88 coverage 0.95
+relationship MRR 0.62 coverage 0.80
+holistic MRR 0.55 coverage 0.75</div>
 <div class="try" id="p4"></div>
 
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I judged by feel after one lucky question and felt done. A single good answer proves nothing. And the judge model is not perfect either, so I now spot-check some of its scores by hand.</span><span class="zh">我问了一个运气好的问题就凭感觉下结论，以为完成了。一个好答案什么也证明不了。裁判模型也不是完美的，所以我现在会手动抽查它给的一部分分数。</span></div>
@@ -98,7 +106,7 @@ fees MRR 0.60 coverage 0.70</div>
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
-<script src="lessons.js?v=0ada53e6"></script><script src="../assets/site.js?v=f0800996"></script><script src="../assets/teach.js?v=ede6f40f"></script>
+<script src="lessons.js?v=0ada53e6"></script><script src="../assets/site.js?v=e6228398"></script><script src="../assets/teach.js?v=ede6f40f"></script>
 <script>
 document.addEventListener('DOMContentLoaded',function(){
  var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
