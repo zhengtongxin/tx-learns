@@ -215,6 +215,21 @@
       if(fg){fg.style.strokeDashoffset=2*Math.PI*18*(1-pr);rn.textContent=Math.round(pr*100);rn.parentNode.setAttribute('aria-valuenow',Math.round(pr*100))}}
     window.addEventListener('scroll',onScroll,{passive:true});onScroll();
 
+    /* code boxes: a Copy button, an optional file/language label (data-file, data-lang on the <pre>), and a keyboard-scrollable region */
+    document.querySelectorAll('main pre, main .codebox').forEach(function(pre){
+      if(pre.closest('.codewrap'))return;
+      var w=document.createElement('div');w.className='codewrap';pre.parentNode.insertBefore(w,pre);
+      var bar=document.createElement('div');bar.className='codebar';
+      var lab=[pre.getAttribute('data-file'),pre.getAttribute('data-lang')].filter(Boolean).join(' · ');
+      bar.innerHTML='<span class="codelab">'+lab+'</span><button type="button" class="codecopy">'+t({en:'Copy',zh:'复制'})+'</button>';
+      w.appendChild(bar);w.appendChild(pre);
+      pre.tabIndex=0;pre.setAttribute('role','region');pre.setAttribute('aria-label',(lab?lab+' · ':'')+'Code · 代码');
+      var b=bar.querySelector('.codecopy');
+      b.onclick=function(){var txt=pre.innerText.replace(/\n+$/,'');
+        function ok(){b.innerHTML=t({en:'Copied ✓',zh:'已复制 ✓'});setTimeout(function(){b.innerHTML=t({en:'Copy',zh:'复制'})},1800)}
+        function fb(){var ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(e){b.innerHTML=t({en:'Press Ctrl+C',zh:'请按 Ctrl+C'})}ta.remove()}
+        if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(ok,fb);else fb()}});
+
     /* components */
     document.querySelectorAll('.flip').forEach(function(f){var w=document.createElement('div');w.className='flip-in';while(f.firstChild)w.appendChild(f.firstChild);f.appendChild(w);
       /* A flashcard is a toggle button: Tab to it, Enter or Space flips it. */
