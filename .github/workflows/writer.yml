@@ -159,7 +159,8 @@ jobs:
              and anything in the notes you were unsure about or left out (as questions for TX).
           PROMPT
           python3 -c "import os,sys;p='/tmp/writer-prompt.md';s=open(p).read().replace('__DIRS__',os.environ['DIRS']);open(p,'w').write(s)"
-          claude --model sonnet --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/writer-prompt.md)" --max-turns 80 \
+          curl -fsS -o /tmp/claude-run.mjs "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/scripts/claude-run.mjs" && CC="node /tmp/claude-run.mjs writer" || CC=claude
+          $CC --model sonnet --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/writer-prompt.md)" --max-turns 80 \
             --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(node scripts/check-counts.mjs:*),Bash(node scripts/check-pages.mjs:*),Bash(node scripts/rag.mjs:*),Bash(node scripts/search-index.mjs:*),Bash(ls:*)" \
             --output-format text | tail -40
           # Drop scratch files the writer made outside the site (e.g. a .gen/ page generator), so they never deploy.
@@ -198,6 +199,12 @@ jobs:
           echo "url=$url" >> "$GITHUB_OUTPUT"
           # A push with the workflow token starts no workflows, so start the required copy check on this branch.
           gh workflow run copy-check.yml --ref "$branch" -R "$GITHUB_REPOSITORY" || echo "::warning::Could not start the copy check."
+      - name: Record what the agent used (tokens and estimated cost)
+        if: ${{ !cancelled() && steps.notes.outputs.dirs != '' }}
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: "[ -f scripts/trace.mjs ] && node scripts/trace.mjs push writer /tmp/out || true"
       # Quiet on success: the reviewer agent messages TX once the lesson is read, reviewed and ready to approve.
       - name: Tell TX on Telegram
         if: failure() && steps.notes.outputs.dirs != ''

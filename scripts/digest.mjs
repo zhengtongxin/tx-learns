@@ -9,6 +9,7 @@
 //      SITE (live URL), DRY_RUN=1 prints instead of sending, GITHUB_API points it at a test server.
 import { appendFileSync } from 'node:fs';
 import { gh, telegram, scrub } from './lib.mjs';
+import { readRuns, summarize } from './trace.mjs';
 
 const SITE = (process.env.SITE || 'https://tx-learns.vercel.app/').replace(/\/?$/, '/');
 const out = (k, v) => process.env.GITHUB_OUTPUT && appendFileSync(process.env.GITHUB_OUTPUT, `${k}<<EOF\n${v}\nEOF\n`);
@@ -61,6 +62,15 @@ async function digest() {
   }
   lines.push(act.length ? '🤖 Last 24 hours:' : '🤖 No agent runs in the last 24 hours.', ...act.map(a => `• ${a}`));
   if (probs.length) lines.push('', '⚠️ Latest problems:', ...probs.map(p => `• ${p}`));
+  // What the agents used (from scripts/claude-run.mjs traces): estimated at API prices; TX's plan is not billed per call.
+  try {
+    const by = summarize((await readRuns()).runs, since), ids = Object.keys(by).filter(k => AG[k]);
+    if (ids.length) {
+      const total = ids.reduce((a, k) => a + by[k].usd, 0), calls = ids.reduce((a, k) => a + by[k].calls, 0);
+      lines.push('', `💰 Agent use, last 24 hours: ${calls} Claude call${calls > 1 ? 's' : ''}, about $${total.toFixed(2)} at API prices`,
+        ...ids.sort((x, y) => by[y].usd - by[x].usd).map(k => `• ${AG[k]}: ${by[k].calls} call${by[k].calls > 1 ? 's' : ''}, $${by[k].usd.toFixed(2)}${by[k].bad ? `, ${by[k].bad} not ok` : ''}`));
+    }
+  } catch { /* no trace yet */ }
   lines.push('', `Site: ${SITE}`);
   await telegram(lines.join('\n'));
   out('state', 'ok'); out('summary', `Sent the daily digest: ${live.length} went live, ${open.length} PRs still open.`);
