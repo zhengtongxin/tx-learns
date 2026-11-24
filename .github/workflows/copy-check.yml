@@ -112,8 +112,12 @@ jobs:
           SUMMARY: "On ${{ github.head_ref || github.ref_name }}: ${{ needs.copy-check.outputs.line }}"
           LINK: ${{ github.event.pull_request.html_url || format('{0}/{1}/actions/runs/{2}', github.server_url, github.repository, github.run_id) }}
         run: "[ -f scripts/record-status.mjs ] && node scripts/record-status.mjs copy-check || echo \"No record script on the default branch yet.\""
-      - name: Let auto-merge look at it
-        if: always()
+      - name: Let auto-merge look at it (only when copy-check and Reviewer are both green on this commit)
+        if: ${{ !cancelled() && needs.copy-check.result == 'success' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run auto-merge.yml --ref main -R "$GITHUB_REPOSITORY" || echo "Auto-merge picks it up on its 30-minute run."
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          rev=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/status?per_page=100" --jq '[.statuses[]|select(.context=="Reviewer")][0].state // "none"' 2>/dev/null || echo none)
+          if [ "$rev" = success ]; then gh workflow run auto-merge.yml --ref main -R "$GITHUB_REPOSITORY" || echo "Auto-merge picks it up on its 30-minute run."
+          else echo "Reviewer is $rev on $SHA: the review starts auto-merge when it is green. A red check is reported by auto-merge's 30-minute run."; fi

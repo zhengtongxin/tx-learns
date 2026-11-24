@@ -4,8 +4,9 @@
 # starts one live check (product engineer agent) on the whole batch, which rolls it back if it broke the live site. A stuck pull request (a red check the agents could not fix, a merge conflict,
 # a change to the auto-merge rules themselves, a workflow change while the secret MERGE_TOKEN is missing, or a
 # check silent for 3 hours) gets one PR comment and one Telegram message.
-# Started by the agents right after they set a check (copy check, UI check, reviewer) and after each live check;
-# every 30 minutes as a safety net. MERGE_TOKEN (fine-grained token: Contents, Pull requests, Workflows read/write on this repo) lets it merge PRs that change workflows. No AI, trusted scripts from main only. The label "hold" keeps a PR open.
+# Started once copy-check and Reviewer are BOTH green on the same commit (by whichever finishes second; the UI check no longer
+# starts it) and after each live check; every 30 minutes as a safety net for a red check, a race or a failed start.
+# A run that is merging is never cancelled (concurrency: cancel-in-progress false); a newer start waits its turn. MERGE_TOKEN (fine-grained token: Contents, Pull requests, Workflows read/write on this repo) lets it merge PRs that change workflows. No AI, trusted scripts from main only. The label "hold" keeps a PR open.
 name: Auto-merge
 on:
   schedule:

@@ -311,8 +311,12 @@ jobs:
           SUMMARY: "${{ steps.share.outputs.summary || format('PR #{0}: could not finish the review.', github.event.pull_request.number || inputs.pr) }}"
           LINK: ${{ github.server_url }}/${{ github.repository }}/pull/${{ github.event.pull_request.number || inputs.pr }}
         run: node $T/record-status.mjs reviewer
-      - name: Let auto-merge look at it
-        if: always()
+      - name: Let auto-merge look at it (only when Reviewer and copy-check are both green on this commit)
+        # A fix commit the reviewer pushed gets its own copy check, which starts auto-merge by itself.
+        if: ${{ !cancelled() && steps.share.outputs.state == 'ok' && steps.share.outputs.pushed == '' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run auto-merge.yml --ref main -R "$GITHUB_REPOSITORY" || echo "Auto-merge picks it up on its 30-minute run."
+        run: |
+          cc=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/check-runs?per_page=100" --jq '[.check_runs[]|select(.name=="copy-check")]|sort_by(.started_at)|last|.conclusion // "none"' 2>/dev/null || echo none)
+          if [ "$cc" = success ]; then gh workflow run auto-merge.yml --ref main -R "$GITHUB_REPOSITORY" || echo "Auto-merge picks it up on its 30-minute run."
+          else echo "copy-check is $cc on $SHA: its own run starts auto-merge when it is green."; fi
