@@ -1,0 +1,161 @@
+# service.py: a dispatch page, a run panel from records, a summary, a health check (all six steps).
+# Start it with:  uvicorn service:app
+import asyncio
+import sqlite3
+import time
+import uuid
+
+import openai   # added: to turn the provider's errors into the dispatcher's RateLimited / TimedOut
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
+from pydantic import BaseModel, Field
+
+from dispatcher import dispatch, RateLimited, TimedOut
+from desk import load_claims, decide
+
+app = FastAPI()
+SIGNOFF_LIMIT = 800
+
+
+# Step 1: the number is checked before any agent starts
+class Start(BaseModel):
+    n: int = Field(default=3, ge=1, le=25)          # 1 to 25 agents at once
+
+
+# Step 3 + 6: a table with one row per claim per run, including cost and time
+db = sqlite3.connect("runs.db", check_same_thread=False)
+db.execute("""CREATE TABLE IF NOT EXISTS claim_runs (
+    run TEXT, claim TEXT, status TEXT, action TEXT, payout REAL,
+    PRIMARY KEY (run, claim))""")
+for column in ("cost_usd REAL", "secs REAL", "started REAL", "finished REAL"):
+    try:
+        db.execute(f"ALTER TABLE claim_runs ADD COLUMN {column}")
+    except sqlite3.OperationalError:
+        pass                                  # the column is already there
+
+
+def save(run, claim_id, **fields):          # fields: status, action, payout, cost_usd... set by our own code
+    db.execute("INSERT OR IGNORE INTO claim_runs (run, claim, status) VALUES (?, ?, 'waiting')",
+               (run, claim_id))
+    for column, value in fields.items():
+        db.execute(f"UPDATE claim_runs SET {column} = ? WHERE run = ? AND claim = ?",
+                   (value, run, claim_id))
+    db.commit()
+
+
+# Step 2: only one dispatch at a time
+current = None                       # the id of the run that is working, if any
+
+
+async def run_dispatch(run, n):
+    global current
+
+    async def agent_for_run(claim):
+        started = time.time()
+        try:
+            decision, cost = await asyncio.to_thread(decide, claim)   # the model call blocks, so use a thread
+        except openai.RateLimitError as err:   # added: "not now" errors wait and retry, they are not strikes
+            raise RateLimited() from err
+        except openai.APITimeoutError as err:
+            raise TimedOut() from err
+        save(run, claim["id"], action=decision["action"], payout=float(decision.get("payout") or 0),
+             cost_usd=cost, started=started, finished=time.time(), secs=time.time() - started)
+        return decision
+
+    try:
+        await dispatch(load_claims(), agent_for_run,
+                       lambda claim_id, status: save(run, claim_id, status=status), n)
+    finally:
+        current = None               # free the lane, even if the run failed
+
+
+@app.post("/dispatch")
+async def start(body: Start):
+    global current
+    if current:                      # no await between this check and the next line, so no race
+        raise HTTPException(409, "A dispatch is already running. Wait for it to finish.")
+    current = uuid.uuid4().hex[:8]
+    asyncio.create_task(run_dispatch(current, body.n))
+    return {"run": current}
+
+
+@app.get("/runs/{run}")
+def panel(run: str):
+    rows = db.execute("SELECT claim, status, action, payout FROM claim_runs WHERE run = ?", (run,))
+    return [{"claim": c, "status": s, "action": a, "payout": p} for c, s, a, p in rows]
+
+
+# Step 4: a finishing summary from records, not from a model
+def count(run, where, *args):
+    return db.execute(f"SELECT COUNT(*) FROM claim_runs WHERE run = ? AND {where}",
+                      (run, *args)).fetchone()[0]
+
+
+@app.get("/runs/{run}/summary")
+def summary(run: str):
+    return {
+        "approved":         count(run, "status = 'done' AND action = 'approve' AND payout <= ?", SIGNOFF_LIMIT),
+        "waiting_signoff":  count(run, "status = 'done' AND action = 'approve' AND payout > ?", SIGNOFF_LIMIT),
+        "declined":         count(run, "status = 'done' AND action = 'decline'"),
+        "referred":         count(run, "status = 'done' AND action = 'refer'"),
+        "left_for_handler": count(run, "status = 'failed'"),
+    }
+
+
+# Step 6: one run's totals, including its own run time
+@app.get("/runs/{run}/totals")     # added: the lesson shows this as a SQL comment; here it is a route
+def totals(run: str):
+    cost, slowest, span = db.execute(
+        "SELECT SUM(cost_usd), MAX(secs), MAX(finished) - MIN(started) FROM claim_runs WHERE run = ?",
+        (run,)).fetchone()
+    return {"cost_usd": cost, "slowest_claim_secs": slowest, "run_secs": span}
+
+
+# Step 5: say so when the agent is not running
+@app.get("/health")
+def health():
+    return {"ok": True, "busy": current is not None}
+
+
+PAGE = """<h1>Queue</h1>
+<label>Agents at once <input id="n" type="number" min="1" max="25" value="3"></label>
+<button id="go">Start dispatch</button> <p id="msg"></p>
+<table id="panel" border="1" cellpadding="4"></table>
+<pre id="summary"></pre>
+<script>
+fetch("/health").then(r => r.json()).catch(() => null).then(h => {
+  if (!h) { go.disabled = true; msg.textContent = "The agent service is not running. Ask Kumar to start it."; }
+  else if (h.busy) { msg.textContent = "A dispatch is already running."; }
+});
+
+// added: the small script the lesson says you write yourself. It asks /runs/{run} every two seconds.
+async function poll(run) {
+  const rows = await (await fetch("/runs/" + run)).json();
+  panel.textContent = "";
+  for (const r of rows) {
+    const tr = panel.insertRow();
+    for (const v of [r.claim, r.status, r.action || "", r.payout == null ? "" : "S$" + r.payout]) {
+      tr.insertCell().textContent = v;       // textContent, never innerHTML
+    }
+  }
+  const h = await (await fetch("/health")).json();
+  if (rows.length && !h.busy) {
+    summary.textContent = JSON.stringify(await (await fetch("/runs/" + run + "/summary")).json(), null, 2);
+    go.disabled = false;
+    return;
+  }
+  setTimeout(() => poll(run), 2000);
+}
+
+go.onclick = async () => {
+  const r = await fetch("/dispatch", {method: "POST", headers: {"Content-Type": "application/json"},
+                                      body: JSON.stringify({n: Number(n.value)})});
+  msg.textContent = r.ok ? "Started." : "Could not start.";
+  if (r.ok) { go.disabled = true; summary.textContent = ""; poll((await r.json()).run); }
+};
+</script>"""
+
+
+@app.get("/", response_class=HTMLResponse)
+def page():
+    return PAGE

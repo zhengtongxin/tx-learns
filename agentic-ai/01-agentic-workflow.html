@@ -1,19 +1,26 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Make an agentic workflow | TX Learns</title>
 <meta name="description" content="Build your first agent in n8n, no code."><meta property="og:title" content="Make an agentic workflow | TX Learns"><meta property="og:description" content="Build your first agent in n8n, no code."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/agentic-ai/01-agentic-workflow.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
-<meta name="updated" content="2026-11-23">
-<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"></head><body>
+<meta name="updated" content="2026-11-24">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 
 <div class="hero">
 <span class="tag"><span class="en">Foundations · Lesson 1</span><span class="zh">基础 · 第 1 课</span></span>
 <h1><span class="en">Make an agentic workflow</span><span class="zh">搭建智能体工作流</span></h1>
-<p class="meta"><span class="en">Build your first agent in n8n, no code · ~5 min · includes a live simulator</span><span class="zh">用 n8n 零代码搭建第一个智能体 · 约 5 分钟 · 含互动模拟器</span></p>
+<p class="meta"><span class="en">Build your first agent in n8n, no code · ~15 min · hands-on</span><span class="zh">用 n8n 零代码搭建第一个智能体 · 约 15 分钟 · 动手实践</span></p>
 </div>
 
-<h2><span class="en">What is n8n?</span><span class="zh">n8n 是什么？</span></h2>
-<p class="en"><b>n8n</b> (n8n.io) is a visual workflow tool. You drag <b>nodes</b> onto a canvas and connect them; data flows from one node to the next. It has a built-in <b>AI Agent</b> node, so you can build an agent by connecting boxes instead of writing code.</p>
-<p class="zh"><b>n8n</b>（n8n.io）是可视化工作流工具。把<b>节点</b>拖到画布上并连线，数据就从一个节点流向下一个。它内置 <b>AI Agent</b> 节点，不用写代码，连几个方块就能搭出智能体。</p>
+<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">Uncle Lim keeps some savings in a broad bond ETF and asks his niece <b>Aina</b>: <i>“Check yesterday's closing price and write it down for me.”</i> Aina does not want to open a price site every morning. We follow her as she builds a small agent in n8n that does it by itself.</p>
+<p class="zh" style="margin:0">Lim 叔叔把一部分积蓄放在一只宽基债券 ETF 里，他请侄女 <b>Aina</b> 帮忙：<i>“查一下昨天的收盘价，记下来给我。”</i> Aina 不想每天早上都去打开行情网站。我们跟着她，在 n8n 里搭一个小智能体，让它自己完成。</p></div>
+
+<div class="callout tip"><b class="lbl"><span class="en">After this lesson you can</span><span class="zh">学完你能做到</span></b>
+<span class="en">• Name the three parts an agent is built from (model, tools, memory) and the node that loops them.<br>• Read an execution log and point to which steps used the model and which used a tool.<br>• Build a six-part n8n workflow: chat trigger, AI Agent, chat model, memory and two tools.</span>
+<span class="zh">• 说出智能体由哪三部分组成（模型、工具、记忆），以及把它们串成循环的节点。<br>• 读懂执行日志，指出哪些步骤用了模型、哪些用了工具。<br>• 搭出一条六部分的 n8n 工作流：聊天触发器、AI Agent、聊天模型、记忆和两个工具。</span></div>
+
+<h2><span class="en">Step 1 · What is n8n, and what is an agent made of?</span><span class="zh">第 1 步 · n8n 是什么，智能体由什么组成？</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><b>n8n</b> (n8n.io) is a visual workflow tool. You drag <b>nodes</b> onto a canvas and connect them; data flows from one node to the next. It has a built-in <b>AI Agent</b> node, so Aina can build an agent by connecting boxes instead of writing code.</p>
+<p class="zh" style="margin:0 0 8px"><b>n8n</b>（n8n.io）是可视化工作流工具。把<b>节点</b>拖到画布上并连线，数据就从一个节点流向下一个。它内置 <b>AI Agent</b> 节点，所以 Aina 不用写代码，连几个方块就能搭出智能体。</p></div>
 
 <div class="grid">
   <div class="flip"><div class="front"><div class="ic">🧠</div><b><span class="en">Brain</span><span class="zh">大脑</span></b><small><span class="en">tap to flip</span><span class="zh">点击翻转</span></small></div>
@@ -25,25 +32,22 @@
 </div>
 <div class="callout tip"><b class="lbl"><span class="en">Key idea</span><span class="zh">核心思想</span></b><span class="en">Agent = LLM + tools + a loop. The AI Agent node is the loop.</span><span class="zh">智能体 = 大模型 + 工具 + 循环。AI Agent 节点就是那个循环。</span></div>
 
-<h2><span class="en">Explore the demo workflow</span><span class="zh">探索演示工作流</span></h2>
-<p class="en">Click any node to learn what it does, then press <b>Run demo</b> to watch the agent work step by step.</p>
-<p class="zh">点击任意节点了解其作用，再按<b>运行演示</b>，观看智能体一步步工作。</p>
+<div class="sc" id="g1"></div>
 
-<div class="wfwrap">
-  <svg class="wfsvg" id="svg" viewBox="0 0 780 400" role="img"></svg>
-  <div class="card" id="detail" style="margin:12px 0;box-shadow:none"></div>
-  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn pri" id="run"></button><span class="meta"><span class="en">Simulated example — real numbers will differ. Not investment advice.</span><span class="zh">模拟示例——实际数值会不同，不构成投资建议。</span></span></div>
-  <div class="wfgrid">
-    <div class="panel"><h3 class="ph">💬 Chat</h3><div id="chat"></div></div>
-    <div class="panel"><h3 class="ph">📜 <span class="en">Execution log</span><span class="zh">执行日志</span> <span id="tot" style="float:right"></span></h3><div id="log"></div></div>
-  </div>
-</div>
-
+<h2><span class="en">Step 2 · Watch the agent run</span><span class="zh">第 2 步 · 看智能体运行</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Uncle Lim's request goes through the chat trigger into the AI Agent node. The agent loads its memory, asks the model what to do, calls a tool if the model asks for one, then asks the model again to write the answer. Press the button to step through one run, then read the <b>log</b> that n8n would show.</p>
+<p class="zh" style="margin:0 0 8px">Lim 叔叔的请求经聊天触发器进入 AI Agent 节点。智能体先读取记忆，问模型该怎么做；模型若要工具就调用工具，然后再问模型写出回答。点按钮一步步看一次运行，再读 n8n 会显示的<b>日志</b>。</p></div>
+<div id="t1"></div>
+<p class="meta"><span class="en">Simulated example: real numbers will differ. Not investment advice.</span><span class="zh">模拟示例：实际数值会不同，不构成投资建议。</span></p>
+<div class="try" id="p1"></div>
 <div class="callout"><b class="lbl"><span class="en">Read the execution log</span><span class="zh">学会看执行日志</span></b>
-<span class="en">Every step the agent took appears in the log with its duration. n8n also shows total time and <b>tokens</b> (the demo above ends at about 1.3k). A <b>token</b> is a small chunk of text, about three quarters of an English word. Models read and charge by the token, so tokens = cost. Watch them as you build.</span>
-<span class="zh">智能体的每一步都会出现在日志中并显示耗时。n8n 还会显示总耗时和 <b>token</b> 数（上面的演示最终约 1.3k）。<b>token</b> 是一小段文字，大约相当于四分之三个英文单词。模型按 token 读取和收费，所以 token 就是成本。搭建时要留意。</span></div>
+<span class="en">Every step the agent took appears in the log with its duration. n8n also shows total time and <b>tokens</b> (the run above ends at about 1.3k). A <b>token</b> is a small chunk of text, about three quarters of an English word. Models read and charge by the token, so tokens = cost. Watch them as you build.</span>
+<span class="zh">智能体的每一步都会出现在日志中并显示耗时。n8n 还会显示总耗时和 <b>token</b> 数（上面这次运行最终约 1.3k）。<b>token</b> 是一小段文字，大约相当于四分之三个英文单词。模型按 token 读取和收费，所以 token 就是成本。搭建时要留意。</span></div>
+<div class="try" id="p2"></div>
 
-<h2><span class="en">Build it yourself</span><span class="zh">动手搭建</span></h2>
+<h2><span class="en">Step 3 · Build it yourself</span><span class="zh">第 3 步 · 动手搭建</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Aina builds the same six parts she just saw, one at a time. Click through the steps.</p>
+<p class="zh" style="margin:0">Aina 把刚才看到的六个部分一个个搭出来。点击查看每一步。</p></div>
 <div class="stepper">
   <div class="step"><b><span class="en">1. New workflow</span><span class="zh">1. 新建工作流</span></b><p class="en">Sign in to n8n (cloud or self-hosted) and create a blank workflow.</p><p class="zh">登录 n8n（云端或自托管），新建空白工作流。</p></div>
   <div class="step"><b><span class="en">2. Add the trigger</span><span class="zh">2. 添加触发器</span></b><p class="en">Add “When chat message received” so you can chat with it.</p><p class="zh">添加“When chat message received”，这样就能和它聊天。</p></div>
@@ -52,84 +56,50 @@
   <div class="step"><b><span class="en">5. Add tools</span><span class="zh">5. 添加工具</span></b><p class="en">Marketstack (market data) and Google Sheets (read / append rows).</p><p class="zh">添加 Marketstack（行情数据）和 Google Sheets（读取 / 追加行）。</p></div>
   <div class="step"><b><span class="en">6. Chat and inspect</span><span class="zh">6. 聊天并检查</span></b><p class="en">Send a message, then open the Logs to see which tools it called.</p><p class="zh">发一条消息，再打开 Logs，看它调用了哪些工具。</p></div>
 </div>
+<div class="callout warn"><b class="lbl"><span class="en">Good to know</span><span class="zh">注意</span></b><span class="en">Simple Memory keeps recent chat inside n8n itself. That is fine for learning; use database-backed memory for real use.</span><span class="zh">Simple Memory 把最近的对话保存在 n8n 内部。学习够用，正式使用请换成基于数据库的记忆。</span></div>
 
-<div class="callout warn"><b class="lbl"><span class="en">Good to know</span><span class="zh">注意</span></b><span class="en">Simple Memory keeps recent chat inside n8n itself — fine for learning; use database-backed memory for real use.</span><span class="zh">Simple Memory 把最近的对话保存在 n8n 内部——学习够用，正式使用请换成基于数据库的记忆。</span></div>
+<div class="try" id="p3"></div>
+<div class="try" id="p4"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在轮到你</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en">Build the six-part workflow in your own n8n and send it one question.</span><span class="zh">在你自己的 n8n 里搭出这六个部分，并发一个问题。</span></span></label><label><input type="checkbox"><span><span class="en">Open the Logs and find which step used the model and which used a tool.</span><span class="zh">打开 Logs，找出哪一步用了模型、哪一步用了工具。</span></span></label><label><input type="checkbox"><span><span class="en">Ask a follow-up such as “suggest another one” and check that memory made it make sense.</span><span class="zh">追问一句，例如“再推荐一个”，确认记忆让它能接上话。</span></span></label></div>
 
 <div class="callout tip"><b class="lbl"><span class="en">Back at the kopitiam</span><span class="zh">回到 kopitiam</span></b><span class="en">Kopi Corner's order pad is a workflow: an order comes in (trigger), Auntie Suria writes it down, the drinks station makes it, the bell goes “ting!”. Each stop is a node, and the pad moves from one to the next.</span><span class="zh">Kopi Corner 的点单本就是一条工作流：订单进来（触发），Suria 阿姨记下，饮料站去做，铃声“叮！”一响。每一站就是一个节点，点单本从一站传到下一站。</span></div>
-<h2><span class="en">Quick check</span><span class="zh">小测验</span></h2>
-<div class="quiz" data-answer="c">
-  <p class="q"><span class="en">Which part lets the agent remember earlier messages?</span><span class="zh">哪个部分让智能体记住之前的消息？</span></p>
-  <button class="opt" data-k="a"><span class="en">Chat trigger</span><span class="zh">聊天触发器</span></button>
-  <button class="opt" data-k="b"><span class="en">Google Sheets tool</span><span class="zh">Google Sheets 工具</span></button>
-  <button class="opt" data-k="c"><span class="en">Simple Memory</span><span class="zh">Simple Memory</span></button>
-  <div class="explain"><span class="en">Memory is attached to the agent, so each new message arrives with the recent conversation.</span><span class="zh">Memory 接在智能体上，所以每条新消息都带着最近的对话。</span></div>
-</div>
-<div class="quiz" data-answer="b">
-  <p class="q"><span class="en">The agent needs yesterday’s closing price. What does it use?</span><span class="zh">智能体需要昨天的收盘价，它会用什么？</span></p>
-  <button class="opt" data-k="a"><span class="en">Simple Memory</span><span class="zh">Simple Memory</span></button>
-  <button class="opt" data-k="b"><span class="en">A tool (Marketstack: Get many EoD data)</span><span class="zh">工具（Marketstack：Get many EoD data）</span></button>
-  <button class="opt" data-k="c"><span class="en">The trigger</span><span class="zh">触发器</span></button>
-  <div class="explain"><span class="en">Models don’t know live data; they call a tool to fetch it.</span><span class="zh">模型本身不知道实时数据，需要调用工具获取。</span></div>
-</div>
-<div class="quiz" data-answer="a">
-  <p class="q"><span class="en">What does the AI Agent node do?</span><span class="zh">AI Agent 节点的作用是什么？</span></p>
-  <button class="opt" data-k="a"><span class="en">Runs the think → act → observe loop</span><span class="zh">运行“思考→行动→观察”的循环</span></button>
-  <button class="opt" data-k="b"><span class="en">Only stores chat history</span><span class="zh">只保存聊天记录</span></button>
-  <button class="opt" data-k="c"><span class="en">Only sends the final reply</span><span class="zh">只负责发送最终回复</span></button>
-  <div class="explain"><span class="en">It ties the model, memory and tools together and repeats until it can answer.</span><span class="zh">它把模型、记忆和工具串起来，重复直到能给出答案。</span></div>
-</div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• n8n connects nodes on a canvas; data flows from one to the next.<br>• Agent = LLM + tools + a loop, and the AI Agent node is the loop.<br>• The model is the brain, tools are the hands, memory is the notebook.<br>• The agent repeats think, act, observe until it can answer.<br>• The execution log shows every step, its time and its tokens; tokens are cost.<br>• Simple Memory is for learning; use database-backed memory for real use.</p><p class="zh" style="margin:0">• n8n 在画布上连接节点，数据从一个节点流向下一个。<br>• 智能体 = 大模型 + 工具 + 循环，AI Agent 节点就是循环。<br>• 模型是大脑，工具是双手，记忆是笔记本。<br>• 智能体重复“思考、行动、观察”，直到能给出答案。<br>• 执行日志显示每一步、耗时和 token；token 就是成本。<br>• Simple Memory 适合学习，正式使用请换成基于数据库的记忆。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Agentic AI</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
-<script src="lessons.js"></script><script src="../assets/site.js"></script>
+<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
 <script>
-(function(){
- var t=TX.t;
- var N=[
-  {id:'trig',x:20,y:80,w:150,h:70,ic:'💬',en:'Chat trigger',zh:'聊天触发器',role:['Input','输入'],n8n:'When chat message received',d:{en:'Starts the workflow whenever you type a message and passes your text to the agent.',zh:'每当你输入消息就启动工作流，并把文字传给智能体。'}},
-  {id:'agent',x:290,y:55,w:200,h:120,ic:'🤖',en:'AI Agent',zh:'AI 智能体',role:['Loop','循环'],n8n:'AI Agent',d:{en:'The loop: reads the message, decides whether to call a tool, looks at the result and repeats until it can answer.',zh:'循环的核心：读取消息，决定是否调用工具，查看结果，重复直到能给出答案。'}},
-  {id:'reply',x:620,y:80,w:150,h:70,ic:'✉️',en:'Reply',zh:'回复',role:['Output','输出'],n8n:'(agent output)',d:{en:'The final answer shown in the chat.',zh:'显示在聊天中的最终回答。'}},
-  {id:'model',x:15,y:300,w:140,h:70,ic:'🧠',en:'Chat Model',zh:'聊天模型',role:['Brain','大脑'],n8n:'OpenAI Chat Model',d:{en:'The LLM that does the reasoning and writes the reply. Plugs into the agent’s Chat Model slot.',zh:'负责推理和撰写回复的大模型，接在智能体的 Chat Model 插槽。'}},
-  {id:'memory',x:165,y:300,w:140,h:70,ic:'🗒️',en:'Memory',zh:'记忆',role:['Notebook','笔记本'],n8n:'Simple Memory',d:{en:'Keeps recent messages so follow-ups like “suggest another one” make sense.',zh:'保存最近的消息，让“再推荐一个”这类追问有上下文。'}},
-  {id:'mkt',x:315,y:300,w:140,h:70,ic:'📈',en:'Market data',zh:'行情数据',role:['Tool','工具'],n8n:'Marketstack · Get many EoD data',d:{en:'Fetches end-of-day stock market data so the agent can use real numbers.',zh:'获取股票日终行情数据，让智能体使用真实数字。'}},
-  {id:'sget',x:465,y:300,w:140,h:70,ic:'📊',en:'Read sheet',zh:'读取表格',role:['Tool','工具'],n8n:'Google Sheets · Get row(s) in sheet',d:{en:'Reads rows from a Google Sheet.',zh:'读取 Google 表格中的行。'}},
-  {id:'sapp',x:615,y:300,w:140,h:70,ic:'✍️',en:'Append row',zh:'追加一行',role:['Tool','工具'],n8n:'Google Sheets · Append row in sheet',d:{en:'Writes a new row so the agent can save information.',zh:'写入新的一行，让智能体保存信息。'}}
- ];
- var by={};N.forEach(function(n){by[n.id]=n});
- var svg=document.getElementById('svg'),h='';
- h+='<path class="edge" data-e="trig" d="M170,115 L290,115"/><path class="edge" data-e="reply" d="M490,115 L620,115"/>';
- N.slice(3).forEach(function(n,i){var ax=310+i*45;h+='<path class="edge sub" data-e="'+n.id+'" d="M'+ax+',175 C'+ax+',245 '+(n.x+70)+',240 '+(n.x+70)+',300"/>'});
- N.forEach(function(n){var cx=n.x+n.w/2,iy=n.y+n.h*0.42,ly=n.y+n.h*0.78;
-  h+='<g class="node" data-id="'+n.id+'"><rect x="'+n.x+'" y="'+n.y+'" width="'+n.w+'" height="'+n.h+'" rx="16"/><text class="ic" x="'+cx+'" y="'+iy+'">'+n.ic+'</text><text class="en" x="'+cx+'" y="'+ly+'">'+n.en+'</text><text class="zh" x="'+cx+'" y="'+ly+'">'+n.zh+'</text></g>'});
- svg.innerHTML=h;
- function sel(id){var n=by[id];svg.querySelectorAll('.node').forEach(function(g){g.classList.toggle('sel',g.dataset.id===id)});
-  document.getElementById('detail').innerHTML='<span class="role">'+n.role[0]+(' / '+n.role[1])+'</span><h3 style="margin:.2em 0">'+n.ic+' '+t({en:n.en,zh:n.zh})+'</h3><div class="meta">n8n: '+n.n8n+'</div><p style="margin:.4em 0 0" class="en">'+n.d.en+'</p><p style="margin:.4em 0 0" class="zh">'+n.d.zh+'</p>'}
- svg.querySelectorAll('.node').forEach(function(g){g.onclick=function(){sel(g.dataset.id)}});sel('agent');
+document.addEventListener('DOMContentLoaded',function(){
+ var $=TX2.$,game=TX2.game,predict=TX2.predict,trace=TX2.trace;TX2.init();
 
- var S=[
-  {n:['trig'],e:['trig'],en:'Chat message received',zh:'收到聊天消息',s:0,k:0},
-  {n:['agent'],en:'Agent starts',zh:'智能体启动',s:0,k:0},
-  {n:['memory'],e:['memory'],en:'Load memory',zh:'读取记忆',s:0,k:0},
-  {n:['model'],e:['model'],en:'Model: I need market data',zh:'模型：需要行情数据',s:1.5,k:520},
-  {n:['mkt'],e:['mkt'],en:'Tool: Get many EoD data',zh:'工具：获取日终行情',s:1.7,k:0},
-  {n:['model'],e:['model'],en:'Model: write the answer',zh:'模型：撰写回答',s:1.8,k:780},
-  {n:['sapp'],e:['sapp'],en:'Tool: Append row in sheet',zh:'工具：表格追加一行',s:1.6,k:0},
-  {n:['memory'],e:['memory'],en:'Save memory',zh:'保存记忆',s:0,k:0},
-  {n:['agent','reply'],e:['reply'],en:'Reply sent',zh:'回复已发送',s:0,k:0}
- ];
- var btn=document.getElementById('run'),chat=document.getElementById('chat'),log=document.getElementById('log'),tot=document.getElementById('tot'),busy=false;
- function lb(){btn.innerHTML=t({en:'▶ Run demo',zh:'▶ 运行演示'})}lb();
- function clr(){svg.querySelectorAll('.on').forEach(function(x){x.classList.remove('on')})}
- btn.onclick=function(){if(busy)return;busy=true;btn.disabled=true;chat.innerHTML='';log.innerHTML='';tot.textContent='';var ts=0,tk=0,i=0;
-  chat.innerHTML='<div class="bub u">'+t({en:'Is a broad bond ETF a good hedge? Check yesterday’s close and log it.',zh:'宽基债券 ETF 适合做对冲吗？查一下昨天收盘价并记录下来。'})+'</div>';
-  (function next(){clr();if(i>=S.length){setTimeout(clr,700);
-    chat.innerHTML+='<div class="bub a">'+t({en:'A broad bond ETF can reduce portfolio volatility. I fetched the latest end-of-day data and added a row to your sheet. Want a defensive equity idea next, like XLV or XLP?',zh:'宽基债券 ETF 可以降低组合波动。我已获取最新日终数据，并在你的表格里追加了一行。接下来要看看防御型股票吗，例如 XLV 或 XLP？'})+'</div>';
-    tot.innerHTML='✅ '+ts.toFixed(1)+'s · '+tk+' tokens';busy=false;btn.disabled=false;return}
-   var s=S[i++];s.n.forEach(function(id){svg.querySelector('.node[data-id="'+id+'"]').classList.add('on')});
-   (s.e||[]).forEach(function(id){var p=svg.querySelector('.edge[data-e="'+id+'"]');if(p)p.classList.add('on')});
-   ts+=s.s;tk+=s.k;log.innerHTML+='<div class="logl"><span><b>✓</b> '+t(s)+'</span><span>'+s.s.toFixed(1)+'s'+(s.k?' · '+s.k+' tok':'')+'</span></div>';
-   setTimeout(next,950)})()};
- new MutationObserver(lb).observe(document.documentElement,{attributes:true,attributeFilter:['data-lang']});
-})();
+ game($('g1'),[
+  {en:'The OpenAI Chat Model reasons and writes the reply.',zh:'OpenAI Chat Model 负责推理并撰写回复。',a:'br',ex:{en:'The model is the LLM that thinks and writes: the brain.',zh:'模型就是负责思考和写作的大模型：大脑。'},hint:{en:'Which part does the thinking?',zh:'哪一部分负责思考？'}},
+  {en:'Marketstack fetches end-of-day prices.',zh:'Marketstack 获取日终价格。',a:'ha',ex:{en:'It reaches outside the model to get real data: a tool, the hands.',zh:'它伸到模型之外去取真实数据：工具，也就是双手。'},hint:{en:'Does it think, or does it fetch and do?',zh:'它是在思考，还是在取数据、做事？'}},
+  {en:'Simple Memory keeps recent messages.',zh:'Simple Memory 保存最近的消息。',a:'no',ex:{en:'It holds the recent conversation so follow-ups make sense: the notebook.',zh:'它保存最近的对话，让追问有上下文：笔记本。'},hint:{en:'Which part remembers earlier messages?',zh:'哪一部分记住之前的消息？'}},
+  {en:'Google Sheets appends a row.',zh:'Google Sheets 追加一行。',a:'ha',ex:{en:'Writing a row is an action in the outside world: a tool.',zh:'写入一行是对外部世界的操作：工具。'},hint:{en:'It writes something outside the model.',zh:'它是在模型之外写入内容。'}}],
+  [{k:'br',en:'Brain',zh:'大脑'},{k:'ha',en:'Hands',zh:'双手'},{k:'no',en:'Notebook',zh:'笔记本'}],{en:'Part',zh:'部件'});
+
+ trace($('t1'),[
+  {k:'you',en:'Is a broad bond ETF a good hedge? Check yesterday’s close and log it.',zh:'宽基债券 ETF 适合做对冲吗？查一下昨天收盘价并记录下来。'},
+  {k:'code',en:'Chat trigger passes the message to the AI Agent node (0.0s)',zh:'聊天触发器把消息交给 AI Agent 节点（0.0 秒）',why:{en:'The trigger only starts the workflow. The loop begins in the agent.',zh:'触发器只负责启动工作流，循环从智能体开始。'}},
+  {k:'code',en:'Load memory (0.0s)',zh:'读取记忆（0.0 秒）',why:{en:'The agent fetches recent messages so the model sees the conversation.',zh:'智能体取出最近的消息，让模型看到对话。'}},
+  {k:'llm',en:'Model: I need market data (1.5s · 520 tokens)',zh:'模型：需要行情数据（1.5 秒 · 520 token）',why:{en:'The model only asks for a tool. Nothing has been fetched yet.',zh:'模型只是请求用工具，还没有取到任何数据。'}},
+  {k:'tool',en:'Tool: Marketstack, Get many EoD data (1.7s)',zh:'工具：Marketstack，获取日终行情（1.7 秒）',why:{en:'The real numbers arrive here, from outside the model.',zh:'真实数字在这里到来，来自模型之外。'}},
+  {k:'llm',en:'Model: write the answer (1.8s · 780 tokens)',zh:'模型：撰写回答（1.8 秒 · 780 token）',why:{en:'With the data in hand, the model writes the reply and asks to log it.',zh:'有了数据，模型写出回答，并请求把它记录下来。'}},
+  {k:'tool',en:'Tool: Google Sheets, Append row in sheet (1.6s)',zh:'工具：Google Sheets，追加一行（1.6 秒）',why:{en:'This is the “write it down” part of Uncle Lim’s request.',zh:'这就是 Lim 叔叔要求里“记下来”的部分。'}},
+  {k:'code',en:'Save memory, then send the reply (0.0s). Total 6.6s · about 1.3k tokens',zh:'保存记忆，然后发送回复（0.0 秒）。总计 6.6 秒 · 约 1.3k token',why:{en:'Final answer: a broad bond ETF can reduce portfolio volatility; the latest end-of-day data was fetched and a row added to the sheet.',zh:'最终回答：宽基债券 ETF 可以降低组合波动；已获取最新日终数据，并在表格里追加了一行。'}}]);
+
+ predict($('p1'),{q:{en:'In the run above, which step brought in the real closing price?',zh:'在上面的运行中，哪一步带来了真实的收盘价？'},opts:[{k:'a',en:'The first model step',zh:'第一次模型步骤'},{k:'b',en:'The Marketstack tool step',zh:'Marketstack 工具步骤'},{k:'c',en:'Load memory',zh:'读取记忆'}],a:'b',ex:{en:'Models do not know live data. They call a tool to fetch it.',zh:'模型本身不知道实时数据，需要调用工具获取。'},hint:{en:'Which step reaches outside the model to get data?',zh:'哪一步伸到模型之外去取数据？'}});
+
+ predict($('p2'),{q:{en:'What does the AI Agent node do?',zh:'AI Agent 节点的作用是什么？'},opts:[{k:'a',en:'Runs the think, act, observe loop',zh:'运行“思考、行动、观察”的循环'},{k:'b',en:'Only stores chat history',zh:'只保存聊天记录'},{k:'c',en:'Only sends the final reply',zh:'只负责发送最终回复'}],a:'a',ex:{en:'It ties the model, memory and tools together and repeats until it can answer.',zh:'它把模型、记忆和工具串起来，重复直到能给出答案。'},hint:{en:'Look at the run: which node kept going back to the model and the tools?',zh:'看那次运行：哪个节点一直在模型和工具之间来回？'}});
+
+ predict($('p3'),{q:{en:'Which part lets the agent remember earlier messages?',zh:'哪个部分让智能体记住之前的消息？'},opts:[{k:'a',en:'Chat trigger',zh:'聊天触发器'},{k:'b',en:'Google Sheets tool',zh:'Google Sheets 工具'},{k:'c',en:'Simple Memory',zh:'Simple Memory'}],a:'c',ex:{en:'Memory is attached to the agent, so each new message arrives with the recent conversation.',zh:'Memory 接在智能体上，所以每条新消息都带着最近的对话。'},hint:{en:'Which one is the notebook?',zh:'哪一个是笔记本？'}});
+
+ predict($('p4'),{q:{en:'The agent needs yesterday’s closing price. What does it use?',zh:'智能体需要昨天的收盘价，它会用什么？'},opts:[{k:'a',en:'Simple Memory',zh:'Simple Memory'},{k:'b',en:'A tool (Marketstack: Get many EoD data)',zh:'工具（Marketstack：Get many EoD data）'},{k:'c',en:'The trigger',zh:'触发器'}],a:'b',ex:{en:'Models do not know live data; they call a tool to fetch it.',zh:'模型本身不知道实时数据，需要调用工具获取。'},hint:{en:'Memory only holds past messages. Where does new data come from?',zh:'记忆只保存过去的消息。新数据从哪里来？'}});
+});
 </script></body></html>

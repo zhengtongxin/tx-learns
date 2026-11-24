@@ -127,14 +127,17 @@
         box.innerHTML='<b class="lbl">'+t({en:'Before you start',zh:'开始之前'})+'</b><dl>'+rows.map(function(r){return '<dt>'+t({en:r[0],zh:r[1]})+'</dt><dd>'+r[2]+'</dd>'}).join('')+'</dl>';
         anchor.after(box);anchor=box}
       if(J&&hm2){var pc=document.createElement('aside');pc.className='card prereq proj';pc.setAttribute('aria-label','Project card · 项目卡');
-        var pk=J.pkg,files=pk&&pk.files?pk.files.map(function(f){return '<li><a href="../'+pk.dir+'/'+f+'">'+f+'</a></li>'}).join(''):'';
+        var pk=J.pkg,fl=pk&&((window.PKGFILES||{})[pk.dir]||pk.files)||[],files='';
+        /* every file of the package (packages.js is generated), grouped by folder */
+        if(fl.length){var gr={};fl.forEach(function(f){var i=f.lastIndexOf('/'),k=i<0?'':f.slice(0,i);(gr[k]=gr[k]||[]).push(f)});
+          files=Object.keys(gr).map(function(k){return '<li>'+(k?'<b>'+k+'/</b> ':'')+gr[k].map(function(f){return '<a href="../'+pk.dir+'/'+f+'">'+f.slice(k?k.length+1:0)+'</a>'}).join(' · ')+'</li>'}).join('')}
         pc.innerHTML='<b class="lbl">'+t({en:'Project card',zh:'项目卡'})+'</b><dl>'+
           (J.goal?'<dt>'+t({en:'Goal',zh:'目标'})+'</dt><dd>'+t(J.goal)+'</dd>':'')+(J.deliver?'<dt>'+t({en:'Deliverable',zh:'交付物'})+'</dt><dd>'+t(J.deliver)+'</dd>':'')+
           (J.level?'<dt>'+t({en:'Difficulty',zh:'难度'})+'</dt><dd>'+t(LV[J.level])+'</dd>':'')+(J.mins?'<dt>'+t({en:'Time',zh:'时间'})+'</dt><dd>'+t({en:'about '+J.mins+' minutes',zh:'约 '+J.mins+' 分钟'})+'</dd>':'')+
           (J.accept?'<dt>'+t({en:'You are done when',zh:'完成标准'})+'</dt><dd><ul>'+li(J.accept)+'</ul></dd>':'')+
           (J.fail?'<dt>'+t({en:'Common problems',zh:'常见问题'})+'</dt><dd><ul>'+li(J.fail)+'</ul></dd>':'')+
           (J.stretch?'<dt>'+t({en:'Stretch goals',zh:'进阶挑战'})+'</dt><dd><ul>'+li(J.stretch)+'</ul></dd>':'')+
-          (files?'<dt>'+t({en:'Starter and final code',zh:'起步与完成代码'})+'</dt><dd><ul class="pkg">'+files+'</ul>'+(pk.note?'<p class="meta">'+t(pk.note)+'</p>':'')+'</dd>':'')+'</dl>';
+          (files?'<dt>'+t({en:'Starter and final code',zh:'起步与完成代码'})+'</dt><dd><ul class="pkg">'+files+'</ul>'+(pk.note?'<p class="meta">'+t(pk.note)+'</p>':'')+'<p class="meta">'+t({en:'Download every file and keep the folder layout.',zh:'下载全部文件，并保持文件夹结构。'})+'</p></dd>':'')+'</dl>';
         anchor.after(pc)}
       var ba=document.querySelector('.stage .track-ba');
       if(!ba&&window.TRACKS&&document.querySelector('.stage .ringbox')){var tr=window.TRACKS.filter(function(x){return x.id===C.id})[0];
@@ -142,8 +145,8 @@
           ba.innerHTML=(tr.before?'<div><b class="lbl">'+t({en:'Before this track',zh:'学这条路线之前'})+'</b><p>'+t(tr.before)+'</p></div>':'')+(tr.after?'<div><b class="lbl">'+t({en:'After this track',zh:'学完之后'})+'</b><p>'+t(tr.after)+'</p></div>':'');
           document.querySelector('.stage .ringbox').after(ba)}}
     }
-    if(C&&(document.querySelector('.stage .ringbox')||document.querySelector('main .meta'))){var pend=2,fin2=function(){if(--pend===0)renderMeta()};
-      ['prereqs.js','projects.js'].forEach(function(f){var sc2=document.createElement('script');sc2.src=f;sc2.onload=sc2.onerror=fin2;document.body.appendChild(sc2)})}
+    if(C&&(document.querySelector('.stage .ringbox')||document.querySelector('main .meta'))){var pend=3,fin2=function(){if(--pend===0)renderMeta()};
+      ['prereqs.js','projects.js','packages.js'].forEach(function(f){var sc2=document.createElement('script');sc2.src=f;sc2.onload=sc2.onerror=fin2;document.body.appendChild(sc2)})}
 
     /* hub: topic and lesson counts are never typed by hand. They come from each track's lessons.js
        (scripts/check-counts.mjs fails a PR that types one). Progress is completed / PUBLISHED lessons; planned lessons are shown separately. */
@@ -211,6 +214,21 @@
     function onScroll(){var h=document.documentElement,pr=h.scrollTop/(h.scrollHeight-h.clientHeight||1);bar.style.width=(pr*100)+'%';
       if(fg){fg.style.strokeDashoffset=2*Math.PI*18*(1-pr);rn.textContent=Math.round(pr*100);rn.parentNode.setAttribute('aria-valuenow',Math.round(pr*100))}}
     window.addEventListener('scroll',onScroll,{passive:true});onScroll();
+
+    /* code boxes: a Copy button, an optional file/language label (data-file, data-lang on the <pre>), and a keyboard-scrollable region */
+    document.querySelectorAll('main pre, main .codebox').forEach(function(pre){
+      if(pre.closest('.codewrap'))return;
+      var w=document.createElement('div');w.className='codewrap';pre.parentNode.insertBefore(w,pre);
+      var bar=document.createElement('div');bar.className='codebar';
+      var lab=[pre.getAttribute('data-file'),pre.getAttribute('data-lang')].filter(Boolean).join(' · ');
+      bar.innerHTML='<span class="codelab">'+lab+'</span><button type="button" class="codecopy">'+t({en:'Copy',zh:'复制'})+'</button>';
+      w.appendChild(bar);w.appendChild(pre);
+      pre.tabIndex=0;pre.setAttribute('role','region');pre.setAttribute('aria-label',(lab?lab+' · ':'')+'Code · 代码');
+      var b=bar.querySelector('.codecopy');
+      b.onclick=function(){var txt=pre.innerText.replace(/\n+$/,'');
+        function ok(){b.innerHTML=t({en:'Copied ✓',zh:'已复制 ✓'});setTimeout(function(){b.innerHTML=t({en:'Copy',zh:'复制'})},1800)}
+        function fb(){var ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(e){b.innerHTML=t({en:'Press Ctrl+C',zh:'请按 Ctrl+C'})}ta.remove()}
+        if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(ok,fb);else fb()}});
 
     /* components */
     document.querySelectorAll('.flip').forEach(function(f){var w=document.createElement('div');w.className='flip-in';while(f.firstChild)w.appendChild(f.firstChild);f.appendChild(w);
