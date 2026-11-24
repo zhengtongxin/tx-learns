@@ -23,7 +23,7 @@ export function clean(line, agent) {
     usd: +Math.min(50, Math.max(0, n(r.usd))).toFixed(4), turns: Math.min(500, n(r.turns)), ms: Math.min(36e5, n(r.ms)),
     in: n(r.in), out: n(r.out), cacheRead: n(r.cacheRead), cacheWrite: n(r.cacheWrite), ok: r.ok === true,
     end: /^[a-z_]{1,40}$/.test(r.end) ? r.end : 'unknown', run: /^\d{1,20}$/.test(String(r.run)) ? String(r.run) : '',
-    step: /^[a-z0-9-]{1,24}$/.test(r.step) ? r.step : 'main',
+    step: typeof r.step === 'string' && /^[a-z0-9-]{1,24}$/.test(r.step) ? r.step : 'main',
   };
 }
 

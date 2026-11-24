@@ -164,7 +164,7 @@ jobs:
             { echo; echo "=== RULE PACKET ==="; cat scripts/rules/writer.md; echo; echo "=== BRIEF ==="; cat /tmp/writer-brief.md; } >> /tmp/writer-prompt.md
           else
             echo "No rule packet yet: falling back to the full documents."
-            echo "Read CLAUDE.md and STYLE.md first and follow STYLE.md exactly. Look up what the site already says with node scripts/rag.mjs \"<concept>\" before writing." >> /tmp/writer-prompt.md
+            echo "Read CLAUDE.md and STYLE.md first and follow STYLE.md exactly. Link back to lessons the site already has on the concept." >> /tmp/writer-prompt.md
           fi
           curl -fsS -o /tmp/runs.json "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/agent-status/trace/runs.json" || true
           TURNS=80; [ -f scripts/max-turns.mjs ] && TURNS=$(node scripts/max-turns.mjs writer 80 --floor 30 || echo 80)
