@@ -82,7 +82,7 @@ const live = TR.flatMap(t => t.T.topics.flatMap(w => w.items).filter(x => x.file
 const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 const want = {
   'sitemap.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<!-- Made by node scripts/check-pages.mjs --fix from lessons.js. Do not edit by hand. -->\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-    ['', 'ecosystem.html', ...TR.map(t => t.dir + '/index.html'), ...live.map(x => x.path)].map(u => `<url><loc>${SITE}${u}</loc></url>`).join('\n') + '\n</urlset>\n',
+    ['', 'ecosystem.html', 'glossary.html', ...TR.map(t => t.dir + '/index.html'), ...live.map(x => x.path)].map(u => `<url><loc>${SITE}${u}</loc></url>`).join('\n') + '\n</urlset>\n',
 };
 const lists = Object.fromEntries(TR.map(t => [t.dir + '/index.html', [/<!-- lessons:start -->[\s\S]*?<!-- lessons:end -->/, '<!-- lessons:start --><noscript><ol>' +
     t.T.topics.flatMap(w => w.items).filter(x => x.file).map(x => `<li><a href="${x.file}">${esc(x.title.en)} · ${esc(x.title.zh)}</a></li>`).join('') + '</ol></noscript><!-- lessons:end -->']]));
@@ -114,7 +114,7 @@ const trackMeta = Object.fromEntries(tracksCtx.window.TRACKS.map(t => [t.id, t])
 const LEVELS = { 1: 'Beginner', 2: 'Intermediate', 3: 'Advanced' };
 const sha = (...fs) => createHash('sha1').update(fs.map(f => readFileSync(new URL(f, root))).reduce((a, b) => Buffer.concat([a, b]), Buffer.alloc(0))).digest('hex').slice(0, 8);
 const hashOf = f => f === 'assets/site.js' ? sha('assets/site.js', 'assets/search.js') : sha(f); // site.js hands its version on to search.js
-const VERSIONED = /^assets\/(site|teach)\.(js|css)$|^tracks\.js$|^[\w-]+\/lessons\.js$/;
+const VERSIONED = /^assets\/(site|teach|build-concepts)\.(js|css)$|^tracks\.js$|^[\w-]+\/lessons\.js$/;
 const REF = /(\b(?:src|href)=")([^"?#]*)(\?v=[0-9a-f]*)?(")/g;
 const resolve = (page, ref) => { const parts = page.split('/').slice(0, -1); for (const seg of ref.split('/')) { if (seg === '..') parts.pop(); else if (seg !== '.' && seg) parts.push(seg); } return parts.join('/'); };
 const jsonLd = o => '<script type="application/ld+json">' + JSON.stringify(o).replace(/</g, '\\u003c') + '</script>';
@@ -161,7 +161,7 @@ for (const p of all.filter(p => p !== '404.html')) {
   }
   if (next !== cur) { if (FIX) writeFileSync(new URL(p, root), next); else bad(p, 'canonical link, JSON-LD or ?v= asset versions out of date (run node scripts/check-pages.mjs --fix)'); }
   // Every use of a file that vercel.json caches as immutable must carry ?v=.
-  for (const m of (FIX ? next : cur).matchAll(REF)) { const t = resolve(p, m[2]); if (/^assets\/(site|teach)\.(js|css)$/.test(t) && !m[3]) unversioned.push(`${p}: ${m[2]}`); }
+  for (const m of (FIX ? next : cur).matchAll(REF)) { const t = resolve(p, m[2]); if (/^assets\/(site|teach|build-concepts)\.(js|css)$/.test(t) && !m[3]) unversioned.push(`${p}: ${m[2]}`); }
 }
 for (const u of unversioned) bad(u.split(':')[0], 'asset cached as immutable has no ?v= version: ' + u.split(': ')[1]);
 // assets/site.js loads assets/search.js itself and must pass its own ?v= on, because search.js is cached as immutable too.
@@ -194,7 +194,7 @@ for (const m of moves) {
     h('/', 'public, max-age=0, must-revalidate'),
     h('/(.*)\\.html', 'public, max-age=0, must-revalidate'),
     // only the files every page references with ?v=<hash> (checked above) are immutable
-    h('/assets/(site\\.js|site\\.css|teach\\.js|teach\\.css|search\\.js)', 'public, max-age=31536000, immutable'),
+    h('/assets/(site\\.js|site\\.css|teach\\.js|teach\\.css|build-concepts\\.js|search\\.js)', 'public, max-age=31536000, immutable'),
     h('/assets/(.+\\.(?:svg|png|jpg|ico|webp))', 'public, max-age=3600, stale-while-revalidate=86400'),
   ], redirects: moves.filter(m => m && m.from && m.to).map(m => ({ source: m.from, destination: m.to, permanent: true })) };
   if (!want.redirects.length) delete want.redirects;
@@ -203,5 +203,14 @@ for (const m of moves) {
   if (curText !== text) { if (FIX) writeFileSync(vp, text); else bad('vercel.json', 'cache headers or redirects out of date (run node scripts/check-pages.mjs --fix)'); }
 }
 
+// The concept cards on ecosystem.html (assets/build-concepts.js): every lesson link is a published lesson with the titles in lessons.js.
+try {
+  const w = {}; new Function('window', readFileSync(new URL('assets/build-concepts.js', root), 'utf8'))(w);
+  for (const c of w.BUILD_CONCEPTS || []) for (const l of c.lessons) {
+    const hit = live.find(x => x.path === l.d + '/' + l.f);
+    if (!hit) bad('assets/build-concepts.js', `${c.id}: ${l.d}/${l.f} is not a published lesson`);
+    else if (hit.title.en !== l.en || hit.title.zh !== l.zh) bad('assets/build-concepts.js', `${c.id}: title of ${l.f} differs from lessons.js`);
+  }
+} catch (e) { bad('assets/build-concepts.js', 'cannot read: ' + e.message); }
 if (problems.length) { console.log(`✗ Page check failed (${problems.length}):\n` + problems.map(x => '  - ' + x).join('\n')); process.exit(1); }
 console.log(`✓ Page check passed: ${pages.length} pages have lang, title, description, link previews, favicon, alt text, heading order, EN/中文 twins and an updated date on each lesson; sitemap, lesson list and start links match lessons.js.`);

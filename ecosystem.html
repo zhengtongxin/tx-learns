@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>How TX Learns works</title>
 <meta name="description" content="This is the whole pipeline. A small team of AI agents works every step, and nothing goes live until every one of them says yes."><meta property="og:title" content="How TX Learns works"><meta property="og:description" content="This is the whole pipeline. A small team of AI agents works every step, and nothing goes live until every one of them says yes."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ecosystem.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
-<link rel="icon" href="assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><link rel="stylesheet" href="assets/site.css">
+<link rel="canonical" href="https://tx-learns.vercel.app/ecosystem.html"><link rel="icon" href="assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><link rel="stylesheet" href="assets/site.css?v=aef15752">
 <style>
 :root{--mono:ui-monospace,"SF Mono",SFMono-Regular,"JetBrains Mono",Menlo,Consolas,monospace}
 .eco{--edge:color-mix(in srgb,var(--fg) 46%,transparent);--edge2:color-mix(in srgb,var(--fg) 26%,transparent);--box:color-mix(in srgb,var(--fg) 22%,transparent)}
@@ -125,6 +125,19 @@
 @media(max-width:760px){.panel{display:none}.olist{display:block}}
 @media(max-width:760px){.olist .it{padding:11px 0 11px 32px}.olist .it::before{top:17px}.olist .it[data-n]::before{top:12px}.olist .it.g::before{top:12px}}
 @media(prefers-reduced-motion:reduce){.panel .ring{animation:none}}
+/* concepts used to build the site */
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;margin-top:26px;list-style:none;padding:0}
+.bcn{margin:0;padding:20px 22px;border-radius:8px;background:var(--glass);border:1px solid var(--line);display:flex;flex-direction:column;gap:10px;border-top:3px solid var(--acc)}
+.bcn.soon{border-top-style:dashed;background:transparent}
+.bcn h3{margin:0;font-size:16px;line-height:1.3;display:flex;align-items:center;gap:8px}
+.bcn .ic{font-size:18px}
+.bcn .bd{margin-left:auto;font:700 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:3px 6px;border-radius:3px;color:var(--acc2);border:1px solid var(--acc);white-space:nowrap}
+.bcn.soon .bd{border-style:dashed;color:var(--mut);border-color:var(--mut)}
+.bcn p{margin:0;font-size:13.5px;line-height:1.6}
+.bcn .ls{margin-top:auto;padding:10px 0 0;border-top:1px solid var(--line);list-style:none;display:flex;flex-direction:column;gap:5px;font-size:13px}
+.bcn .ls a{color:var(--fg);text-decoration:none;border-bottom:1px dotted var(--acc)}.bcn .ls a:hover,.bcn .ls a:focus-visible{color:var(--acc2);border-bottom-style:solid}
+.bcn .ls small{font:10px var(--mono);color:var(--mut);margin-right:6px;text-transform:uppercase;letter-spacing:.06em}
+@media(max-width:760px){.cgrid{grid-template-columns:1fr;gap:14px}}
 /* activity */
 .feed{list-style:none;margin:14px 0 0;padding:0}
 .feed li{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:baseline;padding:11px 4px;border-bottom:1px solid var(--line);font-size:14px;line-height:1.5}
@@ -135,7 +148,7 @@
 .feed .empty{display:block;color:var(--mut);border:0}
 .rule-line{margin-top:40px;text-align:center;font-size:15px;color:var(--mut)}
 .rule-line b{color:var(--fg)}
-</style></head><body>
+</style><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://tx-learns.vercel.app/ecosystem.html","url":"https://tx-learns.vercel.app/ecosystem.html","name":"How TX Learns works","description":"This is the whole pipeline. A small team of AI agents works every step, and nothing goes live until every one of them says yes.","inLanguage":["en","zh"],"isPartOf":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"How TX Learns works","item":"https://tx-learns.vercel.app/ecosystem.html"}]}]}</script></head><body>
 <main class="wide eco">
 <header class="stage compact eco-hero"><div class="orb"></div>
 <span class="eyebrow"><span class="en">Behind the scenes · system view</span><span class="zh">幕后 · 系统视图</span></span>
@@ -158,14 +171,20 @@
 <p class="plumb"><b>record-status.mjs</b> → <b>agent-status</b> branch → <b>/api/status</b> <span class="en">(read-only token)</span><span class="zh">（只读令牌）</span> → <span class="en">this page, every 60 s</span><span class="zh">这一页，每 60 秒</span></p>
 </section>
 
+<section id="concepts">
+<h2><span class="no">02</span><span class="en">The ideas behind it</span><span class="zh">背后用到的概念</span></h2>
+<p><span class="en">This site is built with the same ideas it teaches. Each card says how the site uses the idea, and links to the lessons that explain it. Dashed cards, when there are any, are on their way.</span><span class="zh">这个网站用的，就是它所教的那些想法。每张卡片说明网站怎样用这个概念，并链接到讲解它的课。虚线卡片（如果有）还在路上。</span></p>
+<ul class="cgrid" id="cgrid"></ul>
+</section>
+
 <section>
-<h2><span class="no">02</span><span class="en">Recent activity</span><span class="zh">最近动态</span></h2>
+<h2><span class="no">03</span><span class="en">Recent activity</span><span class="zh">最近动态</span></h2>
 <ul class="feed" id="feed"></ul>
 <p class="rule-line"><span class="en"><b>The agents check, the checks decide.</b> Every change is one pull request that merges by itself only when every check is green. If a merge breaks the site, it is undone by itself; if something gets stuck, I hear about it once.</span><span class="zh"><b>Agent 负责检查，检查结果说了算。</b>每个改动是一个 pull request，只有全部检查通过才会自动合并。如果某次合并弄坏了网站，它会被自动撤销；如果卡住了，我会收到一次通知。</span></p>
 </section>
 </main>
 <div class="tip" id="tip" role="tooltip"></div>
-<script src="tracks.js"></script><script src="assets/site.js"></script>
+<script src="tracks.js?v=adba22f4"></script><script src="assets/build-concepts.js?v=d406f12b"></script><script src="assets/site.js?v=f0800996"></script>
 <script>
 (function(){
   function t(en,zh){return '<span class="en">'+en+'</span><span class="zh">'+zh+'</span>'}
@@ -418,6 +437,10 @@
     document.getElementById('sbar').innerHTML='<span>status: <b class="'+(live?'on':'off')+'">'+(live?'● live':'○ offline')+'</b></span><span>agents: <b>'+act.length+'</b> '+t('active','在线')+(AGENTS.length>act.length?' · <b>'+(AGENTS.length-act.length)+'</b> '+t('planned','计划中'):'')+'</span>'+
       '<span>runs: <b>'+runs+'</b></span>'+(last?'<span>'+t('last run','上次运行')+': <b>'+ago(new Date(last).toISOString())+'</b></span>':'')+'<span>gate: <b>all green</b></span>'}
 
+  (function(){var g=document.getElementById('cgrid'),C=window.BUILD_CONCEPTS||[];
+    g.innerHTML=C.map(function(c){var soon=c.status==='soon';
+      return '<li class="bcn'+(soon?' soon':'')+'"><h3><span class="ic" aria-hidden="true">'+c.icon+'</span>'+t(esc(c.title.en),esc(c.title.zh))+'<span class="bd">'+(soon?t('coming','即将上线'):t('in use','使用中'))+'</span></h3>'
+        +'<p>'+t(esc(c.use.en),esc(c.use.zh))+'</p><ul class="ls">'+c.lessons.map(function(l){return '<li><small>'+esc(l.d.replace(/-/g,' '))+'</small><a href="'+esc(l.d+'/'+l.f)+'">'+t(esc(l.en),esc(l.zh))+'</a></li>'}).join('')+'</ul></li>'}).join('')})();
   function draw(data){
     var live=!!(data&&data.connected),S=(data&&data.agents)||{};
     var c=document.getElementById('conn'),why=data&&data.reason;

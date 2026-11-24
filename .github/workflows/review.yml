@@ -161,7 +161,8 @@ jobs:
              term or source name in it. After the lesson fixes (if you made any) list only what is still wrong.
           Do not run git.
           PROMPT
-          claude --model sonnet --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/review-prompt.md)" --max-turns 40 \
+          curl -fsS -o /tmp/claude-run.mjs "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/scripts/claude-run.mjs" && CC="node /tmp/claude-run.mjs reviewer" || CC=claude
+          $CC --model sonnet --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/review-prompt.md)" --max-turns 40 \
             --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(node scripts/check-counts.mjs:*),Bash(node scripts/check-pages.mjs:*),Bash(node scripts/rag.mjs:*)" \
             --output-format text | tail -30
       - name: Package the result for the share job
@@ -223,6 +224,11 @@ jobs:
         with:
           name: review
           path: /tmp/out
+      - name: Record what the agent used (tokens and estimated cost)
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: "[ -f $T/trace.mjs ] && node $T/trace.mjs push reviewer /tmp/out || true"
       - name: Comment, and add fixes to the lesson PR
         id: share
         run: |
