@@ -20,7 +20,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: scope-guard-${{ github.event.pull_request.number || inputs.pr }}
+  group: scope-guard-${{ github.event.pull_request.number || inputs.pr }}-${{ (github.event.action == 'labeled' || github.event.action == 'unlabeled') && github.event.label.name != 'scope-ok' && 'label' || 'main' }}
   cancel-in-progress: true
 jobs:
   # Marks the agent as working (yellow) on the How it works page, and the "Scope guard" status as pending. Trusted scripts from main only.
@@ -85,9 +85,10 @@ jobs:
           if node -e 'const i=require("/tmp/scope/input.json");process.exit(i.exempt||i.violations.length||!i.files.length?0:1)'; then echo "No AI needed."; else
             # Call 1: the diff alone. It has not seen the request.
             $CC --model haiku --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/scope/blind-prompt.md)" --max-turns 1 --allowedTools "" --output-format text > /tmp/scope/blind.out.txt || echo "::warning::The first call failed."
+            rm -f /tmp/scope/compare-prompt.md
             node scripts/scope-guard.mjs compare --dir /tmp/scope
-            # Call 2: the inferred description against the request.
-            $CC --model haiku --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/scope/compare-prompt.md)" --max-turns 1 --allowedTools "" --output-format text > /tmp/scope/verdict.out.txt || echo "::warning::The second call failed."
+            # Call 2: the inferred description against the request (skipped when the first call gave no usable answer).
+            if [ -s /tmp/scope/compare-prompt.md ]; then $CC --model haiku --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/scope/compare-prompt.md)" --max-turns 1 --allowedTools "" --output-format text > /tmp/scope/verdict.out.txt || echo "::warning::The second call failed."; fi
           fi
           node scripts/scope-guard.mjs decide --dir /tmp/scope
           cp /tmp/scope/result.json /tmp/out/ || true
@@ -135,7 +136,7 @@ jobs:
         run: "[ -f scripts/trace.mjs ] && node scripts/trace.mjs push scope-guard /tmp/out || true"
       - name: Set the statuses, area labels and the comment
         run: |
-          mkdir -p /tmp/scope && cp /tmp/out/result.json /tmp/scope/result.json
+          mkdir -p /tmp/scope && cp /tmp/out/result.json /tmp/scope/result.json || true
           node scripts/scope-guard.mjs post --pr "$PR" --dir /tmp/scope
       - name: Record status for the Ecosystem page
         if: ${{ !cancelled() }}
