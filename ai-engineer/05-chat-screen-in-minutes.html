@@ -1,10 +1,12 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>A chat screen in minutes | TX Learns</title>
 <meta name="description" content="Use Gradio to turn a Python function into a web page, then a streaming chat screen, and see why you rebuild the messages every turn."><meta property="og:title" content="A chat screen in minutes | TX Learns"><meta property="og:description" content="Use Gradio to turn a Python function into a web page, then a streaming chat screen, and see why you rebuild the messages every turn."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-engineer/05-chat-screen-in-minutes.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
-<meta name="updated" content="2026-11-23">
+<meta name="updated" content="2026-11-24">
 <link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Many models, one app · Lesson 2</span><span class="zh">多个模型，一个应用 · 第 2 课</span></span><h1><span class="en">A chat screen in minutes</span><span class="zh">几分钟做出聊天界面</span></h1><p class="meta"><span class="en">You will put a real chat screen on your model without learning front-end · ~15 min · hands-on</span><span class="zh">你会不用学前端，就给自己的模型配上一个真正的聊天界面 · 约 15 分钟 · 动手实践</span></p></div>
+<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the helper could switch models behind one function, but only Wei Jie could use it, from a terminal. Today it fails when Mdm Tan wants to try it and will not type commands. We fix it by wrapping the function in a Gradio chat screen.</p>
+<p class="zh" style="margin:0">上回助手能在一个函数后面切换模型，但只有 Wei Jie 能用，还得在终端里。今天它的毛病是 Tan 太太想试试，却不肯敲命令。解决办法是用 Gradio 聊天界面把这个函数包起来。</p></div>
 <div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0"><b>Mdm Tan</b> wants to try the shop helper Wei Jie is building, but she will not type commands in a terminal. <b>Wei Jie</b> does not want to spend a month on web design either. He reaches for Gradio, which builds a web page straight from plain Python, and has a chat screen for her in minutes.</p>
 <p class="zh" style="margin:0"><b>Tan 太太</b>想试试 Wei Jie 正在做的店铺助手，但她不会在终端里敲命令。<b>Wei Jie</b> 也不想花一个月学网页设计。他拿起 Gradio，它能直接用普通 Python 生成网页，几分钟就给她做出了聊天界面。</p></div>
 
@@ -29,6 +31,34 @@ def ask_once(text):
 <h2><span class="en">Step 2 · A chat screen, and why memory bites</span><span class="zh">第 2 步 · 聊天界面，以及“没记忆”的麻烦</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><code>gr.ChatInterface(fn)</code> gives you a chatbot in a few lines. Your function receives <code>(message, history)</code>. Remember that models are stateless: Gradio hands you the history, and <b>you</b> rebuild the messages list every turn. Use <code>yield</code> instead of <code>return</code> and Gradio shows words as they arrive. (A generator is a function that yields many times.)</p>
 <p class="zh" style="margin:0 0 8px"><code>gr.ChatInterface(fn)</code> 几行代码就给你一个聊天机器人。你的函数会收到 <code>(message, history)</code>。别忘了模型是无状态的：Gradio 把历史交给你，每一轮的 messages 列表要<b>你</b>自己重建。用 <code>yield</code> 代替 <code>return</code>，Gradio 就会边收边显示。（生成器就是会多次 yield 的函数。）</p></div>
+<figure class="fig"><svg viewBox="0 0 720 190" role="img" aria-label="A Gradio chat screen wraps your function">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9a9aa8"/></marker></defs>
+<rect class="box soft" x="2" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="69" y="71">Browser</text>
+<text class="en sm" x="69" y="92">Mdm Tan types</text>
+<text class="zh" x="69" y="71">浏览器</text>
+<text class="zh sm" x="69" y="92">Tan 太太打字</text>
+<rect class="box new" x="196" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="263" y="71">Gradio screen</text>
+<text class="en sm" x="263" y="92">small web server</text>
+<text class="zh" x="263" y="71">Gradio 界面</text>
+<text class="zh sm" x="263" y="92">小型网页服务</text>
+<rect class="box soft" x="390" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="457" y="71">Your function</text>
+<text class="en sm" x="457" y="92">message, history</text>
+<text class="zh" x="457" y="71">你的函数</text>
+<text class="zh sm" x="457" y="92">消息，历史</text>
+<rect class="box soft" x="584" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="651" y="71">Model call</text>
+<text class="en sm" x="651" y="92">system + history</text>
+<text class="zh" x="651" y="71">模型调用</text>
+<text class="zh sm" x="651" y="92">system + 历史</text>
+<path class="lnk hot" d="M139,75 L193,75" marker-end="url(#ah)"/>
+<path class="lnk" d="M333,75 L387,75" marker-end="url(#ah)"/>
+<path class="lnk" d="M527,75 L581,75" marker-end="url(#ah)"/>
+<path class="lnk hot" d="M651,112 C651,165 69,165 69,114" marker-end="url(#ah)"/>
+<text class="en sm" x="360" y="162">reply goes back to the screen</text><text class="zh sm" x="360" y="162">回复回到界面</text>
+</svg><figcaption><span class="en">The screen hands your function the new message and the whole history every turn.</span><span class="zh">界面每一轮都把新消息和整段历史交给你的函数。</span></figcaption></figure>
 <div class="codebox"><span class="dim">system_message = "You are the helper of a neighbourhood provision shop."
 
 </span><span class="chg">def chat(message, history):
@@ -82,7 +112,7 @@ You: Yes! 5 kg bags are on sale this week, a good deal."""</span><span class="di
 
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Add a dropdown</b> that picks between two models.</span><span class="zh"><b>加一个下拉菜单，</b>在两个模型之间选择。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a radio button</b> that changes the reply tone, such as formal or cheerful.</span><span class="zh"><b>加一个单选按钮，</b>切换回复语气，比如正式或欢快。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a login</b> with <code>auth</code>, with the password in <code>.env</code>.</span><span class="zh"><b>用 <code>auth</code> 加一个登录，</b>密码放在 <code>.env</code> 里。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">Back at the void deck</span><span class="zh">回到组屋底层</span></b><span class="en">A chat screen is like the counter in Mdm Tan's shop. The model is the helper behind it who forgets every customer once they leave. The screen hands over the whole conversation each time, and the system message is the note taped by the till that says how to treat people.</span><span class="zh">聊天界面就像 Tan 太太店里的柜台。模型是柜台后的帮手，顾客一走就忘。界面每次都把整段对话递过去，system 消息就是贴在收银机旁、写着该怎么待客的纸条。</span></div>
+<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now Mdm Tan opens the helper as a chat screen in her browser, like the counter in her shop, and a system message taped by the till tells it how to treat customers. The next problem is that when she asks the price of a tin of sardines it makes one up, because it has no way to look anything up.</span><span class="zh">现在 Tan 太太在浏览器里就能打开聊天界面用助手，就像她店里的柜台，贴在收银机旁的 system 消息告诉它怎么待客。下一个问题是：她问一罐沙丁鱼多少钱时，它会编一个价格，因为它没有办法去查任何东西。</span></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• A UI is a wrapper around a function.<br>• <code>ChatInterface</code> gives you a chatbot in about ten lines.<br>• Models are stateless: rebuild the messages from the history every turn.<br>• Clean history items down to <code>role</code> and <code>content</code>.<br>• <code>yield</code> streams the words as they arrive.<br>• The system message is the product's personality.<br>• Injecting extra context for one turn is cheap and powerful.<br>• <code>share=True</code> makes your code reachable by anyone with the link.</p><p class="zh" style="margin:0">• 界面是函数外面的一层包装。<br>• <code>ChatInterface</code> 大约十行代码就能给你一个聊天机器人。<br>• 模型无状态：每一轮都要从历史重建 messages。<br>• 把历史条目清理成只有 <code>role</code> 和 <code>content</code>。<br>• <code>yield</code> 让文字边到边显示。<br>• system 消息就是产品的性格。<br>• 为单轮注入额外背景，又便宜又好用。<br>• <code>share=True</code> 会让拿到链接的人都能接触到你的代码。</p></div>
 

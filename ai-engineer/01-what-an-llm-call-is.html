@@ -1,16 +1,44 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>What an LLM call really is | TX Learns</title>
 <meta name="description" content="Calling a model is not magic. It is one web request, and you can write it yourself."><meta property="og:title" content="What an LLM call really is | TX Learns"><meta property="og:description" content="Calling a model is not magic. It is one web request, and you can write it yourself."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-engineer/01-what-an-llm-call-is.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
-<meta name="updated" content="2026-11-23">
+<meta name="updated" content="2026-11-24">
 <link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Talking to models · Lesson 1</span><span class="zh">和模型对话 · 第 1 课</span></span><h1><span class="en">What an LLM call really is</span><span class="zh">一次大模型调用到底是什么</span></h1><p class="meta"><span class="en">Calling a model is not magic. It is one web request, and you can write it yourself · ~15 min · hands-on</span><span class="zh">调用模型并不神秘，它就是一次网络请求，你自己也能写 · 约 15 分钟 · 动手实践</span></p></div>
-<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">Mdm Tan runs the provision shop at Block 12. She wants one cheerful line about durian for her shop sign. <b>Wei Jie</b>, who fixes phones at the heartland mall, says he can get a model to write it. He has never called a model from code. By the end he writes the call by hand, then swaps in a different model by changing three things.</p>
-<p class="zh" style="margin:0">Tan 太太在 12 座组屋开杂货店。她想要一句关于榴莲的欢快招牌文案。在商场修手机的 <b>Wei Jie</b> 说他可以让大模型来写，可他从没用代码调用过模型。最后，他会亲手写出这次调用，再改三样东西就换成另一个模型。</p></div>
+<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Wei Jie starts the Block 12 helper here, because neighbours keep asking Uncle Raj the same notice questions at the void-deck board. It cannot answer anything yet: he has never called a model from code. Today he writes one call by hand, and the helper answers its first question.</p>
+<p class="zh" style="margin:0">Wei Jie 从这里开始做 Block 12 助手，因为邻居们总在底层公告板前问 Raj 叔叔同样的通知问题。它现在什么也答不了：他从没用代码调用过模型。今天他亲手写出一次调用，助手就能回答它的第一个问题。</p></div>
+<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en" style="margin:0">Mdm Tan runs the provision shop at Block 12. She wants one cheerful line about durian for her shop sign. <b>Wei Jie</b>, who fixes phones at the heartland mall, says he can get a model to write it. He has never called a model from code. By the end he writes the call by hand, then swaps in a different model by changing three things. That durian line is a side case: the same call, with a notice question in place of the sign, is the helper's first job.</p>
+<p class="zh" style="margin:0">Tan 太太在 12 座组屋开杂货店。她想要一句关于榴莲的欢快招牌文案。在商场修手机的 <b>Wei Jie</b> 说他可以让大模型来写，可他从没用代码调用过模型。最后，他会亲手写出这次调用，再改三样东西就换成另一个模型。 榴莲文案只是支线案例：同样的调用，把招牌换成一条通知问题，就是助手的第一份工作。</p></div>
 
 <h2><span class="en">Step 1 · A call is one web request</span><span class="zh">第 1 步 · 调用就是一次网络请求</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Think of the EZ-Link gate: you tap, the gate answers. A model call has the same shape. You send one <b>POST</b> request to a URL (the <b>endpoint</b>) with a JSON body: a model name and a list of messages. The answer comes back as JSON. Your <b>API key</b> rides along in a header, like your card.</p>
 <p class="zh" style="margin:0 0 8px">想想 EZ-Link 闸机：你一刷卡，闸机就回应。调用模型也是这个形状。你向一个网址（<b>endpoint</b>，端点）发一次 <b>POST</b> 请求，请求体是 JSON：一个模型名加一串消息。答案同样以 JSON 返回。你的 <b>API key</b> 放在请求头里，就像那张卡。</p></div>
+<figure class="fig"><svg viewBox="0 0 720 150" role="img" aria-label="One model call as one web request">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9a9aa8"/></marker></defs>
+<rect class="box soft" x="2" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="69" y="71">Your code</text>
+<text class="en sm" x="69" y="92">POST + API key</text>
+<text class="zh" x="69" y="71">你的代码</text>
+<text class="zh sm" x="69" y="92">POST + 密钥</text>
+<rect class="box new" x="196" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="263" y="71">Request</text>
+<text class="en sm" x="263" y="92">model + messages</text>
+<text class="zh" x="263" y="71">请求</text>
+<text class="zh sm" x="263" y="92">模型 + 消息</text>
+<rect class="box soft" x="390" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="457" y="71">Endpoint</text>
+<text class="en sm" x="457" y="92">a URL on the web</text>
+<text class="zh" x="457" y="71">端点</text>
+<text class="zh sm" x="457" y="92">网上的一个网址</text>
+<rect class="box soft" x="584" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="651" y="71">Reply</text>
+<text class="en sm" x="651" y="92">JSON answer</text>
+<text class="zh" x="651" y="71">回复</text>
+<text class="zh sm" x="651" y="92">JSON 答案</text>
+<path class="lnk hot" d="M139,75 L193,75" marker-end="url(#ah)"/>
+<path class="lnk" d="M333,75 L387,75" marker-end="url(#ah)"/>
+<path class="lnk" d="M527,75 L581,75" marker-end="url(#ah)"/>
+</svg><figcaption><span class="en">A call is one request out and one reply back; the key rides in the header.</span><span class="zh">一次调用就是发出一次请求、收回一次回复；密钥放在请求头里。</span></figcaption></figure>
 <div class="codebox"><span class="dim">import os, requests
 
 </span><span class="chg">headers = {"Authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}", "Content-Type": "application/json"}</span><span class="dim">
@@ -55,7 +83,7 @@ print(reply.choices[0].message.content)</span></div>
 
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Send the raw call.</b> Print <code>r.json()</code> in full before picking out the content, and look at everything else in it.</span><span class="zh"><b>发一次原始请求。</b>先完整打印 <code>r.json()</code>，再取出内容，看看里面还有什么。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Switch provider.</b> Ask the same question through a second provider, changing only the base URL, key and model name.</span><span class="zh"><b>换提供商。</b>通过第二家提供商问同一个问题，只改基础网址、密钥和模型名。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Run a small local model.</b> Pick a small size, then compare answer quality and speed.</span><span class="zh"><b>跑一个本地小模型。</b>选个小尺寸，比较答案质量和速度。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">Back at the void deck</span><span class="zh">回到组屋底层</span></b><span class="en">A model call is like Uncle Raj pinning a note on the void-deck noticeboard: you write a request in the agreed format, and a reply comes back in the agreed format. Any noticeboard that uses the same format works with the same note.</span><span class="zh">调用模型就像 Raj 叔叔在底层公告板上贴一张条子：你按约定格式写好请求，回复也按约定格式回来。只要公告板用同样的格式，同一张条子就通用。</span></div>
+<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the Block 12 helper can answer one notice question for Uncle Raj by sending one request and reading the reply, like a note pinned to the board and answered in the same format. The next problem is that it forgets the question the moment the reply arrives, so a neighbour's follow-up gets a blank stare.</span><span class="zh">现在 Block 12 助手能替 Raj 叔叔回答一条通知问题：发一次请求，读回复，就像在公告板上贴条子、用同样的格式得到答复。下一个问题是：回复一到它就忘了刚才的问题，邻居追问时它一脸茫然。</span></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• A model call is one <b>POST</b> with a JSON body. The answer is JSON too.<br>• The body is a model name plus a list of <b>messages</b>, each with a role and content.<br>• <code>system</code> sets the tone, <code>user</code> asks, <code>assistant</code> is what was said before.<br>• The client library is a thin wrapper. There is no model inside it.<br>• Many providers share one shape, so switching is cheap: change base URL, key and model.<br>• Local models are private and free to call, but weaker than the big cloud ones.<br>• A key is a password. Check it first when a call fails.</p><p class="zh" style="margin:0">• 一次模型调用就是带 JSON 请求体的一个 <b>POST</b>，答案也是 JSON。<br>• 请求体是模型名加一串<b>消息</b>，每条有角色和内容。<br>• <code>system</code> 定语气，<code>user</code> 提问，<code>assistant</code> 是之前说过的话。<br>• 客户端库只是薄薄一层包装，里面没有模型。<br>• 许多提供商共用一种格式，所以切换很便宜：改基础网址、密钥和模型名。<br>• 本地模型私密、调用免费，但比大型云端模型弱。<br>• 密钥就是密码。调用失败时先检查它。</p></div>
 
