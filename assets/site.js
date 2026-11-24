@@ -20,6 +20,8 @@
   var TYPE={f:{en:'Foundations',zh:'基础'},c:{en:'Concept',zh:'概念'},p:{en:'Project',zh:'项目'}};
 
   if(window.TRACK&&!window.TRACKS)document.write('<script src="../tracks.js"><\/script>');
+  /* learner search + related lessons live in their own file (scripts/search-index.mjs builds its index) */
+  (function(m){if(m&&m.src){var q=document.createElement('script');q.src=m.src.replace(/site\.js.*$/,'search.js');q.defer=true;document.head.appendChild(q)}})(document.currentScript);
   document.addEventListener('DOMContentLoaded',function(){
     var C=window.TRACK,here=location.pathname.split('/').pop()||'index.html',d=done();
     if(C){C.all=[];C.topics.forEach(function(w){w.items.forEach(function(it,i){it.w=w.n;it.i=i+1;it.g=C.all.length+1;C.all.push(it)})});C.lessons=C.all.filter(function(x){return x.file});C.total=C.all.length}
@@ -56,8 +58,17 @@
         if(cur)body='<a href="index.html" class="'+(here==='index.html'?'cur':'')+'">⌂ '+t({en:'Overview',zh:'总览'})+'</a>'+
           C.topics.map(function(w){return '<h5>'+t(w.title)+'</h5>'+w.items.map(function(l){
             return l.file?'<a href="'+l.file+'" class="'+(l.file===here?'cur ':'')+(d[C.id+'/'+l.file]?'done':'')+'"'+(l.file===here?' aria-current="page"':'')+'>'+t(l.title)+'</a>':'<span class="soon">'+t(l.title)+'</span>'}).join('')}).join('');
-        else body='<a href="../'+c.href+'">⌂ '+t({en:'Overview',zh:'总览'})+'</a>';
+        else body='<a href="../'+c.href+'">⌂ '+t({en:'Overview',zh:'总览'})+'</a><div class="oth" data-o="'+c.id+'"></div>';
         return '<div class="cg'+(open?' open':'')+(cur?' cur':'')+'" data-c="'+c.id+'"><button class="cg-h" aria-expanded="'+open+'" aria-controls="cgb-'+c.id+'"><span class="ic">'+(c.icon||'')+'</span><span class="tt">'+t(c.title)+'</span>'+(cur?'<span class="pg">'+count(c.id,CF)+'/'+CF.length+'</span>':'')+'<i class="chev"></i></button><div class="cg-b" id="cgb-'+c.id+'"'+(open?'':' inert')+'><div>'+body+'</div></div></div>'}).join('');
+      /* Other tracks: read their lessons.js (in a throwaway window object) to list their lessons and show done/total. Without it (e.g. opened from disk) only the Overview link shows. */
+      list.forEach(function(c){if(c.id===C.id)return;
+        fetch('../'+c.id+'/lessons.js').then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(src){
+          var w={};new Function('window',src)(w);var T=w.TRACK;if(!T||!T.topics)return;
+          var files=[],h='';T.topics.forEach(function(tp){var part='';tp.items.forEach(function(l){if(l.file){files.push(l.file);part+='<a href="../'+c.id+'/'+l.file+'"'+(d[c.id+'/'+l.file]?' class="done"':'')+'>'+t(l.title)+'</a>'}else part+='<span class="soon">'+t(l.title)+'</span>'});h+='<h5>'+t(tp.title)+'</h5>'+part});
+          var box=side.querySelector('.oth[data-o="'+c.id+'"]'),hd=side.querySelector('.cg[data-c="'+c.id+'"] .cg-h');
+          if(box)box.innerHTML=h;
+          if(hd&&files.length&&!hd.querySelector('.pg')){var sp=document.createElement('span');sp.className='pg';sp.textContent=count(c.id,files)+'/'+files.length;hd.insertBefore(sp,hd.querySelector('.chev'))}
+        }).catch(function(){})});
       side.querySelectorAll('.cg-h').forEach(function(h){h.onclick=function(){var g=h.parentNode,o=!g.classList.contains('open');g.classList.toggle('open',o);h.setAttribute('aria-expanded',o);g.querySelector('.cg-b').inert=!o;ns[g.dataset.c]=o;try{localStorage.setItem(NK,JSON.stringify(ns))}catch(e){}}});
       scrim=document.createElement('div');scrim.className='scrim';scrim.setAttribute('aria-hidden','true');document.body.appendChild(scrim);
       document.body.appendChild(side);
@@ -127,14 +138,17 @@
         box.innerHTML='<b class="lbl">'+t({en:'Before you start',zh:'开始之前'})+'</b><dl>'+rows.map(function(r){return '<dt>'+t({en:r[0],zh:r[1]})+'</dt><dd>'+r[2]+'</dd>'}).join('')+'</dl>';
         anchor.after(box);anchor=box}
       if(J&&hm2){var pc=document.createElement('aside');pc.className='card prereq proj';pc.setAttribute('aria-label','Project card · 项目卡');
-        var pk=J.pkg,files=pk&&pk.files?pk.files.map(function(f){return '<li><a href="../'+pk.dir+'/'+f+'">'+f+'</a></li>'}).join(''):'';
+        var pk=J.pkg,fl=pk&&((window.PKGFILES||{})[pk.dir]||pk.files)||[],files='';
+        /* every file of the package (packages.js is generated), grouped by folder */
+        if(fl.length){var gr={};fl.forEach(function(f){var i=f.lastIndexOf('/'),k=i<0?'':f.slice(0,i);(gr[k]=gr[k]||[]).push(f)});
+          files=Object.keys(gr).map(function(k){return '<li>'+(k?'<b>'+k+'/</b> ':'')+gr[k].map(function(f){return '<a href="../'+pk.dir+'/'+f+'">'+f.slice(k?k.length+1:0)+'</a>'}).join(' · ')+'</li>'}).join('')}
         pc.innerHTML='<b class="lbl">'+t({en:'Project card',zh:'项目卡'})+'</b><dl>'+
           (J.goal?'<dt>'+t({en:'Goal',zh:'目标'})+'</dt><dd>'+t(J.goal)+'</dd>':'')+(J.deliver?'<dt>'+t({en:'Deliverable',zh:'交付物'})+'</dt><dd>'+t(J.deliver)+'</dd>':'')+
           (J.level?'<dt>'+t({en:'Difficulty',zh:'难度'})+'</dt><dd>'+t(LV[J.level])+'</dd>':'')+(J.mins?'<dt>'+t({en:'Time',zh:'时间'})+'</dt><dd>'+t({en:'about '+J.mins+' minutes',zh:'约 '+J.mins+' 分钟'})+'</dd>':'')+
           (J.accept?'<dt>'+t({en:'You are done when',zh:'完成标准'})+'</dt><dd><ul>'+li(J.accept)+'</ul></dd>':'')+
           (J.fail?'<dt>'+t({en:'Common problems',zh:'常见问题'})+'</dt><dd><ul>'+li(J.fail)+'</ul></dd>':'')+
           (J.stretch?'<dt>'+t({en:'Stretch goals',zh:'进阶挑战'})+'</dt><dd><ul>'+li(J.stretch)+'</ul></dd>':'')+
-          (files?'<dt>'+t({en:'Starter and final code',zh:'起步与完成代码'})+'</dt><dd><ul class="pkg">'+files+'</ul>'+(pk.note?'<p class="meta">'+t(pk.note)+'</p>':'')+'</dd>':'')+'</dl>';
+          (files?'<dt>'+t({en:'Starter and final code',zh:'起步与完成代码'})+'</dt><dd><ul class="pkg">'+files+'</ul>'+(pk.note?'<p class="meta">'+t(pk.note)+'</p>':'')+'<p class="meta">'+t({en:'Download every file and keep the folder layout.',zh:'下载全部文件，并保持文件夹结构。'})+'</p></dd>':'')+'</dl>';
         anchor.after(pc)}
       var ba=document.querySelector('.stage .track-ba');
       if(!ba&&window.TRACKS&&document.querySelector('.stage .ringbox')){var tr=window.TRACKS.filter(function(x){return x.id===C.id})[0];
@@ -142,8 +156,8 @@
           ba.innerHTML=(tr.before?'<div><b class="lbl">'+t({en:'Before this track',zh:'学这条路线之前'})+'</b><p>'+t(tr.before)+'</p></div>':'')+(tr.after?'<div><b class="lbl">'+t({en:'After this track',zh:'学完之后'})+'</b><p>'+t(tr.after)+'</p></div>':'');
           document.querySelector('.stage .ringbox').after(ba)}}
     }
-    if(C&&(document.querySelector('.stage .ringbox')||document.querySelector('main .meta'))){var pend=2,fin2=function(){if(--pend===0)renderMeta()};
-      ['prereqs.js','projects.js'].forEach(function(f){var sc2=document.createElement('script');sc2.src=f;sc2.onload=sc2.onerror=fin2;document.body.appendChild(sc2)})}
+    if(C&&(document.querySelector('.stage .ringbox')||document.querySelector('main .meta'))){var pend=3,fin2=function(){if(--pend===0)renderMeta()};
+      ['prereqs.js','projects.js','packages.js'].forEach(function(f){var sc2=document.createElement('script');sc2.src=f;sc2.onload=sc2.onerror=fin2;document.body.appendChild(sc2)})}
 
     /* hub: topic and lesson counts are never typed by hand. They come from each track's lessons.js
        (scripts/check-counts.mjs fails a PR that types one). Progress is completed / PUBLISHED lessons; planned lessons are shown separately. */

@@ -50,6 +50,9 @@ jobs:
       - name: Check pages (lang, title, previews, alt text, headings, EN/中文 twins)
         if: success() || failure()
         run: "[ -f scripts/check-pages.mjs ] || { echo 'No page check on this branch yet.' > pages.txt; exit 0; }; node scripts/check-pages.mjs | tee pages.txt; exit ${PIPESTATUS[0]}"
+      - name: Search index (a note, never a gate)
+        if: success() || failure()
+        run: "[ -f scripts/search-index.mjs ] && { node scripts/search-index.mjs --check || echo '::notice::The learner search index is behind. The writer agent rebuilds it; or run node scripts/search-index.mjs.'; }; exit 0"
       - name: Tell TX on Telegram
         if: failure()
         env:
