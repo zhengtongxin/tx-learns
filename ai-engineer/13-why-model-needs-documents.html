@@ -13,7 +13,7 @@
 <h2><span class="en">Step 1 · The model has never seen your files</span><span class="zh">第 1 步 · 模型没见过你的文件</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A model learnt from public text up to a cutoff date. It has never read Auntie Lim's files, last week's notice or your company's staff list. When it does not know, it does not stay quiet. It writes something that sounds right. Think of a stranger at the void deck who answers every question with total confidence.</p>
 <p class="zh" style="margin:0 0 8px">模型学的是截至某个日期的公开文字。它从没读过 Lim 阿姨的档案、上周的通告，或你公司的员工名单。不知道的时候，它不会沉默，而是写出一段听起来很对的话。就像组屋底层来了个陌生人，不管问什么都说得信心十足。</p></div>
-<div class="codebox"><span class="dim">from openai import OpenAI      # pip install openai; set OPENAI_API_KEY (calls cost money)
+<div class="codebox" data-file="ask_plain.py" data-lang="python"><span class="dim">from openai import OpenAI      # pip install openai; set OPENAI_API_KEY (calls cost money)
 client = OpenAI()
 
 </span><span class="chg">def ask_plain(question):
@@ -23,12 +23,14 @@ client = OpenAI()
 
 print(ask_plain("Who handles lift complaints at Block 12 town council?"))</span>
 <span class="dim"># a smooth answer with a made-up officer name</span></div>
+<div class="codebox" data-file="output" data-lang="text">The lift complaints at Block 12 are handled by Officer Tan Wei Ming.
+# smooth and confident, and the name is made up</div>
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 2 · The simplest fix: paste the facts</span><span class="zh">第 2 步 · 最简单的办法：把事实贴进去</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">If the model lacks the facts, give them to it in the prompt. Wei Jie loads a small folder of markdown files into a dictionary, one file per key, with the key in lowercase. A small function looks at each word of the question. If a word matches a key, that file's text goes into the system message (the hidden note the model reads before your question) for this turn only.</p>
 <p class="zh" style="margin:0 0 8px">模型缺事实，就在提示词里给它。Wei Jie 把一小个文件夹的 markdown 文件读进一个字典，一个文件对应一个键，键用小写。一个小函数逐个看问题里的词：只要某个词对上了键，这个文件的内容就加进这一轮的 system 消息（模型在读你的问题之前先读的隐藏说明）里。</p></div>
-<div class="codebox"><span class="dim">from pathlib import Path
+<div class="codebox" data-file="add_facts.py" data-lang="python"><span class="dim">from pathlib import Path
 
 </span><span class="chg">files = {}
 for path in Path("council_files").glob("*.md"):
@@ -50,7 +52,7 @@ def ask(question):
 <h2><span class="en">Step 3 · Why the simple version breaks</span><span class="zh">第 3 步 · 简单版本为什么会坏</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">This is already RAG: Retrieval first, then Augmented Generation. But it only works on exact words. "Who started the council?" matches no key, so nothing is added. Pasting every file instead is costly and may not fit in the context window (the most text a model can read at once). Even when it fits, a pile of extra text can bury the one useful sentence.</p>
 <p class="zh" style="margin:0 0 8px">这其实已经是 RAG：先检索（Retrieval），再增强生成（Augmented Generation）。但它只认完全相同的词。“谁创办了理事会？”对不上任何键，所以什么也没加。反过来把所有文件都贴进去，既贵又可能超出上下文窗口（模型一次能读的最多文字）。就算放得下，一大堆多余的文字也会把那句有用的话淹没。</p></div>
-<div class="codebox"><span class="dim">add_facts("Who is Hafiz?")              # finds hafiz.md
+<div class="codebox" data-file="match_notes.txt" data-lang="text"><span class="dim">add_facts("Who is Hafiz?")              # finds hafiz.md
 add_facts("Who looks after the lifts?")  # words: who, looks, after, the, lifts
                                          # no key is called "lifts" -> empty
 add_facts("Who runs the estate office?") # no matching word -> empty</span></div>
@@ -61,7 +63,7 @@ add_facts("Who runs the estate office?") # no matching word -> empty</span></div
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Real RAG replaces word matching with search by meaning. Prepare once: split the documents into chunks, turn each chunk into a vector (a list of numbers that stands for its meaning), and store them. At question time: turn the question into a vector, fetch the closest chunks, put them in the prompt with the rule "say you do not know if the answer is not here", and let the model answer. The next lessons build each part.</p>
 <p class="zh" style="margin:0 0 8px">真正的 RAG 用“按意思搜索”取代词语匹配。先准备一次：把文档切成块，把每块变成向量（一串代表它意思的数字），存起来。提问时：把问题也变成向量，取出最接近的几块，放进提示词，并加一条规则“答案不在这里就说不知道”，然后让模型回答。后面几课会逐个造出这些部分。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 130" role="img" aria-label="The RAG recipe: files are prepared once as vectors, then each question finds the closest chunks, which go into the prompt for the answer."><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box soft" x="10" y="40" width="116" height="56" rx="12"/><text class="en" x="68" y="73">Your files</text><text class="zh" x="68" y="73">你的文件</text><rect class="box new" x="156" y="40" width="116" height="56" rx="12"/><text class="en" x="214" y="65">Chunks as</text><text class="en" x="214" y="81">vectors</text><text class="zh" x="214" y="65">切块并</text><text class="zh" x="214" y="81">变成向量</text><rect class="box new" x="302" y="40" width="116" height="56" rx="12"/><text class="en" x="360" y="65">Closest to</text><text class="en" x="360" y="81">the question</text><text class="zh" x="360" y="65">最接近</text><text class="zh" x="360" y="81">问题的块</text><rect class="box new" x="448" y="40" width="116" height="56" rx="12"/><text class="en" x="506" y="65">Prompt with</text><text class="en" x="506" y="81">the facts</text><text class="zh" x="506" y="65">带事实的</text><text class="zh" x="506" y="81">提示词</text><rect class="box soft" x="594" y="40" width="116" height="56" rx="12"/><text class="en" x="652" y="73">Answer</text><text class="zh" x="652" y="73">回答</text><path class="lnk" d="M126 68 H153" marker-end="url(#ar)"/><path class="lnk" d="M272 68 H299" marker-end="url(#ar)"/><path class="lnk" d="M418 68 H445" marker-end="url(#ar)"/><path class="lnk" d="M564 68 H591" marker-end="url(#ar)"/></svg><figcaption><span class="en">Prepare once; for every question, retrieve first and then generate.</span><span class="zh">准备一次；每个问题都先检索，再生成回答。</span></figcaption></figure>
-<div class="codebox"><span class="dim">PREPARE (once)         documents  -> chunks -> vectors -> store
+<div class="codebox" data-file="rag_vs_prompt.txt" data-lang="text"><span class="dim">PREPARE (once)         documents  -> chunks -> vectors -> store
 ASK (every question)  question   -> vector -> closest chunks
                       chunks + rule "say I do not know" -> prompt -> answer
 
@@ -74,11 +76,16 @@ Other options:
 
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I thought RAG was a database query. It is not. It is a search by meaning, followed by a normal prompt with the found text pasted in. The model still just writes text. We only gave it better pages to read.</span><span class="zh">我以为 RAG 就是查数据库。其实不是。它是按意思去搜，然后把找到的文字贴进一个普通的提示词里。模型照样只是在写文字，只不过我们给了它更好的资料来读。</span></div>
 
+<h2><span class="en">Common errors</span><span class="zh">常见报错</span></h2>
+<div class="card"><p class="en" style="margin:0">• <code>AuthenticationError: Incorrect API key provided</code>. The key is missing, has a stray space or newline, or the <code>.env</code> file was not loaded. Print <code>len(os.getenv('OPENAI_API_KEY'))</code>, fix the file, then restart the notebook.<br>• An answer with a confident but made-up name. The model had no documents. Give it the facts and tell it to say "I do not know" when they are missing.<br>• <code>UnicodeDecodeError: 'charmap' codec can't decode</code>. Open files with <code>encoding="utf-8"</code>.</p><p class="zh" style="margin:0">• <code>AuthenticationError: Incorrect API key provided</code>：密钥缺失、首尾有空格或换行，或者 <code>.env</code> 没有加载。先打印 <code>len(os.getenv('OPENAI_API_KEY'))</code>，改好文件，再重启笔记本。<br>• 答案很自信，名字却是编的：模型手里没有文件。把事实给它，并告诉它缺资料时就说“我不知道”。<br>• <code>UnicodeDecodeError: 'charmap' codec can't decode</code>：打开文件时加上 <code>encoding="utf-8"</code>。</p></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Make five small text files</b> about something you know well, and build the word lookup.</span><span class="zh"><b>做五个小文本文件</b>，写你熟悉的东西，再做出词语查找。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Find a question it fails on,</b> and write down why the words did not match.</span><span class="zh"><b>找一个它答不好的问题，</b>写下为什么词对不上。</span></span></label></div>
 <div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the helper reads Auntie Lim's files pasted into the prompt and says what they say instead of guessing a name. The next problem is that this only works on exact words and the thick file will not fit in a prompt, so it must search by meaning.</span><span class="zh">助手现在会读贴进提示词里的 Lim 阿姨的档案，照着档案说，而不是瞎猜名字。下一个问题是这办法只认一模一样的词，而且那叠厚档案塞不进提示词，所以得改成按意思搜索。</span></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• A model does not know your private files, and it will guess.<br>• Put the right facts in the prompt and it answers from them.<br>• Word lookup is RAG in miniature, but it breaks on different wording.<br>• Pasting everything is costly, may not fit, and can bury the answer.<br>• The recipe: chunk, vector, store; then fetch, prompt, answer.<br>• Fine-tuning suits skills, long context is costly, RAG is cheap and updatable.<br>• RAG is a search by meaning plus a normal prompt, not a database query.</p><p class="zh" style="margin:0">• 模型不认识你的私人文件，而且它会瞎猜。<br>• 把对的事实放进提示词，它就会照着回答。<br>• 词语查找是迷你版 RAG，但换个说法就会失灵。<br>• 全部贴进去很贵、可能放不下，还会淹没答案。<br>• 做法：切块、变向量、存起来；然后检索、拼提示词、回答。<br>• 微调适合技能，长上下文太贵，RAG 便宜又好更新。<br>• RAG 是“按意思搜索”加一个普通提示词，不是数据库查询。</p></div>
+
+<h2><span class="en">Recap</span><span class="zh">小结</span></h2>
+<div class="card"><p class="en" style="margin:0">1. A model alone guesses. Documents give it facts it can quote.<br>2. Retrieval means finding the few relevant pieces first, then asking.<br>3. If the pieces do not contain the answer, the helper should say so.</p><p class="zh" style="margin:0">1. 模型单靠自己只能猜，文件能给它可引用的事实。<br>2. 检索就是先找出少数相关的片段，再提问。<br>3. 如果片段里没有答案，小帮手应该直说。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>

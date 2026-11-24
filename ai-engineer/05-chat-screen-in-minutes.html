@@ -13,7 +13,7 @@
 <h2><span class="en">Step 1 · Any function becomes a form</span><span class="zh">第 1 步 · 任何函数都能变成表单</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A UI is just a wrapper around a function. Gradio starts a small web server and serves a page that calls your function. <code>gr.Interface(fn, inputs, outputs)</code> is the simplest level. Wei Jie began with a silly function that shouts text in capitals, then swapped in a model call. Useful options: <code>inbrowser=True</code> opens the page for you. <code>auth=(user, password)</code> adds a login (keep the password in <code>.env</code>, not in the notebook). <code>share=True</code> makes a temporary public link, which also exposes your laptop's code to anyone with it.</p>
 <p class="zh" style="margin:0 0 8px">界面只是函数外面的一层包装。Gradio 会启动一个小型网页服务器，提供一个会调用你函数的页面。<code>gr.Interface(fn, inputs, outputs)</code> 是最简单的一档。Wei Jie 先写了个把文字变大写的傻函数，再换成模型调用。常用选项：<code>inbrowser=True</code> 自动打开页面；<code>auth=(user, password)</code> 加登录（密码放 <code>.env</code>，别写进 notebook）；<code>share=True</code> 生成临时公开链接，同时也会把你电脑上的代码暴露给拿到链接的任何人。</p></div>
-<div class="codebox"><span class="dim">import gradio as gr
+<div class="codebox" data-file="screen_once.py" data-lang="python"><span class="dim">import gradio as gr
 from openai import OpenAI
 client = OpenAI()
 MODEL = "gpt-5-mini"
@@ -28,6 +28,7 @@ def ask_once(text):
 # first try: gr.Interface(fn=shout, inputs="text", outputs="text").launch()
 # then swap in the model call:
 </span><span class="chg">gr.Interface(fn=ask_once, inputs="text", outputs="text").launch(inbrowser=True)</span></div>
+<div class="codebox" data-file="output" data-lang="text">* Running on local URL:  http://127.0.0.1:7860</div>
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 2 · A chat screen, and why memory bites</span><span class="zh">第 2 步 · 聊天界面，以及“没记忆”的麻烦</span></h2>
@@ -61,7 +62,7 @@ def ask_once(text):
 <path class="lnk hot" d="M651,112 C651,165 69,165 69,114" marker-end="url(#ah)"/>
 <text class="en sm" x="360" y="162">reply goes back to the screen</text><text class="zh sm" x="360" y="162">回复回到界面</text>
 </svg><figcaption><span class="en">The screen hands your function the new message and the whole history every turn.</span><span class="zh">界面每一轮都把新消息和整段历史交给你的函数。</span></figcaption></figure>
-<div class="codebox"><span class="dim">system_message = "You are the helper of a neighbourhood provision shop."
+<div class="codebox" data-file="chat_screen.py" data-lang="python"><span class="dim">system_message = "You are the helper of a neighbourhood provision shop."
 
 </span><span class="chg">def chat(message, history):
     past = [{"role": h["role"], "content": h["content"]} for h in history]
@@ -73,12 +74,13 @@ def ask_once(text):
         yield text</span><span class="dim">
 
 gr.ChatInterface(fn=chat, type="messages").launch()</span></div>
+<div class="codebox" data-file="output" data-lang="text">* Running on local URL:  http://127.0.0.1:7860</div>
 <div class="try" id="p2"></div>
 
 <h2><span class="en">Step 3 · The system message is the product</span><span class="zh">第 3 步 · system 消息就是产品</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Same screen, same model: only the system message decides what the assistant is like. Wei Jie wrote one for the shop: be friendly, nudge people towards items on sale, and show one example reply (<b>one-shot prompting</b>). Change that text while testing and the behaviour changes at once. For testing, a quick global variable is fine.</p>
 <p class="zh" style="margin:0 0 8px">同一个界面、同一个模型：助手是什么样，全由 system 消息决定。Wei Jie 给小店写了一条：友好，引导顾客留意特价商品，再给一个示范回复（<b>单样本提示</b>）。测试时改这段文字，行为立刻就变。测试阶段用个全局变量图快，没问题。</p></div>
-<div class="codebox"><span class="chg">system_message = """You are the helper of Mdm Tan's provision shop.
+<div class="codebox" data-file="persona.py" data-lang="python"><span class="chg">system_message = """You are the helper of Mdm Tan's provision shop.
 Be friendly and brief. Mention items on sale when they fit.
 Example:
 Customer: Do you have rice?
@@ -90,7 +92,7 @@ You: Yes! 5 kg bags are on sale this week, a good deal."""</span><span class="di
 <h2><span class="en">Step 4 · Inject context for one turn</span><span class="zh">第 4 步 · 只为这一轮注入背景信息</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">You can also change the system message <b>for one turn only</b>. If the customer's message mentions “umbrella”, add one extra sentence for that call, such as today's stock. Nothing is stored for later turns. Putting extra facts into a single call like this is cheap and powerful, and it is the seed of retrieval (RAG) later in this track.</p>
 <p class="zh" style="margin:0 0 8px">你也可以<b>只为这一轮</b>改动 system 消息。顾客的消息里提到“雨伞”，就为这次调用多加一句，比如今天的库存。后面的轮次不会留下任何东西。像这样把额外事实放进单次调用，又便宜又好用，也是后面检索（RAG）的种子。</p></div>
-<div class="codebox"><span class="dim">def chat(message, history):
+<div class="codebox" data-file="history.py" data-lang="python"><span class="dim">def chat(message, history):
     past = [{"role": h["role"], "content": h["content"]} for h in history]
     </span><span class="chg">system = system_message
     if "umbrella" in message.lower():
@@ -102,7 +104,7 @@ You: Yes! 5 kg bags are on sale this week, a good deal."""</span><span class="di
 <h2><span class="en">Step 5 · Your own layout with Blocks</span><span class="zh">第 5 步 · 用 Blocks 自己排版</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">When the ready-made screen is not enough, <code>gr.Blocks()</code> lets you build your own: rows, columns, a chatbot, an image box, buttons and callbacks. That is level three. You do not need it yet. Just know it is there, so you can see the ladder: <code>Interface</code>, then <code>ChatInterface</code>, then <code>Blocks</code>. The next lessons and the project use it.</p>
 <p class="zh" style="margin:0 0 8px">现成的界面不够用时，<code>gr.Blocks()</code> 让你自己搭：行、列、聊天框、图片框、按钮和回调。这是第三档。你现在还用不上，只要知道有它，就看清了这个阶梯：<code>Interface</code>，然后 <code>ChatInterface</code>，然后 <code>Blocks</code>。后面的课和项目会用到它。</p></div>
-<div class="codebox"><span class="dim">with gr.Blocks() as screen:
+<div class="codebox" data-file="blocks.py" data-lang="python"><span class="dim">with gr.Blocks() as screen:
     </span><span class="chg">with gr.Row():
         chatbot = gr.Chatbot(type="messages")
         picture = gr.Image()</span><span class="dim">
@@ -114,6 +116,8 @@ screen.launch()   # without this, nothing shows</span></div>
 
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">Gradio's history items carry extra keys, but the API wants only <code>role</code> and <code>content</code>, so I had to clean them first. I also left <code>share=True</code> on and forgot the link was public.</span><span class="zh">Gradio 给的历史条目带有额外的键，而 API 只要 <code>role</code> 和 <code>content</code>，所以要先清理。我还开着 <code>share=True</code> 忘了关，链接其实是公开的。</span></div>
 
+<h2><span class="en">Common errors</span><span class="zh">常见报错</span></h2>
+<div class="card"><p class="en" style="margin:0">• <code>OSError: Cannot find empty port in range: 7860-7860</code>. An older screen is still running. Stop the old cell (or restart the kernel), or pass <code>server_port=7861</code>.<br>• A blank reply or <code>TypeError</code> about <code>history</code>. The chat function must take <code>(message, history)</code> in that order, and the screen needs <code>type="messages"</code>.<br>• <code>AuthenticationError: Incorrect API key provided</code>. The key is missing, has a stray space or newline, or the <code>.env</code> file was not loaded. Print <code>len(os.getenv('OPENAI_API_KEY'))</code>, fix the file, then restart the notebook.</p><p class="zh" style="margin:0">• <code>OSError: Cannot find empty port in range: 7860-7860</code>：上一个界面还在运行。停掉旧单元格（或重启内核），或者传入 <code>server_port=7861</code>。<br>• 回复为空，或出现和 <code>history</code> 有关的 <code>TypeError</code>：聊天函数的参数必须是 <code>(message, history)</code> 这个顺序，界面也要设 <code>type="messages"</code>。<br>• <code>AuthenticationError: Incorrect API key provided</code>：密钥缺失、首尾有空格或换行，或者 <code>.env</code> 没有加载。先打印 <code>len(os.getenv('OPENAI_API_KEY'))</code>，改好文件，再重启笔记本。</p></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Add a dropdown</b> that picks between two models.</span><span class="zh"><b>加一个下拉菜单，</b>在两个模型之间选择。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a radio button</b> that changes the reply tone, such as formal or cheerful.</span><span class="zh"><b>加一个单选按钮，</b>切换回复语气，比如正式或欢快。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a login</b> with <code>auth</code>, with the password in <code>.env</code>.</span><span class="zh"><b>用 <code>auth</code> 加一个登录，</b>密码放在 <code>.env</code> 里。</span></span></label></div>
 <div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now Mdm Tan opens the helper as a chat screen in her browser, like the counter in her shop, and a system message taped by the till tells it how to treat customers. The next problem is that when she asks the price of a tin of sardines it makes one up, because it has no way to look anything up.</span><span class="zh">现在 Tan 太太在浏览器里就能打开聊天界面用助手，就像她店里的柜台，贴在收银机旁的 system 消息告诉它怎么待客。下一个问题是：她问一罐沙丁鱼多少钱时，它会编一个价格，因为它没有办法去查任何东西。</span></div>

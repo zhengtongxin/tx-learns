@@ -13,7 +13,7 @@
 <h2><span class="en">Step 1 · A human baseline</span><span class="zh">第 1 步 · 人类基线</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Before any model, Wei Jie exported 100 test descriptions to a CSV, guessed the prices himself and read them back through the same scoring function. He was not great: knowing prices from daily life only gets you so far. That is a useful dose of humility. A human here is worse than a decent model and better than random.</p>
 <p class="zh" style="margin:0 0 8px">在碰任何模型之前，Wei Jie 先把 100 条测试描述导出成 CSV，自己猜价格，再用同一个评分函数读回来。他表现不算好：靠日常生活积累的价格感，也就到这个程度。这是一剂有用的清醒药：在这个任务上，人比像样的模型差，却比随机猜好。</p></div>
-<div class="codebox"><span class="dim">import csv
+<div class="codebox" data-file="human.py" data-lang="python"><span class="dim">import csv
 </span><span class="chg">with open("my_guesses.csv") as f:
     mine = {row["id"]: float(row["guess"]) for row in csv.DictReader(f)}
 
@@ -21,12 +21,13 @@ def human_pricer(item):
     return mine[item.id]
 
 evaluate(human_pricer, test[:100])      # the same evaluate as before</span></div>
+<div class="codebox" data-file="output" data-lang="text">average error: $58.00 over 100 items</div>
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 2 · A vanilla neural network</span><span class="zh">第 2 步 · 朴素的神经网络</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">First turn each description into a long vector of 5,000 hashed word counts: each word is hashed to a slot number, so there is no vocabulary list to store. A small PyTorch network is a few linear layers with activation functions between them. Training repeats four moves: forward, loss, backward, step. Print the parameter count once, and each epoch check the loss on items the network never trains on (the validation loss). It did about as well as the best classical model: neural nets are not magic on small features.</p>
 <p class="zh" style="margin:0 0 8px">先把每段描述变成 5000 维的哈希词频向量：每个词被哈希到一个槽位，所以不用存词表。小小的 PyTorch 网络就是几层线性层，中间夹着激活函数。训练不断重复四步：前向、算损失、反向、更新。参数量打印一次就行，每个 epoch 再看一下网络没训练过的那些例子上的损失（验证集损失）。它的表现和最好的传统模型差不多：特征不多时，神经网络并不神奇。</p></div>
-<div class="codebox"><span class="dim">import torch, torch.nn as nn
+<div class="codebox" data-file="neural.py" data-lang="python"><span class="dim">import torch, torch.nn as nn
 from sklearn.feature_extraction.text import HashingVectorizer
 hasher = HashingVectorizer(n_features=5000)
 </span><span class="chg">class PriceNet(nn.Module):
@@ -54,7 +55,7 @@ for x, y in batches:                  # x: word counts, y: true prices
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Now skip training entirely: ask a big model "Estimate the price of this product. Reply with the price only", plus the description. It is surprisingly strong, because it has seen the world's prices during its own training. The catch is a cost on every call, and a smaller model is usually weaker. Models add words anyway, so pull the number out with a regex. If no number is found this first version returns 0.0, which quietly hurts the score: the next lesson fixes it.</p>
 <p class="zh" style="margin:0 0 8px">现在完全不训练：问大模型“估一下这件商品的价格，只回答价格”，再附上描述。它出奇地强，因为它自己的训练中见过世界各地的价格。代价是每次调用都要花钱，而小一点的模型通常更弱。模型总爱多说话，所以用正则把数字抠出来。如果找不到数字，第一版会返回 0.0，这会悄悄拉低分数：下一课会修好它。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="The same 100 test items go to a human, a neural network and a frontier model; one harness scores all three"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9a9aa8"/></marker></defs><rect class="box soft" x="20" y="80" width="130" height="60" rx="12"/><text class="en" x="85.0" y="106.0">Same test set</text><text class="zh" x="85.0" y="106.0">同一份测试集</text><text class="en sm" x="85.0" y="124.0">100 items</text><text class="zh sm" x="85.0" y="124.0">100 件</text><rect class="box soft" x="250" y="25" width="190" height="50" rx="12"/><text class="en" x="345.0" y="55.0">Wei Jie, by hand</text><text class="zh" x="345.0" y="55.0">Wei Jie 手估</text><rect class="box " x="250" y="85" width="190" height="50" rx="12"/><text class="en" x="345.0" y="115.0">Neural network</text><text class="zh" x="345.0" y="115.0">神经网络</text><rect class="box new" x="250" y="145" width="190" height="50" rx="12"/><text class="en" x="345.0" y="175.0">Frontier model</text><text class="zh" x="345.0" y="175.0">云端大模型</text><line class="lnk" x1="150" y1="100" x2="250" y2="50" marker-end="url(#ah)"/><line class="lnk" x1="150" y1="110" x2="250" y2="110" marker-end="url(#ah)"/><line class="lnk" x1="150" y1="120" x2="250" y2="170" marker-end="url(#ah)"/><line class="lnk" x1="440" y1="50" x2="520" y2="105" marker-end="url(#ah)"/><line class="lnk" x1="440" y1="110" x2="520" y2="110" marker-end="url(#ah)"/><line class="lnk" x1="440" y1="170" x2="520" y2="115" marker-end="url(#ah)"/><rect class="box " x="520" y="75" width="180" height="70" rx="12"/><text class="en" x="610.0" y="106.0">Scoring board</text><text class="zh" x="610.0" y="106.0">计分板</text><text class="en sm" x="610.0" y="124.0">same rules for all</text><text class="zh sm" x="610.0" y="124.0">规则对谁都一样</text></svg><figcaption><span class="en">Nobody argues who sounds clever: the same harness marks every guesser.</span><span class="zh">没人争谁听起来聪明：同一套计分板给每个估价者打分。</span></figcaption></figure>
-<div class="codebox"><span class="dim">import re
+<div class="codebox" data-file="frontier.py" data-lang="python"><span class="dim">import re
 from openai import OpenAI
 client = OpenAI()
 </span><span class="chg">def frontier_pricer(item, model="your-big-model"):
@@ -68,7 +69,7 @@ client = OpenAI()
 <h2><span class="en">Step 4 · Get examples ready for fine-tuning</span><span class="zh">第 4 步 · 为微调准备样例</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Fine-tuning means training a model a little more on your own examples. For a hosted model it takes examples in JSON Lines: one chat per line, with a user message (the item) and an assistant message (the price, rounded to a whole number to save tokens, the small text pieces models read and bill by). Providers suggest starting with 50 to 100 examples. Wei Jie used 100 for one epoch (one pass over the examples), so the bill stayed tiny, plus a small validation file. Upload the files, start a job, wait, then plug the tuned model's name into the same predictor and the same <code>evaluate</code>.</p>
 <p class="zh" style="margin:0 0 8px">微调就是用你自己的例子把模型再训练一点。托管模型的微调需要 JSON Lines 格式的样例：每行一段对话，包含 user 消息（商品）和 assistant 消息（价格，取整数以省 token，即模型读取和计费的文字小片段）。服务商建议从 50 到 100 条开始。Wei Jie 用了 100 条、跑一个 epoch（把样例过一遍），账单才会很小，另外再配一个小的验证文件。上传文件、开始任务、等待，然后把微调后的模型名字接进同一个预测函数和同一个 <code>evaluate</code>。</p></div>
-<div class="codebox"><span class="dim">import json
+<div class="codebox" data-file="fine_tune_data.py" data-lang="python"><span class="dim">import json
 </span><span class="chg">def to_line(item):
     return json.dumps({"messages": [
         {"role": "user", "content": "Estimate the price: " + item.summary},
@@ -82,11 +83,16 @@ with open("tune_train.jsonl", "w") as f:
 
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I believed a fine-tuned model would clearly beat the plain frontier model. With a strong base model and only 100 examples, the change is small. The real benefit shows with more data and a cheaper base model: lower cost and more consistent answers.</span><span class="zh">我原以为微调后的模型会明显赢过直接用的大模型。底子强的模型只配 100 条样例，变化很小。真正的好处要在更多数据、更便宜的底座模型上才看得出：成本更低、答案更稳定。</span></div>
 
+<h2><span class="en">Common errors</span><span class="zh">常见报错</span></h2>
+<div class="card"><p class="en" style="margin:0">• <code>KeyError: 'id'</code> when reading your guesses. The CSV header differs from the code. Make the header exactly <code>id,guess</code>.<br>• The loss becomes <code>nan</code>. The learning rate is too high or the prices were not scaled. Lower the rate and scale the target.<br>• The frontier model replies with words, so <code>float()</code> fails. Ask for the number only and pull it out with a regular expression.</p><p class="zh" style="margin:0">• 读自己的估价时报 <code>KeyError: 'id'</code>：CSV 的表头和代码不一致。把表头写成 <code>id,guess</code>。<br>• 损失变成 <code>nan</code>：学习率太高，或价格没做缩放。调低学习率并缩放目标值。<br>• 大模型回了一段话，<code>float()</code> 失败：要求只回数字，再用正则取出来。</p></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Guess 20 prices yourself</b> and score them with evaluate.</span><span class="zh"><b>自己猜 20 个价格，</b>用 evaluate 打分。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Write the one-line "price only" prompt</b> and parse the reply.</span><span class="zh"><b>写出一行“只回答价格”的提示词，</b>并解析回复。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Produce the JSONL for 20 examples</b> and open it to look at one line.</span><span class="zh"><b>生成 20 条样例的 JSONL，</b>打开看一行。</span></span></label></div>
 <div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the helper knows how Wei Jie’s own guesses, a plain neural network and an untrained cloud model score on the same 100 test descriptions, and it has examples ready in JSON Lines for tuning. The next problem is that these are separate notebooks; the next lesson ties them into one tool Mdm Tan can type into.</span><span class="zh">现在帮手知道 Wei Jie 自己手估、普通神经网络和没经过训练的云端大模型，在同样 100 条测试描述上各得多少分，还备好了 JSON Lines 格式的微调样例。下一个问题是这些东西散在不同笔记本里；下一课把它们合成一个 Mdm Tan 也能输入的工具。</span></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• Same harness, many predictors: human, classic ML, neural net, prompted model, fine-tuned model.<br>• A human is worse than a decent model but better than random.<br>• Hashed word counts give a vector with no vocabulary to store.<br>• A neural net trains by forward, loss, backward, step, and is no magic on small features.<br>• A frontier model can predict with no training, but costs money per call.<br>• Ask for the number only, then parse it with a regex.<br>• Fine-tuning data is JSON Lines with the price as the assistant reply; gains are small with few examples.</p><p class="zh" style="margin:0">• 同一块计分板，很多预测器：人、传统机器学习、神经网络、提示词大模型、微调模型。<br>• 人比像样的模型差，但比随机猜好。<br>• 哈希词频得到的向量，不用存词表。<br>• 神经网络靠“前向、损失、反向、更新”训练，特征不多时并不神奇。<br>• 大模型不用训练就能预测，但每次调用都要花钱。<br>• 让它只回答数字，再用正则解析。<br>• 微调数据是 JSON Lines，价格放在 assistant 回复里；样例少时提升很小。</p></div>
+
+<h2><span class="en">Recap</span><span class="zh">小结</span></h2>
+<div class="card"><p class="en" style="margin:0">1. Your own guesses give a human score to compare with.<br>2. A small neural net learns from numbers; a big model uses what it already knows.<br>3. Fine-tuning data is just examples of the question and the right answer.</p><p class="zh" style="margin:0">1. 你自己的估价能给出一个“人”的分数来做对照。<br>2. 小神经网络从数字里学；大模型用它本来就知道的。<br>3. 微调数据其实就是问题加正确答案的例子。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>

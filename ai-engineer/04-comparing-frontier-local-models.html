@@ -39,7 +39,7 @@
 <path class="lnk" d="M333,75 L387,75" marker-end="url(#ah)"/>
 <path class="lnk" d="M527,75 L581,75" marker-end="url(#ah)"/>
 </svg><figcaption><span class="en">Only the address and the model name change; the code around them stays the same.</span><span class="zh">只有地址和模型名会变，周围的代码保持不变。</span></figcaption></figure>
-<div class="codebox"><span class="dim">from openai import OpenAI
+<div class="codebox" data-file="clients.py" data-lang="python"><span class="dim">from openai import OpenAI
 
 clients = {
     "cloud-a": OpenAI(),
@@ -56,36 +56,42 @@ def ask(which, model, prompt, **extra):
 <h2><span class="en">Step 2 · Easy prompts tell you nothing</span><span class="zh">第 2 步 · 简单的题看不出差别</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Wei Jie first asked two providers for a joke. Both answered fine. Easy prompts hide the differences, so a good test is a hard prompt with a trap. A favourite: “Two coins are flipped. At least one is heads. What is the chance the other is tails?” The tempting answer is one half. A careful one lists the possible pairs: HH, HT, TH, TT. TT is ruled out, and 2 of the 3 left have a tails, so the answer is 2/3. (The local entry in the code below needs Ollama, which Step 4 sets up; run only the cloud entry until then.)</p>
 <p class="zh" style="margin:0 0 8px">Wei Jie 先让两家服务商讲个笑话，两边都答得不错。简单的题会把差别藏起来，所以好的测试是带陷阱的难题。一个常用的：“抛两枚硬币，至少有一枚是正面，另一枚是反面的概率是多少？”诱人的答案是二分之一，仔细的人会把可能的组合一一列出来：正正、正反、反正、反反。反反被排除，剩下 3 种里有 2 种含反面，所以答案是 2/3。（下面代码里的 local 一项需要 Ollama，第 4 步才会装好；在那之前先只运行云端那一项。）</p></div>
-<div class="codebox"><span class="dim">question = "Two coins are flipped. At least one is heads. What is the chance the other is tails? Explain briefly."
+<div class="codebox" data-file="compare.py" data-lang="python"><span class="dim">question = "Two coins are flipped. At least one is heads. What is the chance the other is tails? Explain briefly."
 
 for which, model in [("cloud-a", "gpt-5-mini"), ("local", "llama3.2")]:
     print(which, "->", </span><span class="chg">ask(which, model, question)</span><span class="dim">)</span></div>
+<div class="codebox" data-file="output" data-lang="text">cloud-a -&gt; The chance is 2/3, because ...
+local -&gt; The chance is 1/2, because ...   # a small model can slip here</div>
 <p class="en">Which kind of prompt shows the difference between models?</p>
 <p class="zh">哪种提示词能看出模型之间的差别？</p><div class="sc" id="g2"></div>
 
 <h2><span class="en">Step 3 · Two dials: size and thinking</span><span class="zh">第 3 步 · 两个旋钮：大小与思考</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A small model with no thinking gets the coin puzzle wrong. Give it a low <b>reasoning effort</b> and it often fixes itself. A bigger reasoning model gets it right too. So there are two dials. One is a <b>bigger model</b> (scale at training time). The other is <b>more thinking before answering</b> (scale at answer time). The second dial is cheap to try, but it costs more tokens and more time.</p>
 <p class="zh" style="margin:0 0 8px">没有思考的小模型会答错硬币谜题。给它一个低档的<b>推理力度</b>，它往往就自己改对了。更大的推理模型也能答对。所以有两个旋钮：一个是<b>更大的模型</b>（训练时的规模），另一个是<b>回答前多想一会儿</b>（回答时的规模）。第二个旋钮试起来便宜，但要多花 token 和时间。</p></div>
-<div class="codebox"><span class="dim">import time
+<div class="codebox" data-file="effort.py" data-lang="python"><span class="dim">import time
 
 for effort in ["minimal", "low", "high"]:
     start = time.time()
     answer = ask("cloud-a", "gpt-5-mini", question, </span><span class="chg">reasoning_effort=effort</span><span class="dim">)
     print(effort, round(time.time() - start, 1), "s,", len(answer), "chars")</span></div>
+<div class="codebox" data-file="output" data-lang="text">minimal 1.8 s, 410 chars
+low 4.2 s, 780 chars
+high 15.6 s, 1450 chars</div>
 <div class="try" id="p3"></div>
 
 <h2><span class="en">Step 4 · Going local, and being honest about it</span><span class="zh">第 4 步 · 用本地模型，并诚实地看待</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A local model runs on your own laptop. Run <code>ollama pull llama3.2</code>, then point the client at <code>localhost</code> (that is the <code>local</code> entry above). It is free per call and private, because your text never leaves the laptop. It is usually weaker too. One rule: never pull a model bigger than your laptop's memory. The B stands for billions of parameters (the numbers a model learns), so a 20B model has 20 billion. A 16 GB laptop copes with roughly 20B-sized open models. A small laptop should use a 1B to 3B size.</p>
 <p class="zh" style="margin:0 0 8px">本地模型跑在你自己的笔记本上。运行 <code>ollama pull llama3.2</code>，再让客户端指向 <code>localhost</code>（就是上面的 <code>local</code> 那一项）。它每次调用不花钱，而且私密，因为文字不会离开你的电脑。一般也更弱一些。有一条规矩：别拉取比笔记本内存还大的模型。B 是十亿个参数（模型学到的数字），所以 20B 就是 200 亿个。16 GB 的笔记本大约能跑 20B 左右的开源模型，小笔记本就用 1B 到 3B 的。</p></div>
-<div class="codebox"><span class="dim"># in a terminal, once:
-#   ollama pull llama3.2
-
-print(</span><span class="chg">ask("local", "llama3.2", question)</span><span class="dim">)</span></div>
+<div class="codebox" data-file="pull_model.sh" data-lang="bash"><span class="dim"># in a terminal, once:
+ollama pull llama3.2</span></div>
+<div class="codebox" data-file="local.py" data-lang="python"><span class="dim">print(</span><span class="chg">ask("local", "llama3.2", question)</span><span class="dim">)</span></div>
 <p class="en">For each case, is a local model a good fit?</p>
 <p class="zh">每种情况，本地模型合适吗？</p><div class="sc" id="g4"></div>
 
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I assumed the newest model always gives the best answer. On easy tasks a cheap, fast model gave the same answer. On tricky ones the thinking dial mattered more than the logo. Also, asking a handful of prompts and picking a favourite is opinion, not a benchmark.</span><span class="zh">我以为最新的模型一定答得最好。简单的任务上，便宜又快的模型答得一样。在刁钻的题上，思考这个旋钮比牌子更重要。另外，问几道题就挑出最爱，只是意见，不是基准测试。</span></div>
 
+<h2><span class="en">Common errors</span><span class="zh">常见报错</span></h2>
+<div class="card"><p class="en" style="margin:0">• <code>openai.APIConnectionError: Connection error</code> for the local client. Ollama is not running. Start it (<code>ollama serve</code>) and check the port is 11434.<br>• <code>model 'llama3.2' not found</code>. You have not pulled it yet. Run <code>ollama pull llama3.2</code> once.<br>• <code>Unsupported value: 'temperature'</code>. Some reasoning models fix their own temperature. Drop the argument for those models.</p><p class="zh" style="margin:0">• 本地客户端报 <code>openai.APIConnectionError: Connection error</code>：Ollama 没在运行。启动它（<code>ollama serve</code>），并确认端口是 11434。<br>• <code>model 'llama3.2' not found</code>：还没下载这个模型。运行一次 <code>ollama pull llama3.2</code>。<br>• <code>Unsupported value: 'temperature'</code>：有些推理模型自己固定温度。对这类模型去掉这个参数。</p></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Ask a tricky question twice</b> with a small model: once with no reasoning, once with low effort. Compare the answer, the time and the length.</span><span class="zh"><b>用小模型把一道刁钻的题问两次：</b>一次不推理，一次低力度。比较答案、耗时和长度。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a third provider</b> using only a new base URL and key.</span><span class="zh"><b>加入第三家服务商，</b>只需要新的 base URL 和密钥。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a timer</b> around each call and print a small table: model, seconds, answer length.</span><span class="zh"><b>给每次调用加计时，</b>打印一张小表：模型、秒数、答案长度。</span></span></label></div>
 <div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the helper can swap between frontier and local models by changing a name, and Priya's hard coin puzzle shows Wei Jie which one is good enough, like Mdm Tan picking the cheap pen for a milk-and-eggs list. The next problem is that only Wei Jie can run any of this, from a terminal; Mdm Tan wants a screen she can just type into.</span><span class="zh">现在助手只要改一个名字，就能在云端大模型和本地模型之间切换，而 Priya 那道难的硬币题让 Wei Jie 看出哪个够用，就像 Tan 太太写牛奶鸡蛋清单用便宜的笔。下一个问题是：这一切只有 Wei Jie 会在终端里跑，Tan 太太想要一个能直接打字的界面。</span></div>
