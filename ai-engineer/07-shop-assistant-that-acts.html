@@ -39,7 +39,7 @@
 <path class="lnk" d="M333,75 L387,75" marker-end="url(#ah)"/>
 <path class="lnk hot" d="M527,75 L581,75" marker-end="url(#ah)"/>
 </svg><figcaption><span class="en">One text question goes through the tool loop; the picture and voice are extra calls on the reply.</span><span class="zh">一条文字问题走完工具循环；图片和声音是对回复额外发起的调用。</span></figcaption></figure>
-<div class="codebox"><span class="chg">system_message = """You are the desk assistant for Uncle Raj's weekend coach trips.
+<div class="codebox" data-file="prompt_tools.py" data-lang="python"><span class="chg">system_message = """You are the desk assistant for Uncle Raj's weekend coach trips.
 Be short, polite and accurate. Use the tools for prices.
 If you are not sure, say you do not know."""
 
@@ -65,7 +65,7 @@ def set_price(place, price):
 <h2><span class="en">Step 2 · The tools and the chat loop</span><span class="zh">第 2 步 · 工具和聊天循环</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Describe each function to the model and run the loop from the last lesson: ask, run what was requested, answer, and repeat while the model keeps asking. A customer may ask about two trips in one sentence, so handle many calls and chained calls. Print each call while testing so you can see what the model asked for. A <code>dispatch</code> table maps the tool name to the function.</p>
 <p class="zh" style="margin:0 0 8px">把每个函数向模型描述一遍，再跑上一课的循环：请求、执行被请求的调用、回答，模型继续请求就继续。顾客可能一句话问两个行程，所以要处理多个调用和连续调用。测试时把每个调用打印出来，看看模型到底请求了什么。用一张 <code>dispatch</code> 表把工具名映射到函数。</p></div>
-<div class="codebox"><span class="dim">import json
+<div class="codebox" data-file="tool_chat.py" data-lang="python"><span class="dim">import json
 from openai import OpenAI
 client = OpenAI()
 MODEL = "gpt-5-mini"
@@ -90,12 +90,13 @@ def run_chat(history):
             messages.append({"role": "tool", "tool_call_id": call.id, "content": result})
         reply = client.chat.completions.create(model=MODEL, messages=messages, tools=tools)
     return reply.choices[0].message.content</span></div>
+<div class="codebox" data-file="output" data-lang="text">tool call: get_price {"place": "Cameron Highlands"}</div>
 <div class="try" id="p2"></div>
 
 <h2><span class="en">Step 3 · A picture and a voice, only when needed</span><span class="zh">第 3 步 · 图片和声音，需要时才用</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Add the two helpers: one draws a pop-art style picture of a place, one turns the reply into audio. The trap is calling them on every message. A picture costs money and takes seconds, so draw only when a tool actually looked up a place. That is what <code>looked_up</code> is for. The voice is cheap enough to run on every reply.</p>
 <p class="zh" style="margin:0 0 8px">加入两个辅助函数：一个画地点的波普风格图片，一个把回复变成音频。陷阱是每条消息都调用它们。图片花钱又要几秒，所以只有工具真的查过某个地点才画。这就是 <code>looked_up</code> 的用处。语音便宜，每条回复都读也行。</p></div>
-<div class="codebox"><span class="dim">import base64
+<div class="codebox" data-file="image_voice.py" data-lang="python"><span class="dim">import base64
 from io import BytesIO
 from PIL import Image
 
@@ -120,7 +121,7 @@ def speak(text):
 <h2><span class="en">Step 4 · The screen, with two callbacks</span><span class="zh">第 4 步 · 界面，用两个回调</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Use <code>gr.Blocks</code>: a row with the chatbot on the left and an image panel on the right, a text box underneath and an audio player for the reply. The send action runs <b>two</b> callbacks in order. The first only puts the user's message into the chat, so it shows up straight away. The second calls the model and then updates the chat, the image and the audio. Wei Jie first tried one callback that did everything, and two callbacks fought over the same history list.</p>
 <p class="zh" style="margin:0 0 8px">用 <code>gr.Blocks</code>：一行里左边是聊天框、右边是图片面板，下面是文本框，再加一个播放回复的音频播放器。发送动作按顺序运行<b>两个</b>回调。第一个只把用户的消息放进聊天，所以马上就能看到。第二个调用模型，然后更新聊天、图片和音频。Wei Jie 起初用一个回调包办一切，结果两个回调抢着改同一个历史列表。</p></div>
-<div class="codebox"><span class="dim">import gradio as gr
+<div class="codebox" data-file="screen.py" data-lang="python"><span class="dim">import gradio as gr
 
 with gr.Blocks() as screen:
     with gr.Row():
@@ -145,6 +146,8 @@ screen.launch()</span></div>
 
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I generated an image on every message. It cost money and was slow, so now it only happens when a tool looked up a place. I also had two callbacks fighting over the same history list, until I split “add the user message” from “get the answer”.</span><span class="zh">我曾经每条消息都生成一张图，又花钱又慢，现在只在工具查过地点时才生成。我还让两个回调抢同一个历史列表，直到把“加入用户消息”和“得到回答”拆开。</span></div>
 
+<h2><span class="en">Common errors</span><span class="zh">常见报错</span></h2>
+<div class="card"><p class="en" style="margin:0">• The loop never ends or calls the same tool again and again. There is no step cap. Stop after a few rounds and return what you have.<br>• <code>KeyError: 'place'</code>. The model sent different argument names than the function expects. Make the tool description name the exact parameters.<br>• <code>AuthenticationError: Incorrect API key provided</code>. The key is missing, has a stray space or newline, or the <code>.env</code> file was not loaded. Print <code>len(os.getenv('OPENAI_API_KEY'))</code>, fix the file, then restart the notebook.</p><p class="zh" style="margin:0">• 循环不停，或一直重复调用同一个工具：没设步数上限。几轮之后就停，返回已有的结果。<br>• <code>KeyError: 'place'</code>：模型传来的参数名和函数要的不一致。在工具描述里写清准确的参数名。<br>• <code>AuthenticationError: Incorrect API key provided</code>：密钥缺失、首尾有空格或换行，或者 <code>.env</code> 没有加载。先打印 <code>len(os.getenv('OPENAI_API_KEY'))</code>，改好文件，再重启笔记本。</p></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Add a “book a trip” tool</b> that writes a row in a second table.</span><span class="zh"><b>加一个“订行程”工具，</b>往第二张表写一行。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Print every tool call</b> to the console so you can see what the model asked for.</span><span class="zh"><b>把每个工具调用打印到控制台，</b>看模型到底请求了什么。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Replace the database with a CSV</b> and see what changes.</span><span class="zh"><b>把数据库换成 CSV，</b>看看有什么变化。</span></span></label></div>
 <div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the desk answers coach-trip prices from a database, shows a picture of the place and reads the reply aloud, so Uncle Raj stops repeating himself at the noticeboard. The picture and voice run only when needed, to keep the bill down. The next problem is that every message still goes to a paid API, which adds up across a whole estate.</span><span class="zh">现在这个柜台能从数据库回答旅游巴士的价格，显示地方的图片，并把回复读出来，Raj 叔叔不用再在公告板前重复同样的话。图片和声音只在需要时才用，免得账单飙升。下一个问题是：每条消息仍然要付费调用 API，整个社区用起来费用会累积。</span></div>

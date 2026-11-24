@@ -13,11 +13,24 @@
 <h2><span class="en">Step 1 · Tokens: what the model really reads</span><span class="zh">第 1 步 · token：模型真正读的东西</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Models do not read letters or words. They read <b>tokens</b>: chunks of text turned into numbers. A common word is often one token. A rare word or a name splits into several. You can look with <code>tiktoken</code>. Why care? Price is per token (in and out), and the context window is a limit counted in tokens.</p>
 <p class="zh" style="margin:0 0 8px">模型读的不是字母或单词，而是 <b>token</b>：被切成小块并变成数字的文本。常见的词往往是一个 token，生僻词或人名会被拆成几个。你可以用 <code>tiktoken</code> 看一看。为什么要在意？因为价格按 token 算（输入和输出都算），上下文窗口的上限也是按 token 数的。</p></div>
-<div class="codebox"><span class="dim">import tiktoken
+<div class="codebox" data-file="count_tokens.py" data-lang="python"><span class="dim">import tiktoken
 </span><span class="chg">enc = tiktoken.get_encoding("o200k_base")</span><span class="dim">
 ids = </span><span class="chg">enc.encode("Two teh peng, one chicken rice, less chilli please")</span><span class="dim">
 for i in ids:
     print(i, repr(enc.decode([i])))</span></div>
+<div class="codebox" data-file="output" data-lang="text">12
+'Two'
+' te'
+'h'
+' peng'
+','
+' one'
+' chicken'
+' rice'
+','
+' less'
+' chilli'
+' please'</div>
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 2 · A model has no memory</span><span class="zh">第 2 步 · 模型没有记忆</span></h2>
@@ -50,7 +63,7 @@ for i in ids:
 <path class="lnk hot" d="M651,112 C651,165 69,165 69,114" marker-end="url(#ah)"/>
 <text class="en sm" x="360" y="162">append the reply, send all again</text><text class="zh sm" x="360" y="162">追加回复，整个再发</text>
 </svg><figcaption><span class="en">The model remembers nothing: your list is the memory, and it grows each turn.</span><span class="zh">模型什么也不记得：你的列表就是记忆，而且每轮都在变长。</span></figcaption></figure>
-<div class="codebox"><span class="dim">messages = [
+<div class="codebox" data-file="messages.py" data-lang="python"><span class="dim">messages = [
     {"role": "system", "content": "You are a helpful assistant"},
     </span><span class="chg">{"role": "user", "content": "Hi, I'm Wei Jie and I fix phones."},
     {"role": "assistant", "content": "Hi Wei Jie! How can I help?"},</span><span class="dim">
@@ -62,7 +75,7 @@ for i in ids:
 <h2><span class="en">Step 4 · You write the loop</span><span class="zh">第 4 步 · 循环由你来写</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">So you manage memory yourself. Keep a list. Append the user message, call the model, append the reply, repeat. The list is the memory. This reuses the call from the last lesson.</p>
 <p class="zh" style="margin:0 0 8px">所以记忆要你自己管理。留一个列表：加入用户消息，调用模型，加入回复，如此循环。这个列表就是记忆。调用方式沿用上一课。</p></div>
-<div class="codebox"><span class="dim">from openai import OpenAI
+<div class="codebox" data-file="remember.py" data-lang="python"><span class="dim">from openai import OpenAI
 client = OpenAI()
 </span><span class="chg">history = [{"role": "system", "content": "You are a helpful assistant"}]</span><span class="dim">
 
@@ -72,6 +85,7 @@ def chat(text):
     answer = reply.choices[0].message.content
     </span><span class="chg">history.append({"role": "assistant", "content": answer})</span><span class="dim">
     return answer</span></div>
+<div class="codebox" data-file="output" data-lang="text">Hi Wei Jie! How can I help with your phone repairs today?</div>
 <div class="try" id="p4"></div>
 
 <h2><span class="en">Step 5 · The cost and the cap</span><span class="zh">第 5 步 · 成本与上限</span></h2>
@@ -80,6 +94,8 @@ def chat(text):
 <p class="en">What happens to the cost? Pick for each case.</p>
 <p class="zh">每种情况下成本会怎样？逐个选择。</p><div class="sc" id="g5"></div>
 
+<h2><span class="en">Common errors</span><span class="zh">常见报错</span></h2>
+<div class="card"><p class="en" style="margin:0">• <code>ModuleNotFoundError: No module named 'X'</code>. The package is not installed in the environment this notebook uses. Run <code>pip install X</code> in a cell, then restart the kernel.<br>• <code>KeyError: 'choices'</code> after a long chat. The request went over the context limit and the reply was an error object. Trim old messages before sending.<br>• <code>NameError: name 'client' is not defined</code>. A cell ran before the one that creates it. Run the cells from top to bottom.</p><p class="zh" style="margin:0">• <code>ModuleNotFoundError: No module named 'X'</code>：当前笔记本的环境没装这个包。在单元格里运行 <code>pip install X</code>，然后重启内核。<br>• 长对话之后出现 <code>KeyError: 'choices'</code>：请求超出上下文上限，返回的是错误对象。发送前先裁掉旧消息。<br>• <code>NameError: name 'client' is not defined</code>：定义它的单元格还没运行。请从上到下依次运行单元格。</p></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Ask with and without history.</b> Send the same follow-up with and without the earlier turns and compare the answers.</span><span class="zh"><b>带历史和不带历史各问一次。</b>同一个追问，分别带上和不带之前的对话，比较答案。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Count tokens.</b> Count a short message, then the same message with typos.</span><span class="zh"><b>数 token。</b>数一条短消息，再数加了错别字的同一条。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a meter.</b> Make the chat loop print how many tokens the history holds so far.</span><span class="zh"><b>加个计数器。</b>让聊天循环打印到目前为止历史里有多少 token。</span></span></label></div>
 <div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the helper keeps a list of messages and sends it all each turn, so when Mdm Tan asks “And on Sunday?” it knows she meant the lift notice, like Uncle Raj re-pinning last week's notice. The next problem is that one call is still one step: choosing the right notices and then writing a tidy announcement takes two calls chained together.</span><span class="zh">现在助手会保存一个消息列表，每轮整个发出去，所以 Tan 太太问“那星期天呢？”时它知道她指的是电梯通知，就像 Raj 叔叔把上周的通知重新贴上。下一个问题是：一次调用仍然只是一步，先挑出对的通知、再写出一条整齐的公告，需要把两次调用串起来。</span></div>

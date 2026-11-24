@@ -14,7 +14,7 @@
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Each example becomes a prompt that ends with "Price is $" and a completion that is just the number. Cut long descriptions at a token limit so every prompt fits. Then split into train, validation and test <b>once</b>, save the three sets to the hub, and never touch the test set again. Everything later depends on this wall staying up.</p>
 <p class="zh" style="margin:0 0 8px">每个例子变成一个以 “Price is $” 结尾的提示，加上只有数字的回答。长描述按 token 上限截断，让每条提示都装得下。然后把数据切成训练、验证、测试三份，<b>只切一次</b>，把三份都存到 hub，之后再也不碰测试集。后面的一切都靠这堵墙不倒。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="All price tags are split once into train and test; train data tunes the model; test data is only used for scoring"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9a9aa8"/></marker></defs><rect class="box soft" x="15" y="75" width="140" height="70" rx="12"/><text class="en" x="85.0" y="106.0">Price tags</text><text class="zh" x="85.0" y="106.0">价签</text><text class="en sm" x="85.0" y="124.0">prompt ends "Price is $"</text><text class="zh sm" x="85.0" y="124.0">提示以 “Price is $” 结尾</text><line class="lnk" x1="155" y1="110" x2="215" y2="110" marker-end="url(#ah)"/><rect class="box " x="215" y="85" width="90" height="50" rx="12"/><text class="en" x="260.0" y="115.0">Split once</text><text class="zh" x="260.0" y="115.0">只切分一次</text><line class="lnk" x1="305" y1="100" x2="380" y2="55" marker-end="url(#ah)"/><line class="lnk" x1="305" y1="120" x2="380" y2="170" marker-end="url(#ah)"/><rect class="box new" x="380" y="30" width="160" height="50" rx="12"/><text class="en" x="460.0" y="60.0">Train: QLoRA</text><text class="zh" x="460.0" y="60.0">训练：QLoRA</text><rect class="box soft" x="380" y="145" width="160" height="50" rx="12"/><text class="en" x="460.0" y="175.0">Test: never seen</text><text class="zh" x="460.0" y="175.0">测试：从没见过</text><line class="lnk" x1="540" y1="55" x2="590" y2="100" marker-end="url(#ah)"/><line class="lnk" x1="540" y1="170" x2="590" y2="125" marker-end="url(#ah)"/><rect class="box " x="590" y="80" width="115" height="60" rx="12"/><text class="en" x="647.5" y="115.0">Scoring board</text><text class="zh" x="647.5" y="115.0">计分板</text></svg><figcaption><span class="en">Splitting once keeps the test honest, so a good score cannot come from leaked tags.</span><span class="zh">只切分一次，测试才可靠，高分就不可能是泄漏出来的。</span></figcaption></figure>
-<div class="codebox"><span class="dim">import random
+<div class="codebox" data-file="prepare.py" data-lang="python"><span class="dim">import random
 from datasets import Dataset, DatasetDict
 
 </span><span class="chg">def to_example(tag):
@@ -34,7 +34,7 @@ sets.push_to_hub("your-hub-name/price-tags")</span></div>
 <h2><span class="en">Step 2 · Train with QLoRA</span><span class="zh">第 2 步 · 用 QLoRA 训练</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Open a rented-GPU notebook and load the 4-bit base. Attach the LoRA config, set up the trainer, and run one epoch. A subset of a few thousand examples takes minutes, so try that first; the full set takes a few hours on a modest GPU. When it finishes, push the adapter to the hub under a run name and write down the revision. The settings are the ones from the last two lessons.</p>
 <p class="zh" style="margin:0 0 8px">打开租用 GPU 的笔记本，加载 4 位底座。挂上 LoRA 配置，设好训练器，跑一个 epoch。几千条的子集只要几分钟，先试它；完整数据在普通 GPU 上要几个小时。跑完就把附加件用一个运行名字推送到 hub，并记下修订号。设置沿用前两课的。</p></div>
-<div class="codebox"><span class="dim"># model, lora and args are the same as in the last two lessons
+<div class="codebox" data-file="train_push.py" data-lang="python"><span class="dim"># model, lora and args are the same as in the last two lessons
 trainer = SFTTrainer(model=model, args=args, peft_config=lora,
                      train_dataset=sets["train"], eval_dataset=sets["validation"])
 </span><span class="chg">trainer.train()
@@ -44,7 +44,7 @@ trainer.model.push_to_hub("your-hub-name/price-guesser-run-01")   # then note th
 <h2><span class="en">Step 3 · Guess a price, and smooth it out</span><span class="zh">第 3 步 · 估价，并让结果更平滑</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">To guess, load the base plus the adapter, give it the prompt that ends in "Price is $", generate a few tokens, and read the number. Make generation deterministic by always taking the most likely token (greedy). Here is a nice trick: instead of trusting only the top token, take the probabilities of the few most likely number tokens and compute a weighted average. That gives a smoother estimate. It works when the model's tokenizer gives a whole number as one token; otherwise you read it digit by digit.</p>
 <p class="zh" style="margin:0 0 8px">要估价，就加载底座和附加件，给它以 “Price is $” 结尾的提示，生成几个 token，读出数字。让生成可重复的做法是每次都取最可能的 token（贪心）。有个好用的小技巧：不要只信第一名的 token，而是取最可能的几个数字 token 的概率，算一个加权平均，估计会更平滑。这在分词器把整个数字当成一个 token 时有效；否则就要一位一位地读。</p></div>
-<div class="codebox"><span class="dim">import torch
+<div class="codebox" data-file="guess_price.py" data-lang="python"><span class="dim">import torch
 
 </span><span class="chg">def guess_price(prompt):
     ids = tok(prompt, return_tensors="pt").to(model.device)
@@ -65,16 +65,20 @@ trainer.model.push_to_hub("your-hub-name/price-guesser-run-01")   # then note th
 <h2><span class="en">Step 4 · Test it fairly</span><span class="zh">第 4 步 · 公平地测试</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Use the same evaluation harness and the same test set as the earlier projects: the average, the linear and forest baselines, and the big frontier model. Compute the average error in dollars over the test set for each. Fairness is the whole point, so the prompt format, the test items and the scoring rule must be identical for everyone.</p>
 <p class="zh" style="margin:0 0 8px">用和前面项目同样的评估流程、同样的测试集：平均值基线、线性和随机森林基线，以及大的云端模型。对每个方案算测试集上的平均误差（美元）。公平就是关键，所以提示格式、测试条目和评分规则对每个方案都必须一样。</p></div>
-<div class="codebox"><span class="dim"># the same harness as the earlier projects
+<div class="codebox" data-file="compare.py" data-lang="python"><span class="dim"># the same harness as the earlier projects
 </span><span class="chg">for name, guesser in {"average": avg_guess, "forest": forest_guess,
                       "frontier": frontier_guess, "tuned": guess_price}.items():
     print(name, evaluate(guesser, sets["test"]))</span></div>
+<div class="codebox" data-file="output" data-lang="text">average $162.40
+forest $71.30
+frontier $52.80
+tuned $38.60</div>
 <div class="try" id="p4"></div>
 
 <h2><span class="en">Step 5 · The comparison table: cost and speed too</span><span class="zh">第 5 步 · 比较表：成本和速度也要列</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Add the tuned model as a new row, with error, cost per 1,000 guesses and seconds per guess. A tuned 3 to 8 billion weight model trained on tens of thousands of examples can match or beat a big frontier model on a narrow task like this, for far less money per call, and it is fully yours. With only a few hundred examples it will not. Compare honestly, including against the easy alternatives.</p>
 <p class="zh" style="margin:0 0 8px">把微调模型作为新的一行加进表里，列上误差、每 1000 次估价的成本和每次估价的秒数。一个 30 到 80 亿权重、用几万条例子训练的微调模型，在这种窄任务上可以追平甚至超过大型云端模型，每次调用便宜得多，而且完全属于你。只有几百条例子就做不到。要诚实地比较，也要和简单的方案比。</p></div>
-<div class="codebox"><span class="dim">model            avg error    $ per 1,000 guesses   seconds per guess
+<div class="codebox" data-file="summary_table.txt" data-lang="text"><span class="dim">model            avg error    $ per 1,000 guesses   seconds per guess
 average          (from the earlier project)
 forest           (from the earlier project)
 frontier model   (fill in from your usage page)
@@ -83,11 +87,18 @@ tuned 3B-8B      (fill in: GPU time costs, not tokens)</span></div>
 
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I evaluated on data the model had already seen, a leak between train and test, and the score looked amazing. I fixed it by building the split once and never touching the test set again.</span><span class="zh">我在模型已经见过的数据上做了评估，训练和测试之间有泄漏，成绩因此好得惊人。后来我只切分一次，再也不碰测试集，才修好了这个问题。</span></div>
 
+<h2><span class="en">In plain words</span><span class="zh">用大白话说</span></h2>
+<div class="card"><p class="en" style="margin:0">Words this lesson uses, in one line each.<br>• <b>Train, validation, test</b>: three separate piles: learn from the first, tune with the second, judge once on the third.<br>• <b>Push to the hub</b>: upload the saved adapter to a model website so any notebook can load it later.<br>• <b>Logits</b>: the raw scores for the next token; the code turns them into a price.</p><p class="zh" style="margin:0">这一课用到的词，每个一句话。<br>• <b>训练、验证、测试</b>：三份互不相同的数据：用第一份学习，用第二份调整，用第三份只做一次评判。<br>• <b>推送到 hub</b>：把保存好的适配器上传到模型网站，之后任何笔记本都能加载。<br>• <b>logits</b>：下一个词元的原始分数，代码再把它们换算成价格。</p></div>
+<h2><span class="en">Common errors</span><span class="zh">常见报错</span></h2>
+<div class="card"><p class="en" style="margin:0">• The tuned model prints text instead of a price. The prompt ends differently from training. Use the exact same prompt shape, ending with <code>Price is $</code>.<br>• <code>HfHubHTTPError: 401</code> when pushing. You are not logged in, or the token cannot write. Log in again with a write token.<br>• <code>torch.OutOfMemoryError: CUDA out of memory</code>. The model or batch is too big for the GPU. Load it in 4-bit, lower the batch size, or pick a smaller model.</p><p class="zh" style="margin:0">• 微调后的模型打印出一段文字而不是价格：提示的结尾和训练时不同。用完全相同的提示格式，以 <code>Price is $</code> 结尾。<br>• 推送时报 <code>HfHubHTTPError: 401</code>：没登录，或令牌没有写权限。用有写权限的令牌重新登录。<br>• <code>torch.OutOfMemoryError: CUDA out of memory</code>：模型或批量对显卡来说太大。改用 4-bit 加载、调小批量，或换更小的模型。</p></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Train on 1,000 examples, then on 10,000</b>, and plot the test error against the data size.</span><span class="zh"><b>先用 1,000 个例子训练，再用 10,000 个</b>，画出测试误差随数据量的变化。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Try r=8 and r=32</b> and see whether the thicker add-on is worth it.</span><span class="zh"><b>试试 r=8 和 r=32</b>，看更厚的附加件值不值得。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Work out the cost of 1,000 guesses</b> for the tuned model and for the frontier model.</span><span class="zh"><b>算出 1,000 次估价的成本</b>，微调模型和云端模型各算一次。</span></span></label></div>
 <div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the helper has its own tuned price model, scored on the same board as the baselines and the cloud model, with cost and speed in the table beside it. The next problem is that it lives in a notebook that needs a GPU; the next lesson puts it behind an API that wakes only when called.</span><span class="zh">现在帮手有了自己的微调价格模型，在同一块计分板上和基线、云端大模型比分，成本和速度也列在表里。下一个问题是它活在需要 GPU 的笔记本里；下一课把它放到只在被调用时才醒来的 API 后面。</span></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• Build the train, validation and test split once, and never touch the test set.<br>• Examples are a prompt ending in "Price is $" and a short completion.<br>• Try a tiny subset first, then the full run, and push the adapter with a run name.<br>• Guess with greedy generation, and optionally average the top number candidates.<br>• Use the same harness and test set for every contender.<br>• A tuned small model on a narrow task with enough data can be cheap, fast and good.<br>• With only a few hundred examples, do not expect it to win.</p><p class="zh" style="margin:0">• 训练、验证、测试只切分一次，之后不碰测试集。<br>• 例子是以 “Price is $” 结尾的提示，加一个短回答。<br>• 先试很小的子集，再跑完整训练，并用运行名字推送附加件。<br>• 用贪心生成来估价，还可以对最可能的几个数字候选取平均。<br>• 每个参赛方案都用同一套流程和同一份测试集。<br>• 窄任务加足够数据，小的微调模型可以又便宜、又快、又好。<br>• 只有几百条例子的话，别指望它能赢。</p></div>
+
+<h2><span class="en">Recap</span><span class="zh">小结</span></h2>
+<div class="card"><p class="en" style="margin:0">1. Prepare prompts that end the same way every time, with the price as the answer.<br>2. Train, push the adapter, then load it to guess prices.<br>3. Compare it with every earlier guesser on the same test set.</p><p class="zh" style="margin:0">1. 准备好每次结尾都一样的提示，答案就是价格。<br>2. 训练、推送适配器，再加载它来估价。<br>3. 在同一个测试集上和之前所有估价器比一比。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>

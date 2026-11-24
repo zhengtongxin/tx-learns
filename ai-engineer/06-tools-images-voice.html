@@ -13,7 +13,7 @@
 <h2><span class="en">Step 1 · A tool is a function you own</span><span class="zh">第 1 步 · 工具就是你自己的函数</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>tool</b> is a normal Python function. You describe it to the model in JSON: a name, a plain-English description and its parameters. The model never runs it. It only replies “please call <code>get_price</code> with item=sardines”. The description is the prompt, so write it clearly.</p>
 <p class="zh" style="margin:0 0 8px"><b>工具</b>就是一个普通的 Python 函数。你用 JSON 向模型描述它：名字、一句大白话的说明和参数。模型从不自己运行它，只会回复“请用 item=沙丁鱼 调用 <code>get_price</code>”。说明就是提示词，所以要写清楚。</p></div>
-<div class="codebox"><span class="chg">shop_prices = {"sardines": 2.2, "rice 5kg": 11.5, "umbrella": 6.0}
+<div class="codebox" data-file="tools.py" data-lang="python"><span class="chg">shop_prices = {"sardines": 2.2, "rice 5kg": 11.5, "umbrella": 6.0}
 
 def get_price(item):
     return f"{item}: S${shop_prices.get(item.lower(), 'unknown')}"
@@ -55,7 +55,7 @@ price_tool = {"type": "function", "function": {
 <path class="lnk hot" d="M333,75 L387,75" marker-end="url(#ah)"/>
 <path class="lnk" d="M527,75 L581,75" marker-end="url(#ah)"/>
 </svg><figcaption><span class="en">The model never runs your function; it only asks, and your code sends back the result.</span><span class="zh">模型从不自己运行你的函数，它只提出请求，由你的代码把结果送回去。</span></figcaption></figure>
-<div class="codebox"><span class="dim">import json
+<div class="codebox" data-file="tool_loop.py" data-lang="python"><span class="dim">import json
 from openai import OpenAI
 client = OpenAI()
 MODEL = "gpt-5-mini"
@@ -72,13 +72,14 @@ def run_chat(messages):
     return reply.choices[0].message.content
 
 print(run_chat([{"role": "user", "content": "How much is an umbrella and a tin of sardines?"}]))</span></div>
+<div class="codebox" data-file="output" data-lang="text">An umbrella costs S$6.0 and a tin of sardines costs S$2.2.</div>
 <div class="try" id="p2"></div>
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I thought the model ran my function. It does not, it only asks. I also forgot to return a tool message for every call id, which gives an API error.</span><span class="zh">我以为模型会运行我的函数。其实不会，它只是发出请求。我还漏了为每个 call id 返回 tool 消息，结果 API 报错。</span></div>
 
 <h2><span class="en">Step 3 · Real data behind the tool</span><span class="zh">第 3 步 · 工具背后放真实数据</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A dict in memory is a toy. Wei Jie swapped it for a small SQLite table and added a second tool that <b>changes</b> a price. Now the model reads and writes real state. That raises a new question: who is allowed to ask for the change? A reader tool is low risk. A writer tool needs thought.</p>
 <p class="zh" style="margin:0 0 8px">放在内存里的字典只是玩具。Wei Jie 把它换成一张小小的 SQLite 表，再加了第二个会<b>修改</b>价格的工具。现在模型读写的是真实状态。这就带来新问题：谁有权请求修改？只读的工具风险低，会写入的工具得好好想想。</p></div>
-<div class="codebox"><span class="dim">import sqlite3
+<div class="codebox" data-file="shop_db.py" data-lang="python"><span class="dim">import sqlite3
 db = sqlite3.connect("shop.db")
 db.execute("CREATE TABLE IF NOT EXISTS prices (item TEXT PRIMARY KEY, price REAL)")
 
@@ -96,7 +97,7 @@ def get_price(item):
 <h2><span class="en">Step 4 · Images and voice are more calls</span><span class="zh">第 4 步 · 图像和语音只是更多的调用</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The chat model decides what to say. Other models draw or speak it. An <b>image model</b> takes a prompt and a size and sends back base64 text, which you decode with PIL. A <b>text-to-speech model</b> takes text and a voice and returns audio bytes. These are just two more API calls. Images cost a few cents each, so do not call them in a loop.</p>
 <p class="zh" style="margin:0 0 8px">聊天模型决定说什么，别的模型负责画或读出来。<b>图像模型</b>收到提示词和尺寸，返回 base64 文本，你用 PIL 解码。<b>语音合成模型</b>收到文字和音色，返回音频字节。它们不过是再多两次 API 调用。图片每张要花几分钱，别放进循环里调用。</p></div>
-<div class="codebox"><span class="dim">import base64
+<div class="codebox" data-file="image_voice.py" data-lang="python"><span class="dim">import base64
 from io import BytesIO
 from PIL import Image
 
@@ -111,6 +112,8 @@ def speak(text):
     return "reply.mp3"</span></div>
 <div class="try" id="p4"></div>
 
+<h2><span class="en">Common errors</span><span class="zh">常见报错</span></h2>
+<div class="card"><p class="en" style="margin:0">• <code>BadRequestError: messages with role 'tool' must follow a tool_calls message</code>. You sent the tool result without first appending the model's tool call. Append both, in order.<br>• <code>json.decoder.JSONDecodeError</code> on <code>call.function.arguments</code>. The arguments arrive as a string. Run <code>json.loads</code> on it before use.<br>• <code>sqlite3.OperationalError: no such table: prices</code>. The table was never created in this file. Run the <code>CREATE TABLE IF NOT EXISTS</code> line first.</p><p class="zh" style="margin:0">• <code>BadRequestError: messages with role 'tool' must follow a tool_calls message</code>：你只发了工具结果，没有先把模型的工具调用加进消息。两者都要按顺序加上。<br>• 对 <code>call.function.arguments</code> 报 <code>JSONDecodeError</code>：参数是字符串形式传来的，用之前要先 <code>json.loads</code>。<br>• <code>sqlite3.OperationalError: no such table: prices</code>：这个文件里还没建表。先运行 <code>CREATE TABLE IF NOT EXISTS</code> 那一行。</p></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Add a second tool</b> and ask a question that needs both.</span><span class="zh"><b>再加一个工具，</b>问一个需要两个工具的问题。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Draw a picture</b> for each item mentioned in the reply.</span><span class="zh"><b>为回复里提到的每件商品画一张图。</b></span></span></label><label><input type="checkbox"><span><span class="en"><b>Make the bot speak</b> its answer.</span><span class="zh"><b>让机器人把答案读出来。</b></span></span></label></div>
 <div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the helper looks up Mdm Tan's sardine price from a real table instead of guessing, the way Uncle Raj says “ask the clerk” and then answers from the file, and it can draw a picture or speak when asked. The next problem is putting the lookup, the picture and the voice together into one desk assistant a real neighbour can use.</span><span class="zh">现在助手会从真实的表里查出 Tan 太太要的沙丁鱼价格，而不是瞎猜，就像 Raj 叔叔说“去问问文员”，再根据档案回答；需要时它还能画图或开口说话。下一个问题是把查询、图片和声音拼成一个真正的邻居也能用的柜台助手。</span></div>

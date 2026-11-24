@@ -39,7 +39,7 @@
 <path class="lnk" d="M333,75 L387,75" marker-end="url(#ah)"/>
 <path class="lnk" d="M527,75 L581,75" marker-end="url(#ah)"/>
 </svg><figcaption><span class="en">A call is one request out and one reply back; the key rides in the header.</span><span class="zh">一次调用就是发出一次请求、收回一次回复；密钥放在请求头里。</span></figcaption></figure>
-<div class="codebox"><span class="dim">import os, requests
+<div class="codebox" data-file="call_raw.py" data-lang="python"><span class="dim">import os, requests
 
 </span><span class="chg">headers = {"Authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}", "Content-Type": "application/json"}</span><span class="dim">
 payload = {
@@ -51,6 +51,8 @@ payload = {
 }
 </span><span class="chg">r = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)</span><span class="dim">
 print(r.json()["choices"][0]["message"]["content"])</span></div>
+<div class="codebox" data-file="output" data-lang="text">Durians have thorns so sharp that fallen fruit can hurt people, yet
+the smell is strong enough to be banned on some trains.</div>
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 2 · Messages: who is speaking</span><span class="zh">第 2 步 · 消息：是谁在说话</span></h2>
@@ -62,17 +64,19 @@ print(r.json()["choices"][0]["message"]["content"])</span></div>
 <h2><span class="en">Step 3 · The library is only a wrapper</span><span class="zh">第 3 步 · 库只是一层包装</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Typing headers every time gets old. The <code>openai</code> Python package builds that same request for you. It has <b>no model inside</b>. It is a thin helper that posts and reads the JSON back.</p>
 <p class="zh" style="margin:0 0 8px">每次都手写请求头太烦。<code>openai</code> 这个 Python 包会替你构造同样的请求。它<b>里面没有模型</b>，只是一个很薄的帮手，负责发送请求、读回 JSON。</p></div>
-<div class="codebox"><span class="chg">from openai import OpenAI
+<div class="codebox" data-file="call_sdk.py" data-lang="python"><span class="chg">from openai import OpenAI
 client = OpenAI()</span><span class="dim">
 reply = </span><span class="chg">client.chat.completions.create(model="gpt-5-mini", messages=payload["messages"])</span><span class="dim">
 print(reply.choices[0].message.content)</span></div>
+<div class="codebox" data-file="output" data-lang="text">Durians have thorns so sharp that fallen fruit can hurt people, yet
+the smell is strong enough to be banned on some trains.</div>
 <div class="try" id="p3"></div>
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I thought calling a model was magic, and that the <code>openai</code> package had a model inside it. It does not. It only builds the request. The model runs on someone else's machine, and the package just talks to it.</span><span class="zh">我以为调用模型很神秘，还以为 <code>openai</code> 这个包里装着模型。其实不是。它只负责构造请求，模型运行在别人的机器上，这个包只是去和它通信。</span></div>
 
 <h2><span class="en">Step 4 · One shape, many providers</span><span class="zh">第 4 步 · 一种格式，多家提供商</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">This chat format got so popular that other providers copied it. They call it an <b>OpenAI-compatible endpoint</b>. So the same client works elsewhere if you change only <code>base_url</code>, <code>api_key</code> and the model name. Even a model on your own laptop (Ollama) speaks it. Click each to see what changes.</p>
 <p class="zh" style="margin:0 0 8px">这种聊天格式太流行，其他提供商都照着做了，称为 <b>OpenAI 兼容端点</b>。所以只要改 <code>base_url</code>、<code>api_key</code> 和模型名，同一个客户端就能用在别处。连你自己笔记本上的模型（Ollama）也说这种格式。点开看看改了什么。</p></div>
-<div class="pills" id="pp"></div><div class="codebox" id="pcode"></div><p class="meta" id="pnote"></p>
+<div class="pills" id="pp"></div><div class="codebox" data-file="switch_provider.py" data-lang="python" id="pcode"></div><p class="meta" id="pnote"></p>
 <div class="try" id="p4"></div>
 
 <h2><span class="en">Step 5 · When the call will not work</span><span class="zh">第 5 步 · 调用跑不通的时候</span></h2>
@@ -81,6 +85,8 @@ print(reply.choices[0].message.content)</span></div>
 <p class="en">Good habit or bad habit?</p>
 <p class="zh">这些做法，哪个好，哪个不好？</p><div class="sc" id="g5"></div>
 
+<h2><span class="en">Common errors</span><span class="zh">常见报错</span></h2>
+<div class="card"><p class="en" style="margin:0">• <code>AuthenticationError: Incorrect API key provided</code>. The key is missing, has a stray space or newline, or the <code>.env</code> file was not loaded. Print <code>len(os.getenv('OPENAI_API_KEY'))</code>, fix the file, then restart the notebook.<br>• <code>BadRequestError: Unsupported parameter</code> or <code>model_not_found</code>. The model name is wrong or your account cannot use it. Copy the exact name from the provider's list.<br>• <code>NameError: name 'client' is not defined</code>. A cell ran before the one that creates it. Run the cells from top to bottom.</p><p class="zh" style="margin:0">• <code>AuthenticationError: Incorrect API key provided</code>：密钥缺失、首尾有空格或换行，或者 <code>.env</code> 没有加载。先打印 <code>len(os.getenv('OPENAI_API_KEY'))</code>，改好文件，再重启笔记本。<br>• <code>BadRequestError: Unsupported parameter</code> 或 <code>model_not_found</code>：模型名写错，或你的账户用不了它。从提供商的列表里原样复制模型名。<br>• <code>NameError: name 'client' is not defined</code>：定义它的单元格还没运行。请从上到下依次运行单元格。</p></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Send the raw call.</b> Print <code>r.json()</code> in full before picking out the content, and look at everything else in it.</span><span class="zh"><b>发一次原始请求。</b>先完整打印 <code>r.json()</code>，再取出内容，看看里面还有什么。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Switch provider.</b> Ask the same question through a second provider, changing only the base URL, key and model name.</span><span class="zh"><b>换提供商。</b>通过第二家提供商问同一个问题，只改基础网址、密钥和模型名。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Run a small local model.</b> Pick a small size, then compare answer quality and speed.</span><span class="zh"><b>跑一个本地小模型。</b>选个小尺寸，比较答案质量和速度。</span></span></label></div>
 <div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the Block 12 helper can answer one notice question for Uncle Raj by sending one request and reading the reply, like a note pinned to the board and answered in the same format. The next problem is that it forgets the question the moment the reply arrives, so a neighbour's follow-up gets a blank stare.</span><span class="zh">现在 Block 12 助手能替 Raj 叔叔回答一条通知问题：发一次请求，读回复，就像在公告板上贴条子、用同样的格式得到答复。下一个问题是：回复一到它就忘了刚才的问题，邻居追问时它一脸茫然。</span></div>
