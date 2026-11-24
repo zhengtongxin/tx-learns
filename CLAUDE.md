@@ -74,5 +74,6 @@ Easiest: drop notes in `inbox/<concept>/` on the `notes` branch and let the writ
 
 1. Copy `agentic-ai/_template.html` to `<track>/NN-slug.html` (next free number in that track).
 2. Write it to `STYLE.md`, with the tag `<Topic> · Lesson N`.
+2b. Lesson widget code (`TX2.game`, `TX2.predict`, ...) goes in `<track>/js/NN-slug.js`, loaded by `<script src="js/NN-slug.js"></script>` after `assets/teach.js` at the end of the page, never inline; `--fix` adds the `?v=` hash.
 3. Add `file:'NN-slug.html'` to its item in `<track>/lessons.js` (or add the item under the right topic), then run `node scripts/check-pages.mjs --fix` (it also stamps the lesson's updated date).
 4. Fill in the `<title>`, description and `og:` tags, run `node scripts/check-copy.mjs`, `node scripts/check-counts.mjs` and `node scripts/check-pages.mjs`, then open the page in a browser and click every widget.
