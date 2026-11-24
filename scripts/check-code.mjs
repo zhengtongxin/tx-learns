@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Code sample check (for the backend engineer agent). No AI, no network, nothing is run.
 // It takes every code box (.codebox) in the given lessons and checks that the code would at least parse:
+// Left out on purpose: JSX/TypeScript files (data-file .tsx/.jsx/.ts), data-file "diagram"/"output", anything after a "# in <place>, replace ..." note, and `...` elisions (filled in before parsing).
 // Python with ast (top-level await allowed), JavaScript with node --check. Shell lines and program output
 // are skipped, as is any box whose data-lang is not python or js. A code box may be a fragment that builds on an earlier step, so names it uses can be missing;
 // only real syntax errors are listed. The result is a note for the reviewer, not a hard fail.
@@ -42,13 +43,22 @@ for (const f of files) {
     // A box that names its language as anything but python or js (bash, text, json, ...) is not syntax-checked.
     const lang = (m[1].match(/data-lang="([^"]*)"/) || [])[1];
     if (lang && !/^(python|py|js|javascript|mjs)$/i.test(lang)) continue;
-    const code = decode(m[2]).replace(/\u00a0/g, ' ');
+    // Not plain Python or JavaScript: JSX/TypeScript files (node --check cannot read them), diagrams and program output.
+    const file = (m[1].match(/data-file="([^"]*)"/) || [])[1] || '';
+    if (/\.(tsx|jsx|ts)$/i.test(file) || /^(diagram|output|text|ascii)$/i.test(file)) continue;
+    // A box that edits an earlier one says where ("# in run_dispatch, replace ...") and may then hold a different language or indented lines: only the part before that note is checked.
+    let code = decode(m[2]).replace(/\u00a0/g, ' ').split(/^\s*(?:#|\/\/)\s*(?:in|inside|add|replace|change|right after|above|below)\b.*$/m)[0];
     const k = kind(code);
     let err = '';
     if (k === 'python') {
       const r = spawnSync('python3', ['-c', PY], { input: code, encoding: 'utf8' });
       if (r.error) { console.log('python3 is not installed: Python boxes were not checked.'); process.exit(0); }
       err = (r.stdout || '').trim();
+      // `...` and `[...]` mean "the rest is left out": retry with the gap filled before calling it an error.
+      if (err && /\.\.\./.test(code)) for (const filled of [code.replace(/(?<=[(,]\s*)\.\.\.(?=\s*[,)])/g, '**_gap').replace(/\.\.\./g, 'None'), code.replace(/\.\.\./g, 'None')]) {
+        const r2 = spawnSync('python3', ['-c', PY], { input: filled, encoding: 'utf8' });
+        if (!(r2.stdout || '').trim()) { err = ''; break; }
+      }
     } else if (k === 'js') {
       const p = join(tmp, `box${boxes}.mjs`); writeFileSync(p, code);
       const r = spawnSync(process.execPath, ['--check', p], { encoding: 'utf8' });
