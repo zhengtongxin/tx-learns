@@ -21,8 +21,13 @@
    ]
   },
   "code": {
-   "count": 17,
+   "count": 18,
    "examples": [
+    {
+     "at": "2026-11-24T07:40:30.329Z",
+     "text": "A manual run with empty `pages` falls back to the last commit's changed pages (steps.find.outputs.pages), not every page as the input text, CLAUDE.md and ecosys",
+     "file": ".github/workflows/ui-check.yml"
+    },
     {
      "at": "2026-11-24T07:36:33.734Z",
      "text": "pages=$(... | while read f; do [ -f \"$f\" ] && echo \"$f\"; done) returns 1 when the last changed .html file was deleted or moved, so bash -e stops the step. Use i",
@@ -32,11 +37,6 @@
      "at": "2026-11-24T07:36:33.734Z",
      "text": "In the shared-layout sample, the for loop's last iteration returns 1 (a directory without lessons.js), so the assignment fails and bash -e stops the Phone fit s",
      "file": ".github/workflows/copy-check.yml"
-    },
-    {
-     "at": "2026-11-24T06:47:56.593Z",
-     "text": "git push runs with no credentials because checkout uses persist-credentials false; use the explicit x-access-token extraheader like reader.yml and review.yml, o",
-     "file": ".github/workflows/improver.yml"
     }
    ]
   },
@@ -52,6 +52,16 @@
      "at": "2026-11-24T03:47:48.558Z",
      "text": "Local check output (quality-out/links.json and links.md) was committed; the json is not in .vercelignore so it would be served live. Delete both and ignore qual",
      "file": "quality-out/links.json"
+    }
+   ]
+  },
+  "other": {
+   "count": 1,
+   "examples": [
+    {
+     "at": "2026-11-24T07:40:30.329Z",
+     "text": "The auto-merge row (and the header of auto-merge.yml) still says the UI check starts auto-merge, but this PR removes that step from ui-check.yml.",
+     "file": "CLAUDE.md"
     }
    ]
   }
