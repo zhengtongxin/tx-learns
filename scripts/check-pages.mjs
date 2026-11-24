@@ -6,15 +6,21 @@
 // the track page, and the "start here" links (data-start) that point at the first published lesson.
 // Each lesson carries <meta name="updated" content="YYYY-MM-DD">, shown on the page as "Updated ...". --fix sets it to
 // today (Malaysia time) when the lesson's text differs from the last commit, or to its last commit date when it is missing.
+// --fix also writes what search engines and caches need, all from the curriculum (tracks.js + <track>/lessons.js):
+// <link rel="canonical">, one JSON-LD block per page (WebSite, LearningResource + BreadcrumbList, ...), ?v=<content hash> on
+// the shared scripts and styles, and the cache headers and redirects in vercel.json (redirects come from scripts/redirects.json).
 // Usage: node scripts/check-pages.mjs [--fix] [page.html ...]   (no pages = every page; --fix rewrites those lists)
-import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import vm from 'node:vm';
 import { execFileSync } from 'node:child_process';
 import { loadTracks } from './lib.mjs';
 
 const root = new URL('..', import.meta.url);
 const FIX = process.argv.includes('--fix');
 const TR = loadTracks(new URL('.', root).pathname);
-const all = ['index.html', 'ecosystem.html', 'glossary.html', 'changelog.html', '404.html', ...TR.flatMap(t => readdirSync(new URL(t.dir + '/', root)).filter(f => f.endsWith('.html')).map(f => t.dir + '/' + f))];
+const rootPages = readdirSync(new URL('.', root)).filter(f => f.endsWith('.html')).sort((a, b) => (a === 'index.html' ? -1 : b === 'index.html' ? 1 : a < b ? -1 : 1));
+const all = [...rootPages, ...TR.flatMap(t => readdirSync(new URL(t.dir + '/', root)).filter(f => f.endsWith('.html')).map(f => t.dir + '/' + f))];
 const named = process.argv.slice(2).filter(a => a !== '--fix');
 const pages = named.length ? named : all;
 const problems = [];
@@ -53,6 +59,8 @@ for (const p of pages) {
 
 // "Updated" dates on lessons.
 const isLesson = p => /^[\w-]+\/\d\d-[\w-]+\.html$/.test(p);
+// Text that --fix generates itself (updated date, canonical, JSON-LD, ?v= versions) does not count as a change to the lesson.
+const plain = h => h.replace(UPD, '').replace(/<link rel="canonical"[^>]*>/, '').replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, '').replace(/\?v=[0-9a-f]{8}"/g, '"');
 const UPD = /<meta name="updated" content="([^"]*)">\n?/;
 const today = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
 const git = (...a) => { try { return execFileSync('git', a, { cwd: new URL('.', root), encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }); } catch { return null; } };
@@ -60,7 +68,7 @@ for (const p of all.filter(isLesson)) {
   const cur = readFileSync(new URL(p, root), 'utf8'), m = cur.match(UPD);
   if (FIX) {
     const head = git('show', `HEAD:${p}`);
-    const changed = head === null || head.replace(UPD, '') !== cur.replace(UPD, '');
+    const changed = head === null || plain(head) !== plain(cur);
     const date = changed ? today : (m && m[1]) || (git('log', '-1', '--format=%cs', '--', p) || '').trim() || today;
     const tag = `<meta name="updated" content="${date}">\n`;
     const next = m ? cur.replace(UPD, tag) : cur.replace(/(<meta name="theme-color"[^>]*>)\n?/, `$1\n${tag}`);
@@ -97,6 +105,102 @@ for (const f of ['index.html', ...TR.map(t => t.dir + '/index.html')]) {
   const own = f === 'index.html' ? TR[0] : TR.find(t => t.dir + '/index.html' === f), first = own && firstOf(own);
   if (first) next = next.replace(/(<a [^>]*data-start[^>]*href=")[^"]*(")/g, (m, a, b) => a + (f === 'index.html' ? own.dir + '/' : '') + first + b);
   if (next !== cur) { if (FIX) writeFileSync(new URL(f, root), next); else bad(f, 'lesson list or start link out of date with lessons.js (run node scripts/check-pages.mjs --fix)'); }
+}
+
+// ---- Canonical links, JSON-LD, cache-busting versions, vercel.json (all generated; --fix rewrites, otherwise stale = fail) ----
+const tracksCtx = { window: {} };
+vm.runInNewContext(readFileSync(new URL('tracks.js', root), 'utf8'), tracksCtx, { filename: 'tracks.js' });
+const trackMeta = Object.fromEntries(tracksCtx.window.TRACKS.map(t => [t.id, t]));
+const LEVELS = { 1: 'Beginner', 2: 'Intermediate', 3: 'Advanced' };
+const sha = (...fs) => createHash('sha1').update(fs.map(f => readFileSync(new URL(f, root))).reduce((a, b) => Buffer.concat([a, b]), Buffer.alloc(0))).digest('hex').slice(0, 8);
+const hashOf = f => f === 'assets/site.js' ? sha('assets/site.js', 'assets/search.js') : sha(f); // site.js hands its version on to search.js
+const VERSIONED = /^assets\/(site|teach|build-concepts)\.(js|css)$|^tracks\.js$|^[\w-]+\/lessons\.js$/;
+const REF = /(\b(?:src|href)=")([^"?#]*)(\?v=[0-9a-f]*)?(")/g;
+const resolve = (page, ref) => { const parts = page.split('/').slice(0, -1); for (const seg of ref.split('/')) { if (seg === '..') parts.pop(); else if (seg !== '.' && seg) parts.push(seg); } return parts.join('/'); };
+const jsonLd = o => '<script type="application/ld+json">' + JSON.stringify(o).replace(/</g, '\\u003c') + '</script>';
+const meta = (html, re) => (html.match(re) || [])[1];
+const crumbs = items => ({ '@type': 'BreadcrumbList', itemListElement: items.map(([name, url], i) => ({ '@type': 'ListItem', position: i + 1, name, item: url })) });
+const webSite = { '@type': 'WebSite', '@id': SITE + '#site', name: 'TX Learns', url: SITE, inLanguage: ['en', 'zh'] };
+const headFor = (p, html) => {
+  const url = SITE + (p === 'index.html' ? '' : p);
+  const title = (meta(html, /<title>([^<]*)<\/title>/) || '').replace(/ \| TX Learns$/, '');
+  const description = meta(html, /<meta name="description" content="([^"]*)"/);
+  const own = TR.find(t => p.startsWith(t.dir + '/'));
+  let graph;
+  if (p === 'index.html') graph = [{ ...webSite, description }];
+  else if (own && p === own.dir + '/index.html') {
+    const tm = trackMeta[own.id];
+    graph = [{ '@type': 'CollectionPage', '@id': url, url, name: tm.title.en, alternateName: tm.title.zh, description, inLanguage: ['en', 'zh'], isPartOf: { '@id': SITE + '#site' } },
+      crumbs([['TX Learns', SITE], [tm.title.en, url]])];
+  } else if (own) {
+    const tm = trackMeta[own.id], file = p.split('/').pop();
+    const topic = own.T.topics.find(w => w.items.some(x => x.file === file)), item = topic.items.find(x => x.file === file);
+    const mod = meta(html, UPD_RE);
+    graph = [{ '@type': 'LearningResource', '@id': url, url, name: item.title.en, alternateName: item.title.zh, description, inLanguage: ['en', 'zh'],
+      learningResourceType: 'Interactive lesson', educationalLevel: LEVELS[topic.level], teaches: topic.title.en, ...(mod ? { dateModified: mod } : {}),
+      isPartOf: { '@type': 'CollectionPage', name: tm.title.en, url: SITE + own.dir + '/index.html' }, publisher: { '@id': SITE + '#site' } },
+      crumbs([['TX Learns', SITE], [tm.title.en, SITE + own.dir + '/index.html'], [item.title.en, url]])];
+  } else graph = [{ '@type': 'WebPage', '@id': url, url, name: title, description, inLanguage: ['en', 'zh'], isPartOf: { '@id': SITE + '#site' } }, crumbs([['TX Learns', SITE], [title, url]])];
+  return { url, ld: jsonLd({ '@context': 'https://schema.org', '@graph': graph }) };
+};
+const UPD_RE = /<meta name="updated" content="([^"]*)">/;
+const unversioned = [];
+for (const p of all) {
+  const cur = readFileSync(new URL(p, root), 'utf8');
+  const tpl = p === '404.html' || p.split('/').pop().startsWith('_'); // 404.html and _template.html get ?v= versions but no canonical or JSON-LD
+  const { url, ld } = tpl ? {} : headFor(p, cur);
+  let next = cur.replace(REF, (m, a, ref, v, z) => {
+    const target = resolve(p, ref);
+    if (!VERSIONED.test(target) || !existsSync(new URL(target, root))) return m;
+    return a + ref + '?v=' + hashOf(target) + z;
+  });
+  if (!tpl) {
+  const canon = `<link rel="canonical" href="${url}">`;
+  next = /<link rel="canonical"[^>]*>/.test(next) ? next.replace(/<link rel="canonical"[^>]*>/, canon) : next.replace(/(<link rel="icon")/, canon + '$1');
+  next = /<script type="application\/ld\+json">[\s\S]*?<\/script>/.test(next) ? next.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, () => ld) : next.replace('</head>', () => ld + '</head>');
+  }
+  if (next !== cur) { if (FIX) writeFileSync(new URL(p, root), next); else bad(p, 'canonical link, JSON-LD or ?v= asset versions out of date (run node scripts/check-pages.mjs --fix)'); }
+  // Every use of a file that vercel.json caches as immutable must carry ?v=.
+  for (const m of (FIX ? next : cur).matchAll(REF)) { const t = resolve(p, m[2]); if (/^assets\/(site|teach|build-concepts)\.(js|css)$/.test(t) && !m[3]) unversioned.push(`${p}: ${m[2]}`); }
+}
+for (const u of unversioned) bad(u.split(':')[0], 'asset cached as immutable has no ?v= version: ' + u.split(': ')[1]);
+// assets/site.js loads assets/search.js itself and must pass its own ?v= on, because search.js is cached as immutable too.
+if (!readFileSync(new URL('assets/site.js', root), 'utf8').includes("'search.js'+(m.src.match(/\\?.*$/)||[''])[0]")) bad('assets/site.js', "must load search.js with site.js's own ?v= (q.src=m.src.replace(/site\\.js.*$/,'search.js'+...)); search.js is cached as immutable");
+
+// Moved or renamed pages: scripts/redirects.json [{from,to}] becomes vercel.json redirects. A published URL is never deleted.
+let moves = [];
+try { moves = JSON.parse(readFileSync(new URL('scripts/redirects.json', root), 'utf8')); } catch { bad('scripts/redirects.json', 'missing or not valid JSON (an array of {"from":"/old.html","to":"/new.html"})'); }
+const exists = u => u === '/' || existsSync(new URL(u.replace(/^\//, ''), root));
+const froms = new Set(moves.map(m => m.from));
+for (const m of moves) {
+  if (!m || !/^\//.test(m.from || '') || !/^(\/|https:\/\/)/.test(m.to || '')) { bad('scripts/redirects.json', 'each entry needs from ("/old") and to ("/new" or https://...): ' + JSON.stringify(m)); continue; }
+  if (exists(m.from) && m.from !== '/') bad('scripts/redirects.json', `${m.from} still exists as a page; remove the redirect or the page`);
+  if (m.to.startsWith('/') && !exists(m.to)) bad('scripts/redirects.json', `${m.to} (target of ${m.from}) does not exist`);
+  if (froms.has(m.to)) bad('scripts/redirects.json', `${m.from} → ${m.to} is a chain: point it straight at the final page`);
+}
+{ // every URL in the sitemap of main (or the last commit) must still open, or redirect
+  let base = null;
+  for (const ref of ['origin/main', 'HEAD']) { base = git('show', `${ref}:sitemap.xml`); if (base) break; }
+  for (const m of (base || '').matchAll(/<loc>([^<]*)<\/loc>/g)) {
+    const path = '/' + m[1].slice(SITE.length);
+    if (m[1].startsWith(SITE) && !exists(path) && !froms.has(path)) bad('sitemap.xml', `${path} was published but is gone: add it to scripts/redirects.json (never delete a published URL)`);
+  }
+}
+{ // vercel.json: keep every other key, own `headers` and `redirects`
+  const vp = new URL('vercel.json', root);
+  let cfg = {}; try { cfg = JSON.parse(readFileSync(vp, 'utf8')); } catch {}
+  const h = (source, value) => ({ source, headers: [{ key: 'Cache-Control', value }] });
+  const want = { ...cfg, headers: [
+    h('/', 'public, max-age=0, must-revalidate'),
+    h('/(.*)\\.html', 'public, max-age=0, must-revalidate'),
+    // only the files every page references with ?v=<hash> (checked above) are immutable
+    h('/assets/(site\\.js|site\\.css|teach\\.js|teach\\.css|build-concepts\\.js|search\\.js)', 'public, max-age=31536000, immutable'),
+    h('/assets/(.+\\.(?:svg|png|jpg|ico|webp))', 'public, max-age=3600, stale-while-revalidate=86400'),
+  ], redirects: moves.filter(m => m && m.from && m.to).map(m => ({ source: m.from, destination: m.to, permanent: true })) };
+  if (!want.redirects.length) delete want.redirects;
+  const text = JSON.stringify(want, null, 2) + '\n';
+  let curText = ''; try { curText = readFileSync(vp, 'utf8'); } catch {}
+  if (curText !== text) { if (FIX) writeFileSync(vp, text); else bad('vercel.json', 'cache headers or redirects out of date (run node scripts/check-pages.mjs --fix)'); }
 }
 
 // The concept cards on ecosystem.html (assets/build-concepts.js): every lesson link is a published lesson with the titles in lessons.js.

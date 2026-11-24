@@ -113,3 +113,21 @@ WHAT CHANGED SINCE THE PREVIOUS LESSON
   agent orders the queue, a to-do list shows progress, each claim gets a fresh
   helper that looks things up by section, and failures are handled in code.
   desk_queue.py is unchanged from the pilot.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- DRY_RUN=1 python run_queue.py --limit 5 --break C003 prints the to-do list by state and ends 'Dry run: 5 claims worked.'
+- done lists C001, C002, C004 and C005; for_handler lists C003.
+- todo.json shows C003 with "tries": 2 and nothing left in to_do or in_progress.
+- Running again without --break skips finished claims, and C003 stays for_handler.
+- With a real model, each claim's "read" list shows which manual sections the helper opened.
+
+Compare your work with final/ afterwards, starting with desk_queue.py, run_queue.py and the retry rule.
+
+验收标准（中文）
+- DRY_RUN=1 python run_queue.py --limit 5 --break C003 按状态打印待办清单，并以 “Dry run: 5 claims worked.” 结束。
+- done 列出 C001、C002、C004、C005；for_handler 列出 C003。
+- todo.json 中 C003 的 "tries" 为 2，to_do 和 in_progress 里都没有剩余。
+- 不加 --break 再运行，已完成的理赔被跳过，C003 仍留给人工处理。
+- 用真实模型时，每个理赔的 "read" 列表显示助手打开了哪些手册章节。

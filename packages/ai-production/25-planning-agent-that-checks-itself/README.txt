@@ -113,3 +113,21 @@ tool is dropped (this task does not need it). Added here and not in the lessons:
 one REGION constant used for the agent and sandbox, an optional MODEL_ID,
 clearing the plan at the start of each request, a clear message from mark_done
 for a step that does not exist, and the cleanup-check script.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- python3 examples/derangements.py prints 9, the correct answer.
+- add_todo('Find the area') then mark_done(1) print '1. [ ] Find the area' then '1. [x] Find the area'.
+- In the cloud the plan has four or five steps, one of them in cyan starting 'Write Python code'.
+- For four people who must not keep their own place, the answer is 9 and the sandbox check prints 9 too.
+- With observability on, the trace shows add_todo calls, run_python (usually the slowest step), mark_done calls and the final answer; after clean-up the agent, image, roles and log groups are gone.
+
+Compare your work with final/ afterwards, starting with agent.py, examples/derangements.py and the scripts folder.
+
+验收标准（中文）
+- python3 examples/derangements.py 打印 9，即正确答案。
+- add_todo('Find the area') 再 mark_done(1)，依次打印 “1. [ ] Find the area” 和 “1. [x] Find the area”。
+- 在云端，计划有四到五步，其中一步以青色显示并以 “Write Python code” 开头。
+- 四个人都不能坐回自己的位子，答案是 9，沙盒检查也打印 9。
+- 开启可观测后，追踪里有 add_todo 调用、run_python（通常最慢）、mark_done 调用和最终答案；清理后智能体、镜像、角色和日志组都消失。

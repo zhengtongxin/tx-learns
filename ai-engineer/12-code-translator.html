@@ -2,7 +2,7 @@
 <title>Project: a code translator | TX Learns</title>
 <meta name="description" content="Ask models to translate slow Python into fast C++, then compile, run and time the result to compare models on a task with an objective score."><meta property="og:title" content="Project: a code translator | TX Learns"><meta property="og:description" content="Ask models to translate slow Python into fast C++, then compile, run and time the result to compare models on a task with an objective score."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-engineer/12-code-translator.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
 <meta name="updated" content="2026-11-24">
-<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<link rel="canonical" href="https://tx-learns.vercel.app/ai-engineer/12-code-translator.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=4ee0731a"><link rel="stylesheet" href="../assets/teach.css?v=348efa72"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-engineer/12-code-translator.html","url":"https://tx-learns.vercel.app/ai-engineer/12-code-translator.html","name":"Project: a code translator","alternateName":"项目：代码翻译器","description":"Ask models to translate slow Python into fast C++, then compile, run and time the result to compare models on a task with an objective score.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Choosing the right model","dateModified":"2026-11-24","isPartOf":{"@type":"CollectionPage","name":"AI Engineer","url":"https://tx-learns.vercel.app/ai-engineer/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Engineer","item":"https://tx-learns.vercel.app/ai-engineer/index.html"},{"@type":"ListItem","position":3,"name":"Project: a code translator","item":"https://tx-learns.vercel.app/ai-engineer/12-code-translator.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Choosing the right model · Project</span><span class="zh">选对模型 · 项目</span></span><h1><span class="en">Project: a code translator</span><span class="zh">项目：代码翻译器</span></h1><p class="meta"><span class="en">You will turn slow Python into fast C++ with a model, and score models by what actually runs · ~30 min · hands-on</span><span class="zh">你会用模型把慢的 Python 变成快的 C++，并按真正跑出来的结果给模型打分 · 约 30 分钟 · 动手实践</span></p></div>
 <div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the helper learnt to pick a model with its own questions, but a person still judged the answers. Today Ah Boy's Python price script takes twenty seconds a run, and fast C++ with the same output can be judged by a stopwatch. We fix it by asking several models to translate, then compiling, running and timing each.</p>
@@ -38,7 +38,7 @@ def strip_fences(reply):
 <p class="zh" style="margin:0 0 8px">一个函数对任何模型完成整条链：提问、去围栏、写入 <code>main.cpp</code>、编译、运行、计时。另一个函数运行 Python 做对照。这样每个模型都有两个客观数字，不靠代码好不好看。在一个把级数求和几百万次的循环上，Python 花了约二十秒，某个模型写的 C++ 约 0.08 秒就跑完。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 130" role="img" aria-label="Five steps for each model: ask, clean the reply, compile, run and time, then compare the output with Python."><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box new" x="10" y="40" width="116" height="56" rx="12"/><text class="en" x="68" y="73">Ask model</text><text class="zh" x="68" y="73">问模型</text><rect class="box new" x="156" y="40" width="116" height="56" rx="12"/><text class="en" x="214" y="65">Clean the</text><text class="en" x="214" y="81">reply</text><text class="zh" x="214" y="65">清理</text><text class="zh" x="214" y="81">回复</text><rect class="box new" x="302" y="40" width="116" height="56" rx="12"/><text class="en" x="360" y="73">Compile</text><text class="zh" x="360" y="73">编译</text><rect class="box new" x="448" y="40" width="116" height="56" rx="12"/><text class="en" x="506" y="65">Run and</text><text class="en" x="506" y="81">time it</text><text class="zh" x="506" y="65">运行并</text><text class="zh" x="506" y="81">计时</text><rect class="box new" x="594" y="40" width="116" height="56" rx="12"/><text class="en" x="652" y="65">Same output</text><text class="en" x="652" y="81">as Python?</text><text class="zh" x="652" y="65">输出和</text><text class="zh" x="652" y="81">Python 相同？</text><path class="lnk" d="M126 68 H153" marker-end="url(#ar)"/><path class="lnk" d="M272 68 H299" marker-end="url(#ar)"/><path class="lnk" d="M418 68 H445" marker-end="url(#ar)"/><path class="lnk" d="M564 68 H591" marker-end="url(#ar)"/></svg><figcaption><span class="en">Every model goes through the same chain, so the timings are fair.</span><span class="zh">每个模型都走同一条链，所以计时是公平的。</span></figcaption></figure>
 <div class="codebox"><span class="dim">import subprocess, time
-from openai import OpenAI
+from openai import OpenAI      # pip install openai; set OPENAI_API_KEY (calls cost money)
 client = OpenAI()
 
 def timed(cmd):
@@ -61,12 +61,19 @@ def run_python(path):
 <div class="try" id="p3"></div>
 
 <h2><span class="en">Step 4 · Verify the output, then rank the models</span><span class="zh">第 4 步 · 核对输出，再给模型排名</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Fast is worthless if it is wrong, so compare the printed output with Python's, line for line. Wei Jie first trusted the output and two models silently printed a wrong number. Use a harder program too: save one as hard_program.py. It could be a random-number generator feeding a search with big numbers, because sloppy translations break there. Then rank by speedup divided by cost, not by speed alone.</p>
-<p class="zh" style="margin:0 0 8px">快但错了毫无价值，所以要把打印的输出和 Python 的逐行对比。Wei Jie 起初相信了输出，结果有两个模型悄悄打印了错误的数字。再加一个更难的程序：存成 hard_program.py，可以是用随机数生成器喂给一个涉及大数的搜索，因为马虎的翻译会在这里露馅。然后按加速倍数除以成本来排名，不要只看速度。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Fast is worthless if it is wrong, so compare the printed output with Python's, line for line. Wei Jie first trusted the output and two models silently printed a wrong number. Use a harder program too: save one as hard_program.py. It could be a random-number generator feeding a search with big numbers, because sloppy translations break there. Then rank by speedup divided by cost (tokens used times the price per token, from your usage page), not by speed alone. A simple hard_program.py:</p>
+<p class="zh" style="margin:0 0 8px">快但错了毫无价值，所以要把打印的输出和 Python 的逐行对比。Wei Jie 起初相信了输出，结果有两个模型悄悄打印了错误的数字。再加一个更难的程序：存成 hard_program.py，可以是用随机数生成器喂给一个涉及大数的搜索，因为马虎的翻译会在这里露馅。然后按加速倍数除以成本（用掉的 token 数乘以每个 token 的价格，见用量页面）来排名，不要只看速度。下面是一个简单的 hard_program.py：</p></div>
+<div class="codebox"><span class="dim"># hard_program.py: a random-number generator feeding a big-number search
+x, total = 12345, 0
+for _ in range(5_000_000):
+    x = (x * 1103515245 + 12345) % 2147483648
+    total += x % 1000
+print(total)   # prints one number; the C++ must print the same one
+</span></div>
 <div class="codebox"><span class="dim">py_out, py_time = run_python("hard_program.py")
 hard_code = open("hard_program.py").read()
 
-</span><span class="chg">for model in ["big-model-a", "mid-model-b", "small-model-c"]:    # your shortlist
+</span><span class="chg">for model in ["gpt-4.1", "gpt-4.1-mini", "gpt-4.1-nano"]:    # your shortlist
     out, took = translate_and_run(model, hard_code)
     if out is None:
         print(model, "failed to compile")
@@ -88,7 +95,7 @@ hard_code = open("hard_program.py").read()
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
-<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script src="lessons.js?v=0ada53e6"></script><script src="../assets/site.js?v=f699e6c7"></script><script src="../assets/teach.js?v=ede6f40f"></script>
 <script>
 document.addEventListener('DOMContentLoaded',function(){
  var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();

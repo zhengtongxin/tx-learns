@@ -122,3 +122,21 @@ body (Pydantic), the model gets a three-section system prompt, and the page
 reads the stream with fetch (not EventSource) so it can send the token.
 Added here and not in the lessons: an error message on the page, a stop
 to the form's page reload, and a PLAN_SLUG constant.
+
+ACCEPTANCE CRITERIA
+-------------------
+You are done when:
+- Signed out, you see only the sign-in button; signed in on the free plan you see the pricing table, not the form.
+- After subscribing with the TEST card, the form appears.
+- Submitting invented notes streams text bit by bit and ends in three headed sections: Summary for the records, Next steps for the nurse, Email to the patient.
+- The API alone answers 401 or 403 without a token, 402 on the free plan, and 422 for a bad date.
+- A GET request to the route is refused with 405.
+
+Compare your work with final/ afterwards, starting with the api folder (the consultation route), the pages folder and vercel.json.
+
+验收标准（中文）
+- 退出登录时只看到登录按钮；以免费套餐登录时看到价格表而不是表单。
+- 用测试卡订阅后，表单出现。
+- 提交虚构的记录后文字逐步流出，最后是三个带标题的部分：Summary for the records、Next steps for the nurse、Email to the patient。
+- 单独调用 API：没有令牌返回 401 或 403，免费套餐返回 402，日期错误返回 422。
+- 对该路由发 GET 请求被拒绝，返回 405。

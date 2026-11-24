@@ -2,7 +2,7 @@
 <title>State, workspaces and three environments | TX Learns</title>
 <meta name="description" content="Run development, test and production as three copies of the same stack from one set of files, without copy-pasting configs."><meta property="og:title" content="State, workspaces and three environments | TX Learns"><meta property="og:description" content="Run development, test and production as three copies of the same stack from one set of files, without copy-pasting configs."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-production/18-state-workspaces-three-environments.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
 <meta name="updated" content="2026-11-24">
-<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<link rel="canonical" href="https://tx-learns.vercel.app/ai-production/18-state-workspaces-three-environments.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=4ee0731a"><link rel="stylesheet" href="../assets/teach.css?v=348efa72"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-production/18-state-workspaces-three-environments.html","url":"https://tx-learns.vercel.app/ai-production/18-state-workspaces-three-environments.html","name":"State, workspaces and three environments","alternateName":"状态、工作区与三套环境","description":"Run development, test and production as three copies of the same stack from one set of files, without copy-pasting configs.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"Infrastructure as code","dateModified":"2026-11-24","isPartOf":{"@type":"CollectionPage","name":"AI Production","url":"https://tx-learns.vercel.app/ai-production/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Production","item":"https://tx-learns.vercel.app/ai-production/index.html"},{"@type":"ListItem","position":3,"name":"State, workspaces and three environments","item":"https://tx-learns.vercel.app/ai-production/18-state-workspaces-three-environments.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Infrastructure as code · Lesson 2</span><span class="zh">基础设施即代码 · 第 2 课</span></span><h1><span class="en">State, workspaces and three environments</span><span class="zh">状态、工作区与三套环境</span></h1><p class="meta"><span class="en">Run development, test and production as three copies of the same stack from one set of files, without copy-pasting configs · ~35 min · hands-on</span><span class="zh">用同一套文件把开发、测试和生产跑成同一个架构的三份副本，不用复制粘贴配置 · 约 35 分钟 · 动手实践</span></p></div>
 <div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the product was described in files. Today it fails when Mr Ong wants dev, test and prod, and Mei Ling's first idea, copying the folder three times, would drift apart by Friday. We fix it by using one config, one variable and one workspace with its own state for each environment.</p>
@@ -74,8 +74,8 @@ terraform plan  -var="environment=dev"
 terraform apply -var="environment=dev"</span></div>
 <div class="try" id="t3"></div>
 <h2><span class="en">Step 5 · Per-environment settings</span><span class="zh">第 5 步 · 每个环境自己的设置</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Environments should share a shape but not every setting. Dev can use a small, cheap model and prod a bigger one. Put the choice in a <b>map</b> (a lookup table) keyed by environment name, and pick from it with one line. The function below also needs its role, so that is included. (Attaching the permissions from earlier lessons to the role is left out to keep this short. Without them the function cannot call the model, so add them before you deploy.)</p>
-<p class="zh" style="margin:0">各环境应该结构一样，但不必每项设置都一样。dev 可以用小而便宜的模型，prod 用更大的。把这个选择放进一张以环境名为键的<b>映射表</b>（map，查找表）里，再用一行去取。下面的函数还需要它的角色，所以也一起写出来。（把前几课的权限挂到角色上这一步为了简短省略了。没有它们，函数就调不了模型，部署前要先加上。）</p>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Environments should share a shape but not every setting. Dev can use a small, cheap model and prod a bigger one. Put the choice in a <b>map</b> (a lookup table) keyed by environment name, and pick from it with one line. The function below also needs its role, so that is included. The role has two parts: <code>assume_role_policy</code> says who may wear it (only the function service, <code>lambda.amazonaws.com</code>), and the separate <code>aws_iam_role_policy</code> says what it may do: call the model, read and write its own memory bucket, and write logs. Without that second part the function cannot call the model.</p>
+<p class="zh" style="margin:0">各环境应该结构一样，但不必每项设置都一样。dev 可以用小而便宜的模型，prod 用更大的。把这个选择放进一张以环境名为键的<b>映射表</b>（map，查找表）里，再用一行去取。下面的函数还需要它的角色，所以也一起写出来。角色分两部分：<code>assume_role_policy</code> 说谁可以穿上它（只有函数服务 <code>lambda.amazonaws.com</code>），另一个 <code>aws_iam_role_policy</code> 说它能做什么：调用模型、读写自己的记忆存储桶、写日志。没有这第二部分，函数就调不了模型。</p>
 <p class="en" style="margin:0">Optional: a custom domain through DNS is one more resource per environment, with the environment name in the address.</p>
 <p class="zh" style="margin:0">可选项：用 DNS 配自定义域名，每个环境再多一个资源，地址里带上环境名。</p></div>
 <div class="codebox"><span class="dim">variable "model_ids" {
@@ -97,6 +97,20 @@ resource "aws_iam_role" "twin" {
     Version   = "2012-10-17"
     Statement = [{ Effect = "Allow", Action = "sts:AssumeRole",
                    Principal = { Service = "lambda.amazonaws.com" } }]
+  })
+}
+
+resource "aws_iam_role_policy" "twin" {
+  name = "${local.prefix}-twin-access"
+  role = aws_iam_role.twin.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      { Effect = "Allow", Action = ["bedrock:InvokeModel"], Resource = "*" },
+      { Effect = "Allow", Action = ["s3:GetObject", "s3:PutObject"],
+        Resource = "${aws_s3_bucket.memory.arn}/*" },
+      { Effect = "Allow", Action = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+        Resource = "*" }]
   })
 }
 
@@ -137,7 +151,7 @@ Plan: 0 to add, 1 to change, 0 to destroy.</span></div>
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Production</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
-<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script src="lessons.js?v=9e5fd147"></script><script src="../assets/site.js?v=f699e6c7"></script><script src="../assets/teach.js?v=ede6f40f"></script>
 <script>
 document.addEventListener('DOMContentLoaded',function(){
  var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();

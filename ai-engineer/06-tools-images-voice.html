@@ -2,7 +2,7 @@
 <title>Tools, images and voice | TX Learns</title>
 <meta name="description" content="A tool is a function the model asks you to run. Learn the call loop, then add pictures and speech as two more model calls."><meta property="og:title" content="Tools, images and voice | TX Learns"><meta property="og:description" content="A tool is a function the model asks you to run. Learn the call loop, then add pictures and speech as two more model calls."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-engineer/06-tools-images-voice.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
 <meta name="updated" content="2026-11-24">
-<link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
+<link rel="canonical" href="https://tx-learns.vercel.app/ai-engineer/06-tools-images-voice.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=4ee0731a"><link rel="stylesheet" href="../assets/teach.css?v=348efa72"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-engineer/06-tools-images-voice.html","url":"https://tx-learns.vercel.app/ai-engineer/06-tools-images-voice.html","name":"Tools, images and voice","alternateName":"工具、图像与语音","description":"A tool is a function the model asks you to run. Learn the call loop, then add pictures and speech as two more model calls.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Many models, one app","dateModified":"2026-11-24","isPartOf":{"@type":"CollectionPage","name":"AI Engineer","url":"https://tx-learns.vercel.app/ai-engineer/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Engineer","item":"https://tx-learns.vercel.app/ai-engineer/index.html"},{"@type":"ListItem","position":3,"name":"Tools, images and voice","item":"https://tx-learns.vercel.app/ai-engineer/06-tools-images-voice.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Many models, one app · Lesson 3</span><span class="zh">多个模型，一个应用 · 第 3 课</span></span><h1><span class="en">Tools, images and voice</span><span class="zh">工具、图像与语音</span></h1><p class="meta"><span class="en">You will let a model ask your code for facts, then add a picture and a voice · ~20 min · hands-on</span><span class="zh">你会让模型向你的代码要事实，再加上图片和声音 · 约 20 分钟 · 动手实践</span></p></div>
 <div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time Mdm Tan could chat with the helper on a screen. Today it fails when she asks “How much is a tin of sardines?” and it invents a price. We fix it by letting the model ask Wei Jie's code to look the price up.</p>
@@ -27,8 +27,8 @@ price_tool = {"type": "function", "function": {
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 2 · The loop: ask, run, answer</span><span class="zh">第 2 步 · 循环：请求、执行、回答</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Call the model with <code>tools=[price_tool]</code>. If the <code>finish_reason</code> is <code>"tool_calls"</code>, run each requested call. There can be several in one reply. Append the assistant message, then <b>one</b> <code>tool</code> message per call, each with its <code>tool_call_id</code>. Call the model again so it can answer in words. Wrap it in <code>while</code> so the model can chain tools one after another.</p>
-<p class="zh" style="margin:0 0 8px">调用模型时带上 <code>tools=[price_tool]</code>。如果 <code>finish_reason</code> 是 <code>"tool_calls"</code>，就执行每一个被请求的调用，一次回复里可能有好几个。先加入助手消息，再为每个调用加<b>一条</b> <code>tool</code> 消息，各带自己的 <code>tool_call_id</code>。然后再调用一次模型，让它用话说出答案。用 <code>while</code> 包起来，模型就能一个接一个地连着用工具。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Call the model with <code>tools=[price_tool]</code>. The model sends its arguments back as a JSON string, so <code>json.loads</code> turns it into a dict, and <code>**args</code> spreads that dict into named arguments (<code>get_price(item="sardines")</code>). If the <code>finish_reason</code> is <code>"tool_calls"</code>, run each requested call. There can be several in one reply. Append the assistant message, then <b>one</b> <code>tool</code> message per call, each with its <code>tool_call_id</code>. Call the model again so it can answer in words. Wrap it in <code>while</code> so the model can chain tools one after another.</p>
+<p class="zh" style="margin:0 0 8px">调用模型时带上 <code>tools=[price_tool]</code>。模型把参数以 JSON 字符串的形式传回来，<code>json.loads</code> 把它变成字典，<code>**args</code> 再把字典展开成具名参数（<code>get_price(item="sardines")</code>）。如果 <code>finish_reason</code> 是 <code>"tool_calls"</code>，就执行每一个被请求的调用，一次回复里可能有好几个。先加入助手消息，再为每个调用加<b>一条</b> <code>tool</code> 消息，各带自己的 <code>tool_call_id</code>。然后再调用一次模型，让它用话说出答案。用 <code>while</code> 包起来，模型就能一个接一个地连着用工具。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 150" role="img" aria-label="The tool loop: the model asks, your code runs">
 <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9a9aa8"/></marker></defs>
 <rect class="box soft" x="2" y="40" width="134" height="70" rx="12"/>
@@ -76,11 +76,13 @@ print(run_chat([{"role": "user", "content": "How much is an umbrella and a tin o
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I thought the model ran my function. It does not, it only asks. I also forgot to return a tool message for every call id, which gives an API error.</span><span class="zh">我以为模型会运行我的函数。其实不会，它只是发出请求。我还漏了为每个 call id 返回 tool 消息，结果 API 报错。</span></div>
 
 <h2><span class="en">Step 3 · Real data behind the tool</span><span class="zh">第 3 步 · 工具背后放真实数据</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A dict in memory is a toy. Wei Jie swapped it for a small SQLite table and added a second tool that <b>changes</b> a price. Now the model reads and writes real state. That raises a new question: who is allowed to ask for the change? A reader tool is low risk. A writer tool needs thought.</p>
-<p class="zh" style="margin:0 0 8px">放在内存里的字典只是玩具。Wei Jie 把它换成一张小小的 SQLite 表，再加了第二个会<b>修改</b>价格的工具。现在模型读写的是真实状态。这就带来新问题：谁有权请求修改？只读的工具风险低，会写入的工具得好好想想。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A dict in memory is a toy. Wei Jie swapped it for a small SQLite table and added a second tool that <b>changes</b> a price. Now the model reads and writes real state. That raises a new question: who is allowed to ask for the change? A reader tool is low risk. A writer tool needs thought. SQLite is a database in one file, and SQL is its query language: <code>SELECT</code> reads rows and <code>INSERT</code> writes them. The model must be told about the new tool too, and your loop must run the right function by name.</p>
+<p class="zh" style="margin:0 0 8px">放在内存里的字典只是玩具。Wei Jie 把它换成一张小小的 SQLite 表，再加了第二个会<b>修改</b>价格的工具。现在模型读写的是真实状态。这就带来新问题：谁有权请求修改？只读的工具风险低，会写入的工具得好好想想。SQLite 是存在一个文件里的数据库，SQL 是它的查询语言：<code>SELECT</code> 读取行，<code>INSERT</code> 写入行。新工具也要告诉模型，而且你的循环要按名字运行对应的函数。</p></div>
 <div class="codebox"><span class="dim">import sqlite3
 db = sqlite3.connect("shop.db")
 db.execute("CREATE TABLE IF NOT EXISTS prices (item TEXT PRIMARY KEY, price REAL)")
+db.execute("INSERT OR IGNORE INTO prices VALUES ('sardines', 2.2), ('umbrella', 6.0)")   # start with some rows
+db.commit()
 
 def get_price(item):
     </span><span class="chg">row = db.execute("SELECT price FROM prices WHERE item = ?", (item.lower(),)).fetchone()</span><span class="dim">
@@ -89,7 +91,17 @@ def get_price(item):
 </span><span class="chg">def set_price(item, price):
     db.execute("INSERT OR REPLACE INTO prices VALUES (?, ?)", (item.lower(), price))
     db.commit()
-    return f"{item} is now S${price}"</span></div>
+    return f"{item} is now S${price}"
+
+set_price_tool = {"type": "function", "function": {
+    "name": "set_price",
+    "description": "Change the price of one item in Mdm Tan's shop.",
+    "parameters": {"type": "object",
+                   "properties": {"item": {"type": "string"}, "price": {"type": "number"}},
+                   "required": ["item", "price"]}}}
+tools = [price_tool, set_price_tool]                    # pass tools=tools in run_chat
+functions = {"get_price": get_price, "set_price": set_price}
+# in the loop: functions[call.function.name](**args)</span></div>
 <p class="en">Which tool is the riskier one to give a chatbot that talks to the public?</p>
 <p class="zh">给一个面向公众的聊天机器人，哪种工具风险更大？</p><div class="sc" id="g3"></div>
 
@@ -113,14 +125,14 @@ def speak(text):
 
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Add a second tool</b> and ask a question that needs both.</span><span class="zh"><b>再加一个工具，</b>问一个需要两个工具的问题。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Draw a picture</b> for each item mentioned in the reply.</span><span class="zh"><b>为回复里提到的每件商品画一张图。</b></span></span></label><label><input type="checkbox"><span><span class="en"><b>Make the bot speak</b> its answer.</span><span class="zh"><b>让机器人把答案读出来。</b></span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the helper looks up Mdm Tan's sardine price from a real table instead of guessing, the way Uncle Raj says “ask the clerk” and then answers from the file, and it can draw a picture or speak when asked. The next problem is putting the lookup, the picture and the voice together into one desk assistant a real neighbour can use.</span><span class="zh">现在助手会从真实的表里查出 Tan 太太要的沙丁鱼价格，而不是瞎猜，就像 Raj 叔叔说“去问问文员”，再根据档案回答；需要时它还能画图或开口说话。下一个问题是把查询、图片和声音拼成一个真正的邻居也能用的柜台助手。</span></div>
+<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the helper looks up Mdm Tan's sardine price from a real table instead of guessing, the way Uncle Raj says “ask the clerk” and then answers from the file, and the <code>draw</code> and <code>speak</code> helpers are ready to be called whenever the code asks for a picture or a voice. The next problem is putting the lookup, the picture and the voice together into one desk assistant a real neighbour can use.</span><span class="zh">现在助手会从真实的表里查出 Tan 太太要的沙丁鱼价格，而不是瞎猜，就像 Raj 叔叔说“去问问文员”，再根据档案回答；需要时你的代码可以调用 <code>draw</code> 和 <code>speak</code> 这两个函数来画图或开口说话。下一个问题是把查询、图片和声音拼成一个真正的邻居也能用的柜台助手。</span></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• Tools: the model asks, your code acts.<br>• The tool description is a prompt, so write it clearly.<br>• Return one <code>tool</code> message for every call id.<br>• A <code>while</code> loop lets the model make many and chained calls.<br>• Real data (a database) makes tools useful. Writer tools need care.<br>• Images and voice are separate models behind separate calls.<br>• Images cost money, so do not call them without a reason.<br>• This is a first step towards agents.</p><p class="zh" style="margin:0">• 工具：模型提出请求，你的代码去执行。<br>• 工具说明就是提示词，要写清楚。<br>• 每个 call id 都要返回一条 <code>tool</code> 消息。<br>• <code>while</code> 循环让模型可以多次、连续地调用。<br>• 真实数据（数据库）让工具有用，会写入的工具要小心。<br>• 图像和语音是不同的模型、不同的调用。<br>• 图片要花钱，没有理由就别调用。<br>• 这是通往智能体的第一步。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
-<script src="lessons.js"></script><script src="../assets/site.js"></script><script src="../assets/teach.js"></script>
+<script src="lessons.js?v=0ada53e6"></script><script src="../assets/site.js?v=f699e6c7"></script><script src="../assets/teach.js?v=ede6f40f"></script>
 <script>
 document.addEventListener('DOMContentLoaded',function(){
  var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
