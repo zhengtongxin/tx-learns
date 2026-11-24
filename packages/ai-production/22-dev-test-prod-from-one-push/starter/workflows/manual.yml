@@ -1,0 +1,32 @@
+# Copy to .github/workflows/manual.yml in your repository.
+# TODO: finish it. A manual run that deploys or destroys one chosen environment.
+name: manual
+on:
+  workflow_dispatch:
+    inputs:
+      environment: { description: Which environment, type: choice, options: [dev, test, prod], required: true }
+      action:      { description: What to do,        type: choice, options: [deploy, destroy], required: true }
+permissions:
+  id-token: write
+  contents: read
+env:
+  ENVIRONMENT: ${{ inputs.environment }}
+  ACTION: ${{ inputs.action }}
+  STATE_BUCKET: ${{ secrets.STATE_BUCKET }}
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # TODO 1: the same setup steps as deploy.yml (terraform, cloud sign-in, terraform init)
+      # TODO 2: show the plan: "./deploy.sh $ENVIRONMENT plan" for deploy,
+      #         "terraform plan -destroy" for destroy (run scripts/ensure-zip.sh first)
+      - run: 'echo "TODO - plan"'
+  apply:
+    needs: plan
+    runs-on: ubuntu-latest
+    # TODO 3: environment: ${{ inputs.environment }}   <- for prod this makes the job wait for a person
+    steps:
+      - uses: actions/checkout@v4
+      # TODO 4: the same setup steps again, then run ./deploy.sh or ./destroy.sh for $ENVIRONMENT
+      - run: 'echo "TODO - apply"'

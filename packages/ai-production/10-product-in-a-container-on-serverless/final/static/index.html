@@ -1,0 +1,22 @@
+<!doctype html>
+<!-- added: a stand-in page so the container runs on its own.
+     Replace the whole "static" folder with your exported front end (scripts/build-static.sh). -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wharf clinic helper (placeholder)</title>
+</head>
+<body style="font-family: sans-serif; max-width: 36rem; margin: 2rem auto; padding: 0 1rem">
+  <h1>Wharf clinic helper</h1>
+  <p>The container is running. This is a placeholder page.</p>
+  <p>API health: <strong id="health">checking...</strong></p>
+  <p>Next step: export your front end and copy it into the <code>static</code> folder.</p>
+  <script>
+    fetch("/api/health")
+      .then(function (r) { return r.json(); })
+      .then(function (d) { document.getElementById("health").textContent = d.ok ? "ok" : "not ok"; })
+      .catch(function () { document.getElementById("health").textContent = "no answer"; });
+  </script>
+</body>
+</html>

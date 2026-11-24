@@ -1,0 +1,52 @@
+# Copy to .github/workflows/manual.yml in your repository.
+# Run it from the main branch: the pipeline role trusts only main (and the named environments).
+name: manual
+on:
+  workflow_dispatch:
+    inputs:
+      environment: { description: Which environment, type: choice, options: [dev, test, prod], required: true }
+      action:      { description: What to do,        type: choice, options: [deploy, destroy], required: true }
+permissions:
+  id-token: write
+  contents: read
+env:
+  ENVIRONMENT: ${{ inputs.environment }}
+  ACTION: ${{ inputs.action }}
+  STATE_BUCKET: ${{ secrets.STATE_BUCKET }}
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/wharf-pipeline
+          aws-region: ${{ vars.AWS_REGION }}
+      - working-directory: infra
+        run: terraform init -backend-config="bucket=$STATE_BUCKET" -backend-config="region=$AWS_REGION" -backend-config="dynamodb_table=wharf-tf-locks"
+      - name: Show the plan
+        run: |
+          if [ "$ACTION" = "deploy" ]; then
+            ./deploy.sh "$ENVIRONMENT" plan
+          else
+            bash scripts/ensure-zip.sh
+            cd infra
+            terraform workspace select "$ENVIRONMENT"
+            terraform plan -destroy -var="environment=$ENVIRONMENT"
+          fi
+  apply:
+    needs: plan
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }} # for prod, this line makes the job wait for a person
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/wharf-pipeline
+          aws-region: ${{ vars.AWS_REGION }}
+      - working-directory: infra
+        run: terraform init -backend-config="bucket=$STATE_BUCKET" -backend-config="region=$AWS_REGION" -backend-config="dynamodb_table=wharf-tf-locks"
+      - run: |
+          if [ "$ACTION" = "deploy" ]; then ./deploy.sh "$ENVIRONMENT"; else ./destroy.sh "$ENVIRONMENT"; fi
