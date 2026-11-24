@@ -1,10 +1,12 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tools, images and voice | TX Learns</title>
 <meta name="description" content="A tool is a function the model asks you to run. Learn the call loop, then add pictures and speech as two more model calls."><meta property="og:title" content="Tools, images and voice | TX Learns"><meta property="og:description" content="A tool is a function the model asks you to run. Learn the call loop, then add pictures and speech as two more model calls."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-engineer/06-tools-images-voice.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
-<meta name="updated" content="2026-11-23">
+<meta name="updated" content="2026-11-24">
 <link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/teach.css"></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Many models, one app · Lesson 3</span><span class="zh">多个模型，一个应用 · 第 3 课</span></span><h1><span class="en">Tools, images and voice</span><span class="zh">工具、图像与语音</span></h1><p class="meta"><span class="en">You will let a model ask your code for facts, then add a picture and a voice · ~20 min · hands-on</span><span class="zh">你会让模型向你的代码要事实，再加上图片和声音 · 约 20 分钟 · 动手实践</span></p></div>
+<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time Mdm Tan could chat with the helper on a screen. Today it fails when she asks “How much is a tin of sardines?” and it invents a price. We fix it by letting the model ask Wei Jie's code to look the price up.</p>
+<p class="zh" style="margin:0">上回 Tan 太太能在界面上和助手聊天。今天它的毛病是她问“一罐沙丁鱼多少钱？”，它编了个价格。解决办法是让模型去请 Wei Jie 的代码查价格。</p></div>
 <div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0"><b>Mdm Tan</b> asks the shop helper “How much is a tin of sardines?” and it makes up a price. <b>Wei Jie</b> wants it to look the price up instead. He teaches the model to ask his code for facts, and later gives the helper a picture and a voice too.</p>
 <p class="zh" style="margin:0"><b>Tan 太太</b>问店铺助手“一罐沙丁鱼多少钱？”，它编了个价格。<b>Wei Jie</b> 想让它去查，而不是瞎编。他教模型向自己的代码要事实，后来还给助手加上了图片和声音。</p></div>
 
@@ -27,6 +29,32 @@ price_tool = {"type": "function", "function": {
 <h2><span class="en">Step 2 · The loop: ask, run, answer</span><span class="zh">第 2 步 · 循环：请求、执行、回答</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Call the model with <code>tools=[price_tool]</code>. If the <code>finish_reason</code> is <code>"tool_calls"</code>, run each requested call. There can be several in one reply. Append the assistant message, then <b>one</b> <code>tool</code> message per call, each with its <code>tool_call_id</code>. Call the model again so it can answer in words. Wrap it in <code>while</code> so the model can chain tools one after another.</p>
 <p class="zh" style="margin:0 0 8px">调用模型时带上 <code>tools=[price_tool]</code>。如果 <code>finish_reason</code> 是 <code>"tool_calls"</code>，就执行每一个被请求的调用，一次回复里可能有好几个。先加入助手消息，再为每个调用加<b>一条</b> <code>tool</code> 消息，各带自己的 <code>tool_call_id</code>。然后再调用一次模型，让它用话说出答案。用 <code>while</code> 包起来，模型就能一个接一个地连着用工具。</p></div>
+<figure class="fig"><svg viewBox="0 0 720 150" role="img" aria-label="The tool loop: the model asks, your code runs">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9a9aa8"/></marker></defs>
+<rect class="box soft" x="2" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="69" y="71">Question</text>
+<text class="en sm" x="69" y="92">price of sardines?</text>
+<text class="zh" x="69" y="71">问题</text>
+<text class="zh sm" x="69" y="92">沙丁鱼多少钱？</text>
+<rect class="box soft" x="196" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="263" y="71">Model asks</text>
+<text class="en sm" x="263" y="92">finish: tool_calls</text>
+<text class="zh" x="263" y="71">模型提出请求</text>
+<text class="zh sm" x="263" y="92">结束原因：tool_calls</text>
+<rect class="box new" x="390" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="457" y="71">Your function</text>
+<text class="en sm" x="457" y="92">runs get_price()</text>
+<text class="zh" x="457" y="71">你的函数</text>
+<text class="zh sm" x="457" y="92">运行 get_price()</text>
+<rect class="box soft" x="584" y="40" width="134" height="70" rx="12"/>
+<text class="en" x="651" y="71">Final answer</text>
+<text class="en sm" x="651" y="92">uses the result</text>
+<text class="zh" x="651" y="71">最终回答</text>
+<text class="zh sm" x="651" y="92">用上查到的结果</text>
+<path class="lnk" d="M139,75 L193,75" marker-end="url(#ah)"/>
+<path class="lnk hot" d="M333,75 L387,75" marker-end="url(#ah)"/>
+<path class="lnk" d="M527,75 L581,75" marker-end="url(#ah)"/>
+</svg><figcaption><span class="en">The model never runs your function; it only asks, and your code sends back the result.</span><span class="zh">模型从不自己运行你的函数，它只提出请求，由你的代码把结果送回去。</span></figcaption></figure>
 <div class="codebox"><span class="dim">import json
 from openai import OpenAI
 client = OpenAI()
@@ -85,7 +113,7 @@ def speak(text):
 
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Add a second tool</b> and ask a question that needs both.</span><span class="zh"><b>再加一个工具，</b>问一个需要两个工具的问题。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Draw a picture</b> for each item mentioned in the reply.</span><span class="zh"><b>为回复里提到的每件商品画一张图。</b></span></span></label><label><input type="checkbox"><span><span class="en"><b>Make the bot speak</b> its answer.</span><span class="zh"><b>让机器人把答案读出来。</b></span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">Back at the void deck</span><span class="zh">回到组屋底层</span></b><span class="en">A tool call is like Uncle Raj saying “ask the clerk at the town council”. He does not walk to the office himself. He tells you what to ask, you go and come back with the file, and then he answers using it.</span><span class="zh">调用工具就像 Raj 叔叔说“去问问市镇理事会的文员”。他自己不会走去办公室，只告诉你该问什么，你去把档案取回来，他再根据它回答。</span></div>
+<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the helper looks up Mdm Tan's sardine price from a real table instead of guessing, the way Uncle Raj says “ask the clerk” and then answers from the file, and it can draw a picture or speak when asked. The next problem is putting the lookup, the picture and the voice together into one desk assistant a real neighbour can use.</span><span class="zh">现在助手会从真实的表里查出 Tan 太太要的沙丁鱼价格，而不是瞎猜，就像 Raj 叔叔说“去问问文员”，再根据档案回答；需要时它还能画图或开口说话。下一个问题是把查询、图片和声音拼成一个真正的邻居也能用的柜台助手。</span></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
 <div class="card"><p class="en" style="margin:0">• Tools: the model asks, your code acts.<br>• The tool description is a prompt, so write it clearly.<br>• Return one <code>tool</code> message for every call id.<br>• A <code>while</code> loop lets the model make many and chained calls.<br>• Real data (a database) makes tools useful. Writer tools need care.<br>• Images and voice are separate models behind separate calls.<br>• Images cost money, so do not call them without a reason.<br>• This is a first step towards agents.</p><p class="zh" style="margin:0">• 工具：模型提出请求，你的代码去执行。<br>• 工具说明就是提示词，要写清楚。<br>• 每个 call id 都要返回一条 <code>tool</code> 消息。<br>• <code>while</code> 循环让模型可以多次、连续地调用。<br>• 真实数据（数据库）让工具有用，会写入的工具要小心。<br>• 图像和语音是不同的模型、不同的调用。<br>• 图片要花钱，没有理由就别调用。<br>• 这是通往智能体的第一步。</p></div>
 
