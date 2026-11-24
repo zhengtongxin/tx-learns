@@ -170,9 +170,7 @@ function pageHelpers(SKIP) {
       const bad = [...document.body.querySelectorAll('*')].filter(el => !(el instanceof SVGElement && !(el instanceof SVGSVGElement)))
         .filter(el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.right > W + 2 && !clips(el); })
         .filter((el, _, all) => !all.some(o => o !== el && el.contains(o)));
-      // Fixed bars are only shifted by a wider layout: when every culprit is fixed, name the widest non-fixed elements too.
-      const wide = bad.length && bad.every(el => getComputedStyle(el).position === 'fixed') ? [...document.body.querySelectorAll('*')].filter(el => getComputedStyle(el).position !== 'fixed' && el.getBoundingClientRect().width > 0 && el.getBoundingClientRect().right > W + 2).sort((a, b) => b.getBoundingClientRect().right - a.getBoundingClientRect().right).slice(0, 3).map(el => desc(el) + ' ends at ' + Math.round(el.getBoundingClientRect().right) + 'px') : [];
-      return { by: sw - W, culprits: bad.slice(0, 3).map(desc).concat(wide.map(w => 'widest: ' + w), bad.length && !wide.length ? ['sizes: clientWidth ' + W + ', scrollWidth ' + sw + ', innerWidth ' + innerWidth + ', body ' + document.body.scrollWidth + ', visual ' + Math.round(visualViewport.width)] : []) };
+      return { by: sw - W, culprits: bad.slice(0, 3).map(desc) };
     },
   };
 }
