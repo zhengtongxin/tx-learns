@@ -61,7 +61,7 @@ try {
   }
 
   // 2. Pages, lessons and every link in them.
-  const pages = ['index.html', 'ecosystem.html', 'glossary.html', ...TR.map(t => t.dir + '/index.html'), ...lessons.map(l => l.path)];
+  const pages = ['index.html', 'ecosystem.html', 'glossary.html', 'changelog.html', ...TR.map(t => t.dir + '/index.html'), ...lessons.map(l => l.path)];
   const links = new Map();
   for (const p of pages) {
     const r = await get(BASE + p);
