@@ -18,6 +18,9 @@ export const short = (s, n) => scrub(String(s || '')).replace(/\s+/g, ' ').trim(
 const out = (k, v) => process.env.GITHUB_OUTPUT && appendFileSync(process.env.GITHUB_OUTPUT, `${k}=${v}\n`);
 
 export async function rawFile(path) {
+  if (process.env.GITHUB_TOKEN) { // the contents API is fresh; raw.githubusercontent.com caches for minutes
+    try { const r = await api('GET', `/contents/${path}?ref=${BRANCH}`); if (r.status === 200) return JSON.parse(Buffer.from(r.json.content || '', 'base64').toString() || '{}'); } catch {}
+  }
   try { const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/${path}`); return r.ok ? await r.json() : {}; } catch { return {}; }
 }
 
@@ -54,7 +57,7 @@ export function mergeReader(data, reader, at = new Date().toISOString()) {
 export const pendingIdeas = (state = {}) => (state.ideas || []).filter(i => existsSync(join(ROOT, i.file))).sort((a, b) => a.priority - b.priority || Date.parse(a.at) - Date.parse(b.at));
 
 // Pick the one thing to fix. Returns {kind, key, files, text} or null.
-export async function pick() {
+export async function pick({ ideas = true } = {}) {
   const attempts = (await rawFile('signals/improver.json')).attempts || {};
   const fresh = k => !attempts[k] || Date.now() - Date.parse(attempts[k]) > COOLDOWN_DAYS * 864e5;
   const issues = await gh('GET', '/issues?state=open&per_page=50').catch(() => []);
@@ -74,6 +77,7 @@ export async function pick() {
     const js = file.replace(/^([^/]+)\/(\d\d-[^.]+)\.html$/, '$1/js/$2.js');
     return { kind: 'reader', key: `reader:${file}`, files: [file, ...(existsSync(join(ROOT, js)) ? [js] : [])], text: `The intern agent (reads lessons as a newcomer to AI) scored ${file} ${v.score}/10 and found these confusing parts:\n${v.confusing.map(c => `- ${c.where}: ${c.why}`).join('\n')}\n\nFix only those parts: small wording changes, a missing step or an unexplained term, in both English and 中文. Keep the story, the structure and the lesson's own voice. Do not touch what was not flagged.` };
   }
+  if (!ideas) return null;
   const idea = pendingIdeas(await rawFile('signals/ideas.json'))[0];
   if (idea) {
     const js = idea.file.replace(/^([^/]+)\/(\d\d-[^.]+)\.html$/, '$1/js/$2.js');

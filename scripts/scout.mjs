@@ -27,7 +27,7 @@ export const ROLES = {
   'content-creator': { files: lessons, ask: 'You are the content creator. Read STYLE.md, then the lesson. Look for what would teach better: a missing worked example, a step that jumps, a weak recap, a figure of speech that does not carry over to 中文, a place where the lesson repeats or contradicts another one (scripts/rag.mjs "<question>" finds related lessons).' },
   'backend-engineer': { files: lessons, ask: 'You are the backend engineer. Read the lesson\'s code boxes and facts. Look for code that would not run as written, a command or setting that is wrong or out of date, a claim that is not true, a missing import or step.' },
   'frontend-engineer': { files: tops, ask: 'You are the frontend engineer. Read the page. Look for what would confuse or block a reader on a phone or with a keyboard: unclear labels, missing headings or alt text, controls that are hard to find, tight tap targets, text that is too long.' },
-  'cybersecurity-engineer': { files: () => ['assets/site.js', 'assets/teach.js', 'assets/search.js'].filter(f => existsSync(join(ROOT, f))), ask: 'You are the cybersecurity engineer. Read the script. Look for unsafe patterns: untrusted text put into HTML (innerHTML), links opened without rel, data read from storage without checking, anything that could run attacker text.' },
+  'cybersecurity-engineer': { files: () => lessons().map(f => f.replace(/^([^/]+)\/(\d\d-.+)\.html$/, '$1/js/$2.js')).filter(f => existsSync(join(ROOT, f))), ask: 'You are the cybersecurity engineer. Read the lesson widget script (one lesson only, never shared site scripts). Look for unsafe patterns: untrusted text put into HTML (innerHTML), links opened without rel, data read from storage without checking, anything that could run attacker text.' },
   'product-engineer': { files: () => ['index.html', ...tops().filter(f => f !== 'index.html')], ask: 'You are the product engineer. Read the page as a first-time visitor. Look for what would make them leave or not know where to start: unclear promise, missing next step, jargon before it is explained.' },
   'intern': { files: () => ['glossary.js'].filter(f => existsSync(join(ROOT, f))), ask: 'You are the intern learning AI. Read the glossary terms. Look for definitions that use a harder word than the one they explain, a term lessons use that is missing, or an English and 中文 pair that do not say the same thing.' },
 };
@@ -36,7 +36,7 @@ const words = s => new Set(String(s).toLowerCase().match(/[a-z0-9一-鿿]{3,}/g)
 const same = (a, b) => { const x = words(a), y = words(b); const n = [...x].filter(w => y.has(w)).length; return n / Math.max(1, Math.min(x.size, y.size)) >= 0.6; };
 
 export async function plan() {
-  if (await pick()) return null;                        // something urgent or an idea is already waiting: no scout
+  if (await pick({ ideas: false })) return null;        // a reported problem comes first: no scout
   const state = await rawFile('signals/ideas.json');
   if (pendingIdeas(state).length >= 5) return null;
   const now = Date.now(), roles = Object.keys(ROLES);
