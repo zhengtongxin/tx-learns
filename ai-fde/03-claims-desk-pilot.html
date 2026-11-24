@@ -30,7 +30,7 @@
 <h2><span class="en">Step 2 · The backend queue</span><span class="zh">第 2 步 · 后端的队列</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Every claim needs a state, so everyone knows where it is. Four are enough: <b>waiting</b>, <b>in progress</b>, <b>waiting for sign-off</b> and <b>decided</b>. In the code they are the words <code>waiting</code>, <code>in_progress</code>, <code>waiting_signoff</code> and <code>decided</code>. It works like the queue-number ticket machine at the shophouse door: a claim is always in exactly one place.</p>
 <p class="zh" style="margin:0 0 8px">每份理赔都要有一个状态，让大家知道它在哪。四个就够：<b>等待中</b>、<b>处理中</b>、<b>等待签字</b>、<b>已决定</b>。代码里它们分别写作 <code>waiting</code>、<code>in_progress</code>、<code>waiting_signoff</code> 和 <code>decided</code>。就像店屋门口的取号机：一份理赔在任何时刻都只在一个地方。</p></div>
-<div class="codebox" data-file="queue.py" data-lang="python"><span class="dim"># backend.py
+<div class="codebox" data-file="backend.py" data-lang="python"><span class="dim"># backend.py
 queue = {}   # claim id -> its record
 
 def add_claim(claim):
@@ -43,7 +43,7 @@ def start(claim_id):
 <h2><span class="en">Step 3 · A dashboard to look at</span><span class="zh">第 3 步 · 一个能看的看板</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The handlers will not read JSON. They need to see the queue, each claim in full, the agent’s reasons, and what the agent is doing step by step. A real page can come later. For the pilot, even a printout of the queue is something Aisha can react to, and that is the point.</p>
 <p class="zh" style="margin:0 0 8px">理赔员不会去读 JSON。他们要看到队列、每份理赔的全部内容、智能体给的理由，以及智能体一步步在做什么。真正的网页可以以后再做。试点阶段，哪怕只是把队列打印出来，Aisha 也能有反应，而这正是目的。</p></div>
-<div class="codebox" data-file="queue.py" data-lang="python"><span class="dim"># backend.py, continued
+<div class="codebox" data-file="backend.py" data-lang="python"><span class="dim"># backend.py, continued
 def show_queue():
     for claim_id, item in queue.items():
         decision = item["decision"]
@@ -58,7 +58,7 @@ def show_queue():
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Any payout over the sign-off limit (here S$800) must wait for a handler, even if the agent tries to pay. A rule in the prompt is a request the model may ignore. A rule in the code is a locked door. So put it in the backend, in the one function every decision passes through. A refer also goes to a handler.</p>
 <p class="zh" style="margin:0 0 8px">任何超过签字上限（这里是 S$800）的赔付都必须等理赔员，哪怕智能体想直接赔。提示词里的规矩只是请求，模型可能不听；代码里的规矩是一扇锁住的门。所以把它放进后端，放在每个决定都必经的那个函数里。转交（refer）也交给理赔员。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="Claims go to the agent, the agent proposes to the backend, the backend applies the payout limit, then the dashboard shows Aisha"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><path class="lnk" d="M150 110L190 110" marker-end="url(#ah)"/><path class="lnk hot" d="M320 110L360 110" marker-end="url(#ah)"/><path class="lnk" d="M510 110L550 110" marker-end="url(#ah)"/><rect class="box soft" x="20" y="75" width="130" height="70" rx="12"/><text class="en" x="85.0" y="105.5">25 claims</text><text class="zh" x="85.0" y="105.5">25 份理赔</text><text class="en sm" x="85.0" y="122.5">sample data</text><text class="zh sm" x="85.0" y="122.5">样本数据</text><rect class="box" x="190" y="75" width="130" height="70" rx="12"/><text class="en" x="255.0" y="105.5">Agent</text><text class="zh" x="255.0" y="105.5">智能体</text><text class="en sm" x="255.0" y="122.5">reads one claim</text><text class="zh sm" x="255.0" y="122.5">读一份理赔</text><rect class="box new" x="360" y="75" width="150" height="70" rx="12"/><text class="en" x="435.0" y="105.5">Backend rule</text><text class="zh" x="435.0" y="105.5">后端规则</text><text class="en sm" x="435.0" y="122.5">over S$800 waits</text><text class="zh sm" x="435.0" y="122.5">超 800 新元要等</text><rect class="box" x="550" y="75" width="150" height="70" rx="12"/><text class="en" x="625.0" y="105.5">Dashboard</text><text class="zh" x="625.0" y="105.5">看板</text><text class="en sm" x="625.0" y="122.5">Aisha stamps</text><text class="zh sm" x="625.0" y="122.5">Aisha 盖章</text></svg><figcaption><span class="en">The limit lives in the backend, not in the prompt: even if the agent tries to pay a big claim, it waits for Aisha.</span><span class="zh">这条上限放在后端，而不是提示词里：就算智能体想赔一笔大额，也得等 Aisha。</span></figcaption></figure>
-<div class="codebox" data-file="queue.py" data-lang="python"><span class="dim"># backend.py, continued
+<div class="codebox" data-file="backend.py" data-lang="python"><span class="dim"># backend.py, continued
 </span><span class="chg">SIGNOFF_LIMIT = 800</span><span class="dim">
 
 def record_decision(claim_id, decision):
@@ -76,7 +76,7 @@ def sign_off(claim_id, handler):
 <h2><span class="en">Step 5 · The agent that reads one claim</span><span class="zh">第 5 步 · 读一份理赔的智能体</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Now the part everyone came to see. The agent gets one claim, with its policy and the wording pasted into the prompt, and returns a decision as JSON: <code>action</code>, <code>payout</code> and <code>reason</code>. It never touches the queue itself. It only returns an answer, and <code>record_decision</code> from Step 4 decides what happens to it. This first agent has no tools: it is one model call, and the code gives it everything it needs. Install with <code>pip install openai</code> and set your <code>OPENAI_API_KEY</code>.</p>
 <p class="zh" style="margin:0 0 8px">现在是大家最想看的部分。智能体拿到一份理赔，保单和条款已经贴在提示词里，然后以 JSON 返回决定：<code>action</code>、<code>payout</code>、<code>reason</code>。它自己不碰队列，只返回答案，怎么处理由第 4 步的 <code>record_decision</code> 决定。这第一个智能体没有工具：它就是一次模型调用，代码把它需要的一切都给了它。用 <code>pip install openai</code> 安装，并设置好 <code>OPENAI_API_KEY</code>。</p></div>
-<div class="codebox" data-file="decide.py" data-lang="python"><span class="dim"># agent.py
+<div class="codebox" data-file="agent.py" data-lang="python"><span class="dim"># agent.py
 import json
 from openai import OpenAI
 
