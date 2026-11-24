@@ -110,7 +110,7 @@ You are done when:
 - Writing to reference.db fails with 'attempt to write a readonly database'.
 - python reset.py clears the notes so the next demo starts clean.
 
-Compare your work with final/ afterwards, starting with: desk.py, make_reference.py, reset.py.
+Compare your work with final/ afterwards, starting with desk.py, make_reference.py and reset.py.
 
 验收标准（中文）
 - 运行之后存在三个 SQLite 文件：claims.db、memory.db 和 reference.db。

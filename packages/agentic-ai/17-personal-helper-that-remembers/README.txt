@@ -111,7 +111,7 @@ You are done when:
 - Rejecting once with a reason makes Kaki change its plan instead of stopping.
 - The run still stops after the tries and ModelCallLimitMiddleware(run_limit=30) if the checker is never satisfied.
 
-Compare your work with final/ afterwards, starting with: worker.py, checker.py, tools.py.
+Compare your work with final/ afterwards, starting with worker.py, checker.py and tools.py.
 
 验收标准（中文）
 - 运行时先打印 Kaki 的待办计划和工具调用，然后在手机提醒前暂停并显示 “Kaki wants to: ...”。

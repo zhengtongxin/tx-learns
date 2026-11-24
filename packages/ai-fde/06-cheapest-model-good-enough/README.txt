@@ -123,7 +123,7 @@ You are done when:
 - A model clears the bar only if it passes every line of it.
 - It prints the cheapest model that clears the bar, a fallback, and a memo with real numbers filled in.
 
-Compare your work with final/ afterwards, starting with: choose_model.py, bench.py, the bar definition.
+Compare your work with final/ afterwards, starting with choose_model.py, bench.py and the bar definition.
 
 验收标准（中文）
 - python bench.py 打印两行，例如 “full 377 tokens, small 225 tokens, saved 40%” 和 “approving everything scores 56%”。

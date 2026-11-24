@@ -132,7 +132,7 @@ You are done when:
 - The API alone answers 401 or 403 without a token, 402 on the free plan, and 422 for a bad date.
 - A GET request to the route is refused with 405.
 
-Compare your work with final/ afterwards, starting with: the api folder (the consultation route), the pages folder, vercel.json.
+Compare your work with final/ afterwards, starting with the api folder (the consultation route), the pages folder and vercel.json.
 
 验收标准（中文）
 - 退出登录时只看到登录按钮；以免费套餐登录时看到价格表而不是表单。

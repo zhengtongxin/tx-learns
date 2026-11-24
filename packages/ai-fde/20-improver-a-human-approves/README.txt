@@ -135,7 +135,7 @@ You are done when:
 - A version is kept only if it is no worse and better on at least one number.
 - POST /versions/2/use on a rolled-back version answers 400; rejecting changes nothing else.
 
-Compare your work with final/ afterwards, starting with: improver.py, versions.py, config_app.py.
+Compare your work with final/ afterwards, starting with improver.py, versions.py and config_app.py.
 
 验收标准（中文）
 - POST /rounds 返回 201 {"version": 2}；版本 2 显示为 “proposed”，改了一个字段，无人批准，智能体仍运行版本 1。

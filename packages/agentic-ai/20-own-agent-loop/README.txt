@@ -115,7 +115,7 @@ You are done when:
 - At the end 'Coordinator says: ...' lists which pages work.
 - final/site/index.html always exists, even if every builder fails, and the folder holds one folder per builder.
 
-Compare your work with final/ afterwards, starting with: coordinator.py, team.py, board.py.
+Compare your work with final/ afterwards, starting with coordinator.py, team.py and board.py.
 
 验收标准（中文）
 - python main.py --plan 打印团队和五个摊位，且不花任何费用。

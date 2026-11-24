@@ -149,7 +149,7 @@ You are done when:
 - On the screen the table fills and coloured log lines from several agents appear in order.
 - The log names the scanner, the price guesser and the messenger as separate agents.
 
-Compare your work with final/ afterwards, starting with: deal_system.py, agents.py, logbus.py.
+Compare your work with final/ afterwards, starting with deal_system.py, agents.py and logbus.py.
 
 验收标准（中文）
 - 在 final/ 里（演示模式）运行 python test_offline.py，打印 ok 行，不需要密钥和 GPU。

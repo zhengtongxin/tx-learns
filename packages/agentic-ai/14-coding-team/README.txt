@@ -114,7 +114,7 @@ You are done when:
 - In the tab screen, topping up RM5 and ordering a teh_tarik (RM2.00) leaves RM3.00.
 - An order larger than the balance is refused.
 
-Compare your work with final/ afterwards, starting with: crew.py, the tools folder, warmup.py.
+Compare your work with final/ afterwards, starting with crew.py, the tools folder and warmup.py.
 
 验收标准（中文）
 - python warmup.py 以数字 6000 结束（1,000 杯 x RM1.80 / 每枚代币 RM0.30）。

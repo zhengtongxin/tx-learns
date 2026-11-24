@@ -134,7 +134,7 @@ You are done when:
 - The log shows a REPORT line with Duration and Billed Duration, and Init Duration on a cold start.
 - After teardown the console shows no function, repository, log group or role with your name.
 
-Compare your work with final/ afterwards, starting with: server.py, Dockerfile, the scripts folder.
+Compare your work with final/ afterwards, starting with server.py, Dockerfile and the scripts folder.
 
 验收标准（中文）
 - 容器在你的电脑上运行，推送任何东西之前 http://localhost:8000/api/health 显示 {"ok":true}。

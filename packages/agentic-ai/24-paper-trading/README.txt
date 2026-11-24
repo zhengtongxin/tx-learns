@@ -130,7 +130,7 @@ You are done when:
 - An order larger than the cash is refused with a clear message.
 - Only the tickers KOPI, ROTI, TEHT and NASI exist; any other gives 'unknown ticker'.
 
-Compare your work with final/ afterwards, starting with: the floor package (trading floor and accounts), the API routes, the frontend folder.
+Compare your work with final/ afterwards, starting with the floor package (trading floor and accounts), the API routes and the frontend folder.
 
 验收标准（中文）
 - python -m floor.trading_floor Wong 运行一轮后，Wong 的现金或持仓在 final/floor.db 中发生变化。

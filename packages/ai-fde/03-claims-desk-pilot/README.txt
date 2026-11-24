@@ -117,7 +117,7 @@ You are done when:
 - Only the scoring code opens the answer_key folder; the agent never does.
 - The dry-run score proves the plumbing only; a real model struggles most on C012, C013, C019 and C025.
 
-Compare your work with final/ afterwards, starting with: desk_queue.py, agent.py, run_pilot.py.
+Compare your work with final/ afterwards, starting with desk_queue.py, agent.py and run_pilot.py.
 
 验收标准（中文）
 - 在 final/ 里运行试点，每个理赔（共 25 个）打印一行，最后是 “agrees with handlers on N of M claims”。

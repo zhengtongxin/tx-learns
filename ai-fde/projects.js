@@ -77,8 +77,8 @@ Object.assign(window.PROJECTS,{
    }
   },
   "solution": {
-   "en": "The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with desk_queue.py, agent.py, run_pilot.py. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.",
-   "zh": "完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从 desk_queue.py、agent.py、run_pilot.py 看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"
+   "en": "The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with desk_queue.py, agent.py and run_pilot.py. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.",
+   "zh": "完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从desk_queue.py、agent.py、run_pilot.py看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"
   }
  },
  "06-cheapest-model-good-enough.html": {
@@ -156,8 +156,8 @@ Object.assign(window.PROJECTS,{
    }
   },
   "solution": {
-   "en": "The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with choose_model.py, bench.py, the bar definition. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.",
-   "zh": "完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从 choose_model.py、bench.py、the bar definition 看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"
+   "en": "The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with choose_model.py, bench.py and the bar definition. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.",
+   "zh": "完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从choose_model.py、bench.py、及格线的定义看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"
   }
  },
  "09-agent-that-works-the-queue.html": {
@@ -233,8 +233,8 @@ Object.assign(window.PROJECTS,{
    }
   },
   "solution": {
-   "en": "The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with desk_queue.py, run_queue.py, the retry rule. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.",
-   "zh": "完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从 desk_queue.py、run_queue.py、the retry rule 看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"
+   "en": "The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with desk_queue.py, run_queue.py and the retry rule. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.",
+   "zh": "完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从desk_queue.py、run_queue.py、重试规则看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"
   }
  },
  "12-scoreboard-for-the-agent.html": {
@@ -318,8 +318,8 @@ Object.assign(window.PROJECTS,{
    }
   },
   "solution": {
-   "en": "The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with scoring.py, scoreboard.py, compare_runs.py. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.",
-   "zh": "完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从 scoring.py、scoreboard.py、compare_runs.py 看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"
+   "en": "The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with scoring.py, scoreboard.py and compare_runs.py. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.",
+   "zh": "完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从scoring.py、scoreboard.py、compare_runs.py看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"
   }
  },
  "15-agent-that-remembers-customers.html": {
@@ -392,8 +392,8 @@ Object.assign(window.PROJECTS,{
    }
   },
   "solution": {
-   "en": "The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with desk.py, make_reference.py, reset.py. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.",
-   "zh": "完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从 desk.py、make_reference.py、reset.py 看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"
+   "en": "The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with desk.py, make_reference.py and reset.py. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.",
+   "zh": "完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从desk.py、make_reference.py、reset.py看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"
   }
  },
  "18-swarm-with-a-cap.html": {
@@ -473,8 +473,8 @@ Object.assign(window.PROJECTS,{
    }
   },
   "solution": {
-   "en": "The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with dispatcher.py, service.py, try_dispatcher.py. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.",
-   "zh": "完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从 dispatcher.py、service.py、try_dispatcher.py 看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"
+   "en": "The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with dispatcher.py, service.py and try_dispatcher.py. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.",
+   "zh": "完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从dispatcher.py、service.py、try_dispatcher.py看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"
   }
  },
  "20-improver-a-human-approves.html": {
@@ -562,8 +562,8 @@ Object.assign(window.PROJECTS,{
    }
   },
   "solution": {
-   "en": "The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with improver.py, versions.py, config_app.py. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.",
-   "zh": "完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从 improver.py、versions.py、config_app.py 看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"
+   "en": "The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with improver.py, versions.py and config_app.py. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.",
+   "zh": "完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从improver.py、versions.py、config_app.py看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"
   }
  },
  "25-the-handover-copilot.html": {
@@ -657,8 +657,8 @@ Object.assign(window.PROJECTS,{
    }
   },
   "solution": {
-   "en": "The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with permissions.py, copilot_tools.py, criteria.py. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.",
-   "zh": "完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从 permissions.py、copilot_tools.py、criteria.py 看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"
+   "en": "The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with permissions.py, copilot_tools.py and criteria.py. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.",
+   "zh": "完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从permissions.py、copilot_tools.py、criteria.py看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"
   }
  }
 });

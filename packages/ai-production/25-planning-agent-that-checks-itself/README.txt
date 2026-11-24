@@ -123,7 +123,7 @@ You are done when:
 - For four people who must not keep their own place, the answer is 9 and the sandbox check prints 9 too.
 - With observability on, the trace shows add_todo calls, run_python (usually the slowest step), mark_done calls and the final answer; after clean-up the agent, image, roles and log groups are gone.
 
-Compare your work with final/ afterwards, starting with: agent.py, examples/derangements.py, the scripts folder.
+Compare your work with final/ afterwards, starting with agent.py, examples/derangements.py and the scripts folder.
 
 验收标准（中文）
 - python3 examples/derangements.py 打印 9，即正确答案。

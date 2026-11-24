@@ -99,7 +99,7 @@ You are done when:
 - python main.py handoff prints 'Last agent: Mailroom'.
 - The Traces page of your provider dashboard shows each run as one entry.
 
-Compare your work with final/ afterwards, starting with: team.py, mail.py, main.py.
+Compare your work with final/ afterwards, starting with team.py, mail.py and main.py.
 
 验收标准（中文）
 - python main.py code 经 4 次模型调用后打印一封邀请邮件（主题加简短正文），内容是面向 9 至 12 岁孩子的周六编程社。

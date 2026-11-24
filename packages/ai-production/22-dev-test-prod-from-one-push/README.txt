@@ -157,7 +157,7 @@ You are done when:
 - terraform plan run twice in a row says 'No changes' the second time.
 - After the three destroy runs, the state list, the command line and the console all show nothing named wharf-twin.
 
-Compare your work with final/ afterwards, starting with: the infra folder, the workflows folder, deploy.sh.
+Compare your work with final/ afterwards, starting with the infra folder, the workflows folder and deploy.sh.
 
 验收标准（中文）
 - 推送到 main 后 dev 运行变绿，日志末尾有 “site:” 和 “api:” 两个地址。

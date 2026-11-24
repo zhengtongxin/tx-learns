@@ -130,7 +130,7 @@ You are done when:
 - On a GPU, python train.py --subset 2000 finishes and the loss lines go down.
 - python compare.py prints one row each for average, forest and tuned, scored on the same test set.
 
-Compare your work with final/ afterwards, starting with: prepare_data.py, train.py, compare.py.
+Compare your work with final/ afterwards, starting with prepare_data.py, train.py and compare.py.
 
 验收标准（中文）
 - 在 final/ 里运行 python test_offline.py，打印 ok 行，不需要 GPU，也不需要密钥。

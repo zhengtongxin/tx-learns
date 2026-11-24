@@ -107,7 +107,7 @@ You are done when:
 - With --long, a long transcript is split into chunks, each chunk is summarised, then the summaries are summarised.
 - Every action item names an owner from the transcript.
 
-Compare your work with final/ afterwards, starting with: minutes.py, test_split.py, the chunking function.
+Compare your work with final/ afterwards, starting with minutes.py, test_split.py and the chunking function.
 
 验收标准（中文）
 - 在 final/ 里运行 python test_split.py，打印 ok 行，不需要 GPU，也不用下载。

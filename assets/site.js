@@ -150,15 +150,16 @@
         /* reference solution: only the files under final/ */
         var refs=fl.filter(function(f){return f.indexOf('final/')===0}).map(function(f){return '<li><a href="../'+pk.dir+'/'+f+'">'+f+'</a></li>'}).join('');
         /* "Done when" checklist: ticks are kept per lesson in the browser (learn-accept), never required */
+        function esc(x){return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
         function acceptList(a){var AK='learn-accept',m=jget(AK,{}),ck=m[here]||[];
-          return '<ul class="accept">'+(a.en||[]).map(function(e,i){return '<li><label><input type="checkbox" data-i="'+i+'"'+(ck.indexOf(i)>-1?' checked':'')+'> '+t({en:e,zh:(a.zh||[])[i]||e})+'</label></li>'}).join('')+'</ul>'}
+          return '<ul class="accept">'+(a.en||[]).map(function(e,i){return '<li><label><input type="checkbox" data-i="'+i+'"'+(ck.indexOf(i)>-1?' checked':'')+'> '+t({en:esc(e),zh:esc((a.zh||[])[i]||e)})+'</label></li>'}).join('')+'</ul>'}
         pc.innerHTML='<b class="lbl">'+t({en:'Project card',zh:'项目卡'})+'</b><dl>'+
           (J.goal?'<dt>'+t({en:'Goal',zh:'目标'})+'</dt><dd>'+t(J.goal)+'</dd>':'')+(J.deliver?'<dt>'+t({en:'Deliverable',zh:'交付物'})+'</dt><dd>'+t(J.deliver)+'</dd>':'')+
           (J.level?'<dt>'+t({en:'Difficulty',zh:'难度'})+'</dt><dd>'+t(LV[J.level])+'</dd>':'')+(J.mins?'<dt>'+t({en:'Time',zh:'时间'})+'</dt><dd>'+t({en:'about '+J.mins+' minutes',zh:'约 '+J.mins+' 分钟'})+'</dd>':'')+
           (J.accept?'<dt>'+t({en:'Done when…',zh:'完成标准'})+'</dt><dd>'+(Array.isArray(J.accept)?'<ul>'+li(J.accept)+'</ul>':acceptList(J.accept))+'</dd>':'')+
           (J.fail?'<dt>'+t({en:'Common problems',zh:'常见问题'})+'</dt><dd><ul>'+li(J.fail)+'</ul></dd>':'')+
           (J.stretch?'<dt>'+t({en:'Stretch goals',zh:'进阶挑战'})+'</dt><dd><ul>'+li(J.stretch)+'</ul></dd>':'')+
-          (J.solution&&refs?'<dt>'+t({en:'Reference solution',zh:'参考答案'})+'</dt><dd><p>'+t(J.solution)+'</p><ul class="pkg">'+refs+'</ul></dd>':'')+
+          (J.solution&&refs?'<dt>'+t({en:'Reference solution',zh:'参考答案'})+'</dt><dd><p>'+t({en:esc(J.solution.en),zh:esc(J.solution.zh)})+'</p><ul class="pkg">'+refs+'</ul></dd>':'')+
           (files?'<dt>'+t({en:'Starter and final code',zh:'起步与完成代码'})+'</dt><dd><ul class="pkg">'+files+'</ul>'+(pk.note?'<p class="meta">'+t(pk.note)+'</p>':'')+'<p class="meta">'+t({en:'Download every file and keep the folder layout.',zh:'下载全部文件，并保持文件夹结构。'})+'</p></dd>':'')+'</dl>';
         pc.addEventListener('change',function(ev){var c=ev.target;if(!c||c.type!=='checkbox'||!c.closest('.accept'))return;
           var AK='learn-accept',m=jget(AK,{}),ck=[];pc.querySelectorAll('.accept input').forEach(function(x){if(x.checked)ck.push(+x.dataset.i)});m[here]=ck;set(AK,JSON.stringify(m))});

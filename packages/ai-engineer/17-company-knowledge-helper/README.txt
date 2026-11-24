@@ -112,7 +112,7 @@ You are done when:
 - python helper.py eval prints MRR and coverage per category for both the basic chain and the full pipeline.
 - tests.jsonl is the question set that eval reads; the full pipeline scores at least as well as the basic chain.
 
-Compare your work with final/ afterwards, starting with: helper.py, tests.jsonl, test_offline.py.
+Compare your work with final/ afterwards, starting with helper.py, tests.jsonl and test_offline.py.
 
 验收标准（中文）
 - 在 final/ 里运行 python test_offline.py，打印 ok 行，不需要密钥，也不下载模型。

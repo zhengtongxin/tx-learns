@@ -106,7 +106,7 @@ You are done when:
 - Exactly one notification is sent, or '[notify skipped, no Pushover keys]' is printed once.
 - A second run suggests markets the scout did not suggest the first time (memory on).
 
-Compare your work with final/ afterwards, starting with: crew.py, the config YAML files, main.py.
+Compare your work with final/ afterwards, starting with crew.py, the config YAML files and main.py.
 
 验收标准（中文）
 - python main.py 显示管理者依次把任务交给侦察员、研究员和挑选者。

@@ -100,7 +100,7 @@ You are done when:
 - Removing the optimisation flags from COMPILE shrinks the speedup a lot.
 - A model that returns a reply wrapped in code fences still compiles, because the fences are stripped.
 
-Compare your work with final/ afterwards, starting with: translate.py, hard_program.py, test_offline.py.
+Compare your work with final/ afterwards, starting with translate.py, hard_program.py and test_offline.py.
 
 验收标准（中文）
 - 在 final/ 里运行 python test_offline.py，打印 ok 行（去掉代码围栏；python 参考版打印 “best run: ...”），不需要密钥。

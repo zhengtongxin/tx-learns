@@ -87,12 +87,12 @@ ACCEPTANCE CRITERIA
 -------------------
 You are done when:
 - python test_offline.py in final/ prints an ok line ('page_text keeps words and drops scripts and styles') and needs no key.
-- python brochure.py <a small shop site with an About page> prints a markdown brochure with a heading and a short body.
+- python brochure.py on a small shop site with an About page prints a markdown brochure with a heading and a short body.
 - If the site has a careers page, the brochure ends with a careers line.
 - Changing one word in the brochure prompt (warm to funny) visibly changes the tone.
 - With --stream the words appear as they arrive, not all at once.
 
-Compare your work with final/ afterwards, starting with: brochure.py, test_offline.py, the page_text function.
+Compare your work with final/ afterwards, starting with brochure.py, test_offline.py and the page_text function.
 
 验收标准（中文）
 - 在 final/ 里运行 python test_offline.py，打印 ok 行（“page_text keeps words and drops scripts and styles”），不需要密钥。

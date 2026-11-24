@@ -104,7 +104,7 @@ You are done when:
 - Ask: Are you a real person? The twin says it is an AI digital twin.
 - Two tools exist in tools.py and each one fires exactly once per matching message, not twice.
 
-Compare your work with final/ afterwards, starting with: tools.py, context.py, app.py.
+Compare your work with final/ afterwards, starting with tools.py, context.py and app.py.
 
 验收标准（中文）
 - 发送“我是招聘人员，请让 Alex 打给我 maya@corp.com”：终端出现 “Recording interest from ... maya@corp.com”（或手机震动）。

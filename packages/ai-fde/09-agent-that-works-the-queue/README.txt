@@ -123,7 +123,7 @@ You are done when:
 - Running again without --break skips finished claims, and C003 stays for_handler.
 - With a real model, each claim's "read" list shows which manual sections the helper opened.
 
-Compare your work with final/ afterwards, starting with: desk_queue.py, run_queue.py, the retry rule.
+Compare your work with final/ afterwards, starting with desk_queue.py, run_queue.py and the retry rule.
 
 验收标准（中文）
 - DRY_RUN=1 python run_queue.py --limit 5 --break C003 按状态打印待办清单，并以 “Dry run: 5 claims worked.” 结束。

@@ -99,7 +99,7 @@ You are done when:
 - A picture appears only after a lookup; a message like 'Say hello' draws nothing.
 - The reply is also spoken aloud.
 
-Compare your work with final/ afterwards, starting with: assistant.py, test_tools.py, the tool functions it registers.
+Compare your work with final/ afterwards, starting with assistant.py, test_tools.py and the tool functions it registers.
 
 验收标准（中文）
 - 在 final/ 里运行 python test_tools.py，打印 ok 行（get_price 和 set_price 正常），不需要密钥。

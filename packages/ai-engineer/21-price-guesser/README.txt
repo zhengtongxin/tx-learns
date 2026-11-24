@@ -122,7 +122,7 @@ You are done when:
 - A reply like 'About $120 maybe' is parsed to 120.
 - Unreadable replies are counted separately and not scored as zero.
 
-Compare your work with final/ afterwards, starting with: price_guesser.py, make_data.py, test_offline.py.
+Compare your work with final/ afterwards, starting with price_guesser.py, make_data.py and test_offline.py.
 
 验收标准（中文）
 - 在 final/ 里运行 python test_offline.py，打印 ok 行，不需要密钥。

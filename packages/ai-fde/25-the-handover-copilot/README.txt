@@ -150,7 +150,7 @@ You are done when:
 - Each tool call shows as a readable step, and each handler sees only their own history.
 - python criteria.py prints met, met, not measured; 'not measured' is never counted as a pass.
 
-Compare your work with final/ afterwards, starting with: permissions.py, copilot_tools.py, criteria.py.
+Compare your work with final/ afterwards, starting with permissions.py, copilot_tools.py and criteria.py.
 
 验收标准（中文）
 - python try_it.py 打印 False、True、Aisha 的路径、“Pay S$300 on C007?” 的确认，以及一行拒绝。

@@ -124,7 +124,7 @@ You are done when:
 - The panel and a page reload show the same rows, and the five summary groups add up to 25 claims.
 - With the service stopped, the saved page disables the button and says why.
 
-Compare your work with final/ afterwards, starting with: dispatcher.py, service.py, try_dispatcher.py.
+Compare your work with final/ afterwards, starting with dispatcher.py, service.py and try_dispatcher.py.
 
 验收标准（中文）
 - python try_dispatcher.py 打印 3、10、25 个智能体，用时递减（约 8.6、3.2、1.5 秒），每次都是 {'done': 25}。

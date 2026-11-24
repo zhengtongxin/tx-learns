@@ -126,7 +126,7 @@ You are done when:
 - A second POST while one runs answers 409 'an evaluation is already running'.
 - compare_runs.py prints better, same or WORSE for each number.
 
-Compare your work with final/ afterwards, starting with: scoring.py, scoreboard.py, compare_runs.py.
+Compare your work with final/ afterwards, starting with scoring.py, scoreboard.py and compare_runs.py.
 
 验收标准（中文）
 - data/held_out_ids.json 列出 10 个理赔编号，每次运行都不变。

@@ -148,15 +148,15 @@ ACCEPTANCE CRITERIA
 You are done when:
 - On your laptop, the twin answers in her voice and admits what it does not know (try: What was your salary last year?).
 - It refuses to give a home address.
-- Say 'Hi, I am Siti.' then ask 'What is my name?': it says Siti, and memory/<session-id>.json now exists.
+- Say 'Hi, I am Siti.' then ask 'What is my name?': it says Siti, and memory/SESSION_ID.json now exists.
 - One curl to the gateway returns {"reply": "..."} and creates test-1.json in the memory bucket.
 - After you replace the function with a fresh copy it still remembers; the clean-up plan lists the five pieces in the right order.
 
-Compare your work with final/ afterwards, starting with: the backend folder, the scripts folder, the iam folder.
+Compare your work with final/ afterwards, starting with the backend folder, the scripts folder and the iam folder.
 
 验收标准（中文）
 - 在你的电脑上，分身用她的口吻回答，并承认自己不知道的事（试问：你去年的薪水是多少？）。
 - 它拒绝给出家庭住址。
-- 说 “Hi, I am Siti.” 再问 “What is my name?”：它答 Siti，并且 memory/<session-id>.json 已经存在。
+- 说 “Hi, I am Siti.” 再问 “What is my name?”：它答 Siti，并且 memory/SESSION_ID.json 已经存在。
 - 对网关发一次 curl 返回 {"reply": "..."}，并在记忆存储桶里创建 test-1.json。
 - 把函数换成全新副本之后它仍然记得；清理计划按正确顺序列出五个部分。
