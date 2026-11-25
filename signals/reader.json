@@ -433,20 +433,20 @@
    ]
   },
   "ai-engineer/07-shop-assistant-that-acts.html": {
-   "score": 8,
-   "at": "2026-11-25T06:48:03.382Z",
+   "score": 7,
+   "at": "2026-11-25T06:49:45.698Z",
    "confusing": [
     {
-     "where": "Step 2 tools",
-     "why": "The customer chat gives the model set_price. Staff only is just words the model reads. Nothing in the code checks who is asking, so a customer could ask for a lower price, and the lesson does not ment"
+     "where": "Step 1 code, database connection",
+     "why": "Gradio runs the callbacks from Step 4 on worker threads, and I think a default SQLite connection made on the main thread refuses use from another thread. I could not run it, so I am not sure, but the "
     },
     {
-     "where": "Step 3 code",
-     "why": "It draws only the last place looked up. With Mandai and Changi in one question, only Changi gets a picture, and the lesson never says so."
+     "where": "Step 4, What I got wrong",
+     "why": "The lesson says the two callbacks fought but never shows how. The only reason given in Step 4 is that the user message shows up straight away, which is a different reason."
     },
     {
-     "where": "Step 2 expected output",
-     "why": "The sample place is not in the price table, and it is in Malaysia, while the desk sells Singapore trips."
+     "where": "Step 2, the set_price tool",
+     "why": "This assistant hands set_price to every customer, and no code checks who is asking. As a newcomer I cannot tell whether Staff only is a rule or just a comment."
     }
    ]
   }
