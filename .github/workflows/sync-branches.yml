@@ -1,0 +1,54 @@
+# Keeps lesson pull requests mergeable. Every lesson PR changes the same generated lists (sitemap.xml, the track page's
+# no-JavaScript list, assets/related.json) and its own `file:` line in lessons.js, so when one PR merges, the others show a
+# conflict although nothing is really wrong. After every merge into main (and every 30 minutes as a safety net) this merges
+# main into each open writer/ or improver/ branch that has a conflict, takes main's version of the generated files, keeps the
+# branch's own lesson line, rebuilds the generated files with main's scripts (scripts/sync-branch.mjs) and pushes with MERGE_TOKEN,
+# so the checks run on the new commit. Any other clash, or a branch that touches scripts/ or .github/, is left alone.
+# Without MERGE_TOKEN it does nothing. Trusted scripts from main only; the token is given only to the list and push commands.
+name: Sync lesson branches
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: sync-branches
+  cancel-in-progress: false
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Merge main into conflicting lesson branches
+        env:
+          MERGE_TOKEN: ${{ secrets.MERGE_TOKEN }}
+        run: |
+          [ -n "$MERGE_TOKEN" ] || { echo "No MERGE_TOKEN: nothing to do."; exit 0; }
+          export GH_TOKEN="$MERGE_TOKEN"
+          # GitHub works out "has a conflict" lazily after a merge, so look twice.
+          sleep 20
+          list() { gh pr list --state open --limit 100 --json headRefName,mergeStateStatus,isCrossRepository \
+            --jq '.[] | select(.isCrossRepository==false and .mergeStateStatus=="DIRTY" and (.headRefName|test("^(writer|improver)/"))) | .headRefName'; }
+          branches=$(list); [ -z "$branches" ] && { sleep 30; branches=$(list); }
+          [ -z "$branches" ] && { echo "No conflicting lesson branches."; exit 0; }
+          cp scripts/sync-branch.mjs /tmp/sync-branch.mjs
+          for b in $branches; do
+            echo "== $b"
+            git checkout -q -f main
+            # Node never sees the token: it runs only main's scripts on the branch's files.
+            if env -u MERGE_TOKEN -u GH_TOKEN node /tmp/sync-branch.mjs "$b"; then
+              if [ "$(git rev-parse sync-work)" != "$(git rev-parse "origin/$b")" ]; then
+                git push "https://x-access-token:${MERGE_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "sync-work:refs/heads/$b" || echo "::warning::Could not push $b"
+              fi
+            fi
+          done
