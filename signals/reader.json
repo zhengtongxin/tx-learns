@@ -377,6 +377,78 @@
      "why": "The next line passes ctx.context on, so I cannot ignore it. The comment and the code disagree."
     }
    ]
+  },
+  "agentic-ai/13-market-research-team.html": {
+   "score": 7,
+   "at": "2026-11-25T06:48:03.382Z",
+   "confusing": [
+    {
+     "where": "Where we left off, Side case, What changed",
+     "why": "The story has two people. Uncle Lim is the main thread, and Mei's aunt is the side case. The code and diagram ping Mei's aunt, but the What changed box says Lim gets the ping. A newcomer cannot tell w"
+    },
+    {
+     "where": "Expected output and the Done-when list",
+     "why": "The expected output lists markets.json, studies.json and report.md. The code writes only output/studies.json, and the Done-when list asks for pick.md. Three names for one result."
+    },
+    {
+     "where": "Step 1 and Step 4 code",
+     "why": "self.agents and self.agents_config are used, but the class they belong to (a CrewBase class) is never introduced. agents.yaml, which defines the boss, is never shown."
+    }
+   ]
+  },
+  "agentic-ai/17-personal-helper-that-remembers.html": {
+   "score": 5,
+   "at": "2026-11-25T06:48:03.382Z",
+   "confusing": [
+    {
+     "where": "Step 3 expected output, and the quiz after Step 4",
+     "why": "The expected output pauses on write_file, but interrupt_on lists only ping_phone and ask_human. The quiz says writing kopi.md just goes ahead. The code and the lesson disagree about which step pauses."
+    },
+    {
+     "where": "What I got wrong (Step 1 sessions)",
+     "why": "The lesson names the fix but shows no code for it. Task, asyncio and cancel scope are never explained, and the code shown still opens the sessions at top level."
+    },
+    {
+     "where": "Step 1 code",
+     "why": "await at top level works only in a notebook. Run as a script, it is a SyntaxError, and the lesson never says which to use."
+    }
+   ]
+  },
+  "agentic-ai/23-many-mcp-servers.html": {
+   "score": 7,
+   "at": "2026-11-25T06:48:03.382Z",
+   "confusing": [
+    {
+     "where": "Step 4 code",
+     "why": "The lesson's other places are in Singapore (Bukit Timah, the e-wallet). Klang Valley is in Malaysia, and the next question drops the place altogether, so the shop's city is unclear."
+    },
+    {
+     "where": "Step 5 Learn",
+     "why": "The code opens the memory and search servers one by one, not in a loop. Only the payments server is conditional. A reader looking for the loop will not find it."
+    },
+    {
+     "where": "What I got wrong",
+     "why": "This is a pinning story about a server that is not in the lesson, with cancel-scope errors and uvx --with that are not explained. Too much jargon for a newcomer."
+    }
+   ]
+  },
+  "ai-engineer/07-shop-assistant-that-acts.html": {
+   "score": 8,
+   "at": "2026-11-25T06:48:03.382Z",
+   "confusing": [
+    {
+     "where": "Step 2 tools",
+     "why": "The customer chat gives the model set_price. Staff only is just words the model reads. Nothing in the code checks who is asking, so a customer could ask for a lower price, and the lesson does not ment"
+    },
+    {
+     "where": "Step 3 code",
+     "why": "It draws only the last place looked up. With Mandai and Changi in one question, only Changi gets a picture, and the lesson never says so."
+    },
+    {
+     "where": "Step 2 expected output",
+     "why": "The sample place is not in the price table, and it is in Malaysia, while the desk sells Singapore trips."
+    }
+   ]
   }
  }
 }
