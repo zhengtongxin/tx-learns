@@ -45,8 +45,7 @@ jobs:
           dirs=$(git diff --name-only --diff-filter=AM "$BEFORE" "$GITHUB_SHA" -- inbox/ | grep -v '^inbox/README.md$' | awk -F/ 'NF>2{print $1"/"$2}' | sort -u | tr '\n' ' ')
           [ -z "${dirs// }" ] && { echo "No note folders changed."; exit 0; }
           echo "Folders: $dirs"
-          # One run per folder: a single run with many folders made the concurrency group name too long (over 400 characters), so the run never started.
-          for d in $dirs; do gh workflow run writer.yml --ref main -R "$GITHUB_REPOSITORY" -f folder="$d"; done
+          gh workflow run writer.yml --ref main -R "$GITHUB_REPOSITORY" -f folder="$dirs"
 
   # Marks the writer as working (yellow) on the How it works page while this run goes. Trusted scripts from main only.
   working:
