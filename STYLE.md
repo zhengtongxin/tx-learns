@@ -29,7 +29,7 @@ Each track has its own setting. AI Agentic uses the kopitiam below; the AI Engin
 
 ### The kopitiam thread (AI Agentic)
 
-Kopi Corner, Uncle Lim's kopitiam in Penang, is the recurring setting. Every lesson ends with one short "Back at the kopitiam" callout (`.callout tip`, EN and 中文) that ties its idea to the shop, just before the takeaways. Keep the cast and props the same:
+Kopi Corner, Uncle Lim's kopitiam in Singapore, is the recurring setting. Every lesson ends with one short "Back at the kopitiam" callout (`.callout tip`, EN and 中文) that ties its idea to the shop, just before the takeaways. Keep the cast and props the same:
 
 - People: Uncle Lim (towkay), Auntie Suria (counter, remembers regulars), Aina (his niece, the builder), Ah Seng (drinks), Kak Ros (noodles), Uncle Rahim (mamak credit notebook).
 - Props: the order pad (shared state), the chalkboard menu (tool list), the "ting!" bell (handoff), the QR sign (cashless payment), kopi, teh, kaya toast.

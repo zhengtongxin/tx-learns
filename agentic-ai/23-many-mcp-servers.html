@@ -76,7 +76,7 @@ Store anything worth keeping. When asked what you know, search the knowledge bas
 async with MCPServerStdio(params=search, tool_filter=only_search, client_session_timeout_seconds=60) as s, \
            MCPServerStdio(params=vectors, client_session_timeout_seconds=120) as v:
     a = Agent(name="buyer", instructions=NOTES, model="gpt-4o-mini", mcp_servers=[s, v])
-    await Runner.run(a, "Find current wholesale prices for condensed milk in the Klang Valley and remember them.")
+    await Runner.run(a, "Find current wholesale prices for condensed milk in Singapore and remember them.")
 
 </span><span class="chg"># Run 2: no web, only the knowledge base
 async with MCPServerStdio(params=vectors, client_session_timeout_seconds=120) as v:
