@@ -1,94 +1,110 @@
 {
  "lessons": {
   "agentic-ai/01-agentic-workflow.html": {
-   "score": 7,
-   "at": "2026-11-25T09:19:57.348Z",
+   "score": 6,
+   "at": "2026-11-25T09:28:03.580Z",
    "confusing": [
     {
      "where": "Step 3 · Build it",
-     "why": "The build steps never say how to connect the Marketstack key or Google account in n8n, so a newcomer hits a wall right after the first two steps."
+     "why": "No step says where the OpenAI or Marketstack key goes, so a newcomer gets a credential error with no next move."
     },
     {
-     "where": "Step 1 · Learn",
-     "why": "Memory is introduced as a notebook without saying why an agent needs one. Models forget between calls, and that is not explained until Lesson 3."
+     "where": "Step 1 · What an agent is made of",
+     "why": "Lesson 2 calls a fixed-route flow a workflow, yet this n8n build, where the model picks the tools, is called an agentic workflow. The same word means two things."
     },
     {
-     "where": "Step 2 · Learn",
-     "why": "Closing price and end-of-day (EoD) data are used before they are defined; the definition only appears inside the log."
+     "where": "Takeaways",
+     "why": "Database is never explained and no option is named."
     }
    ]
   },
   "agentic-ai/02-agents-and-patterns.html": {
-   "score": 6,
-   "at": "2026-11-25T09:19:57.348Z",
+   "score": 7,
+   "at": "2026-11-25T09:28:03.580Z",
    "confusing": [
     {
-     "where": "Step 3 · Five workflow patterns",
-     "why": "Step 2 defines a workflow as code that fixes the route. Orchestrator-worker is filed under workflow patterns, yet its boss LLM picks the sub-tasks at run time, which is the agent definition. I could n"
+     "where": "Step 2 · Workflow vs agent",
+     "why": "Lesson 1 called its n8n build an agentic workflow, so I could not tell which meaning applies to what I built."
     },
     {
-     "where": "Step 2 · Learn",
-     "why": "agentic systems is used as a term with no definition, right beside the workflow and agent definitions."
+     "where": "Step 2 · agent.py sketch",
+     "why": "Guardrail is used here and again in Step 4 but is never defined."
+    },
+    {
+     "where": "Step 3 · Five workflow patterns",
+     "why": "The Learn text is one sentence. Orchestrator-worker and evaluator-optimizer still feel abstract."
     }
    ]
   },
   "agentic-ai/03-first-api-calls.html": {
-   "score": 8,
-   "at": "2026-11-25T09:19:57.348Z",
+   "score": 7,
+   "at": "2026-11-25T09:28:03.580Z",
    "confusing": [
     {
-     "where": "Step 2 · Make your first call",
-     "why": "The code on screen is about nine lines with the imports and the key check, so the count does not match what I see."
+     "where": "Step 1 quiz",
+     "why": "load_dotenv is used before Step 2 explains what it does."
     },
     {
      "where": "Step 3 · Chain three calls",
-     "why": "kopitiam is local slang I did not know, and the example prompt depends on it."
+     "why": "The code uses gpt-5.4-mini twice and gpt-5.4 for the judge; nano never appears."
+    },
+    {
+     "where": "Step 3 · code",
+     "why": "Kopitiam is not explained, so a reader outside Singapore may not know what the question means."
     }
    ]
   },
   "agentic-ai/04-many-models.html": {
-   "score": 7,
-   "at": "2026-11-25T09:19:57.348Z",
+   "score": 6,
+   "at": "2026-11-25T09:28:03.580Z",
    "confusing": [
     {
-     "where": "Step 2 · Keep or Edit quiz",
-     "why": "The Chinese column label of this quiz reads only the first character, so the header looks broken."
+     "where": "Step 3 · judge.py",
+     "why": "No code in this lesson creates question, competitors or answers, so the script cannot run as shown."
     },
     {
-     "where": "Step 3 · A model judges the rest",
-     "why": "The judge code uses competitors and answers, but no earlier step creates them. The reply is also typed in, so the code never calls the judge. Lessons should build before they use."
+     "where": "Step 3 · judge.py",
+     "why": "The judge prompt is built but never sent to a model; the reply is typed in, so the reader thinks the code calls the judge."
+    },
+    {
+     "where": "Step 2 · Local models",
+     "why": "It is not said whether 3 GB is download size on disk or memory."
     }
    ]
   },
   "agentic-ai/05-autonomy-and-tools.html": {
-   "score": 7,
-   "at": "2026-11-25T09:19:57.348Z",
+   "score": 6,
+   "at": "2026-11-25T09:28:03.580Z",
    "confusing": [
     {
-     "where": "Step 3 · A tool: let the model ask",
-     "why": "The code shows ??? as the description, and the body never says to fill it in. Only the quiz below asks for it, so a reader running the code sees a placeholder."
+     "where": "Step 4 · the loop",
+     "why": "The ** unpacking is never explained here; lesson 6 explains it later."
     },
     {
-     "where": "Step 4 · The loop",
-     "why": "Each tool result must name the request it answers, but this id is never explained. The reason only shows up in the error callout."
+     "where": "Step 4 · callout",
+     "why": "The code has no cap and no example of one."
+    },
+    {
+     "where": "Step 2 · code",
+     "why": "The lesson never says what history looks like, or that client comes from lesson 3."
     }
    ]
   },
   "agentic-ai/06-career-agent.html": {
    "score": 6,
-   "at": "2026-11-25T09:19:57.348Z",
+   "at": "2026-11-25T09:28:03.580Z",
    "confusing": [
     {
-     "where": "Step 1 · Two tools, two jobs",
-     "why": "Step 4 does not set up Pushover. The setup is in Now make it yours, so the pointer sends a reader to the wrong place."
+     "where": "Step 1 · tools.py",
+     "why": "The Pushover setup is an unlabelled checkbox after Step 4, and the card calls Pushover optional while the checklist reads as required."
     },
     {
-     "where": "Step 1 game vs Step 3 chat",
-     "why": "In Step 1 Sam asks about pizza and should be logged. In Steps 2 and 3, Sam asks for a poem and the twin steers back. The same visitor gets two different answers."
+     "where": "Step 2 · tool JSON",
+     "why": "The second tool's description is only a comment, so it is never shown."
     },
     {
-     "where": "Step 4 · From a tool name to a real call, then ship",
-     "why": "uv, gradio and hosting are never introduced, pypdf is not used by any code shown, and app.py is never shown although the chat code lives in it."
+     "where": "Step 2 · tool_json.py",
+     "why": "Lesson 5 said JSON, but this is Python: a capital False, and additionalProperties is never explained."
     }
    ]
   },
