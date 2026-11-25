@@ -37,13 +37,13 @@
   <div class="flip"><div class="front"><div class="ic">🗒️</div><b><span class="en">Notebook</span><span class="zh">笔记本</span></b><small><span class="en">tap to flip</span><span class="zh">点击翻转</span></small></div>
     <div class="back"><span class="en"><b>Simple Memory</b><br>Keeps recent messages so follow-ups make sense.</span><span class="zh"><b>Simple Memory</b><br>保存最近的消息，让追问有上下文。</span></div></div>
 </div>
-<div class="callout tip"><b class="lbl"><span class="en">Key idea</span><span class="zh">核心思想</span></b><span class="en">Agent = LLM + tools + a loop. The AI Agent node is the loop.</span><span class="zh">智能体 = 大模型 + 工具 + 循环。AI Agent 节点就是那个循环。</span></div>
+<div class="callout tip"><b class="lbl"><span class="en">Key idea</span><span class="zh">核心思想</span></b><span class="en">Agent = LLM + tools + a loop (the same steps repeated until the job is done). The AI Agent node is the loop.</span><span class="zh">智能体 = 大模型 + 工具 + 循环（同样的步骤重复，直到任务完成）。AI Agent 节点就是那个循环。</span></div>
 
 <div class="sc" id="g1"></div>
 
 <h2><span class="en">Step 2 · Watch the agent run</span><span class="zh">第 2 步 · 看智能体运行</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Uncle Lim's request goes through the chat trigger into the AI Agent node. The agent loads its memory, asks the model what to do, and if the model asks for a tool, <b>n8n</b> (not the model) runs it and hands the result back. Then the agent asks the model again to write the answer. That cycle of think (ask the model), act (run a tool) and observe (read the result) repeats until the agent can answer: it is the <b>think, act, observe loop</b>. Press the button to step through one run, then read the <b>log</b> that n8n would show.</p>
-<p class="zh" style="margin:0 0 8px">Lim 叔叔的请求经聊天触发器进入 AI Agent 节点。智能体先读取记忆，问模型该怎么做；模型若要工具，就由 <b>n8n</b>（不是模型）去运行它并把结果交回。然后智能体再问模型写出回答。“思考（问模型）、行动（运行工具）、观察（读结果）”这一圈会重复，直到智能体能回答：这就是<b>“思考、行动、观察”循环</b>。点按钮一步步看一次运行，再读 n8n 会显示的<b>日志</b>。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Uncle Lim's request goes through the chat trigger into the AI Agent node. The agent loads its memory, asks the model what to do, and if the model asks for a tool, <b>n8n</b> (not the model) runs it and hands the result back. The model only replies with text: a tool name and the inputs to use. Then the agent asks the model again to write the answer. That cycle of think (ask the model), act (run a tool) and observe (read the result) repeats until the agent can answer: it is the <b>think, act, observe loop</b>. Press the button to step through one run, then read the <b>log</b> that n8n would show.</p>
+<p class="zh" style="margin:0 0 8px">Lim 叔叔的请求经聊天触发器进入 AI Agent 节点。智能体先读取记忆，问模型该怎么做；模型若要工具，就由 <b>n8n</b>（不是模型）去运行它并把结果交回。模型只回复文字：一个工具名和要用的输入。然后智能体再问模型写出回答。“思考（问模型）、行动（运行工具）、观察（读结果）”这一圈会重复，直到智能体能回答：这就是<b>“思考、行动、观察”循环</b>。点按钮一步步看一次运行，再读 n8n 会显示的<b>日志</b>。</p></div>
 <div id="t1"></div>
 <p class="meta"><span class="en">Simulated example: real numbers will differ. Closing prices come from the tool, but the model can still be wrong, and this is not investment advice.</span><span class="zh">模拟示例：实际数值会不同。收盘价来自工具，但模型仍可能出错，这不构成投资建议。</span></p>
 <div class="try" id="p1"></div>
