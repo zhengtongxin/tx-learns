@@ -115,17 +115,20 @@ try {
       const kind = p === 'index.html' ? 'home' : /^[\w-]+\/\d\d-/.test(p) ? 'lesson' : 'other';
       await page.waitForFunction(k => {
         if (document.fonts && document.fonts.status === 'loading') return false;
-        if (k === 'home') { const a = document.querySelector('[data-sum="topics"]'), b = document.querySelector('[data-sum="lessons"]'); return !!(a && b && a.dataset.count && b.dataset.count && a.textContent.trim() === a.dataset.count && b.textContent.trim() === b.dataset.count && a.dataset.count !== '0'); } /* wait for the count-up animation (1.2 s) to finish, or the totals are read half way */
+        if (k === 'home') { const a = document.querySelector('[data-sum="topics"]'), b = document.querySelector('[data-sum="lessons"]'); if (!a && !b) return !!document.querySelector('.track-list a'); /* no totals on the home page: wait for the track list */ return !!(a && b && a.dataset.count && b.dataset.count && a.textContent.trim() === a.dataset.count && b.textContent.trim() === b.dataset.count && a.dataset.count !== '0'); } /* wait for the count-up animation (1.2 s) to finish, or the totals are read half way */
         if (k === 'lesson') return !!(document.querySelector('.tag') && document.querySelector('h1'));
         return document.body && document.body.innerText.trim().length > 0;
       }, kind, { timeout: 6000, polling: 100 }).catch(() => {});
       await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
       await page.waitForTimeout(300);
     }
+    // The browser driver evaluates strings to poll the page (waitForFunction). Under the site's report-only content policy that logs
+    // an 'unsafe-eval' message which no reader ever causes: the site itself evaluates no strings. Every other policy message still counts.
+    const OWN_EVAL = /\[Report Only\][\s\S]*'unsafe-eval'/;
     async function render(p) {
       const page = await ctx.newPage(), errs = [];
       page.on('pageerror', e => errs.push(`script error: ${e.message.split('\n')[0]}`));
-      page.on('console', m => { if (m.type() === 'error' && !/favicon|api\/status|^Failed to load resource/.test(m.text())) errs.push(`console error: ${m.text().slice(0, 160)}`); });
+      page.on('console', m => { if (m.type() === 'error' && !/favicon|api\/status|^Failed to load resource/.test(m.text()) && !OWN_EVAL.test(m.text())) errs.push(`console error: ${m.text().slice(0, 160)}`); });
       page.on('response', r => { const u = new URL(r.url()); if (r.status() >= 400 && u.origin === new URL(BASE).origin && !/favicon|^\/api\//.test(u.pathname)) errs.push(`missing file ${u.pathname} (${r.status()})`); });
       try {
         const t0 = Date.now();
@@ -135,8 +138,8 @@ try {
         await ready(page, p);
         if (p === 'index.html') {
           const got = await page.evaluate(() => ({ topics: document.querySelector('[data-sum="topics"]')?.textContent, lessons: document.querySelector('[data-sum="lessons"]')?.textContent }));
-          if (+got.topics !== topicCount) errs.push(`home page shows ${got.topics} topics, lessons.js has ${topicCount}`);
-          if (+got.lessons !== total) errs.push(`home page shows ${got.lessons} lessons, lessons.js has ${total}`);
+          if (got.topics !== undefined && +got.topics !== topicCount) errs.push(`home page shows ${got.topics} topics, lessons.js has ${topicCount}`);
+          if (got.lessons !== undefined && +got.lessons !== total) errs.push(`home page shows ${got.lessons} lessons, lessons.js has ${total}`);
         }
         if (/^[\w-]+\/\d\d-/.test(p)) {
           const got = await page.evaluate(() => ({ tag: document.querySelector('.tag')?.innerText.trim(), h1: document.querySelector('h1')?.innerText.trim() }));
