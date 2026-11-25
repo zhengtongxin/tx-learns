@@ -11,7 +11,7 @@ window.TRACK={id:'ai-leader',title:{en:'AI Leader',zh:'AI 领导者'},topics:[
   {k:'c',title:{en:"Working with the tech team on AI choices",zh:"和技术团队一起做 AI 选择"}},
   {k:'c',title:{en:"What an agent really costs, and what can go wrong",zh:"一个智能体真正的成本，以及会出什么错"}},
   {k:'c',title:{en:"RAG or fine-tuning for your use case",zh:"你的场景用 RAG 还是微调"}},
-  {k:'c',title:{en:"Scaling laws in plain business terms",zh:"用商业语言讲规模定律"}}]},
+  {k:'c',file:'10-scaling-laws-for-business.html',title:{en:"Scaling laws in plain business terms",zh:"用商业语言讲规模定律"}}]},
  {n:3,level:3,title:{en:"Leading the change",zh:"带领变革"},items:[
   {k:'f',title:{en:"Finding new AI ideas and dodging the traps",zh:"找到新的 AI 点子，避开陷阱"}},
   {k:'c',title:{en:"Who does what: organisation, rules and hiring for AI",zh:"谁来做什么：组织、规则与 AI 招聘"},file:'12-org-governance-and-hiring.html'},
