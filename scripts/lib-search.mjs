@@ -1,6 +1,5 @@
 // Local, free search over the lessons. No dependencies, no network, no model download.
-// Used by the agents (scripts/rag.mjs: "what do our lessons already say?") and by the "Related lessons" card
-// (assets/search.js reads the related.json that scripts/search-index.mjs writes).
+// Used by the agents (scripts/rag.mjs: "what do our lessons already say?").
 //   Language: a lesson holds both EN and 中文, so one index serves both. English words are lowercased, stop words
 //   dropped and lightly stemmed; 中文 is split into overlapping two-character pieces. A small list of concept
 //   groups (SYN) lets a query in one language find a lesson that names the idea in the other.

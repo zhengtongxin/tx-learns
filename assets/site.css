@@ -316,6 +316,9 @@ h2{margin-top:2.6em}
 .statrow .stat b{font-size:clamp(1.2rem,2.6vw,1.6rem);color:var(--mut)}
 /* lesson: readable line length, folded detail cards, on-page contents, toast */
 main:not(.wide) :is(p,li){max-width:70ch}
+/* the lesson sub-header (summary · time · tag) uses the full column, not a ch-measure (too narrow for 中文); "Updated" and "Last changed" sit on their own lines, so the date never splits */
+main:not(.wide) p.meta{max-width:none;text-wrap:pretty}
+.meta .updated,.meta .changed{display:block;margin-top:2px;font-size:.92em}.meta .updated+.changed{margin-top:0}
 .fold{margin:14px 0;border:1px solid var(--line);border-radius:16px;background:var(--glass)}
 .fold>summary{cursor:pointer;list-style:none;padding:13px 18px;font-weight:700;font-size:.95rem;display:flex;align-items:center;gap:10px}
 .fold>summary::-webkit-details-marker{display:none}
