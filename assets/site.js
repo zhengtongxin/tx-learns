@@ -4,7 +4,7 @@
   function set(k,v){try{localStorage.setItem(k,v)}catch(e){}}
   function t(o){return '<span class="en">'+o.en+'</span><span class="zh">'+o.zh+'</span>'}
   function done(){try{return JSON.parse(get(DONE,'{}'))}catch(e){return {}}}
-  var LAST='learn-last',REC='learn-recent';
+  var LAST='learn-last';
   function jget(k,d){try{var v=JSON.parse(get(k,''));return v==null?d:v}catch(e){return d}}
   var L0=get(KEY,(navigator.language||'').toLowerCase().indexOf('zh')===0?'zh':'en');if(L0!=='zh')L0='en';
   /* The page language follows EN/中文, so screen readers and search engines read it right. */
@@ -199,12 +199,10 @@
       var sh=document.getElementById('stopped');if(sh){if(go&&started){sh.hidden=false;sh.innerHTML=t({en:'Next up: ',zh:'下一课：'})+t(go.c.titles[go.f])}else sh.hidden=true}
       if(!rsm)return;
       if(!started){rsm.hidden=false;rsm.innerHTML='<p class="meta">'+t({en:'No saved progress yet. Your progress is kept only in this browser; open any lesson to begin.',zh:'还没有学习记录。进度只保存在这个浏览器里，打开任意一课就开始了。'})+'</p>'+(canStore()?'':'<p class="meta warn">'+t({en:'This browser is blocking saved progress, so your place cannot be remembered.',zh:'这个浏览器禁止保存数据，所以无法记住你的进度。'})+'</p>');return}
-      var rec=jget(REC,[]).filter(function(k){return lookup[k]}).slice(0,5);
       rsm.hidden=false;
       rsm.innerHTML='<h2>'+t({en:'Your learning',zh:'我的学习'})+'</h2><div class="rs-grid">'+
         (go?'<a class="cc spot rs-go" href="'+go.c.href.replace(/[^\/]*$/,'')+go.f+'"><div><div class="ey">'+t({en:'Continue',zh:'继续学习'})+' · '+t(go.c.title)+'</div><h3>'+t(go.c.titles[go.f])+'</h3></div><div class="go">→</div></a>':'<div class="cc rs-go"><div><h3>'+t({en:'You have finished every published lesson. 🎉',zh:'所有已发布的课你都学完了。🎉'})+'</h3></div></div>')+
         '<div class="cc rs-all"><div><div class="ey">'+t({en:'All tracks',zh:'全部路线'})+'</div><div style="font-weight:700">'+t({en:fin+' of '+tot+' published lessons completed',zh:'已完成 '+fin+' / '+tot+' 课（已发布）'})+'</div>'+pbar(fin,tot,'Overall progress · 总进度')+'</div></div></div>'+
-        (rec.length?'<div class="rs-rec"><h3>'+t({en:'Recent lessons',zh:'最近学过'})+'</h3><ul>'+rec.map(function(k){var x=lookup[k];return '<li><a href="'+x.c.href.replace(/[^\/]*$/,'')+x.f+'">'+t(x.t)+'</a> <span class="meta">'+t(x.c.title)+(d[k]?' ✓':'')+'</span></li>'}).join('')+'</ul></div>':'')+
         (canStore()?'':'<p class="meta warn">'+t({en:'This browser is blocking saved progress.',zh:'这个浏览器禁止保存数据。'})+'</p>');
     }
     if(window.TRACKS&&(hub||sums.length||rsm)){
@@ -274,7 +272,7 @@
     /* lesson: prev/next + done + dock */
     var db=document.querySelector('.mark-done'),idx=C?C.lessons.findIndex(function(l){return l.file===here}):-1;
     if(C&&idx>-1){
-      var lk=C.id+'/'+here,rc=jget(REC,[]).filter(function(x){return x!==lk});rc.unshift(lk);set(LAST,JSON.stringify({t:C.id,f:here}));set(REC,JSON.stringify(rc.slice(0,6)));
+      set(LAST,JSON.stringify({t:C.id,f:here}));
       var cl=C.lessons[idx],tp=C.topics.filter(function(w){return w.n===cl.w})[0],tag0=document.querySelector('main .tag');
       if(tag0&&tp){var bc=document.createElement('nav');bc.className='crumbs';bc.setAttribute('aria-label','Breadcrumb · 面包屑');
         bc.innerHTML='<a href="../index.html">'+t({en:'Home',zh:'首页'})+'</a> › <a href="index.html">'+t(C.title)+'</a> › <span>'+t(tp.title)+'</span>';tag0.before(bc)}
