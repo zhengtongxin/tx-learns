@@ -7,7 +7,7 @@
 //   node scripts/run-evals.mjs --llm      also the backend engineer's judgement (evals/review-cases.json): one Haiku call
 //                                         per case through `claude -p`. Needs Claude auth; costs a few cents; run it by hand.
 // Cases live in evals/*.json. Writes a Markdown report to $GITHUB_STEP_SUMMARY when set. Exit 1 on any miss.
-import { readFileSync, writeFileSync, appendFileSync, mkdtempSync, cpSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, appendFileSync, mkdtempSync, cpSync, existsSync, rmSync } from 'node:fs';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join, dirname, resolve } from 'node:path';
@@ -62,6 +62,33 @@ for (const c of JSON.parse(readFileSync(join(ROOT, 'evals/triage-cases.json'), '
   const f = join(tmp, '.triage-case.diff'); writeFileSync(f, c.diff);
   const r = spawnSync('node', [join(ROOT, 'scripts/review-triage.mjs'), f], { encoding: 'utf8' });
   report(c.name, r.status === c.exit, r.status === c.exit ? '' : `exit ${r.status}, wanted ${c.exit}`);
+}
+
+// ── 1d. The daily scan (scripts/daily-scan.mjs): the docs check, the rework count, the reader signal and the summary ──
+{
+  const { drift, reworkFrom, readerSignal, combine } = await import('./daily-scan.mjs');
+  const clean = drift(tmp);
+  report('daily: the docs of a clean repo match it', clean.ok, clean.ok ? '' : clean.problems[0]);
+  writeFileSync(join(tmp, '.github/workflows/zz-undocumented.yml'), 'name: x\n');
+  const d1 = drift(tmp); rmSync(join(tmp, '.github/workflows/zz-undocumented.yml'));
+  report('daily: a workflow the docs do not mention is caught', d1.problems.some(p => p.includes('zz-undocumented.yml')));
+  const md = readFileSync(join(tmp, 'CLAUDE.md'), 'utf8');
+  writeFileSync(join(tmp, 'CLAUDE.md'), md + '\nSee `scripts/no-such-script.mjs` and `gone.yml`.\n');
+  const d2 = drift(tmp); writeFileSync(join(tmp, 'CLAUDE.md'), md);
+  report('daily: a script and a workflow the docs name but that do not exist are caught', d2.problems.some(p => p.includes('no-such-script.mjs')) && d2.problems.some(p => p.includes('gone.yml')));
+  const api = readFileSync(join(tmp, 'api/status.js'), 'utf8');
+  writeFileSync(join(tmp, 'api/status.js'), api.replace("'recall']", "'recall', 'ghost']"));
+  const d3 = drift(tmp); writeFileSync(join(tmp, 'api/status.js'), api);
+  report('daily: an agent id the How it works page has no card for is caught', d3.problems.some(p => p.includes('ghost')));
+  const rw = reworkFrom('@one\n\n10\t2\ta.html\n1\t1\tb.html\n@two\n\n9\t0\ta.html\n1\t1\tb.html\n@three\n\n5\t5\ta.html\n1\t1\tb.html\n30\t3\tsitemap.xml\n');
+  report('daily: a file changed by three merges is rework; hash-only and generated changes are not', rw.prs === 3 && rw.hot.length === 1 && rw.hot[0].file === 'a.html');
+  const known = ['t/01-a.html', 't/02-b.html'];
+  const rs = readerSignal({ views: [{ key: '/t/01-a.html', n: 40 }, { key: '/gone.html', n: 3 }, { key: '/', n: 9 }], yes: [{ key: 't/01-a.html', n: 1 }, { key: 't/02-b.html', n: 5 }], no: [{ key: 't/01-a.html', n: 2 }, { key: 't/02-b.html', n: 1 }], done: [] }, known, ['index.html', ...known]);
+  report('daily: a lesson half of at least 3 readers marked unclear is picked, a clear one is not', rs.unclear.length === 1 && rs.unclear[0].file === 't/01-a.html' && rs.missing.length === 1 && rs.missing[0].path === 'gone.html');
+  const few = readerSignal({ views: [], yes: [], no: [{ key: 't/01-a.html', n: 2 }], done: [] }, known, known);
+  report('daily: two answers are too few to call a lesson unclear', few.unclear.length === 0);
+  report('daily: rework alone never flags the run, a broken package does, no results is a failure',
+    combine({ rework: { ok: false, summary: '' }, drift: { ok: true, summary: '' } }).state === 'ok' && combine({ smoke: { ok: false, summary: '' } }).state === 'flag' && combine({}).state === 'fail');
 }
 
 // ── 2. The reviewer's judgement (optional, uses Claude) ──

@@ -1,0 +1,146 @@
+# QA engineer agent, daily scan: the light pass between the weekly quality checks. No AI, a few minutes.
+#   readers  what real readers did (Vercel Web Analytics): lessons marked "not quite clear", addresses that do not exist
+#   smoke    one project package a day: its code parses, its requirements install, the names it imports still exist
+#   drift    CLAUDE.md and README.md still match the workflows, scripts, tracks and agent ids in the repo
+#   speed    a speed budget on a phone for the home page and two rotating pages
+#   rework   files that three or more merges changed in two days (a trend for the digest, never a flag)
+# It never opens a PR or an issue and never commits to main. The result goes to signals/daily.json on the data-only
+# `agent-status` branch, where the daily digest picks it up; lessons readers marked unclear become ideas for the
+# improvement engineer agent. Telegram only when the scan itself breaks. It records under the `quality` status id.
+# Reader data needs the VERCEL_TOKEN secret and the VERCEL_PROJECT_ID (and VERCEL_TEAM_ID) repository variables; without
+# them that one check is skipped.
+name: QA engineer (daily scan)
+on:
+  schedule:
+    - cron: '43 22 * * *'   # 22:43 UTC = 6:43 AM Malaysia time, well before the 8 PM digest
+  workflow_dispatch:
+    inputs:
+      pkg:
+        description: 'Project package to smoke-run (packages/<track>/<name>); empty = today''s'
+        required: false
+permissions:
+  contents: read
+concurrency:
+  group: quality
+  cancel-in-progress: false
+jobs:
+  # Marks the QA engineer agent as working (yellow) on the How it works page while this run goes. Trusted scripts from main only.
+  working:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: scripts
+          persist-credentials: false
+      - name: Show the agent as working
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATE: run
+        run: "[ -f scripts/record-status.mjs ] && node scripts/record-status.mjs quality || true"
+
+  # Read-only job: runs the scripts of main and installs project requirements in a throwaway environment. No write token here.
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 400   # two days of merges, for the rework count
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - name: Cache the headless browser
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ${{ runner.temp }}/pw
+          key: pw-1.49.1-axe-4.10.2-${{ runner.os }}
+      - name: Install a headless browser
+        continue-on-error: true
+        run: |
+          [ -x "$RUNNER_TEMP/pw/node_modules/.bin/playwright" ] || npm install --no-save --no-audit --no-fund --prefix "$RUNNER_TEMP/pw" playwright@1.49.1 axe-core@4.10.2
+          node -e "require(process.argv[1]+'/node_modules/playwright').chromium.launch().then(b=>b.close())" "$RUNNER_TEMP/pw" 2>/dev/null \
+            && echo "Browser from cache" || "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Docs, rework and speed
+        env:
+          PLAYWRIGHT_DIR: ${{ runner.temp }}/pw
+        run: |
+          node scripts/daily-scan.mjs drift --out daily-out || true
+          node scripts/daily-scan.mjs rework --out daily-out || true
+          node scripts/daily-scan.mjs speed --out daily-out || true
+      # Before the smoke run on purpose: that step installs third-party packages, and no step after it may hold a secret.
+      - name: What readers did
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+          VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
+        run: node scripts/daily-scan.mjs readers --out daily-out || true
+      - name: Smoke-run one project package
+        env:
+          PKG: ${{ inputs.pkg }}
+        run: |
+          if [ -n "$PKG" ]; then node scripts/daily-scan.mjs smoke --pkg "$PKG" --out daily-out || true
+          else node scripts/daily-scan.mjs smoke --out daily-out || true; fi
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: ${{ !cancelled() }}
+        with:
+          name: daily-scan
+          path: daily-out
+          if-no-files-found: ignore
+
+  # Separate job with the write token and trusted scripts from main: the result file, reader ideas and the status log.
+  report:
+    needs: [scan, working]
+    if: ${{ !cancelled() && needs.scan.result != 'skipped' && needs.scan.result != 'cancelled' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: |
+            scripts
+            banned-words.txt
+            tracks.js
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        continue-on-error: true
+        with:
+          name: daily-scan
+          path: daily-out
+      - name: Store the result and hand reader findings to the improvement engineer agent
+        id: report
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/daily-scan.mjs report --out daily-out
+      - name: Record status for the How it works page
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SCAN: ${{ needs.scan.result }}
+          STATE_IN: ${{ steps.report.outputs.state }}
+          SUMMARY_IN: ${{ steps.report.outputs.summary }}
+        run: |
+          STATE="${STATE_IN:-fail}"; SUMMARY="Daily scan: ${SUMMARY_IN:-it could not finish.}"
+          [ "$SCAN" = success ] || { STATE=fail; SUMMARY="The daily scan could not finish."; }
+          # The weekly check's open issue must not be hidden by a clean daily scan.
+          n=$(gh issue list -R "$GITHUB_REPOSITORY" --state open --search '"Quality check" in:title' --json number,title --jq '[.[]|select(.title=="Quality check")][0].number // empty' 2>/dev/null || true)
+          if [ -n "$n" ] && [ "$STATE" = ok ]; then STATE=flag; SUMMARY="$SUMMARY The weekly Quality check issue is still open."; fi
+          STATE="$STATE" SUMMARY="$SUMMARY" node scripts/record-status.mjs quality
+          echo "state=$STATE" >> "$GITHUB_OUTPUT"
+      - name: Tell TX on Telegram (only when the scan itself broke)
+        if: ${{ needs.scan.result != 'success' }}
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          { echo "🔎 QA engineer agent: the daily scan could not finish"; echo; echo "Run: $RUN"; } | node scripts/notify-telegram.mjs

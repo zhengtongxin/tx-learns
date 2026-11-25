@@ -68,10 +68,21 @@ async function digest() {
     const by = summarize((await readRuns()).runs, since), ids = Object.keys(by).filter(k => AG[k]);
     if (ids.length) {
       const total = ids.reduce((a, k) => a + by[k].usd, 0), calls = ids.reduce((a, k) => a + by[k].calls, 0);
-      lines.push('', `💰 Agent use, last 24 hours: ${calls} Claude call${calls > 1 ? 's' : ''}, about $${total.toFixed(2)} at API prices`,
+      lines.push('', `💰 Agent use, last 24 hours: ${calls} Claude call${calls > 1 ? 's' : ''}, about $${total.toFixed(2)} at API prices${live.length ? ` ($${(total / live.length).toFixed(2)} per merged pull request)` : ''}`,
         ...ids.sort((x, y) => by[y].usd - by[x].usd).map(k => `• ${AG[k]}: ${by[k].calls} call${by[k].calls > 1 ? 's' : ''}, $${by[k].usd.toFixed(2)}${by[k].bad ? `, ${by[k].bad} not ok` : ''}`));
     }
   } catch { /* no trace yet */ }
+  // What the QA engineer agent's daily scan found (signals/daily.json, written by scripts/daily-scan.mjs report): only what needs a look.
+  try {
+    const D = JSON.parse(await gh('GET', '/contents/signals/daily.json?ref=agent-status', null, { raw: true }));
+    if (D.at && Date.now() - Date.parse(D.at) < 26 * 3600e3) {
+      const NAMES = { readers: 'Readers', smoke: 'Project code', drift: 'Docs', speed: 'Speed', rework: 'Rework' };
+      const bad = Object.keys(NAMES).filter(k => D[k] && !D[k].ok && !D[k].skipped);
+      lines.push('', bad.length ? '🔬 Daily scan:' : '🔬 Daily scan: nothing needs a look.');
+      for (const k of bad) lines.push(`• ${NAMES[k]}: ${scrub(D[k].summary).slice(0, 160)}`, ...(D[k].problems || []).slice(0, 3).map(p => `   · ${scrub(p).slice(0, 150)}`));
+      if (D.readers && !D.readers.skipped && D.readers.ok) lines.push(`• Readers: ${scrub(D.readers.summary).slice(0, 160)}`);
+    }
+  } catch { /* no daily scan yet */ }
   // Sundays: the weekly report by model and workflow step, so a change to the agents can be compared with the week before.
   if (new Date().getUTCDay() === 0 || process.env.WEEKLY === '1') {
     try { lines.push('', weekly((await readRuns()).runs)); } catch { /* no trace yet */ }

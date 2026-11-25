@@ -10,6 +10,7 @@
     { "name": "pages: clean lesson passes", "check": "pages", "expect": "pass" },
     { "name": "pages: missing description is caught", "check": "pages", "regex": ["<meta name=\"description\"[^>]*>", ""], "expect": "fail", "match": "description" },
     { "name": "pages: the same script loaded twice is caught", "check": "pages", "append": "<script src=\"../assets/site.js?v=751eec33\"></script>", "expect": "fail", "match": "loaded twice" },
+    { "name": "pages: a home page track list that differs from tracks.js is caught", "check": "pages", "file": "index.html", "regex": ["<!-- tracks:start --><noscript><a class=\"cc\" href=\"[^\"]*\">", "<!-- tracks:start --><noscript><a class=\"cc\" href=\"somewhere/index.html\">"], "expect": "fail", "match": "track list" },
     { "name": "pages: a stale canonical link is caught", "check": "pages", "regex": ["<link rel=\"canonical\" href=\"[^\"]*\">", "<link rel=\"canonical\" href=\"https://example.org/old.html\">"], "expect": "fail", "match": "canonical" },
     { "name": "pages: a stale asset version is caught", "check": "pages", "regex": ["site\\.css\\?v=[0-9a-f]+", "site.css?v=00000000"], "expect": "fail", "match": "out of date" },
     { "name": "pages: image without alt text is caught", "check": "pages", "append": "<img src=\"x.png\">", "expect": "fail", "match": "alt" },

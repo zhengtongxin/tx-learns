@@ -19,7 +19,7 @@ const MAX_PER_RUN = 2, MAX_PENDING = 12, EXPIRE_DAYS = 30, RESCOUT_DAYS = 45, RO
 const out = (k, v) => process.env.GITHUB_OUTPUT && appendFileSync(process.env.GITHUB_OUTPUT, `${k}=${v}\n`);
 const lessons = () => readdirSync(ROOT, { withFileTypes: true }).filter(d => d.isDirectory() && existsSync(join(ROOT, d.name, 'lessons.js')))
   .flatMap(d => readdirSync(join(ROOT, d.name)).filter(f => /^\d\d-[a-z0-9-]+\.html$/.test(f)).map(f => `${d.name}/${f}`));
-const tops = () => ['index.html', 'glossary.html', '404.html'].filter(f => existsSync(join(ROOT, f)));
+const tops = () => ['index.html', 'glossary.html', 'about.html', '404.html'].filter(f => existsSync(join(ROOT, f)));
 
 // One lens per role. `files` lists what the role may look at; `ask` says what that role cares about.
 // Files are chosen so one file means one area (the scope guard allows one area per pull request).
@@ -29,6 +29,7 @@ export const ROLES = {
   'frontend-engineer': { files: tops, ask: 'You are the frontend engineer. Read the page. Look for what would confuse or block a reader on a phone or with a keyboard: unclear labels, missing headings or alt text, controls that are hard to find, tight tap targets, text that is too long.' },
   'cybersecurity-engineer': { files: () => lessons().map(f => f.replace(/^([^/]+)\/(\d\d-.+)\.html$/, '$1/js/$2.js')).filter(f => existsSync(join(ROOT, f))), ask: 'You are the cybersecurity engineer. Read the lesson widget script (one lesson only, never shared site scripts). Look for unsafe patterns: untrusted text put into HTML (innerHTML), links opened without rel, data read from storage without checking, anything that could run attacker text.' },
   'product-engineer': { files: () => ['index.html', ...tops().filter(f => f !== 'index.html')], ask: 'You are the product engineer. Read the page as a first-time visitor. Look for what would make them leave or not know where to start: unclear promise, missing next step, jargon before it is explained.' },
+  'translator': { files: lessons, ask: 'You are the translator. Read the lesson in both languages (the class="en" and class="zh" blocks, and the {en, zh} strings in its script). Look for places where the 中文 does not say the same thing as the English: a sentence dropped or added, a number, name or step that differs, a term translated differently from glossary.js or from earlier in the same lesson, or English left as it is where a common 中文 term exists. Wording that is merely different but means the same is fine.' },
   'intern': { files: () => ['glossary.js'].filter(f => existsSync(join(ROOT, f))), ask: 'You are the intern learning AI. Read the glossary terms. Look for definitions that use a harder word than the one they explain, a term lessons use that is missing, or an English and 中文 pair that do not say the same thing.' },
 };
 const hash = f => createHash('sha1').update(readFileSync(join(ROOT, f))).digest('hex').slice(0, 12);

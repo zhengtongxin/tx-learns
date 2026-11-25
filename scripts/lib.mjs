@@ -3,6 +3,7 @@
 //   telegram(text, {html})  message TX; never throws, never fails a workflow
 //   loadTrack(source)       window.TRACK from lessons.js text
 //   scrub(text)             replaces banned terms (banned-words.txt) with [source]
+//   modelsInLessons(root)   the AI model ids the published lessons use, with the lessons that use each
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import vm from 'node:vm';
@@ -61,6 +62,18 @@ export function loadTracks(root) {
   const ctx = { window: {} };
   vm.runInNewContext(readFileSync(join(root, 'tracks.js'), 'utf8'), ctx, { filename: 'tracks.js' });
   return ctx.window.TRACKS.map(t => ({ id: t.id, dir: t.id, T: loadTrack(readFileSync(join(root, t.id, 'lessons.js'), 'utf8')) }));
+}
+
+// Model ids as lessons write them in code, e.g. gpt-5.4-mini, claude-sonnet-4-6, gemini-3.1-flash-lite, llama3.2.
+export const MODEL = /\b(?:gpt-[0-9][\w.-]*|gpt-oss-[\w.-]+|o[1-9]-(?:mini|pro)|claude-[a-z]+-[\w.-]+|gemini-[0-9][\w.-]*|llama[0-9][\w.:-]*|deepseek-[\w.-]+|qwen[0-9][\w.:-]*|mistral-[\w.-]+|grok-[0-9][\w.-]*)\b/gi;
+export const modelIds = text => [...new Set((String(text).match(MODEL) || []).map(m => m.replace(/[.:-]+$/, '').toLowerCase()))];
+// Every model id the published lessons use: { id: [lesson paths] } (the learning coach's monthly check and the daily news scan read it).
+export function modelsInLessons(root) {
+  const found = {};
+  for (const t of loadTracks(root)) for (const l of t.T.topics.flatMap(w => w.items).filter(x => x.file)) {
+    for (const id of modelIds(readFileSync(join(root, t.dir, l.file), 'utf8'))) (found[id] ||= new Set()).add(t.dir + '/' + l.file);
+  }
+  return Object.fromEntries(Object.entries(found).sort().map(([k, v]) => [k, [...v]]));
 }
 
 // Banned terms: the generic rules in banned-words.txt (public) plus the source names, which live outside the repo:
