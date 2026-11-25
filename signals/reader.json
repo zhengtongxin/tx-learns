@@ -1751,6 +1751,110 @@
      "why": "These numbers do not match the expected output above (0.8571 and 0.4286), so I could not tell which baseline the question means."
     }
    ]
+  },
+  "ai-fde/12-scoreboard-for-the-agent.html": {
+   "score": 6,
+   "at": "2026-11-25T13:52:57.548Z",
+   "confusing": [
+    {
+     "where": "Step 2 Learn",
+     "why": "score_run() is in this file, and the numbers come from scoring.py functions (matrix, kappa, straight_through) that this lesson never shows."
+    },
+    {
+     "where": "Step 3 Learn",
+     "why": "kappa and straight-through rate are never defined in this lesson, so I got stuck at kappa."
+    },
+    {
+     "where": "Step 2 Learn",
+     "why": "run_claim() never creates a human_wait event, so I could not see where the tag is set."
+    }
+   ]
+  },
+  "ai-fde/13-agentic-rag-over-a-manual.html": {
+   "score": 6,
+   "at": "2026-11-25T13:52:57.548Z",
+   "confusing": [
+    {
+     "where": "Step 2 code",
+     "why": "The message flow is never explained: the model asks for a search, and the answer goes back tagged with the same id. TOOLS, the JSON description of the search, is also unexplained."
+    },
+    {
+     "where": "Step 1 Learn",
+     "why": "Matching is whole words only, so \"bag\" does not find E1 (\"baggage\"). I thought the search was broken."
+    },
+    {
+     "where": "Step 2 quiz",
+     "why": "The code also returns M4.2 for \"strike\", since both sections contain it, and the expected output lists both."
+    }
+   ]
+  },
+  "ai-fde/14-a-memory-over-mcp.html": {
+   "score": 8,
+   "at": "2026-11-25T13:52:57.548Z",
+   "confusing": [
+    {
+     "where": "Step 2 Learn",
+     "why": "stdio is not explained."
+    },
+    {
+     "where": "Step 1 code",
+     "why": "It looks like a comment. The agent reads it to decide when to call the tool, and the lesson never says so."
+    }
+   ]
+  },
+  "ai-fde/15-agent-that-remembers-customers.html": {
+   "score": 6,
+   "at": "2026-11-25T13:52:57.548Z",
+   "confusing": [
+    {
+     "where": "Step 2 Learn",
+     "why": "remember() saves every note the model returns. The two-note cap and the no-card-numbers rule exist only in the prompt, not in the code."
+    },
+    {
+     "where": "Step 1 code",
+     "why": "One code box holds two files, make_reference.py and desk.py, so I could not tell which lines go in which file."
+    },
+    {
+     "where": "Step 2 code",
+     "why": "The doubled braces are f-string escaping, and nothing explains them, so the prompt looks broken."
+    }
+   ]
+  },
+  "ai-fde/16-pause-for-approval-and-resume.html": {
+   "score": 5,
+   "at": "2026-11-25T13:52:57.548Z",
+   "confusing": [
+    {
+     "where": "Step 1 Learn",
+     "why": "No step says how to get a Postgres database, and Step 1 cannot run without one."
+    },
+    {
+     "where": "Step 1 Learn",
+     "why": "I did not follow why a laptop file would vanish, or why that matters for a checkpoint."
+    },
+    {
+     "where": "Step 2 Learn",
+     "why": "I could not see who answers. The example that shows it is only in a comment at the bottom of the code."
+    }
+   ]
+  },
+  "ai-fde/17-swarms-of-agents-in-parallel.html": {
+   "score": 5,
+   "at": "2026-11-25T13:52:57.548Z",
+   "confusing": [
+    {
+     "where": "Step 1 code",
+     "why": "async, await and asyncio.run are used before anyone says what they mean."
+    },
+    {
+     "where": "Step 2 code",
+     "why": "The 25 is the example's batch size, hard-coded into the cap. With a cap of 40 only 25 run at once, and max(1, …) is not explained."
+    },
+    {
+     "where": "Step 3 code",
+     "why": "A real openai RateLimitError is not RateLimited, so it counts as a real failure, and two 429s send a claim to a handler. The Common errors box says to try later, but the code never shows how."
+    }
+   ]
   }
  }
 }
