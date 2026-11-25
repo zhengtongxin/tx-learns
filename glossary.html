@@ -8,23 +8,9 @@
 .gl-sec{margin-top:36px}
 .gl-sec>h2{margin:0 0 6px}
 .gl-note{margin:0 0 16px;color:var(--mut);font-size:15px}
-/* concept map */
-.cmap{display:block;width:100%;height:auto;margin:6px 0 4px;padding:8px;border:1px solid var(--line);border-radius:12px;background:var(--glass)}
-.cmap text{fill:var(--fg);font-family:var(--sans)}
-.cmap .nt{font-size:15px;font-weight:700}
-.cmap .nm{font-size:11.5px;fill:var(--mut)}
-.cmap .no{font:700 11px ui-monospace,Menlo,Consolas,monospace;fill:var(--h)}
-.cmap .nd rect{fill:color-mix(in srgb,var(--h) 13%,var(--node,var(--bg)));stroke:var(--h);stroke-width:1.5}
-.cmap a{outline:none;cursor:pointer}
-.cmap a:hover rect,.cmap a:focus-visible rect{stroke-width:3}
-.cmap a:focus-visible rect{stroke:var(--fg)}
-.cmap .e{fill:none;stroke:var(--mut);stroke-width:1.5}
-.cmap .e.d{stroke-dasharray:5 4;opacity:.7}
-.cmap marker path{fill:var(--mut)}
-.cmap .el{font-size:10.5px;fill:var(--mut)}
-.themes{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;margin-top:14px}
-.theme{padding:14px 16px 16px;border:1px solid var(--line);border-top:3px solid var(--h);border-radius:12px;background:var(--glass);scroll-margin-top:70px}
-.theme:target{border-color:var(--h)}
+/* concept map: one node per theme, its terms inside */
+.themes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:14px;margin-top:14px}
+.theme{position:relative;padding:14px 16px 16px;border:1px solid color-mix(in srgb,var(--h) 55%,var(--line));border-top:3px solid var(--h);border-radius:14px;background:color-mix(in srgb,var(--h) 7%,var(--glass));scroll-margin-top:70px}
 .theme h3{margin:0 0 2px;font-size:17px}
 .theme h3 .no{font:700 12px ui-monospace,Menlo,Consolas,monospace;color:var(--h);margin-right:8px}
 .theme p{margin:0 0 10px;color:var(--mut);font-size:14px;line-height:1.5}
@@ -53,7 +39,6 @@
 html[data-theme=light] .gl-m .tg{color:color-mix(in srgb,var(--h) 30%,var(--fg))}
 .gl-m a{font-weight:600}
 .gl-none{padding:18px;border:1px dashed var(--line);border-radius:10px;color:var(--mut);text-align:center}
-@media(max-width:640px){.cmap{display:none}.themes{grid-template-columns:1fr}}
 </style><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://tx-learns.vercel.app/glossary.html","url":"https://tx-learns.vercel.app/glossary.html","name":"AI terms glossary","description":"The core AI terms used in the lessons, in plain words, with a concept map that groups them by theme and a link to the lesson that teaches each one.","inLanguage":["en","zh"],"isPartOf":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI terms glossary","item":"https://tx-learns.vercel.app/glossary.html"}]}]}</script></head><body>
 <main class="wide">
 <header class="stage compact gl-hero"><div class="orb"></div>
@@ -64,29 +49,7 @@ html[data-theme=light] .gl-m .tg{color:color-mix(in srgb,var(--h) 30%,var(--fg))
 
 <section class="gl-sec" id="map" aria-labelledby="map-h">
 <h2 id="map-h"><span class="en">Concept map</span><span class="zh">概念图</span></h2>
-<p class="gl-note"><span class="en">The terms fall into seven themes. A model sits at the centre of an agent, tools and memory extend it, and measuring, safety and delivery keep it honest and running. Pick a theme or a term to jump to it.</span><span class="zh">这些词分成七个主题：模型是智能体的核心，工具和记忆扩展它，衡量、安全和上线交付让它可靠、能跑。点一个主题或词语即可跳转。</span></p>
-<svg class="cmap" viewBox="0 0 720 330" role="group" aria-label="Concept map · 概念图" focusable="false">
-<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z"/></marker></defs>
-<path class="e" d="M210 56H268" marker-end="url(#ar)"/>
-<path class="e" d="M452 56H510" marker-end="url(#ar)"/>
-<path class="e" d="M360 84V148" marker-end="url(#ar)"/>
-<path class="e" d="M605 84V148" marker-end="url(#ar)"/>
-<path class="e" d="M360 204V268" marker-end="url(#ar)"/>
-<path class="e d" d="M300 84L170 146" marker-end="url(#ar)"/>
-<a href="#theme-models" class="th-0 nd"><rect x="20" y="28" width="190" height="56" rx="12"/><text class="no" x="34" y="49">1</text><text class="nt en" x="34" y="71">Models</text><text class="nt zh" x="34" y="71">模型</text></a>
-<a href="#theme-agents" class="th-1 nd"><rect x="268" y="28" width="184" height="56" rx="12"/><text class="no" x="282" y="49">2</text><text class="nt en" x="282" y="71">Agents</text><text class="nt zh" x="282" y="71">智能体</text></a>
-<a href="#theme-tools" class="th-2 nd"><rect x="510" y="28" width="190" height="56" rx="12"/><text class="no" x="524" y="49">3</text><text class="nt en" x="524" y="71">Tools</text><text class="nt zh" x="524" y="71">工具</text></a>
-<a href="#theme-evals" class="th-4 nd"><rect x="20" y="148" width="190" height="56" rx="12"/><text class="no" x="34" y="169">5</text><text class="nt en" x="34" y="191">Measuring</text><text class="nt zh" x="34" y="191">衡量</text></a>
-<a href="#theme-safety" class="th-5 nd"><rect x="268" y="148" width="184" height="56" rx="12"/><text class="no" x="282" y="169">6</text><text class="nt en" x="282" y="191">Safety and control</text><text class="nt zh" x="282" y="191">安全与控制</text></a>
-<a href="#theme-memory" class="th-3 nd"><rect x="510" y="148" width="190" height="56" rx="12"/><text class="no" x="524" y="169">4</text><text class="nt en" x="524" y="191">Memory and retrieval</text><text class="nt zh" x="524" y="191">记忆与检索</text></a>
-<a href="#theme-delivery" class="th-6 nd"><rect x="268" y="268" width="184" height="56" rx="12"/><text class="no" x="282" y="289">7</text><text class="nt en" x="282" y="311">Delivery</text><text class="nt zh" x="282" y="311">上线交付</text></a>
-<text class="el en" x="214" y="48">calls</text><text class="el zh" x="214" y="48">调用</text>
-<text class="el en" x="455" y="48">uses</text><text class="el zh" x="455" y="48">使用</text>
-<text class="el en" x="368" y="122">kept in line by</text><text class="el zh" x="368" y="122">受其约束</text>
-<text class="el en" x="612" y="122">reads from</text><text class="el zh" x="612" y="122">读取</text>
-<text class="el en" x="368" y="242">shipped by</text><text class="el zh" x="368" y="242">由其上线</text>
-<text class="el en" x="200" y="104" text-anchor="end">scored by</text><text class="el zh" x="200" y="104" text-anchor="end">由其评分</text>
-</svg>
+<p class="gl-note"><span class="en">Seven themes, in order: a model powers an agent, tools and memory extend it, and measuring, safety and delivery keep it honest and running. Tap a term for its meaning.</span><span class="zh">七个主题依次是：模型驱动智能体，工具和记忆扩展它，衡量、安全和上线交付让它可靠、能跑。点词语看解释。</span></p>
 <div class="themes" id="themes"></div>
 <noscript><p class="gl-note"><span class="en">The term list needs JavaScript. Without it, open the lessons from the home page.</span><span class="zh">词汇列表需要 JavaScript。没有的话，请从首页进入各课。</span></p></noscript>
 </section>
@@ -114,13 +77,13 @@ html[data-theme=light] .gl-m .tg{color:color-mix(in srgb,var(--h) 30%,var(--fg))
     function thc(id){var i=thIdx[id];return 'th-'+(i==null?0:i)}
     G.sort(function(a,b){return a.en.toLowerCase().localeCompare(b.en.toLowerCase(),'en')});
 
-    /* the concept map: theme cards (numbers match the SVG), each listing its terms */
+    /* the concept map: one node per theme with its terms inside */
     var order=['models','agents','tools','memory','evals','safety','delivery'];
     themesEl.innerHTML=order.map(function(id,n){
       var t=TH[thIdx[id]];if(!t)return '';
       var terms=G.filter(function(g){return g.theme===id});
       return '<section class="theme '+thc(id)+'" id="theme-'+esc(id)+'"><h3><span class="no">'+(n+1)+'</span>'+bi(t.title)+'</h3><p>'+bi(t.blurb)+'</p><ul class="chips-l">'+
-        terms.map(function(g){return '<li><a href="#t-'+esc(g.id)+'" data-t="'+esc(g.id)+'">'+bi({en:g.en,zh:g.zh})+'</a></li>'}).join('')+'</ul></section>'}).join('');
+        terms.map(function(g){return '<li><a href="#t-'+esc(g.id)+'" data-t="'+esc(g.id)+'" title="'+esc(g.def.en)+'">'+bi({en:g.en,zh:g.zh})+'</a></li>'}).join('')+'</ul></section>'}).join('');
 
     /* the A to Z list */
     var groups={};
