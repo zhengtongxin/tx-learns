@@ -5,31 +5,16 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/ai-engineer/18-curating-and-cleaning-a-dataset.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-engineer/18-curating-and-cleaning-a-dataset.html","url":"https://tx-learns.vercel.app/ai-engineer/18-curating-and-cleaning-a-dataset.html","name":"Cleaning a dataset","alternateName":"清洗数据集","description":"Turn a messy pile of product listings into a clean, balanced, split dataset before any model sees it: filter, clean, balance, split and save.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"Predicting with data","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Engineer","url":"https://tx-learns.vercel.app/ai-engineer/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Engineer","item":"https://tx-learns.vercel.app/ai-engineer/index.html"},{"@type":"ListItem","position":3,"name":"Cleaning a dataset","item":"https://tx-learns.vercel.app/ai-engineer/18-curating-and-cleaning-a-dataset.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Predicting with data · Lesson 1</span><span class="zh">用数据做预测 · 第 1 课</span></span><h1><span class="en">Cleaning a dataset</span><span class="zh">清洗数据集</span></h1><p class="meta"><span class="en">You will turn a messy pile of listings into a clean, balanced dataset that later lessons can learn from · ~20 min · concept</span><span class="zh">你会把一堆杂乱的商品列表整理成干净、均衡的数据集，供后面的课使用 · 约 20 分钟 · 概念课</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the helper answered from Auntie Lim's files, but it cannot guess a price. Today Ah Boy hands over a huge pile of messy online listings. We fix it by cleaning them into one tidy dataset.</p>
-<p class="zh" style="margin:0">上回助手能照 Lim 阿姨的档案回答，却猜不出价格。今天 Ah Boy 交来一大堆乱糟糟的网上商品列表。我们的办法是把它们清洗成一份整齐的数据集。</p></div>
-<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0"><b>Ah Boy</b> knows second-hand prices by heart, but he cannot sit at the counter all day. <b>Wei Jie</b> wants a program that reads a gadget's description and guesses its price. Ah Boy hands over a huge pile of online listings: title, description, features and price. Before any model, Wei Jie has to make that pile fit to learn from.</p>
-<p class="zh" style="margin:0"><b>Ah Boy</b> 把二手价格背得滚瓜烂熟，可他不能整天守在柜台。<b>Wei Jie</b> 想做个程序，读一件数码产品的描述就猜出价格。Ah Boy 给了他一大堆网上的商品列表：标题、描述、特点和价格。在碰任何模型之前，Wei Jie 得先把这堆东西整理到适合学习的程度。</p></div>
-
-<h2><span class="en">Step 1 · Look before you touch</span><span class="zh">第 1 步 · 先看，再动手</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A model can only learn from what you feed it, so look at the data first. Load a published dataset from the Hugging Face hub with <code>load_dataset</code>. Print one record, the most expensive record, and how many records have a price at all. Think of a stock-take: you count what is on the shelf before you decide what to sell.</p>
-<p class="zh" style="margin:0 0 8px">模型只能从你喂给它的东西里学，所以先看数据。用 <code>load_dataset</code> 从 Hugging Face hub 加载一个公开数据集。打印一条记录、最贵的一条记录，以及到底有多少条记录有价格。就像盘点货架：先数清货架上有什么，再决定卖什么。</p></div>
-<div class="codebox" data-file="inspect_data.py" data-lang="python"><span class="dim">from datasets import load_dataset
+<h2><span class="en">Step 1 · Look, then keep only what is usable</span><span class="zh">第 1 步 · 先看，再只留能用的</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">A model learns only from what you feed it, so look first: print one record, the most extreme record, and how many have a price. Then drop rows with no price, too little text, or a tiny or absurd price. A few outliers drag a model the wrong way.</p><p class="zh" style="margin:0">模型只能从你喂给它的东西里学，所以先看：打印一条记录、最极端的一条，以及有多少条有价格。然后丢掉没有价格、文字太少、价格太小或离谱的行。几个离群值会把模型带偏。</p></div>
+<div class="codebox" data-file="inspect_filter.py" data-lang="python"><span class="dim">from datasets import load_dataset
 
 listings = load_dataset("your-name/gadget-listings", split="train")   # your own dataset id
 </span><span class="chg">print(listings[0])                                        # one record
 priced = [r for r in listings if r["price"]]               # many have no price
-print(len(priced), "of", len(listings), "have a price")
-print(max(priced, key=lambda r: float(r["price"])))        # the most extreme row</span></div>
-<div class="codebox" data-file="output" data-lang="text">{'title': 'Phone stand', 'description': '...', 'price': '12.90'}
-8412 of 9000 have a price
-{'title': 'Pro camera kit', 'price': '1499.00'}</div>
-<div class="try" id="p1"></div>
+print(max(priced, key=lambda r: float(r["price"])))        # the most extreme row
 
-<h2><span class="en">Step 2 · Keep only what is usable</span><span class="zh">第 2 步 · 只留下能用的</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Throw away rows with no price, rows with too little text, and prices that are tiny or absurd. Wei Jie kept prices between $1 and $1000, and descriptions with at least a minimum number of characters. A few huge outliers drag a model the wrong way, like one wrong price tag that makes a whole shelf look expensive.</p>
-<p class="zh" style="margin:0 0 8px">丢掉没有价格的行、文字太少的行，以及太便宜或离谱的价格。Wei Jie 只保留 1 到 1000 美元之间的价格，以及描述至少达到最少字符数的行。几个特别大的离群值会把模型带偏，就像一张标错的价签，让整排货架都显得很贵。</p></div>
-<div class="codebox" data-file="filter.py" data-lang="python"><span class="chg">MIN_CHARS = 300
-
+MIN_CHARS = 300
 def usable(row):
     if not row["price"]:
         return False
@@ -39,12 +24,13 @@ def usable(row):
 
 kept = [r for r in listings if usable(r)]
 print("kept", len(kept), "of", len(listings))</span></div>
-<div class="codebox" data-file="output" data-lang="text">kept 7120 of 9000</div>
+<div class="codebox" data-file="output" data-lang="text">{'title': 'Phone stand', 'description': '...', 'price': '12.90'}
+{'title': 'Pro camera kit', 'price': '1499.00'}
+kept 7120 of 9000</div>
 <div class="try" id="p2"></div>
 
-<h2><span class="en">Step 3 · Clean the text into an Item</span><span class="zh">第 3 步 · 把文字清洗成 Item</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Put each survivor into a small <code>Item</code> class with one clean <code>summary</code> text and a <code>price</code>. Strip stray symbols and boilerplate lines such as "Manufacturer" or "Date first available". Drop any word with a long run of digits, like a part number: it adds noise, not meaning. Finally cut the text to a fixed length, so every example is about the same size.</p>
-<p class="zh" style="margin:0 0 8px">把每个幸存的记录放进一个小小的 <code>Item</code> 类：一段干净的 <code>summary</code> 文字加一个 <code>price</code>。去掉乱码符号和“Manufacturer”“Date first available”这类套话。含一长串数字的词（比如零件编号）也删掉：它只带来噪音，没有意义。最后把文字截到固定长度，让每个例子大小差不多。</p></div>
+<h2><span class="en">Step 2 · Clean the text into an Item</span><span class="zh">第 2 步 · 把文字清洗成 Item</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Put each survivor into an <code>Item</code> with one clean <code>summary</code> and a <code>price</code>: strip boilerplate lines, drop part-number words (noise, not meaning), and cut to a fixed length.</p><p class="zh" style="margin:0">把每个幸存的记录放进一个 <code>Item</code>：一段干净的 <code>summary</code> 加一个 <code>price</code>。去掉套话行，删掉零件编号词（噪音，没有意义），并截到固定长度。</p></div>
 <div class="codebox" data-file="clean.py" data-lang="python"><span class="dim">import re
 </span><span class="chg">NOISE_LINES = ("Manufacturer", "ASIN", "Date first available")
 MAX_CHARS = 800
@@ -62,11 +48,9 @@ class Item:
         self.price = float(row["price"])
 
 items = [Item(r) for r in kept]</span></div>
-<div class="try" id="p3"></div>
 
-<h2><span class="en">Step 4 · Plot, then balance</span><span class="zh">第 4 步 · 画图，再均衡</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Plot the text lengths and the prices. Prices are skewed: lots of cheap things and a long tail of expensive ones. If you train on that as it is, the model learns "the answer is about thirty dollars" and is rarely wrong by much, yet never useful. So sample on purpose: keep every expensive item and only part of the huge cheap crowd, so every price range and category is represented.</p>
-<p class="zh" style="margin:0 0 8px">把文字长度和价格都画出来。价格是偏斜的：便宜的东西很多，昂贵的拖着一条长尾巴。如果原样训练，模型会学到“答案大概是三十块”，很少错得离谱，却毫无用处。所以要有意识地抽样：贵的全留，便宜的庞大人群只留一部分，让每个价格区间和类别都有代表。</p></div>
+<h2><span class="en">Step 3 · Balance the prices</span><span class="zh">第 3 步 · 均衡价格</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Prices are skewed: many cheap items, a long tail of dear ones. Train on that as is and the model learns "about thirty dollars", rarely far off and never useful. Sample on purpose: keep every expensive item and only part of the cheap crowd.</p><p class="zh" style="margin:0">价格是偏斜的：便宜的很多，贵的拖着长尾。原样训练，模型会学到“大概三十块”，很少错得远，却毫无用处。有意抽样：贵的全留，便宜的只留一部分。</p></div>
 <div class="codebox" data-file="balance.py" data-lang="python"><span class="dim">import random
 random.seed(42)
 </span><span class="chg">cheap = [i for i in items if i.price < 50]
@@ -76,9 +60,8 @@ random.shuffle(balanced)</span></div>
 <p class="en">Which of these makes a model useless for price guessing?</p>
 <p class="zh">下面哪一种情况会让价格预测模型变得没用？</p><div class="sc" id="g4"></div>
 
-<h2><span class="en">Step 5 · Split, then save</span><span class="zh">第 5 步 · 切分，然后保存</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Split into three sets: a big training set (hundreds of thousands), a validation set (a few thousand) and a test set (about 2,000). Think of Priya's tuition class: practice papers, a mock exam and the real exam. Never peek at the test set until the very end. Then push the finished dataset to the hub so a later notebook or cloud machine loads it in one line. Keep a small "lite" copy for quick runs.</p>
-<p class="zh" style="margin:0 0 8px">切成三份：很大的训练集（几十万条）、验证集（几千条）和测试集（约 2000 条）。就像 Priya 的补习班：练习卷、模拟考和真正的考试。测试集在最后之前绝不能偷看。然后把整理好的数据集推送到 hub，以后的 notebook 或云端机器一行就能加载。再留一份小的“lite”版本，方便快速跑。</p></div>
+<h2><span class="en">Step 4 · Split, then save</span><span class="zh">第 4 步 · 切分，然后保存</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Split into training (large), validation (a few thousand) and test (about 2,000), like practice papers, a mock exam and the real exam. Never peek at test until the end. Push the dataset to the hub so later notebooks load it in one line, plus a small "lite" copy for quick runs.</p><p class="zh" style="margin:0">切成训练集（很大）、验证集（几千条）和测试集（约 2000 条），就像练习卷、模拟考和真正的考试。测试集到最后之前绝不偷看。把数据集推送到 hub，以后一行就能加载，再留一份小的“lite”版本方便快速跑。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 130" role="img" aria-label="Cleaning flow: raw listings, drop unusable rows, clean text into Items, balance the prices, then split into training, validation and test sets and save."><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box soft" x="10" y="40" width="116" height="56" rx="12"/><text class="en" x="68" y="73">Raw listings</text><text class="zh" x="68" y="73">原始列表</text><rect class="box new" x="156" y="40" width="116" height="56" rx="12"/><text class="en" x="214" y="65">Drop the</text><text class="en" x="214" y="81">unusable</text><text class="zh" x="214" y="65">丢掉</text><text class="zh" x="214" y="81">不能用的</text><rect class="box new" x="302" y="40" width="116" height="56" rx="12"/><text class="en" x="360" y="65">Clean into</text><text class="en" x="360" y="81">an Item</text><text class="zh" x="360" y="65">清洗成</text><text class="zh" x="360" y="81">Item</text><rect class="box new" x="448" y="40" width="116" height="56" rx="12"/><text class="en" x="506" y="65">Balance</text><text class="en" x="506" y="81">the prices</text><text class="zh" x="506" y="65">均衡</text><text class="zh" x="506" y="81">价格</text><rect class="box new" x="594" y="40" width="116" height="56" rx="12"/><text class="en" x="652" y="65">Split and</text><text class="en" x="652" y="81">save</text><text class="zh" x="652" y="65">切分并</text><text class="zh" x="652" y="81">保存</text><path class="lnk" d="M126 68 H153" marker-end="url(#ar)"/><path class="lnk" d="M272 68 H299" marker-end="url(#ar)"/><path class="lnk" d="M418 68 H445" marker-end="url(#ar)"/><path class="lnk" d="M564 68 H591" marker-end="url(#ar)"/></svg><figcaption><span class="en">The order matters: tidy first, then balance, then split.</span><span class="zh">顺序很重要：先整理，再均衡，最后切分。</span></figcaption></figure>
 <div class="codebox" data-file="publish.py" data-lang="python"><span class="dim">from datasets import Dataset, DatasetDict
 </span><span class="chg">test  = balanced[:2000]
@@ -92,24 +75,17 @@ data = DatasetDict({"train": to_ds(train), "validation": to_ds(valid), "test": t
 data.push_to_hub("your-name/gadget-prices")                    # needs a hub login
 lite = DatasetDict({k: v.select(range(min(500, len(v)))) for k, v in data.items()})
 lite.push_to_hub("your-name/gadget-prices-lite")</span></div>
-<div class="try" id="p5"></div>
 
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I spent time on models before I looked at the data. The first plot showed a few absurd prices that I would otherwise have trained on. Now the plot and the most extreme row come first, every time.</span><span class="zh">我没看数据就先花时间去弄模型。第一张图一画，就看到几个离谱的价格，要是没看，我就拿它们去训练了。现在每次都先画图、先看最极端的那一行。</span></div>
-
-<h2><span class="en">Common errors</span><span class="zh">常见报错</span></h2>
-<div class="card"><p class="en" style="margin:0">• <code>ValueError: could not convert string to float: ''</code>. Some rows have an empty price. Filter them out before converting.<br>• <code>DatasetNotFoundError</code> or 401. The dataset id is wrong or private. Check the spelling and log in with <code>huggingface-cli login</code>.<br>• A model that always guesses cheap. The data is mostly cheap items. Balance the price bands before you split.</p><p class="zh" style="margin:0">• <code>ValueError: could not convert string to float: ''</code>：有些行的价格是空的。转换之前先过滤掉。<br>• <code>DatasetNotFoundError</code> 或 401：数据集 id 写错或是私有的。检查拼写，并用 <code>huggingface-cli login</code> 登录。<br>• 模型总是猜低价：数据里大多是便宜的东西。切分之前先把各价格段配平。</p></div>
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I worked on models before looking at the data. The first plot showed absurd prices I would have trained on. Look first, every time.</span><span class="zh">我没看数据就先弄模型。第一张图就显示了本来会被拿去训练的离谱价格。每次都先看。</span></div>
+<div class="callout warn"><b class="lbl"><span class="en">Common errors</span><span class="zh">常见报错</span></b><span class="en"><code>ValueError: could not convert string to float: ''</code>: an empty price; filter before converting. <code>DatasetNotFoundError</code> or 401: wrong or private id; check it and run <code>huggingface-cli login</code>.</span><span class="zh"><code>ValueError: could not convert string to float: ''</code>：价格为空；转换前先过滤。<code>DatasetNotFoundError</code> 或 401：id 错误或私有；检查并运行 <code>huggingface-cli login</code>。</span></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Load a small public dataset</b> and print its most extreme row.</span><span class="zh"><b>加载一个小的公开数据集，</b>打印它最极端的一行。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Write a cleaning function</b> and count how many rows it removes.</span><span class="zh"><b>写一个清洗函数，</b>数一数它删掉了多少行。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Plot a histogram</b> of the target before and after filtering.</span><span class="zh"><b>画目标值的直方图，</b>对比过滤前后。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Ah Boy's pile of listings is now a clean set of Items with a price, balanced and split into training, validation and test, saved for reuse. The next problem is a yardstick: before any clever model, what does a plain average or a simple formula score on the test set?</span><span class="zh">Ah Boy 的那堆商品列表，现在成了一批带价格的干净 Item，经过均衡，切分成训练、验证和测试三份，存好可以重复使用。下一个问题是一把尺子：在用任何高明的模型之前，一个普通平均值或简单公式在测试集上能得多少分？</span></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Load a small public dataset</b> and print its most extreme row.</span><span class="zh"><b>加载一个小的公开数据集，</b>打印它最极端的一行。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Plot a histogram</b> of the target before and after filtering.</span><span class="zh"><b>画目标值的直方图，</b>对比过滤前后。</span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• Data work comes first and is most of the job.<br>• Look at one record and the most extreme record before anything else.<br>• Filter out missing, tiny and absurd prices.<br>• Clean the text: boilerplate, part numbers, fixed length.<br>• Plot the target: skewed prices need balancing.<br>• Split train, validation and test, and never peek at test.<br>• Push the finished dataset to the hub, with a small lite copy for fast tests.</p><p class="zh" style="margin:0">• 数据工作排在最前，而且是工作的大头。<br>• 任何事之前，先看一条记录和最极端的那条。<br>• 过滤掉缺失、过小和离谱的价格。<br>• 清洗文字：套话、零件编号、固定长度。<br>• 把目标值画出来：偏斜的价格需要均衡。<br>• 切成训练、验证、测试，测试集绝不偷看。<br>• 把成品推送到 hub，再留一份小的 lite 版本做快速测试。</p></div>
-
-<h2><span class="en">Recap</span><span class="zh">小结</span></h2>
-<div class="card"><p class="en" style="margin:0">1. Look at the raw data first, then drop rows that are too short or have no price.<br>2. Clean the text, and balance cheap and expensive items so the model learns both.<br>3. Split into train, validation and test once, and never peek at the test set.</p><p class="zh" style="margin:0">1. 先看原始数据，再去掉太短或没有价格的行。<br>2. 清理文字，并让便宜和贵的东西数量均衡，模型两边都学得到。<br>3. 训练、验证、测试只切一次，永远不要偷看测试集。</p></div>
+<div class="card"><p class="en" style="margin:0">• Data work comes first and is most of the job.<br>• Look at the most extreme row; filter missing, tiny and absurd prices.<br>• Clean the text: boilerplate, part numbers, fixed length.<br>• Balance skewed prices, then split train, validation and test, and never peek at test.</p><p class="zh" style="margin:0">• 数据工作排在最前，而且是工作的大头。<br>• 看最极端的一行；过滤缺失、过小和离谱的价格。<br>• 清洗文字：套话、零件编号、固定长度。<br>• 均衡偏斜的价格，再切成训练、验证、测试，测试集绝不偷看。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"goals":{"en":["Inspect one record and the most extreme record first","Filter out missing, tiny and absurd values","Clean text of boilerplate and part numbers and fix its length","Split train, validation and test and push the dataset to the hub"],"zh":["先看一条普通记录和一条最极端的记录","过滤缺失、过小和荒谬的值","清理文本里的套话和零件编号，并统一长度","划分训练、验证和测试集并推送到 hub"]},"prev":[],"tools":{"en":"Python 3.10+, the datasets package, internet to download the dataset","zh":"Python 3.10+、datasets 包、能联网下载数据集"},"know":{"en":"Basic Python lists, dictionaries and loops.","zh":"基础 Python 的列表、字典和循环。"},"mins":30,"offline":false}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=dcd48bec"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/18-curating-and-cleaning-a-dataset.js?v=f56c3460"></script></body></html>
+<script src="js/18-curating-and-cleaning-a-dataset.js?v=6b9d59b7"></script></body></html>

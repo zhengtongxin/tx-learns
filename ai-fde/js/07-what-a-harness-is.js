@@ -1,11 +1,5 @@
 document.addEventListener('DOMContentLoaded',function(){
- var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
-
- game($('g1'),[
-  {en:'Choosing which claim to work on next',zh:'决定下一个处理哪份理赔',a:'a',ex:{en:'The agent can see the whole queue and weigh the claims, so let it plan.',zh:'智能体能看到整条队列并权衡，让它自己规划。'},hint:{en:'Who can see all the claims at once?',zh:'谁能同时看到所有理赔？'}},
-  {en:'Finding the manual section a claim needs',zh:'找出一份理赔需要的手册章节',a:'a',ex:{en:'It is the one reading the claim, so it knows what to look up.',zh:'读理赔的是它，所以它最清楚该查什么。'},hint:{en:'Who knows what the claim is about?',zh:'谁知道这份理赔讲的是什么？'}},
-  {en:'Refusing a big payout until a handler signs it off',zh:'没有理赔员签字，就拒绝大额赔付',a:'c',ex:{en:'A hard limit is a locked door in code, not a request in a prompt.',zh:'硬性上限是代码里的锁，而不是提示词里的请求。'},hint:{en:'Must this hold even if the model slips?',zh:'模型出错时这条也必须成立吗？'}},
-  {en:'Putting a failed claim back in the queue',zh:'把失败的理赔放回队列',a:'c',ex:{en:'A crashed call cannot decide anything, so plain code has to catch it.',zh:'崩掉的调用什么也决定不了，必须由普通代码接住。'},hint:{en:'Can a model that crashed read its instructions?',zh:'崩掉的模型还读得到指令吗？'}}],[{k:'a',en:'Let the agent do it',zh:'让智能体做'},{k:'c',en:'Keep it in code',zh:'留在代码里'}],{en:'Job',zh:'工作'});
+ var $=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
 
  game($('g2'),[
   {en:'Reading a claim and writing two or three sentences of reasons',zh:'读一份理赔并写两三句理由',a:'m',ex:{en:'Reading and reasoning is what the model is for.',zh:'阅读和推理正是模型的本职。'},hint:{en:'Is it thinking, or plumbing?',zh:'这是思考，还是管道？'}},
@@ -13,8 +7,6 @@ document.addEventListener('DOMContentLoaded',function(){
   {en:'The list of tools the agent is allowed to call',zh:'智能体可以调用的工具清单',a:'h',ex:{en:'You choose the tools; the model only picks among them.',zh:'工具由你选，模型只是在其中挑。'},hint:{en:'Who hands out the tools?',zh:'谁来发放工具？'}},
   {en:'Understanding that a delayed flight is not the same as a cancelled one',zh:'明白航班延误和航班取消不是一回事',a:'m',ex:{en:'General language understanding lives in the model.',zh:'一般的语言理解在模型里。'},hint:{en:'Is it about meaning?',zh:'这和词义有关吗？'}},
   {en:'Retrying a claim that failed',zh:'重试失败的理赔',a:'h',ex:{en:'Error handling is middleware, which is code in the harness.',zh:'错误处理是中间件，也就是 harness 里的代码。'},hint:{en:'Is it a decision about meaning or about errors?',zh:'这是关于词义的决定，还是关于错误的？'}}],[{k:'m',en:'The model',zh:'模型'},{k:'h',en:'The harness',zh:'harness'}],{en:'Piece',zh:'部分'});
-
- predict($('p1'),{q:{en:'One long chat handles all 25 claims. A fresh helper handles each claim in the other design. How does the cost of the 25th claim compare with the 1st in the fresh-helper design?',zh:'一种设计是一个长对话处理全部 25 份理赔，另一种是每份理赔一个新帮手。在新帮手的设计里，第 25 份的成本和第 1 份相比如何？'},opts:[{k:'a',en:'About the same',zh:'差不多'},{k:'b',en:'Much higher, it carries 24 claims',zh:'高很多，因为带着 24 份理赔'},{k:'c',en:'Much lower, it is learning',zh:'低很多，因为它越学越会'}],a:'a',ex:{en:'A fresh helper starts clean every time, so each claim costs about the same. In one long chat, each new claim drags every earlier one along.',zh:'新帮手每次都从干净状态开始，所以每份理赔的成本差不多。在一个长对话里，每份新理赔都要拖着之前所有的理赔。'},hint:{en:'What does the helper see when it starts?',zh:'帮手一开始看到什么？'}});
 
  predict($('p2'),{q:{en:'A claim is about a cancelled flight. The wording is forty pages. What should the agent be given?',zh:'一份理赔是关于航班取消。条款有四十页。该给智能体什么？'},opts:[{k:'a',en:'All forty pages, every time',zh:'每次都给全部四十页'},{k:'b',en:'The section titles, plus a tool to read one section',zh:'章节标题，加一个读取某一节的工具'},{k:'c',en:'Nothing; it should know insurance already',zh:'什么都不给，它本来就该懂保险'}],a:'b',ex:{en:'Titles are cheap, and the tool fetches only what the claim needs. Pasting everything costs more and buries the useful part.',zh:'标题很便宜，工具只取这份理赔需要的。全贴进去更费钱，还会把有用的部分埋掉。'},hint:{en:'Think of opening one drawer, not the whole cabinet.',zh:'想想只拉开一个抽屉，而不是整个柜子。'}});
 

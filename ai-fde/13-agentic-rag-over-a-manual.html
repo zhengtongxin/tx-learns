@@ -4,16 +4,11 @@
 <meta name="updated" content="2026-11-25">
 <link rel="canonical" href="https://tx-learns.vercel.app/ai-fde/13-agentic-rag-over-a-manual.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-fde/13-agentic-rag-over-a-manual.html","url":"https://tx-learns.vercel.app/ai-fde/13-agentic-rag-over-a-manual.html","name":"Agentic RAG over a manual","alternateName":"手册上的智能体检索","description":"Let the agent search a claims manual and notes on outside events by itself, with short specific questions, instead of stuffing everything into the prompt.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Knowledge and memory","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI FDE","url":"https://tx-learns.vercel.app/ai-fde/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI FDE","item":"https://tx-learns.vercel.app/ai-fde/index.html"},{"@type":"ListItem","position":3,"name":"Agentic RAG over a manual","item":"https://tx-learns.vercel.app/ai-fde/13-agentic-rag-over-a-manual.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
-<div class="hero"><span class="tag"><span class="en">Knowledge and memory · Lesson 1</span><span class="zh">知识与记忆 · 第 1 课</span></span><h1><span class="en">Agentic RAG over a manual</span><span class="zh">手册上的智能体检索</span></h1><p class="meta"><span class="en">Let the agent look things up in the claims manual and in notes on outside events, choosing its own searches · ~25 min · concept + one runnable idea</span><span class="zh">让智能体自己在理赔手册和外部事件笔记里查资料，自己决定怎么搜 · 约 25 分钟 · 概念 + 一个能跑的想法</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the pilot got a scoreboard that shows which runs are better. Today the hard claims still fail, because they need facts from Mr Goh’s thick claims manual that are not in the policy. We fix it by giving the agent a search tool over the manual.</p>
-<p class="zh" style="margin:0">上回试点有了一块能看出哪次运行更好的计分板。今天难理赔仍然出错，因为它们需要 Goh 先生那本厚厚的理赔手册里、保单中没有的事实。我们的办法是给智能体一个能搜手册的检索工具。</p></div>
-<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">The pilot at Kaya Travel Cover handles easy claims well. The hard ones need facts that are not in the policy: a strike at the airport, a typhoon warning, the rule on old bags. Mr Goh keeps those in a thick claims manual. Mei Ling could paste the whole manual into every prompt, but it grows every month. So she builds a small knowledge base and gives the agent a <b>search tool</b>, so it can look things up the way Aisha does.</p>
-<p class="zh" style="margin:0">Kaya Travel Cover 的试点处理简单理赔很顺手。难的那些需要保单里没有的事实：机场罢工、台风警报、旧行李的赔偿规则。Goh 先生把这些都记在一本厚厚的理赔手册里。Mei Ling 可以把整本手册贴进每个提示词，但手册每个月都在变厚。所以她建了一个小小的知识库，再给智能体一个<b>搜索工具</b>，让它像 Aisha 那样自己去查。</p></div>
+<div class="hero"><span class="tag"><span class="en">Knowledge and memory · Lesson 1</span><span class="zh">知识与记忆 · 第 1 课</span></span><h1><span class="en">Agentic RAG over a manual</span><span class="zh">手册上的智能体检索</span></h1><p class="meta"><span class="en">Let the agent look things up in the claims manual and in notes on outside events, choosing its own searches · ~20 min · concept + one runnable idea</span><span class="zh">让智能体自己在理赔手册和外部事件笔记里查资料，自己决定怎么搜 · 约 20 分钟 · 概念 + 一个能跑的想法</span></p></div>
 
-<div class="callout tip"><b class="lbl"><span class="en">Words in this lesson</span><span class="zh">这一课用到的词</span></b><span class="en"><b>Retrieval</b>: finding the few manual sections that matter for one claim, instead of pasting the whole manual.<br><b>Agentic RAG</b>: the model decides what to search for, and can search again if the first answer is not enough.<br><b>Score</b>: a number for how many words a section shares with the question; the highest ones are shown first.</span><span class="zh"><b>检索</b>：只找出和这份理赔有关的几段手册，而不是把整本手册贴进去。<br><b>智能体式检索</b>：由模型自己决定搜什么，第一次不够时还能再搜一次。<br><b>得分</b>：一段手册和问题共有多少词的数字；分数高的排在前面。</span></div>
-<h2><span class="en">Step 1 · A small knowledge base</span><span class="zh">第 1 步 · 一个小小的知识库</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Pasting everything into the prompt costs money on every claim, and a long prompt buries the one line that matters. Instead, cut the material into small <b>sections</b>, each with an id, and let the agent fetch only what it needs. This idea is called <b>RAG</b>: retrieve the right pieces, then answer from them. Think of the grey filing cabinet: nobody reads every folder, you pull the one you need.</p>
-<p class="zh" style="margin:0 0 8px">把所有东西贴进提示词，每份理赔都要花钱，而且提示词太长，会把关键的那一行埋掉。换个办法：把资料切成小<b>段落</b>，每段有个编号，让智能体只取它需要的。这个做法叫 <b>RAG</b>：先取回合适的片段，再根据它们回答。就像那个灰色档案柜：没人会把每个文件夹都读一遍，你只抽出需要的那一份。</p></div>
+<h2><span class="en">Step 1 · A small knowledge base and a search</span><span class="zh">第 1 步 · 一个小知识库和一个搜索</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0"><li>Pasting a whole manual into every prompt costs money and buries the one line that matters. <b>RAG</b> (retrieval-augmented generation) cuts the material into small <b>sections</b> with ids, retrieves the right ones, then answers from them.</li><li>This search is the simplest kind: it counts words shared with each section. A real system matches by meaning, using embeddings. The idea is the same.</li></ul>
+<ul class="zh" style="margin:0"><li>把整本手册贴进每个提示词，既花钱，又会埋掉关键的那一行。<b>RAG</b>（检索增强生成）把资料切成带编号的小<b>段落</b>，取回合适的几段，再根据它们回答。</li><li>这个搜索是最简单的那种：数一数和每段共有多少个词。真正的系统会按意思匹配，用嵌入向量。道理是一样的。</li></ul></div>
 <div class="codebox" data-file="kb.py" data-lang="python"><span class="chg">KB = [
     {"id": "M4.2", "title": "Strikes",
      "text": "A delay or cancellation caused by a strike is covered only if the strike was not announced before the policy was bought."},
@@ -24,14 +19,9 @@
     {"id": "E1", "title": "Airport handlers strike",
      "text": "Baggage handlers at the main airport announced a strike on 3 March. It ran from 10 to 12 March."},
     {"id": "E2", "title": "Typhoon in the north",
-     "text": "An official typhoon warning covered the northern coast from 20 to 22 August."}]</span></div>
-<p class="en">Which of these belong in the knowledge base?</p>
-<p class="zh">下面哪些该放进知识库？</p><div class="sc" id="g1"></div>
+     "text": "An official typhoon warning covered the northern coast from 20 to 22 August."}]
 
-<h2><span class="en">Step 2 · A search tool</span><span class="zh">第 2 步 · 一个搜索工具</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A search tool takes a short question and returns the best-matching sections. This one is the simplest kind: it counts how many words the question shares with each section, and drops sections that share none. A real system would match by meaning, using embeddings (a list of numbers for each section, where similar meanings get similar numbers). The idea is the same.</p>
-<p class="zh" style="margin:0 0 8px">搜索工具接收一个简短的问题，返回匹配度最高的段落。这个是最简单的那种：数一数问题和每段共有多少个词，一个词都不共有的就丢掉。真正的系统会按意思匹配：用嵌入向量（每段话变成一串数字，意思相近的，数字也相近），但道理是一样的。</p></div>
-<div class="codebox" data-file="kb.py" data-lang="python"><span class="chg">import re
+import re
 
 def words(text):
     return set(re.findall(r"[a-z0-9]+", text.lower()))
@@ -42,26 +32,30 @@ def search(query, top=2):
         return len(q &amp; words(s["title"] + " " + s["text"]))
     best = sorted(KB, key=score, reverse=True)
     return [s for s in best[:top] if score(s) &gt; 0]</span></div>
+<p class="en">Which of these belong in the knowledge base?</p>
+<p class="zh">下面哪些该放进知识库？</p><div class="sc" id="g1"></div>
 <div class="try" id="p1"></div>
 
-<h2><span class="en">Step 3 · The agent chooses its own searches</span><span class="zh">第 3 步 · 智能体自己决定怎么搜</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Now hand the search to the agent as a tool, as in the pilot. It reads the claim, decides what it is missing, searches, reads the result, and can search again. That loop is the “agentic” part. A <b>tool</b> is a function you write: the model asks for it, you run it, and the result goes back into the chat. <code>max_searches</code> is a safety cap so it cannot loop forever; once it is reached, the tool is taken away and the agent must answer. Install with <code>pip install openai</code>.</p>
-<p class="zh" style="margin:0 0 8px">现在把搜索当成工具交给智能体，和试点里一样。它读理赔，判断自己缺什么，去搜，读结果，还可以再搜。这个循环就是“智能体式”的部分。<b>工具</b>就是你自己写的函数：模型来请求，你来运行，结果再送回对话里。<code>max_searches</code> 是一道安全上限，防止它无限循环；到了上限，工具就被收走，智能体必须作答。用 <code>pip install openai</code> 安装。</p></div>
+<h2><span class="en">Step 2 · The agent chooses its own searches</span><span class="zh">第 2 步 · 智能体自己决定怎么搜</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0"><li>Hand the search to the agent as a <b>tool</b>. It reads the claim, decides what it is missing, searches, reads the result and can search again. That loop is the “agentic” part (<b>agentic RAG</b>).</li><li><code>max_searches</code> is a safety cap: once reached, the tool is taken away and the agent must answer, or refer.</li><li>Searches work only as well as the question. Tell the agent to ask a short, specific question (3 to 6 words), never the customer’s whole story.</li><li>Return the section ids it read, so a handler can check a “decline” for themselves.</li><li>Install with <code>pip install openai</code>.</li></ul>
+<ul class="zh" style="margin:0"><li>把搜索当成<b>工具</b>交给智能体。它读理赔，判断自己缺什么，去搜，读结果，还可以再搜。这个循环就是“智能体式”的部分（<b>智能体式 RAG</b>）。</li><li><code>max_searches</code> 是一道安全上限：到了上限，工具就被收走，智能体必须作答，或者转交。</li><li>搜索的好坏取决于问题。告诉智能体问一个简短、具体的问题（3 到 6 个词），不要贴客户的整段故事。</li><li>把它读过的段落编号一起返回，理赔员就能亲自核对一个“拒绝”。</li><li>用 <code>pip install openai</code> 安装。</li></ul></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="A claim goes to the agent, which sends short searches to a search tool over the manual and gets sections back, then decides with section ids shown"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><path class="lnk" d="M130 110L170 110" marker-end="url(#ah)"/><path class="lnk hot" d="M300 80L370 48" marker-end="url(#ah)"/><path class="lnk" d="M450 72L450 148" marker-end="url(#ah)"/><path class="lnk" d="M370 175L300 135" marker-end="url(#ah)"/><path class="lnk" d="M320 110L580 110" marker-end="url(#ah)"/><rect class="box soft" x="20" y="80" width="110" height="60" rx="12"/><text class="en" x="75.0" y="114.0">Claim</text><text class="zh" x="75.0" y="114.0">理赔</text><rect class="box new" x="170" y="80" width="150" height="60" rx="12"/><text class="en" x="245.0" y="105.5">Agent</text><text class="zh" x="245.0" y="105.5">智能体</text><text class="en sm" x="245.0" y="122.5">what am I missing?</text><text class="zh sm" x="245.0" y="122.5">还缺什么？</text><rect class="box" x="370" y="20" width="160" height="52" rx="12"/><text class="en" x="450.0" y="41.5">Search tool</text><text class="zh" x="450.0" y="41.5">检索工具</text><text class="en sm" x="450.0" y="58.5">short question</text><text class="zh sm" x="450.0" y="58.5">简短提问</text><rect class="box soft" x="370" y="148" width="160" height="52" rx="12"/><text class="en" x="450.0" y="169.5">Manual</text><text class="zh" x="450.0" y="169.5">手册</text><text class="en sm" x="450.0" y="186.5">sections with ids</text><text class="zh sm" x="450.0" y="186.5">带编号的章节</text><rect class="box" x="580" y="80" width="120" height="60" rx="12"/><text class="en" x="640.0" y="105.5">Decision</text><text class="zh" x="640.0" y="105.5">决定</text><text class="en sm" x="640.0" y="122.5">with section ids</text><text class="zh sm" x="640.0" y="122.5">附章节编号</text></svg><figcaption><span class="en">The agent decides what to look up. Only the sections it asks for come back, and their ids travel with the decision.</span><span class="zh">由智能体决定查什么。只有它要的章节才会回来，章节编号会随决定一起显示。</span></figcaption></figure>
 <div class="codebox" data-file="agent.py" data-lang="python"><span class="dim">import json
 from openai import OpenAI
 
 client = OpenAI()
 
-RULES = """You decide travel insurance claims for Kaya Travel Cover.
+RULES = """You decide travel insurance claims.
 If you do not have the facts you need, reply refer.
 Reply with JSON only: {"action": "approve" or "decline" or "refer", "payout": a number in S$, "reason": two or three short sentences}"""
 
-</span><span class="chg">LOOKUP = "\nBefore you decide, use search_kb to look up the manual and notes on outside events."
+</span><span class="chg">LOOKUP = ("\nBefore you decide, use search_kb to look up the manual and notes on outside events."
+          "\nSearch with a short, specific question of 3 to 6 words, for example 'strike announced before policy'."
+          "\nNever paste the customer's story. Search again if you still miss a fact.")
 
 TOOLS = [{"type": "function", "function": {
     "name": "search_kb",
-    "description": "Search the claims manual and notes on outside events.",
+    "description": "Search with ONE short specific question (3 to 6 words). Returns up to 2 sections with ids.",
     "parameters": {"type": "object",
                    "properties": {"query": {"type": "string"}},
                    "required": ["query"]}}}]
@@ -69,6 +63,7 @@ TOOLS = [{"type": "function", "function": {
 def decide(claim, max_searches=4):
     messages = [{"role": "system", "content": RULES + LOOKUP},
                 {"role": "user", "content": json.dumps(claim)}]
+    read = []                                   # every section id the agent saw
     searches = 0
     while True:
         tools = {"tools": TOOLS} if searches &lt; max_searches else {}   # no tools once the cap is reached
@@ -76,29 +71,24 @@ def decide(claim, max_searches=4):
             model="gpt-5.4-mini", messages=messages, **tools)
         message = reply.choices[0].message
         if not message.tool_calls:
-            return json.loads(message.content)
+            decision = json.loads(message.content)
+            decision["read"] = sorted(set(read))
+            return decision
         messages.append(message)
         for call in message.tool_calls:
             query = json.loads(call.function.arguments)["query"]
             searches += 1
+            found = search(query)
+            read += [s["id"] for s in found]
             messages.append({"role": "tool", "tool_call_id": call.id,
-                             "content": json.dumps(search(query))})</span></div>
+                             "content": json.dumps(found)})</span></div>
 <div class="try" id="p2"></div>
-
-<h2><span class="en">Step 4 · Ask short, specific questions</span><span class="zh">第 4 步 · 问得短、问得具体</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A search only works as well as its question. If the agent searches with the customer’s whole story, every common word matches something, and you get noise. A short question with the one fact it needs finds the right section. Tell the agent so, in the instruction and in the tool description, which it reads each time.</p>
-<p class="zh" style="margin:0 0 8px">搜索的好坏取决于问题。如果智能体拿客户的整段故事去搜，每个常见的词都能匹配到点什么，结果全是噪音。一个只带它所需那一个事实的短问题，才找得到对的段落。在指令和工具描述里都告诉它，它每次都会读。</p></div>
-<div class="codebox" data-file="agent.py" data-lang="python"><span class="dim">LOOKUP = ("\nBefore you decide, use search_kb to look up the manual and notes on outside events."
-          </span><span class="chg">"\nSearch with a short, specific question of 3 to 6 words, for example 'strike announced before policy'."
-          "\nNever paste the customer's story. Search again if you still miss a fact.")</span><span class="dim">
-
-TOOLS[0]["function"]["description"] = </span><span class="chg">"Search with ONE short specific question (3 to 6 words). Returns up to 2 sections with ids."</span></div>
 <p class="en">Sort these searches.</p>
 <p class="zh">给这些搜索分一分。</p><div class="sc" id="g2"></div>
 
-<h2><span class="en">Step 5 · Compare with one-shot retrieval</span><span class="zh">第 5 步 · 和一次性检索比一比</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Plain RAG searches once, with the claim’s story, and always pastes the same top sections. That is cheap and fine for simple claims. It fails when a claim needs <b>two facts joined</b>. Take Mr Tan: the strike note says the strike was announced on 3 March, and the manual says a strike announced before purchase is not covered. He bought on 5 March. Only the agent can search for the date first and then for the rule.</p>
-<p class="zh" style="margin:0 0 8px">普通 RAG 只搜一次，用理赔的故事去搜，永远贴同样的前几段。这样便宜，处理简单理赔也够了。但当一份理赔需要<b>把两个事实连起来</b>时，它就不行了。拿 Tan 先生来说：罢工笔记说罢工 3 月 3 日宣布，手册说购买前已宣布的罢工不赔，而他 3 月 5 日才买。只有智能体能先搜日期、再搜规则。</p></div>
+<h2><span class="en">Step 3 · Compare with one-shot retrieval</span><span class="zh">第 3 步 · 和一次性检索比一比</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Plain RAG searches once, with the claim’s story. It is cheap and fine for simple claims, but fails when a claim needs <b>two facts joined</b>. Here the strike note says the strike was announced on 3 March, the manual says a strike announced before purchase is not covered, and he bought on 5 March. Only the agent can search for the date first, then for the rule.</p>
+<p class="zh" style="margin:0">普通 RAG 只搜一次，用理赔的故事去搜。这样便宜，处理简单理赔也够了，但当一份理赔需要<b>把两个事实连起来</b>时就不行了。这里罢工笔记说罢工 3 月 3 日宣布，手册说购买前已宣布的罢工不赔，而他 3 月 5 日才买。只有智能体能先搜日期、再搜规则。</p></div>
 <div class="codebox" data-file="agent.py" data-lang="python"><span class="chg">def decide_oneshot(claim):
     top = search(claim["story"], top=2)          # one search, the whole story
     prompt = f"""{RULES}
@@ -113,52 +103,18 @@ claim = {"id": "C031", "customer": "Mr Tan", "bought": "5 March",
          "story": "My flight on 11 March was cancelled and I paid S$420 for a hotel. The airline said it was a strike.",
          "amount": 420}</span><span class="dim">
 print(decide(claim))          # searches the strike note, then the strike rule: decline
-print(decide_oneshot(claim))  # one try; it may miss a fact</span></div>
-<p class="en">Which claims need more than one search?</p>
-<p class="zh">哪些理赔需要不止一次搜索？</p><div class="sc" id="g3"></div>
-<div class="try" id="p3"></div>
-
-<h2><span class="en">Step 6 · Show where the facts came from</span><span class="zh">第 6 步 · 说清事实从哪来</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Aisha will not trust “decline” without a reason she can check. Keep a list of every section id the agent was shown, and return it with the decision. The handler’s claim page can then show “read: E1, M4.2”. A cap on searches also becomes a safety setting: when the agent runs out of searches, the rules already tell it to reply <code>refer</code>.</p>
-<p class="zh" style="margin:0 0 8px">Aisha 不会相信一个说不出理由的“拒赔”。把智能体看过的每个段落编号记下来，随决定一起返回。理赔员的页面就能显示“读过：E1、M4.2”。搜索次数的上限也成了安全开关：智能体搜索次数用完时，规则已经告诉它回答 <code>refer</code>（转交）。</p></div>
-<div class="codebox" data-file="agent.py" data-lang="python"><span class="dim">def decide(claim, max_searches=4):
-    messages = [{"role": "system", "content": RULES + LOOKUP},
-                {"role": "user", "content": json.dumps(claim)}]
-    </span><span class="chg">read = []                                   # every section id the agent saw</span><span class="dim">
-    searches = 0
-    while True:
-        tools = {"tools": TOOLS} if searches &lt; max_searches else {}   # no tools once the cap is reached
-        reply = client.chat.completions.create(
-            model="gpt-5.4-mini", messages=messages, **tools)
-        message = reply.choices[0].message
-        if not message.tool_calls:
-            </span><span class="chg">decision = json.loads(message.content)
-            decision["read"] = sorted(set(read))
-            return decision</span><span class="dim">
-        messages.append(message)
-        for call in message.tool_calls:
-            query = json.loads(call.function.arguments)["query"]
-            searches += 1
-            found = search(query)
-            </span><span class="chg">read += [s["id"] for s in found]</span><span class="dim">
-            messages.append({"role": "tool", "tool_call_id": call.id,
-                             "content": json.dumps(found)})</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">{'action': 'decline', 'payout': 0, 'reason': 'M4.2: strikes announced before booking are not covered.', 'read': ['M4.2', 'M4.3']}
+print(decide_oneshot(claim))  # one try; it may miss a fact</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">{'action': 'decline', 'payout': 0, 'reason': 'M4.2: strikes announced before booking are not covered.', 'read': ['E1', 'M4.2']}
 {'action': 'approve', 'payout': 420, 'reason': 'Cancelled flight, hotel receipts match.'}</div>
 <div class="try" id="p4"></div>
 
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我当时想错了</span></b><span class="en">My agent searched with the customer’s whole story and got noise back. The fix was not a better search: it was telling the agent to ask a short, specific question. That worked far better.</span><span class="zh">我的智能体拿客户的整段故事去搜，结果全是噪音。解决办法不是换更好的搜索，而是告诉智能体问一个简短、具体的问题。效果好得多。</span></div>
-
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Remove one manual section</b> and see which claim breaks.</span><span class="zh"><b>删掉一段手册内容</b>，看哪份理赔会出错。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Limit the agent to two searches</b> and note what changes.</span><span class="zh"><b>把智能体限制在两次搜索</b>，记下有什么变化。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a source line</b> to every answer, such as “Based on E1 and M4.2”.</span><span class="zh"><b>给每个答案加一行出处</b>，比如“依据 E1 和 M4.2”。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the pilot looks up what it needs with short searches and shows Aisha which manual sections sit behind each decision, so she can check a “decline” for herself. The next problem is that it forgets customers between claims, while Auntie Siew remembers every name.</span><span class="zh">现在试点会用简短的搜索查它需要的内容，并让 Aisha 看到每个决定背后的手册章节，她能亲自核对一个“拒绝”。下一个问题是它在两份理赔之间会忘掉客户，而 Siew 阿姨记得每一位客人的名字。</span></div>
-<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2><div class="card"><p class="en" style="margin:0 0 12px"><code>openai.BadRequestError: 'tool_call_id' is missing for a tool message</code><br>Cause: the tool reply was added without the id of the call it answers. Fix: copy <code>call.id</code> into every tool message.</p><p class="zh" style="margin:0 0 12px"><code>openai.BadRequestError: 'tool_call_id' is missing for a tool message</code><br>原因：加入工具回复时没带上它所回答的那次调用的 id。解决：每条工具消息都要带上 <code>call.id</code>。</p><p class="en" style="margin:0 0 12px"><code>json.decoder.JSONDecodeError: Unterminated string</code><br>Cause: the tool arguments from the model were cut off. Fix: keep the search query short, and catch the error and ask the model to try again.</p><p class="zh" style="margin:0 0 12px"><code>json.decoder.JSONDecodeError: Unterminated string</code><br>原因：模型给的工具参数被截断了。解决：让检索问题保持简短，并捕获错误，让模型再试一次。</p><p class="en" style="margin:0 0 12px"><code>KeyError: 'query'</code><br>Cause: the model called the search tool with a different argument name. Fix: say in the tool description that the argument is <code>query</code>, read it with <code>.get("query")</code>, and let the model retry if it is missing.</p><p class="zh" style="margin:0 0 12px"><code>RuntimeError: too many searches</code><br>原因：模型调用检索工具时用了别的参数名。解决：在工具说明里写明参数叫 <code>query</code>，并用 <code>.get("query")</code> 读取，缺了就让它重试。</p></div>
-<h2><span class="en">Recap</span><span class="zh">小结</span></h2><div class="card"><p class="en" style="margin:0">• Do not paste the whole manual; search it.<br>• Let the model choose the search words and search again, with a cap.<br>• Record which sections it read, so a handler can check the answer.</p><p class="zh" style="margin:0">• 不要把整本手册贴进去，而是去检索。<br>• 让模型自己选检索词，可以再搜，但要有上限。<br>• 记录它读了哪些段落，方便理赔员核对答案。</p></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Remove one manual section</b> and see which claim breaks.</span><span class="zh"><b>删掉一段手册内容</b>，看哪份理赔会出错。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Limit the agent to two searches</b> and note what changes.</span><span class="zh"><b>把智能体限制在两次搜索</b>，记下有什么变化。</span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• Do not stuff everything into the prompt: cut it into sections and let the agent search.<br>• Let the agent choose its own searches, and search again when a fact is missing.<br>• Short, specific queries beat pasting the whole story.<br>• Agentic search wins when a claim needs two facts joined.<br>• It costs more calls, so use it only where one shot fails.<br>• Keep the section ids the agent read and show them to the handler.<br>• When the searches run out, the safe answer is to refer.</p><p class="zh" style="margin:0">• 不要把所有东西塞进提示词：切成段落，让智能体去搜。<br>• 让智能体自己决定怎么搜，缺了事实就再搜一次。<br>• 简短、具体的问题，胜过把整段故事贴进去。<br>• 理赔需要把两个事实连起来时，智能体式搜索更胜一筹。<br>• 它要多花几次调用，所以只在一次检索不行的地方用。<br>• 记下智能体读过的段落编号，并展示给理赔员。<br>• 搜索次数用完时，稳妥的答案是转交。</p></div>
+<div class="card"><p class="en" style="margin:0">• Do not paste the whole manual; search it in small sections.<br>• Let the model choose short, specific searches and search again, with a cap.<br>• One-shot retrieval fails when two facts must be joined.<br>• Record which sections it read, so a handler can check the answer.</p><p class="zh" style="margin:0">• 不要把整本手册贴进去，而是在小段落里检索。<br>• 让模型自己选简短、具体的检索词，可以再搜，但要有上限。<br>• 需要把两个事实连起来时，一次性检索就不行了。<br>• 记录它读了哪些段落，方便理赔员核对答案。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI FDE</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"prev":["07-what-a-harness-is.html"],"tools":{"en":"Python 3, the openai package, an OpenAI API key","zh":"Python 3、openai 包、OpenAI API 密钥"},"know":{"en":"Embeddings and retrieval from the AI Engineer track; agents, tools and MCP from the AI Agentic track.","zh":"AI Engineer 路线里的嵌入与检索；AI Agentic 路线里的智能体、工具和 MCP。"},"mins":40,"offline":false,"goals":{"en":["Cut a manual into sections and let the agent search them","Let the agent search again when a fact is missing","Keep and show the section ids it read","Refer to a human when the searches run out"],"zh":["把手册切成小节，让智能体去搜索","事实缺失时让智能体再搜一次","保留并展示它读过的小节编号","搜索用尽时转交人工"]}}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=37968fc4"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/13-agentic-rag-over-a-manual.js?v=cce66938"></script></body></html>
+<script src="js/13-agentic-rag-over-a-manual.js?v=a96c1ece"></script></body></html>

@@ -5,15 +5,10 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/ai-production/21-push-to-deploy-github-actions.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-production/21-push-to-deploy-github-actions.html","url":"https://tx-learns.vercel.app/ai-production/21-push-to-deploy-github-actions.html","name":"Push to deploy","alternateName":"推送即部署","description":"Make git push the only deploy step: a robot builds, plans and applies for you, signs in without long-lived keys and waits for approval before production.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"Automatic deploys","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Production","url":"https://tx-learns.vercel.app/ai-production/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Production","item":"https://tx-learns.vercel.app/ai-production/index.html"},{"@type":"ListItem","position":3,"name":"Push to deploy","item":"https://tx-learns.vercel.app/ai-production/21-push-to-deploy-github-actions.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Automatic deploys · Lesson 2</span><span class="zh">自动部署 · 第 2 课</span></span><h1><span class="en">Push to deploy</span><span class="zh">推送即部署</span></h1><p class="meta"><span class="en">Make git push the only deploy step: a robot builds, plans and applies for you, signs in without long-lived keys and waits for approval before production · ~40 min · hands-on</span><span class="zh">让 git push 成为唯一的部署步骤：机器人替你构建、做计划、apply，登录时不用长期密钥，生产环境还要等人批准 · 约 40 分钟 · 动手实践</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the state became shared, so the product could be deployed from anywhere. Today it fails Kumar's rule that nobody carries boxes by hand, and Sergeant Lee's rule that no permanent key is stored. We fix it with a GitHub Actions workflow that signs in with a short-lived token and waits for Mr Ong before prod.</p>
-<p class="zh" style="margin:0">上回，状态变成共享的，产品可以从任何地方部署。今天它违反了 Kumar 的规矩（不许人手搬箱子）和 Lee 警官的规矩（不许存永久密钥）。我们的办法是用 GitHub Actions 工作流，靠短期令牌登录，并在上生产前等 Ong 先生批准。</p></div>
-<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0"><b>Kumar</b> has a rule for the conveyor belt: "Nobody carries boxes by hand." The state is now shared, so the twin can be deployed from anywhere. <b>Mei Ling</b> wants the robot to do it: she pushes, the robot builds and applies. <b>Sergeant Lee</b> adds a condition: the robot must not hold a permanent key to the account, and nothing reaches production without a person saying yes.</p>
-<p class="zh" style="margin:0"><b>Kumar</b> 对传送带有一条规矩：“谁也不许徒手搬箱子。”状态现在是共享的，分身可以在任何地方部署。<b>Mei Ling</b> 想让机器人来做：她一推送，机器人就构建并 apply。<b>Lee 警官</b>加了一个条件：机器人不能持有账号的永久密钥，而且没有人点头，什么都不能进生产环境。</p></div>
-<h2><span class="en">Step 1 · Put the project in git, with a careful ignore file</span><span class="zh">第 1 步 · 把项目放进 git，并写一份仔细的忽略文件</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">A robot can only deploy what is in the repository, so the whole project goes into git. The danger is committing what must stay private or can be rebuilt: state, installed packages, build output, environment files and keys. Write the <code>.gitignore</code> before the first commit, then read the list <code>git status</code> shows you before you commit it.</p>
-<p class="zh" style="margin:0">机器人只能部署仓库里有的东西，所以整个项目都要放进 git。危险在于把该保密、或者可以重新生成的东西也提交了：状态、装好的包、构建产物、环境文件和密钥。第一次提交之前先写好 <code>.gitignore</code>，提交之前再读一遍 <code>git status</code> 给你的清单。</p></div>
-<div class="codebox" data-file=".gitignore"><span class="dim"># .gitignore
-</span><span class="chg">.terraform/
+<h2><span class="en">Step 1 · Git, with a careful ignore file</span><span class="zh">第 1 步 · 放进 git，并写好忽略文件</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">A robot can only deploy what is in the repository, so the whole project goes into git. Keep out what is private or rebuildable: state, installed packages, build output, env files and keys. Write <code>.gitignore</code> before the first commit and read <code>git status</code> before you commit.</p>
+<p class="zh" style="margin:0">机器人只能部署仓库里有的东西，所以整个项目都放进 git。把私密的或可重建的挡在外面：状态、装好的包、构建产物、环境文件和密钥。第一次提交前写好 <code>.gitignore</code>，提交前读一遍 <code>git status</code>。</p></div>
+<div class="codebox" data-file=".gitignore"><span class="chg">.terraform/
 *.tfstate
 *.tfstate.*
 *.tfvars
@@ -22,22 +17,11 @@ backend/package/
 backend/twin.zip
 frontend/dist/
 .env
-*.pem</span><span class="dim">
-</span></div>
-<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim">git init -b main
-git add .
-git status          # read every line before you commit</span></div>
-<div class="codebox" data-file="output">On branch main
-Changes to be committed:
-  new file:   deploy.sh
-  new file:   infra/main.tf
-  (no .tfstate, no .env)</div>
-<div class="sc" id="t0"></div>
+*.pem</span></div>
 <h2><span class="en">Step 2 · A workflow that deploys dev on every push</span><span class="zh">第 2 步 · 每次推送都部署 dev 的工作流</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">A <b>GitHub Actions workflow</b> is a text file in <code>.github/workflows/</code> that tells GitHub: when this happens, run these steps on a fresh machine. This one runs when something is pushed to <code>main</code>, and it deploys <b>dev</b> with the very script you wrote. The Ubuntu runner already has Python, Node, zip and the AWS command line, so only Terraform needs installing. A second workflow, which lets you deploy or destroy any environment by hand, comes in step 5.</p>
-<p class="zh" style="margin:0"><b>GitHub Actions 工作流</b>是 <code>.github/workflows/</code> 里的一个文本文件，告诉 GitHub：发生这件事时，在一台全新的机器上运行这些步骤。这个工作流在有东西推送到 <code>main</code> 时运行，用你写好的那个脚本部署 <b>dev</b>。Ubuntu 运行器已经自带 Python、Node、zip 和 AWS 命令行，所以只需要安装 Terraform。第二个工作流（让你手动部署或销毁任意环境）在第 5 步。</p></div>
-<div class="codebox" data-file=".github/workflows/deploy.yml" data-lang="yaml"><span class="dim"># .github/workflows/deploy.yml
-name: deploy-dev
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">A <b>GitHub Actions workflow</b> is a text file in <code>.github/workflows/</code>: when this happens, run these steps on a fresh machine. This one runs on a push to <code>main</code> and calls your deploy script. Account-specific values (account id, region, state bucket) come from GitHub <b>secrets</b> (hidden in logs) and <b>variables</b> (plain values), never from the files. Set them with <code>printf %s "value" | gh secret set NAME</code> so no stray newline sneaks in.</p>
+<p class="zh" style="margin:0"><b>GitHub Actions 工作流</b>是 <code>.github/workflows/</code> 里的文本文件：发生这件事时，在一台全新的机器上运行这些步骤。这个在推送到 <code>main</code> 时运行，并调用你的部署脚本。因账号而异的值（账号 id、区域、状态桶）来自 GitHub 的<b>密钥</b>（日志里隐藏）和<b>变量</b>（普通值），绝不来自文件。用 <code>printf %s "value" | gh secret set NAME</code> 设置，这样不会混进多余的换行。</p></div>
+<div class="codebox" data-file=".github/workflows/deploy.yml" data-lang="yaml"><span class="dim">name: deploy-dev
 </span><span class="chg">on:
   push:
     branches: [main]</span><span class="dim">
@@ -48,8 +32,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: dev
-    env:
-      STATE_BUCKET: ${{ secrets.STATE_BUCKET }}
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
@@ -57,35 +39,15 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/wharf-pipeline
           aws-region: ${{ vars.AWS_REGION }}
-      - name: Connect to the shared state
-        working-directory: infra
-        run: terraform init -backend-config="bucket=$STATE_BUCKET" -backend-config="region=$AWS_REGION" -backend-config="dynamodb_table=wharf-tf-locks"
+      - working-directory: infra
+        run: terraform init -backend-config="bucket=${{ secrets.STATE_BUCKET }}" -backend-config="region=${{ vars.AWS_REGION }}" -backend-config="dynamodb_table=wharf-tf-locks"
       - run: ./deploy.sh dev</span></div>
 <div class="try" id="t1"></div>
-<h2><span class="en">Step 3 · Secrets and variables, not files</span><span class="zh">第 3 步 · 放进密钥和变量，不放进文件</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Values that differ per account, such as the account id, the region and the state bucket name, must not be written in the files. GitHub keeps them in two places: <b>secrets</b> (hidden in logs, for anything sensitive) and <b>variables</b> (plain values, fine to show). The workflow reads them as <code>${{ secrets.NAME }}</code> and <code>${{ vars.NAME }}</code>. Set a model id the same way if you choose it outside the files. A tip: pipe the value in with <code>printf %s</code>, so no stray space or newline sneaks in.</p>
-<p class="zh" style="margin:0">因账号而异的值，比如账号 id、区域和状态存储桶的名字，不能写在文件里。GitHub 把它们放在两个地方：<b>密钥（secrets）</b>（在日志里会隐藏，放敏感的东西）和<b>变量（variables）</b>（普通的值，显示出来也没关系）。工作流用 <code>${{ secrets.NAME }}</code> 和 <code>${{ vars.NAME }}</code> 来读。如果模型 id 是在文件之外选定的，也用同样的办法设置。一个小技巧：用 <code>printf %s</code> 把值管道传进去，这样不会混进多余的空格或换行。</p></div>
-<div class="codebox" data-file="terminal" data-lang="bash"><span class="chg">printf %s "111122223333"                  | gh secret set AWS_ACCOUNT_ID
-printf %s "wharf-tf-state-111122223333"   | gh secret set STATE_BUCKET
-printf %s "ap-southeast-1"                | gh variable set AWS_REGION</span><span class="dim">
-
-# in the workflow:   ${{ secrets.STATE_BUCKET }}     ${{ vars.AWS_REGION }}</span></div>
-<div class="codebox" data-file="output">✓ Set Actions secret AWS_ACCOUNT_ID for wharf-it/twin
-✓ Set Actions secret STATE_BUCKET for wharf-it/twin
-✓ Created variable AWS_REGION for wharf-it/twin</div>
-<div class="sc" id="t2"></div>
-<h2><span class="en">Step 4 · No keys on disk: sign in with a short-lived token</span><span class="zh">第 4 步 · 磁盘上没有密钥：用短期令牌登录</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A long-lived access key in a secret is a permanent pass that can leak. Instead, use <b>OIDC</b> (OpenID Connect). Each run, GitHub gives the job a short-lived signed token that says who it is: which repository, which branch or environment. You tell the cloud once: "trust tokens from GitHub, and let <i>this one named repository</i> take the pipeline role". The cloud swaps the token for temporary credentials that expire in about an hour.</p>
-<p class="zh" style="margin:0 0 8px">放在密钥里的长期访问密钥，是一张可能泄露的永久通行证。改用 <b>OIDC</b>（OpenID Connect）。每次运行，GitHub 会给任务一个短期的、带签名的令牌，说明它是谁：哪个仓库、哪个分支或环境。你只需对云说一次：“信任来自 GitHub 的令牌，并允许<i>这一个指名的仓库</i>扮演流水线角色”。云会用令牌换来一份大约一小时就过期的临时凭证。</p>
-<p class="en" style="margin:0">The token's <b>subject</b> line names the repository and the branch or environment. GitHub has introduced a newer, longer format for it, so while you move across, let the trust policy accept both the old and the new pattern, whatever your repository actually sends.</p>
-<p class="zh" style="margin:0">令牌里的<b>主体（subject）</b>那一行写着仓库和分支或环境。GitHub 推出了更新、更长的格式，所以在过渡期间，让信任策略同时接受新旧两种写法，以你的仓库实际发送的为准。</p></div>
+<h2><span class="en">Step 3 · No keys on disk: a short-lived token</span><span class="zh">第 3 步 · 磁盘上没有密钥：短期令牌</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A stored access key is a permanent pass that can leak. Use <b>OIDC</b> instead: each run, GitHub gives the job a short-lived signed token naming its repository and branch or environment. You tell the cloud once to trust GitHub and let <i>this one named repository</i> take the pipeline role; it swaps the token for credentials that expire in about an hour. The trust policy's <code>sub</code> line must match exactly what your repository sends.</p>
+<p class="zh" style="margin:0 0 8px">存着的访问密钥是可能泄露的永久通行证。改用 <b>OIDC</b>：每次运行，GitHub 给任务一个短期的签名令牌，写明仓库和分支或环境。你只需对云说一次：信任 GitHub，并允许<i>这一个指名的仓库</i>扮演流水线角色；云会把令牌换成大约一小时就过期的凭证。信任策略的 <code>sub</code> 一行必须和你的仓库实际发送的完全匹配。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 150" role="img" aria-label="A push starts a workflow, which gets a short-lived token, deploys dev, and waits for approval before prod"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box" x="0.0" y="50" width="120.0" height="64" rx="12"/><text class="en" x="60.0" y="78.0">git push</text><text class="zh" x="60.0" y="78.0">推送代码</text><text class="en sm" x="60.0" y="96.0">to the repo</text><text class="zh sm" x="60.0" y="96.0">到仓库</text><path class="lnk" d="M122.0 82.0 L147.0 82.0" marker-end="url(#ah)"/><rect class="box" x="150.0" y="50" width="120.0" height="64" rx="12"/><text class="en" x="210.0" y="78.0">Workflow</text><text class="zh" x="210.0" y="78.0">工作流</text><text class="en sm" x="210.0" y="96.0">starts a runner</text><text class="zh sm" x="210.0" y="96.0">启动运行器</text><path class="lnk hot" d="M272.0 82.0 L297.0 82.0" marker-end="url(#ah)"/><rect class="box new" x="300.0" y="50" width="120.0" height="64" rx="12"/><text class="en" x="360.0" y="78.0">Day-pass token</text><text class="zh" x="360.0" y="78.0">当日令牌</text><text class="en sm" x="360.0" y="96.0">expires at dawn</text><text class="zh sm" x="360.0" y="96.0">天亮即失效</text><path class="lnk" d="M422.0 82.0 L447.0 82.0" marker-end="url(#ah)"/><rect class="box" x="450.0" y="50" width="120.0" height="64" rx="12"/><text class="en" x="510.0" y="78.0">Deploy dev</text><text class="zh" x="510.0" y="78.0">部署 dev</text><text class="en sm" x="510.0" y="96.0">no key on disk</text><text class="zh sm" x="510.0" y="96.0">磁盘上没有密钥</text><path class="lnk" d="M572.0 82.0 L597.0 82.0" marker-end="url(#ah)"/><rect class="box" x="600.0" y="50" width="120.0" height="64" rx="12"/><text class="en" x="660.0" y="78.0">Ong signs</text><text class="zh" x="660.0" y="78.0">Ong 签字</text><text class="en sm" x="660.0" y="96.0">then prod</text><text class="zh sm" x="660.0" y="96.0">才部署 prod</text></svg><figcaption><span class="en">The cloud trusts the workflow for a few minutes and then forgets it. Prod needs a person to approve.</span><span class="zh">云只在几分钟内信任这个工作流，之后就不认了。上生产还需要人来批准。</span></figcaption></figure>
-<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim"># once per account
-aws iam create-open-id-connect-provider --url https://token.actions.githubusercontent.com --client-id-list sts.amazonaws.com
-# (if your command line asks for a thumbprint, add the provider in the console instead)
-</span></div>
-<div class="codebox" data-file="trust-policy.json" data-lang="json"><span class="dim"># the pipeline role's trust policy
-{"Version": "2012-10-17",
+<div class="codebox" data-file="trust-policy.json" data-lang="json"><span class="dim">{"Version": "2012-10-17",
  "Statement": [{
    "Effect": "Allow",
    "Principal": {"Federated": "arn:aws:iam::111122223333:oidc-provider/token.actions.githubusercontent.com"},
@@ -96,76 +58,41 @@ aws iam create-open-id-connect-provider --url https://token.actions.githubuserco
        </span><span class="chg">"repo:wharf-it/twin:environment:*",
        "repo:wharf-it/twin:ref:refs/heads/main"</span><span class="dim">]}}}]}</span></div>
 <div class="try" id="t3"></div>
-<h2><span class="en">Step 5 · Environments, a manual workflow and approval before prod</span><span class="zh">第 5 步 · 环境、手动工作流和上生产前的批准</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>GitHub environment</b> (dev, test, prod) is a named target with its own rules. In the repository settings, add <b>required reviewers</b> to <code>prod</code>: any job that uses that environment pauses until a person approves it. The manual workflow below has two jobs. The first, <code>plan</code>, only shows what would change. The second, <code>apply</code>, uses the chosen environment, so for prod it waits for approval. The reviewer reads the first job's log, then decides.</p>
-<p class="zh" style="margin:0 0 8px"><b>GitHub 环境</b>（dev、test、prod）是一个有名字的目标，可以有自己的规则。在仓库设置里给 <code>prod</code> 加上<b>必需的审批人</b>：任何用到这个环境的任务都会暂停，直到有人批准。下面的手动工作流有两个任务。第一个 <code>plan</code> 只显示将会改什么。第二个 <code>apply</code> 使用所选的环境，所以对 prod 来说它要等批准。审批人先读第一个任务的日志，再做决定。</p>
-<p class="en" style="margin:0">Choose the branch in the "Run workflow" menu with care. The role trusts only <code>main</code>, so a run from any other branch is refused.</p>
-<p class="zh" style="margin:0">在“Run workflow”菜单里选分支要当心。这个角色只信任 <code>main</code>，所以从别的分支发起的运行会被拒绝。</p></div>
-<div class="codebox" data-file=".github/workflows/manual.yml" data-lang="yaml"><span class="dim"># .github/workflows/manual.yml
-name: manual
+<h2><span class="en">Step 4 · Approval before prod</span><span class="zh">第 4 步 · 上 prod 前先批准</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>GitHub environment</b> (dev, test, prod) is a named target with its own rules. Add <b>required reviewers</b> to <code>prod</code> in the repository settings: any job using it pauses until a person approves. A manual workflow can split the work in two jobs: <code>plan</code> only shows what would change, then <code>apply</code> uses the chosen environment, so prod waits for approval. The reviewer reads the plan first.</p>
+<p class="zh" style="margin:0 0 8px"><b>GitHub 环境</b>（dev、test、prod）是有自己规则的命名目标。在仓库设置里给 <code>prod</code> 加上<b>必需的审批人</b>：用到它的任务会暂停，直到有人批准。手动工作流可以拆成两个任务：<code>plan</code> 只显示将会改什么，<code>apply</code> 使用所选环境，所以 prod 要等批准。审批人先读 plan。</p></div>
+<div class="codebox" data-file=".github/workflows/manual.yml" data-lang="yaml"><span class="dim">name: manual
 on:
   workflow_dispatch:
     inputs:
-      environment: { description: Which environment, type: choice, options: [dev, test, prod], required: true }
-      action:      { description: What to do,        type: choice, options: [deploy, destroy], required: true }
-permissions:
-  id-token: write
-  contents: read
-env:
-  ENVIRONMENT: ${{ inputs.environment }}
-  ACTION: ${{ inputs.action }}
-  STATE_BUCKET: ${{ secrets.STATE_BUCKET }}
+      environment: { type: choice, options: [dev, test, prod], required: true }
 jobs:
   plan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
-      - uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/wharf-pipeline
-          aws-region: ${{ vars.AWS_REGION }}
-      - working-directory: infra
-        run: terraform init -backend-config="bucket=$STATE_BUCKET" -backend-config="region=$AWS_REGION" -backend-config="dynamodb_table=wharf-tf-locks"
-      - name: Show the plan
-        run: |
-          if [ "$ACTION" = "deploy" ]; then
-            ./deploy.sh "$ENVIRONMENT" plan
-          else
-            cd infra
-            terraform workspace select "$ENVIRONMENT"
-            terraform plan -destroy -var="environment=$ENVIRONMENT"
-          fi
+      # same checkout, Terraform, sign-in and init steps as deploy.yml, then:
+      - run: |
+          cd infra
+          terraform workspace select -or-create "${{ inputs.environment }}"
+          terraform plan -var="environment=${{ inputs.environment }}"
   apply:
     needs: plan
     runs-on: ubuntu-latest
     </span><span class="chg">environment: ${{ inputs.environment }}      # for prod, this line makes the job wait for a person</span><span class="dim">
     steps:
-      - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
-      - uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/wharf-pipeline
-          aws-region: ${{ vars.AWS_REGION }}
-      - working-directory: infra
-        run: terraform init -backend-config="bucket=$STATE_BUCKET" -backend-config="region=$AWS_REGION" -backend-config="dynamodb_table=wharf-tf-locks"
-      - run: |
-          if [ "$ACTION" = "deploy" ]; then ./deploy.sh "$ENVIRONMENT"; else ./destroy.sh "$ENVIRONMENT"; fi</span></div>
+      # same setup steps, then:
+      - run: ./deploy.sh "${{ inputs.environment }}"</span></div>
 <div class="try" id="t4"></div>
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en"><b>Three slips.</b> My trust policy named the wrong repository, so every run said "not authorized to assume role". I typed a secret with a trailing space, and the state bucket was "not found". And a manual run started from a branch I did not mean, which the trust policy rightly refused.</span><span class="zh"><b>三个失误。</b>我的信任策略写错了仓库名，所以每次运行都报“无权扮演该角色”。我输入密钥时末尾多了一个空格，于是状态存储桶“找不到”。还有一次手动运行是从我没打算用的分支发起的，信任策略正确地拒绝了它。</span></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Push a small change</b> and watch the run in the Actions tab.</span><span class="zh"><b>推送一个小改动，</b>在 Actions 标签页里看着这次运行。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Read the log</b> down to the first failing step, and say what it tells you.</span><span class="zh"><b>读日志</b>，找到第一个失败的步骤，说说它告诉了你什么。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a required approval</b> to the prod environment, then try a prod run.</span><span class="zh"><b>给 prod 环境加上必需的审批，</b>再试着运行一次 prod。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now a push from Mei Ling sets the conveyor belt moving: dev deploys itself with a day-pass token, and prod waits for Mr Ong's approval. The next problem is that the pieces have only been shown one at a time, and Mr Ong wants to see all three environments from one push, then all of it gone.</span><span class="zh">现在 Mei Ling 一推送，传送带就动起来：dev 用当日通行证令牌自己部署，prod 则等 Ong 先生批准。下一个问题是这些零件只是一个个演示过，Ong 先生想看到一次推送带出三套环境，然后全部清空。</span></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Push a small change</b> and watch the run in the Actions tab.</span><span class="zh"><b>推送一个小改动，</b>在 Actions 标签页里看这次运行。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a required approval</b> to the prod environment, then try a prod run.</span><span class="zh"><b>给 prod 环境加上必需的审批，</b>再试着运行一次 prod。</span></span></label></div>
 <h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
-<div class="card"><p class="en" style="margin:0">• <code>Error: Not authorized to perform sts:AssumeRoleWithWebIdentity</code> The role trust policy does not match this repository or branch. <b>Fix:</b> Check the <code>sub</code> line: <code>repo:OWNER/REPO:ref:refs/heads/main</code>.<br>• <code>Credentials could not be loaded</code> <code>id-token: write</code> is missing from the workflow. <b>Fix:</b> Add it under <code>permissions</code>.<br>• <code>Error: Backend configuration changed</code> The pipeline ran <code>init</code> without the bucket settings. <b>Fix:</b> Pass the <code>-backend-config</code> values as in the workflow step.</p><p class="zh" style="margin:0">• <code>Error: Not authorized to perform sts:AssumeRoleWithWebIdentity</code> 角色的信任策略和这个仓库或分支不匹配。 <b>解决：</b>检查 <code>sub</code> 这一行：<code>repo:所有者/仓库:ref:refs/heads/main</code>。<br>• <code>Credentials could not be loaded</code> 工作流里缺少 <code>id-token: write</code>。 <b>解决：</b>在 <code>permissions</code> 下加上它。<br>• <code>Error: Backend configuration changed</code> 流水线运行 <code>init</code> 时没有带桶的设置。 <b>解决：</b>像工作流那一步一样传入 <code>-backend-config</code> 的值。</p></div>
-<div class="callout tip"><b class="lbl"><span class="en">Recap</span><span class="zh">小结</span></b><span class="en">A push to main deploys dev with no password stored anywhere.<br>The pipeline borrows a short-lived identity through OIDC, limited to this repository.<br>A manual workflow plans first, then applies, and prod waits for a person.</span><span class="zh">推送到 main 就部署 dev，任何地方都不存密码。<br>流水线通过 OIDC 借用短期身份，且只限这个仓库。<br>手动工作流先 plan 再 apply，prod 要等人确认。</span></div>
-<div class="callout tip"><b class="lbl"><span class="en">Plain words</span><span class="zh">白话词汇</span></b><span class="en"><b>Pipeline</b>: steps a robot runs for you after every push. <b>OIDC</b>: a way for GitHub to prove who it is to the cloud, without a saved password. <b>Secret</b>: a value GitHub keeps hidden from logs.</span><span class="zh"><b>流水线（pipeline）</b>：每次推送后由机器人替你执行的一系列步骤。<b>OIDC</b>：让 GitHub 向云证明身份、而不用保存密码的方式。<b>密钥（secret）</b>：GitHub 在日志里隐藏的值。</span></div>
+<div class="card"><p class="en" style="margin:0">• <code>Not authorized to perform sts:AssumeRoleWithWebIdentity</code> <b>Fix:</b> Check the trust policy's <code>sub</code> line: <code>repo:OWNER/REPO:ref:refs/heads/main</code>.<br>• <code>Credentials could not be loaded</code> <b>Fix:</b> Add <code>id-token: write</code> under <code>permissions</code>.<br>• <code>Backend configuration changed</code> <b>Fix:</b> Pass the <code>-backend-config</code> values as in the workflow step.</p><p class="zh" style="margin:0">• <code>Not authorized to perform sts:AssumeRoleWithWebIdentity</code> <b>解决：</b>检查信任策略的 <code>sub</code> 行：<code>repo:所有者/仓库:ref:refs/heads/main</code>。<br>• <code>Credentials could not be loaded</code> <b>解决：</b>在 <code>permissions</code> 下加上 <code>id-token: write</code>。<br>• <code>Backend configuration changed</code> <b>解决：</b>像工作流那一步一样传入 <code>-backend-config</code> 的值。</p></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• Put the project in git with a careful ignore file: state, packages, env files and keys stay out.<br>• A workflow is a text file in <code>.github/workflows/</code>: when this happens, run these steps.<br>• One workflow deploys dev on every push to main; another deploys or destroys a chosen environment by hand.<br>• Account-specific values live in repository secrets and variables, never in the files.<br>• OIDC replaces stored keys: GitHub proves who it is, and the cloud lets one named repository assume a role.<br>• Let the trust policy accept both the old and the newer subject pattern GitHub may send.<br>• GitHub environments can require approval before prod, and the reviewer should read the plan first.</p><p class="zh" style="margin:0">• 把项目放进 git，并写好仔细的忽略文件：状态、包、环境文件和密钥都留在外面。<br>• 工作流是 <code>.github/workflows/</code> 里的一个文本文件：发生这件事时，运行这些步骤。<br>• 一个工作流在每次推送到 main 时部署 dev；另一个手动部署或销毁所选环境。<br>• 因账号而异的值放在仓库的密钥和变量里，绝不放进文件。<br>• OIDC 取代了存放的密钥：GitHub 证明自己是谁，云只让一个指名的仓库扮演角色。<br>• 让信任策略同时接受 GitHub 可能发送的新旧两种主体写法。<br>• GitHub 环境可以要求上 prod 前先批准，审批人应当先读 plan。</p></div>
+<div class="card"><p class="en" style="margin:0">• Put the project in git; keep state, packages, env files and keys out.<br>• A workflow is a text file: when this happens, run these steps.<br>• Account-specific values live in repository secrets and variables, never in files.<br>• OIDC replaces stored keys: GitHub proves who it is, and the cloud lets one named repository assume a role.<br>• Environments can require approval before prod; the reviewer reads the plan first.</p><p class="zh" style="margin:0">• 把项目放进 git；状态、包、环境文件和密钥留在外面。<br>• 工作流是文本文件：发生这件事时，运行这些步骤。<br>• 因账号而异的值放在仓库密钥和变量里，绝不放进文件。<br>• OIDC 取代存放的密钥：GitHub 证明自己是谁，云只让一个指名的仓库扮演角色。<br>• 环境可以要求上 prod 前先批准；审批人先读 plan。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Production</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"goals":{"en":["Put a project in git with an ignore file that keeps state, packages, env files and keys out","Write a workflow in .github/workflows/ that deploys dev on every push to main","Add a manual workflow to deploy or destroy a chosen environment","Use OIDC and repository secrets instead of stored keys"],"zh":["把项目放进 git，并用忽略文件排除状态、依赖包、env 文件和密钥","在 .github/workflows/ 写工作流，每次推送到 main 就部署 dev","加一个手动工作流来部署或销毁指定环境","用 OIDC 和仓库 secrets 代替保存的密钥"]},"prev":["19-deploy-scripts-and-clean-teardown.html","20-shared-state-and-stale-locks.html"],"tools":{"en":"A GitHub account, git, the gh CLI, AWS account with IAM access, Terraform","zh":"GitHub 账号、git、gh 命令行工具、能用 IAM 的 AWS 账号、Terraform"},"know":{"en":"You can use git (commit, push) and edit a short YAML file.","zh":"会用 git（提交、推送），能编辑简短的 YAML 文件。"},"mins":45,"offline":false}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=afade96e"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/21-push-to-deploy-github-actions.js?v=7a14819f"></script></body></html>
+<script src="js/21-push-to-deploy-github-actions.js?v=4348ec96"></script></body></html>

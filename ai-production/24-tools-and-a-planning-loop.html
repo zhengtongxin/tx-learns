@@ -5,13 +5,9 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/ai-production/24-tools-and-a-planning-loop.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-production/24-tools-and-a-planning-loop.html","url":"https://tx-learns.vercel.app/ai-production/24-tools-and-a-planning-loop.html","name":"Tools and a planning loop","alternateName":"工具与规划循环","description":"Give the deployed agent a tool, then a to-do list it uses to plan and tick off its own steps.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"Agents as a managed service","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Production","url":"https://tx-learns.vercel.app/ai-production/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Production","item":"https://tx-learns.vercel.app/ai-production/index.html"},{"@type":"ListItem","position":3,"name":"Tools and a planning loop","item":"https://tx-learns.vercel.app/ai-production/24-tools-and-a-planning-loop.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Agents as a managed service · Lesson 2</span><span class="zh">托管的智能体服务 · 第 2 课</span></span><h1><span class="en">Tools and a planning loop</span><span class="zh">工具与规划循环</span></h1><p class="meta"><span class="en">Give the deployed agent a tool, then a to-do list so it plans and ticks off its own steps · ~35 min · hands-on</span><span class="zh">给已部署的智能体一个工具，再给它一份待办清单，让它自己做计划、自己打钩 · 约 35 分钟 · 动手</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the wharf agent answered questions on a managed runtime. Today it fails when it gets a sum wrong, and when Mr Ong cannot see what it plans to do. We fix it with a calculator tool and a visible to-do list the agent must write before it acts.</p>
-<p class="zh" style="margin:0">上回，码头智能体在托管运行时上回答问题。今天它算错了数，Ong 先生也看不到它打算做什么。我们的办法是给它一个计算器工具，再加一份它行动之前必须先写出来的、看得见的待办清单。</p></div>
-<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">The wharf agent from the last lesson answers questions, but it cannot do sums reliably and it never says what it is about to do. <b>Mei Ling</b> wants two upgrades. First, a tool for the sums. Second, a visible to-do list, so that <b>Mr Ong</b> can see the plan before the agent acts, the way he reads a work order before a shift starts.</p>
-<p class="zh" style="margin:0">上一课的码头智能体能回答问题，但算数不可靠，也从不说自己接下来要做什么。<b>Mei Ling</b> 想做两个升级。第一，加一个算数的工具。第二，加一份看得见的待办清单，让 <b>Ong 先生</b>能在智能体动手之前看到计划，就像他在换班前先读工单一样。</p></div>
 <h2><span class="en">Step 1 · A tool is a function with a good description</span><span class="zh">第 1 步 · 工具就是带好说明的函数</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>tool</b> is a plain function the model may ask to run. You mark it with a decorator (a line like <code>@tool</code> above the function). The model never sees your code. It sees the function name and the <b>docstring</b>, the text in triple quotes. So the docstring is the instruction manual. If it is vague, the model will ignore the tool.</p>
-<p class="zh" style="margin:0 0 8px"><b>工具</b>就是模型可以请求运行的普通函数。你用装饰器（函数上面的 <code>@tool</code> 这一行）来标记它。模型看不到你的代码，它只看到函数名和<b>文档字符串</b>，也就是三引号里的那段文字。所以文档字符串就是使用说明书。写得含糊，模型就会无视这个工具。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>tool</b> is a plain function the model may ask to run, marked with a <code>@tool</code> decorator. The model never sees your code, only the name and the <b>docstring</b>, so the docstring is the manual: if it is vague, the tool is ignored. Pass tools in a list when you build the agent, launch again (the deployed copy does not change by itself) and check the logs for a real tool call.</p>
+<p class="zh" style="margin:0 0 8px"><b>工具</b>是模型可以请求运行的普通函数，用 <code>@tool</code> 装饰器标记。模型看不到你的代码，只看到名字和<b>文档字符串</b>，所以文档字符串就是说明书：写得含糊，工具就会被无视。构建智能体时把工具放进列表传入，再启动一次（已部署的那份不会自己变），并在日志里确认真的有工具调用。</p></div>
 <div class="codebox" data-file="agent.py" data-lang="python"><span class="dim">import math
 from strands import tool
 
@@ -19,39 +15,29 @@ from strands import tool
 def square_root(number: float) -&gt; float:
     """Return the square root of a non-negative number.
     Use this whenever the user needs a square root."""
-    return math.sqrt(number)</span></div>
-<div class="try" id="t1"></div>
-<h2><span class="en">Step 2 · Hand the tool to the agent and relaunch</span><span class="zh">第 2 步 · 把工具交给智能体，再启动</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Pass the tools in a list when you build the agent. The deployed copy does not change by itself, so launch again, then invoke it with a prompt that really needs the tool. Check the logs: you should see the tool being called, not the model guessing.</p>
-<p class="zh" style="margin:0 0 8px">构建智能体时，把工具放进一个列表传进去。已经部署的那份不会自己变，所以要再启动一次，然后用一个确实需要这个工具的提示词去调用它。看一下日志：你应该看到工具被调用，而不是模型在瞎猜。</p></div>
-<div class="codebox" data-file="agent.py" data-lang="python"><span class="dim">helper = Agent(
+    return math.sqrt(number)</span><span class="dim">
+
+helper = Agent(
     system_prompt="You are a short, friendly helper for the wharf IT desk.",
     </span><span class="chg">tools=[square_root],</span><span class="dim">
-)
-# in agent.py, define square_root above this agent. handle() still calls helper</span></div>
-<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim"># in your terminal, not in agent.py
-</span><span class="chg">agentcore launch
-agentcore invoke '{"prompt": "A square yard is about 0.836 square metres. How long is one side, in metres?"}'</span></div>
-<div class="codebox" data-file="output">The side is about 0.914 metres.   (tool used: square_root(0.836))</div>
-<div class="sc" id="t2"></div>
-<h2><span class="en">Step 3 · Build a to-do list the agent can use</span><span class="zh">第 3 步 · 做一份智能体能用的待办清单</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A plan is just a list the agent writes and updates. You need three things: a <b>typed item</b> (a small record with a description and a done flag; <code>BaseModel</code> from pydantic checks the type of each field), a <b>list kept in memory</b>, and <b>tools</b> to add an item, mark one done and print the list. Tell the model that positions start at 1, in the tool text itself. People count from 1, and a model will follow what you wrote there. Python lists count from 0, so the first item is <code>plan[0]</code>: the code subtracts 1 from the position to find it.</p>
-<p class="zh" style="margin:0 0 8px">计划其实就是智能体自己写、自己更新的一份清单。你需要三样东西：一个<b>有类型的条目</b>（一条小记录，有描述和完成标记；pydantic 的 <code>BaseModel</code> 会检查每个字段的类型）、一份<b>放在内存里的清单</b>，以及<b>工具</b>：新增条目、把某条标为完成、打印清单。在工具说明里直接写明位置从 1 开始。人是从 1 数起的，而模型会照你写在那里的说法去做。Python 的列表是从 0 数起的，所以第 1 项在代码里是 <code>plan[0]</code>：代码要把位置减 1 才能找到它。</p></div>
+)</span></div>
+<div class="try" id="t1"></div>
+<h2><span class="en">Step 2 · A to-do list the agent can use</span><span class="zh">第 2 步 · 智能体能用的待办清单</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A plan is a list the agent writes and updates: a <b>typed item</b> (description plus done flag, checked by pydantic's <code>BaseModel</code>), a list in memory, and tools to add an item, tick one and print the list. Say in the tool text that positions start at 1; Python counts from 0, so the code subtracts 1.</p>
+<p class="zh" style="margin:0 0 8px">计划是智能体自己写、自己更新的清单：一个<b>有类型的条目</b>（描述加完成标记，由 pydantic 的 <code>BaseModel</code> 检查）、一份内存里的清单，以及新增、打钩、打印的工具。在工具说明里写明位置从 1 开始；Python 从 0 数起，所以代码要减 1。</p></div>
 <div class="codebox" data-file="agent.py" data-lang="python"><span class="dim">from pydantic import BaseModel
 
 class Todo(BaseModel):
     description: str
     done: bool = False
 
-plan: list[Todo] = []   # lives in memory (see "what I got wrong")
+plan: list[Todo] = []   # in memory: resets when the container restarts
 
 @tool
 def show_plan() -&gt; str:
     """Return the current plan, one line per step."""
-    return "\n".join(
-        f"{i}. [{'x' if t.done else ' '}] {t.description}"
-        for i, t in enumerate(plan, start=1)
-    )
+    return "\n".join(f"{i}. [{'x' if t.done else ' '}] {t.description}"
+                     for i, t in enumerate(plan, start=1))
 
 @tool
 def add_todo(description: str) -&gt; str:
@@ -65,9 +51,9 @@ def mark_done(position: int) -&gt; str:
     </span><span class="chg">plan[position - 1].done = True</span><span class="dim">
     return show_plan()</span></div>
 <div class="try" id="t3"></div>
-<h2><span class="en">Step 4 · Tell the agent to plan first</span><span class="zh">第 4 步 · 让智能体先做计划</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The tools exist, but the agent will not use them unless the system prompt says so. Spell out the loop: make a plan with the to-do tools, do each step, mark it done, then answer. Because every tool returns the list, you see the plan change after each move.</p>
-<p class="zh" style="margin:0 0 8px">工具有了，但系统提示词不说，智能体就不会用。把循环写清楚：先用待办工具做计划，一步一步做，每做完一步就标记完成，最后回答。因为每个工具都会返回清单，你每动一步都能看到计划在变。</p></div>
+<h2><span class="en">Step 3 · Tell the agent to plan first</span><span class="zh">第 3 步 · 让智能体先做计划</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Tools alone are not enough: the system prompt must spell out the loop. Because every tool returns the whole list, you see the plan change after each move, and if the answer is wrong you can find the step where it went off. A good plan line is one clear action; "figure it out" hides it.</p>
+<p class="zh" style="margin:0 0 8px">光有工具不够：系统提示词必须把循环写清楚。因为每个工具都返回整份清单，你每动一步都能看到计划在变，答案不对时也能找到偏掉的那一步。好的计划条目是一个清楚的动作；“想办法搞定”会把它藏起来。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 190" role="img" aria-label="The agent writes a plan, uses a tool for each step, ticks the list, and loops until the plan is done, then answers"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box" x="0.0" y="50" width="120.0" height="64" rx="12"/><text class="en" x="60.0" y="78.0">Question</text><text class="zh" x="60.0" y="78.0">问题</text><text class="en sm" x="60.0" y="96.0">from a person</text><text class="zh sm" x="60.0" y="96.0">来自用户</text><path class="lnk hot" d="M122.0 82.0 L147.0 82.0" marker-end="url(#ah)"/><rect class="box new" x="150.0" y="50" width="120.0" height="64" rx="12"/><text class="en" x="210.0" y="78.0">Write plan</text><text class="zh" x="210.0" y="78.0">写计划</text><text class="en sm" x="210.0" y="96.0">to-do list first</text><text class="zh sm" x="210.0" y="96.0">先写待办清单</text><path class="lnk" d="M272.0 82.0 L297.0 82.0" marker-end="url(#ah)"/><rect class="box" x="300.0" y="50" width="120.0" height="64" rx="12"/><text class="en" x="360.0" y="78.0">Use a tool</text><text class="zh" x="360.0" y="78.0">用工具</text><text class="en sm" x="360.0" y="96.0">e.g. calculator</text><text class="zh sm" x="360.0" y="96.0">比如计算器</text><path class="lnk" d="M422.0 82.0 L447.0 82.0" marker-end="url(#ah)"/><rect class="box" x="450.0" y="50" width="120.0" height="64" rx="12"/><text class="en" x="510.0" y="78.0">Tick the list</text><text class="zh" x="510.0" y="78.0">勾掉一项</text><text class="en sm" x="510.0" y="96.0">then next line</text><text class="zh sm" x="510.0" y="96.0">再做下一行</text><path class="lnk" d="M572.0 82.0 L597.0 82.0" marker-end="url(#ah)"/><rect class="box" x="600.0" y="50" width="120.0" height="64" rx="12"/><text class="en" x="660.0" y="78.0">Answer</text><text class="zh" x="660.0" y="78.0">回答</text><text class="en sm" x="660.0" y="96.0">plan is visible</text><text class="zh sm" x="660.0" y="96.0">计划看得见</text><path class="lnk hot" d="M510.0 116 C510.0 169 360.0 169 360.0 118" marker-end="url(#ah)"/><text class="en sm" x="435.0" y="166">repeat until done</text><text class="zh sm" x="435.0" y="166">重复直到做完</text></svg><figcaption><span class="en">Plan first, then act line by line, ticking each one off. The list is what Mr Ong reads.</span><span class="zh">先计划，再逐行行动，每做完一行就勾掉。Ong 先生读的就是这份清单。</span></figcaption></figure>
 <div class="codebox" data-file="agent.py" data-lang="python"><span class="dim">planner = Agent(
     </span><span class="chg">system_prompt=(
@@ -77,36 +63,22 @@ def mark_done(position: int) -&gt; str:
     ),
     tools=[add_todo, mark_done, show_plan, square_root],</span><span class="dim">
 )
-# in handle(), call planner instead of helper: reply = planner(...)
-# then launch again, and invoke with a task that has four steps</span></div>
+# in handle(), call planner instead of helper, then launch again</span></div>
 <div class="codebox" data-file="output">1. [x] Find the area of the square yard
 2. [x] Take its square root
 3. [x] Convert the length to feet
-4. [x] Write the answer
 One side is about 0.91 m, or 3.0 feet.</div>
 <div class="try" id="t4"></div>
-<h2><span class="en">Step 5 · Read the plan as it moves</span><span class="zh">第 5 步 · 看计划怎么动</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Read the printed list top to bottom. An agent you can see is easier to trust and easier to fix: if the answer is wrong, you can find the step where it went off. A good plan line is one clear action, such as <code>Take its square root</code>. A vague line like <code>figure it out</code> hides the real action, so you cannot check it.</p>
-<p class="zh" style="margin:0 0 8px">从上到下读打印出来的清单。看得见的智能体更容易信任，也更容易修：答案不对，你能找到它从哪一步偏掉的。好的计划条目是一个清楚的动作，比如“取它的平方根”。“想办法搞定”这样含糊的条目会把真正的动作藏起来，你就没法检查。</p></div>
-<div class="codebox" data-file="plan-output"><span class="dim">1. [x] Find the area of the square yard
-2. [x] </span><span class="chg">Take its square root</span><span class="dim">
-3. [ ] Convert the length to feet
-4. [ ] Write the answer</span></div>
-<div class="sc" id="t5"></div>
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en"><b>Three slips.</b> My first docstring just said "math tool", so the model ignored it; once it said exactly when to use it, it worked. I was off by one: the model said "step 1" and my code treated that as the second item, so I now ask for positions starting at 1 and subtract 1 in code. And my list is a global, so it resets when the container restarts. That is fine for a demo, not for real work.</span><span class="zh"><b>三个失误。</b>我第一版的文档字符串只写了“数学工具”，模型就无视它；写清楚什么时候该用之后，它就好了。我还差了一位：模型说“第 1 步”，我的代码却把它当成第二项，所以现在我要求位置从 1 开始，并在代码里减 1。我的清单是个全局变量，容器一重启就清空。做演示没关系，真用就不行。</span></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Add a tool</b> that returns today's date.</span><span class="zh"><b>加一个工具</b>，返回今天的日期。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Ask a task with four steps</b> and read the plan it makes.</span><span class="zh"><b>问一个有四步的任务</b>，读读它做出的计划。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Make mark_done refuse</b> a position that does not exist, with a clear message.</span><span class="zh"><b>让 mark_done 拒绝</b>不存在的位置，并给出清楚的提示。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the agent writes its plan first and then uses the calculator, so Mr Ong reads the job sheet and sees which line it is on. The next problem is that it still sounds sure whether or not it is right, and Mr Ong asks how he can know.</span><span class="zh">现在智能体先写计划，再用计算器，Ong 先生读工作单就能看到它做到了哪一行。下一个问题是不管对不对它听起来都很有把握，Ong 先生问他怎么才能知道。</span></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Add a tool</b> that returns today's date.</span><span class="zh"><b>加一个工具</b>，返回今天的日期。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Make mark_done refuse</b> a position that does not exist, with a clear message.</span><span class="zh"><b>让 mark_done 拒绝</b>不存在的位置，并给出清楚的提示。</span></span></label></div>
 <h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
-<div class="card"><p class="en" style="margin:0">• <code>NameError: name 'square_root' is not defined</code> The tool is defined below the agent that uses it. <b>Fix:</b> Move <code>square_root</code> above the <code>Agent(...)</code> line.<br>• <code>IndexError: list index out of range</code> <code>mark_done</code> got a position that is not in the plan (positions start at 1). <b>Fix:</b> Call <code>show_plan</code> first, and count from 1.<br>• <code>The plan is empty on the next request</code> It lives in memory, and a new copy of the agent starts fresh. <b>Fix:</b> Keep the plan per request, or save it somewhere that lasts.</p><p class="zh" style="margin:0">• <code>NameError: name 'square_root' is not defined</code> 工具定义在使用它的智能体下面。 <b>解决：</b>把 <code>square_root</code> 移到 <code>Agent(...)</code> 那一行上面。<br>• <code>IndexError: list index out of range</code> <code>mark_done</code> 收到的位置不在计划里（位置从 1 开始）。 <b>解决：</b>先调用 <code>show_plan</code>，并从 1 开始数。<br>• <code>The plan is empty on the next request</code> 它存在内存里，新的智能体副本会从头开始。 <b>解决：</b>让计划只属于每次请求，或把它存到能持久保存的地方。</p></div>
-<div class="callout tip"><b class="lbl"><span class="en">Recap</span><span class="zh">小结</span></b><span class="en">A tool is a plain function with a clear docstring the model reads.<br>A to-do list makes the model write a plan, then follow it step by step.<br>Tools return the whole plan, so the model always sees where it is.</span><span class="zh">工具就是带清楚文档字符串的普通函数，模型会读它。<br>待办清单让模型先写计划，再一步步照着做。<br>工具返回整份计划，所以模型总知道自己做到哪了。</span></div>
-<div class="callout tip"><b class="lbl"><span class="en">Plain words</span><span class="zh">白话词汇</span></b><span class="en"><b>Tool</b>: a function the model may ask your code to run. <b>Docstring</b>: the text inside a function that explains it; the model reads it to decide when to use the tool. <b>Planning loop</b>: plan, do one step, mark it, repeat.</span><span class="zh"><b>工具（tool）</b>：模型可以请你的代码去运行的函数。<b>文档字符串（docstring）</b>：函数里解释它的文字，模型靠它判断何时使用工具。<b>规划循环</b>：写计划、做一步、标记、重复。</span></div>
+<div class="card"><p class="en" style="margin:0">• <code>NameError: name 'square_root' is not defined</code> <b>Fix:</b> Define the tool above the <code>Agent(...)</code> line.<br>• <code>IndexError: list index out of range</code> The position is not in the plan. <b>Fix:</b> Call <code>show_plan</code> first, and count from 1.<br>• <code>The plan is empty on the next request</code> It lives in memory. <b>Fix:</b> Keep the plan per request, or save it somewhere that lasts.</p><p class="zh" style="margin:0">• <code>NameError: name 'square_root' is not defined</code> <b>解决：</b>把工具定义在 <code>Agent(...)</code> 那一行上面。<br>• <code>IndexError: list index out of range</code> 位置不在计划里。 <b>解决：</b>先调用 <code>show_plan</code>，并从 1 开始数。<br>• <code>The plan is empty on the next request</code> 它存在内存里。 <b>解决：</b>让计划只属于每次请求，或存到能持久保存的地方。</p></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• A tool is a plain function with a decorator and a docstring.<br>• The model reads the docstring, not your code. Make it specific.<br>• After you change the agent, launch again.<br>• A plan is a typed to-do list plus tools to add, tick and print.<br>• Say in the tool text that positions start at 1.<br>• The system prompt must tell the agent to plan first.<br>• A visible plan makes an agent easier to trust and to debug.</p><p class="zh" style="margin:0">• 工具就是带装饰器和文档字符串的普通函数。<br>• 模型读的是文档字符串，不是你的代码，所以要写具体。<br>• 改了智能体之后，要再启动一次。<br>• 计划就是一份有类型的待办清单，加上新增、打钩、打印的工具。<br>• 在工具说明里写明位置从 1 开始。<br>• 系统提示词必须要求智能体先做计划。<br>• 看得见的计划，让智能体更容易信任，也更容易调试。</p></div>
+<div class="card"><p class="en" style="margin:0">• A tool is a function with a decorator and a docstring; the model reads the docstring, not the code.<br>• Launch again after changing the agent.<br>• A plan is a typed to-do list plus tools to add, tick and print.<br>• The system prompt must tell the agent to plan first.<br>• A visible plan is easier to trust and to debug.</p><p class="zh" style="margin:0">• 工具是带装饰器和文档字符串的函数；模型读的是文档字符串，不是代码。<br>• 改了智能体之后要再启动一次。<br>• 计划是有类型的待办清单，加上新增、打钩、打印的工具。<br>• 系统提示词必须要求智能体先做计划。<br>• 看得见的计划更容易信任，也更容易调试。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Production</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"goals":{"en":["Write a tool as a plain function with a decorator and a specific docstring","Build a plan as a typed to-do list with tools to add, tick and print","Tell the agent in the system prompt to plan first","Launch again after changing the agent"],"zh":["把工具写成带装饰器和具体 docstring 的普通函数","把计划做成有类型的待办清单，配添加、勾选和打印工具","在系统提示词里要求智能体先做计划","改动智能体后重新启动"]},"prev":["23-agent-runtime-in-minutes.html"],"tools":{"en":"The lesson 23 agent project, Python 3, AWS CLI, the agentcore command","zh":"Lesson 23 的智能体项目、Python 3、AWS 命令行工具、agentcore 命令"},"know":{"en":"You have an agent deployed and can read a short Python function.","zh":"已部署过一个智能体，能读懂简短的 Python 函数。"},"mins":40,"offline":false}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=afade96e"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/24-tools-and-a-planning-loop.js?v=496a1f67"></script></body></html>
+<script src="js/24-tools-and-a-planning-loop.js?v=737f3255"></script></body></html>

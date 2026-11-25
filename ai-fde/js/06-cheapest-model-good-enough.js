@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded',function(){
- var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ var $=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
 
  game($('g1'),[
   {en:'Matches the handlers on at least 90% of easy claims',zh:'简单理赔上至少 90% 和理赔员一致',a:'b',ex:{en:'A clear accuracy line, on the claims that should be simple.',zh:'一条清楚的准确率线，针对本该简单的理赔。'},hint:{en:'Is it a number the customer can check?',zh:'这是客户能核对的数字吗？'}},
@@ -7,8 +7,6 @@ document.addEventListener('DOMContentLoaded',function(){
   {en:'Answers within 5 seconds',zh:'5 秒内给出答案',a:'b',ex:{en:'Speed is a real need on a busy queue, so write it down.',zh:'队列忙的时候速度是真需求，要写下来。'},hint:{en:'Would a slow model hold up the desk?',zh:'慢的模型会拖住理赔台吗？'}},
   {en:'The model has the most impressive name',zh:'模型的名字最响亮',a:'o',ex:{en:'A name is not a requirement.',zh:'名字不是需求。'},hint:{en:'Can you measure it?',zh:'能量出来吗？'}},
   {en:'It is the newest release',zh:'它是最新发布的',a:'o',ex:{en:'New is not the same as good enough for this job.',zh:'新不等于够用。'},hint:{en:'Does newest mean it passes our claims?',zh:'最新就意味着能过我们的理赔吗？'}}],[{k:'b',en:'In the bar',zh:'写进标准线'},{k:'o',en:'Leave out',zh:'不用写'}],{en:'Item',zh:'内容'});
-
- predict($('p1'),{q:{en:'A model gets 22 claims right in run 1 and 24 in run 2, out of 25 each. What accuracy do you report?',zh:'一个模型第一遍对 22 份，第二遍对 24 份（各 25 份）。你该汇报多少准确率？'},opts:[{k:'a',en:'88%, the lower run',zh:'88%，较差的那遍'},{k:'b',en:'92%, the average of both',zh:'92%，两遍的平均'},{k:'c',en:'96%, the best run',zh:'96%，最好的那遍'}],a:'b',out:{en:'(22 + 24) ÷ 50 = 46 ÷ 50 = 92%',zh:'(22 + 24) ÷ 50 = 46 ÷ 50 = 92%'},ex:{en:'The average of both runs is fairer than the best or the worst one. The gap between the runs also shows how much the model wobbles.',zh:'两遍的平均比最好或最差的一遍更公平。两遍之间的差距也能看出这个模型有多不稳。'},hint:{en:'Add the right answers from both runs, then divide by all the answers.',zh:'把两遍对的加起来，再除以全部答案数。'}});
 
  predict($('p2'),{q:{en:'A model’s two runs cost US$0.05 in total for 25 claims each (50 claims). What is the cost per 1,000 claims?',zh:'一个模型两遍加起来共花 0.05 美元，每遍 25 份理赔（共 50 份）。每 1,000 份理赔的成本是多少？'},opts:[{k:'a',en:'US$1',zh:'1 美元'},{k:'b',en:'US$2.50',zh:'2.50 美元'},{k:'c',en:'US$50',zh:'50 美元'}],a:'a',out:{en:'0.05 ÷ 50 × 1,000 = US$1',zh:'0.05 ÷ 50 × 1,000 = 1 美元'},ex:{en:'The 0.05 covers 50 claims, so one claim is US$0.001 and 1,000 are US$1. That is why the code divides by n, the number of attempts across both runs.',zh:'0.05 对应 50 份，所以一份 0.001 美元，1,000 份就是 1 美元。这就是代码要除以 n（两遍的总次数）的原因。'},hint:{en:'Divide by 50, not 25.',zh:'要除以 50，不是 25。'}});
 
@@ -21,5 +19,4 @@ document.addEventListener('DOMContentLoaded',function(){
 
  predict($('p3'),{q:{en:'The cheap model costs US$2 per 1,000 claims and the strong one US$12. Of 1,000 claims, the cheap model refers 100 to the strong one. What does the router cost for all 1,000?',zh:'便宜模型每 1,000 份理赔 2 美元，强模型 12 美元。1,000 份理赔里，便宜模型把 100 份转给了强模型。路由器处理这 1,000 份一共多少钱？'},opts:[{k:'a',en:'US$3.20',zh:'3.20 美元'},{k:'b',en:'US$12',zh:'12 美元'},{k:'c',en:'US$14',zh:'14 美元'}],a:'a',out:{en:'cheap: 1,000 claims = US$2. strong: 100 claims = 100 ÷ 1,000 × 12 = US$1.20. total US$3.20',zh:'便宜的：1,000 份 = 2 美元。强的：100 份 = 100 ÷ 1,000 × 12 = 1.20 美元。合计 3.20 美元'},ex:{en:'Every claim goes to the cheap model, but only a tenth also go to the strong one. That is far below US$12 for the strong model on everything.',zh:'每份都先交给便宜模型，只有十分之一再交给强模型。远低于全部交给强模型的 12 美元。'},hint:{en:'The cheap model sees all 1,000. The strong one sees only 100.',zh:'便宜模型看全部 1,000 份，强模型只看 100 份。'}});
 
- predict($('p4'),{q:{en:'Which sentence is best for Mr Goh’s half page?',zh:'哪一句最适合写进 Goh 先生的半页纸？'},opts:[{k:'a',en:'We chose Model B because it is the newest and everyone says it is great.',zh:'我们选了模型 B，因为它最新，大家都说它很棒。'},{k:'b',en:'We chose Model B: the cheaper of the two that cleared the agreed bar, with Claude Sonnet 5.5 as fallback.',zh:'我们选了模型 B：在过了约定标准线的两个里更便宜，并以 Claude Sonnet 5.5 做后备。'},{k:'c',en:'Model B had the best score, so it wins.',zh:'模型 B 分数最高，所以它赢。'}],a:'b',ex:{en:'It names the agreed bar, the reason for the pick and the fallback, so Mr Goh can repeat it to the owners.',zh:'它写明了约定的标准线、选择的理由和后备方案，Goh 先生可以原样转述给老板们。'},hint:{en:'Which one points back to the bar?',zh:'哪一句回扣到了标准线？'}});
 });

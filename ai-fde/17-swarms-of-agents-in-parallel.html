@@ -5,136 +5,84 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/ai-fde/17-swarms-of-agents-in-parallel.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-fde/17-swarms-of-agents-in-parallel.html","url":"https://tx-learns.vercel.app/ai-fde/17-swarms-of-agents-in-parallel.html","name":"Parallel agent swarms","alternateName":"并行智能体群","description":"Work many claims at once with a plain-code dispatcher, a cap on how many agents run together, and retries that never let one bad claim stop the rest.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"Pausing and working in parallel","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI FDE","url":"https://tx-learns.vercel.app/ai-fde/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI FDE","item":"https://tx-learns.vercel.app/ai-fde/index.html"},{"@type":"ListItem","position":3,"name":"Parallel agent swarms","item":"https://tx-learns.vercel.app/ai-fde/17-swarms-of-agents-in-parallel.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Pausing and working in parallel · Lesson 2</span><span class="zh">暂停与并行 · 第 2 课</span></span><h1><span class="en">Parallel agent swarms</span><span class="zh">并行智能体群</span></h1><p class="meta"><span class="en">Work many claims at once with a dispatcher, a cap on how many agents run together, and retries · ~25 min · concept with one runnable idea</span><span class="zh">用调度器、并行上限和重试，同时处理很多份理赔 · 约 25 分钟 · 概念课，附一个可动手的做法</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the pilot could wait for Aisha and carry on after a crash, but it still worked one claim at a time. Today it fails after a long weekend: 25 claims at 30 seconds each is over twelve minutes, and Auntie Siew’s phone keeps ringing. We fix it with a dispatcher that runs several agents at once, with a cap.</p>
-<p class="zh" style="margin:0">上回，试点能等 Aisha 签字、崩溃后接着干，但一次还是只处理一份理赔。今天的问题是长周末之后：25 份理赔，每份 30 秒，要十几分钟，Siew 阿姨的电话响个不停。我们的办法是做一个调度器，让几个智能体同时干活，并设上限。</p></div>
-<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">After a long weekend, Kaya Travel Cover has 25 claims waiting. The agent takes about 30 seconds on each, so one after another that is over twelve minutes, and Auntie Siew’s phone keeps ringing. Mei Ling wants them all worked <b>at the same time</b>. But she also remembers the last time she sent too much at once, so she builds a small <b>dispatcher</b> that is careful about how many agents it lets loose.</p>
-<p class="zh" style="margin:0">长周末过后，Kaya Travel Cover 积压了 25 份理赔。智能体处理一份大约要 30 秒，一份接一份做下来要十几分钟，Siew 阿姨的电话响个不停。Mei Ling 想让它们<b>同时</b>处理。但她也记得上次一下子发太多出去的教训，所以她做了一个小<b>调度器</b>，对放出多少个智能体很谨慎。</p></div>
-
-<div class="callout tip"><b class="lbl"><span class="en">Words in this lesson</span><span class="zh">这一课用到的词</span></b><span class="en"><b>Swarm</b>: many agents, each with one claim, running at the same time.<br><b>async / await</b>: a way to start many slow jobs and wait for them together, instead of one after another.<br><b>Gate</b>: a counter that lets only N agents run at once; the others wait their turn.</span><span class="zh"><b>智能体群</b>：很多智能体，每个处理一份理赔，同时运行。<br><b>async / await</b>：一种写法：同时启动很多慢的任务再一起等，而不是一个接一个。<br><b>闸门</b>：一个计数器，只让 N 个智能体同时运行，其余的排队。</span></div>
-<h2><span class="en">Step 1 · A dispatcher made of plain code</span><span class="zh">第 1 步 · 用普通代码做调度器</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>dispatcher</b> is the person at the front desk who hands each claim to a free handler. It does not need to be clever, so it uses no model at all. It lists the claims and starts one piece of work for each. Plain code is free, instant and does the same thing every time. In Python, <code>asyncio</code> lets many waits (like “waiting for the model”) overlap instead of queueing. <code>async def</code> marks a job that can pause; <code>await</code> is the pause; <code>asyncio.gather</code> starts every job and waits until all are done; and <code>asyncio.run(...)</code> starts it all from a normal script.</p>
-<p class="zh" style="margin:0 0 8px"><b>调度器</b>就像前台那位把每份理赔交给空闲理赔员的人。它不需要聪明，所以完全不用模型。它列出理赔，给每一份开一个任务。普通代码免费、即时，而且每次做的事都一样。在 Python 里，<code>asyncio</code> 能让很多次等待（比如“等模型回答”）重叠进行，而不是排队。<code>async def</code> 标出一个可以暂停的任务；<code>await</code> 就是那个暂停；<code>asyncio.gather</code> 同时开始所有任务，并等它们全部做完；<code>asyncio.run(...)</code> 则从普通脚本里启动这一切。</p></div>
-<div class="codebox" data-file="dispatcher.py" data-lang="python"><span class="chg">import asyncio
+<h2><span class="en">Step 1 · A plain-code dispatcher</span><span class="zh">第 1 步 · 用普通代码做调度器</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b>
+<ul class="en" style="margin:0"><li>A <b>dispatcher</b> hands each claim to an agent. Its job is fixed, so use plain code, no model: free, instant, the same every time.</li><li><code>asyncio.gather</code> starts one job per claim and waits for all of them, so the slow waits (for the model) overlap instead of queueing.</li><li>Test with a <b>stand-in</b> that just sleeps, not the real agent: it is slow, costs money and can hide your own bugs.</li></ul>
+<ul class="zh" style="margin:0"><li><b>调度器</b>把每份理赔交给一个智能体。它的活是固定的，所以用普通代码，不用模型：免费、即时、每次都一样。</li><li><code>asyncio.gather</code> 给每份理赔开一个任务并等它们全部做完，这样（等模型的）慢等待是重叠的，不是排队。</li><li>用只会睡一会儿的<b>替身</b>来测，而不是真智能体：它又慢又花钱，还可能盖住你自己的 bug。</li></ul></div>
+<div class="codebox" data-file="dispatcher.py" data-lang="python"><span class="chg">import asyncio, random
 
 async def dispatch(claims, agent):
     # start one piece of work per claim, then wait for all of them
     results = await asyncio.gather(*(agent(c) for c in claims))
-    return dict(zip([c["id"] for c in claims], results))</span></div>
-<div class="try" id="p1"></div>
+    return dict(zip([c["id"] for c in claims], results))
 
-<h2><span class="en">Step 2 · Test it with stand-in agents first</span><span class="zh">第 2 步 · 先用替身智能体测试</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Do not test a dispatcher with the real agent: it is slow, it costs money and it can fail in ways that hide your own bugs. Use a <b>stand-in</b> that just sleeps for a moment and returns a fixed answer. Like a fire drill, where nobody is really on fire. When the dispatcher behaves with stand-ins, swap in the real agent.</p>
-<p class="zh" style="margin:0 0 8px">不要用真智能体来测调度器：它又慢又花钱，还可能出错，把你自己代码里的毛病盖住。用一个<b>替身</b>，只睡一小会儿，再返回固定的答案。就像消防演习，没人真的着火。调度器用替身跑得正常了，再换上真的智能体。</p></div>
-<div class="codebox" data-file="dispatcher.py" data-lang="python"><span class="dim">import random
-
-</span><span class="chg">async def stand_in(claim):
+async def stand_in(claim):
     await asyncio.sleep(random.uniform(0.5, 1.5))     # pretend to think
-    return {"action": "approve", "payout": claim["amount"]}</span><span class="dim">
+    return {"action": "approve", "payout": claim["amount"]}
 
 claims = [{"id": f"C-{i}", "amount": 100 * i} for i in range(1, 26)]
-print(asyncio.run(dispatch(claims, stand_in)))</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">{'C-1': {'action': 'approve', 'payout': 100}, 'C-2': {'action': 'approve', 'payout': 200}, 'C-3': {'action': 'approve', 'payout': 300}, ... 'C-25': {'action': 'approve', 'payout': 2500}}</div>
+print(asyncio.run(dispatch(claims, stand_in)))</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">{'C-1': {'action': 'approve', 'payout': 100}, ... 'C-25': {'action': 'approve', 'payout': 2500}}</div>
 <div class="try" id="p2"></div>
 
-<h2><span class="en">Step 3 · Keep the dispatcher’s state</span><span class="zh">第 3 步 · 记住调度器的状态</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">While 25 things run, you need to see which claims are running, which are done and which failed. So the dispatcher reports each change to a small record. It also catches an error inside each claim, so one bad claim becomes a “failed” line instead of crashing the whole batch. Like the queue board on the wall, which shows every ticket’s status at a glance.</p>
-<p class="zh" style="margin:0 0 8px">25 件事同时在跑时，你得看得出哪些在跑、哪些做完了、哪些失败了。所以调度器把每次变化报给一份小记录。它还在每份理赔内部接住错误，让一份有问题的理赔变成一行“失败”，而不是把整批搞崩。就像墙上的叫号板，每张号码的状态一眼就能看到。</p></div>
-<div class="codebox" data-file="dispatcher.py" data-lang="python"><span class="chg">async def run_one(claim, agent, on_change):
-    on_change(claim["id"], "running")
-    try:
-        result = await agent(claim)
-    except Exception:
-        on_change(claim["id"], "failed")             # one bad claim stays one bad claim
-        return None
-    on_change(claim["id"], "done")
-    return result
-
-async def dispatch(claims, agent, on_change):
-    results = await asyncio.gather(*(run_one(c, agent, on_change) for c in claims))
-    return dict(zip([c["id"] for c in claims], results))</span><span class="dim">
-
-state = {}
-def on_change(claim_id, status):
-    state[claim_id] = status</span></div>
-<div class="try" id="p3"></div>
-
-<h2><span class="en">Step 4 · Put a cap on the swarm</span><span class="zh">第 4 步 · 给智能体群设个上限</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Starting all 25 at once is how you meet the model provider’s <b>rate limit</b>, a ceiling on how many requests you may send per minute. A <b>cap</b> says “at most N agents at the same time”; the rest wait their turn. A cap is about how many run at once, not how many requests go out per minute, so it helps with the rate limit but does not promise you stay under it. Python’s <code>asyncio.Semaphore</code> is exactly that: N tickets at the door. Keep N between 1 and 25.</p>
-<p class="zh" style="margin:0 0 8px">一次放出 25 个，正是撞上模型供应商<b>速率限制</b>的办法：它规定你每分钟最多能发多少个请求。<b>上限</b>的意思是“同一时间最多 N 个智能体”，其余的排队等。上限管的是同时有几个在跑，不是每分钟发出几个请求，所以它能帮你避开速率限制，但不保证一定避开。Python 的 <code>asyncio.Semaphore</code> 就是这个：门口只有 N 张入场券。N 取 1 到 25 之间。</p></div>
+<h2><span class="en">Step 2 · Track state, isolate failures, cap the swarm</span><span class="zh">第 2 步 · 记状态、隔离失败、给群设上限</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b>
+<ul class="en" style="margin:0"><li>Report each change (waiting, running, done, failed) to a small record, so you can see the whole batch.</li><li>Catch errors inside each claim: one bad claim becomes a “failed” line, not a crashed batch.</li><li>Starting all 25 at once is how you hit the provider's <b>rate limit</b>. An <code>asyncio.Semaphore</code> is N tickets at the door: at most N agents at a time, the rest wait.</li></ul>
+<ul class="zh" style="margin:0"><li>把每次变化（等待、运行、完成、失败）报给一份小记录，这样整批的情况一目了然。</li><li>在每份理赔内部接住错误：一份有问题的理赔只变成一行“失败”，不会让整批崩掉。</li><li>一次放出 25 个，正是撞上供应商<b>速率限制</b>的办法。<code>asyncio.Semaphore</code> 就是门口的 N 张票：同一时间最多 N 个智能体，其余的等。</li></ul></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="Twenty-five claims wait in a queue; a cap lets only a few agents run at once, and results go to the records"><defs><marker id="ah17" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><path class="lnk" d="M165 95L195 95" marker-end="url(#ah17)"/><path class="lnk hot" d="M345 95L375 95" marker-end="url(#ah17)"/><path class="lnk" d="M525 95L555 95" marker-end="url(#ah17)"/><rect class="box soft" x="15" y="60" width="150" height="70" rx="10"/><text class="en" x="90" y="91">25 claims</text><text class="zh" x="90" y="91">25 份理赔</text><text class="en sm" x="90" y="108">waiting</text><text class="zh sm" x="90" y="108">等候中</text><rect class="box new" x="195" y="60" width="150" height="70" rx="10"/><text class="en" x="270" y="91">The cap</text><text class="zh" x="270" y="91">上限</text><text class="en sm" x="270" y="108">at most N at once</text><text class="zh sm" x="270" y="108">同时最多 N 个</text><rect class="box" x="375" y="60" width="150" height="70" rx="10"/><text class="en" x="450" y="91">N agents</text><text class="zh" x="450" y="91">N 个智能体</text><text class="en sm" x="450" y="108">running</text><text class="zh sm" x="450" y="108">运行中</text><rect class="box soft" x="555" y="60" width="150" height="70" rx="10"/><text class="en" x="630" y="91">Records</text><text class="zh" x="630" y="91">记录</text><text class="en sm" x="630" y="108">one row per claim</text><text class="zh sm" x="630" y="108">每份理赔一行</text><text class="en sm" x="360" y="175">asyncio.Semaphore: N tickets at the door</text><text class="zh sm" x="360" y="175">asyncio.Semaphore：门口只发 N 张票</text></svg><figcaption><span class="en">The rest wait for a free ticket, so the provider’s rate limit is not hit all at once.</span><span class="zh">其余的等空出来的票，这样不会一下子撞上服务商的速率限制。</span></figcaption></figure>
-<div class="codebox" data-file="dispatcher.py" data-lang="python"><span class="chg">async def run_one(claim, agent, on_change, gate):
+<div class="codebox" data-file="dispatcher.py" data-lang="python"><span class="chg">state = {}
+def on_change(claim_id, status):
+    state[claim_id] = status
+
+async def run_one(claim, agent, on_change, gate):
     async with gate:                                 # wait here until a ticket is free
         on_change(claim["id"], "running")
         try:
             result = await agent(claim)
         except Exception:
-            on_change(claim["id"], "failed")
+            on_change(claim["id"], "failed")         # one bad claim stays one bad claim
             return None
         on_change(claim["id"], "done")
         return result
 
 async def dispatch(claims, agent, on_change, cap=3):
-    cap = max(1, min(25, cap))
-    gate = asyncio.Semaphore(cap)
+    gate = asyncio.Semaphore(max(1, min(25, cap)))
     for c in claims:
         on_change(c["id"], "waiting")
     results = await asyncio.gather(*(run_one(c, agent, on_change, gate) for c in claims))
     return dict(zip([c["id"] for c in claims], results))</span></div>
 <div class="try" id="p4"></div>
 
-<h2><span class="en">Step 5 · Retries: wait or go back</span><span class="zh">第 5 步 · 重试：等一等，还是退回去</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Not every error means the same. A <b>rate limit</b> or a <b>timeout</b> only means “not now”: wait a little and ask again, and it is still the <em>same attempt</em>, not a strike against the claim. Any other failure is a real problem, so the claim goes back once. If it fails a second time, leave it for a handler and move on. Like a queue ticket: if the counter is busy you wait, but a torn form is sent back once, then to a person.</p>
-<p class="zh" style="margin:0 0 8px">不是所有错误都是一回事。<b>速率限制</b>或<b>超时</b>只是说“现在不行”：等一会儿再问，这仍是<em>同一次尝试</em>，不算这份理赔的一次失败。其他任何失败都是真问题，所以这份理赔退回去一次。第二次还失败，就留给理赔员，继续往下做。就像排号：柜台忙你就等，但撕破的表格会退回一次，再不行就交给人。</p></div>
+<h2><span class="en">Step 3 · Retries: wait or go back</span><span class="zh">第 3 步 · 重试：等一等，还是退回去</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b>
+<ul class="en" style="margin:0"><li>A <b>rate limit</b> or <b>timeout</b> means “not now”: wait and ask again. It is the same attempt, not a strike against the claim.</li><li>Any other failure goes back once. A second failure is left for a handler.</li><li>Going parallel cuts the time a lot; the cost per claim stays the same.</li></ul>
+<ul class="zh" style="margin:0"><li><b>速率限制</b>或<b>超时</b>只是“现在不行”：等一会儿再问。这是同一次尝试，不算这份理赔的一次失败。</li><li>其他任何失败退回一次。第二次失败就留给理赔员。</li><li>并行能大幅缩短时间；每份理赔的成本不变。</li></ul></div>
 <div class="codebox" data-file="dispatcher.py" data-lang="python"><span class="dim">class RateLimited(Exception): pass     # map your provider's rate-limit error to this
 class TimedOut(Exception): pass        # and its timeout error to this
-
 </span><span class="chg">WAIT_SECONDS = 2
-
 async def attempt(claim, agent):
     failures = 0
     while True:
         try:
             return await agent(claim)
         except (RateLimited, TimedOut):
-            await asyncio.sleep(WAIT_SECONDS)      # same attempt, just later (real code also needs a limit on how long it waits)
+            await asyncio.sleep(WAIT_SECONDS)      # same attempt, just later
         except Exception:
             failures += 1
             if failures == 2:                      # second real failure: give up
                 raise</span><span class="dim">
-
-# in run_one, one line changes:   result = await attempt(claim, agent)
-# A "failed" claim is left for a handler. The rest carry on.</span></div>
-<div class="try" id="p5"></div>
+# in run_one, one line changes:   result = await attempt(claim, agent)</span></div>
 <p class="en">Which way should each error go? Sort them.</p>
 <p class="zh">每种错误该走哪条路？来分一分。</p><div class="sc" id="g1"></div>
 
-<h2><span class="en">Step 6 · Measure the time, and read the result from records</span><span class="zh">第 6 步 · 量一量时间，结果从记录里读</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Run the same 25 claims with a cap of 3, then 10, then 25, and time each run. The stand-ins here sleep about a second each, so expect seconds, not minutes. With the real agent at about 30 seconds each, one at a time takes over ten minutes, and the whole queue in parallel takes about as long as the slowest single claim. The cost per claim does not change: you pay for the same work, only sooner. The summary is a count over <code>state</code>, with no model writing it, so it can never disagree with what happened.</p>
-<p class="zh" style="margin:0 0 8px">把同样的 25 份理赔，分别用上限 3、10、25 各跑一遍，并计时。这里的替身每个只睡约一秒，所以你会看到几秒，不是几分钟。换成真智能体（每份约 30 秒）时，按顺序做要十分钟以上；整队并行时，用时差不多等于最慢的那一份理赔。每份理赔的成本不变：做的是同样的活，只是更早做完。总结就是对 <code>state</code> 的一次计数，不用模型来写，所以它绝不会和实际发生的事不一致。</p></div>
-<div class="codebox" data-file="dispatcher.py" data-lang="python"><span class="dim">import time
-from collections import Counter
-
-</span><span class="chg">for cap in (3, 10, 25):
-    state.clear()
-    start = time.perf_counter()
-    asyncio.run(dispatch(claims, stand_in, on_change, cap))
-    print(cap, "agents:", round(time.perf_counter() - start, 1), "seconds", dict(Counter(state.values())))</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">3 agents: 9.1 seconds {'done': 25}
-10 agents: 3.3 seconds {'done': 25}
-25 agents: 1.4 seconds {'done': 25}</div>
-<div class="try" id="p6"></div>
-
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我当时想错了</span></b><span class="en">I fanned out all 25 at once and hit the provider’s rate limit straight away. Half the claims failed, and it was not my code’s fault. A cap and a wait-and-retry rule fixed it.</span><span class="zh">我一口气把 25 个全放出去，立刻撞上了供应商的速率限制。一半的理赔失败了，而这不是我代码的错。加上上限和“等一等再试”的规则就好了。</span></div>
-
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Run with 3, then 10, then 25</b> and note the time and any rate-limit errors.</span><span class="zh"><b>分别用 3、10、25 跑一遍</b>，记下用时和速率限制的错误。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Make one claim fail on purpose</b> and check the other 24 still finish.</span><span class="zh"><b>故意让一份理赔失败</b>，确认另外 24 份照样完成。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Print a dispatch summary</b> from <code>state</code> alone, with no model writing it.</span><span class="zh"><b>只用 <code>state</code> 打印一份调度总结</b>，不让模型来写。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the pilot clears Monday’s queue with several agents at once, the board on the wall fills with green, and the one red claim waits for Aisha. The next problem is that only Mei Ling can start it, from a terminal on her laptop.</span><span class="zh">现在试点让几个智能体同时处理星期一的队列，墙上的叫号板一片绿，只有那份红色的理赔等着 Aisha。下一个问题是：只有 Mei Ling 能在她笔记本的终端上启动它。</span></div>
-<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2><div class="card"><p class="en" style="margin:0 0 12px"><code>RuntimeError: asyncio.run() cannot be called from a running event loop</code><br>Cause: you ran this in a notebook, which already has a loop. Fix: use <code>await dispatch(...)</code> there, or run it as a plain script.</p><p class="zh" style="margin:0 0 12px"><code>RuntimeError: asyncio.run() cannot be called from a running event loop</code><br>原因：你在笔记本里运行，它已经有事件循环。解决：在里面用 <code>await dispatch(...)</code>，或者当作普通脚本运行。</p><p class="en" style="margin:0 0 12px"><code>RuntimeWarning: coroutine 'run_one' was never awaited</code><br>Cause: a call is missing <code>await</code> or is not put in the list that is gathered. Fix: add <code>await</code> or include it in <code>asyncio.gather</code>.</p><p class="zh" style="margin:0 0 12px"><code>RuntimeWarning: coroutine 'run_one' was never awaited</code><br>原因：某次调用漏了 <code>await</code>，或没放进被收集的列表。解决：加上 <code>await</code>，或放进 <code>asyncio.gather</code>。</p><p class="en" style="margin:0 0 12px"><code>openai.RateLimitError: Error code: 429</code><br>Cause: too many agents at once. Fix: lower the cap, and treat the error as "try later", not a decision.</p><p class="zh" style="margin:0 0 12px"><code>openai.RateLimitError: Error code: 429</code><br>原因：同时跑的智能体太多。解决：调低上限，并把这个错误当成“稍后再试”，不是一个决定。</p></div>
-<h2><span class="en">Recap</span><span class="zh">小结</span></h2><div class="card"><p class="en" style="margin:0">• Run one agent per claim in parallel, and gather the results together.<br>• A failed or slow claim must not stop the others; mark it and move on.<br>• Put a cap on how many run at once, so you do not hit rate limits.</p><p class="zh" style="margin:0">• 每份理赔一个智能体，并行运行，最后一起收集结果。<br>• 一份失败或很慢，不能拖住其他的；标记它，继续往下。<br>• 给同时运行的数量设上限，免得碰到限流。</p></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Run with a cap of 3, then 10, then 25</b> and note the time and any rate-limit errors.</span><span class="zh"><b>分别用上限 3、10、25 跑一遍</b>，记下用时和速率限制的错误。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Make one claim fail on purpose</b> and check the other 24 still finish.</span><span class="zh"><b>故意让一份理赔失败</b>，确认另外 24 份照样完成。</span></span></label></div>
+<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2><div class="card"><p class="en" style="margin:0 0 12px"><code>RuntimeError: asyncio.run() cannot be called from a running event loop</code><br>Fix: in a notebook use <code>await dispatch(...)</code>; otherwise run a plain script.</p><p class="zh" style="margin:0 0 12px"><code>RuntimeError: asyncio.run() cannot be called from a running event loop</code><br>解决：在笔记本里用 <code>await dispatch(...)</code>；否则当作普通脚本运行。</p><p class="en" style="margin:0 0 12px"><code>openai.RateLimitError: Error code: 429</code><br>Fix: lower the cap, and treat the error as “try later”, not a decision.</p><p class="zh" style="margin:0 0 12px"><code>openai.RateLimitError: Error code: 429</code><br>解决：调低上限，并把这个错误当成“稍后再试”，不是一个决定。</p></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• Use plain code for dispatch: it is free, quick and predictable.<br>• Test the dispatcher with stand-in agents before the real one.<br>• Keep the dispatcher’s state so you can see who is waiting, running, done or failed.<br>• Cap concurrency; the first limit you hit is the provider’s rate limit, not your code.<br>• A retry after a rate limit or timeout is the same attempt; another failure goes back once, then to a handler.<br>• One bad claim never stops the rest.<br>• Going parallel cuts the time a lot and leaves the cost per claim unchanged.</p><p class="zh" style="margin:0">• 调度用普通代码：免费、快、可预测。<br>• 先用替身智能体测调度器，再换真的。<br>• 记住调度器的状态，这样看得出谁在等、在跑、已完成或已失败。<br>• 给并行设上限；最先撞上的是供应商的速率限制，不是你的代码。<br>• 速率限制或超时之后的重试是同一次尝试；其他失败退回一次，再不行就交给理赔员。<br>• 一份有问题的理赔绝不拖住其余的。<br>• 并行能大幅缩短时间，每份理赔的成本不变。</p></div>
+<div class="card"><p class="en" style="margin:0">• Dispatch with plain code and test it with stand-in agents first.<br>• Keep state so you can see who is waiting, running, done or failed.<br>• Cap concurrency; the first limit you hit is the provider's rate limit.<br>• A rate-limit retry is the same attempt; other failures go back once, then to a handler.<br>• Parallel cuts time, not cost per claim.</p><p class="zh" style="margin:0">• 用普通代码调度，并先用替身智能体测试。<br>• 记住状态，看得出谁在等、在跑、已完成或已失败。<br>• 给并行设上限；最先撞上的是供应商的速率限制。<br>• 速率限制后的重试是同一次尝试；其他失败退回一次，再不行交给理赔员。<br>• 并行缩短时间，不改变每份理赔的成本。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI FDE</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"prev":["09-agent-that-works-the-queue.html"],"tools":{"en":"Python 3","zh":"Python 3"},"know":{"en":"A basic agent loop from Lesson 9.","zh":"前面几课的基本智能体循环。"},"mins":30,"offline":true,"goals":{"en":["Dispatch claims to agents in parallel with plain code","Test the dispatcher with stand-in agents first","Cap concurrency to stay under the provider's rate limit","Retry once, then send a failed claim to a handler without stopping the rest"],"zh":["用普通代码把理赔单并行分发给智能体","先用替身智能体测试分发器","限制并发数，避免触到服务商的速率上限","失败时重试一次再转人工，且不影响其余的单"]}}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=37968fc4"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/17-swarms-of-agents-in-parallel.js?v=49b63f30"></script></body></html>
+<script src="js/17-swarms-of-agents-in-parallel.js?v=9c61b93e"></script></body></html>

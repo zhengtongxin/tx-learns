@@ -5,14 +5,9 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/agentic-ai/08-agents-tools-handoffs.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/agentic-ai/08-agents-tools-handoffs.html","url":"https://tx-learns.vercel.app/agentic-ai/08-agents-tools-handoffs.html","name":"Tools, handoffs, guardrails","alternateName":"工具、交接与护栏","description":"One agent becomes a small team, with checks at the door.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Agent SDKs","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Agentic","url":"https://tx-learns.vercel.app/agentic-ai/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Agentic","item":"https://tx-learns.vercel.app/agentic-ai/index.html"},{"@type":"ListItem","position":3,"name":"Tools, handoffs, guardrails","item":"https://tx-learns.vercel.app/agentic-ai/08-agents-tools-handoffs.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Agent SDKs · Lesson 2</span><span class="zh">智能体 SDK · 第 2 课</span></span><h1><span class="en">Tools, handoffs, guardrails</span><span class="zh">工具、交接与护栏</span></h1><p class="meta"><span class="en">One agent becomes a small team, with checks at the door · ~25 min · hands-on</span><span class="zh">一个智能体变成一支小团队，门口还有安检 · 约 25 分钟 · 动手实践</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time one agent on the SDK took every order, drinks and noodles alike. Today it fails when a regular orders mee goreng and asks for a refund in the same chat: one agent does all of it, badly. We fix it with specialist agents, handoffs and guardrails.</p>
-<p class="zh" style="margin:0">上回 SDK 上的一个智能体包办所有订单，饮料面食都是它。今天它的问题是：熟客点了炒面，又在同一段对话里要退款，一个智能体什么都做，结果都做不好。办法是专员智能体、交接和护栏。</p></div>
-<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en"style="margin:0">Noor runs <b>Pot &amp; Petal</b>, a small online plant shop. She wants a help desk agent called <b>Fern</b>. Fern should ask a plant expert when a customer's plant looks sick, pass refund requests to a returns specialist, and never let a pasted card number or a made-up discount slip through. Each step today adds one of those. At Kopi Corner Fern is the counter agent, and Plant Doctor and Returns Desk become Ah Seng's and Kak Ros's agents.</p>
-<p class="zh"style="margin:0">Noor 开了一家小网店 <b>Pot &amp; Petal</b>，卖绿植。她想要一个叫 <b>Fern</b> 的客服智能体。顾客的植物生病时，Fern 要去问植物专家；有人要退款时，把对话转给退货专员；还绝不能让顾客贴进来的银行卡号或凭空许诺的折扣溜过去。今天每一步加上其中一样。放到 Kopi Corner，Fern 就是柜台智能体，Plant Doctor 和 Returns Desk 变成 Ah Seng 和 Kak Ros 的智能体。</p></div>
-
 <h2><span class="en">Step 1 · An agent as a tool</span><span class="zh">第 1 步 · 把智能体当工具</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Fern is good at chatting, but not at diagnosing plants. You could stuff plant knowledge into Fern's prompt, but it gets long and messy. Instead, build a separate <b>Plant Doctor</b> agent and give it to Fern as a tool with <code>.as_tool()</code>. Think of asking a colleague across the desk: you get an answer, then <b>you</b> keep talking to the customer.</p>
-<p class="zh"style="margin:0 0 8px">Fern 擅长聊天，但不擅长给植物看病。你可以把植物知识塞进 Fern 的提示词，但那会又长又乱。更好的做法是单独做一个 <b>Plant Doctor</b> 智能体，再用 <code>.as_tool()</code> 把它当工具交给 Fern。就像问隔壁工位的同事：拿到答案后，还是<b>你</b>继续和顾客说话。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Example: <b>Fern</b>, the help desk agent of an online plant shop. Instead of stuffing plant knowledge into Fern's prompt, build a separate <b>Plant Doctor</b> agent and give it to Fern with <code>.as_tool()</code>. It is like asking a colleague: you get an answer, then <b>you</b> keep talking to the customer.</p>
+<p class="zh" style="margin:0">示例：网上植物店的客服智能体 <b>Fern</b>。不要把植物知识塞进 Fern 的提示词，而是单独做一个 <b>Plant Doctor</b> 智能体，用 <code>.as_tool()</code> 交给 Fern。就像问同事：拿到答案后，还是<b>你</b>继续和顾客说话。</p></div>
 <div class="codebox" data-file="plant_doctor.py" data-lang="python"><span class="dim">plant_doctor = Agent(
     name="Plant Doctor",
     instructions="Diagnose a houseplant from its symptoms. Two sentences: the likely cause, then one fix.",
@@ -20,25 +15,18 @@
 
 fern = Agent(
     name="Fern",
-    instructions="You are the help desk of Pot & Petal. Be warm and brief. For sick plants, ask plant_doctor, then answer in your own words.",
+    instructions="You are the help desk of a plant shop. Be warm and brief. For sick plants, ask plant_doctor, then answer in your own words.",
     model="gpt-5.4-mini",
     tools=[</span><span class="chg">plant_doctor.as_tool(
         tool_name="plant_doctor",
         tool_description="Diagnose a sick houseplant from a description of its symptoms")</span><span class="dim">])
 
 result = await Runner.run(fern, "My monstera has yellow leaves with brown tips")</span></div>
-<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
-<div class="codebox" data-file="output" data-lang="text">Yellow leaves with brown tips usually mean overwatering or dry air.
-Check that the pot drains, let the top 3 cm of soil dry out, and keep the
-plant away from the aircon vent.</div>
-<p class="en">Step through what happens inside that one run.</p>
-<p class="zh">一步步看看这一次运行里发生了什么。</p>
 <div id="t1"></div>
-<div class="try" id="p1"></div>
 
-<h2><span class="en">Step 2 · A handoff</span><span class="zh">第 2 步 · 交接（handoff）</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Refunds are different. Noor wants <b>Returns Desk</b> to own the whole chat, not have Fern relay messages. List it in <code>handoffs</code>, and when the model picks it, the SDK makes Returns Desk the active agent. This is transferring the phone call, not asking a colleague.</p>
-<p class="zh"style="margin:0 0 8px">退款不一样。Noor 希望 <b>Returns Desk</b> 接管整段对话，而不是让 Fern 在中间传话。把它写进 <code>handoffs</code>，模型选中它时，SDK 就让 Returns Desk 成为当前智能体。这是把电话转过去，而不是问同事。</p></div>
+<h2><span class="en">Step 2 · A handoff, and which to use</span><span class="zh">第 2 步 · 交接，以及怎么选</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">For refunds, a <b>Returns Desk</b> agent should own the whole chat. List it in <code>handoffs</code>: when the model picks it, the SDK makes it the active agent. That is transferring the phone call, not asking a colleague. To tell the two apart ask: <b>who talks to the customer next?</b> The first agent still talking means a tool; the second agent taking over means a handoff.</p>
+<p class="zh" style="margin:0">退款时，应由 <b>Returns Desk</b> 智能体接管整段对话。把它写进 <code>handoffs</code>：模型选中它时，SDK 就让它成为当前智能体。这是把电话转过去，而不是问同事。分辨两者只需问：<b>接下来谁和顾客说话？</b>第一个智能体继续说是工具；第二个智能体接手是交接。</p></div>
 <div class="codebox" data-file="returns_desk.py" data-lang="python"><span class="dim">returns_desk = Agent(
     name="Returns Desk",
     </span><span class="chg">handoff_description="Handles refunds and returns for damaged or wrong orders",</span><span class="dim">
@@ -48,73 +36,47 @@ plant away from the aircon vent.</div>
 fern = Agent(name="Fern", ..., tools=[...], </span><span class="chg">handoffs=[returns_desk]</span><span class="dim">)
 
 result = await Runner.run(fern, "My pot arrived cracked. I want my money back.")
-print(</span><span class="chg">result.last_agent.name</span><span class="dim">)   # who gave the final answer</span></div>
-<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
-<div class="codebox" data-file="output" data-lang="text">Returns Desk</div>
-<div id="t2"></div>
-<div class="try" id="p2"></div>
-
-<h2><span class="en">Step 3 · Tool or handoff?</span><span class="zh">第 3 步 · 工具还是交接？</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Both put a second agent to work, so they look alike. One question tells them apart: <b>who talks to the customer next?</b> If the first agent gets an answer back and keeps talking, it is a tool. If the second agent takes over and replies, it is a handoff.</p>
-<p class="zh"style="margin:0 0 8px">两种方式都让第二个智能体干活，所以看起来很像。一个问题就能分清：<b>接下来谁和顾客说话？</b>如果第一个智能体拿回答案并继续说，那是工具；如果第二个智能体接手并回复，那就是交接。</p></div>
+print(</span><span class="chg">result.last_agent.name</span><span class="dim">)   # who gave the final answer: Returns Desk</span></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="Two rows. As a tool, the customer talks to Fern, Fern asks Plant Doctor, and Fern replies. As a handoff, the customer talks to Fern, Fern hands over to Returns Desk, and Returns Desk replies"><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" fill="#9a9aa8"/></marker></defs><text class="en sm" x="360" y="20">As a tool: Fern keeps the chat</text><text class="zh sm" x="360" y="20">当工具：Fern 继续对话</text><rect class="box soft" x="10" y="30" width="140" height="40" rx="10"/><text class="en" x="80.0" y="55.0">Customer</text><text class="zh" x="80.0" y="55.0">顾客</text><rect class="box soft" x="190" y="30" width="140" height="40" rx="10"/><text class="en" x="260.0" y="55.0">Fern</text><text class="zh" x="260.0" y="55.0">Fern</text><rect class="box soft" x="370" y="30" width="140" height="40" rx="10"/><text class="en" x="440.0" y="55.0">Plant Doctor</text><text class="zh" x="440.0" y="55.0">Plant Doctor</text><rect class="box new" x="560" y="30" width="150" height="40" rx="10"/><text class="en" x="635.0" y="55.0">Fern replies</text><text class="zh" x="635.0" y="55.0">Fern 来回复</text><path class="lnk" d="M150,50 H188" marker-end="url(#ar)"/><path class="lnk hot" d="M330,50 H368" marker-end="url(#ar)"/><path class="lnk hot" d="M510,50 H558" marker-end="url(#ar)"/><text class="en sm" x="360" y="128">As a handoff: the specialist takes over</text><text class="zh sm" x="360" y="128">当交接：专员接手对话</text><rect class="box soft" x="10" y="138" width="140" height="40" rx="10"/><text class="en" x="80.0" y="163.0">Customer</text><text class="zh" x="80.0" y="163.0">顾客</text><rect class="box soft" x="190" y="138" width="140" height="40" rx="10"/><text class="en" x="260.0" y="163.0">Fern</text><text class="zh" x="260.0" y="163.0">Fern</text><rect class="box soft" x="370" y="138" width="140" height="40" rx="10"/><text class="en" x="440.0" y="163.0">Returns Desk</text><text class="zh" x="440.0" y="163.0">退货专员</text><rect class="box new" x="560" y="138" width="150" height="40" rx="10"/><text class="en" x="635.0" y="163.0">Returns replies</text><text class="zh" x="635.0" y="163.0">退货专员回复</text><path class="lnk" d="M150,158 H188" marker-end="url(#ar)"/><path class="lnk hot" d="M330,158 H368" marker-end="url(#ar)"/><path class="lnk hot" d="M510,158 H558" marker-end="url(#ar)"/></svg><figcaption><span class="en">The only difference is who writes the next reply to the customer.</span><span class="zh">唯一的区别：谁来给顾客写下一条回复。</span></figcaption></figure>
-<div class="callout tip"><b class="lbl"><span class="en">The moment it clicked</span><span class="zh">恍然大悟的那一刻</span></b><span class="en">At first I thought <code>as_tool</code> and handoffs were the same thing. Then it clicked: a tool is asking a colleague for an answer; a handoff is transferring the phone call. Another way to see it: <code>as_tool</code> is just a function call that happens to be an agent.</span><span class="zh">一开始我以为 <code>as_tool</code> 和交接是一回事。后来突然想通了：工具是向同事要一个答案，交接是把电话转过去。换个角度看，<code>as_tool</code> 就是一次函数调用，只不过那个函数恰好是个智能体。</span></div>
-<p class="en">Sort each Pot &amp; Petal case.</p>
-<p class="zh">给 Pot &amp; Petal 的每个情景分类。</p>
 <div class="sc" id="g3"></div>
 
-<h2><span class="en">Step 4 · Input guardrail: check what comes in</span><span class="zh">第 4 步 · 输入护栏：检查进来的内容</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Some customers paste their full card number into the chat. Fern must never act on it. An <b>input guardrail</b> is a check on the customer's message that can stop the run before Fern replies. It returns <code>GuardrailFunctionOutput</code>, and if <code>tripwire_triggered</code> is true, the SDK stops the run by raising <code>InputGuardrailTripwireTriggered</code>. Like a smoke alarm: it does not cook, it only stops things when it sees trouble.</p>
-<p class="zh"style="margin:0 0 8px">有些顾客会把完整的银行卡号贴进聊天框。Fern 绝不能据此行事。<b>输入护栏</b>是检查顾客消息的一道关卡，能在 Fern 回复之前叫停运行。它返回 <code>GuardrailFunctionOutput</code>；如果 <code>tripwire_triggered</code> 为真，SDK 就抛出 <code>InputGuardrailTripwireTriggered</code> 叫停运行。就像烟雾报警器：它不做饭，只在发现问题时喊停。</p></div>
+<h2><span class="en">Step 3 · Guardrails</span><span class="zh">第 3 步 · 护栏</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">A <b>guardrail</b> is a check that can stop a run. An <b>input guardrail</b> checks the customer's message before Fern replies; an <b>output guardrail</b> checks the final answer before the customer sees it. Each returns <code>GuardrailFunctionOutput</code>; if <code>tripwire_triggered</code> is true, the SDK raises an exception you catch.</p>
+<p class="zh" style="margin:0"><b>护栏</b>是能叫停运行的检查。<b>输入护栏</b>在 Fern 回复之前检查顾客的消息；<b>输出护栏</b>在顾客看到之前检查最终回答。两者都返回 <code>GuardrailFunctionOutput</code>；<code>tripwire_triggered</code> 为真时，SDK 抛出异常，由你捕获。</p></div>
 <div class="codebox" data-file="guardrails.py" data-lang="python"><span class="dim">import re
-from agents import input_guardrail, GuardrailFunctionOutput, InputGuardrailTripwireTriggered
+from agents import (input_guardrail, output_guardrail, GuardrailFunctionOutput,
+                    InputGuardrailTripwireTriggered)
 
 </span><span class="chg">@input_guardrail</span><span class="dim">
 async def no_card_numbers(ctx, agent, message):
     found = bool(re.search(r"\d(?:[ -]?\d){12,15}", str(message)))
     return </span><span class="chg">GuardrailFunctionOutput(output_info={"card_number": found}, tripwire_triggered=found)</span><span class="dim">
 
-fern = Agent(name="Fern", ..., </span><span class="chg">input_guardrails=[no_card_numbers]</span><span class="dim">)
+@output_guardrail
+async def no_discount_promises(ctx, agent, output):      # deliberately simple
+    promised = "discount" in str(output).lower()
+    return GuardrailFunctionOutput(output_info={"discount": promised}, tripwire_triggered=promised)
+
+fern = Agent(name="Fern", ..., </span><span class="chg">input_guardrails=[no_card_numbers], output_guardrails=[no_discount_promises]</span><span class="dim">)
 
 try:
     result = await Runner.run(fern, "Charge 4111 1111 1111 1111 for two ferns")
 </span><span class="chg">except InputGuardrailTripwireTriggered:</span><span class="dim">
     print("Please never share card numbers in chat. Use the checkout page.")</span></div>
-<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
-<div class="codebox" data-file="output" data-lang="text">Please never share card numbers in chat. Use the checkout page.</div>
 <div class="try" id="p4"></div>
-
-<h2><span class="en">Step 5 · Output guardrail, and where guardrails run</span><span class="zh">第 5 步 · 输出护栏，以及护栏在哪里运行</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Noor also fears Fern inventing a discount. An <b>output guardrail</b> checks the final answer before the customer sees it (this one is deliberately simple; a real check would be smarter). The catch is <b>where</b> guardrails run: input guardrails only on the <b>first</b> agent, output guardrails only on the agent that gives the <b>final</b> answer.</p>
-<p class="zh"style="margin:0 0 8px">Noor 还担心 Fern 自己编出一个折扣。<b>输出护栏</b>在顾客看到最终回答之前检查它（这个例子故意写得很简单，真实的检查会更聪明）。关键在于护栏<b>在哪里</b>运行：输入护栏只在<b>第一个</b>智能体上运行，输出护栏只在给出<b>最终</b>回答的智能体上运行。</p></div>
-<div class="codebox" data-file="guardrails.py" data-lang="python"><span class="dim">from agents import output_guardrail, OutputGuardrailTripwireTriggered
-
-</span><span class="chg">@output_guardrail</span><span class="dim">
-async def no_discount_promises(ctx, agent, output):
-    promised = "discount" in str(output).lower()
-    return GuardrailFunctionOutput(output_info={"discount": promised}, tripwire_triggered=promised)
-
-fern = Agent(name="Fern", ..., input_guardrails=[no_card_numbers],
-             </span><span class="chg">output_guardrails=[no_discount_promises]</span><span class="dim">)</span></div>
-<p class="en">Will the guardrail run? Decide for each setup.</p>
-<p class="zh">护栏会运行吗？逐个判断。</p>
+<div class="teach"><b class="lbl"><span class="en">Where they run</span><span class="zh">在哪里运行</span></b><p class="en" style="margin:0">Input guardrails run only on the <b>first</b> agent, output guardrails only on the agent giving the <b>final</b> answer. Put them on the front-door agent, not on helpers.</p>
+<p class="zh" style="margin:0">输入护栏只在<b>第一个</b>智能体上运行，输出护栏只在给出<b>最终</b>回答的智能体上运行。装在“前台”智能体上，不要装在帮手身上。</p></div>
 <div class="sc" id="g5"></div>
 
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我踩过的坑</span></b><span class="en">I put the input guardrail on Plant Doctor, the agent Fern uses as a tool, and expected it to check the customer's message. It never did. Input guardrails only check the input of the first agent in the run, and output guardrails only check the agent that gives the final output. Plant Doctor is neither, and it only ever sees what Fern chooses to send it. Fix: put the guardrails on the front-door agent (here, Fern), and give every handoff target its own output guardrail.</span><span class="zh">我把输入护栏装在了 Plant Doctor 上，也就是 Fern 当工具用的那个智能体，还以为它会检查顾客的消息。结果它从来没检查过。输入护栏只检查运行中第一个智能体的输入，输出护栏只检查给出最终输出的那个智能体。Plant Doctor 两者都不是，而且它只能看到 Fern 决定发给它的内容。解决办法：把护栏装在“前台”智能体上（这里是 Fern），并给每个交接目标单独配上输出护栏。</span></div>
-
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Give your agent a specialist.</b> Pick one thing your agent is bad at, build a small agent for it, and add it with <code>.as_tool()</code>. Open the trace and find the nested call.</span><span class="zh"><b>给你的智能体配一位专家。</b>挑一件它不擅长的事，为此做一个小智能体，用 <code>.as_tool()</code> 加进去。打开 trace，找到那次嵌套调用。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add one handoff.</b> Print <code>result.last_agent.name</code> for a few messages and see when the model chooses to transfer.</span><span class="zh"><b>加一个交接。</b>对几条不同的消息打印 <code>result.last_agent.name</code>，看看模型什么时候选择转交。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Trip your own wire.</b> Write an input guardrail, send a message that should trip it, and catch the exception with a friendly reply.</span><span class="zh"><b>亲手触发护栏。</b>写一个输入护栏，发一条应该触发它的消息，然后捕获异常并回一句友好的话。</span></span></label></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en">Give your agent a specialist with <code>.as_tool()</code> and find the nested call in the trace.</span><span class="zh">用 <code>.as_tool()</code> 给你的智能体配一位专家，并在 trace 里找到那次嵌套调用。</span></span></label><label><input type="checkbox"><span><span class="en">Write an input guardrail, trip it on purpose and catch the exception with a friendly reply.</span><span class="zh">写一个输入护栏，故意触发它，并捕获异常、回一句友好的话。</span></span></label></div>
 
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the counter agent hands mee goreng orders to Kak Ros's agent and drinks to Ah Seng's, and a guardrail stops it promising a free kopi Uncle Lim never agreed to. The next problem is that it only answers customers; the monthly note to regulars is still written by hand.</span><span class="zh">现在柜台智能体会把炒面单交给 Kak Ros 的智能体，把饮料单交给 Ah Seng 的智能体，还有护栏拦住它，不让它许诺 Lim 叔叔没同意的免费咖啡。下一个问题是：它只会回答顾客，给熟客的月度通知还得手写。</span></div>
-<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
-<div class="card"><p class="en" style="margin:0">• <b><code>agents.exceptions.InputGuardrailTripwireTriggered: Guardrail tripped</code></b>: Not a bug: the guardrail worked and raised an <code>InputGuardrailTripwireTriggered</code> exception, but nothing caught it. Fix: wrap <code>Runner.run</code> in <code>try / except</code> and print a friendly line.<br>• <b><code>agents.exceptions.MaxTurnsExceeded: Max turns (10) exceeded</code></b>: Two agents keep calling each other or a tool. Fix: tighten the instructions so one agent clearly finishes, or pass a larger <code>max_turns</code> on purpose.<br>• <b>No error, but <code>result.last_agent.name</code> is still Fern</b>: The handoff never fired because the target's purpose is vague. Fix: give it a clear <code>handoff_description</code> such as "refunds and cracked pots".</p>
-<p class="zh" style="margin:0">• <b><code>agents.exceptions.InputGuardrailTripwireTriggered: Guardrail tripped</code></b>：不是故障：护栏起作用并抛出了 <code>InputGuardrailTripwireTriggered</code> 异常，只是没人接住它。解决：用 <code>try / except</code> 包住 <code>Runner.run</code>，再打印一句友好的话。<br>• <b><code>agents.exceptions.MaxTurnsExceeded: Max turns (10) exceeded</code></b>：两个智能体在互相调用，或反复调用工具。解决：把指令写清楚，让其中一个明确收尾；或有意识地调大 <code>max_turns</code>。<br>• <b>没有报错，但 <code>result.last_agent.name</code> 还是 Fern</b>：交接没触发，因为目标的用途写得太含糊。解决：给它一个清楚的 <code>handoff_description</code>，比如“退款与破损花盆”。</p></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• <code>agent.as_tool(tool_name, tool_description)</code> turns an agent into a tool. The caller gets the answer and stays in charge.<br>• <code>handoffs=[other]</code> lets the model pass the whole conversation on. The other agent replies from then on.<br>• Tool or handoff? Ask <b>who talks to the user next</b>.<br>• <code>handoff_description</code> tells the model when a handoff fits. <code>result.last_agent</code> tells you who answered.<br>• Guardrails return <code>GuardrailFunctionOutput</code>. When <code>tripwire_triggered</code> is true, the SDK raises an exception you catch.<br>• Input guardrails run only on the first agent. Output guardrails run only on the agent with the final answer.<br>• Put guardrails on the front door, not on helpers.</p><p class="zh" style="margin:0">• <code>agent.as_tool(tool_name, tool_description)</code> 把智能体变成工具，调用者拿到答案后继续掌控。<br>• <code>handoffs=[other]</code> 让模型把整段对话交出去，之后由另一个智能体回复。<br>• 工具还是交接？问一句：<b>接下来谁和用户说话</b>。<br>• <code>handoff_description</code> 告诉模型何时该交接，<code>result.last_agent</code> 告诉你最后是谁回答的。<br>• 护栏返回 <code>GuardrailFunctionOutput</code>；<code>tripwire_triggered</code> 为真时，SDK 抛出异常，由你捕获。<br>• 输入护栏只在第一个智能体上运行，输出护栏只在给出最终回答的智能体上运行。<br>• 护栏装在前台，别装在辅助智能体上。</p></div>
+<div class="card"><p class="en" style="margin:0">• <code>agent.as_tool(...)</code> turns an agent into a tool; the caller stays in charge.<br>• <code>handoffs=[other]</code> passes the whole conversation on; <code>result.last_agent</code> says who answered.<br>• Tool or handoff? Ask <b>who talks to the user next</b>.<br>• A guardrail trips by raising an exception you catch.<br>• Input guardrails run on the first agent, output guardrails on the one giving the final answer.</p><p class="zh" style="margin:0">• <code>agent.as_tool(...)</code> 把智能体变成工具，调用者继续掌控。<br>• <code>handoffs=[other]</code> 把整段对话交出去，<code>result.last_agent</code> 告诉你是谁回答的。<br>• 工具还是交接？问<b>接下来谁和用户说话</b>。<br>• 护栏触发时会抛出异常，由你捕获。<br>• 输入护栏在第一个智能体上运行，输出护栏在给出最终回答的智能体上运行。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Agentic</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"goals":{"en":["Turn an agent into a tool with as_tool","Hand a conversation to another agent","Choose tool or handoff by asking who talks to the user next","Add input and output guardrails and catch the tripwire"],"zh":["用 as_tool 把智能体变成工具","把对话交接给另一个智能体","问“下一个跟用户说话的是谁”来选工具还是交接","加上输入和输出护栏并捕获触发"]},"prev":["07-agents-sdk-basics.html"],"tools":{"en":"Python 3.10+, the openai-agents package, an OpenAI API key","zh":"Python 3.10+、openai-agents 包、OpenAI API 密钥"},"know":{"en":"You can build and run one agent with the SDK.","zh":"能用 SDK 搭建并运行一个智能体。"},"mins":35,"offline":false}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=8290ab6e"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/08-agents-tools-handoffs.js?v=afae6657"></script></body></html>
+<script src="js/08-agents-tools-handoffs.js?v=4c9bb336"></script></body></html>

@@ -5,71 +5,55 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/ai-fde/16-pause-for-approval-and-resume.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-fde/16-pause-for-approval-and-resume.html","url":"https://tx-learns.vercel.app/ai-fde/16-pause-for-approval-and-resume.html","name":"Approval and resume","alternateName":"批准与恢复","description":"Save the agent's progress at every step so it can wait for a person's sign-off, carry on after a restart, and never pay the same claim twice.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"Pausing and working in parallel","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI FDE","url":"https://tx-learns.vercel.app/ai-fde/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI FDE","item":"https://tx-learns.vercel.app/ai-fde/index.html"},{"@type":"ListItem","position":3,"name":"Approval and resume","item":"https://tx-learns.vercel.app/ai-fde/16-pause-for-approval-and-resume.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Pausing and working in parallel · Lesson 1</span><span class="zh">暂停与并行 · 第 1 课</span></span><h1><span class="en">Approval and resume</span><span class="zh">批准与恢复</span></h1><p class="meta"><span class="en">Make the agent able to wait for a person and carry on after a restart, without paying twice · ~25 min · concept with one runnable idea</span><span class="zh">让智能体能等人批准，重启之后接着干，而且不会重复付款 · 约 25 分钟 · 概念课，附一个可动手的做法</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the pilot knew each returning customer and kept its notes apart from the records. Today it fails when a S$1,200 payout needs Aisha’s stamp and she is at lunch: a power cut would wipe the claim, and a restart might pay twice. We fix it by saving the pilot’s place after every step.</p>
-<p class="zh" style="margin:0">上回，试点认得每位回头客，也把笔记和记录分开存放。今天的问题是：一笔 S$1,200 的赔付要 Aisha 盖章，而她在吃午饭，一次断电就会让这份理赔消失，重启还可能付两次钱。我们的办法是每走一步就存一次档。</p></div>
-<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">Mei Ling’s claims agent decides a S$1,200 payout. Anything over S$800 needs a handler’s sign-off, and Aisha is at lunch. If the agent just waits in memory, one power cut or restart and it forgets the whole claim. Worse, if it starts again and pays twice, Mr Goh will find out. So Mei Ling makes the agent a <b>worker that saves its place</b>: it can stop for hours, survive a crash, and carry on from the exact spot.</p>
-<p class="zh" style="margin:0">Mei Ling 的理赔智能体判定了一笔 S$1,200 的赔付。超过 S$800 的赔付要理赔员签字，而 Aisha 正在吃午饭。如果智能体只是在内存里干等，一次断电或重启，它就把整份理赔忘光了。更糟的是，要是它重头再来、付了两次钱，Goh 先生一定会发现。所以 Mei Ling 把智能体做成一个<b>会存档的工人</b>：它可以停几个小时，扛得住崩溃，还能从原地接着干。</p></div>
-
-<div class="callout tip"><b class="lbl"><span class="en">Words in this lesson</span><span class="zh">这一课用到的词</span></b><span class="en"><b>Checkpoint</b>: a saved copy of the run's state after each step, so it can continue after a stop or crash.<br><b>Interrupt</b>: a deliberate stop in the graph that waits for a person's answer.<br><b>Idempotency key</b>: a label on a payment; a repeat with the same label is ignored, so nobody is paid twice.</span><span class="zh"><b>检查点</b>：每一步之后保存的运行状态，停下或崩溃后可以接着跑。<br><b>中断</b>：流程里故意设的停点，等人给出答案。<br><b>幂等键</b>：付款上的标签；同一标签的重复请求会被忽略，所以不会付两次。</span></div>
-<h2><span class="en">Step 1 · Turn the agent into steps and edges</span><span class="zh">第 1 步 · 把智能体拆成步骤和连线</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">You can only save progress if progress has a shape. So draw the agent as a <b>graph</b>: each <b>node</b> is one step (decide, pay) and each <b>edge</b> is an arrow saying what comes next. The <b>state</b> is the notebook that travels along the arrows. Like the queue-number ticket machine: every claim has a number and always sits at one known place in the line. This uses LangGraph; install it with <code>pip install langgraph langgraph-checkpoint-postgres "psycopg[binary]"</code>.</p>
-<p class="zh" style="margin:0 0 8px">进度要有“形状”才存得下来。所以把智能体画成一张<b>图</b>：每个<b>节点</b>是一个步骤（判定、付款），每条<b>边</b>是一个箭头，说明下一步去哪。<b>状态</b>就是沿着箭头传递的笔记本。就像取号机：每份理赔有一个号码，永远排在已知的某个位置。这里用的是 LangGraph，用 <code>pip install langgraph langgraph-checkpoint-postgres "psycopg[binary]"</code> 安装。</p></div>
-<div class="codebox" data-file="graph.py" data-lang="python"><span class="dim">from typing import TypedDict
+<h2><span class="en">Step 1 · Steps, edges and a checkpointer</span><span class="zh">第 1 步 · 步骤、连线和存档器</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b>
+<ul class="en" style="margin:0"><li>Progress can only be saved if it has a shape: draw the agent as a <b>graph</b>. A <b>node</b> is a step, an <b>edge</b> says what comes next, the <b>state</b> is the notebook that travels along.</li><li>A <b>checkpointer</b> saves the state after every step, in a hosted database (a file on your laptop disappears with it).</li><li>Each claim gets a <b>thread id</b>, its folder label. Same id later, same folder.</li></ul>
+<ul class="zh" style="margin:0"><li>进度要有“形状”才存得下来：把智能体画成一张<b>图</b>。<b>节点</b>是步骤，<b>边</b>说明下一步去哪，<b>状态</b>是沿途传递的笔记本。</li><li><b>存档器</b>在每一步之后保存状态，放在托管数据库里（笔记本上的文件会随电脑一起消失）。</li><li>每份理赔有一个<b>线程 id</b>，就是文件夹标签。以后用同一个 id，就找到同一个文件夹。</li></ul>
+<p class="en" style="margin:8px 0 0">Uses LangGraph: <code>pip install langgraph langgraph-checkpoint-postgres "psycopg[binary]"</code>, and set <code>DATABASE_URL</code>.</p>
+<p class="zh" style="margin:8px 0 0">这里用 LangGraph：<code>pip install langgraph langgraph-checkpoint-postgres "psycopg[binary]"</code>，并设好 <code>DATABASE_URL</code>。</p></div>
+<div class="codebox" data-file="graph.py" data-lang="python"><span class="dim">import os
+from typing import TypedDict
 from langgraph.graph import StateGraph, START, END
-
+from langgraph.checkpoint.postgres import PostgresSaver
 SIGNOFF_LIMIT = 800
-
 # Stand-ins so this runs on its own. Swap in the real agent and payment call later.
 def decide_claim(claim):
     return {"action": "approve", "payout": claim["amount"]}
-
 def send_payment(claim_id, amount):
     print("paying", claim_id, amount)
-
 </span><span class="chg">class ClaimState(TypedDict, total=False):
     claim: dict
     decision: dict
     paid: bool
-
 def decide(state):
     return {"decision": decide_claim(state["claim"])}
-
 def pay(state):
     if state["decision"]["action"] != "approve":
         return {"paid": False}
     send_payment(state["claim"]["id"], state["decision"]["payout"])
     return {"paid": True}
-
 builder = StateGraph(ClaimState)
 builder.add_node("decide", decide)
 builder.add_node("pay", pay)
 builder.add_edge(START, "decide")
 builder.add_edge("decide", "pay")
-builder.add_edge("pay", END)</span></div>
-<div class="try" id="p1"></div>
+builder.add_edge("pay", END)
 
-<h2><span class="en">Step 2 · Add a checkpointer</span><span class="zh">第 2 步 · 加一个存档器</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>checkpointer</b> saves the state after every step, like the grey filing cabinet that keeps each claim’s folder. Point it at a hosted database, because a file on your laptop disappears with your laptop. Each claim gets a <b>thread id</b>, its folder label. Use the same label later and the agent finds the same folder. Set <code>DATABASE_URL</code> to your database’s address first.</p>
-<p class="zh" style="margin:0 0 8px"><b>存档器</b>会在每一步之后保存状态，就像灰色档案柜给每份理赔留一个文件夹。让它指向一个托管的数据库，因为放在笔记本电脑上的文件会随电脑一起消失。每份理赔有一个<b>线程 id</b>，就是文件夹上的标签。以后用同一个标签，智能体就能找到同一个文件夹。先把 <code>DATABASE_URL</code> 设成你的数据库地址。</p></div>
-<div class="codebox" data-file="graph.py" data-lang="python"><span class="dim">import os
-</span><span class="chg">from langgraph.checkpoint.postgres import PostgresSaver</span><span class="dim">
-
-claim = {"id": "C-1042", "amount": 600}
-</span><span class="chg">with PostgresSaver.from_conn_string(os.environ["DATABASE_URL"]) as checkpointer:
+with PostgresSaver.from_conn_string(os.environ["DATABASE_URL"]) as checkpointer:
     checkpointer.setup()                       # creates its tables the first time
     graph = builder.compile(checkpointer=checkpointer)
-    config = {"configurable": {"thread_id": claim["id"]}}
-    result = graph.invoke({"claim": claim}, config)
-    print(result["paid"])</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">paying C-1042 600
+    config = {"configurable": {"thread_id": "C-1042"}}
+    result = graph.invoke({"claim": {"id": "C-1042", "amount": 600}}, config)
+    print(result["paid"])</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">paying C-1042 600
 True</div>
 <div class="try" id="p2"></div>
 
-<h2><span class="en">Step 3 · Stop and wait for a person</span><span class="zh">第 3 步 · 停下来等人</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Now the agent can stop. Add a node that calls <code>interrupt()</code>: the graph saves everything it worked out, hands a question to whoever is watching, and ends the run. Nothing waits in memory; the process can even exit. A conditional edge sends only payouts over the limit down this path. Like a clerk who clips a note to the folder, “needs the stamp”, and moves on to the next customer. Compile the builder again inside Step 2’s <code>with</code> block, so <code>graph</code> still has its checkpointer.</p>
-<p class="zh" style="margin:0 0 8px">现在智能体可以停下来了。加一个调用 <code>interrupt()</code> 的节点：图会把已经算出来的一切存好，把问题交给在看的人，然后结束这次运行。没有任何东西在内存里干等，进程甚至可以退出。再用一条条件边，只让超过限额的赔付走这条路。就像柜员在文件夹上夹一张“需要盖章”的便条，然后去招呼下一位客人。再在第 2 步的 <code>with</code> 块里把 builder 重新编译一次，让 <code>graph</code> 仍然带着存档器。</p></div>
+<h2><span class="en">Step 2 · Stop for a person, then resume</span><span class="zh">第 2 步 · 停下等人，再接着干</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b>
+<ul class="en" style="margin:0"><li>A node that calls <code>interrupt()</code> saves everything, hands a question to whoever is watching, and ends the run. Nothing waits in memory; the process can exit.</li><li>A conditional edge sends only payouts over the limit down this path.</li><li>To resume, call the graph again with the <em>same thread id</em> and <code>Command(resume=...)</code>. The answer becomes the return value of <code>interrupt()</code>.</li><li>Catch: the node restarts from its first line, so code above <code>interrupt()</code> must be safe to run twice (no payments, no emails).</li></ul>
+<ul class="zh" style="margin:0"><li>调用 <code>interrupt()</code> 的节点会存好一切，把问题交给在看的人，然后结束这次运行。内存里没有东西在等；进程可以退出。</li><li>一条条件边只让超过限额的赔付走这条路。</li><li>要恢复，就用<em>同一个线程 id</em> 和 <code>Command(resume=...)</code> 再次调用这张图。答案成为 <code>interrupt()</code> 的返回值。</li><li>陷阱：节点会从第一行重新开始，所以 <code>interrupt()</code> 上面的代码必须能安全地跑两遍（不付款，不发邮件）。</li></ul></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="The agent runs decide, then waits for a handler sign-off, then pays; every step is saved to a checkpoint store"><defs><marker id="ah16" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><path class="lnk hot" d="M180 103L285 103" marker-end="url(#ah16)"/><path class="lnk hot" d="M435 103L540 103" marker-end="url(#ah16)"/><path class="lnk" d="M360 49L360 75" marker-end="url(#ah16)"/><path class="lnk" d="M105 131L105 170" marker-end="url(#ah16)"/><path class="lnk" d="M360 131L360 170" marker-end="url(#ah16)"/><path class="lnk" d="M615 131L615 170" marker-end="url(#ah16)"/><rect class="box soft" x="285" y="5" width="150" height="44" rx="10"/><text class="en" x="360" y="31">Aisha signs off</text><text class="zh" x="360" y="31">Aisha 签字</text><rect class="box" x="30" y="75" width="150" height="56" rx="10"/><text class="en" x="105" y="107">decide</text><text class="zh" x="105" y="107">判定</text><rect class="box new" x="285" y="75" width="150" height="56" rx="10"/><text class="en" x="360" y="99">wait</text><text class="zh" x="360" y="99">等待</text><text class="en sm" x="360" y="116">interrupt()</text><text class="zh sm" x="360" y="116">interrupt()</text><rect class="box" x="540" y="75" width="150" height="56" rx="10"/><text class="en" x="615" y="107">pay</text><text class="zh" x="615" y="107">付款</text><rect class="box soft" x="30" y="170" width="660" height="44" rx="10"/><text class="en" x="360" y="196">Saved state: the claim, the decision, where we stopped</text><text class="zh" x="360" y="196">存档：理赔、判定、停在哪一步</text><text class="en sm" x="400" y="64">resume</text><text class="zh sm" x="400" y="64">继续</text></svg><figcaption><span class="en">The graph stops at the wait step; the saved state is what lets it carry on after hours or a crash.</span><span class="zh">图在“等待”这一步停下；有了存档，等几个小时或崩溃之后都能接着走。</span></figcaption></figure>
 <div class="codebox" data-file="approval.py" data-lang="python"><span class="dim">from langgraph.types import interrupt, Command
-
 class ClaimState(TypedDict, total=False):
     claim: dict
     decision: dict
@@ -80,15 +64,12 @@ def approve(state):
     d = state["decision"]
     answer = interrupt({"claim": state["claim"]["id"], "payout": d["payout"]})
     return {"signed_off": answer["ok"]}       # runs only after a person answers
-
 def after_decide(state):
     d = state["decision"]
     big = d["action"] == "approve" and float(d["payout"]) &gt; SIGNOFF_LIMIT
     return "approve" if big else "pay"
-
 def after_approve(state):
     return "pay" if state["signed_off"] else END
-
 builder = StateGraph(ClaimState)
 builder.add_node("decide", decide)
 builder.add_node("approve", approve)
@@ -97,40 +78,25 @@ builder.add_edge(START, "decide")
 builder.add_conditional_edges("decide", after_decide, ["approve", "pay"])
 builder.add_conditional_edges("approve", after_approve, ["pay", END])
 builder.add_edge("pay", END)</span><span class="dim">
-
-# graph = builder.compile(checkpointer=checkpointer)   # compile again inside Step 2's with block
-# claim = {"id": "C-1200", "amount": 1200}  -> the run now stops at "approve".
-# result = graph.invoke({"claim": claim}, config)
-# result["__interrupt__"][0].value  -> {"claim": "C-1200", "payout": 1200}</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">{'claim': 'C-1200', 'payout': 1200}</div>
-<div class="try" id="p3"></div>
-
-<h2><span class="en">Step 4 · A handler signs off, the agent carries on</span><span class="zh">第 4 步 · 理赔员签字，智能体接着干</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">When Aisha clicks “sign off” in the dashboard, your code calls the graph again with the <em>same thread id</em> and a <code>Command(resume=...)</code>. Her answer becomes the return value of <code>interrupt()</code>. One catch: when it resumes, the <code>approve</code> node starts again from its first line. So anything above <code>interrupt()</code> must be safe to run twice. Keep that part to plain reading, with no payments and no emails.</p>
-<p class="zh" style="margin:0 0 8px">Aisha 在看板上点“签字”时，你的代码用<em>同一个线程 id</em> 和 <code>Command(resume=...)</code> 再次调用这张图。她的回答就成了 <code>interrupt()</code> 的返回值。有一个陷阱：恢复时，<code>approve</code> 节点是从第一行重新开始跑的。所以 <code>interrupt()</code> 上面的代码必须能安全地跑两遍，只放读取，不放付款，也不放发邮件。</p></div>
-<div class="codebox" data-file="approval.py" data-lang="python"><span class="dim"># later, maybe hours after the stop, maybe from another process
-config = {"configurable": {"thread_id": "C-1200"}}
-</span><span class="chg">result = graph.invoke(Command(resume={"ok": True}), config)
-print(result["paid"])                          # True: it paid, after the sign-off
-
-# a "no" instead: Command(resume={"ok": False}) ends the run with nothing paid</span></div>
+# compile again inside the with block, so graph keeps its checkpointer
+# graph = builder.compile(checkpointer=checkpointer)
+# config = {"configurable": {"thread_id": "C-1200"}}
+# result = graph.invoke({"claim": {"id": "C-1200", "amount": 1200}}, config)
+# result["__interrupt__"][0].value  -> {"claim": "C-1200", "payout": 1200}
+#
+# hours later, maybe from another process:
+</span><span class="chg"># result = graph.invoke(Command(resume={"ok": True}), config)   # pays after the sign-off</span></div>
 <div class="try" id="p4"></div>
 
-<h2><span class="en">Step 5 · Kill it halfway, then restart</span><span class="zh">第 5 步 · 半路杀掉进程，再重启</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Because every finished step is saved, a crash costs you at most the step that was running. After a restart, ask the graph where that claim stands, then call <code>invoke(None, config)</code>. Passing <code>None</code> means “no new input, carry on”. It is the same claim and the same attempt, not a new one. Steps that already finished are not run again, so you do not pay the model for them twice.</p>
-<p class="zh" style="margin:0 0 8px">每个完成的步骤都存过档，所以崩溃最多让你损失当时正在跑的那一步。重启后，先问这张图那份理赔停在哪，再调用 <code>invoke(None, config)</code>。传 <code>None</code> 的意思是“没有新输入，接着干”。这是同一份理赔、同一次尝试，不是新的一次。已经完成的步骤不会重跑，所以不会为它们再付一次模型的钱。</p></div>
-<div class="codebox" data-file="approval.py" data-lang="python"><span class="dim"># a new process after the crash: rebuild the graph and open the same database
-config = {"configurable": {"thread_id": "C-1200"}}
-</span><span class="chg">snapshot = graph.get_state(config)
-print(snapshot.next)                           # e.g. ('pay',): the step still to run
-if snapshot.next:
-    graph.invoke(None, config)                 # carry on from the last checkpoint</span></div>
-<div class="try" id="p5"></div>
+<h2><span class="en">Step 3 · Survive a crash without paying twice</span><span class="zh">第 3 步 · 崩溃后不重复付款</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b>
+<ul class="en" style="margin:0"><li>After a restart, <code>graph.get_state(config)</code> shows where the claim stands and <code>invoke(None, config)</code> carries on. Finished steps are not run again.</li><li>If the process dies <em>after</em> a payment went out but <em>before</em> the checkpoint saved, <code>pay</code> runs again. Fix: an <b>idempotency key</b>, a unique label sent with each payment. The backend ignores a key it has seen.</li><li>The backend also checks the sign-off rule itself; never trust the agent alone.</li></ul>
+<ul class="zh" style="margin:0"><li>重启后，<code>graph.get_state(config)</code> 显示这份理赔停在哪，<code>invoke(None, config)</code> 接着干。已完成的步骤不会重跑。</li><li>如果进程在付款发出<em>之后</em>、存档<em>之前</em>挂了，<code>pay</code> 会再跑一遍。解法：<b>幂等键</b>，每笔付款带一个唯一标签，后端忽略见过的键。</li><li>后端也自己检查签字规则；不能只信智能体。</li></ul></div>
+<div class="codebox" data-file="payments.py" data-lang="python"><span class="dim"># after a crash: rebuild the graph, then
+# snapshot = graph.get_state(config); print(snapshot.next)   # e.g. ('pay',)
+# if snapshot.next: graph.invoke(None, config)
 
-<h2><span class="en">Step 6 · Make every step safe to repeat</span><span class="zh">第 6 步 · 让每一步都能安全重复</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Saving is the easy half. If the process dies <em>after</em> the payment went out but <em>before</em> the checkpoint was saved, the restart runs <code>pay</code> again. A step is <b>idempotent</b> when doing it twice gives the same result as doing it once. The fix is an <b>idempotency key</b>: a unique label sent with each payment, like a receipt number. The payment backend remembers the keys it has seen and ignores a repeat. It also checks the sign-off rule itself, so it never trusts the agent’s say-so alone.</p>
-<p class="zh" style="margin:0 0 8px">存档是容易的那一半。如果进程在付款发出<em>之后</em>、存档<em>之前</em>挂了，重启就会把 <code>pay</code> 再跑一遍。做两次和做一次的结果一样，就叫<b>幂等</b>。解法是<b>幂等键</b>：每笔付款都带一个唯一标签，像收据编号。付款后端记住见过的键，遇到重复就忽略。它还自己检查签字规则，不会只听智能体一面之词。</p></div>
-<div class="codebox" data-file="payments.py" data-lang="python"><span class="dim">paid_keys = {}   # in real life: a table where the key column must be unique
-
+paid_keys = {}   # in real life: a table where the key column must be unique
 </span><span class="chg">def send_payment(claim_id, amount, key, signed_off=False):
     if key in paid_keys:                       # a repeat after a restart: do nothing
         return paid_keys[key]
@@ -138,7 +104,6 @@ if snapshot.next:
         raise ValueError("over the limit and not signed off")
     paid_keys[key] = {"claim": claim_id, "amount": amount}
     return paid_keys[key]
-
 def pay(state):
     if state["decision"]["action"] != "approve":
         return {"paid": False}
@@ -150,19 +115,15 @@ def pay(state):
 <p class="en">Which steps are safe to run twice after a restart? Sort them.</p>
 <p class="zh">重启后，哪些步骤跑两遍也安全？来分一分。</p><div class="sc" id="g1"></div>
 
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我当时想错了</span></b><span class="en">After a crash in a test I got a duplicate payment. I had saved the state, but the payment step ran again on restart and paid again. Now every payment carries a unique key and the backend ignores repeats.</span><span class="zh">测试里崩溃一次之后，我得到了一笔重复的付款。状态我是存了，可重启时付款那一步又跑了一遍，又付了一次。现在每笔付款都带一个唯一的键，后端遇到重复就忽略。</span></div>
-
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Interrupt a run at three different points</b> and check the result is the same each time.</span><span class="zh"><b>在三个不同的位置打断运行</b>，检查每次结果都一样。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Reject a held payout</b> instead of signing it off, and confirm nothing is paid.</span><span class="zh"><b>拒绝一笔被扣住的赔付</b>，而不是签字，并确认没有付钱。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Show the saved checkpoints</b> for one claim with <code>graph.get_state_history(config)</code>.</span><span class="zh"><b>列出一份理赔所有存过的档</b>，用 <code>graph.get_state_history(config)</code>。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the pilot stops at Aisha’s stamp, survives the Friday power cut with every claim still in its folder, and never pays twice. The next problem is the long weekend: 25 waiting claims at about 30 seconds each is over twelve minutes if it takes them one by one.</span><span class="zh">现在试点会停在 Aisha 的图章前，扛得住星期五的停电，每份理赔都还在自己的文件夹里，也不会付两次钱。下一个问题是长周末：积压 25 份理赔，每份约 30 秒，一份接一份做要十几分钟。</span></div>
-<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2><div class="card"><p class="en" style="margin:0 0 12px"><code>ValueError: Checkpointer requires one or more of the following 'configurable' keys: thread_id</code><br>Cause: <code>invoke</code> was called without a <code>thread_id</code>. Fix: always pass <code>config</code> with the claim id as <code>thread_id</code>.</p><p class="zh" style="margin:0 0 12px"><code>ValueError: Checkpointer requires one or more of the following 'configurable' keys: thread_id</code><br>原因：调用 <code>invoke</code> 时没给 <code>thread_id</code>。解决：每次都传 <code>config</code>，用理赔编号做 <code>thread_id</code>。</p><p class="en" style="margin:0 0 12px"><code>psycopg.OperationalError: connection failed</code><br>Cause: <code>DATABASE_URL</code> is wrong or the database is not running. Fix: check the address, user and password, then test it with <code>psql</code>.</p><p class="zh" style="margin:0 0 12px"><code>psycopg.OperationalError: connection failed</code><br>原因：<code>DATABASE_URL</code> 写错了，或者数据库没运行。解决：检查地址、用户和密码，用 <code>psql</code> 试连一下。</p><p class="en" style="margin:0 0 12px"><code>KeyError: 'DATABASE_URL'</code><br>Cause: the variable is not set in this terminal. Fix: export it before running.</p><p class="zh" style="margin:0 0 12px"><code>KeyError: 'DATABASE_URL'</code><br>原因：这个终端里没设这个变量。解决：运行前先 export。</p></div>
-<h2><span class="en">Recap</span><span class="zh">小结</span></h2><div class="card"><p class="en" style="margin:0">• Save the state after every step, keyed by claim id.<br>• Stop at the approval step and wait; resume with the person's answer, even from another process.<br>• Give each payment a key, so a retry never pays twice.</p><p class="zh" style="margin:0">• 每一步之后保存状态，用理赔编号作键。<br>• 在批准那一步停下等待；用人的回答继续，即使换了进程。<br>• 每笔付款带一个键，重试时就不会付两次。</p></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Interrupt a run at three different points</b> and check the result is the same each time.</span><span class="zh"><b>在三个不同的位置打断运行</b>，检查每次结果都一样。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Reject a held payout</b> with <code>{"ok": False}</code> and confirm nothing is paid.</span><span class="zh"><b>用 <code>{"ok": False}</code> 拒绝一笔被扣住的赔付</b>，并确认没有付钱。</span></span></label></div>
+<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2><div class="card"><p class="en" style="margin:0 0 12px"><code>ValueError: Checkpointer requires one or more of the following 'configurable' keys: thread_id</code><br>Fix: always pass <code>config</code> with the claim id as <code>thread_id</code>.</p><p class="zh" style="margin:0 0 12px"><code>ValueError: Checkpointer requires one or more of the following 'configurable' keys: thread_id</code><br>解决：每次都传 <code>config</code>，用理赔编号做 <code>thread_id</code>。</p><p class="en" style="margin:0 0 12px"><code>KeyError: 'DATABASE_URL'</code><br>Fix: export the variable in this terminal before running.</p><p class="zh" style="margin:0 0 12px"><code>KeyError: 'DATABASE_URL'</code><br>解决：运行前在这个终端里先 export 这个变量。</p></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• Draw the agent as steps and edges so its progress has a shape that can be saved.<br>• A checkpointer in a hosted database saves state after every step, under one thread id per claim.<br>• Pause by saving, not by waiting in memory: <code>interrupt()</code> stops the run and a later resume carries on.<br>• After a crash, continue from the last checkpoint; it is the same attempt, not a new one.<br>• A resumed step starts from its first line, so keep the code above <code>interrupt()</code> free of side effects.<br>• Make every step safe to repeat: each payment carries a unique key and the backend ignores repeats.<br>• The backend still enforces the sign-off rule; never rely on the agent alone.</p><p class="zh" style="margin:0">• 把智能体画成步骤和连线，让进度有一个可以保存的形状。<br>• 托管数据库里的存档器在每一步之后保存状态，每份理赔一个线程 id。<br>• 用存档来暂停，而不是在内存里干等：<code>interrupt()</code> 停下这次运行，之后恢复就能接着干。<br>• 崩溃之后从最近的存档继续；这是同一次尝试，不是新的一次。<br>• 恢复的步骤从第一行重新开始，所以 <code>interrupt()</code> 之前的代码不能有副作用。<br>• 让每一步都能安全重复：每笔付款带唯一的键，后端忽略重复。<br>• 签字规则仍由后端把关，不能只靠智能体。</p></div>
+<div class="card"><p class="en" style="margin:0">• Draw the agent as steps and edges; a checkpointer saves state after every step, one thread id per claim.<br>• Pause by saving, not by waiting: <code>interrupt()</code> stops the run, a later resume carries on.<br>• A resumed node restarts from its first line, so keep side effects out of the code above <code>interrupt()</code>.<br>• Make every step safe to repeat: a unique key per payment, and the backend enforces the sign-off rule.</p><p class="zh" style="margin:0">• 把智能体画成步骤和连线；存档器在每一步之后保存状态，每份理赔一个线程 id。<br>• 用存档来暂停，而不是干等：<code>interrupt()</code> 停下运行，之后恢复就能接着干。<br>• 恢复的节点从第一行重新开始，所以 <code>interrupt()</code> 上面的代码不能有副作用。<br>• 让每一步都能安全重复：每笔付款一个唯一键，签字规则由后端把关。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI FDE</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"prev":["09-agent-that-works-the-queue.html"],"tools":{"en":"Python 3, langgraph with the Postgres checkpointer, a hosted Postgres database (DATABASE_URL)","zh":"Python 3、langgraph（含 Postgres 存档器）、托管的 Postgres 数据库（DATABASE_URL）"},"know":{"en":"A basic agent loop (Lesson 9) and what a database is.","zh":"基本的智能体循环和数据库是什么。"},"mins":45,"offline":false,"goals":{"en":["Draw an agent as steps and edges so progress can be saved","Save state after every step with a checkpointer and one thread id per claim","Pause with interrupt() and resume later","Make every step safe to repeat with a unique payment key"],"zh":["把智能体画成步骤和边，让进度可以保存","用 checkpointer 在每一步后保存状态，每单一个 thread id","用 interrupt() 暂停，之后再恢复","用唯一的付款键让每一步都能安全重复"]}}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=37968fc4"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/16-pause-for-approval-and-resume.js?v=7f78aa1c"></script></body></html>
+<script src="js/16-pause-for-approval-and-resume.js?v=a4cc38e3"></script></body></html>

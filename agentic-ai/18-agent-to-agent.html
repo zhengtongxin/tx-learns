@@ -5,72 +5,37 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/agentic-ai/18-agent-to-agent.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/agentic-ai/18-agent-to-agent.html","url":"https://tx-learns.vercel.app/agentic-ai/18-agent-to-agent.html","name":"Agent-to-agent protocols","alternateName":"智能体之间的协议","description":"Let an agent in another process do a job for yours, like a stall next door.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"Framework tour","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Agentic","url":"https://tx-learns.vercel.app/agentic-ai/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Agentic","item":"https://tx-learns.vercel.app/agentic-ai/index.html"},{"@type":"ListItem","position":3,"name":"Agent-to-agent protocols","item":"https://tx-learns.vercel.app/agentic-ai/18-agent-to-agent.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Framework tour · Lesson 1</span><span class="zh">框架巡礼 · 第 1 课</span></span><h1><span class="en">Agent-to-agent protocols</span><span class="zh">智能体之间的协议</span></h1><p class="meta"><span class="en">Let an agent in another process do a job for yours, like a stall next door · ~30 min · hands-on</span><span class="zh">让另一个进程里的智能体替你的智能体干活，就像隔壁摊位 · 约 30 分钟 · 动手实践</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the Kopi Corner assistant became a helper that remembers each regular. Today it fails when a customer wants satay: Ah Seng does not grill, and the stall next door runs its own agent. We fix it by letting our agent talk to theirs through a protocol.</p>
-<p class="zh" style="margin:0">上次 Kopi Corner 助手成了记得每位熟客的助手。今天有客人要沙爹就卡住了：Ah Seng 不会烤，隔壁摊位有自己的智能体。我们让两边的智能体通过协议对话来解决。</p></div>
-<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en" style="margin:0">You are helping <b>Mei</b>, who runs a drinks stall at a night market. Next to her, <b>Uncle Hock</b> grills satay. He takes no drink orders, and Mei sells no food. When a customer asks Mei for satay, she does not learn to grill. She <b>walks over, reads his signboard</b> (what he sells, the prices, where to order), passes the order on and brings the plate back. Today you build both stalls as agents, and the walk between them is the <b>A2A</b> (Agent2Agent) protocol. Mei's night market is a side case: Ah Seng asking the satay stall next door is the same walk.</p>
-<p class="zh" style="margin:0">你在帮 <b>Mei</b>，她在夜市摆饮料摊。隔壁是 <b>Hock 叔</b>，他烤沙爹，不收饮料单；Mei 也不卖吃的。顾客向 Mei 点沙爹时，她不会去学烤沙爹，而是<b>走过去看他的招牌</b>（卖什么、多少钱、在哪里下单），把单子递过去，再把盘子端回来。今天你要把两个摊位都做成智能体，而它们之间的这段路就是 <b>A2A</b>（Agent2Agent）协议。Mei 的夜市是个支线案例：Ah Seng 去问隔壁沙爹档，走的是同一段路。</p></div>
-<h2><span class="en">Step 1 · One agent in Google ADK</span><span class="zh">第 1 步 · 用 Google ADK 做一个智能体</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Before two agents can talk, you need one. In Google's <b>Agent Development Kit (ADK)</b>, an <code>LlmAgent</code> is just a model plus an <code>instruction</code>, the same idea as the agents you already know. <code>run_debug</code> opens a session, sends one message and prints the whole trace (the step-by-step log of what the agent did). It is for experiments only. It reads your Google key (a secret password for the model) from a <code>.env</code> file, so the key never sits inside the code.</p><p class="zh" style="margin:0 0 8px">两个智能体要对话，先得有一个。在 Google 的<b>智能体开发套件（ADK）</b>里，<code>LlmAgent</code> 就是一个模型加一段 <code>instruction</code>，和你已经认识的智能体是同一个概念。<code>run_debug</code> 会新建会话、发一条消息并打印完整过程（逐步的运行记录），只适合做实验。它从 <code>.env</code> 文件里读取你的 Google 密钥（调用模型用的密码），这样密钥就不会写进代码里。</p></div>
-<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim">pip install "google-adk[a2a,mcp]" python-dotenv requests
+<div class="teach"><b class="lbl"><span class="en">Key point</span><span class="zh">要点</span></b><p class="en" style="margin:0"><b>A2A</b> (Agent2Agent) lets your agent hand a job to an agent in <b>another process</b> and use it like a local sub-agent. Picture Mei at a night-market drinks stall. A customer wants satay, so she walks to Uncle Hock's stall, <b>reads his signboard</b> and passes the order on. The signboard is his <b>agent card</b>.</p><p class="zh" style="margin:0"><b>A2A</b>（Agent2Agent）让你的智能体把任务交给<b>另一个进程</b>里的智能体，并像本地子智能体一样使用。想象夜市饮料摊的 Mei：顾客要沙爹，她走到 Hock 叔的摊位，<b>读他的招牌</b>，再把订单递过去。这块招牌就是他的<b>智能体名片</b>。</p></div>
 
-</span></div>
+<h2><span class="en">Step 1 · One agent in Google ADK</span><span class="zh">第 1 步 · Google ADK 里的一个智能体</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li>In Google's <b>Agent Development Kit</b>, an <code>LlmAgent</code> is a model plus an <code>instruction</code>.</li><li>A tool is a plain typed function with a docstring. No decorator: ADK reads the type hints and the docstring.</li><li><code>run_debug</code> sends one message and prints the whole trace. Experiments only. The key comes from <code>.env</code>.</li></ul>
+<ul class="zh" style="margin:0;padding-left:18px"><li>在 Google 的<b>智能体开发套件（ADK）</b>里，<code>LlmAgent</code> 就是模型加一段 <code>instruction</code>。</li><li>工具就是带类型标注和文档字符串的普通函数，不需要装饰器：ADK 会读类型标注和文档字符串。</li><li><code>run_debug</code> 发一条消息并打印完整过程，只用于实验。密钥来自 <code>.env</code>。</li></ul></div>
+<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim">pip install "google-adk[a2a]" python-dotenv requests</span></div>
 <div class="codebox" data-file="drinks_agent.py" data-lang="python"><span class="dim">from dotenv import load_dotenv
 from google.adk.agents import LlmAgent
 from google.adk.runners import InMemoryRunner
-
 load_dotenv(override=True)      # reads GOOGLE_API_KEY
-</span><span class="chg">drinks = LlmAgent(
-    model="gemini-2.5-flash",
-    name="drinks_stall",
-    instruction="You sell drinks at a night market. Answer in one short sentence.",
-)
-await InMemoryRunner(agent=drinks).run_debug("What is iced barley?", verbose=True)</span></div>
-<div class="try" id="p1"></div>
-<h2><span class="en">Step 2 · Tools and MCP</span><span class="zh">第 2 步 · 工具与 MCP</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Mei needs to remember orders, so she needs tools. In ADK a tool is a plain typed function with a docstring. No decorator: ADK reads the type hints and the docstring, just like the SDK you met earlier.</p><p class="zh" style="margin:0 0 8px">Mei 要记订单，所以需要工具。在 ADK 里，工具就是带类型标注和文档字符串的普通函数，不需要装饰器：ADK 会读类型标注和文档字符串，和你之前见过的 SDK 一样。</p><p class="en" style="margin:0 0 8px">Tools that someone else wrote plug in through <b>MCP</b>, a standard plug for tools (it gets its own topic later). Scope it to one folder, so the agent cannot touch anything else.</p><p class="zh" style="margin:0 0 8px">别人写好的工具通过 <b>MCP</b> 接入，它是工具的标准插头（之后会有单独的主题）。把它限定在一个文件夹里，智能体就碰不到别的东西。</p></div>
-<div class="codebox" data-file="order_tools.py" data-lang="python"><span class="dim">notepad = []                    # Mei's notepad: a plain list
 
+notepad = []                    # Mei's notepad: a plain list
 def save_order(item: str, qty: int) -> str:
 </span><span class="chg">    """Write one customer order on the notepad. Use it after the customer confirms."""</span><span class="dim">
     notepad.append((item, qty))
     return "saved"
 
-from pathlib import Path
-from google.adk.tools.mcp_tool import McpToolset, StdioConnectionParams
-from mcp import StdioServerParameters
-
-stall = Path("stall_files").resolve()
-</span><span class="chg">files = McpToolset(connection_params=StdioConnectionParams(
-    server_params=StdioServerParameters(command="npx",
-        args=["-y", "@modelcontextprotocol/server-filesystem", str(stall)], cwd=str(stall)),
-    timeout=30))
-
-drinks = LlmAgent(model="gemini-2.5-flash", name="drinks_stall",
-                  instruction="Take drink orders and write them down.",
-                  tools=[save_order, files])</span></div>
+</span><span class="chg">drinks = LlmAgent(
+    model="gemini-2.5-flash",
+    name="drinks_stall",
+    instruction="You sell drinks at a night market. Take orders and write them down.",
+    tools=[save_order],
+)
+await InMemoryRunner(agent=drinks).run_debug("Two iced barley, please", verbose=True)</span></div>
+<div class="try" id="p1"></div>
 <div class="try" id="p2"></div>
-<h2><span class="en">Step 3 · The real run loop</span><span class="zh">第 3 步 · 真正的运行循环</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">In real code you own the <b>session</b> and read the stream of <b>events</b>. Each event is one thing that happened: a tool call, a tool result or the final reply. It is the loop you once wrote by hand, now with labels.</p><p class="zh" style="margin:0 0 8px">真实代码里，你自己持有<b>会话</b>并读取<b>事件</b>流。每个事件是发生的一件事：一次工具调用、一个工具结果或最终回复。这就是你曾经手写的循环，只是现在每一步都有标签。</p></div>
-<div class="codebox" data-file="run_agent.py" data-lang="python"><span class="dim">from google.genai import types
 
-runner = InMemoryRunner(agent=drinks)
-session = await runner.session_service.create_session(app_name=runner.app_name, user_id="mei")
-
-</span><span class="chg">async for ev in runner.run_async(user_id="mei", session_id=session.id,
-                                 new_message=types.UserContent("Two iced barley, please")):
-    for call in ev.get_function_calls():
-        print("tool:", call.name, call.args)
-    if ev.is_final_response():
-        print(ev.content.parts[0].text)</span></div>
-<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
-<div class="codebox" data-file="output" data-lang="text">tool: save_order {'item': 'kopi-o', 'qty': 2}
-Saved 2 x kopi-o. Anything else?</div>
-<div class="try" id="p3"></div>
-<div class="callout tip"><b class="lbl"><span class="en">Debug view</span><span class="zh">调试界面</span></b><span class="en">If you put the agent in a folder (<code>agent.py</code> that exposes <code>root_agent</code>, made with <code>adk create my_agent</code>), then <code>adk web</code> shows a visual trace where every tool call lights up. It only lists agents in the folder you start it from.</span><span class="zh">如果把智能体放进一个文件夹（<code>agent.py</code> 里暴露 <code>root_agent</code>，可用 <code>adk create my_agent</code> 生成），运行 <code>adk web</code> 就能看到可视化的过程，每次工具调用都会亮起来。它只会列出你启动时所在文件夹里的智能体。</span></div>
-<h2><span class="en">Step 4 · Put Uncle Hock behind a signboard</span><span class="zh">第 4 步 · 把 Hock 叔放到招牌后面</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Uncle Hock runs in <b>his own process</b>: a separate program with its own door (a <b>port</b>, a numbered entrance on your computer), like a stall with its own street number. <code>to_a2a</code> wraps his agent in a small web app that serves two things: the A2A endpoint, and his <b>agent card</b>. The card is a JSON file at a well-known address that says his name, his skills and where to reach him. That is the signboard. <code>uvicorn</code> is the small server program that opens that port and runs the app.</p><p class="zh" style="margin:0 0 8px">Hock 叔运行在<b>他自己的进程</b>里：一个单独运行的程序，有自己的门（<b>端口</b>，电脑上的一个编号入口），就像有自己门牌号的摊位。<code>to_a2a</code> 把他的智能体包进一个小型网络应用，提供两样东西：A2A 接口，以及他的<b>智能体名片（agent card）</b>。名片是放在固定地址的 JSON 文件，写着他的名字、技能和联系地址，也就是那块招牌。<code>uvicorn</code> 是把这个应用打开端口、运行起来的小型服务程序。</p></div>
-<div class="codebox" data-file="satay_server.py" data-lang="python"><span class="dim"># satay_server.py
-from google.adk.agents import LlmAgent
+<h2><span class="en">Step 2 · Put Uncle Hock behind a signboard</span><span class="zh">第 2 步 · 把 Hock 叔放在招牌后面</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li>Hock runs in <b>his own process</b>, behind his own <b>port</b> (a numbered door on your computer).</li><li><code>to_a2a</code> wraps his agent in a small web app that serves the A2A endpoint and his <b>agent card</b>: a JSON file at a well-known address with his name, skills and where to reach him.</li><li><code>uvicorn</code> is the server program that opens the port.</li></ul>
+<ul class="zh" style="margin:0;padding-left:18px"><li>Hock 运行在<b>他自己的进程</b>里，有自己的<b>端口</b>（你电脑上带编号的门）。</li><li><code>to_a2a</code> 把他的智能体包进一个小网页应用，提供 A2A 入口和他的<b>智能体名片</b>：一个放在固定地址的 JSON 文件，写着他的名字、技能和联系方式。</li><li><code>uvicorn</code> 是打开端口的服务器程序。</li></ul></div>
+<div class="codebox" data-file="satay_server.py" data-lang="python"><span class="dim">from google.adk.agents import LlmAgent
 from google.adk.a2a.utils.agent_to_a2a import to_a2a
 
 hock = LlmAgent(
@@ -79,50 +44,40 @@ hock = LlmAgent(
 </span><span class="chg">    description="Takes satay orders and confirms them with a price in S$.",</span><span class="dim">
     instruction="Confirm the satay order (how many sticks, chicken or beef) and give the price.",
 )
-</span><span class="chg">a2a_app = to_a2a(hock, port=8001)      # serves the card and the endpoint</span><span class="dim"></span></div>
-<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim"># in a terminal (curl just fetches the card and prints it):
+</span><span class="chg">a2a_app = to_a2a(hock, port=8001)      # serves the card and the endpoint</span></div>
+<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim"># in a terminal; curl fetches the card and prints it:
 </span><span class="chg">uvicorn satay_server:a2a_app --host localhost --port 8001
 curl http://localhost:8001/.well-known/agent-card.json</span></div>
-<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
-<div class="codebox" data-file="output" data-lang="text">{"name":"satay_hock","description":"Takes satay orders and confirms them with a price in S$.","url":"http://localhost:8001/...",
- "skills":[...],"version":"..."}</div>
 <div class="try" id="p4"></div>
-<h2><span class="en">Step 5 · Mei walks over</span><span class="zh">第 5 步 · Mei 走过去</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">On Mei's side, Uncle Hock becomes a <code>RemoteA2aAgent</code> and goes into her <code>sub_agents</code> like any local helper. Her instruction says what to do herself and what to hand over. Notice that nothing finds him for you: you point at his card address.</p><p class="zh" style="margin:0 0 8px">在 Mei 这边，Hock 叔变成一个 <code>RemoteA2aAgent</code>，和本地帮手一样放进她的 <code>sub_agents</code>。她的指令写明哪些自己做、哪些交出去。注意没有任何东西会替你去找他：你要把名片地址告诉她。</p></div>
+
+<h2><span class="en">Step 3 · Mei walks over</span><span class="zh">第 3 步 · Mei 走过去</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">On Mei's side Hock becomes a <code>RemoteA2aAgent</code> in her <code>sub_agents</code>. Nothing finds him for you: you give the <i>full</i> card URL.</p><p class="zh" style="margin:0">在 Mei 这边，Hock 变成她 <code>sub_agents</code> 里的一个 <code>RemoteA2aAgent</code>。没有谁会替你找到他：你要给出<i>完整的</i>名片 URL。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="Mei's agent reads Hock's agent card, sends him the task and gets the result back"><defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box soft" x="20" y="30" width="200" height="160" rx="12"/><text class="en sm" x="120" y="55">Mei's process</text><text class="zh sm" x="120" y="55">Mei 的进程</text><rect class="box" x="40" y="85" width="160" height="60" rx="12"/><text class="en" x="120.0" y="120.0">Mei agent</text><text class="zh" x="120.0" y="120.0">Mei 的智能体</text><rect class="box new" x="500" y="30" width="200" height="160" rx="12"/><text class="en sm" x="600" y="55">Hock's process</text><text class="zh sm" x="600" y="55">Hock 的进程</text><rect class="box" x="520" y="85" width="160" height="60" rx="12"/><text class="en" x="600.0" y="120.0">Hock agent</text><text class="zh" x="600.0" y="120.0">Hock 的智能体</text><path class="lnk" d="M200 95 L520 95" marker-end="url(#ar)"/><text class="en sm" x="360" y="87">1  read agent card</text><text class="zh sm" x="360" y="87">1  读招牌</text><path class="lnk hot" d="M200 115 L520 115" marker-end="url(#ar)"/><text class="en sm" x="360" y="133">2  send the task</text><text class="zh sm" x="360" y="133">2  递上任务</text><path class="lnk" d="M520 135 L200 135" marker-end="url(#ar)"/><text class="en sm" x="360" y="158">3  plate comes back</text><text class="zh sm" x="360" y="158">3  盘子端回来</text></svg><figcaption><span class="en">Two separate programs: Mei reads the signboard first, then passes the order over the A2A door, and the answer comes back the same way.</span><span class="zh">两个互相独立的程序：Mei 先看招牌，再通过 A2A 的门把单子递过去，结果沿原路回来。</span></figcaption></figure>
 <div class="codebox" data-file="remote_agent.py" data-lang="python"><span class="dim">from google.adk.agents.remote_a2a_agent import RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
-
 </span><span class="chg">hock_remote = RemoteA2aAgent(
     name="satay_hock",
     description="Remote stall that takes satay orders.",
     agent_card=f"http://localhost:8001{AGENT_CARD_WELL_KNOWN_PATH}",   # the full card URL
 )
-
 root_agent = LlmAgent(
     model="gemini-2.5-flash",
     name="mei_stall",
     instruction="Handle drinks yourself. For any satay order, hand it to satay_hock.",
     sub_agents=[hock_remote],
 )</span></div>
-<p class="en">Is each case a local sub-agent or a remote A2A agent? Sort them.</p>
-<p class="zh">下面每个情景是本地子智能体，还是远程 A2A 智能体？逐个分类。</p>
+<p class="en">Is each case a local sub-agent or a remote A2A agent? Sort them.</p><p class="zh">每种情况是本地子智能体，还是远程 A2A 智能体？请分类。</p>
 <div class="sc" id="g5"></div>
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我踩过的坑</span></b><span class="en">I expected A2A agents to find each other. They do not: the client is pointed at a known card URL, and <code>agent_card=</code> wants the <i>full</i> URL, not a bare host. Worse, the port in <code>to_a2a(..., port=8001)</code> is only what the card <i>advertises</i>. When uvicorn ran on another port, the card pointed at the wrong place and calls failed quietly. Keep the two ports equal. Also stop an old <code>adk web</code> before starting the next one, and filter the many <code>[EXPERIMENTAL]</code> warnings (notices that a feature is still being tested) with <code>warnings.filterwarnings</code> so the trace stays readable.</span><span class="zh">我以为 A2A 的智能体会自动互相发现，其实不会：客户端要指向一个已知的名片地址，而且 <code>agent_card=</code> 要的是<i>完整</i> URL，不是只有主机。更坑的是，<code>to_a2a(..., port=8001)</code> 里的端口只是名片上<i>声明</i>的地址。uvicorn 跑在别的端口时，名片指向错的地方，调用悄悄失败。两个端口要一致。另外，启动新的 <code>adk web</code> 前要先停掉旧的；大量 <code>[EXPERIMENTAL]</code> 警告（提示某个功能仍在测试中）可以用 <code>warnings.filterwarnings</code> 过滤，让过程保持可读。</span></div>
-<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Read a signboard.</b> Start the satay server and open its agent card in a browser. Find the name, the description and the address.</span><span class="zh"><b>读一次招牌。</b>启动沙爹服务，在浏览器里打开它的名片，找到名字、描述和地址。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Break the port on purpose.</b> Run uvicorn on 8002 while the card says 8001, and watch what the failure looks like. Then you will recognise it.</span><span class="zh"><b>故意弄错端口。</b>让 uvicorn 跑在 8002 而名片写 8001，看看失败是什么样子，以后就认得出来。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a third stall.</b> A dessert agent on port 8003, and teach Mei to hand over dessert orders.</span><span class="zh"><b>再加一个摊位。</b>在 8003 端口做一个甜品智能体，让 Mei 学会把甜品单交给它。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the Kopi Corner assistant can ask the satay stall's agent next door for a plate, as Ah Seng walks over to ask, by reading its agent card first. The next problem is which framework to stay on.</span><span class="zh">现在 Kopi Corner 助手能向隔壁沙爹档的智能体要一盘沙爹，就像 Ah Seng 走过去问，先看对方的智能体名片。下一个问题是：到底留在哪个框架上。</span></div>
-<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
-<div class="card"><p class="en" style="margin:0">• <b><code>google.genai.errors.ClientError: 403 PERMISSION_DENIED / API key not valid</code></b>: <code>GOOGLE_API_KEY</code> is missing or wrong. Fix: put it in <code>.env</code> and call <code>load_dotenv(override=True)</code>.<br>• <b><code>httpx.ConnectError: All connection attempts failed</code></b>: The satay server is not running yet. Fix: start <code>satay_server.py</code> in its own terminal first, and check the port.<br>• <b><code>curl: (7) Failed to connect to localhost port 8001</code></b>: Same cause, wrong port or server stopped. Fix: use the port you gave <code>uvicorn</code> or the server file.</p>
-<p class="zh" style="margin:0">• <b><code>google.genai.errors.ClientError: 403 PERMISSION_DENIED / API key not valid</code></b>：<code>GOOGLE_API_KEY</code> 缺失或不对。解决：写进 <code>.env</code>，并调用 <code>load_dotenv(override=True)</code>。<br>• <b><code>httpx.ConnectError: All connection attempts failed</code></b>：沙爹摊的服务还没启动。解决：先在另一个终端启动 <code>satay_server.py</code>，并确认端口。<br>• <b><code>curl: (7) Failed to connect to localhost port 8001</code></b>：原因相同，或端口不对、服务已停。解决：用你启动服务时指定的端口。</p></div>
-<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• An ADK <b>LlmAgent</b> is a model plus an instruction. <code>run_debug</code> is only for experiments.<br>• A tool is a typed function with a docstring. ADK reads both. No decorator.<br>• Scope MCP file tools to one folder.<br>• <code>run_async</code> gives you events: tool calls, results, the final reply. <code>InMemoryRunner</code> forgets when the process stops.<br>• A2A lets an agent in <b>another process</b> (or another company) act like a local sub-agent.<br>• The <b>agent card</b> is the signboard: name, skills, address, at a well-known URL.<br>• No auto-discovery: you give the full card URL, and the advertised port must match the real one.</p><p class="zh" style="margin:0">• ADK 的 <b>LlmAgent</b> 就是模型加 instruction。<code>run_debug</code> 只适合做实验。<br>• 工具就是带类型标注和文档字符串的函数，ADK 两样都会读，不需要装饰器。<br>• 把 MCP 文件工具限定在一个文件夹里。<br>• <code>run_async</code> 给你事件：工具调用、结果、最终回复。<code>InMemoryRunner</code> 在进程结束后就忘了一切。<br>• A2A 让<b>另一个进程</b>（甚至另一家公司）里的智能体，像本地子智能体一样工作。<br>• <b>智能体名片</b>就是招牌：名字、技能、地址，放在固定的 URL。<br>• 没有自动发现：你要给出完整的名片 URL，而且声明的端口必须和实际端口一致。</p></div>
 
-<h3><span class="en">Recap</span><span class="zh">三句回顾</span></h3>
-<div class="card"><p class="en" style="margin:0">• An agent card is a public description of what a remote agent can do.<br>• A remote agent is used like a local one, but the call crosses the network.<br>• Check the card first, then wire it in as a sub-agent.</p>
-<p class="zh" style="margin:0">• 智能体名片是对远程智能体能力的公开说明。<br>• 远程智能体用起来和本地的一样，只是调用要经过网络。<br>• 先看名片，再把它接成子智能体。</p></div>
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en">The port in <code>to_a2a(..., port=8001)</code> is only what the card <i>advertises</i>. When uvicorn ran on another port, calls failed quietly. Keep the two equal.</span><span class="zh"><code>to_a2a(..., port=8001)</code> 里的端口只是名片上<i>宣称</i>的地址。uvicorn 跑在别的端口时，调用会悄悄失败。两者要一致。</span></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Read a signboard.</b> Start the satay server and open its agent card in a browser.</span><span class="zh"><b>读一块招牌。</b>启动沙爹服务，在浏览器里打开它的智能体名片。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Break the port on purpose</b> (uvicorn on 8002, card says 8001) and see what the failure looks like.</span><span class="zh"><b>故意弄错端口</b>（uvicorn 跑 8002，名片写 8001），看失败是什么样子。</span></span></label></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• An ADK <code>LlmAgent</code> is a model plus an instruction; a tool is a typed function with a docstring.<br>• A2A lets an agent in another process (or company) act like a local sub-agent.<br>• The agent card is the signboard: name, skills, address, at a well-known URL.<br>• No auto-discovery: give the full card URL, and keep the advertised port equal to the real one.</p><p class="zh" style="margin:0">• ADK 的 <code>LlmAgent</code> 就是模型加指令；工具是带类型标注和文档字符串的函数。<br>• A2A 让另一个进程（或另一家公司）的智能体像本地子智能体一样工作。<br>• 智能体名片就是招牌：名字、技能、地址，放在固定 URL。<br>• 没有自动发现：要给完整名片 URL，宣称的端口要和实际端口一致。</p></div>
+
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Agentic</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"goals":{"en":["Build one agent in Google ADK with a typed tool","Scope MCP file tools to a single folder","Read run_async events for tool calls and the final reply","Publish an agent card and call that agent over A2A"],"zh":["用 Google ADK 搭一个带有类型工具的智能体","把 MCP 文件工具限定在单个文件夹","读取 run_async 事件中的工具调用和最终回复","发布智能体卡片，并通过 A2A 调用该智能体"]},"prev":["05-autonomy-and-tools.html","07-agents-sdk-basics.html"],"tools":{"en":"Python 3.10+, google-adk with the a2a and mcp extras, a Google API key","zh":"Python 3.10+、带 a2a 和 mcp 扩展的 google-adk、Google API 密钥"},"know":{"en":"You have built one agent with tools in any framework.","zh":"在任一框架里搭过一个带工具的智能体。"},"mins":45,"offline":false}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=8290ab6e"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/18-agent-to-agent.js?v=3913af6b"></script></body></html>
+<script src="js/18-agent-to-agent.js?v=48cdb07a"></script></body></html>

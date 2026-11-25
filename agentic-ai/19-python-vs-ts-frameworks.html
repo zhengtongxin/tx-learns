@@ -5,137 +5,79 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/agentic-ai/19-python-vs-ts-frameworks.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/agentic-ai/19-python-vs-ts-frameworks.html","url":"https://tx-learns.vercel.app/agentic-ai/19-python-vs-ts-frameworks.html","name":"Python vs JS/TS frameworks","alternateName":"Python 与 JS/TS 框架","description":"Build the same worker five times and learn to pick a framework by its extra.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"Framework tour","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Agentic","url":"https://tx-learns.vercel.app/agentic-ai/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Agentic","item":"https://tx-learns.vercel.app/agentic-ai/index.html"},{"@type":"ListItem","position":3,"name":"Python vs JS/TS frameworks","item":"https://tx-learns.vercel.app/agentic-ai/19-python-vs-ts-frameworks.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Framework tour · Lesson 2</span><span class="zh">框架巡礼 · 第 2 课</span></span><h1><span class="en">Python vs JS/TS frameworks</span><span class="zh">Python 与 JS/TS 框架</span></h1><p class="meta"><span class="en">Build the same worker five times and learn to pick a framework by its extra · ~30 min · hands-on</span><span class="zh">把同一个工人做五遍，学会按“额外的本事”选框架 · 约 30 分钟 · 动手实践</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the Kopi Corner assistant learned to ask the stall next door's own agent for help over A2A. Today Aina has to choose which framework to keep building on, and every one looks different. We fix it by building the same worker five times and comparing them.</p>
-<p class="zh" style="margin:0">上次 Kopi Corner 助手学会了通过 A2A 向隔壁摊位自己的智能体求助。今天 Aina 要选一个框架继续做下去，而每个看起来都不一样。我们把同一个工人做五遍来比较。</p></div>
-<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en" style="margin:0">Five cafés in <b>Singapore</b> all brew the same filter coffee. One has a lever machine, one a drip tower, one a cloth sock, one a moka pot, one a French press. The machines differ, but the <b>steps are identical</b>: grind, wet, brew, pour, serve. Once you know the steps you can work in any café. Agent frameworks are the same. You will build one identical <b>worker</b> five times. Its job: take a goal from a shared SQLite board (“read tonight's takings.txt, total each stall, write summary.txt”), plan its own steps, do them with file tools and tick each off. The Singapore cafés are a side case: Kopi Corner is the sixth café, free to pick any machine.</p>
-<p class="zh" style="margin:0"><b>新加坡</b>有五家咖啡店，都冲同样的滤泡咖啡。一家用杠杆机，一家用滴滤塔，一家用布袋，一家用摩卡壶，一家用法压壶。机器不同，但<b>步骤完全一样</b>：磨、润、冲、倒、上桌。会了步骤，去哪家店都能上手。智能体框架也是这样。你要把同一个<b>工人</b>用五个框架各做一遍。它的任务：从共享的 SQLite 任务板领一个目标（“读 takings.txt，按摊位合计，写进 summary.txt”），自己规划步骤，用文件工具完成，并逐项打勾。新加坡的咖啡店是个支线案例：Kopi Corner 就是第六家店，可以随便挑机器。</p></div>
-<h2><span class="en">Step 1 · The same five steps everywhere</span><span class="zh">第 1 步 · 到哪里都是同样的五步</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Every framework asks you for the same five things, in the same order: <b>1</b> create the agent (a model plus a system prompt: the instruction text that says what the agent is for), <b>2</b> run it, <b>3</b> add tools (typed functions), <b>4</b> add MCP (the standard plug for ready-made tools, here a file server limited to one folder), <b>5</b> put it in a loop with a goal. Only the names change.</p><p class="zh" style="margin:0 0 8px">每个框架都按同样的顺序要你做同样的五件事：<b>1</b> 创建智能体（模型加系统提示词，也就是告诉智能体它的职责的那段指令文字），<b>2</b> 运行，<b>3</b> 加工具（带类型的函数），<b>4</b> 接 MCP（给智能体接上现成工具的标准插头，这里是限定在一个文件夹的文件服务），<b>5</b> 带着目标放进循环。变的只是名字。</p></div>
-<figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="The same five steps in every framework: create, run, tools, MCP, goal loop"><defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box" x="20" y="40" width="120" height="60" rx="12"/><text class="en" x="80.0" y="75.0">1 Create</text><text class="zh" x="80.0" y="75.0">1 创建</text><path class="lnk" d="M140 70 L160 70" marker-end="url(#ar)"/><rect class="box" x="160" y="40" width="120" height="60" rx="12"/><text class="en" x="220.0" y="75.0">2 Run</text><text class="zh" x="220.0" y="75.0">2 运行</text><path class="lnk" d="M280 70 L300 70" marker-end="url(#ar)"/><rect class="box" x="300" y="40" width="120" height="60" rx="12"/><text class="en" x="360.0" y="75.0">3 Tools</text><text class="zh" x="360.0" y="75.0">3 工具</text><path class="lnk" d="M420 70 L440 70" marker-end="url(#ar)"/><rect class="box" x="440" y="40" width="120" height="60" rx="12"/><text class="en" x="500.0" y="75.0">4 MCP</text><text class="zh" x="500.0" y="75.0">4 MCP</text><path class="lnk" d="M560 70 L580 70" marker-end="url(#ar)"/><rect class="box new" x="580" y="40" width="120" height="60" rx="12"/><text class="en" x="640.0" y="75.0">5 Goal loop</text><text class="zh" x="640.0" y="75.0">5 目标循环</text><rect class="box soft" x="20" y="140" width="680" height="50" rx="12"/><text class="en sm" x="360" y="170">Only the names change: Strands · Pydantic AI · MS Agent Framework · Agno · Mastra</text><text class="zh sm" x="360" y="170">变的只是名字：Strands · Pydantic AI · MS Agent Framework · Agno · Mastra</text></svg><figcaption><span class="en">Five frameworks, one order of work. Pick by the extra each one brings, not by the core.</span><span class="zh">五个框架，同一个工作顺序。看各自的“额外的本事”来选，别看核心。</span></figcaption></figure>
-<p class="en">Which of the five steps is each line of code?</p>
-<p class="zh">下面每行代码属于五步中的哪一步？</p>
-<div class="sc" id="g1"></div>
-<h2><span class="en">Step 2 · Strands and Pydantic AI</span><span class="zh">第 2 步 · Strands 与 Pydantic AI</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">From here the worker uses OpenAI's <code>gpt-4o-mini</code> model, so set an <code>OPENAI_API_KEY</code> in your <code>.env</code> file the way you set the Google key in the first lesson of this tour. <code>board</code> is the shared task board from the story, a small SQLite database that lists the goals.</p><p class="en" style="margin:0 0 8px"><b>Strands</b> marks tools with <code>@tool</code> and builds <code>Agent(model, system_prompt, tools)</code>. Its headline feature is portability: swap the model class for another provider and nothing else changes.</p><p class="zh" style="margin:0 0 8px">从这里开始，工人改用 OpenAI 的 <code>gpt-4o-mini</code> 模型，所以要像这组巡礼的第一课那样，在 <code>.env</code> 文件里设置 <code>OPENAI_API_KEY</code>。<code>board</code> 是故事里的共享任务板，就是一个列出目标的小型 SQLite 数据库。</p><p class="zh" style="margin:0 0 8px"><b>Strands</b> 用 <code>@tool</code> 标记工具，构造 <code>Agent(model, system_prompt, tools)</code>。它的招牌是可移植：把模型类换成别的供应商，其余代码不用动。</p></div>
-<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim">pip install "strands-agents[openai]" "pydantic-ai-slim[mcp,openai]" mcp fastmcp python-dotenv
+<div class="teach"><b class="lbl"><span class="en">Key point</span><span class="zh">要点</span></b><p class="en" style="margin:0">Every agent framework asks for the same five steps, so switching is mostly renaming. <b>Choose by the extra</b> each one adds, not by the core. We build one worker that reads a goal from a task board, totals <code>takings.txt</code> per stall and writes <code>summary.txt</code>.</p><p class="zh" style="margin:0">每个智能体框架都要你做同样的五步，所以换框架多半只是改名字。<b>按各自多出来的特色来选</b>，别按核心来选。我们做一个执行者：从任务板读目标，按摊位汇总 <code>takings.txt</code>，写出 <code>summary.txt</code>。</p></div>
 
-</span></div>
+<h2><span class="en">Step 1 · The same five steps everywhere</span><span class="zh">第 1 步 · 到处都一样的五步</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ol class="en" style="margin:0;padding-left:20px"><li><b>Create</b> the agent: a model plus a system prompt.</li><li><b>Run</b> it with a first message.</li><li>Add <b>tools</b>: typed functions.</li><li>Add <b>MCP</b>: ready-made tools, here a file server limited to one folder.</li><li>Put it in a <b>loop</b> with a goal.</li></ol>
+<ol class="zh" style="margin:0;padding-left:20px"><li><b>创建</b>智能体：模型加系统提示词。</li><li>用第一条消息<b>运行</b>它。</li><li>加<b>工具</b>：带类型的函数。</li><li>加 <b>MCP</b>：现成的工具，这里是限定在一个文件夹的文件服务。</li><li>放进带目标的<b>循环</b>。</li></ol></div>
+<figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="The same five steps in every framework: create, run, tools, MCP, goal loop"><defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box" x="20" y="40" width="120" height="60" rx="12"/><text class="en" x="80.0" y="75.0">1 Create</text><text class="zh" x="80.0" y="75.0">1 创建</text><path class="lnk" d="M140 70 L160 70" marker-end="url(#ar)"/><rect class="box" x="160" y="40" width="120" height="60" rx="12"/><text class="en" x="220.0" y="75.0">2 Run</text><text class="zh" x="220.0" y="75.0">2 运行</text><path class="lnk" d="M280 70 L300 70" marker-end="url(#ar)"/><rect class="box" x="300" y="40" width="120" height="60" rx="12"/><text class="en" x="360.0" y="75.0">3 Tools</text><text class="zh" x="360.0" y="75.0">3 工具</text><path class="lnk" d="M420 70 L440 70" marker-end="url(#ar)"/><rect class="box" x="440" y="40" width="120" height="60" rx="12"/><text class="en" x="500.0" y="75.0">4 MCP</text><text class="zh" x="500.0" y="75.0">4 MCP</text><path class="lnk" d="M560 70 L580 70" marker-end="url(#ar)"/><rect class="box new" x="580" y="40" width="120" height="60" rx="12"/><text class="en" x="640.0" y="75.0">5 Goal loop</text><text class="zh" x="640.0" y="75.0">5 目标循环</text><rect class="box soft" x="20" y="140" width="680" height="50" rx="12"/><text class="en sm" x="360" y="170">Only the names change: Strands · Pydantic AI · MS Agent Framework · Agno · Mastra</text><text class="zh sm" x="360" y="170">变的只是名字：Strands · Pydantic AI · MS Agent Framework · Agno · Mastra</text></svg><figcaption><span class="en">Five frameworks, one order of work. Pick by the extra each one brings, not by the core.</span><span class="zh">五个框架，同一个工作顺序。看各自的“额外的本事”来选，别看核心。</span></figcaption></figure>
+<p class="en">Which of the five steps is each line of code?</p><p class="zh">下面每行代码属于五步中的哪一步？</p>
+<div class="sc" id="g1"></div>
+
+<h2><span class="en">Step 2 · Two Python frameworks</span><span class="zh">第 2 步 · 两个 Python 框架</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li>Both use OpenAI's <code>gpt-4o-mini</code>, so put <code>OPENAI_API_KEY</code> in <code>.env</code>.</li><li><b>Strands</b> marks tools with <code>@tool</code>. Its extra: swap the model class for another provider and nothing else changes.</li><li><b>Pydantic AI</b> takes plain functions and MCP as <code>toolsets=</code>. Its extra: <code>output_type=</code> gives a validated object, not loose text.</li><li>MCP connections must be opened: <code>async with worker</code> in Pydantic AI. Forget it and the tools are silently not connected.</li></ul>
+<ul class="zh" style="margin:0;padding-left:18px"><li>两者都用 OpenAI 的 <code>gpt-4o-mini</code>，所以在 <code>.env</code> 里放 <code>OPENAI_API_KEY</code>。</li><li><b>Strands</b> 用 <code>@tool</code> 标记工具。特色：把模型类换成别的供应商，其余都不用改。</li><li><b>Pydantic AI</b> 用普通函数，MCP 通过 <code>toolsets=</code> 传入。特色：<code>output_type=</code> 给出校验过的对象，而不是随意的文字。</li><li>MCP 连接必须先打开：Pydantic AI 里是 <code>async with worker</code>。忘了的话，工具就悄悄没连上。</li></ul></div>
+<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim">pip install "strands-agents[openai]" "pydantic-ai-slim[mcp,openai]" mcp fastmcp python-dotenv</span></div>
 <div class="codebox" data-file="strands_agent.py" data-lang="python"><span class="dim">import os, subprocess
 from strands import Agent, tool
 from strands.models.openai import OpenAIModel
 from strands.tools.mcp import MCPClient
 from mcp import stdio_client, StdioServerParameters
 
+CAFE = "/abs/path/to/workspace"        # folder holding takings.txt
+TODOS = ["Read takings.txt, total each stall, write summary.txt"]
 model = OpenAIModel(client_args={"api_key": os.environ["OPENAI_API_KEY"]}, model_id="gpt-4o-mini")
-
 </span><span class="chg">@tool</span><span class="dim">
-def show_board() -> list[dict]:
+def show_board() -> list[str]:
     """List every todo on the task board."""
-    return board.list_todos()
-
+    return TODOS
 </span><span class="chg">files = MCPClient(lambda: stdio_client(
     StdioServerParameters(command="npx", args=["-y", "@modelcontextprotocol/server-filesystem", CAFE], cwd=CAFE),
     errlog=subprocess.DEVNULL))
-
 worker = Agent(model=model, system_prompt="Work the pending goal on the board.", tools=[show_board, files])
 await worker.invoke_async("Please work the pending goal.")</span></div>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><b>Pydantic AI</b> takes a model string like <code>"openai-chat:gpt-4o-mini"</code>, <code>instructions=</code>, plain functions as tools and MCP servers as <code>toolsets=</code>. Its special strength is <b>typed, validated output</b>: pass <code>output_type=</code> a Pydantic model and you get a checked object back, not loose text.</p><p class="zh" style="margin:0 0 8px"><b>Pydantic AI</b> 用 <code>"openai-chat:gpt-4o-mini"</code> 这样的模型字符串、<code>instructions=</code>、普通函数当工具，MCP 服务放进 <code>toolsets=</code>。它的特长是<b>带类型、经过校验的输出</b>：给 <code>output_type=</code> 传一个 Pydantic 模型，拿回的就是校验过的对象，而不是随意的文字。</p></div>
 <div class="codebox" data-file="pydantic_agent.py" data-lang="python"><span class="dim">import os
 from pathlib import Path
 from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPToolset
 from fastmcp.client.transports import StdioTransport
 
+def show_board() -> list[str]:
+    """List every todo on the task board."""
+    return TODOS
+
 files = MCPToolset(StdioTransport(command="npx",
         args=["-y", "@modelcontextprotocol/server-filesystem", CAFE], cwd=CAFE,
         log_file=Path(os.devnull)), init_timeout=60)
-
 worker = Agent("openai-chat:gpt-4o-mini", instructions="Work the pending goal.",
                tools=[show_board], toolsets=[files])
 </span><span class="chg">async with worker:                       # this opens the MCP connection
     res = await worker.run("Please work the pending goal.")</span><span class="dim">
 print(res.output)</span></div>
-<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
-<div class="codebox" data-file="output" data-lang="text">I worked the pending goal: the page is written and ticked off on the board.</div>
 <div class="try" id="p2"></div>
-<h2><span class="en">Step 3 · Microsoft Agent Framework and Agno</span><span class="zh">第 3 步 · Microsoft Agent Framework 与 Agno</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><b>Microsoft Agent Framework</b> merges two older Microsoft agent projects. You give it a chat <i>client</i> plus <code>instructions</code>, and it is async-first. Its real selling point is underneath: a graph <b>workflow engine</b> with checkpoints and human approval, and the same API in .NET.</p><p class="zh" style="margin:0 0 8px"><b>Microsoft Agent Framework</b> 合并了微软两个较早的智能体项目。你给它一个聊天<i>客户端</i>加 <code>instructions</code>，它以异步为先。真正的卖点在底层：带检查点和人工审批的图<b>工作流引擎</b>，而且 .NET 上有同样的 API。</p><p class="en" style="margin:0 0 8px"><b>Agno</b> is very light. Making an agent takes microseconds, which matters when a server creates a fresh agent for every request.</p><p class="zh" style="margin:0 0 8px"><b>Agno</b> 非常轻。创建一个智能体只要微秒级，当服务器每个请求都新建一个智能体时，这一点就很重要。</p></div>
-<div class="codebox" data-file="ms_and_agno.py" data-lang="python"><span class="dim"># Microsoft Agent Framework
-from agent_framework import Agent, MCPStdioTool
-from agent_framework.openai import OpenAIChatClient
 
-files = MCPStdioTool(name="files", command="npx",
-                     args=["-y", "@modelcontextprotocol/server-filesystem", CAFE])
-worker = Agent(client=OpenAIChatClient(model="gpt-4o-mini"),
-               instructions="Work the pending goal.", tools=[show_board, files])
-</span><span class="chg">async with files:                        # the tool, not the agent
-    res = await worker.run("Please work the pending goal.")</span><span class="dim">
-print(res.text)
-
-# Agno
-from agno.agent import Agent
-from agno.models.openai import OpenAIChat
-from agno.tools.mcp import MCPTools
-
-</span><span class="chg">async with MCPTools(server_params=srv, timeout_seconds=60) as files:</span><span class="dim">
-    worker = Agent(model=OpenAIChat(id="gpt-4o-mini"), instructions="Work the pending goal.",
-                   tools=[show_board, files])
-    res = await worker.arun(input="Please work the pending goal.")
-print(res.content)</span></div>
-<div class="try" id="p3"></div>
-<h2><span class="en">Step 4 · Mastra, the TypeScript one</span><span class="zh">第 4 步 · Mastra，TypeScript 的那个</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Same five steps, different language. Mastra sits on the Vercel AI SDK, so a model is a <code>"provider/model"</code> string and a tool's inputs are described with a <b>zod</b> schema (zod is TypeScript's way of saying “this object must look like this”). Choose it when the rest of your app is already TypeScript.</p><p class="zh" style="margin:0 0 8px">同样五步，换了语言。Mastra 建在 Vercel AI SDK 之上，所以模型是 <code>"provider/model"</code> 字符串，工具的输入用 <b>zod</b> 模式描述（zod 是 TypeScript 里表达“这个对象必须长这样”的办法）。如果你的应用其余部分已经是 TypeScript，就选它。</p></div>
-<div class="codebox" data-file="mastra_agent.ts" data-lang="js"><span class="dim">import { Agent } from "@mastra/core/agent";
-import { createTool } from "@mastra/core/tools";
-import { MCPClient } from "@mastra/mcp";
-import { z } from "zod";
-
-</span><span class="chg">const showBoard = createTool({
-  id: "show_board",
-  description: "List every todo on the task board.",
-  inputSchema: z.object({}),
-  execute: async () => ({ todos: listTodos() }),
-});</span><span class="dim">
-
-const mcp = new MCPClient({ servers: { files: { command: "npx",
-  args: ["-y", "@modelcontextprotocol/server-filesystem", CAFE] } } });
-
-</span><span class="chg">const worker = new Agent({ id: "takings-worker", name: "Takings Worker",
-  instructions: "Work the pending goal on the board.", model: "openai/gpt-4o-mini",
-  tools: { showBoard, ...(await mcp.listTools()) } });</span><span class="dim">
-
-const reply = await worker.generate("Please work the pending goal.", { maxSteps: 30 });
-console.log(reply.text);
-</span><span class="chg">process.exit(0);                         // otherwise the script hangs</span></div>
-<div class="try" id="p4"></div>
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我踩过的坑</span></b><span class="en">Three things cost me an evening. <b>1)</b> The file server prints a banner on stderr (the program's error channel, where warnings go), and inside a Jupyter notebook on Windows there is no real stderr, so the launch fails. Each framework hides it differently: Strands <code>errlog=</code>, Pydantic AI <code>log_file=</code>, Agno needs its <code>stdio_client</code> patched, Microsoft Agent Framework needs a small subclass. Setting <code>cwd=</code> to the workspace is what makes <code>takings.txt</code> resolve. <b>2)</b> The <code>async with</code> dance: Pydantic AI wants it on the agent, Agno and Microsoft Agent Framework on the tool. Forget it and the tools are simply not connected, with an error that does not say so. <b>3)</b> Mastra keeps its connection pool open and never exits, so I end every script with <code>process.exit(0)</code>. It also moves fast, so pin <code>@mastra/core</code> and do not trust old blog posts.</span><span class="zh">有三件事让我耗了一个晚上。<b>1)</b> 文件服务会在 stderr（程序的错误输出通道，警告就打在这里）打印横幅，而在 Windows 的 Jupyter 笔记本里没有真正的 stderr，启动就失败。每个框架的藏法都不同：Strands 用 <code>errlog=</code>，Pydantic AI 用 <code>log_file=</code>，Agno 要给它的 <code>stdio_client</code> 打补丁，Microsoft Agent Framework 要写一个小子类。把 <code>cwd=</code> 设为工作目录，<code>takings.txt</code> 这样的相对路径才找得到。<b>2)</b> <code>async with</code> 的位置：Pydantic AI 写在智能体上，Agno 和 Microsoft Agent Framework 写在工具上。忘了写，工具就是没连上，而报错并不会告诉你这一点。<b>3)</b> Mastra 一直占着连接池不退出，所以我每个脚本都以 <code>process.exit(0)</code> 结尾。它更新也很快，要锁定 <code>@mastra/core</code> 的版本，别太信旧博客。</span></div>
-<h2><span class="en">Step 5 · Choose by the extra</span><span class="zh">第 5 步 · 看“额外的本事”来选</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Line them up and the core is almost the same. So do not pick by the core. Pick by what each one adds on top.</p><p class="zh" style="margin:0 0 8px">把它们排在一起，核心几乎一样。所以不要按核心来选，要看每个在核心之上多了什么。</p></div>
-<div style="overflow-x:auto;max-width:100%"><table style="min-width:640px"><thead><tr><th>Framework</th><th>Built from</th><th>Run</th><th>Tools</th><th>MCP</th></tr></thead><tbody>
-<tr><td>Google ADK</td><td>LlmAgent(model, instruction)</td><td>Runner.run_async</td><td>plain functions</td><td>McpToolset</td></tr>
-<tr><td>Strands</td><td>Agent(model, system_prompt)</td><td>invoke_async</td><td>@tool</td><td>MCPClient</td></tr>
-<tr><td>Pydantic AI</td><td>Agent("prov:model", instructions)</td><td>run → .output</td><td>plain functions</td><td>toolsets=[MCPToolset]</td></tr>
-<tr><td>MS Agent Framework</td><td>Agent(client, instructions)</td><td>run → .text</td><td>plain functions</td><td>MCPStdioTool</td></tr>
-<tr><td>Agno</td><td>Agent(model, instructions)</td><td>arun → .content</td><td>plain functions</td><td>MCPTools</td></tr>
-<tr><td>Mastra (TS)</td><td>new Agent({model, instructions})</td><td>generate → .text</td><td>createTool + zod</td><td>MCPClient.listTools()</td></tr></tbody></table></div>
-<p class="en">Which framework fits each need?</p>
-<p class="zh">下面每个需求适合哪个框架？</p>
+<h2><span class="en">Step 3 · Choose by the extra</span><span class="zh">第 3 步 · 按特色来选</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Line them up and the core is almost the same. The difference is what each adds on top.</p><p class="zh" style="margin:0">把它们排在一起，核心几乎一样，区别在于各自额外多了什么。</p></div>
+<div style="overflow-x:auto;max-width:100%"><table style="min-width:640px"><thead><tr><th>Framework</th><th>Built from</th><th>Run</th><th>Tools</th><th>MCP</th><th>Extra</th></tr></thead><tbody>
+<tr><td>Google ADK</td><td>LlmAgent(model, instruction)</td><td>Runner.run_async</td><td>plain functions</td><td>McpToolset</td><td>A2A, visual debug</td></tr>
+<tr><td>Strands</td><td>Agent(model, system_prompt)</td><td>invoke_async</td><td>@tool</td><td>MCPClient</td><td>swap providers</td></tr>
+<tr><td>Pydantic AI</td><td>Agent("prov:model", instructions)</td><td>run → .output</td><td>plain functions</td><td>toolsets=[MCPToolset]</td><td>validated output</td></tr>
+<tr><td>MS Agent Framework</td><td>Agent(client, instructions)</td><td>run → .text</td><td>plain functions</td><td>MCPStdioTool</td><td>graph workflows, .NET</td></tr>
+<tr><td>Agno</td><td>Agent(model, instructions)</td><td>arun → .content</td><td>plain functions</td><td>MCPTools</td><td>very fast to create</td></tr>
+<tr><td>Mastra (TS)</td><td>new Agent({model, instructions})</td><td>generate → .text</td><td>createTool + zod</td><td>MCPClient.listTools()</td><td>TypeScript</td></tr></tbody></table></div>
+<p class="en">Which framework fits each need?</p><p class="zh">每种需求适合哪个框架？</p>
 <div class="sc" id="g5"></div>
-<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Port one worker.</b> Take a small agent you already built and rewrite it in a second framework. Count how much is just renaming.</span><span class="zh"><b>移植一个工人。</b>把你已经做好的小智能体用第二个框架重写，数一数有多少只是改名。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Forget the <code>async with</code> on purpose.</b> See the error with your own eyes so you recognise it later.</span><span class="zh"><b>故意漏写 <code>async with</code>。</b>亲眼看一次报错，以后就认得出来。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Write your own pick.</b> For your next idea, write one line: “I would choose ___ because of its ___.”</span><span class="zh"><b>写下你的选择。</b>针对你的下一个想法写一句话：“我会选 ___，因为它的 ___。”</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the Kopi Corner assistant can be built in Python or JS/TS, and Aina knows to choose by each framework's extra, like picking a machine for Uncle Lim's morning rush. The next problem is that frameworks hide what the loop actually does.</span><span class="zh">现在 Kopi Corner 助手用 Python 或 JS/TS 框架都能做，Aina 也知道该看各框架的“额外的本事”来选，就像为林叔的早市挑机器。下一个问题是：框架把循环里到底做了什么藏起来了。</span></div>
-<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
-<div class="card"><p class="en" style="margin:0">• <b><code>ModuleNotFoundError: No module named 'strands'</code></b>: The package name differs from the import. Fix: <code>pip install "strands-agents[openai]"</code> inside the same environment you run from.<br>• <b><code>KeyError: 'OPENAI_API_KEY'</code></b>: Several of these frameworks read <code>os.environ</code> directly. Fix: call <code>load_dotenv()</code> first.<br>• <b><code>Cannot find module '@mastra/core'</code></b>: The JS packages are not installed. Fix: run <code>npm install @mastra/core</code> in the project folder.</p>
-<p class="zh" style="margin:0">• <b><code>ModuleNotFoundError: No module named 'strands'</code></b>：包名和导入名不同。解决：在运行代码的同一个环境里 <code>pip install "strands-agents[openai]"</code>。<br>• <b><code>KeyError: 'OPENAI_API_KEY'</code></b>：这些框架里有几个直接读 <code>os.environ</code>。解决：先调用 <code>load_dotenv()</code>。<br>• <b><code>Cannot find module '@mastra/core'</code></b>：没装 JS 依赖。解决：在项目文件夹里运行 <code>npm install @mastra/core</code>。</p></div>
-<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• Every framework asks for the same five steps: agent, run, tools, MCP, loop.<br>• Switching frameworks is mostly renaming. Pick by the <b>extra</b> each one offers.<br>• Strands: swap model providers freely. Pydantic AI: typed, validated output.<br>• Microsoft Agent Framework: durable graph workflows and .NET. Agno: very fast to create.<br>• Mastra: the TypeScript choice, with zod schemas for tools. Pin its version.<br>• MCP is where the pain is: stderr noise, <code>cwd</code>, and where <code>async with</code> goes.<br>• If tools seem missing and no error explains why, check the connection first.</p><p class="zh" style="margin:0">• 每个框架都要同样的五步：智能体、运行、工具、MCP、循环。<br>• 换框架多半只是改名。要按各自<b>额外的本事</b>来选。<br>• Strands：自由切换模型供应商。Pydantic AI：带类型、经过校验的输出。<br>• Microsoft Agent Framework：可持久的图工作流和 .NET。Agno：创建速度极快。<br>• Mastra：TypeScript 的选择，工具用 zod 模式，记得锁定版本。<br>• 麻烦主要在 MCP：stderr 噪音、<code>cwd</code>，以及 <code>async with</code> 写在哪里。<br>• 工具好像没了又没有报错说明时，先检查连接。</p></div>
 
-<h3><span class="en">Recap</span><span class="zh">三句回顾</span></h3>
-<div class="card"><p class="en" style="margin:0">• Frameworks differ in spelling, not in shape: a model, instructions, tools and a loop.<br>• Pick Python or JS/TS by where the rest of your app lives.<br>• Compare frameworks by running the same small task in each.</p>
-<p class="zh" style="margin:0">• 框架的差别在写法，不在结构：模型、指令、工具和循环。<br>• 选 Python 还是 JS/TS，看你的其他应用在哪边。<br>• 比较框架最好的办法：在每个里面跑同一个小任务。</p></div>
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en">Where <code>async with</code> goes differs: on the agent in Pydantic AI, on the tool in Agno and Microsoft Agent Framework. Mastra never exits unless the script ends with <code>process.exit(0)</code>.</span><span class="zh"><code>async with</code> 写的位置不同：Pydantic AI 写在智能体上，Agno 和 Microsoft Agent Framework 写在工具上。Mastra 的脚本不以 <code>process.exit(0)</code> 结尾就永远不退出。</span></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Port one worker.</b> Rewrite a small agent you built in a second framework and count how much is just renaming.</span><span class="zh"><b>移植一个执行者。</b>用第二个框架重写你做过的小智能体，数数有多少只是改名。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Write your own pick:</b> “I would choose ___ because of its ___.”</span><span class="zh"><b>写下你的选择：</b>“我会选 ___，因为它的 ___。”</span></span></label></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Every framework asks for the same five steps: agent, run, tools, MCP, loop.<br>• Pick by the extra: Strands swaps providers, Pydantic AI validates output, Microsoft Agent Framework has graph workflows, Agno is fast, Mastra is TypeScript.<br>• MCP is where the pain is: stderr noise, <code>cwd</code>, and where <code>async with</code> goes.<br>• If tools seem missing with no error, check the connection first.</p><p class="zh" style="margin:0">• 每个框架都要同样的五步：智能体、运行、工具、MCP、循环。<br>• 按特色选：Strands 能换供应商，Pydantic AI 校验输出，Microsoft Agent Framework 有图工作流，Agno 很快，Mastra 是 TypeScript。<br>• 麻烦都在 MCP：stderr 噪音、<code>cwd</code>、<code>async with</code> 写在哪里。<br>• 工具莫名缺失又没有报错，先检查连接。</p></div>
+
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Agentic</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"goals":{"en":["Spot the same five steps in every agent framework","Pick a framework by the extra it offers","Write a TypeScript agent tool with a zod schema in Mastra","Debug a missing-tools problem by checking the MCP connection first"],"zh":["在每个智能体框架里认出相同的五个步骤","按各框架的特色来选择","在 Mastra 里用 zod 结构写一个 TypeScript 智能体工具","遇到工具缺失时先检查 MCP 连接"]},"prev":["18-agent-to-agent.html","07-agents-sdk-basics.html"],"tools":{"en":"Python 3.10+, strands-agents, pydantic-ai, fastmcp, an OpenAI API key; Node for the JS/TS side","zh":"Python 3.10+、strands-agents、pydantic-ai、fastmcp、OpenAI API 密钥；JS/TS 部分需要 Node"},"know":{"en":"You have used at least one agent framework.","zh":"用过至少一个智能体框架。"},"mins":45,"offline":false}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=8290ab6e"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/19-python-vs-ts-frameworks.js?v=d6781b78"></script></body></html>
+<script src="js/19-python-vs-ts-frameworks.js?v=18a82ab0"></script></body></html>

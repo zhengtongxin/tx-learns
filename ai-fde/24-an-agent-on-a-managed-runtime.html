@@ -5,28 +5,21 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/ai-fde/24-an-agent-on-a-managed-runtime.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-fde/24-an-agent-on-a-managed-runtime.html","url":"https://tx-learns.vercel.app/ai-fde/24-an-agent-on-a-managed-runtime.html","name":"Agent on managed runtime","alternateName":"托管运行时上的智能体","description":"Wrap the agent as a small app with a work endpoint and a health ping, run it on a managed runtime where each run gets its own session, keep long jobs visibly alive, and let a handler send a decision back.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"Handing it over","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI FDE","url":"https://tx-learns.vercel.app/ai-fde/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI FDE","item":"https://tx-learns.vercel.app/ai-fde/index.html"},{"@type":"ListItem","position":3,"name":"Agent on managed runtime","item":"https://tx-learns.vercel.app/ai-fde/24-an-agent-on-a-managed-runtime.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Handing it over · Lesson 2</span><span class="zh">交付上线 · 第 2 课</span></span><h1><span class="en">Agent on managed runtime</span><span class="zh">托管运行时上的智能体</span></h1><p class="meta"><span class="en">Run the same agent where someone else keeps the servers, and write its long jobs so they survive session limits · ~30 min · concept with one runnable idea</span><span class="zh">让同一个智能体跑在别人维护服务器的地方，并把长任务写得能熬过会话的时限 · 约 30 分钟 · 概念课，带一段能跑的代码</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the pilot read its rules from a service with owners and dates. Today it fails when Mei Ling closes her laptop: it runs nowhere else, and Kumar does not want one more server to mind. We fix it by packaging the agent as an app that a managed runtime starts fresh for each piece of work.</p>
-<p class="zh" style="margin:0">上回，试点从一个有主人、有日期的服务里读规则。今天的问题是：Mei Ling 一合上笔记本，它就哪里都不跑了，而 Kumar 不想再多管一台服务器。我们的办法是把智能体打包成一个应用，交给托管运行时，每件工作都启动一份全新的副本。</p></div>
-<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">The agent works on Mei Ling’s laptop, and Kumar does not want to look after one more server. He wants a place where the agent runs, scales and restarts without him. A <b>managed agent runtime</b> is that: you hand it your agent as an app, and it starts a fresh, isolated copy for each piece of work. Mei Ling’s job is to make the agent fit. You need Flask and requests (<code>pip install flask requests</code>). The agent itself stays a stand-in, so everything runs on its own.</p>
-<p class="zh" style="margin:0">智能体在 Mei Ling 的笔记本上跑得好好的，而 Kumar 不想再多管一台服务器。他想要一个地方，让智能体自己运行、伸缩、重启，不用他操心。<b>托管的智能体运行时</b>就是这样的地方：你把智能体当成一个应用交给它，它为每一件工作启动一份全新的、相互隔离的副本。Mei Ling 要做的，是让智能体适应它。你需要 Flask 和 requests（<code>pip install flask requests</code>）。智能体本身仍用替身，所以一切都能独立运行。</p></div>
-
-<div class="callout tip"><b class="lbl"><span class="en">Words in this lesson</span><span class="zh">这一课用到的词</span></b><span class="en"><b>Managed runtime</b>: a hosted place that starts, stops and scales your agent for you, so you do not run a server yourself.<br><b>/invocations and /ping</b>: the two addresses the runtime expects: one to run a claim, one to ask if the agent is healthy.<br><b>Cold start</b>: the slow first call after the agent has been idle, while the runtime starts it up.</span><span class="zh"><b>托管运行时</b>：一个托管的地方，替你启动、停止并伸缩智能体，你不必自己跑服务器。<br><b>/invocations 和 /ping</b>：运行时要求的两个地址：一个用来处理理赔，一个用来问智能体是否健康。<br><b>冷启动</b>：智能体闲置后的第一次调用较慢，因为运行时正在启动它。</span></div>
-<h2><span class="en">Step 1 · Turn the agent into an app with two doors</span><span class="zh">第 1 步 · 把智能体做成有两扇门的应用</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A runtime does not know what is inside your agent. It only needs two doors. One endpoint takes <b>work</b> (here <code>/invocations</code>). One endpoint answers a <b>health ping</b> (<code>/ping</code>): “are you alive?”. Like the queue ticket machine and the counter bell: one gives out numbers, the other tells the street the shop is open. Many runtimes use these two names on port 8080. Check yours.</p>
-<p class="zh" style="margin:0 0 8px">运行时不知道你的智能体里面是什么。它只需要两扇门。一个接口接收<b>工作</b>（这里是 <code>/invocations</code>）。一个接口回应<b>健康探测</b>（<code>/ping</code>）：“你还活着吗？”。就像取号机和柜台的铃：一个发号码，一个告诉街上的人店开着。很多运行时用这两个名字，端口 8080。要核对你用的那个。</p></div>
+<h2><span class="en">Step 1 · An app with two doors</span><span class="zh">第 1 步 · 有两扇门的应用</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b>
+<ul class="en" style="margin:0"><li>A <b>managed runtime</b> starts, stops and scales your agent so you run no server. It does not care what is inside; it needs two doors: <code>/invocations</code> takes work, <code>/ping</code> answers “are you alive?”. Many runtimes use these names on port 8080; check yours.</li><li>Test at home first with Flask's test client; the same code runs on the runtime, only the address changes.</li><li>After deploying, the first call is a <b>cold start</b> (the runtime starts a fresh copy) and is slow; later calls are <b>warm</b> and fast.</li></ul>
+<ul class="zh" style="margin:0"><li><b>托管运行时</b>替你启动、停止并伸缩智能体，你不用跑服务器。它不在乎里面是什么，只需要两扇门：<code>/invocations</code> 接收工作，<code>/ping</code> 回答“你还活着吗？”。很多运行时用这两个名字、端口 8080；要核对你用的那个。</li><li>先在家里用 Flask 的测试客户端测试；同一份代码在运行时上跑，只有地址不同。</li><li>部署后，第一次调用是<b>冷启动</b>（运行时要启动一份新副本），比较慢；之后是<b>热</b>调用，很快。</li></ul>
+<p class="en" style="margin:8px 0 0">Install with <code>pip install flask requests</code>. The agent stays a stand-in, so everything runs on its own.</p>
+<p class="zh" style="margin:8px 0 0">用 <code>pip install flask requests</code> 安装。智能体仍用替身，所以一切都能独立运行。</p></div>
 <div class="codebox" data-file="agent_app.py" data-lang="python"><span class="chg"># agent_app.py
 from flask import Flask, jsonify, request
-
 app = Flask(__name__)
-
 def decide_claim(claim):
     """Stand-in for the real agent. Swap the real one in later."""
     return {"action": "approve", "payout": float(claim["amount"])}
-
 @app.get("/ping")
 def ping():
     return jsonify(status="Healthy")
-
 @app.post("/invocations")
 def invocations():
     body = request.get_json(silent=True) or {}
@@ -34,71 +27,21 @@ def invocations():
     if not claim:
         return jsonify(error="send a claim"), 400
     return jsonify(decision=decide_claim(claim))
-
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)</span></div>
-<div class="try" id="p1"></div>
+    app.run(host="0.0.0.0", port=8080)
 
-<h2><span class="en">Step 2 · Test it on your own computer first</span><span class="zh">第 2 步 · 先在自己电脑上测试</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Deploying is slow and costs money, so find the mistakes at home. The same app runs on your laptop and on the runtime. Only the address changes. Flask’s test client calls the app without starting a server. To run it for real, use <code>python agent_app.py</code> and call <code>http://127.0.0.1:8080</code>.</p>
-<p class="zh" style="margin:0 0 8px">部署又慢又花钱，所以错误要在家里先找出来。同一个应用在笔记本和运行时上跑的是同一份代码，只有地址不同。Flask 的测试客户端不用启动服务器就能调用应用。想真跑一遍，就用 <code>python agent_app.py</code>，然后调用 <code>http://127.0.0.1:8080</code>。</p></div>
-<div class="codebox" data-file="test_local.py" data-lang="python"><span class="chg"># test_local.py
-from agent_app import app
+# test_local.py
+# client = app.test_client()
+# client.get("/ping").json                                                           # {'status': 'Healthy'}
+# client.post("/invocations", json={"claim": {"id": "C-2001", "amount": 450}}).json  # {'decision': {...}}
+# client.post("/invocations", json={}).status_code                                   # 400</span></div>
 
-client = app.test_client()
-print(client.get("/ping").json)                                                     # {'status': 'Healthy'}
-print(client.post("/invocations", json={"claim": {"id": "C-2001", "amount": 450}}).json)
-print(client.post("/invocations", json={}).status_code)                             # 400: no claim sent</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">{'status': 'Healthy'}
-{'decision': {'action': 'approve', 'payout': 450.0}}
-400</div>
-<div class="try" id="p2"></div>
-
-<h2><span class="en">Step 3 · Deploy, then watch cold and warm starts</span><span class="zh">第 3 步 · 部署，然后观察冷启动和热启动</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Package the app (usually as a container image, a sealed bundle of your app and everything it needs) and deploy it with your runtime’s own command. Those commands differ, so follow its guide. The agent code does not change. Then time it. A <b>cold start</b> is the first call, when the runtime must start a fresh copy. A <b>warm</b> call reaches a copy that is already running, and it is much faster. Like the shophouse in the morning: the first customer waits while the ceiling fans spin up.</p>
-<p class="zh" style="margin:0 0 8px">把应用打包（通常做成一个容器镜像，也就是把应用和它需要的一切装进一个密封的包里），用运行时自己的命令部署。这些命令各家不同，照它的指南来。智能体的代码不用变。然后给它计时。<b>冷启动</b>是第一次调用，运行时得先启动一份新的副本。<b>热</b>调用则打到已经在跑的副本上，快得多。就像早上的店屋：第一位客人要等吊扇转起来。</p></div>
-<div class="codebox" data-file="timing.py" data-lang="python"><span class="chg"># timing.py: set AGENT_URL to the deployed address, or leave it for your laptop
-import os, time, requests
-
-URL = os.environ.get("AGENT_URL", "http://127.0.0.1:8080")
-CLAIM = {"claim": {"id": "C-2001", "amount": 450}}
-
-def timed():
-    start = time.perf_counter()
-    reply = requests.post(URL + "/invocations", json=CLAIM, timeout=60)   # add your runtime’s sign-in headers if it needs them
-    return reply.status_code, round(time.perf_counter() - start, 2)
-
-print("first call:", timed())
-print("second call:", timed())</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">first call: (200, 6.82)
-second call: (200, 1.94)</div>
-<div class="try" id="p3"></div>
-
-<h2><span class="en">Step 4 · Every run gets its own session, and sessions end</span><span class="zh">第 4 步 · 每次运行有自己的会话，会话会结束</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The runtime gives each dispatch (one request that runs the agent) and each evaluation (one test run) its own <b>session</b>: a separate little computer with its own memory. Two claims never share variables. A session ends when it has been <b>idle</b> for about a minute, meaning no request is in flight. It ends even if a background thread of yours is still going, because the runtime cannot see inside. Anything kept in the session’s memory or disk goes with it. Only things stored outside survive. Your runtime tells you the session id in a request header. The name differs, so check it.</p>
-<p class="zh" style="margin:0 0 8px">运行时给每一次派发（一次运行智能体的请求）和每一次评测（一次测试运行）一个自己的<b>会话</b>：一台独立的小电脑，有自己的内存。两份理赔永远不共用变量。会话在<b>空闲</b>大约一分钟后结束，空闲的意思是没有任何请求在处理。哪怕你有后台线程还在跑，它也照样结束，因为运行时看不到里面。会话内存或磁盘里放的东西，会随它一起消失。只有存在外面的才活得下来。运行时会在请求头里告诉你会话编号，名字各家不同，要去核对。</p></div>
-<div class="codebox" data-file="agent_app.py" data-lang="python"><span class="dim"># agent_app.py, changed
-</span><span class="chg">SESSIONS = {}                                        # lives in this session’s memory only
-
-def session_id():
-    return request.headers.get("X-Session-Id", "local")    # header name differs per runtime</span><span class="dim">
-
-@app.post("/invocations")
-def invocations():
-    body = request.get_json(silent=True) or {}
-    claim = body.get("claim")
-    if not claim:
-        return jsonify(error="send a claim"), 400
-    </span><span class="chg">seen = SESSIONS.setdefault(session_id(), [])
-    seen.append(claim["id"])</span><span class="dim">
-    return jsonify(decision=decide_claim(claim)</span><span class="chg">, seen_in_this_session=seen</span><span class="dim">)</span></div>
-<p class="en">What survives when a session ends? Sort them.</p>
-<p class="zh">会话结束后，什么还在？来分一分。</p><div class="sc" id="g1"></div>
-
-<h2><span class="en">Step 5 · Keep long work visibly alive</span><span class="zh">第 5 步 · 让长任务清清楚楚地“活着”</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A long job, such as reading a thick claim file, may run for minutes in a background thread. To the runtime, nothing is happening, so it ends the session mid-job. The fix is to show the work. Count the jobs that are running, and let <code>/ping</code> say “busy” while the count is above zero. Also record each step, so a person can see progress. Keep the flag honest: set it only while real work runs. The helper <code>busy()</code> does this for you, inside a <code>with</code> block: it adds one when the work starts and takes it away when the work ends, even after a crash. A stuck flag keeps a session, and your bill, alive. The word for “busy” varies, so use your runtime’s.</p>
-<p class="zh" style="margin:0 0 8px">长任务，比如读一份很厚的理赔文件，可能在后台线程里跑几分钟。对运行时来说，什么都没发生，于是它在任务中途结束了会话。解法是把工作亮出来。数一数正在跑的任务，只要数字大于零，就让 <code>/ping</code> 回答“忙”。再把每一步记下来，让人看得到进度。标志要诚实：只在真有工作时才设置。<code>busy()</code> 在 <code>with</code> 代码块里替你做这件事：工作开始时加一，工作结束时减一，即使中途崩溃也会减回去。标志卡住不放，会话和你的账单就一直活着。“忙”这个词各家不同，用你的运行时规定的。</p></div>
+<h2><span class="en">Step 2 · Sessions end, so show long work is alive</span><span class="zh">第 2 步 · 会话会结束，所以要亮出长任务还活着</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b>
+<ul class="en" style="margin:0"><li>Each run gets its own <b>session</b>: a separate little computer. Two claims never share variables.</li><li>A session ends after about a minute <b>idle</b> (no request in flight), even if your background thread is still running. Anything in its memory or disk goes with it; only what is stored outside survives.</li><li>So report long work: count running jobs and let <code>/ping</code> say “busy” while the count is above zero, and write each step down so a person sees progress. <code>busy()</code> adds one when work starts and removes it when it ends, even after a crash. The word for “busy” varies by runtime.</li></ul>
+<ul class="zh" style="margin:0"><li>每次运行有自己的<b>会话</b>：一台独立的小电脑。两份理赔永远不共用变量。</li><li>会话在<b>空闲</b>（没有请求在处理）约一分钟后结束，哪怕你的后台线程还在跑。内存或磁盘里的东西随它消失；只有存在外面的才活得下来。</li><li>所以要汇报长任务：数一数正在跑的任务，只要数字大于零，就让 <code>/ping</code> 回答“忙”，并把每一步记下来，让人看得到进度。<code>busy()</code> 在工作开始时加一，结束时减一，即使崩溃也会减回去。“忙”这个词各家不同。</li></ul></div>
 <div class="codebox" data-file="agent_app.py" data-lang="python"><span class="dim"># agent_app.py, added (import threading, time and from contextlib import contextmanager at the top)
 </span><span class="chg">BUSY, LOCK, JOBS = 0, threading.Lock(), {}
-
 @contextmanager
 def busy():
     global BUSY
@@ -109,42 +52,36 @@ def busy():
     finally:
         with LOCK:
             BUSY -= 1
-
 def long_job(claim_id):
     with busy():
         for step in ("read the file", "decide", "write the record"):
             JOBS[claim_id] = {"step": step, "at": time.time()}      # progress anyone can read
             time.sleep(20)                                           # stands in for slow model and tool calls
         JOBS[claim_id] = {"step": "done", "at": time.time()}
-
 @app.post("/jobs/&lt;claim_id&gt;")
 def start_job(claim_id):
     threading.Thread(target=long_job, args=(claim_id,), daemon=True).start()
-    return jsonify(started=claim_id), 202
-
-@app.get("/jobs/&lt;claim_id&gt;")
-def job(claim_id):
-    return jsonify(JOBS.get(claim_id, {"step": "unknown"}))</span><span class="dim">
-
+    return jsonify(started=claim_id), 202</span><span class="dim">
 # and ping becomes:
 @app.get("/ping")
 def ping():
     </span><span class="chg">return jsonify(status="HealthyBusy" if BUSY else "Healthy")</span></div>
+<p class="en">What survives when a session ends? Sort them.</p>
+<p class="zh">会话结束后，什么还在？来分一分。</p><div class="sc" id="g1"></div>
 <div class="try" id="p5"></div>
 
-<h2><span class="en">Step 6 · Pause in one session, resume in another</span><span class="zh">第 6 步 · 在一个会话里暂停，在另一个会话里继续</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A payout over S$800 waits for a handler, maybe for hours. The session that started it will be gone by then. So park the waiting claim <em>outside</em> the session, in a database, under its claim id. Whichever new session gets the handler’s answer takes it out and carries on. This is the pause idea from the earlier lesson, in a smaller form. Here it is a local SQLite file so the code runs at home. On the runtime, point it at a hosted database, because the session’s disk disappears too.</p>
-<p class="zh" style="margin:0 0 8px">超过 S$800 的赔付要等理赔员，可能一等就是几个小时。到那时，发起它的会话早已不在了。所以要把等待中的理赔放在会话<em>外面</em>，放进数据库，用理赔编号做标签。无论哪个新会话收到理赔员的答复，都把它取出来接着干。这是前面那一课“暂停”的想法，做成了更小的版本。这里用的是本地 SQLite 文件，方便在家里运行。到了运行时上，要换成托管数据库，因为会话的磁盘也会消失。</p></div>
+<h2><span class="en">Step 3 · Pause in one session, resume in another</span><span class="zh">第 3 步 · 在一个会话里暂停，在另一个会话里继续</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b>
+<ul class="en" style="margin:0"><li>A payout over S$800 waits for a handler, maybe hours; the session that started it will be gone. Park the waiting claim <em>outside</em> the session, in a database, under its claim id. Any new session that gets the answer takes it out and carries on.</li><li>This is a local SQLite file so it runs at home; on the runtime use a hosted database.</li><li>A handler can also <b>send back</b> with a note (“receipt shows a smaller bag”): the agent decides again in a new session with the note as extra input. A plain sign-off carries no reason.</li></ul>
+<ul class="zh" style="margin:0"><li>超过 S$800 的赔付要等理赔员，可能几个小时；发起它的会话到时已不在。把等待中的理赔放在会话<em>外面</em>，放进数据库，用理赔编号做标签。任何收到答复的新会话都把它取出来接着干。</li><li>这里用本地 SQLite 文件，方便在家里运行；在运行时上要换成托管数据库。</li><li>理赔员也可以附上一句话<b>退回</b>（“收据显示箱子更小”）：智能体在新会话里把这句话当额外输入重新判定。单纯签字不带理由。</li></ul></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="Session A saves its state and ends; after a handler signs off, a fresh session B loads the state and finishes the claim"><defs><marker id="ah24" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><path class="lnk hot" d="M185 100L275 100" marker-end="url(#ah24)"/><path class="lnk hot" d="M445 115L535 115" marker-end="url(#ah24)"/><path class="lnk" d="M620 45L620 75" marker-end="url(#ah24)"/><rect class="box soft" x="535" y="5" width="170" height="40" rx="10"/><text class="en" x="620" y="29">Aisha signs off</text><text class="zh" x="620" y="29">Aisha 签字</text><rect class="box soft" x="15" y="75" width="170" height="64" rx="10"/><text class="en" x="100" y="103">Session A</text><text class="zh" x="100" y="103">会话 A</text><text class="en sm" x="100" y="120">runs, then ends</text><text class="zh sm" x="100" y="120">运行后结束</text><rect class="box new" x="275" y="75" width="170" height="64" rx="10"/><text class="en" x="360" y="103">Saved state</text><text class="zh" x="360" y="103">存档</text><text class="en sm" x="360" y="120">outside the session</text><text class="zh sm" x="360" y="120">在会话之外</text><rect class="box soft" x="535" y="75" width="170" height="64" rx="10"/><text class="en" x="620" y="103">Session B</text><text class="zh" x="620" y="103">会话 B</text><text class="en sm" x="620" y="120">a fresh copy</text><text class="zh sm" x="620" y="120">全新副本</text><text class="en sm" x="230" y="92">pause: save</text><text class="zh sm" x="230" y="92">暂停：保存</text><text class="en sm" x="490" y="106">resume: load</text><text class="zh sm" x="490" y="106">继续：读取</text><text class="en sm" x="360" y="185">Nothing is remembered inside a session; it is all in the saved state.</text><text class="zh sm" x="360" y="185">会话里什么都不记，全在存档里。</text></svg><figcaption><span class="en">The runtime ends sessions on its own, so a pause only survives if the state is saved outside.</span><span class="zh">运行时会自己结束会话，所以暂停要靠把状态存在会话之外才能撑过去。</span></figcaption></figure>
 <div class="codebox" data-file="agent_app.py" data-lang="python"><span class="dim"># agent_app.py, added (import json, os and sqlite3 at the top)
 </span><span class="chg">SIGNOFF_LIMIT = 800
 db = sqlite3.connect(os.environ.get("STATE_DB", "state.db"), check_same_thread=False)
 db.execute("CREATE TABLE IF NOT EXISTS parked (claim_id TEXT PRIMARY KEY, claim TEXT, decision TEXT)")
-
 def park(claim, decision):
     db.execute("INSERT OR REPLACE INTO parked VALUES (?, ?, ?)", (claim["id"], json.dumps(claim), json.dumps(decision)))
     db.commit()
-
 def take(claim_id):
     row = db.execute("SELECT claim, decision FROM parked WHERE claim_id = ?", (claim_id,)).fetchone()
     if row is None:
@@ -152,61 +89,39 @@ def take(claim_id):
     db.execute("DELETE FROM parked WHERE claim_id = ?", (claim_id,))
     db.commit()
     return json.loads(row[0]), json.loads(row[1])
-
+def decide_claim(claim, note=""):
+    payout = float(claim["amount"])
+    if note:                                           # stand-in: a real agent reads the note in its prompt
+        payout = min(payout, SIGNOFF_LIMIT)
+    return {"action": "approve", "payout": payout}
 def settle(claim, decision):
     if decision["payout"] &gt; SIGNOFF_LIMIT:
         park(claim, decision)
         return jsonify(waiting=True, payout=decision["payout"])
     return jsonify(paid=decision["payout"])        # stand-in for the real payment call</span><span class="dim">
-
 # in invocations(): a resume carries no new claim, so handle it right after "body = ...", before the 400 check
-</span><span class="chg">    resume = body.get("resume")                  # e.g. {"claim_id": "C-2002", "ok": True}
+</span><span class="chg">    resume = body.get("resume")          # e.g. {"claim_id": "C-2002", "ok": True} or {..., "send_back": "note"}
     if resume:
         found = take(resume.get("claim_id"))
         if found is None:
             return jsonify(error="nothing is waiting for that claim"), 404
         claim, decision = found
+        if resume.get("send_back"):
+            return settle(claim, decide_claim(claim, note=resume["send_back"]))
         return jsonify(paid=decision["payout"] if resume.get("ok") else False)</span><span class="dim">
-
 # and the last line of invocations() becomes:
 </span><span class="chg">    return settle(claim, decide_claim(claim))</span></div>
 <div class="try" id="p6"></div>
 
-<h2><span class="en">Step 7 · Send it back, not only sign it off</span><span class="zh">第 7 步 · 能退回，不只是签字</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A handler can do more than yes or no. A senior handler can <b>send back</b> a large approval with a note, “the receipt is for a smaller bag”, and the agent decides again in a new session, with the note as extra input. A plain sign-off carries no reason. A send-back does. The stand-in agent here just obeys the note by capping the payout. A real agent reads the note in its prompt and may decide something else.</p>
-<p class="zh" style="margin:0 0 8px">理赔员能做的不只是“行”或“不行”。资深理赔员可以把一笔大额批准<b>退回</b>，附上一句话，比如“收据上的箱子小一些”，智能体就在新会话里重新判定，把这句话当作额外的输入。单纯的签字不带理由，退回带着理由。这里的替身智能体只是照字面执行，把赔付封顶。真正的智能体会在提示词里读这句话，可能做出别的决定。</p></div>
-<div class="codebox" data-file="agent_app.py" data-lang="python"><span class="dim"># agent_app.py, changed
-</span><span class="chg">def decide_claim(claim, note=""):
-    payout = float(claim["amount"])
-    if note:                                           # stand-in: a real agent reads the note in its prompt
-        payout = min(payout, SIGNOFF_LIMIT)
-    return {"action": "approve", "payout": payout}</span><span class="dim">
-
-# in the resume branch of invocations(): right after "claim, decision = found", and above the line that returns paid:
-</span><span class="chg">        if resume.get("send_back"):
-            return settle(claim, decide_claim(claim, note=resume["send_back"]))</span><span class="dim">
-
-# try_it.py
-# client = app.test_client()
-# claim = {"id": "C-2002", "amount": 1200}
-# print(client.post("/invocations", json={"claim": claim}).json)                   # waiting: True
-# back = {"resume": {"claim_id": "C-2002", "send_back": "receipt shows a smaller bag"}}
-# print(client.post("/invocations", json=back).json)                              # paid: 800.0</span></div>
-<div class="try" id="p7"></div>
-
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我当时想错了</span></b><span class="en">A long job simply stopped halfway. Nothing in my logs said why. The runtime had decided the session was idle, because the job ran in a background thread and nothing was reporting. I first blamed my code. The fix was to report progress while it works: the busy ping and a step the job writes down at each stage. Keeping long work alive and visible is the harness’s job (the code you wrap around the agent to run it and report on it), not the runtime’s.</span><span class="zh">一个长任务在半路就停了。我的日志里什么原因都没写。运行时认定这个会话空闲了，因为任务跑在后台线程里，没有任何东西在汇报。我一开始怪自己的代码。解决办法是边干边汇报：忙碌的 ping，加上任务在每个阶段写下的一步记录。让长任务活着、看得见，是 harness 的工作（也就是你围绕智能体写的、负责运行和汇报的那层代码），不是运行时的工作。</span></div>
-
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Send a claim back with a note</b> and watch the second decision come from a new session.</span><span class="zh"><b>带着一句话退回一份理赔</b>，看第二次判定从一个新会话里出来。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Compare cold and warm start times</b> with <code>timing.py</code>, once straight after a deploy and once after a long wait.</span><span class="zh"><b>用 <code>timing.py</code> 比较冷启动和热启动的时间</b>，一次在刚部署之后，一次在等了很久之后。</span></span></label><label><input type="checkbox"><span><span class="en"><b>List what could end a session early</b>: idle time, a crash, a redeploy, a limit on total run time. Write which of them your agent can survive.</span><span class="zh"><b>列出可能让会话提前结束的事</b>：空闲时间、崩溃、重新部署、总运行时长的上限。写下你的智能体能扛住其中哪几种。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the pilot runs on a managed runtime and can pause in one session and resume in another, like a folder with the stamp note clipped to it, and Kumar has no server to mend. The next problem is the handover: once Mei Ling is back at her own desk, Aisha will need to ask it things herself.</span><span class="zh">现在试点跑在托管运行时上，能在一个会话里暂停、在另一个会话里继续，就像夹着盖章便条的文件夹，Kumar 也没有服务器要修。下一个问题是交接：Mei Ling 回到自己的座位之后，Aisha 得自己向它提问。</span></div>
-<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2><div class="card"><p class="en" style="margin:0 0 12px"><code>ModuleNotFoundError: No module named 'flask'</code><br>Cause: not installed. Fix: <code>pip install flask requests</code>.</p><p class="zh" style="margin:0 0 12px"><code>ModuleNotFoundError: No module named 'flask'</code><br>原因：没有安装。解决：<code>pip install flask requests</code>。</p><p class="en" style="margin:0 0 12px"><code>requests.exceptions.ReadTimeout: HTTPConnectionPool: Read timed out. (read timeout=60)</code><br>Cause: a cold start plus a slow model took over 60 seconds. Fix: call again; the second call is faster. Raise the timeout only if it keeps happening.</p><p class="zh" style="margin:0 0 12px"><code>requests.exceptions.ReadTimeout: HTTPConnectionPool: Read timed out. (read timeout=60)</code><br>原因：冷启动加上模型较慢，超过了 60 秒。解决：再调用一次，第二次会快些。持续发生时才加大超时。</p><p class="en" style="margin:0 0 12px"><code>400 Bad Request: {"error":"send a claim"}</code><br>Cause: the body has no <code>claim</code> field. Fix: send <code>{"claim": {...}}</code> with an id and an amount.</p><p class="zh" style="margin:0 0 12px"><code>400 Bad Request: {"error":"send a claim"}</code><br>原因：请求内容里没有 <code>claim</code> 字段。解决：发送带编号和金额的 <code>{"claim": {...}}</code>。</p><p class="en" style="margin:0 0 12px"><code>sqlite3.OperationalError: unable to open database file</code><br>Cause: the folder in <code>STATE_DB</code> does not exist or is not writable. Fix: point it to a folder the runtime can write to.</p><p class="zh" style="margin:0 0 12px"><code>sqlite3.OperationalError: unable to open database file</code><br>原因：<code>STATE_DB</code> 里的文件夹不存在或不可写。解决：指向运行时能写的文件夹。</p></div>
-<h2><span class="en">Recap</span><span class="zh">小结</span></h2><div class="card"><p class="en" style="margin:0">• Wrap the agent in a small app with /ping and /invocations; that is all the runtime asks for.<br>• Expect a slow first call and a fast second one.<br>• Keep state in a database, because the runtime may stop your program at any time.</p><p class="zh" style="margin:0">• 把智能体包成带 /ping 和 /invocations 的小应用；运行时只要求这些。<br>• 第一次调用慢、第二次快，这是正常的。<br>• 状态要存在数据库里，因为运行时随时可能停掉你的程序。</p></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Send a claim back with a note</b> and watch the second decision come from a new session.</span><span class="zh"><b>带着一句话退回一份理赔</b>，看第二次判定从一个新会话里出来。</span></span></label><label><input type="checkbox"><span><span class="en"><b>List what could end a session early</b>: idle time, a crash, a redeploy, a run-time limit. Write which ones your agent survives.</span><span class="zh"><b>列出可能让会话提前结束的事</b>：空闲时间、崩溃、重新部署、运行时长上限。写下你的智能体能扛住哪几种。</span></span></label></div>
+<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2><div class="card"><p class="en" style="margin:0 0 12px"><code>requests.exceptions.ReadTimeout: Read timed out. (read timeout=60)</code><br>Cause: a cold start plus a slow model. Fix: call again; the second call is faster.</p><p class="zh" style="margin:0 0 12px"><code>requests.exceptions.ReadTimeout: Read timed out. (read timeout=60)</code><br>原因：冷启动加上模型较慢。解决：再调用一次，第二次会快些。</p><p class="en" style="margin:0 0 12px"><code>400 Bad Request: {"error":"send a claim"}</code><br>Fix: send <code>{"claim": {...}}</code> with an id and an amount.</p><p class="zh" style="margin:0 0 12px"><code>400 Bad Request: {"error":"send a claim"}</code><br>解决：发送带编号和金额的 <code>{"claim": {...}}</code>。</p></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• The same agent runs on a laptop or a runtime. The app needs one door for work and one for a health ping.<br>• Test at home first. Then deploy and time the cold and the warm start.<br>• Each dispatch or evaluation gets its own session, and nothing in a session’s memory or disk outlives it.<br>• A session ends after about a minute idle, even with a background thread running.<br>• Keep long work visibly alive: a busy ping, and a progress step at every stage.<br>• Park waiting work in a database under its claim id, so any later session can resume it.<br>• Sending back with a note is as important as signing off.</p><p class="zh" style="margin:0">• 同一个智能体，在笔记本上或运行时上都能跑。应用需要一扇接收工作的门，一扇健康探测的门。<br>• 先在家里测试。再部署，给冷启动和热启动计时。<br>• 每次派发或评测都有自己的会话，会话内存和磁盘里的东西，活不过会话。<br>• 空闲约一分钟后会话就结束，即使后台线程还在跑。<br>• 让长任务清清楚楚地活着：忙碌的 ping，加上每个阶段的进度记录。<br>• 把等待中的工作按理赔编号放进数据库，之后任何会话都能接着干。<br>• 带着理由退回，和签字批准一样重要。</p></div>
+<div class="card"><p class="en" style="margin:0">• The same agent runs on a laptop or a runtime; it needs one door for work and one for a health ping.<br>• Expect a slow cold start and fast warm calls.<br>• Each run gets its own session; nothing in its memory or disk outlives it.<br>• Keep long work visibly alive: a busy ping and a progress step at each stage.<br>• Park waiting work in a database under its claim id; sending back with a note matters as much as signing off.</p><p class="zh" style="margin:0">• 同一个智能体在笔记本或运行时上都能跑；它需要一扇接收工作的门，一扇健康探测的门。<br>• 冷启动慢，热调用快。<br>• 每次运行有自己的会话；它内存和磁盘里的东西活不过会话。<br>• 让长任务清清楚楚地活着：忙碌的 ping，加上每个阶段的进度记录。<br>• 把等待中的工作按理赔编号放进数据库；带着理由退回，和签字批准一样重要。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI FDE</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"prev":["22-gateway-keys-and-policy.html","23-the-context-layer-as-its-own-service.html"],"tools":{"en":"Python 3, Flask and requests; a managed agent runtime account to deploy (optional)","zh":"Python 3、Flask 和 requests；可选：用于部署的托管运行时账号"},"know":{"en":"A small Flask service from Lessons 22 and 23.","zh":"前面几课的小型 Flask 服务。"},"mins":45,"offline":false,"goals":{"en":["Test an agent at home, then deploy and time the cold and warm start","Give each dispatch or evaluation its own session","Keep long work alive with a busy ping and progress steps","Park waiting work in a database under its claim id"],"zh":["先在本地测试智能体，再部署并测量冷启动和热启动","给每次分发或评估单独的会话","用忙碌心跳和进度步骤让长任务保持存活","把等待中的工作按理赔编号存进数据库"]}}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=37968fc4"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/24-an-agent-on-a-managed-runtime.js?v=f12743e4"></script></body></html>
+<script src="js/24-an-agent-on-a-managed-runtime.js?v=bb1e9315"></script></body></html>

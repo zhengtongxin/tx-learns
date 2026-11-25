@@ -5,26 +5,12 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/ai-production/19-deploy-scripts-and-clean-teardown.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-production/19-deploy-scripts-and-clean-teardown.html","url":"https://tx-learns.vercel.app/ai-production/19-deploy-scripts-and-clean-teardown.html","name":"Deploy scripts and teardown","alternateName":"部署脚本与拆除","description":"Wrap the steps in two scripts so deploying and destroying are one command each, and leave nothing running behind you.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"Infrastructure as code","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Production","url":"https://tx-learns.vercel.app/ai-production/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Production","item":"https://tx-learns.vercel.app/ai-production/index.html"},{"@type":"ListItem","position":3,"name":"Deploy scripts and teardown","item":"https://tx-learns.vercel.app/ai-production/19-deploy-scripts-and-clean-teardown.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Infrastructure as code · Lesson 3</span><span class="zh">基础设施即代码 · 第 3 课</span></span><h1><span class="en">Deploy scripts and teardown</span><span class="zh">部署脚本与拆除</span></h1><p class="meta"><span class="en">Wrap the steps in two scripts so deploying and destroying are one command each, and leave nothing running behind you · ~30 min · hands-on</span><span class="zh">把步骤包进两个脚本，让部署和销毁各是一条命令，并且不在身后留下任何还在运行的东西 · 约 30 分钟 · 动手实践</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time Mei Ling could make three environments, but each took eight commands in the right order. Today it fails when Kumar wants one button up and one down, and Mr Ong asks for proof that a deleted copy is not still billing. We fix it by writing a deploy script and a destroy script that empties first, then checks.</p>
-<p class="zh" style="margin:0">上回，Mei Ling 能造出三套环境，但每套都要按顺序敲八条命令。今天 Kumar 想要一个上线按钮和一个下线按钮，Ong 先生还要证据证明删掉的副本不再计费。我们的办法是写一个部署脚本和一个先清空再检查的销毁脚本。</p></div>
-<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0"><b>Mei Ling</b> can now make three environments, but each one takes eight commands in the right order. <b>Kumar</b> wants one button for going up and one for coming down. <b>Mr Ong</b> has a harder question: "When you are finished with the test copy, can you prove nothing is still running and billing us?" She starts by writing the two scripts.</p>
-<p class="zh" style="margin:0"><b>Mei Ling</b> 现在能建出三个环境了，但每一个都要按正确顺序敲八条命令。<b>Kumar</b> 想要一个“上去”的按钮和一个“下来”的按钮。<b>Ong 先生</b>有个更难的问题：“测试那份用完之后，你能证明没有东西还在跑、还在向我们收费吗？”她先动手写这两个脚本。</p></div>
 <h2><span class="en">Step 1 · A deploy script</span><span class="zh">第 1 步 · 一个部署脚本</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A deploy has an order, and the order matters. Build the backend package first, because the function resource reads the zip. The first line, <code>set -euo pipefail</code>, means stop at the first error. The pip flags build the package for Lambda's Linux, even if your laptop is a Mac. Build the front end. Select (or create) the workspace and print it. Apply (with <code>-auto-approve</code>, which skips the yes/no question Terraform normally asks). Then upload the site files and print the addresses. Put all of it in one script that takes the environment name. The script reads five names from <code>outputs.tf</code> (<code>site_bucket</code>, <code>site_url</code>, <code>api_url</code>, <code>cdn_id</code> and <code>memory_bucket</code>); each is a short output block that points at a resource from the last lesson (shown below, with the resource names from your main file), and Terraform prints it after apply. After the upload the script also tells the CDN to forget its old copies, so the stale-page problem from the live-twin lesson does not return. A second mode, <code>plan</code>, builds and shows the plan but changes nothing; this lesson does not use it, but it is there for checking changes.</p>
-<p class="zh" style="margin:0 0 8px">部署有顺序，而且顺序很重要。先构建后端包，因为函数资源要读那个 zip。脚本第一行 <code>set -euo pipefail</code> 的意思是：遇到第一个错误就停下。pip 那几个参数是为 Lambda 的 Linux 环境构建包，哪怕你的笔记本是 Mac。再构建前端。选中（或新建）工作区并把它打印出来。apply（加上 <code>-auto-approve</code>，它会跳过 Terraform 平时问你的 yes/no 确认）。然后上传网站文件，打印出地址。把这些全放进一个接收环境名的脚本里。脚本读取的五个名字（<code>site_bucket</code>、<code>site_url</code>、<code>api_url</code>、<code>cdn_id</code> 和 <code>memory_bucket</code>）来自 <code>outputs.tf</code>：每个都是一个指向上一课某个资源的输出块（见下面，资源名以你的主文件为准），apply 之后 Terraform 会打印出来。上传之后脚本还会让 CDN 忘掉旧副本，这样上线的分身那一课里的旧页面问题就不会再回来。再加一个 <code>plan</code> 模式：构建并显示计划，但什么都不改；本课不用它，但它可以用来检查改动。</p>
-<p class="en" style="margin:0">One more thing: a script written on your machine may not run on a friend's operating system. This one is for macOS and Linux; this lesson does not cover Windows, which needs its own PowerShell version.</p>
-<p class="zh" style="margin:0">还有一点：在你机器上写的脚本，未必能在朋友的操作系统上运行。这个是给 macOS 和 Linux 的；本课不讲 Windows，它需要自己的 PowerShell 版本。</p></div>
-<div class="codebox" data-file="infra/outputs.tf" data-lang="hcl"><span class="dim"># infra/outputs.tf
-output "site_bucket"   { value = aws_s3_bucket.site.bucket }
-output "memory_bucket" { value = aws_s3_bucket.memory.bucket }
-output "site_url"      { value = "https://${aws_cloudfront_distribution.site.domain_name}" }
-output "api_url"       { value = aws_apigatewayv2_api.twin.api_endpoint }
-output "cdn_id"        { value = aws_cloudfront_distribution.site.id }</span></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A deploy has an order: build the backend zip first (the function resource reads it), build the front end, select and print the workspace, apply, upload the site, tell the CDN to forget old copies, print the addresses. Put it in one script that takes the environment name. <code>set -euo pipefail</code> stops at the first error, and <code>-auto-approve</code> skips Terraform's yes/no question. The addresses come from <code>outputs.tf</code>, short blocks that expose resources from the last lesson. This script is for macOS and Linux.</p>
+<p class="zh" style="margin:0 0 8px">部署有顺序：先构建后端 zip（函数资源要读它），构建前端，选中并打印工作区，apply，上传网站，让 CDN 忘掉旧副本，打印地址。把它放进一个接收环境名的脚本。<code>set -euo pipefail</code> 遇到第一个错误就停，<code>-auto-approve</code> 跳过 Terraform 的 yes/no 确认。地址来自 <code>outputs.tf</code>，那是几个暴露上一课资源的小块。这个脚本适用于 macOS 和 Linux。</p></div>
 <div class="codebox" data-file="deploy.sh" data-lang="bash"><span class="dim">#!/usr/bin/env bash
-# deploy.sh &lt;dev|test|prod&gt; [plan]
 set -euo pipefail
-ENV="${1:?usage: ./deploy.sh dev|test|prod [plan]}"
-MODE="${2:-apply}"
+ENV="${1:?usage: ./deploy.sh dev|test|prod}"
 
 </span><span class="chg">( cd backend &amp;&amp; rm -rf package twin.zip \
   &amp;&amp; pip install --platform manylinux2014_x86_64 --target package --only-binary=:all: -r requirements.txt \
@@ -34,24 +20,16 @@ MODE="${2:-apply}"
 cd infra
 terraform workspace select -or-create "$ENV"
 echo "workspace: $(terraform workspace show)"
-
-if [ "$MODE" = "plan" ]; then
-  terraform plan -var="environment=$ENV"
-  exit 0
-fi
-
 terraform apply -auto-approve -var="environment=$ENV"
 aws s3 sync ../frontend/dist "s3://$(terraform output -raw site_bucket)" --delete
 aws cloudfront create-invalidation --distribution-id "$(terraform output -raw cdn_id)" --paths "/*" &gt; /dev/null
-echo "site: $(terraform output -raw site_url)"
-echo "api:  $(terraform output -raw api_url)"</span></div>
+echo "site: $(terraform output -raw site_url)"</span></div>
 <div class="try" id="t0"></div>
 <h2><span class="en">Step 2 · A destroy script that empties first</span><span class="zh">第 2 步 · 先清空的销毁脚本</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Going up is half the job. Terraform will not delete a bucket that still holds files, so <code>destroy</code> fails at the buckets. The destroy script empties them first, then lets Terraform remove everything else. (If your buckets keep old versions of files, those block deletion too. Setting <code>force_destroy = true</code> on the bucket resource in dev and test lets Terraform empty them itself.)</p>
-<p class="zh" style="margin:0">上去只是一半的活。Terraform 不会删除还装着文件的存储桶，所以 <code>destroy</code> 会在存储桶那里失败。销毁脚本先把它们清空，再让 Terraform 移除其余所有东西。（如果你的存储桶会保留文件的旧版本，这些旧版本也会挡住删除。在 dev 和 test 里给存储桶资源设上 <code>force_destroy = true</code>，Terraform 就会自己去清空。）</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Terraform will not delete a bucket that still holds files, so <code>destroy</code> fails at the buckets. The destroy script empties them first, then lets Terraform remove the rest. (<code>force_destroy = true</code> on the bucket resource in dev and test lets Terraform do it itself.)</p>
+<p class="zh" style="margin:0">Terraform 不会删除还装着文件的存储桶，所以 <code>destroy</code> 会在存储桶那里失败。销毁脚本先把它们清空，再让 Terraform 移除其余部分。（在 dev 和 test 的存储桶资源上设 <code>force_destroy = true</code>，Terraform 就会自己清空。）</p></div>
 <figure class="fig"><svg viewBox="0 0 720 150" role="img" aria-label="The destroy script empties the buckets, destroys the rest, then lists leftovers to prove nothing remains"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box new" x="0.0" y="50" width="157.5" height="64" rx="12"/><text class="en" x="78.75" y="78.0">Empty buckets</text><text class="zh" x="78.75" y="78.0">清空存储桶</text><text class="en sm" x="78.75" y="96.0">full ones refuse delete</text><text class="zh sm" x="78.75" y="96.0">有内容就删不掉</text><path class="lnk" d="M159.5 82.0 L184.5 82.0" marker-end="url(#ah)"/><rect class="box" x="187.5" y="50" width="157.5" height="64" rx="12"/><text class="en" x="266.25" y="78.0">Destroy</text><text class="zh" x="266.25" y="78.0">销毁</text><text class="en sm" x="266.25" y="96.0">removes the rest</text><text class="zh sm" x="266.25" y="96.0">删除其余部分</text><path class="lnk" d="M347.0 82.0 L372.0 82.0" marker-end="url(#ah)"/><rect class="box" x="375.0" y="50" width="157.5" height="64" rx="12"/><text class="en" x="453.75" y="78.0">List leftovers</text><text class="zh" x="453.75" y="78.0">列出残留</text><text class="en sm" x="453.75" y="96.0">ask the cloud</text><text class="zh sm" x="453.75" y="96.0">向云查询</text><path class="lnk" d="M534.5 82.0 L559.5 82.0" marker-end="url(#ah)"/><rect class="box" x="562.5" y="50" width="157.5" height="64" rx="12"/><text class="en" x="641.25" y="78.0">Nothing left</text><text class="zh" x="641.25" y="78.0">什么也没剩</text><text class="en sm" x="641.25" y="96.0">no more bill</text><text class="zh sm" x="641.25" y="96.0">不再计费</text></svg><figcaption><span class="en">A clean teardown has an order: empty first, then destroy, then prove it by listing what remains.</span><span class="zh">干净的拆除有顺序：先清空，再销毁，最后列出剩余的东西来证明。</span></figcaption></figure>
 <div class="codebox" data-file="destroy.sh" data-lang="bash"><span class="dim">#!/usr/bin/env bash
-# destroy.sh &lt;dev|test|prod&gt;
 set -euo pipefail
 ENV="${1:?usage: ./destroy.sh dev|test|prod}"
 
@@ -64,66 +42,28 @@ echo "workspace: $(terraform workspace show)"
 done</span><span class="dim">
 
 terraform destroy -auto-approve -var="environment=$ENV"</span></div>
-<div class="codebox" data-file="output">$ ./destroy.sh test
-workspace: test
-delete: s3://wharf-twin-test-site-111122223333/index.html
-...
-Destroy complete! Resources: 8 destroyed.</div>
 <div class="try" id="t1"></div>
-<h2><span class="en">Step 3 · Run it for dev, check the twin, then test</span><span class="zh">第 3 步 · 先跑 dev，检查分身，再跑 test</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Run the script for dev and open the printed address. Chat with the live twin: does it answer, and does it remember you? Only then run the same script for test. Each environment has its own workspace and its own names, so deploying test does not touch dev.</p>
-<p class="zh" style="margin:0">给 dev 运行脚本，然后打开打印出来的地址。和上线的分身聊几句：它能回答吗？它记得你吗？确认了再给 test 运行同一个脚本。每个环境都有自己的工作区和自己的名字，所以部署 test 不会碰 dev。</p></div>
-<div class="codebox" data-file="terminal" data-lang="bash"><span class="chg">./deploy.sh dev</span><span class="dim">
-# workspace: dev
-# ...
-# site: https://d1example.cloudfront.net
-# api:  https://abc123.execute-api.ap-southeast-1.amazonaws.com
-# (open the site, chat with the twin, say hello twice)
-
-</span><span class="chg">./deploy.sh test</span><span class="dim">
-# workspace: test       the same steps, a different set of names</span></div>
-<div class="try" id="t2"></div>
-<h2><span class="en">Step 4 · Delete cleanly, then prove it</span><span class="zh">第 4 步 · 干净地删除，然后证明它</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">"It said destroy complete" is not proof. Check three ways. Terraform's own list of what it still manages should be empty. The cloud's command line should find no leftover buckets, functions, CDN distributions, gateways, roles or log groups with that environment's name. And the console should show nothing under the same name. A deploy you cannot undo is a risk; a teardown you cannot verify is nearly the same one.</p>
-<p class="zh" style="margin:0">“它说 destroy complete”不算证据。用三种方式检查。Terraform 自己管理的清单应该是空的。云的命令行应该找不到带那个环境名字的、遗留的存储桶、函数、CDN 分发、网关、角色或日志组。控制台里同样的名字下也应该什么都没有。无法撤销的部署是风险；无法验证的拆除，几乎是同一种风险。</p></div>
+<h2><span class="en">Step 3 · Prove the teardown</span><span class="zh">第 3 步 · 证明拆除干净</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">"Destroy complete" is not proof. Check that Terraform's own list is empty, that the cloud's command line finds nothing with that environment's name, and that the console agrees. Because both directions are one command, delete test environments every time you stop work. The budget alarm is the last line of defence; your own habit is the first.</p>
+<p class="zh" style="margin:0">“Destroy complete”不算证据。检查 Terraform 自己的清单是空的，云的命令行找不到带那个环境名的东西，控制台也一致。因为两个方向都只要一条命令，每次收工就删掉测试环境。预算警报是最后一道防线；你自己的习惯才是第一道。</p></div>
 <div class="codebox" data-file="terminal" data-lang="bash"><span class="chg">./destroy.sh test</span><span class="dim">
 
 cd infra &amp;&amp; terraform workspace select test
 terraform state list                                  # should print nothing
 aws s3 ls | grep wharf-twin-test                      # should print nothing
 aws lambda list-functions \
-  --query "Functions[?starts_with(FunctionName, 'wharf-twin-test')].FunctionName"   # should be []
-aws cloudfront list-distributions --query "DistributionList.Items[].Origins.Items[].DomainName" | grep wharf-twin-test   # nothing
-aws apigatewayv2 get-apis --query "Items[?starts_with(Name, 'wharf-twin-test')].Name"                                  # []
-aws iam list-roles --query "Roles[?starts_with(RoleName, 'wharf-twin-test')].RoleName"                                  # []
-aws logs describe-log-groups --log-group-name-prefix /aws/lambda/wharf-twin-test --query "logGroups[].logGroupName"    # []
-# then search the console for "wharf-twin-test" and see nothing</span></div>
-<div class="codebox" data-file="output">$ terraform state list
-$ aws s3 ls | grep wharf-twin-test
-$ aws lambda list-functions --query "..."
-[]</div>
+  --query "Functions[?starts_with(FunctionName, 'wharf-twin-test')].FunctionName"   # should be []</span></div>
 <div class="sc" id="t3"></div>
-<h2><span class="en">Step 5 · Cost: delete between sessions</span><span class="zh">第 5 步 · 费用：每次用完就删</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Because both directions are one command, you can afford to tear down a test environment every time you stop work, and rebuild it next session. That is the real saving. The budget alarm from the safe-account lesson is still there, but it is the <b>last</b> line of defence: it tells you after the money is spent. The first line is your own habit of running destroy.</p>
-<p class="zh" style="margin:0">因为两个方向都只要一条命令，你就能负担得起每次收工都拆掉测试环境，下次再重建。这才是真正的节省。账号安全那课设的预算警报还在，但它只是<b>最后</b>一道防线：钱花出去之后它才告诉你。第一道防线，是你自己运行 destroy 的习惯。</p></div>
-<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim"># end of every working session
-</span><span class="chg">./destroy.sh test        # and dev too, unless you are still using it</span><span class="dim">
-# prod stays up, because the public is using it</span></div>
-<div class="try" id="t4"></div>
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en"><b>Three slips.</b> Destroy failed because the buckets still held files, so the script now empties them first. The scripts I wrote for my own machine broke on a friend's operating system, so I keep a version for each. And I forgot to destroy test after I finished, and found out from the cost page.</span><span class="zh"><b>三个失误。</b>destroy 失败了，因为存储桶里还有文件，所以现在脚本先把它们清空。我为自己机器写的脚本，在朋友的操作系统上跑不起来，所以我每种系统各留一个版本。我还忘了在用完后销毁 test，是在费用页面上才发现的。</span></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Time a full deploy and a full destroy.</b></span><span class="zh"><b>给一次完整的部署和一次完整的销毁计时。</b></span></span></label><label><input type="checkbox"><span><span class="en"><b>Make the script stop</b> if the current workspace is not the one you typed.</span><span class="zh"><b>让脚本在当前工作区不是你输入的那个时停下来。</b></span></span></label><label><input type="checkbox"><span><span class="en"><b>Do a deploy, destroy, deploy cycle</b> and compare the outputs of the two deploys.</span><span class="zh"><b>做一轮部署、销毁、再部署，</b>比较两次部署的输出。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now Mei Ling brings an environment up with one script and takes it down with another, and a check lists what is left, so Mr Ong can see that nothing it built is left (a check is only as good as its list, so add any new kind of resource to it). The next problem is that the state still sits on her laptop, so a robot cannot read it and two people deploying at once would both write in the book.</span><span class="zh">现在 Mei Ling 用一个脚本上线、另一个脚本下线，再用检查列出剩下的东西，Ong 先生能看到它建的东西一样不剩（检查只和它的清单一样可靠，所以新增了资源类型，就要把它加进清单）。下一个问题是状态仍然放在她的笔记本上，机器人读不到，两个人同时部署也会同时往簿子上写。</span></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Time a full deploy and a full destroy.</b></span><span class="zh"><b>给一次完整的部署和一次完整的销毁计时。</b></span></span></label><label><input type="checkbox"><span><span class="en"><b>Make the script stop</b> if the current workspace is not the one you typed.</span><span class="zh"><b>让脚本在当前工作区不是你输入的那个时停下来。</b></span></span></label></div>
 <h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
-<div class="card"><p class="en" style="margin:0">• <code>bash: ./deploy.sh: Permission denied</code> The script file is not marked as runnable. <b>Fix:</b> Run <code>chmod +x deploy.sh destroy.sh</code>.<br>• <code>./deploy.sh: line 4: 1: usage: ./deploy.sh dev|test|prod [plan]</code> You ran it without an environment name. <b>Fix:</b> Add one: <code>./deploy.sh dev</code>.<br>• <code>BucketNotEmpty</code> A bucket still holds files, so it cannot be deleted. <b>Fix:</b> Keep the <code>aws s3 rm --recursive</code> step before <code>terraform destroy</code>.</p><p class="zh" style="margin:0">• <code>bash: ./deploy.sh: Permission denied</code> 脚本文件没有被标记为可执行。 <b>解决：</b>运行 <code>chmod +x deploy.sh destroy.sh</code>。<br>• <code>./deploy.sh: line 4: 1: usage: ./deploy.sh dev|test|prod [plan]</code> 运行时没有给环境名。 <b>解决：</b>加上环境名：<code>./deploy.sh dev</code>。<br>• <code>BucketNotEmpty</code> 桶里还有文件，所以无法删除。 <b>解决：</b>保留 <code>terraform destroy</code> 之前的 <code>aws s3 rm --recursive</code> 步骤。</p></div>
-<div class="callout tip"><b class="lbl"><span class="en">Recap</span><span class="zh">小结</span></b><span class="en">One script deploys, and one script tears down, with the same environment name.<br>Print the workspace first, so you never change the wrong copy.<br>After a destroy, check three places for leftovers.</span><span class="zh">一个脚本部署，一个脚本拆除，用同一个环境名。<br>先打印工作区，免得改错了副本。<br>拆除之后，到三个地方检查有没有残留。</span></div>
-<div class="callout tip"><b class="lbl"><span class="en">Plain words</span><span class="zh">白话词汇</span></b><span class="en"><b>Script</b>: a text file of commands run in order. <b><code>set -euo pipefail</code></b>: makes the script stop at the first failure instead of carrying on.</span><span class="zh"><b>脚本</b>：按顺序执行的命令文本文件。<b><code>set -euo pipefail</code></b>：让脚本在第一次失败时就停下，而不是接着往下跑。</span></div>
+<div class="card"><p class="en" style="margin:0">• <code>Permission denied</code> <b>Fix:</b> Run <code>chmod +x deploy.sh destroy.sh</code>.<br>• <code>usage: ./deploy.sh dev|test|prod</code> You gave no environment. <b>Fix:</b> Run <code>./deploy.sh dev</code>.<br>• <code>BucketNotEmpty</code> <b>Fix:</b> Keep the <code>aws s3 rm --recursive</code> step before <code>terraform destroy</code>.</p><p class="zh" style="margin:0">• <code>Permission denied</code> <b>解决：</b>运行 <code>chmod +x deploy.sh destroy.sh</code>。<br>• <code>usage: ./deploy.sh dev|test|prod</code> 没给环境名。 <b>解决：</b>运行 <code>./deploy.sh dev</code>。<br>• <code>BucketNotEmpty</code> <b>解决：</b>保留 <code>terraform destroy</code> 之前的 <code>aws s3 rm --recursive</code> 步骤。</p></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• A deploy has an order: build the backend, build the front end, pick the workspace, apply, upload the site, print the addresses.<br>• Print the current workspace every time, before anything changes.<br>• A destroy script empties the buckets first, because a bucket with files will not delete.<br>• Keep a script version for each operating system your team uses.<br>• Prove a teardown: the state list, the command line and the console should all show nothing.<br>• Delete test environments between sessions; the budget alarm is the last line of defence, not the first.<br>• A deploy you cannot undo is a risk, so script both directions.</p><p class="zh" style="margin:0">• 部署有顺序：构建后端、构建前端、选工作区、apply、上传网站、打印地址。<br>• 每次在任何东西改变之前，先打印当前的工作区。<br>• 销毁脚本先清空存储桶，因为还有文件的存储桶删不掉。<br>• 团队用到哪种操作系统，就保留哪种系统的脚本版本。<br>• 要证明拆除干净：状态清单、命令行和控制台都应该什么都没有。<br>• 测试环境每次用完就删；预算警报是最后一道防线，不是第一道。<br>• 无法撤销的部署是风险，所以两个方向都要写成脚本。</p></div>
+<div class="card"><p class="en" style="margin:0">• One script deploys and one destroys, both taking the environment name.<br>• Print the current workspace before anything changes.<br>• Empty buckets first: a bucket with files will not delete.<br>• Prove a teardown with the state list, the command line and the console.<br>• Delete test environments between sessions; the budget alarm is the last line of defence.</p><p class="zh" style="margin:0">• 一个脚本部署、一个脚本销毁，都接收环境名。<br>• 任何改动之前先打印当前工作区。<br>• 先清空存储桶：有文件的桶删不掉。<br>• 用状态清单、命令行和控制台证明拆除干净。<br>• 测试环境每次用完就删；预算警报是最后一道防线。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Production</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"goals":{"en":["Script a deploy in order: backend, front end, workspace, apply, upload, addresses","Print the current workspace before anything changes","Write a destroy script that empties buckets first","Prove a teardown shows nothing in the state list, command line and console"],"zh":["按顺序写部署脚本：后端、前端、工作区、apply、上传、打印地址","在任何改动前打印当前工作区","写一个先清空存储桶的销毁脚本","用状态列表、命令行和控制台都为空来证明已清理干净"]},"prev":["17-why-console-clicking-does-not-scale.html","18-state-workspaces-three-environments.html"],"tools":{"en":"Terraform, AWS CLI, Python 3 with pip, Node 18+, zip, a bash shell","zh":"Terraform、AWS 命令行工具、带 pip 的 Python 3、Node 18+、zip、bash 终端"},"know":{"en":"You have the three-environment Terraform setup and can read a bash script.","zh":"已有三套环境的 Terraform 配置，能读懂 bash 脚本。"},"mins":35,"offline":false}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=afade96e"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/19-deploy-scripts-and-clean-teardown.js?v=c937e7e5"></script></body></html>
+<script src="js/19-deploy-scripts-and-clean-teardown.js?v=9835dc28"></script></body></html>

@@ -5,91 +5,69 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/agentic-ai/07-agents-sdk-basics.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/agentic-ai/07-agents-sdk-basics.html","url":"https://tx-learns.vercel.app/agentic-ai/07-agents-sdk-basics.html","name":"Agents SDK basics","alternateName":"Agents SDK 基础","description":"In the last topic you hand-built the harness. Now a few lines do it.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Agent SDKs","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Agentic","url":"https://tx-learns.vercel.app/agentic-ai/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Agentic","item":"https://tx-learns.vercel.app/agentic-ai/index.html"},{"@type":"ListItem","position":3,"name":"Agents SDK basics","item":"https://tx-learns.vercel.app/agentic-ai/07-agents-sdk-basics.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Agent SDKs · Lesson 1</span><span class="zh">智能体 SDK · 第 1 课</span></span><h1><span class="en">Agents SDK basics</span><span class="zh">Agents SDK 基础</span></h1><p class="meta"><span class="en">In the last topic you hand-built the harness. Now a few lines do it · ~20 min · hands-on</span><span class="zh">上一个主题里你亲手写了外壳，现在几行代码就够 · 约 20 分钟 · 动手实践</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the assistant had two tools and a loop Aina wrote by hand. Today it fails when she wants a third tool: the hand-written loop is long, and every change risks breaking order saving. We fix it by rebuilding on an agent SDK, which carries the loop.</p>
-<p class="zh" style="margin:0">上回助手有两个工具，循环是 Aina 手写的。今天它的问题是：她想再加一个工具，手写的循环又长，改一处就可能弄坏记订单。办法是用智能体 SDK 重建，循环交给 SDK。</p></div>
-<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en"style="margin:0">You are building <b>Quip</b>, a tiny assistant. First it tells a joke. Then it can buzz your phone. Then it remembers your name. Before, each of these meant writing the prompt, the history, the tool JSON and a <code>while</code> loop yourself. Today the <b>OpenAI Agents SDK</b> carries all of that, and you only describe what you want. At Kopi Corner, Quip's buzz is the assistant pinging Aina's phone when an order arrives.</p>
-<p class="zh"style="margin:0">你要做一个小助手 <b>Quip</b>。先让它讲笑话，再让它能震动你的手机，再让它记住你的名字。之前每一步都意味着自己写提示词、历史记录、工具 JSON 和 <code>while</code> 循环。今天 <b>OpenAI Agents SDK</b> 把这些都包办了，你只需要描述想要什么。放到 Kopi Corner，Quip 的“震动手机”就是助手在订单到来时通知 Aina 的手机。</p></div>
-<h2><span class="en">Step 0 · One new keyword pair: async / await</span><span class="zh">第 0 步 · 一对新关键字：async / await</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Calling a model means waiting for the network. Think of ordering a coffee: while it is being made, you do not freeze, you can still do other things. <code>async def</code> marks a function that is allowed to wait like that. <code>await</code> means “wait here for this result” and only works inside an <code>async def</code>. One twist: a Jupyter notebook already runs an event loop, so there you may write <code>await</code> at the top level. In a normal <code>.py</code> file you wrap it:</p>
-<p class="zh"style="margin:0 0 8px">调用模型要等网络。就像点咖啡：等咖啡做好时你不会僵住，还可以做别的事。<code>async def</code> 标记一个允许这样等待的函数；<code>await</code> 表示“在这里等这个结果”，只能写在 <code>async def</code> 里面。一个特例：Jupyter 笔记本本身已经有事件循环，所以在那里可以直接在最外层写 <code>await</code>。普通 <code>.py</code> 文件里则要这样包一层：</p></div>
-<div class="codebox" data-file="hello_agent.py" data-lang="python"><span class="dim"># in a .py file
+<h2><span class="en">Step 1 · Agent, and one keyword pair</span><span class="zh">第 1 步 · Agent 与一对关键字</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">An <b>Agent</b> is one LLM plus a system prompt plus tools. In code it is four fields, each replacing something you hand-wrote earlier. Click each.</p>
+<p class="zh" style="margin:0 0 8px"><b>Agent</b> 就是一个大模型加系统提示词再加工具。代码里是四个字段，每个都替代了你之前手写的东西。逐个点开。</p></div>
+<div class="pills" id="ap"></div><div class="codebox" id="acode"></div><p class="meta" id="anote"></p>
+<div class="try" id="p1"></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Calling a model means waiting for the network. <code>async def</code> marks a function that may wait; <code>await</code> means “wait here for this result” and works only inside an <code>async def</code>. A Jupyter notebook already runs an event loop, so there <code>await</code> works at the top level. In a <code>.py</code> file, wrap it:</p>
+<p class="zh" style="margin:0 0 8px">调用模型要等网络。<code>async def</code> 标记允许等待的函数；<code>await</code> 表示“在这里等这个结果”，只能写在 <code>async def</code> 里。Jupyter 笔记本已有事件循环，所以那里可以在最外层直接写 <code>await</code>。在 <code>.py</code> 文件里要包一层：</p></div>
+<div class="codebox" data-file="hello_agent.py" data-lang="python"><span class="dim"># pip install openai-agents (not "agents": that is a different, older library)
+import asyncio
+from agents import Agent, Runner
+
+agent = Agent(name="Quip", instructions="You tell short, friendly jokes", model="gpt-5.4-mini")
+
 </span><span class="chg">async def main():</span><span class="dim">
     result = </span><span class="chg">await</span><span class="dim"> Runner.run(agent, "Tell a joke")
     print(result.final_output)
 
 </span><span class="chg">asyncio.run(main())</span></div>
-<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
-<div class="codebox" data-file="output" data-lang="text">Why did the developer go broke? Because he used up all his cache.</div>
-<p class="en">Which of these will run? Decide for each snippet.</p>
-<p class="zh">下面哪些能运行？逐个判断。</p><div class="sc" id="g0"></div>
-<h2><span class="en">Step 1 · Agent: a model with a role and tools</span><span class="zh">第 1 步 · Agent：带角色和工具的模型</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">An <b>Agent</b> is just one LLM plus a system prompt plus tools. In code it is four fields, and each replaces something you wrote by hand earlier. Click each field to see which.</p>
-<p class="zh"style="margin:0 0 8px"><b>Agent</b> 就是一个大模型加系统提示词再加工具。代码里是四个字段，每个都替代了你之前手写的某样东西。点开每个字段看看。</p></div>
-<div class="pills" id="ap"></div><div class="codebox" id="acode"></div><p class="meta" id="anote"></p>
-<div class="try" id="p1"></div>
-<h2><span class="en">Step 2 · Runner: the agent loop, for free</span><span class="zh">第 2 步 · Runner：现成的智能体循环</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Quip exists, but nothing has run yet. <code>Runner.run</code> does the running: it calls the model, runs any tools it asks for, and repeats until the model stops asking. That is your old <code>while</code> loop, with a turn limit built in.</p>
-<p class="zh"style="margin:0 0 8px">Quip 已经定义好了，但还没运行。<code>Runner.run</code> 负责运行：调用模型、执行它请求的工具、重复，直到模型不再请求。这就是你之前写的 <code>while</code> 循环，还自带轮数上限。</p></div>
+<div class="sc" id="g0"></div>
+
+<h2><span class="en">Step 2 · Runner: the loop, for free</span><span class="zh">第 2 步 · Runner：现成的循环</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">The code above already ran the agent. <code>Runner.run</code> calls the model, runs any tools it asks for, and repeats until it stops asking: your old <code>while</code> loop, with a turn limit built in. <code>final_output</code> is the answer; <code>result.to_input_list()</code> is every message of the run. Wrap calls in <code>with trace("name"):</code> to inspect each step at platform.openai.com/traces.</p>
+<p class="zh" style="margin:0">上面的代码已经运行了智能体。<code>Runner.run</code> 调用模型、执行它请求的工具、重复，直到不再请求：就是你之前的 <code>while</code> 循环，还自带轮数上限。<code>final_output</code> 是答案；<code>result.to_input_list()</code> 是这次运行的所有消息。把调用放进 <code>with trace("name"):</code>，就能在 platform.openai.com/traces 查看每一步。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="Your code calls Runner.run. Inside it the model is called, a requested tool runs, the result goes back to the model, and when no tool is requested final_output comes out"><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" fill="#9a9aa8"/></marker></defs><rect class="box soft" x="190" y="12" width="370" height="196" rx="14"/><rect class="box soft" x="10" y="80" width="140" height="50" rx="10"/><text class="en" x="80.0" y="110.0">Your code</text><text class="zh" x="80.0" y="110.0">你的代码</text><rect class="box" x="215" y="80" width="120" height="50" rx="10"/><text class="en" x="275.0" y="110.0">Model call</text><text class="zh" x="275.0" y="110.0">调用模型</text><rect class="box new" x="415" y="80" width="120" height="50" rx="10"/><text class="en" x="475.0" y="110.0">Run tool</text><text class="zh" x="475.0" y="110.0">运行工具</text><rect class="box soft" x="590" y="80" width="120" height="50" rx="10"/><text class="en" x="650.0" y="110.0">final_output</text><text class="zh" x="650.0" y="110.0">final_output</text><path class="lnk" d="M150,105 H213" marker-end="url(#ar)"/><path class="lnk hot" d="M335,98 H413" marker-end="url(#ar)"/><path class="lnk hot" d="M475,130 V165 H275 V132" marker-end="url(#ar)"/><path class="lnk" d="M275,80 V46 H650 V78" marker-end="url(#ar)"/><text class="en sm" x="374" y="92">asks</text><text class="zh sm" x="374" y="92">请求</text><text class="en sm" x="375" y="158">tool result</text><text class="zh sm" x="375" y="158">工具结果</text><text class="en sm" x="470" y="40">no more requests: done</text><text class="zh sm" x="470" y="40">不再请求：完成</text><text class="en sm" x="375" y="196">Runner.run is this loop</text><text class="zh sm" x="375" y="196">Runner.run 就是这个循环</text></svg><figcaption><span class="en">Runner.run repeats model, tool, model until the model stops asking, then hands back final_output.</span><span class="zh">Runner.run 反复执行 模型、工具、模型，直到模型不再请求，再交回 final_output。</span></figcaption></figure>
-<div class="codebox" data-file="quip.py" data-lang="python"><span class="dim">agent = Agent(name="Quip", instructions="You tell short, friendly jokes", model="gpt-5.4-mini")
-
-</span><span class="chg">result = await Runner.run(agent, "Tell a joke about debugging on a Friday")</span><span class="dim">
-print(result.final_output)      # the answer
-result.to_input_list()          # every message of the run</span></div>
 <div class="try" id="p2"></div>
-<div class="callout warn"><b class="lbl"><span class="en">Install name</span><span class="zh">安装名称</span></b><span class="en">The package is <code>openai-agents</code> (<code>pip install openai-agents</code>), imported with <code>from agents import Agent, Runner</code>. Do not <code>pip install agents</code>: that is a different, older library.</span><span class="zh">安装包名是 <code>openai-agents</code>（<code>pip install openai-agents</code>），导入写 <code>from agents import Agent, Runner</code>。不要装 <code>agents</code>，那是另一个旧的库。</span></div>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Two ways to see inside a run. <b>trace</b> groups your calls under one name so you can inspect every step at <b>platform.openai.com/traces</b>. <b>Streaming</b> hands you the text piece by piece as it is written, so a chat feels fast.</p>
-<p class="zh"style="margin:0 0 8px">有两种方式看清一次运行的内部。<b>trace</b> 把你的调用归在一个名字下，可以在 <b>platform.openai.com/traces</b> 查看每一步。<b>流式输出</b>则边生成边把文字一段段交给你，让聊天显得很快。</p></div>
-<div class="codebox" data-file="quip.py" data-lang="python"><span class="chg">with trace("Quip warm-up"):</span><span class="dim">
-    result = await Runner.run(agent, "Tell a joke")
 
-</span><span class="chg">result = Runner.run_streamed(agent, input="Tell me 3 jokes about coffee")</span><span class="dim">
-async for event in result.stream_events():
-    if event.type == "raw_response_event" and isinstance(event.data, ResponseTextDeltaEvent):
-        print(event.data.delta, end="", flush=True)</span></div>
-<div class="try" id="p2b"></div>
 <h2><span class="en">Step 3 · Tool: one decorator</span><span class="zh">第 3 步 · 工具：一个装饰器</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Now Quip should buzz your phone. You already have a plain function, <code>push</code>, from the career agent. Back then you also wrote its JSON by hand. The SDK reads your function instead: the <b>docstring</b> becomes the description and the <b>type hints</b> become the inputs.</p>
-<p class="zh"style="margin:0 0 8px">现在让 Quip 能震动你的手机。在职业智能体里你已经有了普通函数 <code>push</code>，而且当时还手写了它的 JSON。现在 SDK 直接读你的函数：<b>文档字符串</b>变成描述，<b>类型标注</b>变成输入参数。</p></div>
-<div class="codebox" data-file="tools.py" data-lang="python"><span class="chg">@function_tool</span><span class="dim">
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">No more hand-written tool JSON. The SDK reads your function: the <b>docstring</b> becomes the description and the <b>type hints</b> become the inputs.</p>
+<p class="zh" style="margin:0">不用再手写工具 JSON。SDK 直接读你的函数：<b>文档字符串</b>变成描述，<b>类型标注</b>变成输入参数。</p></div>
+<div class="codebox" data-file="tools.py" data-lang="python"><span class="dim"># push() is the Pushover helper from the career agent lesson
+from agents import function_tool
+
+</span><span class="chg">@function_tool</span><span class="dim">
 def push_tool(</span><span class="chg">message: str</span><span class="dim">) -> str:
     </span><span class="chg">"""Send this message to my phone as a push notification. Use it when the user asks to be notified."""</span><span class="dim">
-    payload = {"user": pushover_user, "token": pushover_token, "message": message}
-    status = requests.post(pushover_url, data=payload).status_code
-    return f"Push sent, status {status}"
+    push(message)
+    return "Push sent"
 
 notifier = Agent(name="Notifier", model="gpt-5.4-mini", instructions="You send the user a push message when asked", tools=[push_tool])</span></div>
 <div class="try" id="p3"></div>
-<h2><span class="en">Step 4 · Memory: sessions</span><span class="zh">第 4 步 · 记忆：Session</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">You tell Quip “My name is Mei”, then ask “What's my name?”. Each <code>Runner.run</code> starts fresh, just like the stateless calls in “Autonomy and tools”. Two ways to remember: <b>by hand</b>, pass <code>response.to_input_list()</code> plus the new message (the history you kept by hand before), or <b>with a session</b>, where the SDK stores and replays it for you.</p>
-<p class="zh"style="margin:0 0 8px">你告诉 Quip“我叫 Mei”，然后问“我叫什么？”。每次 <code>Runner.run</code> 都是全新开始，和《自主性与工具》里讲的无状态调用一样。有两种记住的方式：<b>手动</b>，把 <code>response.to_input_list()</code> 加上新消息传回去（就是你之前手动维护的历史记录）；或者<b>用 session</b>，由 SDK 替你保存并回放。</p></div>
-<div class="codebox" data-file="memory.py" data-lang="python"><span class="dim">session = SQLiteSession("mei-chat")     # in memory. For a file: SQLiteSession("mei-chat", "memory.db")
 
-response = await Runner.run(agent, "Hey! I am Mei, nice to meet you.", </span><span class="chg">session=session</span><span class="dim">)
-response = await Runner.run(agent, "What's my name?", </span><span class="chg">session=session</span><span class="dim">)</span></div>
-<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
-<div class="codebox" data-file="output" data-lang="text">Nice to meet you, Mei!
-Your name is Mei.</div>
+<h2><span class="en">Step 4 · Memory and teamwork</span><span class="zh">第 4 步 · 记忆与协作</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Each <code>Runner.run</code> starts fresh. To remember, pass a <b>session</b> and the SDK stores and replays the history for you. Try it below.</p>
+<p class="zh" style="margin:0 0 8px">每次 <code>Runner.run</code> 都是全新开始。想记住，就传入 <b>session</b>，SDK 替你保存并回放历史。在下面试试。</p></div>
+<div class="codebox" data-file="memory.py" data-lang="python"><span class="dim">from agents import SQLiteSession
+
+session = SQLiteSession("mei-chat")     # in memory; for a file: SQLiteSession("mei-chat", "memory.db")
+await Runner.run(agent, "Hey! I am Mei, nice to meet you.", </span><span class="chg">session=session</span><span class="dim">)
+await Runner.run(agent, "What's my name?", </span><span class="chg">session=session</span><span class="dim">)</span></div>
 <div class="chat" id="smem"></div>
-<h2><span class="en">Step 5 · Preview: agents working together</span><span class="zh">第 5 步 · 预览：智能体如何协作</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">One agent is only the start. The next lessons combine agents in two ways, and one question tells them apart: <b>who talks to the user next?</b> With <b>an agent as a tool</b>, a manager calls another agent like a function, gets the result back and stays in control. With a <b>handoff</b>, one agent passes the whole conversation to another, which takes over and replies.</p>
-<p class="zh"style="margin:0 0 8px">一个智能体只是开始。后面的课会用两种方式把智能体组合起来，用一个问题就能分辨：<b>接下来由谁来和用户说话？</b><b>智能体当工具</b>时，主管像调用函数一样调用另一个智能体，拿回结果并继续掌控；<b>交接（handoff）</b>时，一个智能体把整段对话交给另一个，由后者接手并回复。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Next up</span><span class="zh">接下来</span></b><p class="en" style="margin:0 0 8px">Agents combine in two ways, told apart by <b>who talks to the user next</b>: an <b>agent as a tool</b> returns its result and the manager stays in control; a <b>handoff</b> passes the whole conversation to another agent, which replies.</p>
+<p class="zh" style="margin:0 0 8px">智能体有两种组合方式，区别在于<b>接下来由谁和用户说话</b>：<b>智能体当工具</b>是返回结果，主管继续掌控；<b>交接（handoff）</b>是把整段对话交给另一个智能体，由它回复。</p></div>
 <div class="sc" id="hgame"></div>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px"><b>Guardrails</b> are checks that can stop a run. An <b>input</b> guardrail checks what comes in, before the main work. An <b>output</b> guardrail checks what goes out, before the user sees it.</p>
-<p class="zh"style="margin:0 0 8px"><b>护栏（guardrail）</b>是可以叫停运行的检查。<b>输入护栏</b>在主要工作开始前检查传入内容；<b>输出护栏</b>在用户看到之前检查传出内容。</p></div>
-<div class="sc" id="ggame"></div>
+
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Rebuild an earlier project with the SDK.</b> The digital twin or the checklist loop. Notice how short it gets.</span><span class="zh"><b>用 SDK 重做之前的一个项目。</b>数字分身或清单循环都行，感受一下它变得多短。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Open the trace.</b> Run your agent inside <code>with trace(...)</code> and find the run at platform.openai.com/traces.</span><span class="zh"><b>打开 trace。</b>在 <code>with trace(...)</code> 里运行你的智能体，并在 platform.openai.com/traces 找到这次运行。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the assistant is rebuilt on the SDK in far fewer lines: one Agent, one Runner call, one decorated tool, and a session that keeps Auntie Suria's regular in mind across messages. Aina just says what to cook and the kitchen handles the rest. The next problem is that drinks and noodles need different specialists.</span><span class="zh">现在助手用 SDK 重建，代码少了很多：一个 Agent、一次 Runner 调用、一个装饰器工具，再加一个 Session，让它在多条消息间记得 Suria 阿姨的熟客。Aina 只说想做什么，其余厨房搞定。下一个问题是：饮料和面食需要不同的专员。</span></div>
-<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
-<div class="card"><p class="en" style="margin:0">• <b><code>ModuleNotFoundError: No module named 'agents'</code></b>: The package is installed as <code>openai-agents</code> but imported as <code>agents</code>. Fix: <code>pip install openai-agents</code>.<br>• <b><code>RuntimeError: asyncio.run() cannot be called from a running event loop</code></b>: A notebook already runs an event loop. Fix: in a notebook write <code>await main()</code>; in a <code>.py</code> file keep <code>asyncio.run(main())</code>.<br>• <b><code>SyntaxError: 'await' outside function</code></b>: <code>await</code> only works inside an <code>async def</code> in a script. Fix: wrap the lines in <code>async def main()</code>.<br>• <b><code>openai.AuthenticationError: Error code: 401</code></b>: The SDK cannot find your key. Fix: put <code>OPENAI_API_KEY</code> in <code>.env</code> and call <code>load_dotenv(override=True)</code> before you build the agent.</p>
-<p class="zh" style="margin:0">• <b><code>ModuleNotFoundError: No module named 'agents'</code></b>：包的安装名是 <code>openai-agents</code>，导入名却是 <code>agents</code>。解决：<code>pip install openai-agents</code>。<br>• <b><code>RuntimeError: asyncio.run() cannot be called from a running event loop</code></b>：notebook 里已经有一个事件循环在运行。解决：notebook 里写 <code>await main()</code>；<code>.py</code> 文件里保留 <code>asyncio.run(main())</code>。<br>• <b><code>SyntaxError: 'await' outside function</code></b>：脚本里 <code>await</code> 只能写在 <code>async def</code> 里。解决：把这些代码放进 <code>async def main()</code>。<br>• <b><code>openai.AuthenticationError: Error code: 401</code></b>：SDK 找不到你的密钥。解决：把 <code>OPENAI_API_KEY</code> 写进 <code>.env</code>，并在创建智能体之前调用 <code>load_dotenv(override=True)</code>。</p></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en">Rebuild an earlier project with the SDK and notice how short it gets.</span><span class="zh">用 SDK 重做之前的一个项目，感受一下它变得多短。</span></span></label><label><input type="checkbox"><span><span class="en">Run your agent inside <code>with trace(...)</code> and find the run in the traces page.</span><span class="zh">在 <code>with trace(...)</code> 里运行你的智能体，并在 traces 页面找到这次运行。</span></span></label></div>
+
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• <code>await</code> waits for the model. Only inside <code>async def</code>, or at the top level of a notebook.<br>• An <b>Agent</b> is a model, instructions (the system prompt) and tools.<br>• <b>Runner.run</b> is the agent loop. <code>final_output</code> is the answer.<br>• <b>trace</b> shows every step. <b>Streaming</b> shows text as it is written.<br>• <code>@function_tool</code> builds the tool JSON from your function. The docstring is the description.<br>• Each run is stateless. Pass a <b>session</b> to remember.<br>• Agents as tools keep control, handoffs pass it on, guardrails check inputs and outputs.</p><p class="zh" style="margin:0">• <code>await</code> 用来等模型，只能写在 <code>async def</code> 里，或笔记本最外层。<br>• <b>Agent</b> = 模型 + instructions（系统提示词）+ 工具。<br>• <b>Runner.run</b> 就是智能体循环，<code>final_output</code> 是最终答案。<br>• <b>trace</b> 展示每一步，<b>流式输出</b>边写边显示。<br>• <code>@function_tool</code> 根据函数生成工具 JSON，文档字符串就是描述。<br>• 每次运行都是无状态的，传入 <b>session</b> 才能记住。<br>• 智能体当工具会保持控制，交接会把控制权交出去，护栏检查输入和输出。</p></div>
+<div class="card"><p class="en" style="margin:0">• An <b>Agent</b> is a model, instructions and tools.<br>• <b>Runner.run</b> is the agent loop; <code>final_output</code> is the answer. <code>await</code> works only inside <code>async def</code> or at a notebook's top level.<br>• <code>@function_tool</code> builds the tool JSON from your function; the docstring is the description.<br>• Each run is stateless: pass a <b>session</b> to remember.<br>• Agents as tools keep control; handoffs pass it on.</p><p class="zh" style="margin:0">• <b>Agent</b> = 模型 + instructions + 工具。<br>• <b>Runner.run</b> 就是智能体循环，<code>final_output</code> 是答案。<code>await</code> 只能写在 <code>async def</code> 里或笔记本最外层。<br>• <code>@function_tool</code> 根据函数生成工具 JSON，文档字符串就是描述。<br>• 每次运行无状态：传入 <b>session</b> 才能记住。<br>• 智能体当工具保持控制，交接把控制权交出去。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Agentic</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"goals":{"en":["Use async and await in an agent script","Build an Agent with instructions and a @function_tool","Run it with Runner.run and read final_output","Add a session so the agent remembers"],"zh":["在智能体脚本里使用 async 和 await","用指令和 @function_tool 创建一个 Agent","用 Runner.run 运行并读取 final_output","加上 session 让智能体记住对话"]},"prev":["03-first-api-calls.html"],"tools":{"en":"Python 3.10+, the openai-agents package, an OpenAI API key","zh":"Python 3.10+、openai-agents 包、OpenAI API 密钥"},"know":{"en":"Basic Python, including async functions.","zh":"会基础 Python，包括 async 函数。"},"mins":30,"offline":false}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=8290ab6e"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/07-agents-sdk-basics.js?v=361941b5"></script></body></html>
+<script src="js/07-agents-sdk-basics.js?v=dafb1b70"></script></body></html>

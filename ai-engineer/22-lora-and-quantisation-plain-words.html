@@ -5,23 +5,9 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/ai-engineer/22-lora-and-quantisation-plain-words.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-engineer/22-lora-and-quantisation-plain-words.html","url":"https://tx-learns.vercel.app/ai-engineer/22-lora-and-quantisation-plain-words.html","name":"LoRA and quantisation","alternateName":"LoRA 与量化","description":"Two tricks let a small GPU fine-tune a big model: train only a tiny add-on (LoRA) and store the frozen part in 4 bits (quantisation).","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"Fine-tuning open models","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Engineer","url":"https://tx-learns.vercel.app/ai-engineer/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Engineer","item":"https://tx-learns.vercel.app/ai-engineer/index.html"},{"@type":"ListItem","position":3,"name":"LoRA and quantisation","item":"https://tx-learns.vercel.app/ai-engineer/22-lora-and-quantisation-plain-words.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Fine-tuning open models · Lesson 1</span><span class="zh">微调开源模型 · 第 1 课</span></span><h1><span class="en">LoRA and quantisation</span><span class="zh">LoRA 与量化</span></h1><p class="meta"><span class="en">You will learn the two tricks that make fine-tuning fit on a small, cheap GPU, and tell them apart · ~20 min · concept</span><span class="zh">你会学会让微调装得进小而便宜的 GPU 的两个技巧，并分清它们 · 约 20 分钟 · 概念课</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the helper could show three guessers side by side. Today it fails when Ah Boy wants it to price like him, but the only GPU is a small free one. We fix it by training a thin add-on (LoRA) on a base packed into 4 bits.</p>
-<p class="zh" style="margin:0">上回，帮手能把三种估价者并排展示。今天的难题是 Ah Boy 想让它像自己一样估价，可手上只有一块小小的免费 GPU。我们的办法是在压成 4 位的底座模型上，只训练一层薄薄的附加层（LoRA）。</p></div>
-<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en" style="margin:0"><b>Ah Boy</b> prices second-hand gadgets by feel and wants a model that does it as well as he does. <b>Wei Jie</b> says: let us fine-tune a small open model on your old price tags. The catch is that his only GPU is a small free one in a cloud notebook. Updating every number in a model with billions of them will not fit, so he learns two tricks. This is the helper's way to learn Ah Boy's eye without a big machine.</p>
-<p class="zh" style="margin:0"><b>Ah Boy</b> 凭手感给二手电子产品定价，想要一个能做到同样水准的模型。<b>Wei Jie</b> 说：我们拿你以前的价签去微调一个小的开源模型。问题是他只有云端笔记本里一块小小的免费 GPU。要更新一个有几十亿个数字的模型，根本装不下，于是他学了两个技巧。这是帮手不靠大机器也能学会 Ah Boy 眼光的办法。</p></div>
-
-<h2><span class="en">Step 1 · Why not train everything</span><span class="zh">第 1 步 · 为什么不全部训练</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A model is billions of numbers, called weights. Each one is stored in 16 bits (a bit is one 0-or-1 slot, and 8 bits make a byte), so 2 bytes per weight: 3 billion weights is about 6 GB. Full fine-tuning updates all of them, and for every one you need space for the number itself plus the extra bookkeeping that training keeps. That is several times the size of the model, far beyond a free GPU. We need to train less, and store less.</p>
-<p class="zh" style="margin:0 0 8px">模型就是几十亿个数字，叫权重。每个权重用 16 位存（一位就是一个 0 或 1 的格子，8 位是一个字节），也就是每个 2 字节：30 亿个权重大约 6 GB。完整微调会更新全部权重，每个数字除了本身，还要为训练的额外记录留空间，总共是模型体积的好几倍，远超免费 GPU。所以我们要训练得少一点，存得少一点。</p></div>
-<div class="codebox" data-file="memory_sums.txt" data-lang="text"><span class="dim">rough memory for a 3-billion-weight model
-store the weights, 16 bits each ......... about 6 GB
-full fine-tuning also keeps extra copies . several times that
-the free notebook GPU ................... 16 GB at most (often less usable)</span></div>
-<div class="try" id="p1"></div>
-
-<h2><span class="en">Step 2 · LoRA: freeze the book, add sticky notes</span><span class="zh">第 2 步 · LoRA：冻住课本，贴便利贴</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">LoRA (low-rank adaptation) freezes the original weights and trains only a small add-on beside some layers. Think of a printed textbook: you do not reprint it, you stick notes in the margin. The add-on is two thin matrices (a matrix is just a grid of numbers, and r, the rank, says how thin the two grids are), and at run time their product is added to the original weights. The base model is never changed, and the add-on is a small file you can share.</p>
-<p class="zh" style="margin:0 0 8px">LoRA（低秩适配）冻住原来的权重，只在部分层旁边训练一个小小的附加件。就像一本印好的课本：你不会重印，而是在页边贴便利贴。附加件是两个很“瘦”的矩阵（矩阵就是一格格数字，r 叫秩，决定这两张表有多“瘦”），运行时把它们的乘积加到原权重上。基础模型从不被改动，附加件是一个可以分享的小文件。</p></div>
+<h2><span class="en">Step 1 · LoRA: freeze the book, add sticky notes</span><span class="zh">第 1 步 · LoRA：冻住课本，贴便利贴</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A model is billions of weights, each stored in 16 bits (2 bytes): 3 billion weights is about 6 GB. Full fine-tuning updates every one and keeps extra copies for each, several times the model's size, far beyond a free GPU. So train less.</p><p class="zh" style="margin:0 0 8px">模型是几十亿个权重，每个用 16 位（2 字节）存：30 亿个权重约 6 GB。完整微调要更新每一个，还要为每个保存额外拷贝，是模型体积的好几倍，远超免费 GPU。所以要少训练。</p>
+<p class="en" style="margin:0">LoRA (low-rank adaptation) freezes the original weights and trains only a small add-on: two thin matrices (grids of numbers; r, the rank, sets how thin) whose product is added to the original weights. Like sticky notes in a printed textbook, the base is never changed and the add-on is a small file you can share.</p><p class="zh" style="margin:0">LoRA（低秩适配）冻住原来的权重，只训练一个小附加件：两个很“瘦”的矩阵（一格格数字；r 叫秩，决定有多“瘦”），它们的乘积被加到原权重上。就像课本页边的便利贴：底座从不被改动，附加件是一个可以分享的小文件。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="Frozen base weights packed to 4 bits feed a small trainable LoRA adapter whose output is added"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9a9aa8"/></marker></defs><rect class="box soft" x="20" y="50" width="230" height="90" rx="12"/><text class="en" x="135.0" y="91.0">Base model, frozen</text><text class="zh" x="135.0" y="91.0">底座模型（冻结）</text><text class="en sm" x="135.0" y="109.0">packed to 4 bits</text><text class="zh sm" x="135.0" y="109.0">压成 4 位</text><rect class="box new" x="20" y="160" width="230" height="40" rx="12"/><text class="en" x="135.0" y="185.0">LoRA adapter, small</text><text class="zh" x="135.0" y="185.0">LoRA 附加层（很小）</text><line class="lnk" x1="250" y1="95" x2="330" y2="100" marker-end="url(#ah)"/><line class="lnk hot" x1="250" y1="180" x2="360" y2="140" marker-end="url(#ah)"/><rect class="box " x="330" y="60" width="60" height="80" rx="12"/><text class="en" x="360.0" y="105.0">Add</text><text class="zh" x="360.0" y="105.0">相加</text><line class="lnk" x1="390" y1="100" x2="450" y2="100" marker-end="url(#ah)"/><rect class="box " x="450" y="60" width="150" height="80" rx="12"/><text class="en" x="525.0" y="96.0">Price answer</text><text class="zh" x="525.0" y="96.0">估价结果</text><text class="en sm" x="525.0" y="114.0">Ah Boy style</text><text class="zh sm" x="525.0" y="114.0">Ah Boy 风格</text></svg><figcaption><span class="en">Only the small adapter is trained; the packed base stays as it is.</span><span class="zh">只训练那层小小的附加层，压缩过的底座保持不动。</span></figcaption></figure>
 <div class="codebox" data-file="lora_sums.txt" data-lang="text"><span class="dim">one layer is 4096 x 4096 numbers ....... 16.8 million weights (frozen)
 </span><span class="chg">LoRA with r = 8: two thin matrices
@@ -29,9 +15,26 @@ the free notebook GPU ................... 16 GB at most (often less usable)</spa
   that is about 0.4 percent of the layer</span></div>
 <div class="try" id="p2"></div>
 
-<h2><span class="en">Step 3 · The four LoRA settings</span><span class="zh">第 3 步 · LoRA 的四个设置</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">You will meet four settings. <b>r</b> is the thickness, usually 8 to 32. <b>alpha</b> scales how loudly the add-on speaks; a common choice is alpha equal to r, or twice r. <b>target modules</b> says which layers get an add-on, and the attention layers (the parts that decide which words to look at) are the usual start. <b>dropout</b> randomly switches off a little of the add-on during training to avoid memorising.</p>
-<p class="zh" style="margin:0 0 8px">你会遇到四个设置。<b>r</b> 是厚度，通常 8 到 32。<b>alpha</b> 决定附加件“说话的音量”，常见选择是 alpha 等于 r，或 r 的两倍。<b>target modules</b> 指定哪些层加附加件，一般从注意力层（决定该看哪些词的部分）开始。<b>dropout</b> 在训练时随机关掉一小部分附加件，避免死记硬背。</p></div>
+<h2><span class="en">Step 2 · Quantisation: pack the frozen part smaller</span><span class="zh">第 2 步 · 量化：把冻住的部分压得更小</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">LoRA cuts what you train. Quantisation cuts the memory of the frozen part, storing each weight in 4 bits instead of 16, like vacuum-packing clothes: same clothes, a quarter of the space. A 3 to 8 billion weight model then fits a small GPU. LoRA on a 4-bit base is QLoRA.</p><p class="zh" style="margin:0">LoRA 减少要训练的部分。量化减少冻住那部分的内存：每个权重用 4 位而不是 16 位存，就像把衣服抽真空：衣服不变，只占四分之一空间。这样 30 到 80 亿权重的模型就能放进小 GPU。在 4 位底座上做 LoRA 就是 QLoRA。</p></div>
+<div class="codebox" data-file="load_4bit.py" data-lang="python"><span class="dim">import torch
+from transformers import AutoModelForCausalLM, BitsAndBytesConfig
+
+</span><span class="chg">pack = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_quant_type="nf4",
+    bnb_4bit_compute_dtype=torch.bfloat16,
+    bnb_4bit_use_double_quant=True,   # also compress the small scaling numbers
+)
+model = AutoModelForCausalLM.from_pretrained(
+    "your-small-open-model", quantization_config=pack, device_map="auto")
+print(model.get_memory_footprint() / 1e9, "GB")</span></div>
+<div class="codebox" data-file="output" data-lang="text">2.3 GB</div>
+
+<h2><span class="en">Step 3 · The LoRA settings and the data</span><span class="zh">第 3 步 · LoRA 设置与数据</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b>
+<ul class="en"><li><b>r</b>: thickness, usually 8 to 32.</li><li><b>alpha</b>: volume of the add-on; r or twice r.</li><li><b>target modules</b>: which layers get an add-on; start with attention.</li><li><b>dropout</b>: switches off a little of the add-on in training to avoid memorising.</li></ul><ul class="zh"><li><b>r</b>：厚度，通常 8 到 32。</li><li><b>alpha</b>：附加件的音量；取 r 或 r 的两倍。</li><li><b>target modules</b>：哪些层加附加件；从注意力层开始。</li><li><b>dropout</b>：训练时关掉一小部分附加件，避免死记。</li></ul>
+<p class="en" style="margin:0">Shape each example as a prompt plus a short completion, and compute the loss on the answer only, so the model learns to produce the price, not repeat the description.</p><p class="zh" style="margin:0">把每个例子整理成“提示 + 短回答”，只在答案部分算损失，这样模型学的是给出价格，而不是复述描述。</p></div>
 <div class="codebox" data-file="lora_config.py" data-lang="python"><span class="dim">from peft import LoraConfig
 
 </span><span class="chg">lora = LoraConfig(
@@ -40,57 +43,26 @@ the free notebook GPU ................... 16 GB at most (often less usable)</spa
     target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],  # attention layers
     lora_dropout=0.05,       # switch off a little while training
     task_type="CAUSAL_LM",
-)</span></div>
+)
+
+example = {
+    "prompt": "Used phone, 128 GB, cracked corner, battery 82 percent. Price is $",
+    "completion": "145",     # train on this part only
+}</span></div>
 <p class="en">Which setting does each sentence describe?</p>
 <p class="zh">每句话描述的是哪个设置？</p><div class="sc" id="g3"></div>
-
-<h2><span class="en">Step 4 · Quantisation: pack the frozen part smaller</span><span class="zh">第 4 步 · 量化：把冻住的部分压得更小</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">LoRA cuts what we train. Quantisation cuts how much memory the frozen part uses, by storing each weight in 4 bits instead of 16. It is like vacuum-packing clothes for a suitcase: same clothes, much less space, slightly less crisp. A 3 to 8 billion weight model then fits on one small GPU. The usual recipe is the NF4 4-bit type with bfloat16 for the maths; put LoRA on top and you have QLoRA.</p>
-<p class="zh" style="margin:0 0 8px">LoRA 减少的是要训练的部分。量化减少的是冻住那部分占的内存：每个权重用 4 位而不是 16 位来存。就像把衣服抽真空装进行李箱：衣服还是那些，占地小很多，只是没那么挺。这样一个 30 到 80 亿权重的模型就能放进一块小 GPU。常用配方是 NF4 的 4 位类型，计算用 bfloat16；在上面加 LoRA 就是 QLoRA。</p></div>
-<div class="codebox" data-file="load_4bit.py" data-lang="python"><span class="dim">import torch
-from transformers import AutoModelForCausalLM, BitsAndBytesConfig
-
-</span><span class="chg">pack = BitsAndBytesConfig(
-    load_in_4bit=True,
-    bnb_4bit_quant_type="nf4",
-    bnb_4bit_compute_dtype=torch.bfloat16,
-    bnb_4bit_use_double_quant=True,   # also compress the small scaling numbers quantisation keeps
-)
-model = AutoModelForCausalLM.from_pretrained(
-    "your-small-open-model", quantization_config=pack, device_map="auto")
-print(model.get_memory_footprint() / 1e9, "GB")</span></div>
-<div class="codebox" data-file="output" data-lang="text">2.3 GB</div>
-<div class="try" id="p4"></div>
-
-<h2><span class="en">Step 5 · Pick a base, shape the data</span><span class="zh">第 5 步 · 选底座模型，整理数据</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Pick a size your GPU can hold: 3 to 8 billion weights is fine on a cheap one. Choose a family with a good tokenizer (the splitter that cuts text into tokens, the small pieces a model reads) and a licence you can live with, and check how it splits numbers, because families that read each digit on its own make price guessing easier. Then shape each example as a prompt plus a short completion such as "Price is $123". Cut long descriptions at a token limit, and compute the loss on the answer only, so the model learns to produce the price instead of repeating the description.</p>
-<p class="zh" style="margin:0 0 8px">选一个你的 GPU 装得下的大小，30 到 80 亿权重在便宜的 GPU 上就可以。选分词器（把文字切成 token 这种小片段的工具）好、许可证能接受的模型家族，并看看它怎么切数字：把每个数字单独读的家族，让猜价格更容易。然后把每个例子整理成“提示 + 一个短的回答”，比如 “Price is $123”。长描述按 token 上限截断，并且只在答案部分计算损失，这样模型学的是给出价格，而不是复述描述。</p></div>
-<div class="codebox" data-file="example.jsonl" data-lang="json"><span class="dim">example = {
-    "prompt": "Used phone, 128 GB, cracked corner, battery 82 percent. Price is $",
-    "completion": "145",
-}
-# train on the completion only, so the loss is about the price</span></div>
 <p class="en">LoRA, quantisation, or neither?</p>
 <p class="zh">是 LoRA、量化，还是都不是？</p><div class="sc" id="g5"></div>
 
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I mixed the two ideas up. LoRA shrinks what is trained. Quantisation shrinks how much memory the frozen part uses. They are independent, and that is why they combine so well.</span><span class="zh">我把这两个概念混在一起了。LoRA 缩小的是要训练的部分，量化缩小的是冻结部分占的内存。它们互相独立，所以才能配合得这么好。</span></div>
-
-<h2><span class="en">In plain words</span><span class="zh">用大白话说</span></h2>
-<div class="card"><p class="en" style="margin:0">Words this lesson uses, in one line each.<br>• <b>Weights</b>: the numbers inside a model that hold what it learnt.<br>• <b>Bits</b>: the size of each stored number: fewer bits means less memory.<br>• <b>Adapter</b>: the small extra part LoRA trains and saves; the big model stays untouched.<br>• <b>GPU runtime</b>: a notebook setting that gives you a graphics card; pick it before you load a model.</p><p class="zh" style="margin:0">这一课用到的词，每个一句话。<br>• <b>权重</b>：模型内部存着所学内容的那些数字。<br>• <b>位（bit）</b>：每个数字占用的存储大小：位数越少，占内存越少。<br>• <b>适配器</b>：LoRA 训练并保存的那个小的附加部分，大模型本身不动。<br>• <b>GPU 运行环境</b>：笔记本里的一个设置，给你分配显卡；加载模型之前先选好。</p></div>
-<h2><span class="en">Common errors</span><span class="zh">常见报错</span></h2>
-<div class="card"><p class="en" style="margin:0">• <code>torch.OutOfMemoryError: CUDA out of memory</code>. The model or batch is too big for the GPU. Load it in 4-bit, lower the batch size, or pick a smaller model.<br>• <code>ImportError: Using bitsandbytes 4-bit quantization requires ...</code>. Install <code>bitsandbytes</code> and <code>accelerate</code>, and use a GPU runtime.<br>• <code>ValueError: Target modules ... not found in the base model</code>. The layer names in <code>target_modules</code> differ per model. Print the model and copy the names.</p><p class="zh" style="margin:0">• <code>torch.OutOfMemoryError: CUDA out of memory</code>：模型或批量对显卡来说太大。改用 4-bit 加载、调小批量，或换更小的模型。<br>• <code>ImportError: Using bitsandbytes 4-bit quantization requires ...</code>：安装 <code>bitsandbytes</code> 和 <code>accelerate</code>，并使用 GPU 运行环境。<br>• <code>ValueError: Target modules ... not found in the base model</code>：<code>target_modules</code> 里的层名因模型而异。打印模型，照着里面的名字写。</p></div>
+<div class="callout warn"><b class="lbl"><span class="en">Common errors</span><span class="zh">常见报错</span></b><span class="en"><code>CUDA out of memory</code>: load in 4-bit, lower the batch size, or pick a smaller model. <code>Target modules ... not found</code>: layer names differ per model; print the model and copy them.</span><span class="zh"><code>CUDA out of memory</code>：改用 4-bit 加载、调小批量，或换更小的模型。<code>Target modules ... not found</code>：层名因模型而异；打印模型，照着写。</span></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Load a small model in 4 bits</b> and print its memory footprint.</span><span class="zh"><b>用 4 位加载一个小模型</b>，打印它的内存占用。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Wrap it with a LoRA config</b> (peft's <code>get_peft_model</code>) and call <code>print_trainable_parameters()</code>.</span><span class="zh"><b>用 LoRA 配置包装它</b>（peft 的 <code>get_peft_model</code>），再调用 <code>print_trainable_parameters()</code>。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Compare the trainable count</b> at r=8 and r=64.</span><span class="zh"><b>比较可训练参数的数量</b>：r=8 对 r=64。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the helper has a plan that fits the free GPU: a frozen 4-bit base plus a small LoRA add-on, like Mdm Tan sticking one new tag instead of reprinting the whole list. The next problem is the training run itself, which bills by the hour; the next lesson shows what to watch so Wei Jie does not waste it.</span><span class="zh">现在帮手有了一个放得进免费 GPU 的方案：冻住的 4 位底座，加一层小小的 LoRA，就像 Mdm Tan 只贴一张新价签、不重印整张价目表。下一个问题是训练本身按小时收费；下一课讲该盯哪些指标，让 Wei Jie 不白花钱。</span></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Load a small model in 4 bits</b> and print its memory footprint.</span><span class="zh"><b>用 4 位加载一个小模型</b>，打印它的内存占用。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Wrap it with a LoRA config</b> (<code>get_peft_model</code>) and call <code>print_trainable_parameters()</code> at r=8 and r=64.</span><span class="zh"><b>用 LoRA 配置包装它</b>（<code>get_peft_model</code>），在 r=8 和 r=64 时各调用一次 <code>print_trainable_parameters()</code>。</span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• Full fine-tuning updates billions of weights: too much for a small GPU.<br>• LoRA freezes the base and trains two thin matrices beside some layers.<br>• Four settings: r, alpha, target modules, dropout.<br>• Quantisation stores the frozen weights in 4 bits instead of 16.<br>• LoRA on a 4-bit base is QLoRA; the two ideas are independent.<br>• Pick a base your GPU can hold, with a sensible tokenizer and licence.<br>• Train on a prompt plus a short answer, and compute the loss on the answer only.</p><p class="zh" style="margin:0">• 完整微调要更新几十亿个权重：小 GPU 吃不消。<br>• LoRA 冻住底座，在部分层旁边训练两个很瘦的矩阵。<br>• 四个设置：r、alpha、目标层、dropout。<br>• 量化把冻住的权重从 16 位压到 4 位来存。<br>• 在 4 位底座上做 LoRA 就是 QLoRA；两个概念互相独立。<br>• 选 GPU 装得下、分词器和许可证都合适的底座。<br>• 用“提示 + 短答案”训练，只对答案部分算损失。</p></div>
-
-<h2><span class="en">Recap</span><span class="zh">小结</span></h2>
-<div class="card"><p class="en" style="margin:0">1. Quantisation stores weights in fewer bits, so the model fits in less memory.<br>2. LoRA trains two thin extra matrices and freezes the rest, so a free GPU can tune it.<br>3. Together they make tuning a 3B model possible on small hardware.</p><p class="zh" style="margin:0">1. 量化把权重存成更少的位，模型占的内存就更小。<br>2. LoRA 只训练两个很薄的附加矩阵，其余冻结，所以免费显卡也能调。<br>3. 两者合起来，小硬件也能调一个 30 亿参数的模型。</p></div>
+<div class="card"><p class="en" style="margin:0">• Full fine-tuning updates billions of weights: too much for a small GPU.<br>• LoRA freezes the base and trains two thin matrices; quantisation stores the frozen weights in 4 bits. The two are independent, so they combine (QLoRA).<br>• Four settings: r, alpha, target modules, dropout.<br>• Train on a prompt plus a short answer, with loss on the answer only.</p><p class="zh" style="margin:0">• 完整微调要更新几十亿个权重：小 GPU 吃不消。<br>• LoRA 冻住底座、训练两个很瘦的矩阵；量化把冻住的权重存成 4 位。两者互相独立，所以能配合（QLoRA）。<br>• 四个设置：r、alpha、目标层、dropout。<br>• 用“提示 + 短答案”训练，只对答案算损失。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"goals":{"en":["Explain why full fine-tuning is too big for a small GPU","Describe LoRA as two thin matrices beside a frozen base","Name the four LoRA settings: r, alpha, target modules, dropout","Distinguish quantisation from QLoRA"],"zh":["说明为什么全量微调对小 GPU 太大","把 LoRA 描述成冻结基座旁的两个窄矩阵","说出 LoRA 的四个设置：r、alpha、目标模块、dropout","区分量化和 QLoRA"]},"prev":["09-tokenizers-how-models-load.html","18-curating-and-cleaning-a-dataset.html"],"tools":{"en":"A free GPU notebook (Colab or similar) with transformers, peft and bitsandbytes","zh":"带 GPU 的免费笔记本（Colab 等），装有 transformers、peft、bitsandbytes"},"know":{"en":"Loading a model and its tokenizer.","zh":"会加载模型和分词器。"},"mins":25,"offline":false}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=dcd48bec"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/22-lora-and-quantisation-plain-words.js?v=ed4fb4f9"></script></body></html>
+<script src="js/22-lora-and-quantisation-plain-words.js?v=aef9cf46"></script></body></html>

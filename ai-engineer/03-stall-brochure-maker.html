@@ -5,14 +5,9 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/ai-engineer/03-stall-brochure-maker.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-engineer/03-stall-brochure-maker.html","url":"https://tx-learns.vercel.app/ai-engineer/03-stall-brochure-maker.html","name":"Stall brochure maker","alternateName":"摊位宣传册生成器","description":"Chain two small model calls to turn a shop website into a short brochure: pick the useful links, then write and stream it.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Talking to models","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Engineer","url":"https://tx-learns.vercel.app/ai-engineer/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Engineer","item":"https://tx-learns.vercel.app/ai-engineer/index.html"},{"@type":"ListItem","position":3,"name":"Stall brochure maker","item":"https://tx-learns.vercel.app/ai-engineer/03-stall-brochure-maker.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Talking to models · Project</span><span class="zh">和模型对话 · 项目</span></span><h1><span class="en">Stall brochure maker</span><span class="zh">摊位宣传册生成器</span></h1><p class="meta"><span class="en">You will chain two model calls so that a shop's website turns into a short brochure · ~25 min · hands-on</span><span class="zh">你会把两次模型调用串起来，让一家店的网站变成一份简短的宣传册 · 约 25 分钟 · 动手实践</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the helper could follow a chat by resending it, but every answer came from a single call. Today it fails when Uncle Raj's board has dozens of notices and only a few matter this month. We fix it by chaining two calls: one picks, the next writes.</p>
-<p class="zh" style="margin:0">上回助手靠重发对话能接住追问，但每个回答都只来自一次调用。今天它的毛病是 Raj 叔叔的公告板上有几十条通知，这个月只有几条重要。解决办法是串起两次调用：先挑，再写。</p></div>
-<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en" style="margin:0"><b>Ah Boy</b> sells second-hand gadgets online and has a website, but nothing short to hand to a new customer or a job seeker. <b>Wei Jie</b> offers to build a brochure maker: give it a name and a web address, get back one page. It is Wei Jie's first time chaining more than one model call, and the first small taste of an agentic pattern. The brochure maker is a side case: its pick-then-write chain is how the helper will choose which notices to announce.</p>
-<p class="zh" style="margin:0"><b>Ah Boy</b> 在网上卖二手数码产品，有个网站，却没有一份可以递给新顾客或求职者的简短介绍。<b>Wei Jie</b> 提出做一个宣传册生成器：给它店名和网址，就得到一页纸。这是 Wei Jie 第一次把不止一次模型调用串起来，也是智能体模式的第一次小小尝试。 宣传册生成器是支线案例：它“先挑后写”的链条，就是助手挑选该播哪些通知的方法。</p></div>
-
-<h2><span class="en">Step 1 · A summariser for one page</span><span class="zh">第 1 步 · 只总结一个页面</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Start small: one page in, one summary out. A <b>system prompt</b> sets the task and tone. A <b>user prompt</b> carries the page text. First a helper fetches the page and strips it to plain text (remove scripts, styles and images). It uses <b>BeautifulSoup</b> (<code>pip install beautifulsoup4</code>), a library that reads HTML; <code>decompose()</code> deletes a tag and everything inside it. Pages that need JavaScript to draw themselves come back nearly empty this way, and some sites block scrapers with a 403. That is a limit of this simple helper, not of the model.</p>
-<p class="zh" style="margin:0 0 8px">先做最小的：一个页面进，一份摘要出。<b>system 提示词</b>定任务和语气，<b>user 提示词</b>装页面文字。先用一个辅助函数抓取页面，把它剥成纯文字（去掉脚本、样式和图片）。它用到 <b>BeautifulSoup</b>（<code>pip install beautifulsoup4</code>），一个读取 HTML 的库；<code>decompose()</code> 会删掉一个标签和它里面的全部内容。靠 JavaScript 才能画出内容的页面，用这个办法抓回来几乎是空的，有些网站还会用 403 拒绝爬取。这是这个简单函数的局限，不是模型的问题。</p></div>
+<h2><span class="en">Step 1 · Summarise one page</span><span class="zh">第 1 步 · 总结一个页面</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">One page in, one summary out. The <b>system prompt</b> sets task and tone; the <b>user prompt</b> carries the page text. A helper strips the page to plain text with <b>BeautifulSoup</b> (<code>pip install beautifulsoup4</code>; <code>decompose()</code> deletes a tag and what is inside it). Pages drawn by JavaScript come back nearly empty: a limit of this helper, not of the model.</p>
+<p class="zh" style="margin:0 0 8px">一个页面进，一份摘要出。<b>system 提示词</b>定任务和语气，<b>user 提示词</b>装页面文字。辅助函数用 <b>BeautifulSoup</b>（<code>pip install beautifulsoup4</code>；<code>decompose()</code> 删掉标签及其内容）把页面剥成纯文字。靠 JavaScript 画出内容的页面抓回来几乎是空的：这是这个函数的局限，不是模型的问题。</p></div>
 <div class="codebox" data-file="brochure_basics.py" data-lang="python"><span class="dim">import requests
 from bs4 import BeautifulSoup
 from openai import OpenAI
@@ -30,22 +25,18 @@ def ask(system, user):
         {"role": "user", "content": user}])
     return reply.choices[0].message.content
 
-</span><span class="chg">print(ask("Summarise this shop page in three lines.", page_text("https://example.com")))</span></div>
-<div class="codebox" data-file="output" data-lang="text">- Example Domain: a page kept for use in documents.
-- It has one short paragraph and one link.
-- Nothing on it is for sale.</div>
+print(ask("Summarise this shop page in three lines.", page_text("https://example.com")))</span></div>
 <div class="try" id="p1"></div>
-
 <h2><span class="en">Step 2 · Let the model choose the links</span><span class="zh">第 2 步 · 让模型挑出有用的链接</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A brochure needs the About and Careers pages, not the Privacy page. That is hard to write as rules and easy for a model. So call 1 gets the links on the landing page and returns <b>JSON only</b>. Show one example in the prompt (<b>one-shot prompting</b>) so the model copies the shape. Ask for JSON mode, then <code>json.loads</code> the reply, because it arrives as a string, not a Python dict.</p>
-<p class="zh" style="margin:0 0 8px">一份宣传册需要“关于我们”和“招聘”页，不需要“隐私”页。这很难写成规则，对模型却很简单。所以第 1 次调用拿到首页上的链接，<b>只返回 JSON</b>。在提示词里给一个例子（<b>单样本提示</b>），让模型照着它的格式写。开启 JSON 模式，再用 <code>json.loads</code> 解析，因为回来的是字符串，不是 Python 字典。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A brochure needs the About and Careers pages, not Privacy. That is hard as rules and easy for a model. Call 1 gets the landing-page links and returns <b>JSON only</b>. Show one example in the prompt (<b>one-shot prompting</b>) so the reply copies its shape, then <code>json.loads</code> it: it arrives as a string.</p>
+<p class="zh" style="margin:0 0 8px">宣传册需要“关于我们”和“招聘”页，不需要“隐私”页。这很难写成规则，对模型却很简单。第 1 次调用拿到首页链接，<b>只返回 JSON</b>。在提示词里给一个例子（<b>单样本提示</b>），回复就会照着它的格式，再用 <code>json.loads</code> 解析：回来的是字符串。</p></div>
 <div class="codebox" data-file="pick_links.py" data-lang="python"><span class="dim">import json
 from urllib.parse import urljoin
 
-</span><span class="chg">def all_links(url):
+def all_links(url):
     soup = BeautifulSoup(requests.get(url, timeout=10).text, "html.parser")
     return [urljoin(url, a["href"]) for a in soup.find_all("a", href=True)]
-</span><span class="dim">
+
 link_system = """Pick the links a customer or job seeker would want.
 Skip terms, privacy and mailto. Reply as JSON like:
 {"links": [{"type": "about page", "url": "https://shop.example/about"}]}"""
@@ -57,10 +48,9 @@ def pick_links(url, links):
         </span><span class="chg">response_format={"type": "json_object"})
     return json.loads(reply.choices[0].message.content)["links"]</span></div>
 <div class="try" id="p2"></div>
-
-<h2><span class="en">Step 3 · Gather the pages and write the brochure</span><span class="zh">第 3 步 · 收集页面，写宣传册</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Call 2 needs the text of the landing page plus every page call 1 picked. Join them under headings, then <b>cut the combined text to a fixed length</b> so the call stays cheap and inside the context window. The code below cuts by 5000 characters (a quick stand-in; Lesson 2 counted in tokens, and 5000 characters is roughly 1,200 tokens). A second system prompt asks for a short markdown brochure. Change one sentence of that prompt, say “formal” to “funny”, and the tone changes. Tone is just prompt.</p>
-<p class="zh" style="margin:0 0 8px">第 2 次调用需要首页文字，加上第 1 次挑出的每个页面。把它们放在小标题下拼起来，再把<b>总文字截到固定长度</b>，这样调用既便宜又不超出上下文窗口。下面的代码按 5000 个字符来截（只是个简便替代；第 2 课按 token 计，5000 个字符大约是 1200 个 token）。第二个 system 提示词要求写一份简短的 markdown 宣传册。把其中一句从“正式”改成“搞笑”，语气就变了。语气不过是提示词。</p></div>
+<h2><span class="en">Step 3 · Write the brochure</span><span class="zh">第 3 步 · 写宣传册</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Call 2 gets the landing page plus every picked page, joined under headings and <b>cut to a fixed length</b> so it stays cheap and inside the context window. Change one sentence of the prompt (&ldquo;warm&rdquo; to &ldquo;funny&rdquo;) and the tone changes: tone is just prompt.</p>
+<p class="zh" style="margin:0 0 8px">第 2 次调用拿到首页和每个选中的页面，放在小标题下拼起来，并<b>截到固定长度</b>，既便宜又不超出上下文窗口。把提示词里的一个词从“温暖”改成“搞笑”，语气就变了：语气不过是提示词。</p></div>
 <figure class="fig"><svg class="fig-h" viewBox="0 0 720 150" role="img" aria-label="A two-call chain: pick the links, then write the brochure">
 <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9a9aa8"/></marker></defs>
 <rect class="box soft" x="2" y="40" width="134" height="70" rx="12"/>
@@ -87,22 +77,21 @@ def pick_links(url, links):
 <path class="lnk" d="M333,75 L387,75" marker-end="url(#ah)"/>
 <path class="lnk hot" d="M527,75 L581,75" marker-end="url(#ah)"/>
 </svg><svg class="fig-v" viewBox="0 0 360 438" aria-hidden="true"><defs><marker id="ahv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9a9aa8"/></marker></defs><rect class="box soft" x="50" y="10" width="220" height="70" rx="12"/><text class="en" x="160" y="41.0">Landing page</text><text class="en sm" x="160" y="62.0">text of one page</text><text class="zh" x="160" y="41.0">首页</text><text class="zh sm" x="160" y="62.0">一个页面的文字</text><rect class="box new" x="50" y="126" width="220" height="70" rx="12"/><text class="en" x="160" y="157.0">Call 1: pick</text><text class="en sm" x="160" y="178.0">which links matter</text><text class="zh" x="160" y="157.0">第 1 次：挑选</text><text class="zh sm" x="160" y="178.0">哪些链接重要</text><rect class="box soft" x="50" y="242" width="220" height="70" rx="12"/><text class="en" x="160" y="273.0">Chosen pages</text><text class="en sm" x="160" y="294.0">fetched and joined</text><text class="zh" x="160" y="273.0">选中的页面</text><text class="zh sm" x="160" y="294.0">取回并合并</text><rect class="box new" x="50" y="358" width="220" height="70" rx="12"/><text class="en" x="160" y="389.0">Call 2: write</text><text class="en sm" x="160" y="410.0">one short brochure</text><text class="zh" x="160" y="389.0">第 2 次：撰写</text><text class="zh sm" x="160" y="410.0">一页简短宣传册</text><path class="lnk hot" d="M160,83 L160,123" marker-end="url(#ahv)"/><path class="lnk" d="M160,199 L160,239" marker-end="url(#ahv)"/><path class="lnk hot" d="M160,315 L160,355" marker-end="url(#ahv)"/></svg><figcaption><span class="en">Call 1 decides what to read; call 2 writes only from what call 1 chose.</span><span class="zh">第 1 次调用决定读什么；第 2 次调用只根据它选中的内容来写。</span></figcaption></figure>
-<div class="codebox" data-file="brochure.py" data-lang="python"><span class="dim">brochure_system = "Write a short brochure in markdown for customers and job seekers. Include culture, customers and careers if present. Tone: warm and plain."
+<div class="codebox" data-file="brochure.py" data-lang="python"><span class="dim">brochure_system = "Write a short brochure in markdown. Tone: warm and plain."
 
 def build_material(url):
     parts = ["Landing page:\n" + page_text(url)]
     for link in pick_links(url, all_links(url)):
         parts.append("Link: " + link["type"] + "\n" + page_text(link["url"]))
-    </span><span class="chg">return "\n\n".join(parts)[:5000]</span><span class="dim">
+    </span><span class="chg">return "\n\n".join(parts)[:5000]</span><span class="dim">   # quick cap; Lesson 2 counted tokens instead
 
 def brochure(url):
     return ask(brochure_system, build_material(url))</span></div>
 <p class="en">Which job belongs to the model, and which to plain code?</p>
 <p class="zh">哪些活交给模型，哪些交给普通代码？</p><div class="sc" id="g3"></div>
-
-<h2><span class="en">Step 4 · Stream the answer</span><span class="zh">第 4 步 · 把回答流式显示</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A long brochure can take several seconds, and a blank screen feels broken. Pass <code>stream=True</code> and the reply comes in small chunks. Add each chunk's <code>delta</code> to the text so far and show it again (a real screen would redraw; here we just print). The <code>yield</code> in the code makes the function a <b>generator</b>: it hands back one piece at a time instead of one final answer. Lesson 5 uses the same idea. It is the same call, but the reader sees words straight away. It does not make the model faster, it just stops the waiting from feeling like nothing.</p>
-<p class="zh" style="margin:0 0 8px">长的宣传册可能要好几秒，空白的屏幕让人觉得坏了。传入 <code>stream=True</code>，回复就会一小块一小块地到来。把每块的 <code>delta</code> 加到已有文字后面，再显示一次（真正的界面会重画，这里只是打印）。代码里的 <code>yield</code> 让函数变成<b>生成器</b>：它一次交出一小份，而不是只交一个最终答案。第 5 课会用到同样的思路。调用本身没变，读的人却立刻看到字。它不会让模型变快，只是让等待不再像什么都没发生。</p></div>
+<h2><span class="en">Step 4 · Stream the answer</span><span class="zh">第 4 步 · 流式显示回答</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A blank screen feels broken. With <code>stream=True</code> the reply arrives in small chunks you can show at once. The <code>yield</code> makes the function a <b>generator</b>: it hands back one piece at a time. It is not faster, it just stops the wait feeling empty.</p>
+<p class="zh" style="margin:0 0 8px">空白的屏幕让人觉得坏了。传入 <code>stream=True</code>，回复就分小块到来，可以立刻显示。<code>yield</code> 让函数变成<b>生成器</b>：一次交出一小份。它不会更快，只是让等待不再像什么都没发生。</p></div>
 <div class="codebox" data-file="stream.py" data-lang="python"><span class="dim">def brochure_stream(url):
     </span><span class="chg">stream = client.chat.completions.create(model="gpt-5-mini", stream=True, messages=[
         {"role": "system", "content": brochure_system},
@@ -114,22 +103,13 @@ def brochure(url):
 
 for so_far in brochure_stream("https://example.com"):
     print(so_far[-40:])</span></div>
-<div class="codebox" data-file="output" data-lang="text">Ah Huat
-Ah Huat Stall sells
-Ah Huat Stall sells fresh kaya toast and
-...        # one line per streamed chunk, each the last 40 characters
-# example only: your text will differ</div>
 <div class="try" id="p4"></div>
-
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I pasted a whole website into one prompt and hit the length limit. Choosing the pages first, then cutting the text, fixed it. I also forgot the link list came back as a JSON string until I added <code>json.loads</code>.</span><span class="zh">我把整个网站塞进一个提示词，撞上了长度上限。先挑页面、再截断文字，问题就解决了。我还忘了链接列表回来的是 JSON 字符串，直到加上 <code>json.loads</code> 才好。</span></div>
-
 <h2><span class="en">Common errors</span><span class="zh">常见报错</span></h2>
-<div class="card"><p class="en" style="margin:0">• <code>requests.exceptions.MissingSchema: Invalid URL</code>. The link has no <code>https://</code> at the front. Join relative links with <code>urljoin</code> first.<br>• <code>json.decoder.JSONDecodeError: Expecting value</code>. The model wrapped its JSON in words or code fences. Ask for JSON only, strip fences before <code>json.loads</code>, or use a structured-output option.<br>• A brochure made of nav menus and cookie text. The page text was not cleaned. Pass only the visible body text and cut it to a sensible length.</p><p class="zh" style="margin:0">• <code>requests.exceptions.MissingSchema: Invalid URL</code>：链接前面没有 <code>https://</code>。先用 <code>urljoin</code> 把相对链接补完整。<br>• <code>json.decoder.JSONDecodeError: Expecting value</code>：模型在 JSON 外面加了文字或代码围栏。要求只回 JSON，<code>json.loads</code> 之前先去掉围栏，或使用结构化输出。<br>• 小册子里全是菜单和 cookie 提示。页面文字没清理。只传可见的正文，并截到合适的长度。</p></div>
+<div class="card"><p class="en" style="margin:0">• <code>json.decoder.JSONDecodeError</code>. The model wrapped its JSON in words or code fences. Ask for JSON only, or strip fences first.<br>• <code>MissingSchema: Invalid URL</code>. A relative link has no <code>https://</code>. Join it with <code>urljoin</code>.</p><p class="zh" style="margin:0">• <code>json.decoder.JSONDecodeError</code>：模型在 JSON 外面加了文字或代码围栏。要求只回 JSON，或先去掉围栏。<br>• <code>MissingSchema: Invalid URL</code>：相对链接没有 <code>https://</code>。用 <code>urljoin</code> 补完整。</p></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Make a brochure for a business you know.</b> Try a shop whose site is plain HTML.</span><span class="zh"><b>给你熟悉的一家店做一份宣传册。</b>选一个纯 HTML 网站的店。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Switch the tone to funny</b> by changing one sentence, and compare the two brochures.</span><span class="zh"><b>把语气改成搞笑</b>，只改一句话，比较两份宣传册。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Swap in a local model</b> and note what gets worse (the JSON links are a good place to look).</span><span class="zh"><b>换成本地模型</b>，看看什么变差了（JSON 链接那一步最值得看）。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the helper can read the board, pick the few notices that matter and write one short announcement for Uncle Raj, streamed so the screen is never blank. Choosing first and writing second keeps the announcement short. The next problem is deciding which model should do each call, because a cheap one may be enough for picking and a better one is needed for writing.</span><span class="zh">现在助手能读公告板，挑出几条重要的通知，为 Raj 叔叔写一条简短的公告，并且流式显示，屏幕不会空白。先挑后写，公告才简短。下一个问题是每次调用该用哪个模型：挑选也许用便宜的就够，写作则需要更好的。</span></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Make a brochure</b> for a business you know with a plain HTML site.</span><span class="zh"><b>给你熟悉的一家店做一份宣传册</b>，选纯 HTML 网站的。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Switch the tone to funny</b> and compare the two brochures.</span><span class="zh"><b>把语气改成搞笑</b>，比较两份宣传册。</span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• Two small calls beat one giant one.<br>• Let the model make the fuzzy choice (which links). Let code do the plumbing.<br>• Show one example in the prompt so the reply copies its shape.<br>• JSON replies arrive as strings: <code>json.loads</code> them.<br>• Prompts set tone. Change one sentence and the voice changes.<br>• Cut the input so the call stays cheap and inside the context window.<br>• Stream the output so the reader sees words straight away.</p><p class="zh" style="margin:0">• 两次小调用胜过一次巨大的调用。<br>• 模糊的判断（选哪些链接）交给模型，管道活交给代码。<br>• 在提示词里给一个例子，回复就会照着它的格式。<br>• JSON 回复是字符串，要用 <code>json.loads</code> 解析。<br>• 提示词决定语气，改一句话，口吻就变了。<br>• 截短输入，调用才便宜，也不超出上下文窗口。<br>• 流式输出，让读的人立刻看到字。</p></div>
+<div class="card"><p class="en" style="margin:0">• Two small calls beat one giant one: pick first, then write.<br>• Let the model make fuzzy choices; let code do the plumbing.<br>• JSON replies arrive as strings: <code>json.loads</code> them.<br>• Cut the input to keep the call cheap and inside the context window.<br>• Stream the output so the reader sees words straight away.</p><p class="zh" style="margin:0">• 两次小调用胜过一次巨大的调用：先挑，再写。<br>• 模糊的判断交给模型，管道活交给代码。<br>• JSON 回复是字符串，要用 <code>json.loads</code> 解析。<br>• 截短输入，调用才便宜，也不超出上下文窗口。<br>• 流式输出，让读的人立刻看到字。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>

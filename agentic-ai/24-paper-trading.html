@@ -5,48 +5,37 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/agentic-ai/24-paper-trading.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/agentic-ai/24-paper-trading.html","url":"https://tx-learns.vercel.app/agentic-ai/24-paper-trading.html","name":"Paper-trading simulation","alternateName":"模拟交易","description":"Four agent uncles trade pretend money through MCP servers, on a timer, while a dashboard shows who is winning.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"MCP","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Agentic","url":"https://tx-learns.vercel.app/agentic-ai/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Agentic","item":"https://tx-learns.vercel.app/agentic-ai/index.html"},{"@type":"ListItem","position":3,"name":"Paper-trading simulation","item":"https://tx-learns.vercel.app/agentic-ai/24-paper-trading.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">MCP · Project</span><span class="zh">MCP · 项目</span></span><h1><span class="en">Paper-trading simulation</span><span class="zh">模拟交易</span></h1><p class="meta"><span class="en">Watch autonomous agents trade pretend money and learn from the result · ~60 min · project</span><span class="zh">看自主的智能体用模拟的钱做交易，并从结果中学习 · 约 60 分钟 · 项目</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the Kopi Corner assistant could use many MCP servers at once. Today it fails when the pieces have never run together: each works alone, but nothing proves they hold up as one system. We fix it with a final project that combines agents, tools, MCP servers, a timer and a tracer.</p>
-<p class="zh" style="margin:0">上回 Kopi Corner 助手已经能同时用好几个 MCP 服务端。今天的问题是：各个部件单独都行，却从没一起跑过，没人证明它们合起来还稳。我们用一个收尾项目，把智能体、工具、MCP 服务端、定时器和追踪合在一起。</p></div>
-<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en" style="margin:0">Every morning at the kopitiam, four uncles argue about stocks over roti bakar. <b>Uncle Wong</b> only buys solid, boring companies. <b>Uncle Muthu</b> chases whatever is in the news. <b>Uncle Ah Kow</b> trades on chart patterns. <b>Uncle Hamid</b> buys what everyone else is selling. None of them ever proves who is right. So you build a <b>paper trading floor</b>: four agent uncles, each with S$10,000 of <i>pretend</i> money, a written strategy and the same tools, trading four made-up tickers on a timer. It is play money only. The point is to watch autonomous agents and a feedback loop, not to trade for real. Aina builds the same shape for Kopi Corner, with Uncle Lim's say as the limit instead of S$10,000.</p>
-<p class="zh" style="margin:0">每天早上，咖啡店里四位大叔一边吃烤面包，一边争论股票。<b>Wong 叔</b>只买扎实无聊的公司。<b>Muthu 叔</b>追着新闻跑。<b>Ah Kow 叔</b>看图表形态交易。<b>Hamid 叔</b>买别人都在卖的。可没有一个人能证明自己才对。于是你搭一个<b>模拟交易场</b>：四个智能体大叔，每人有 10,000 新元的<i>模拟</i>资金、一份写好的策略和同样的工具，按定时器交易四只虚构的股票。这只是玩具钱，目的是观察自主的智能体和反馈循环，不是真的去交易。Aina 给 Kopi Corner 搭的是同样的结构，只是限制换成了 Lim 叔的点头，而不是 10,000 新元。</p></div>
-<h2><span class="en">Step 1 · The floor is built from MCP servers</span><span class="zh">第 1 步 · 交易场由 MCP 服务端搭成</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Every uncle is an agent whose tools come from MCP servers. The <b>accounts server</b> is your own FastMCP (the small Python helper that builds an MCP server), like the tab book you wrote in the build-your-own-server lesson: it holds cash and shares, and every uncle starts with S$10,000. The <b>market server</b> gives prices. Its prices come from a <b>simulator</b>, a small made-up price function you write first, in the code below. The <b>push server</b> has one tool that pings your phone after a trade.</p><p class="zh" style="margin:0 0 8px">每位大叔都是一个智能体，工具来自 MCP 服务端。<b>账户服务端</b>是你自己写的 FastMCP（用来搭 MCP 服务端的小型 Python 工具），就像你在“自己搭服务端”那一课写的账本：管现金和股份，每位大叔起始都有 10,000 新元。<b>行情服务端</b>提供价格，价格来自一个<b>模拟器</b>（一个小型的虚构价格函数），下面的代码里先把它写好。<b>推送服务端</b>只有一个工具，每笔交易后给你的手机发通知。</p><p class="en" style="margin:0 0 8px">Each uncle also has a <b>researcher</b>: another agent with its own servers (fetch, filtered web search, memory). It is handed to the trader <b>as a tool</b>, the pattern from the Agent SDKs topic.</p><p class="zh" style="margin:0 0 8px">每位大叔还有一个<b>研究员</b>：另一个智能体，有自己的服务端（抓取网页、过滤后的搜索、记忆）。它<b>作为工具</b>交给交易员，用的就是智能体 SDK 主题里的那种模式。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Key point</span><span class="zh">要点</span></b><p class="en" style="margin:0">A whole system can be built from MCP servers plus agents on a timer. Here four agent “uncles” each trade S$10,000 of <b>pretend</b> money on made-up tickers, with different written strategies (steady, news-chasing, charts, contrarian). Watch the agents and the feedback loop; this is play money only.</p><p class="zh" style="margin:0">一整个系统可以由 MCP 服务端加定时运行的智能体搭成。这里四位智能体“大叔”各拿 1 万新元的<b>模拟</b>资金，在虚构的股票代码上交易，各有不同的书面策略（稳健、追新闻、看图表、反向）。重点是观察智能体和反馈循环；这只是玩具资金。</p></div>
+<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim">pip install openai-agents "mcp[cli]&lt;2" python-dotenv requests
+# keys in .env: OPENAI_API_KEY, TAVILY_API_KEY, PUSHOVER_USER, PUSHOVER_TOKEN, optional RUN_EVERY_N_MINUTES</span></div>
+
+<h2><span class="en">Step 1 · The floor is three MCP servers</span><span class="zh">第 1 步 · 交易所是三个 MCP 服务端</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li>The <b>accounts server</b> (your own FastMCP, like the tab book) holds cash, shares and each uncle's strategy.</li><li>The <b>market server</b> gives prices from a <b>simulator</b>: a slow, smooth made-up price function, so two calls a second apart do not jump. Swap in a real provider later without touching any uncle.</li><li>The <b>push server</b> has one tool that pings your phone.</li></ul>
+<ul class="zh" style="margin:0;padding-left:18px"><li><b>账户服务端</b>（你自己的 FastMCP，像账本那样）保存现金、持股和每位大叔的策略。</li><li><b>行情服务端</b>用<b>模拟器</b>给出价格：一个缓慢平滑的虚构价格函数，所以相隔一秒的两次调用不会大跳。以后可换成真实数据源，不用动任何大叔。</li><li><b>推送服务端</b>只有一个工具：给你的手机发提醒。</li></ul></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="A timer starts a trader agent that uses accounts, market and push MCP servers, and calls a researcher agent as a tool"><defs><marker id="ah24" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box soft" x="20" y="85" width="120" height="50" rx="10"/><text class="en" x="80.0" y="114.0">Timer</text><text class="zh" x="80.0" y="114.0">定时器</text><rect class="box new" x="190" y="85" width="170" height="50" rx="10"/><text class="en" x="275.0" y="114.0">Trader uncle</text><text class="zh" x="275.0" y="114.0">交易员大叔</text><rect class="box" x="190" y="160" width="170" height="46" rx="10"/><text class="en" x="275.0" y="187.0">Researcher agent</text><text class="zh" x="275.0" y="187.0">研究员智能体</text><rect class="box new" x="460" y="15" width="220" height="46" rx="10"/><text class="en" x="570.0" y="42.0">Accounts server</text><text class="zh" x="570.0" y="42.0">账户服务端</text><rect class="box new" x="460" y="87" width="220" height="46" rx="10"/><text class="en" x="570.0" y="114.0">Market (simulator)</text><text class="zh" x="570.0" y="114.0">行情（模拟器）</text><rect class="box new" x="460" y="159" width="220" height="46" rx="10"/><text class="en" x="570.0" y="186.0">Push server</text><text class="zh" x="570.0" y="186.0">推送服务端</text><path class="lnk" d="M140 110L190 110" marker-end="url(#ah24)"/><path class="lnk hot" d="M360 100L460 38" marker-end="url(#ah24)"/><path class="lnk hot" d="M360 110L460 110" marker-end="url(#ah24)"/><path class="lnk hot" d="M360 120L460 182" marker-end="url(#ah24)"/><path class="lnk" d="M275 160L275 135" marker-end="url(#ah24)"/><text class="en sm" x="325" y="151">as a tool</text><text class="zh sm" x="325" y="151">作为工具</text></svg><figcaption><span class="en">The trader gets its tools from three MCP servers and borrows a researcher agent as a fourth tool.</span><span class="zh">交易员的工具来自三个 MCP 服务端，还把研究员智能体当作第四个工具借来用。</span></figcaption></figure>
-<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim">pip install openai-agents "mcp[cli]&lt;2" gradio fastapi uvicorn python-dotenv requests
-# keys in .env: OPENAI_API_KEY, TAVILY_API_KEY, PUSHOVER_USER, PUSHOVER_TOKEN
-# optional: RUN_EVERY_N_MINUTES
-
- </span></div>
-<div class="codebox" data-file="diagram" data-lang="text"><span class="dim">Uncle (trader agent) ---- accounts server  (my FastMCP: balance, holdings, buy, sell, past_trades, change_strategy)
-    |      |------------- market server    (lookup_price)
-    |      '------------- push server      (one tool: ping my phone)
-    '-- Researcher (agent, used as a tool) -- fetch + filtered search + memory servers
-
-</span></div>
-<div class="codebox" data-file="market.py" data-lang="python"><span class="chg"># floor/market.py  (the price simulator: made-up prices that move slowly)
+<div class="codebox" data-file="market.py" data-lang="python"><span class="chg"># floor/market.py: made-up prices that move slowly
 import math, time
-
 BASE = {"KOPI": 10.0, "ROTI": 5.0, "TEHT": 8.0, "NASI": 12.0}
-
 def get_price(symbol: str) -&gt; float:
-    t = time.time() / 600                       # a slow clock: a gentle change every few minutes
-    seed = sum(map(ord, symbol))
+    t = time.time() / 600
+    seed = sum(map(ord, symbol))                # each ticker gets its own wave
     wave = math.sin(t + seed) * 0.6 + math.sin(t * 2.3 + seed * 1.7) * 0.3
-    return round(BASE[symbol] * (1 + 0.08 * wave), 2)
-
-</span></div>
-<div class="codebox" data-file="accounts_server.py" data-lang="python"><span class="chg"># floor/accounts_server.py  (Account is a plain ledger class, like Tab before)
+    return round(BASE[symbol] * (1 + 0.08 * wave), 2)</span></div>
+<div class="codebox" data-file="accounts_server.py" data-lang="python"><span class="dim"># floor/accounts_server.py
 import json, os
 from mcp.server.fastmcp import FastMCP
 from floor.market import get_price
-
 mcp = FastMCP("accounts")
 DB = "accounts.json"                    # a file, so cash survives between runs
-
+STRATEGIES = {
+    "Wong":  "Buy only solid, boring companies and hold them.",
+    "Muthu": "Chase whatever is in the news.",
+    "AhKow": "Trade on chart patterns.",
+    "Hamid": "Buy what everyone else is selling.",
+}
 class Account:
     def __init__(self, name, data=None):
         self.name = name
-        # a new uncle starts with S$10,000 of pretend cash
         d = data or {"cash": 10000.0, "holdings": {}, "trades": [], "strategy": STRATEGIES[name]}
         self.__dict__.update(d)
     @classmethod
@@ -69,189 +58,128 @@ class Account:
         self.strategy = text
         self.save()
         return "Strategy updated"
-    def summary(self):
-        value = self.cash + sum(q * get_price(s) for s, q in self.holdings.items())
-        return {"value": round(value, 2), "cash": round(self.cash, 2), "holdings": self.holdings}
-
-@mcp.tool()
+</span><span class="chg">@mcp.tool()
 async def buy_shares(name: str, symbol: str, qty: int) -&gt; str:
     """Buy shares at the current price from this account's cash. Fails if cash is short."""
     return Account.get(name).buy(symbol, qty, get_price(symbol))
 
-@mcp.resource("strategy://{name}")
-async def strategy_page(name: str) -&gt; str:
-    """The written strategy of one uncle."""
-    return Account.get(name).strategy
-
 @mcp.tool()
-async def past_trades(name: str) -> list:
+async def past_trades(name: str) -&gt; list:
     """The last 10 trades this uncle made, so he can judge how his strategy did."""
-    return Account.get(name).trades[-10:]</span><span class="dim">
+    return Account.get(name).trades[-10:]
 
-STRATEGIES = {
-    "Wong":  "Buy only solid, boring companies and hold them.",
-    "Muthu": "Chase whatever is in the news.",
-    "AhKow": "Trade on chart patterns.",
-    "Hamid": "Buy what everyone else is selling.",
-}</span></div>
-<p class="en">Which server would each action go to?</p>
-<p class="zh">下面每个动作应该交给哪个服务端？</p>
-<div class="sc" id="g1"></div>
-<h2><span class="en">Step 2 · A market and a push server, with a simulator inside</span><span class="zh">第 2 步 · 行情与推送服务端，里面藏着模拟器</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Real prices need a data account and a key. So the prices come from the <b>simulator</b> you wrote in Step 1: a made-up price that moves slowly and smoothly with time, so two calls a second apart do not jump wildly. The ticker list is made up too: <code>KOPI</code>, <code>ROTI</code>, <code>TEHT</code>, <code>NASI</code>. In the code, <code>seed</code> comes from the letters of the ticker, so each ticker gets its own wave instead of all moving together.</p><p class="zh" style="margin:0 0 8px">真实行情需要数据账号和密钥。所以价格来自你在第 1 步写好的<b>模拟器</b>：一个随时间缓慢、平滑变化的虚构价格，这样相隔一秒的两次调用不会大起大落。股票代码也是虚构的：<code>KOPI</code>、<code>ROTI</code>、<code>TEHT</code>、<code>NASI</code>。代码里的 <code>seed</code> 由股票代码的字母算出，所以每只股票有自己的波动，不会一起涨跌。</p><p class="en" style="margin:0 0 8px">Because the market is its own server, you can swap in a real provider later without touching any uncle.</p><p class="zh" style="margin:0 0 8px">因为行情是独立的服务端，以后换成真实数据源时，不用动任何一位大叔。</p></div>
-<div class="codebox" data-file="market_server.py" data-lang="python"><span class="dim"># floor/market_server.py
+if __name__ == "__main__":
+    mcp.run(transport="stdio")</span></div>
+<div class="codebox" data-file="market_and_push.py" data-lang="python"><span class="dim"># floor/market_server.py
 from mcp.server.fastmcp import FastMCP
 from floor.market import get_price
-
 mcp = FastMCP("market")
-
 </span><span class="chg">@mcp.tool()
 async def lookup_price(symbol: str) -&gt; float:
     """Latest price of a ticker, in S$."""
     return get_price(symbol)
-
 if __name__ == "__main__":
     mcp.run(transport="stdio")</span><span class="dim">
 
-</span></div>
-<div class="codebox" data-file="push_server.py" data-lang="python"><span class="dim"># floor/push_server.py: one tool, same shape
+# floor/push_server.py: one tool, same shape (ends with the same mcp.run)
 import os, requests
 mcp = FastMCP("push")
-
 @mcp.tool()
 async def push(message: str) -&gt; str:
     """Send a short note to my phone, e.g. after a trade."""
     r = requests.post("https://api.pushover.net/1/messages.json", data={
         "user": os.getenv("PUSHOVER_USER"), "token": os.getenv("PUSHOVER_TOKEN"), "message": message})
     return "sent" if r.ok else "failed"</span></div>
+<p class="en">Which server would each action go to?</p><p class="zh">每个动作该交给哪个服务端？</p>
+<div class="sc" id="g1"></div>
 <div class="try" id="p2"></div>
-<h2><span class="en">Step 3 · One uncle, one researcher</span><span class="zh">第 3 步 · 一位大叔，一位研究员</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Each uncle needs three servers for trading and the researcher needs three of its own. Six <code>async with</code> blocks nested inside each other would be unreadable, so use <code>AsyncExitStack</code>: it opens servers in a loop and closes them all, even if the run fails.</p><p class="zh" style="margin:0 0 8px">每位大叔交易要用三个服务端，研究员又要三个自己的。六层嵌套的 <code>async with</code> 根本没法读，所以用 <code>AsyncExitStack</code>：用循环打开服务端，结束时全部关掉，即使运行失败也一样。</p><p class="en" style="margin:0 0 8px"><code>researcher.as_tool(...)</code> turns the researcher into a tool of the uncle. The uncle stays in charge and gets its answer back. The trace id carries the uncle's name, so Step 5 can tell whose run each span belongs to. <code>max_turns=30</code> stops a runaway run. <code>only_search</code> is a tool filter: the Tavily server offers several tools, and this keeps just <code>tavily_search</code>. The uncle can change his strategy with a tool you add in Step 6; for now he only trades.</p><p class="zh" style="margin:0 0 8px"><code>researcher.as_tool(...)</code> 把研究员变成大叔的一个工具。大叔始终做主，并拿回研究员的答案。trace id 里带着大叔的名字，第 5 步就能分清每一段记录属于谁。<code>max_turns=30</code> 能防止一次运行失控。<code>only_search</code> 是工具过滤器：Tavily 服务端有好几个工具，这里只留下 <code>tavily_search</code>。大叔改策略要用第 6 步才加的工具，现在他只会交易。</p></div>
-<div class="codebox" data-file="trading_floor.py" data-lang="python"><span class="dim">import os, secrets
+
+<h2><span class="en">Step 2 · One uncle, one researcher, a timer</span><span class="zh">第 2 步 · 一位大叔、一位研究员、一个定时器</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li>Each uncle is an agent whose tools come from the three servers. His <b>researcher</b> is another agent (fetch plus filtered search), handed over <b>as a tool</b> with <code>as_tool</code>, so the uncle stays in charge.</li><li><code>AsyncExitStack</code> opens servers in a loop and closes them all, even on failure. <code>max_turns=30</code> stops a runaway run.</li><li><code>asyncio.gather</code> runs all four at once, then the floor sleeps. Watch the cost: four traders, each with a researcher, every N minutes adds up while you sleep.</li></ul>
+<ul class="zh" style="margin:0;padding-left:18px"><li>每位大叔都是一个智能体，工具来自这三个服务端。他的<b>研究员</b>是另一个智能体（抓取加过滤搜索），用 <code>as_tool</code> <b>作为工具</b>交给他，所以大叔始终是主导。</li><li><code>AsyncExitStack</code> 循环打开服务端，最后统一关闭，失败时也一样。<code>max_turns=30</code> 防止失控。</li><li><code>asyncio.gather</code> 让四位同时运行，然后交易所休眠。留意成本：四位交易员各带研究员，每 N 分钟一次，你睡觉时费用也在涨。</li></ul></div>
+<div class="codebox" data-file="trading_floor.py" data-lang="python"><span class="dim">import asyncio, os
 from contextlib import AsyncExitStack
 from agents import Agent, Runner, trace
 from agents.mcp import MCPServerStdio, create_static_tool_filter
+from floor.accounts_server import STRATEGIES
 
 STRATEGY_NOTE = "Look at how your past trades actually performed, and update your strategy if the results say you should."
-RESEARCH_RULES = "Research the ticker you are asked about: news first, then context. Reply in three lines."
-def trader_rules(name):  return f"{STRATEGIES[name]} Trade only KOPI, ROTI, TEHT, NASI. Never guess prices. {STRATEGY_NOTE}"
-async def build_message(name): return f"You are {name}. Check your account and strategy, trade if it is worthwhile, then push a short note."
-
-def make_trace_id(tag):                           # "trace_" + 32 chars; the name rides in front
-    return "trace_" + (tag + "0" + secrets.token_hex(16))[:32]
-
 only_search = create_static_tool_filter(allowed_tool_names=["tavily_search"])
 
 def trader_servers():
-    p = [{"command": "uv", "args": ["run", "-m", "floor.accounts_server"]},
-         {"command": "uv", "args": ["run", "-m", "floor.push_server"]},
-         {"command": "uv", "args": ["run", "-m", "floor.market_server"]}]
-    return [MCPServerStdio(x, client_session_timeout_seconds=120) for x in p]
+    mods = ["accounts_server", "push_server", "market_server"]
+    return [MCPServerStdio({"command": "uv", "args": ["run", "-m", f"floor.{m}"]},
+                           client_session_timeout_seconds=120) for m in mods]
 
-def researcher_servers(name):
+def researcher_servers():
     return [MCPServerStdio({"command": "uvx", "args": ["mcp-server-fetch"]}, client_session_timeout_seconds=120),
             MCPServerStdio({"command": "npx", "args": ["-y", "tavily-mcp@latest"],
                             "env": {"TAVILY_API_KEY": os.getenv("TAVILY_API_KEY")}},
-                           tool_filter=only_search, client_session_timeout_seconds=120),
-            MCPServerStdio({"command": "npx", "args": ["-y", "@modelcontextprotocol/server-memory"],
-                            "env": {"MEMORY_FILE_PATH": os.path.abspath(f"memory/{name.lower()}.json")}},
-                           client_session_timeout_seconds=120)]
-
+                           tool_filter=only_search, client_session_timeout_seconds=120)]
 </span><span class="chg">async def run_uncle(name: str, model: str = "gpt-4o-mini"):
     async with AsyncExitStack() as stack:
         t_srv = [await stack.enter_async_context(s) for s in trader_servers()]
-        r_srv = [await stack.enter_async_context(s) for s in researcher_servers(name)]
-        researcher = Agent(name="Researcher", instructions=RESEARCH_RULES, model=model, mcp_servers=r_srv)
-        uncle = Agent(name=name, instructions=trader_rules(name), model=model, mcp_servers=t_srv,
+        r_srv = [await stack.enter_async_context(s) for s in researcher_servers()]
+        researcher = Agent(name="Researcher", model=model, mcp_servers=r_srv,
+                           instructions="Research the ticker you are asked about: news first, then context. Reply in three lines.")
+        uncle = Agent(name=name, model=model, mcp_servers=t_srv,
+                      instructions=f"{STRATEGIES[name]} Trade only KOPI, ROTI, TEHT, NASI. Never guess prices. {STRATEGY_NOTE}",
                       tools=[researcher.as_tool(tool_name="Researcher",
                                                 tool_description="Research news and prices for a ticker")])
-        with trace(f"{name}-trading", trace_id=make_trace_id(name.lower())):
-            await Runner.run(uncle, await build_message(name), max_turns=30)</span></div>
-<div class="try" id="p3"></div>
-<h2><span class="en">Step 4 · Run all four on a timer</span><span class="zh">第 4 步 · 让四位大叔按定时器运行</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><code>async</code>/<code>await</code> let a program wait for something slow (a server, a model) without freezing. <code>asyncio.gather</code> runs the four uncles at the same time. Then the floor sleeps, and the loop starts again. The pause comes from an environment variable, so you can change it without editing code.</p><p class="zh" style="margin:0 0 8px"><code>async</code>/<code>await</code> 让程序在等慢的东西（服务端、模型）时不会卡住。<code>asyncio.gather</code> 让四位大叔同时运行。然后交易场休息一会儿，再重新开始。休息的时间来自环境变量，不用改代码就能调整。</p><p class="en" style="margin:0 0 8px">Watch the cost. Four traders, each with a researcher and six servers, every N minutes, adds up while you sleep.</p><p class="zh" style="margin:0 0 8px">要留意费用。四位交易员，每人带一个研究员和六个服务端，每隔 N 分钟就跑一次，你睡觉的时候钱也在花。</p></div>
-<div class="codebox" data-file="trading_floor.py" data-lang="python"><span class="dim">import asyncio, os
+        with trace(f"{name}-trading"):
+            await Runner.run(uncle, f"You are {name}. Check your account, trade if it is worthwhile, then push a short note.",
+                             max_turns=30)
 
-</span><span class="chg">async def floor():
+async def floor():
     while True:
-        await asyncio.gather(*(run_uncle(n) for n in ["Wong", "Muthu", "AhKow", "Hamid"]))
-        await asyncio.sleep(int(os.getenv("RUN_EVERY_N_MINUTES", "60")) * 60)</span><span class="dim">
+        await asyncio.gather(*(run_uncle(n) for n in STRATEGIES))
+        await asyncio.sleep(int(os.getenv("RUN_EVERY_N_MINUTES", "60")) * 60)
 
-# floor/trading_floor.py ends with:
 if __name__ == "__main__":
     asyncio.run(floor())</span></div>
-<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
-<div class="codebox" data-file="output" data-lang="text">$ uv run -m floor.trading_floor
-(no text appears here: the uncles' trades and logs go to the database;
- open the dashboard or call the API below to see them)</div>
+<div class="try" id="p3"></div>
 <div class="try" id="p4"></div>
-<h2><span class="en">Step 5 · See inside with your own tracer</span><span class="zh">第 5 步 · 用自己的追踪器看清内部</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Four uncles running at once make a messy log. The SDK lets you plug in a <code>TracingProcessor</code>: it is called for every <b>span</b> (an agent step, a tool call or a model call). Yours writes each span to a database with the uncle's name, and the dashboard reads those rows as a live, colour-coded log.</p><p class="zh" style="margin:0 0 8px">四位大叔同时运行，日志会乱成一团。SDK 允许你接入一个 <code>TracingProcessor</code>：每一个 <b>span</b>（智能体的一步、一次工具调用或一次模型调用）都会交给它。你的追踪器把每个 span 连同大叔的名字写进数据库，仪表盘把这些记录读成实时的彩色日志。</p><p class="en" style="margin:0 0 8px">The trick is the name inside <code>trace_id</code>, which <code>make_trace_id</code> put in front. Every span can then be traced back to its owner. <code>_who</code> reads the name back out: the text between the first underscore and the <code>0</code>. In each method, <code>w</code> holds the name, and the row is written only <code>if</code> there is a name.</p><p class="zh" style="margin:0 0 8px">关键在 <code>trace_id</code> 里的名字，也就是 <code>make_trace_id</code> 放在最前面的那部分。这样每个 span 都能追回它的主人。<code>_who</code> 把名字读回来：取第一个下划线和 <code>0</code> 之间的文字。每个方法里，<code>w</code> 存着名字，只有 <code>if</code> 有名字，才写这一行记录。</p></div>
-<div class="codebox" data-file="tracing.py" data-lang="python"><span class="dim">from agents import TracingProcessor, add_trace_processor
-from floor.db import write_log          # a small helper that inserts a row into SQLite
 
-</span><span class="chg">class FloorLog(TracingProcessor):
-    def _who(self, x):                      # trace ids look like trace_&lt;name&gt;0&lt;random&gt;
-        tag = x.trace_id.split("_")[1]
-        return tag.split("0")[0] if "0" in tag else None
-    def on_trace_start(self, t):
-        w = self._who(t)
-        if w:
-            write_log(w, "trace", f"start {t.name}")
-    def on_trace_end(self, t):
-        w = self._who(t)
-        if w:
-            write_log(w, "trace", f"end {t.name}")
-    def on_span_start(self, s):
-        if (w := self._who(s)) and s.span_data:
-            write_log(w, s.span_data.type, f"start {getattr(s.span_data, 'name', '')}")
-    def on_span_end(self, s): pass
-    def shutdown(self): pass
-    def force_flush(self): pass
-
-add_trace_processor(FloorLog())</span></div>
-<div class="try" id="p5"></div>
-<h2><span class="en">Step 6 · Let them rewrite their own strategy</span><span class="zh">第 6 步 · 让他们改写自己的策略</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The most interesting idea: <code>change_strategy</code> is one of the account tools, and the instructions (<code>STRATEGY_NOTE</code>) tell the uncle to look at how past trades performed (the <code>past_trades</code> tool from Step 1 returns them) and update if the results say so. Profit and loss is a <b>real-world evaluation</b> that feeds into the next decision. That makes a loop that learns, not a fixed prompt.</p><p class="zh" style="margin:0 0 8px">最有意思的想法是：<code>change_strategy</code> 是账户工具之一，指令（<code>STRATEGY_NOTE</code>）叫大叔去看过往交易的表现（第 1 步的 <code>past_trades</code> 工具会返回它们），结果说该改就改。盈亏就是一种<b>真实世界的评估</b>，会反馈到下一次决策里。这就成了一个会学习的循环，而不是固定不变的提示词。</p><p class="en" style="margin:0 0 8px">For the screen, split it like a real product. A small, <b>read-only</b> FastAPI app serves the roster, values, holdings, transactions and logs. A Vite + TypeScript page (Vite is the tool that serves a web page while you build it) asks it for new numbers every couple of seconds. That repeated asking is called <b>polling</b>. The page draws a chart per uncle. Browsers block a page from reading data on another address, a rule called CORS. Vite's dev server passes <code>/api</code> requests on to port 8000, so the browser sees one address and you set nothing up.</p><p class="zh" style="margin:0 0 8px">屏幕那边，像真正的产品一样拆开。一个小巧的<b>只读</b> FastAPI 应用提供名单、总值、持仓、交易和日志。一个 Vite + TypeScript 页面（Vite 是你开发时用来提供网页的工具）每隔几秒向它要一次最新数字，这种反复询问叫做<b>轮询</b>，页面还会给每位大叔画一张图。浏览器默认不允许网页读取另一个地址上的数据，这条规则叫 CORS。Vite 的开发服务器会把 <code>/api</code> 的请求转给 8000 端口，所以浏览器只看到一个地址，你什么都不用设置。</p></div>
-<div class="codebox" data-file="accounts_server.py" data-lang="python"><span class="dim"># floor/accounts_server.py  (past_trades, shown in Step 1, is how he sees his results)
+<h2><span class="en">Step 3 · Trace each uncle, let him learn</span><span class="zh">第 3 步 · 追踪每位大叔，让他学习</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li>Four agents at once make a messy log. A custom <code>TracingProcessor</code> is called for every <b>span</b> (an agent step, tool call or model call). Put the uncle's name inside the <code>trace_id</code> so every span traces back to its owner.</li><li>The learning loop: <code>change_strategy</code> lets an uncle rewrite his own strategy after reviewing <code>past_trades</code>. Profit and loss is real feedback, so a fixed prompt becomes a loop that learns.</li></ul>
+<ul class="zh" style="margin:0;padding-left:18px"><li>四个智能体同时跑，日志会很乱。自定义的 <code>TracingProcessor</code> 会在每个 <b>span</b>（智能体的一步、工具调用或模型调用）时被调用。把大叔的名字放进 <code>trace_id</code>，每个 span 就能追溯到主人。</li><li>学习循环：<code>change_strategy</code> 让大叔在查看 <code>past_trades</code> 之后改写自己的策略。盈亏是真实的反馈，固定的提示词于是变成会学习的循环。</li></ul></div>
+<div class="codebox" data-file="learning_and_tracing.py" data-lang="python"><span class="dim"># add to floor/accounts_server.py, above the mcp.run line
 </span><span class="chg">@mcp.tool()
 async def change_strategy(name: str, new_strategy: str) -&gt; str:
     """Replace this uncle's written strategy. Use it only after reviewing real results."""
     return Account.get(name).set_strategy(new_strategy)</span><span class="dim">
 
-</span></div>
-<div class="codebox" data-file="api.py" data-lang="python"><span class="dim"># floor/api.py: read-only, one endpoint shown
-from fastapi import FastAPI
-app = FastAPI()
+# floor/tracing.py
+import secrets
+from agents import TracingProcessor, add_trace_processor
+from floor.db import write_log          # a small helper that inserts a row into SQLite
 
-@app.get("/api/portfolio/{name}")
-def portfolio(name: str):
-    return Account.get(name).summary()      # value, cash, holdings; nothing here can trade
-
-# one-time setup: pip install uv   and   cd frontend && npm install  (needs Node.js)
-</span></div>
-<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim"># three terminals:
-</span><span class="chg">uv run uvicorn floor.api:app --port 8000     # terminal 1
-cd frontend &amp;&amp; npm run dev                  # terminal 2 -&gt; http://localhost:5173
-uv run -m floor.trading_floor                # terminal 3: the uncles start trading</span></div>
-<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
-<div class="codebox" data-file="output" data-lang="text">INFO:     Uvicorn running on http://127.0.0.1:8000
-$ curl localhost:8000/api/portfolio/Wong
-{"value":10012.4,"cash":9949.4,"holdings":{"KOPI":5}}</div>
+def make_trace_id(tag):                 # "trace_" + 32 chars; the name rides in front
+    return "trace_" + (tag + "0" + secrets.token_hex(16))[:32]
+# in run_uncle: with trace(f"{name}-trading", trace_id=make_trace_id(name.lower())):
+</span><span class="chg">class FloorLog(TracingProcessor):
+    def _who(self, x):                  # trace ids look like trace_&lt;name&gt;0&lt;random&gt;
+        tag = x.trace_id.split("_")[1]
+        return tag.split("0")[0] if "0" in tag else None
+    def on_span_start(self, s):
+        if (w := self._who(s)) and s.span_data:
+            write_log(w, s.span_data.type, f"start {getattr(s.span_data, 'name', '')}")
+    def on_trace_start(self, t): pass
+    def on_trace_end(self, t): pass
+    def on_span_end(self, s): pass
+    def shutdown(self): pass
+    def force_flush(self): pass
+add_trace_processor(FloorLog())</span></div>
+<div class="try" id="p5"></div>
 <div class="try" id="p6"></div>
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我踩过的坑</span></b><span class="en">I did not expect the cost of a timer. Four traders, a researcher each and several servers, every N minutes, adds up while you sleep. Now I set <code>RUN_EVERY_N_MINUTES</code> high, use small models and stop the floor when I am done watching. Nesting six <code>async with</code> blocks was unreadable until I used <code>AsyncExitStack</code>, and each server needs a generous timeout (I use 120 s) because <code>uv run</code> start-up and first-time downloads are slow. Last, I wanted different uncles on different providers. The SDK takes a plain model name for OpenAI, and an <code>OpenAIChatCompletionsModel(model=..., openai_client=AsyncOpenAI(base_url=...))</code> for any OpenAI-compatible provider (one that speaks the same API), so I route by model-name prefix. (A provider is the company that hosts a model. The routing is not in this lesson's code: it is an idea for later.) Each provider needs its own key variable, so a missing one only breaks that uncle.</span><span class="zh">我没想到定时器会这么花钱。四位交易员、各带一个研究员和好几个服务端，每隔 N 分钟跑一次，你睡觉的时候钱也在花。现在我把 <code>RUN_EVERY_N_MINUTES</code> 设得很大，用小模型，看完就停掉交易场。嵌套六层 <code>async with</code> 根本没法读，直到用上 <code>AsyncExitStack</code>；每个服务端还要给足超时（我用 120 秒），因为 <code>uv run</code> 启动和第一次下载都很慢。最后，我想让不同的大叔用不同的模型提供商。SDK 对 OpenAI 直接接受模型名字；对任何兼容 OpenAI 的提供商（即说同一种接口的提供商），要用 <code>OpenAIChatCompletionsModel(model=..., openai_client=AsyncOpenAI(base_url=...))</code>，所以我按模型名字的前缀来分流。（提供商就是托管模型的公司。这段分流没有写在本课的代码里，留作以后的想法。）每个提供商都要有自己的密钥变量，缺一个只会让对应的那位大叔出问题。</span></div>
-<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Run one uncle once.</b> Call <code>run_uncle("Wong")</code> alone, then read his account and the logs before starting the whole floor.</span><span class="zh"><b>先让一位大叔跑一次。</b>单独调用 <code>run_uncle("Wong")</code>，看过他的账户和日志，再开动整个交易场。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a fifth uncle.</b> Write a strategy of your own and see whether he beats the others after a day.</span><span class="zh"><b>再加第五位大叔。</b>写一份你自己的策略，看一天后他能不能赢过别人。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Read a strategy change.</b> After a few runs, compare each uncle's strategy with the one he started with. Did the results justify the change?</span><span class="zh"><b>读一次策略的变化。</b>跑几轮之后，把每位大叔现在的策略和起初的比一比，结果真的支持这些改动吗？</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the whole Kopi Corner assistant is one system: a model that picks tools, MCP servers for the order pad, memory and prices, a timer-driven run, a tracer to record each run, and only pretend money. The next problem is the real shop: this ran on pretend money, so you decide with Uncle Lim what it may touch for real, and how you will keep checking it.</span><span class="zh">现在整个 Kopi Corner 助手是一个完整的系统：会挑工具的模型、给点单本、记忆和价格用的 MCP 服务端、按定时器运行、用追踪器记录每一次运行，而且用的全是模拟的钱。下一个问题是真实的店：这次用的是模拟的钱，所以你要和 Lim 叔商量它在现实中能碰什么，以及怎样持续检查它。</span></div>
-<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
-<div class="card"><p class="en" style="margin:0">• <b><code>ModuleNotFoundError: No module named 'floor'</code></b>: You ran the file from inside the folder. Fix: run from the project root with <code>uv run -m floor.trading_floor</code>.<br>• <b><code>agents.exceptions.MaxTurnsExceeded: Max turns (30) exceeded</code></b>: An uncle kept calling tools. Fix: tighten his strategy text or accept the limit, since the round simply ends.<br>• <b><code>Address already in use</code></b>: An earlier run still holds port 8000. Fix: stop it, or pass <code>--port 8001</code> and update the front end.<br>• <b><code>Insufficient funds / not enough shares (returned by a tool)</code></b>: Not a crash: the ledger refused the trade. Fix: nothing; the agent should read the message and adjust.</p>
-<p class="zh" style="margin:0">• <b><code>ModuleNotFoundError: No module named 'floor'</code></b>：你在文件夹内部运行了文件。解决：在项目根目录用 <code>uv run -m floor.trading_floor</code> 运行。<br>• <b><code>agents.exceptions.MaxTurnsExceeded: Max turns (30) exceeded</code></b>：某位大叔一直在调用工具。解决：把他的策略写得更明确，或接受这个上限，这一轮会直接结束。<br>• <b><code>Address already in use</code></b>：上一次运行还占着 8000 端口。解决：先停掉它，或加上 <code>--port 8001</code> 并同步改前端。<br>• <b><code>Insufficient funds / not enough shares (returned by a tool)</code></b>：不是崩溃：账本拒绝了这笔交易。解决：不用处理；智能体应读到这条信息并调整。</p></div>
-<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• A whole system can be made of MCP servers: your own accounts server, a market server and a push server.<br>• Put a simulator behind the market server, and a real data source can replace it later without touching the agents.<br>• A researcher agent is handed to the trader as a tool, so the trader stays in charge.<br>• <code>AsyncExitStack</code> opens many servers in a loop and closes them all, even on failure.<br>• A custom <code>TracingProcessor</code> plus the name inside the trace id gives a live log per agent.<br>• Profit and loss is real feedback: letting agents rewrite their strategy turns a fixed prompt into a loop that learns.<br>• Timers cost money while you sleep: slow interval, small models, stop when done. And it is pretend money only.</p><p class="zh" style="margin:0">• 整个系统可以由 MCP 服务端搭成：你自己的账户服务端、行情服务端和推送服务端。<br>• 在行情服务端后面放一个模拟器，以后换成真实数据源时，不用动智能体。<br>• 研究员智能体作为工具交给交易员，交易员始终做主。<br>• <code>AsyncExitStack</code> 用循环打开很多服务端，并且即使失败也会全部关掉。<br>• 自定义的 <code>TracingProcessor</code> 加上 trace id 里的名字，就能得到每个智能体各自的实时日志。<br>• 盈亏是真实的反馈：让智能体改写自己的策略，就把固定的提示词变成了会学习的循环。<br>• 定时器会在你睡觉时花钱：间隔拉长、用小模型、看完就停。而且这只是模拟的钱。</p></div>
 
-<h3><span class="en">Recap</span><span class="zh">三句回顾</span></h3>
-<div class="card"><p class="en" style="margin:0">• One MCP server per job (accounts, prices, push), one agent per uncle.<br>• Tracing and a read-only API let you watch without touching the money.<br>• Paper money first: test the loop and guardrails before anything real.</p>
-<p class="zh" style="margin:0">• 一个任务一个 MCP 服务（账户、价格、推送），每位大叔一个智能体。<br>• 追踪日志加只读 API，让你只看不碰钱。<br>• 先用模拟资金：在碰真钱之前，把循环和护栏测好。</p></div>
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en">I did not expect the cost of a timer. Now I set <code>RUN_EVERY_N_MINUTES</code> high, use small models and stop the floor when I am done watching.</span><span class="zh">我没想到定时器会这么烧钱。现在我把 <code>RUN_EVERY_N_MINUTES</code> 设得很大，用小模型，看完就停掉交易所。</span></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Run one uncle once.</b> Call <code>run_uncle("Wong")</code> alone and read his account before starting the whole floor.</span><span class="zh"><b>先跑一位大叔一次。</b>单独调用 <code>run_uncle("Wong")</code>，看过他的账户再启动整个交易所。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Read a strategy change.</b> After a few runs, compare each strategy with the original. Did the results justify the change?</span><span class="zh"><b>读一次策略变更。</b>跑几轮后，把每位的策略和原来的对比，结果是否支持这个改动？</span></span></label></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• One MCP server per job (accounts, prices, push), one agent per uncle.<br>• A simulator behind the market server can be swapped for real data without touching the agents.<br>• A researcher is handed to the trader as a tool, so the trader stays in charge.<br>• A custom <code>TracingProcessor</code> plus the name in the trace id gives a log per agent.<br>• Real results fed back make a loop that learns. Timers cost money while you sleep, and this is pretend money only.</p><p class="zh" style="margin:0">• 每项工作一个 MCP 服务端（账户、价格、推送），每位大叔一个智能体。<br>• 行情服务端背后的模拟器可换成真实数据，不用动智能体。<br>• 研究员作为工具交给交易员，交易员始终是主导。<br>• 自定义 <code>TracingProcessor</code> 加上 trace id 里的名字，就得到每个智能体各自的日志。<br>• 真实结果回流就成了会学习的循环。定时器在你睡觉时也在花钱，而且这只是模拟资金。</p></div>
+
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Agentic</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>

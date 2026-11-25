@@ -5,45 +5,35 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/agentic-ai/06-career-agent.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/agentic-ai/06-career-agent.html","url":"https://tx-learns.vercel.app/agentic-ai/06-career-agent.html","name":"Personal career agent","alternateName":"个人职业智能体","description":"Make the twin act at the right moment using words alone, then ship it.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Tools and memory","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Agentic","url":"https://tx-learns.vercel.app/agentic-ai/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Agentic","item":"https://tx-learns.vercel.app/agentic-ai/index.html"},{"@type":"ListItem","position":3,"name":"Personal career agent","item":"https://tx-learns.vercel.app/agentic-ai/06-career-agent.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Tools and memory · Project</span><span class="zh">工具与记忆 · 项目</span></span><h1><span class="en">Personal career agent</span><span class="zh">个人职业智能体</span></h1><p class="meta"><span class="en">Make the twin act at the right moment using words alone, then ship it · ~20 min · hands-on</span><span class="zh">只用文字让分身在对的时机行动，然后上线 · 约 20 分钟 · 动手实践</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the assistant could save an order and note a regular's drink. It still fails when a customer asks something it has no notes for, like the closing time, or whether Kak Ros does halal catering for 80: it guesses or goes silent. We fix that kind of failure with words alone: tool descriptions and a prompt that say when to answer and when to hand over. To practise, today's worked example, and the main thread of this lesson, is Alex's career twin below; the Kopi Corner version of the same idea is at the end of the side case.</p>
-<p class="zh" style="margin:0">上回助手能记订单、记熟客的饮料。它还是会出问题：顾客问到它没有资料的事，比如几点关门，或者 Kak Ros 能不能承办 80 人的清真外烩，它要么乱猜，要么不吭声。这类问题只用文字就能解决：写好工具描述和提示词，说清什么时候回答、什么时候交给人。为了练习，今天的示范例子、也是本课的主线，是 Alex 的职业分身；同样的做法放到 Kopi Corner 是什么样，见支线案例的最后。</p></div>
-<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en"style="margin:0">Alex's twin is live. Today four visitors arrive: <b>Maya</b>, a recruiter who wants to talk; <b>Raj</b>, who asks something that is not in Alex's files; <b>Sam</b>, who asks for a poem; and <b>Lee</b>, who asks “are you a real person?”. Alex wants his phone to buzz for the first two, and the twin to behave well for all four. You will do it without changing any code logic, using only <b>words</b>. At Kopi Corner the same two tools become “save a regular's number” and “note a question Uncle Lim must answer”.</p>
-<p class="zh"style="margin:0">Alex 的分身上线了。今天来了四位访客：想联系他的猎头 <b>Maya</b>；问了 Alex 资料里没有的问题的 <b>Raj</b>；要求写首诗的 <b>Sam</b>；还有问“你是真人吗？”的 <b>Lee</b>。Alex 希望前两位出现时手机会震动，并且分身对四个人都表现得体。你不用改任何代码逻辑，只用<b>文字</b>来做到。放到 Kopi Corner，这两个工具就是“记下熟客的电话”和“记下 Lim 叔叔必须回答的问题”。</p></div>
 <h2><span class="en">Step 1 · Two tools, two jobs</span><span class="zh">第 1 步 · 两个工具，两项工作</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">The twin should do two real things. <b>record_user_details</b>: someone wants to get in touch, so save their email (name and notes are optional). <b>record_unknown_question</b>: the twin could not answer, so log the question and learn what is missing. Both finish with the same one-liner that buzzes your phone:</p>
-<p class="zh"style="margin:0 0 8px">分身要做两件实事。<b>record_user_details</b>：有人想联系，保存他们的邮箱（姓名和备注可选）。<b>record_unknown_question</b>：分身答不上来，就记录问题，了解还缺什么资料。两者最后都调用同一行代码，让你的手机震动：</p></div>
-<div class="codebox" data-file="push.py" data-lang="python"><span class="dim"># packages: requests (sends the web request) and python-dotenv (reads .env)
-import os
-import requests
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Alex's career twin should do two real things, using words alone to decide when:</p>
+<p class="en" style="margin:0">• <b>record_user_details</b>: someone wants to get in touch, so save their email.<br>• <b>record_unknown_question</b>: the twin could not answer, so log the question and learn what is missing.</p>
+<p class="zh" style="margin:0">Alex 的职业分身要做两件实事，何时做只靠文字来决定：</p>
+<p class="zh" style="margin:0">• <b>record_user_details</b>：有人想联系，保存他们的邮箱。<br>• <b>record_unknown_question</b>：分身答不上来，记录问题，了解还缺什么资料。</p></div>
+<div class="codebox" data-file="tools.py" data-lang="python"><span class="dim"># push(): sends a phone notification through Pushover (set up under Step 4)
+import os, requests
 from dotenv import load_dotenv
-
 load_dotenv(override=True)
-pushover_user = os.getenv("PUSHOVER_USER")       # who receives the push (set up in Step 5)
-pushover_token = os.getenv("PUSHOVER_TOKEN")     # which app sends it
-pushover_url = "https://api.pushover.net/1/messages.json"
 
-</span><span class="chg">def push(message):
-    payload = {"user": pushover_user, "token": pushover_token, "message": message}
-    requests.post(pushover_url, data=payload)</span></div>
-<p class="en">The two tools are plain functions that call <code>push</code>. Each returns a short text, which goes back to the model:</p>
-<p class="zh">两个工具就是调用 <code>push</code> 的普通函数。每个都返回一小段文字，交还给模型：</p>
-<div class="codebox" data-file="tools.py" data-lang="python"><span class="chg">def record_user_details(email, name="name not given", notes="not given"):
+def push(message):
+    payload = {"user": os.getenv("PUSHOVER_USER"), "token": os.getenv("PUSHOVER_TOKEN"), "message": message}
+    requests.post("https://api.pushover.net/1/messages.json", data=payload)
+
+</span><span class="chg">def record_user_details(email, name="name not given", notes="not given"):
     push(f"Someone wants to get in touch: {name}, {email}. Notes: {notes}")
     return "Recorded"
 
 def record_unknown_question(question):
     push(f"Could not answer: {question}")
     return "Recorded"</span></div>
-<p class="en">The model never sees this code. It only sees each tool's <b>name and description</b>, and chooses from those. Act as the model:</p>
-<p class="zh">模型永远看不到这段代码，它只能看到每个工具的<b>名字和描述</b>，并据此选择。现在由你来扮演模型：</p><div class="sc" id="g1"></div>
+<p class="en">The model never sees this code, only each tool's <b>name and description</b>. Act as the model:</p>
+<p class="zh">模型看不到这段代码，只能看到每个工具的<b>名字和描述</b>。现在由你来扮演模型：</p>
+<div class="sc" id="g1"></div>
+
 <h2><span class="en">Step 2 · The description is the trigger</span><span class="zh">第 2 步 · 描述就是触发器</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Compare how the two descriptions are worded. The second says <b>“Always use this tool”</b>. Strong wording makes the model reliable. Also notice <code>required</code>: only <code>email</code> is listed, so the model may call the tool as soon as it has an email.</p>
-<p class="zh"style="margin:0 0 8px">对比两个描述的写法。第二个写的是<b>“Always use this tool”</b>。语气强，模型就更可靠。另外看 <code>required</code>：只列了 <code>email</code>，所以模型一拿到邮箱就可以调用。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">The model picks a tool from its description, so strong wording (“Always use this tool”) makes it reliable. <code>required</code> lists what the model must collect before acting; here only <code>email</code>.</p>
+<p class="zh" style="margin:0">模型靠描述来选工具，所以语气强（“Always use this tool”）更可靠。<code>required</code> 列出行动前必须收集的信息；这里只有 <code>email</code>。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="Four visitors reach the twin. Maya triggers record_user_details, Raj triggers record_unknown_question, Sam and Lee get a reply with no tool"><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" fill="#9a9aa8"/></marker></defs><rect class="box soft" x="10" y="8" width="170" height="38" rx="10"/><text class="en" x="95.0" y="32.0">Maya · recruiter</text><text class="zh" x="95.0" y="32.0">Maya · 猎头</text><path class="lnk" d="M180,27 L270,90" marker-end="url(#ar)"/><rect class="box soft" x="10" y="62" width="170" height="38" rx="10"/><text class="en" x="95.0" y="86.0">Raj · unknown Q</text><text class="zh" x="95.0" y="86.0">Raj · 未知问题</text><path class="lnk" d="M180,81 L270,103" marker-end="url(#ar)"/><rect class="box soft" x="10" y="116" width="170" height="38" rx="10"/><text class="en" x="95.0" y="140.0">Sam · wants a poem</text><text class="zh" x="95.0" y="140.0">Sam · 要首诗</text><path class="lnk" d="M180,135 L270,117" marker-end="url(#ar)"/><rect class="box soft" x="10" y="170" width="170" height="38" rx="10"/><text class="en" x="95.0" y="194.0">Lee · real person?</text><text class="zh" x="95.0" y="194.0">Lee · 你是真人吗？</text><path class="lnk" d="M180,189 L270,130" marker-end="url(#ar)"/><rect class="box new" x="270" y="70" width="130" height="80" rx="10"/><text class="en" x="335.0" y="115.0">The twin</text><text class="zh" x="335.0" y="115.0">分身</text><rect class="box" x="500" y="24" width="210" height="44" rx="10"/><text class="en" x="605.0" y="51.0">record_user_details</text><text class="zh" x="605.0" y="51.0">record_user_details</text><rect class="box" x="500" y="88" width="210" height="44" rx="10"/><text class="en" x="605.0" y="115.0">record_unknown_question</text><text class="zh" x="605.0" y="115.0">record_unknown_question</text><rect class="box soft" x="500" y="152" width="210" height="44" rx="10"/><text class="en" x="605.0" y="179.0">just replies, no tool</text><text class="zh" x="605.0" y="179.0">只回复，不用工具</text><path class="lnk hot" d="M400,95 L498,46" marker-end="url(#ar)"/><path class="lnk hot" d="M400,110 L498,110" marker-end="url(#ar)"/><path class="lnk" d="M400,125 L498,174" marker-end="url(#ar)"/></svg><figcaption><span class="en">The description is the trigger: Maya and Raj match a tool, Sam and Lee do not, so the twin only replies.</span><span class="zh">描述就是触发器：Maya 和 Raj 对上了工具，Sam 和 Lee 没有，分身只回复。</span></figcaption></figure>
-<div class="codebox" data-file="tool_descriptions.txt" data-lang="text"><span class="dim">record_user_details  → </span><span class="chg">"Use this tool to record that a user is interested in being in touch and provided an email address"</span><span class="dim">
-record_unknown_question → </span><span class="chg">"Always use this tool to record any question that couldn't be answered as you didn't know the answer"</span></div>
-<p class="en">Here is the full description for the first tool, so you can see <code>required</code> in place. It is written as a Python dictionary, which looks like JSON (a text format for data) but is not identical: Python writes <code>False</code> with a capital F, while JSON writes <code>false</code> in lower case. The second tool is written the same way, with <code>"question"</code> as its only required input.</p>
-<p class="zh">下面是第一个工具的完整描述，可以看到 <code>required</code> 的位置。它写成 Python 字典，看起来像 JSON（一种数据文本格式），但并不完全一样：Python 里 <code>False</code> 首字母大写，JSON 里 <code>false</code> 全是小写。第二个工具写法相同，只有 <code>"question"</code> 是必填输入。</p>
 <div class="codebox" data-file="tool_json.py" data-lang="python"><span class="dim">record_user_details_json = {
     "name": "record_user_details",
     "description": "Use this tool to record that a user is interested in being in touch and provided an email address",
@@ -51,69 +41,40 @@ record_unknown_question → </span><span class="chg">"Always use this tool to re
         "type": "object",
         "properties": {
             "email": {"type": "string", "description": "The email address of this user"},
-            "name": {"type": "string", "description": "The user's name, if they gave it"},
-            "notes": {"type": "string", "description": "Anything else worth recording"}
+            "name": {"type": "string", "description": "The user's name, if they gave it"}
         },
         </span><span class="chg">"required": ["email"]</span><span class="dim">,
         "additionalProperties": False
     }
-}</span></div>
+}
+# record_unknown_question_json is written the same way: "Always use this tool to record any question that couldn't be answered", required: ["question"]</span></div>
 <div class="try" id="p2"></div>
+
 <h2><span class="en">Step 3 · The prompt decides the behaviour</span><span class="zh">第 3 步 · 提示词决定行为</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Tools alone are not enough: the model still needs the system prompt to tell it <b>when</b> to use them. A good line names the situation and the action: “If X, then do Y with your tool.” Vague wishes like “be helpful” change nothing. Below, the twin has both tools but an empty prompt. Switch lines on and watch what each visitor gets. Goal: all four handled right.</p>
-<p class="zh"style="margin:0 0 8px">光有工具还不够：模型还需要系统提示词告诉它<b>什么时候</b>用。好的一句话要写明情境和动作：“如果 X，就用你的工具做 Y。”“要乐于助人”这类空话没有作用。下面的分身有两个工具，但提示词是空的。逐条打开，看看每位访客得到什么。目标：四位访客都处理对。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Tools alone are not enough: the system prompt says <b>when</b> to use them. A good line names the situation and the action: “If X, do Y with your tool.” “Be helpful” changes nothing. The twin below has both tools and an empty prompt. Switch lines on until all four visitors are handled right.</p>
+<p class="zh" style="margin:0">光有工具不够：系统提示词说明<b>何时</b>使用。好的一句话写明情境和动作：“如果 X，就用你的工具做 Y。”“要乐于助人”没有作用。下面的分身有两个工具，提示词为空。逐条打开，直到四位访客都处理对。</p></div>
 <div class="chat"><div class="pills" id="lines"></div><div class="codebox" id="pr" style="min-height:48px"></div><div id="vis"></div><div id="vm"></div></div>
-<p class="meta"><span class="en">You changed no code, only words. That is <b>context prompting</b>. Remember: calls are stateless, so this whole prompt is sent again on every call.</span><span class="zh">你没有改任何代码，只改了文字，这就是<b>上下文提示</b>。记住：调用是无状态的，所以整段提示词每次调用都会重发。</span></p>
-<h2><span class="en">Step 4 · From a tool name to a real call</span><span class="zh">第 4 步 · 从工具名到真正的调用</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">When the model picks a tool, it returns only a <b>name as text</b>, for example <code>"record_user_details"</code>. Your code must turn that name into a real function call. Two ways: an <code>if / elif</code> chain with one branch per tool, or a lookup that finds the function by its name.</p>
-<p class="zh"style="margin:0 0 8px">模型选中工具时，返回的只是<b>文字形式的名字</b>，比如 <code>"record_user_details"</code>。你的代码得把这个名字变成真正的函数调用。有两种办法：每个工具一个分支的 <code>if / elif</code>，或者按名字查找函数。</p></div>
+
+<h2><span class="en">Step 4 · From a tool name to a real call, then ship</span><span class="zh">第 4 步 · 从工具名到真正的调用，再上线</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">The model returns only a tool's <b>name as text</b>. Your code turns it into a call. <code>**arguments</code> unpacks a dictionary into named inputs. For a public app, look the name up in a dictionary of allowed tools instead of <code>globals()</code>, so the model can never call anything else.</p>
+<p class="zh" style="margin:0">模型返回的只是工具的<b>文字名字</b>，由你的代码变成调用。<code>**arguments</code> 把字典展开成带名字的输入。公开应用里，请在允许工具的字典里按名字查找，而不要用 <code>globals()</code>，这样模型永远调不到别的函数。</p></div>
 <div class="codebox" data-file="chat.py" data-lang="python"><span class="dim">import json
 
 # inside the loop over the model's tool calls (as in Lesson 5):
-tool_name = call.function.name                      # text, e.g. "record_user_details"
-arguments = json.loads(call.function.arguments)     # e.g. {"email": "mei@example.com"}
+</span><span class="chg">ALLOWED = {"record_user_details": record_user_details, "record_unknown_question": record_unknown_question}
 
-# way 1: one branch per tool
-if tool_name == "record_user_details": result = record_user_details(**arguments)
-elif tool_name == "record_unknown_question": result = record_unknown_question(**arguments)
-else: result = "Unknown tool"
-
-# way 2: look the function up by its name
-</span><span class="chg">tool = globals().get(tool_name)
+tool = ALLOWED.get(call.function.name)                      # text name -> function, or None
+arguments = json.loads(call.function.arguments)             # e.g. {"email": "mei@example.com"}
 result = tool(**arguments) if tool else "Unknown tool"</span></div>
-<p class="en">Two bits of Python in that code. <code>**arguments</code> unpacks a dictionary into named inputs: if <code>arguments = {"email": "mei@example.com"}</code>, then <code>tool(**arguments)</code> means <code>tool(email="mei@example.com")</code>. <code>globals()</code> is the dictionary of every name defined in your file, so <code>globals().get("record_user_details")</code> hands back that function, or <code>None</code> when no such name exists.</p>
-<p class="zh">这段代码里有两个 Python 小知识。<code>**arguments</code> 把字典展开成带名字的输入：如果 <code>arguments = {"email": "mei@example.com"}</code>，那么 <code>tool(**arguments)</code> 就等于 <code>tool(email="mei@example.com")</code>。<code>globals()</code> 是你文件里所有已定义名字的字典，所以 <code>globals().get("record_user_details")</code> 会返回那个函数；没有这个名字就返回 <code>None</code>。</p>
 <div class="try" id="p4"></div>
-<div class="callout warn"><b class="lbl"><span class="en">Public app?</span><span class="zh">公开应用？</span></b><span class="en">Use an explicit dictionary of allowed tools instead of <code>globals()</code>, so the model can never call anything else.</span><span class="zh">改用一个明确列出允许工具的字典，而不是 <code>globals()</code>，这样模型永远调不到别的函数。</span></div>
-<h2><span class="en">Step 5 · Ship it</span><span class="zh">第 5 步 · 上线</span></h2>
-<p class="en">These are setup steps, not new ideas. Do them once, in order.</p>
-<p class="zh">这些是设置步骤，不是新概念。按顺序做一遍就行。</p><h3><span class="en">A · Get the push working</span><span class="zh">A · 让推送生效</span></h3>
-<div class="cl"><label><input type="checkbox"><span><span class="en">Sign up at pushover.net (30-day free trial, then a small one-time fee; check the current price).</span><span class="zh">在 pushover.net 注册（30 天免费试用，之后一次性付少量费用，价格以官网为准）。</span></span></label><label><input type="checkbox"><span><span class="en">Create an Application/API Token and name it, for example <b>Agents</b>.</span><span class="zh">创建一个 Application/API Token，起名例如 <b>Agents</b>。</span></span></label><label><input type="checkbox"><span><span class="en">Add <code>PUSHOVER_USER</code> (starts with u) and <code>PUSHOVER_TOKEN</code> (starts with a) to your <code>.env</code>.</span><span class="zh">把 <code>PUSHOVER_USER</code>（以 u 开头）和 <code>PUSHOVER_TOKEN</code>（以 a 开头）加到 <code>.env</code>。</span></span></label><label><input type="checkbox"><span><span class="en">Install Pushover on your phone and add the device.</span><span class="zh">在手机上安装 Pushover 并添加设备。</span></span></label></div>
-<p class="meta"><span class="en">The <b>u</b> key says who receives the push (you). The <b>a</b> key says which app sends it. Keep both in <code>.env</code>, never in your code.</span><span class="zh"><b>u</b> 开头的是接收者（你），<b>a</b> 开头的是发送推送的应用。两者都放在 <code>.env</code> 里，绝不要写进代码。</span></p>
-<h3><span class="en">B · Split the code by job</span><span class="zh">B · 按职责拆分代码</span></h3>
-<p class="en">You have already seen most of this code. Move it, do not rewrite it: <code>push.py</code> is the Step 1 push code, the two tool functions and the dictionary above go in <code>tools.py</code>, with the lookup from Step 4 as the dispatcher, and the model call and tool loop from Lesson 5 go in <code>app.py</code>.</p>
-<p class="zh">这些代码你大多已经见过。把它们搬过去，不用重写：<code>push.py</code> 就是第 1 步的推送代码；两个工具函数和上面的字典放进 <code>tools.py</code>，第 4 步的按名字查找就是分发代码；调用模型和处理工具调用的循环（第 5 课）放进 <code>app.py</code>。</p>
-<div class="grid"><div class="card"><h3 style="margin-top:0"><code>push.py</code></h3><p class="en">The push code from Step 1.</p>
-<p class="zh">第 1 步的推送代码。</p></div><div class="card"><h3 style="margin-top:0"><code>context.py</code></h3><p class="en">Loads the data and builds the system prompt.</p>
-<p class="zh">加载资料并构造系统提示词。</p></div><div class="card"><h3 style="margin-top:0"><code>tools.py</code></h3><p class="en">Tool functions, their JSON, and the dispatcher.</p>
-<p class="zh">工具函数、JSON 描述和分发代码。</p></div><div class="card"><h3 style="margin-top:0"><code>app.py</code></h3><p class="en">The chat UI and the call to the model.</p>
-<p class="zh">聊天界面和调用模型的代码。</p></div></div>
-<h3><span class="en">C · Deploy</span><span class="zh">C · 部署</span></h3>
-<p class="en"><b>uv</b> is a fast Python tool (install it once from its website). In your project folder, run <code>uv init</code> once, then <code>uv add gradio openai pypdf python-dotenv requests</code> to add the packages the app needs. After that, <code>uv run app.py</code> runs the app. A <b>host</b> is a website service that runs your app on the internet for you, for example Hugging Face Spaces: you sign up, connect your project folder, and paste your keys into its secrets page.</p>
-<p class="zh"><b>uv</b> 是一个很快的 Python 工具（从它的官网安装一次即可）。在项目文件夹里先运行一次 <code>uv init</code>，再用 <code>uv add gradio openai pypdf python-dotenv requests</code> 添加应用需要的包。之后用 <code>uv run app.py</code> 运行应用。<b>托管平台</b>是替你在互联网上运行应用的网站服务，例如 Hugging Face Spaces：注册、连接你的项目文件夹，再把密钥粘贴到它的密钥页面。</p>
-<div class="cl"><label><input type="checkbox"><span><span class="en">Test locally: <code>uv run app.py</code> (after the <code>uv add</code> above).</span><span class="zh">本地测试：<code>uv run app.py</code>（在上面的 <code>uv add</code> 之后）。</span></span></label><label><input type="checkbox"><span><span class="en">Put <code>OPENAI_API_KEY</code>, <code>PUSHOVER_USER</code> and <code>PUSHOVER_TOKEN</code> in the host's secrets settings, never in code.</span><span class="zh">把 <code>OPENAI_API_KEY</code>、<code>PUSHOVER_USER</code>、<code>PUSHOVER_TOKEN</code> 放进托管平台的密钥设置，绝不写进代码。</span></span></label><label><input type="checkbox"><span><span class="en">Deploy, then try the four visitors yourself.</span><span class="zh">部署，然后自己扮演这四位访客试一遍。</span></span></label></div>
-<p class="meta"><span class="en">Example only: wording will differ</span><span class="zh">仅为示例：实际措辞会不同</span></p>
-<div class="codebox" data-file="output" data-lang="text">$ uv run app.py
-* Running on local URL:  http://127.0.0.1:7860</div>
-<div class="callout warn"><b class="lbl"><span class="en">Privacy and abuse</span><span class="zh">隐私与滥用</span></b><span class="en">Your LinkedIn text goes to the AI provider on every chat. Emails visitors leave are personal data: store them carefully and say so. A public twin whose tool buzzes your phone can be spammed, so cap how often the tool may fire.</span><span class="zh">你的 LinkedIn 内容每次聊天都会发给 AI 服务商。访客留下的邮箱是个人数据：要妥善保存并告知对方。一个会让你手机震动的公开分身可能被刷屏，所以要限制工具的触发频率。</span></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en">Push: sign up at pushover.net, create an API token and put <code>PUSHOVER_USER</code> and <code>PUSHOVER_TOKEN</code> in <code>.env</code> (check current pricing).</span><span class="zh">推送：在 pushover.net 注册，创建 API token，把 <code>PUSHOVER_USER</code> 和 <code>PUSHOVER_TOKEN</code> 放进 <code>.env</code>（价格以官网为准）。</span></span></label><label><input type="checkbox"><span><span class="en">Deploy: add packages with <code>uv add gradio openai pypdf python-dotenv requests</code>, test with <code>uv run app.py</code>, then host it (for example Hugging Face Spaces) with your keys in its secrets settings, never in code.</span><span class="zh">部署：用 <code>uv add gradio openai pypdf python-dotenv requests</code> 添加包，用 <code>uv run app.py</code> 测试，再托管（例如 Hugging Face Spaces），密钥放在它的密钥设置里，绝不写进代码。</span></span></label></div>
+<div class="callout warn"><b class="lbl"><span class="en">Privacy and abuse</span><span class="zh">隐私与滥用</span></b><span class="en">Visitors' emails are personal data: store them carefully. A public tool that buzzes your phone can be spammed, so cap how often it fires.</span><span class="zh">访客的邮箱是个人数据，要妥善保存。会让你手机震动的公开工具可能被刷屏，所以要限制触发频率。</span></div>
+
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en">Deploy your own twin. It is a living résumé.</span><span class="zh">部署你自己的分身，它就是一份活的简历。</span></span></label><label><input type="checkbox"><span><span class="en">Improve its context with richer material about yourself.</span><span class="zh">给它更丰富的个人资料来改进上下文。</span></span></label><label><input type="checkbox"><span><span class="en">Add more tools, such as a Q&amp;A database it can read and write.</span><span class="zh">增加更多工具，例如可读可写的问答数据库。</span></span></label><label><input type="checkbox"><span><span class="en">Add an evaluator that checks each reply before it is sent.</span><span class="zh">增加评估器，在回复发出前先检查。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the assistant answers customers about the shop from Uncle Lim's notes, and when someone asks about catering for 80 it notes the question for Auntie Suria instead of promising anything. The next problem is that one agent does all of it: answering, saving and handing over.</span><span class="zh">现在助手能根据 Lim 叔叔的资料回答顾客关于店里的问题；有人问 80 人的外烩，它会把问题记给 Suria 阿姨，而不是随口答应。下一个问题是：回答、记录、转交都压在一个智能体身上。</span></div>
-<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
-<div class="card"><p class="en" style="margin:0">• <b><code>ModuleNotFoundError: No module named 'gradio'</code></b>: The packages are not installed in the environment <code>uv</code> uses. Fix: <code>uv add gradio openai pypdf python-dotenv requests</code>, then <code>uv run app.py</code> again.<br>• <b><code>FileNotFoundError: [Errno 2] No such file or directory: 'twin/linkedin.pdf'</code></b>: You started the app from a different folder. Fix: run it from the project folder, or build the path from <code>__file__</code>.<br>• <b><code>TypeError: record_user_details() got an unexpected keyword argument 'e_mail'</code></b>: The JSON description names an input differently from the Python function. Fix: make the names in <code>parameters</code> and in the <code>def</code> line identical.<br>• <b><code>The phone never buzzes (no error)</code></b>: <code>PUSHOVER_USER</code> or <code>PUSHOVER_TOKEN</code> is empty on the host. Fix: add both in the host's secrets settings and restart the app.</p>
-<p class="zh" style="margin:0">• <b><code>ModuleNotFoundError: No module named 'gradio'</code></b>：<code>uv</code> 使用的环境里没装这些包。解决：<code>uv add gradio openai pypdf python-dotenv requests</code>，再运行 <code>uv run app.py</code>。<br>• <b><code>FileNotFoundError: [Errno 2] No such file or directory: 'twin/linkedin.pdf'</code></b>：你在别的文件夹里启动了应用。解决：在项目文件夹里运行，或用 <code>__file__</code> 拼出路径。<br>• <b><code>TypeError: record_user_details() got an unexpected keyword argument 'e_mail'</code></b>：JSON 描述里的输入名和 Python 函数里的不一样。解决：让 <code>parameters</code> 和 <code>def</code> 那一行的名字完全相同。<br>• <b><code>The phone never buzzes (no error)</code></b>：托管平台上的 <code>PUSHOVER_USER</code> 或 <code>PUSHOVER_TOKEN</code> 是空的。解决：在托管平台的密钥设置里补上两个，然后重启应用。</p></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en">Deploy your own twin: a living résumé.</span><span class="zh">部署你自己的分身：一份活的简历。</span></span></label><label><input type="checkbox"><span><span class="en">Add one prompt line for a case it handles badly, and retest.</span><span class="zh">为它处理不好的情况加一句提示词，再测试。</span></span></label></div>
+
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• One tool per job. The <b>description</b> is what the model reads to choose.<br>• <code>required</code> fields are what the model must collect before acting.<br>• The <b>system prompt</b> says when to act: “If X, do Y with your tool.”<br>• A tool name comes back as text; your code maps it to a real function.<br>• Secrets live in <code>.env</code> or host settings, never in code.</p><p class="zh" style="margin:0">• 一个工具一项工作，模型靠<b>描述</b>来选择。<br>• <code>required</code> 字段是模型行动前必须收集的信息。<br>• <b>系统提示词</b>说明何时行动：“如果 X，就用你的工具做 Y。”<br>• 工具名以文字返回，由你的代码映射到真正的函数。<br>• 密钥放在 <code>.env</code> 或平台设置里，绝不写进代码。</p></div>
+<div class="card"><p class="en" style="margin:0">• One tool per job; the <b>description</b> is what the model reads to choose.<br>• <code>required</code> fields must be collected before the tool is called.<br>• The <b>system prompt</b> says when to act: “If X, do Y with your tool.”<br>• A tool name comes back as text; map it to a function through an allowed list.<br>• Secrets live in <code>.env</code> or host settings, never in code.</p><p class="zh" style="margin:0">• 一个工具一项工作，模型靠<b>描述</b>来选择。<br>• 调用工具前必须先收集 <code>required</code> 字段。<br>• <b>系统提示词</b>说明何时行动：“如果 X，就用你的工具做 Y。”<br>• 工具名以文字返回，通过允许列表映射到函数。<br>• 密钥放在 <code>.env</code> 或平台设置里，绝不写进代码。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Agentic</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>

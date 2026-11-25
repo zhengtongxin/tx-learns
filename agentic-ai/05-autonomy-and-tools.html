@@ -5,79 +5,65 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/agentic-ai/05-autonomy-and-tools.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/agentic-ai/05-autonomy-and-tools.html","url":"https://tx-learns.vercel.app/agentic-ai/05-autonomy-and-tools.html","name":"Autonomy and tools","alternateName":"自主性与工具","description":"How a model that can only talk ends up doing things.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Tools and memory","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Agentic","url":"https://tx-learns.vercel.app/agentic-ai/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Agentic","item":"https://tx-learns.vercel.app/agentic-ai/index.html"},{"@type":"ListItem","position":3,"name":"Autonomy and tools","item":"https://tx-learns.vercel.app/agentic-ai/05-autonomy-and-tools.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Tools and memory · Lesson 1</span><span class="zh">工具与记忆 · 第 1 课</span></span><h1><span class="en">Autonomy and tools</span><span class="zh">自主性与工具</span></h1><p class="meta"><span class="en">How a model that can only talk ends up doing things · ~18 min · hands-on</span><span class="zh">只会说话的模型，是怎样开始做事的 · 约 18 分钟 · 动手实践</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the assistant could switch provider and use a cheaper model for Auntie Suria's easy questions. Today it fails when a regular says “I always take kopi-o kosong, remember that”: it can only reply, not write anything down. We fix it by giving it a tool, a function the model can ask for.</p>
-<p class="zh" style="margin:0">上回助手学会了换模型提供商，用便宜的模型回答 Suria 阿姨的简单问题。今天它的问题是：熟客说“我一直点 kopi-o kosong，记住哦”，它只会回话，什么也记不下来。办法是给它一个工具，也就是模型可以请求执行的函数。</p></div>
-<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en"style="margin:0">Alex has a digital twin on his website. A visitor, <b>Mei</b>, types: <i>“Hi, you can reach me at mei@example.com”</i>. Alex wants that email saved. We follow Mei's message through four upgrades, and by the end the twin saves it by itself. At Kopi Corner the same pattern is Aina's order pad: the model asks, and a small function writes the regular's drink down.</p>
-<p class="zh"style="margin:0">Alex 的网站上有一个数字分身。访客 <b>Mei</b> 输入：<i>“你好，可以通过 mei@example.com 联系我”</i>。Alex 想把这个邮箱存下来。我们跟着 Mei 的这条消息经过四次升级，最后分身会自己把它存下来。放到 Kopi Corner，同样的做法就是 Aina 的点单本：模型提出请求，一个小函数把熟客的饮料记下来。</p></div>
-<h2><span class="en">The problem: a model only talks</span><span class="zh">问题：模型只会说话</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0">A model turns <b>text into text</b>. That is all. Saving a file, sending an email, looking something up must be done by <b>your code</b>. Watch what happens to Mei's message on a plain model with nothing around it.</p>
-<p class="zh"style="margin:0">模型只会把<b>文字变成文字</b>，仅此而已。存文件、发邮件、查资料，都得由<b>你的代码</b>来做。看看 Mei 的消息交给一个没有任何配套的模型会怎样。</p></div>
+<h2><span class="en">Step 1 · A model only talks</span><span class="zh">第 1 步 · 模型只会说话</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">A model turns <b>text into text</b>. Saving a file or sending an email must be done by <b>your code</b>. Example: a digital twin on Alex's website, and a visitor, Mei, who leaves her email. The code around the model is the <b>harness</b>: it builds the input, reads the output, acts on it and repeats. We add four pieces: context, memory, a tool, a loop.</p>
+<p class="zh" style="margin:0">模型只把<b>文字变成文字</b>。存文件、发邮件必须由<b>你的代码</b>来做。示例：Alex 网站上的数字分身，访客 Mei 留下了邮箱。模型外面的那层代码叫<b>外壳（harness）</b>：构造输入、读取输出、据此行动并重复。我们加四块：上下文、记忆、工具、循环。</p></div>
 <div id="t0"></div>
-<div class="try" id="p0"></div>
-<p class="en">So you need code around the model. That code is called the <b>harness</b>: it builds the input, reads the output, acts on it, and repeats. The next four steps build it one piece at a time: <b>① Context</b>, <b>② Memory</b>, <b>③ Tool</b>, <b>④ Loop</b>.</p>
-<p class="zh">所以模型外面要有一层代码，叫<b>外壳（harness）</b>：它构造输入、读取输出、据此行动、必要时重复。接下来四步一块一块把它搭起来：<b>① 上下文</b>、<b>② 记忆</b>、<b>③ 工具</b>、<b>④ 循环</b>。</p><h2><span class="en">① Context: tell it who it is</span><span class="zh">① 上下文：告诉它它是谁</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">The model knows nothing about Alex. Anything it should say about him must be pasted into its <b>system prompt</b>, the instructions sent first on every call. Two files do the job: <code>linkedin.pdf</code> (your profile saved as PDF) and <code>summary.txt</code> (a few lines in your own words). Your code turns them into two text variables:</p>
-<p class="zh"style="margin:0 0 8px">模型对 Alex 一无所知。想让它说关于他的事，就得把内容贴进<b>系统提示词</b>，也就是每次调用最先发送的指令。两个文件就够了：<code>linkedin.pdf</code>（导出的个人资料 PDF）和 <code>summary.txt</code>（用自己的话写的几行介绍）。代码把它们变成两个文本变量：</p></div>
-<div class="codebox" data-file="twin.py" data-lang="python"><span class="dim"># once, in a terminal: pip install pypdf
-from pypdf import PdfReader
 
-reader = PdfReader("twin/linkedin.pdf")
-linkedin = ""
-for page in reader.pages:
-    text = page.extract_text()
-    if text: linkedin += text
+<h2><span class="en">Step 2 · Context and memory</span><span class="zh">第 2 步 · 上下文与记忆</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><b>Context:</b> the model knows nothing about Alex, so paste what it needs into the <b>system prompt</b> (the instructions sent first on every call) and tell it to admit gaps.</p>
+<p class="en" style="margin:0"><b>Memory:</b> every call is <b>stateless</b>. A chat feels continuous only because your code resends the whole conversation each time.</p>
+<p class="zh" style="margin:0 0 8px"><b>上下文：</b>模型对 Alex 一无所知，所以把它需要的内容贴进<b>系统提示词</b>（每次调用最先发送的指令），并要求它承认不知道。</p>
+<p class="zh" style="margin:0"><b>记忆：</b>每次调用都是<b>无状态</b>的。聊天看起来连续，只是因为你的代码每次都把整段对话重发一遍。</p></div>
+<div class="codebox" data-file="twin.py" data-lang="python"><span class="dim"># summary.txt: a few lines about Alex in your own words
 with open("twin/summary.txt") as f: summary = f.read()
 
-</span><span class="chg">system_prompt = f"You are Alex's digital twin. Answer questions about his career.\n## Summary\n{summary}\n## LinkedIn\n{linkedin}\nIf you don't know something, say so. Never make things up."</span></div>
-<div class="try" id="p1"></div>
-<div class="try" id="p1b"></div>
-<h2><span class="en">② Memory: why a chat feels continuous</span><span class="zh">② 记忆：为什么聊天看起来是连续的</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Every call to a model is <b>stateless</b>: it remembers nothing from the last call. A chat feels continuous only because your code sends the <b>whole conversation so far</b> each time. Mei says “My name is Mei”, then later asks “What's my name?”. For the model to answer, the first message must travel again with the second.</p>
-<p class="zh"style="margin:0 0 8px">每次调用模型都是<b>无状态</b>的：它不记得上一次的任何内容。聊天看起来连续，只是因为你的代码每次都把<b>到目前为止的整段对话</b>一起发过去。Mei 先说“我叫 Mei”，之后问“我叫什么？”。模型要答得出来，第一条消息必须和第二条一起再发一遍。</p></div>
-<div class="codebox" data-file="chat.py" data-lang="python"><span class="dim">def chat(message, </span><span class="chg">history</span><span class="dim">):
-    messages = [{"role": "system", "content": system_prompt}] + </span><span class="chg">history</span><span class="dim"> + [{"role": "user", "content": message}]
+</span><span class="chg">system_prompt = f"You are Alex's digital twin. Answer questions about his career.\n## Summary\n{summary}\nIf you don't know something, say so. Never make things up."
+
+def chat(message, history):
+    messages = [{"role": "system", "content": system_prompt}] + history + [{"role": "user", "content": message}]
     response = client.chat.completions.create(model="gpt-5.4-mini", messages=messages)
     return response.choices[0].message.content</span></div>
-<p class="meta"><span class="en">A chat window such as Gradio's ChatInterface (Gradio is a Python library that turns a function into a small web page) passes <code>history</code> to your function on every turn.</span><span class="zh">Gradio 的 ChatInterface 这类聊天窗口（Gradio 是一个 Python 库，能把一个函数变成一个小网页），会在每一轮把 <code>history</code> 传给你的函数。</span></p>
+<div class="try" id="p1b"></div>
 <div class="try" id="p2"></div>
-<h2><span class="en">③ Tool: let the model ask your code to act</span><span class="zh">③ 工具：让模型请求你的代码去执行</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Back to Mei's email. The fix is to let the model <b>ask</b>. A tool has three parts: <b>1)</b> a plain Python function you write, <b>2)</b> a description the model can read, and <b>3)</b> your code that runs the function when the model asks. Part 1 saves an email:</p>
-<p class="zh"style="margin:0 0 8px">回到 Mei 的邮箱。办法是让模型<b>提出请求</b>。一个工具有三部分：<b>1)</b> 你写的普通 Python 函数，<b>2)</b> 模型能读懂的描述，<b>3)</b> 当模型请求时运行函数的代码。第 1 部分负责存邮箱：</p></div>
+
+<h2><span class="en">Step 3 · A tool: let the model ask</span><span class="zh">第 3 步 · 工具：让模型来请求</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">A tool has three parts: <b>1)</b> a plain Python function, <b>2)</b> a description the model can read, and <b>3)</b> your code that runs the function when the model asks. The model never saves anything; it asks, your code acts, the result goes back.</p>
+<p class="zh" style="margin:0">工具有三部分：<b>1)</b> 普通 Python 函数，<b>2)</b> 模型能读懂的描述，<b>3)</b> 模型请求时运行函数的代码。模型自己什么也不存：它提出请求，你的代码执行，结果再送回。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="Mei's message goes to the model, the model asks your code to run a tool, your code saves the email and sends the result back to the model"><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" fill="#9a9aa8"/></marker></defs><rect class="box soft" x="20" y="55" width="110" height="50" rx="10"/><text class="en" x="75.0" y="85.0">Message</text><text class="zh" x="75.0" y="85.0">消息</text><rect class="box" x="200" y="55" width="110" height="50" rx="10"/><text class="en" x="255.0" y="85.0">Model</text><text class="zh" x="255.0" y="85.0">模型</text><rect class="box new" x="380" y="55" width="110" height="50" rx="10"/><text class="en" x="435.0" y="85.0">Your code</text><text class="zh" x="435.0" y="85.0">你的代码</text><rect class="box soft" x="560" y="55" width="110" height="50" rx="10"/><text class="en" x="615.0" y="85.0">emails.txt</text><text class="zh" x="615.0" y="85.0">emails.txt</text><path class="lnk" d="M130,80 H198" marker-end="url(#ar)"/><path class="lnk hot" d="M310,80 H378" marker-end="url(#ar)"/><path class="lnk hot" d="M490,80 H558" marker-end="url(#ar)"/><text class="en sm" x="344" y="72">asks</text><text class="zh sm" x="344" y="72">请求</text><text class="en sm" x="524" y="72">saves</text><text class="zh sm" x="524" y="72">写入</text><text class="en sm" x="164" y="72">text</text><text class="zh sm" x="164" y="72">文字</text><path class="lnk hot" d="M435,105 V150 H255 V107" marker-end="url(#ar)"/><text class="en sm" x="345" y="170">the result goes back to the model</text><text class="zh sm" x="345" y="170">结果送回模型</text></svg><figcaption><span class="en">The model never saves anything. It asks, your code acts, and the result goes back.</span><span class="zh">模型自己什么也不存。它提出请求，你的代码去执行，结果再送回模型。</span></figcaption></figure>
 <div class="codebox" data-file="tools.py" data-lang="python"><span class="dim">def record_email_tool(email):
     with open("emails.txt", "a") as f:
         f.write(email + "\n")
-    return "Email recorded"</span></div>
-<p class="en">The model cannot see your Python. So part 2 describes the tool in <b>JSON</b> (a plain-text format of labels and values that code and models can both read): a name, what it is for, and the inputs it needs. The <code>"???"</code> is a blank for you to fill in: the quiz below helps you choose.</p>
-<p class="zh">模型看不到你的 Python 代码。所以第 2 部分用 <b>JSON</b>（一种由标签和值组成、代码和模型都能读的纯文本格式）描述这个工具：名字、用途和需要的输入。其中的 <code>"???"</code> 是留给你填写的空白，下面的小测会帮你选。</p><div class="codebox" data-file="tools.py" data-lang="python"><span class="dim">record_email_tool_json = {
+    return "Email recorded"
+
+# the model cannot see your Python, so describe the tool in JSON (labels and values)
+record_email_tool_json = {
     "name": "record_email_tool",
     "description": </span><span class="chg">"???"</span><span class="dim">,
     "parameters": {"type": "object", "properties": {"email": {"type": "string", "description": "The email address of this user"}}, "required": ["email"]}
 }</span></div>
 <div class="try" id="p3"></div>
-<p class="en">Now all three parts work together. Step through what happens to Mei's message, one half-step at a time.</p>
-<p class="zh">现在三部分一起工作。一步一步看 Mei 的消息经历了什么。</p><div id="t3"></div>
-<div class="try" id="p3b"></div>
-<h2><span class="en">④ Loop: what if one call is not enough?</span><span class="zh">④ 循环：一次调用不够怎么办？</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">The walk-through handled one request with an <code>if</code>. But the model might need one tool's result before choosing the next. You cannot know how many rounds a task takes, so you <b>keep going while the model keeps asking for tools</b>:</p>
-<p class="zh"style="margin:0 0 8px">上面的演示用一个 <code>if</code> 就处理完了。但模型要先拿到一个工具的结果才能决定下一步。你无法预知需要几轮，所以只要模型还在请求工具，就<b>一直循环</b>：</p></div>
-<p class="en">Two helpers first, because the loop uses them. <code>tools</code> is the list of JSON descriptions you hand the model. <code>handle_tool_calls</code> runs each tool the model asked for and builds the reply messages. One model reply can ask for <b>several tools at once</b> (these are parallel tool calls), so it loops over a list. The model also says why it stopped in <code>finish_reason</code>: <code>"tool_calls"</code> means "I want tools run", <code>"stop"</code> means "I am done, here is my answer".</p>
-<p class="zh">先写两个辅助，因为循环要用到它们。<code>tools</code> 是交给模型的 JSON 描述列表。<code>handle_tool_calls</code> 负责运行模型请求的每个工具，并生成回复消息。模型的一次回复可能<b>同时请求好几个工具</b>（即并行工具调用），所以这里要遍历一个列表。模型还会在 <code>finish_reason</code> 里说明它为什么停下：<code>"tool_calls"</code> 表示“请帮我运行工具”，<code>"stop"</code> 表示“我答完了”。</p>
+<div id="t3"></div>
+
+<h2><span class="en">Step 4 · The loop</span><span class="zh">第 4 步 · 循环</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">The model may need one tool's result before choosing the next, so <b>keep going while it keeps asking for tools</b>. <code>finish_reason</code> says why it stopped: <code>"tool_calls"</code> means run my tools, <code>"stop"</code> means done. One reply can ask for several tools, so the helper loops over a list.</p>
+<p class="zh" style="margin:0">模型可能要先拿到一个工具的结果才能决定下一步，所以<b>只要它还在请求工具就继续循环</b>。<code>finish_reason</code> 说明停下的原因：<code>"tool_calls"</code> 表示请运行我的工具，<code>"stop"</code> 表示答完了。一次回复可能请求好几个工具，所以辅助函数遍历一个列表。</p></div>
 <div class="codebox" data-file="tools.py" data-lang="python"><span class="dim">import json
 
-tools = [{"type": "function", "function": record_email_tool_json}]   # the JSON description from above
+tools = [{"type": "function", "function": record_email_tool_json}]   # the JSON description from step 3
 
 def handle_tool_calls(tool_calls):
     results = []
-    for call in tool_calls:                                  # one reply can hold several requests
-        arguments = json.loads(call.function.arguments)      # the inputs arrive as JSON text
+    for call in tool_calls:
+        arguments = json.loads(call.function.arguments)      # inputs arrive as JSON text
         if call.function.name == "record_email_tool":
-            output = record_email_tool(**arguments)   # ** unpacks the dict into named inputs: email="..."
+            output = record_email_tool(**arguments)
         else:
             output = "Unknown tool"
         results.append({"role": "tool", "tool_call_id": call.id, "content": output})
-    return results</span></div>
-<div class="codebox" data-file="chat.py" data-lang="python"><span class="dim">def chat(message, history):
+    return results
+
+def chat(message, history):
     messages = [{"role": "system", "content": system_prompt}] + history + [{"role": "user", "content": message}]
     </span><span class="chg">done = False
     while not done:</span><span class="dim">
@@ -88,25 +74,19 @@ def handle_tool_calls(tool_calls):
         else:
             </span><span class="chg">done = True</span><span class="dim">
     return response.choices[0].message.content</span></div>
-<p class="meta"><span class="en">Example only: wording will differ</span><span class="zh">仅为示例：实际措辞会不同</span></p>
-<div class="codebox" data-file="output" data-lang="text">Reply: Thanks, Mei! I have saved your email.
-
-$ cat emails.txt
-mei@example.com</div>
-<p class="en"><b>Choose the simplest version that works.</b></p><p class="zh"><b>选一个够用的最简单版本。</b></p>
-<div class="sc" id="g4"></div>
-<div class="callout tip"><b class="lbl"><span class="en">You just wrote an agent loop</span><span class="zh">你刚写出了一个智能体循环</span></b><span class="en">An LLM, tools, and a <code>while</code> loop that runs until the model stops asking for tools. That is the core of every agent. A framework only hides these lines behind a neat name.</span><span class="zh">一个大模型、几个工具，加一个 <code>while</code> 循环，直到模型不再请求工具为止。这就是所有智能体的核心。框架只是把这些代码藏在了漂亮的名字后面。</span></div>
+<div class="callout tip"><b class="lbl"><span class="en">You just wrote an agent loop</span><span class="zh">你刚写出了一个智能体循环</span></b><span class="en">An LLM, tools and a <code>while</code> loop until the model stops asking. A framework only hides these lines behind a neat name.</span><span class="zh">一个大模型、几个工具，加一个 <code>while</code> 循环，直到模型不再请求。框架只是把这些代码藏在了漂亮的名字后面。</span></div>
 <div class="try" id="p4"></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the assistant can call tools: when a regular leaves an email address, it asks for record_email_tool and the address is saved to a file, the way Aina's order pad keeps a note. A similar tool could note that Auntie Suria's regular takes kopi-o kosong. Like the chalkboard menu, it can only do what is on its tool list. The next problem is that this tool loop has only met tidy messages; real customers ask messy things.</span><span class="zh">现在助手会调用工具了：熟客留下邮箱时，它会请求 record_email_tool，邮箱就被存进一个文件，就像 Aina 的点单本记下一条备注。类似的工具还能记下 Suria 阿姨的熟客喝 kopi-o kosong。就像墙上的黑板菜单，它只能做工具清单上有的事。下一个问题是：这个工具循环只见过整齐的消息，真实的顾客会问各种乱七八糟的事。</span></div>
-<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
-<div class="card"><p class="en" style="margin:0">• <b><code>openai.AuthenticationError: Error code: 401 - Incorrect API key provided</code></b>: The key is missing, mistyped or <code>.env</code> was not loaded. Fix: check <code>OPENAI_API_KEY</code>, call <code>load_dotenv(override=True)</code> first and restart the notebook.<br>• <b><code>NameError: name 'handle_tool_calls' is not defined</code></b>: The loop calls a helper you have not built yet. Fix: define <code>handle_tool_calls</code> (and <code>tools</code>) from step ④ before you run <code>chat</code>.<br>• <b><code>openai.BadRequestError: Invalid parameter: messages with role 'tool' must be a response to a preceeding message with 'tool_calls'</code></b>: You sent the tool results without first adding the model's own tool request to <code>messages</code>. Fix: <code>messages.append(response.choices[0].message)</code> before extending with the results.<br>• <b><code>The loop never ends (no error, the cell just keeps running)</code></b>: The model keeps asking for a tool because your function returned nothing useful. Fix: always return a short result string, and cap the rounds with a counter.</p>
-<p class="zh" style="margin:0">• <b><code>openai.AuthenticationError: Error code: 401 - Incorrect API key provided</code></b>：密钥没填、填错，或 <code>.env</code> 没加载。解决：检查 <code>OPENAI_API_KEY</code>，先调用 <code>load_dotenv(override=True)</code>，再重启 notebook。<br>• <b><code>NameError: name 'handle_tool_calls' is not defined</code></b>：循环调用了你还没写的辅助函数。解决：先定义第 ④ 步里的 <code>handle_tool_calls</code> 和 <code>tools</code>，再运行 <code>chat</code>。<br>• <b><code>openai.BadRequestError: Invalid parameter: messages with role 'tool' must be a response to a preceeding message with 'tool_calls'</code></b>：你发回了工具结果，却没有先把模型自己的工具请求加进 <code>messages</code>。解决：先 <code>messages.append(response.choices[0].message)</code>，再追加工具结果。<br>• <b><code>The loop never ends (no error, the cell just keeps running)</code></b>：模型一直请求工具，因为你的函数没返回有用的东西。解决：总是返回一个简短的结果字符串，并用计数器限制轮数。</p></div>
+<div class="callout warn"><b class="lbl"><span class="en">Common error</span><span class="zh">常见错误</span></b><span class="en"><code>BadRequestError ... role 'tool' must be a response to a preceeding message with 'tool_calls'</code>: append the model's own tool request to <code>messages</code> before the results, as above. If the loop never ends, always return a short result string and cap the rounds.</span><span class="zh"><code>BadRequestError ... role 'tool' must be a response to a preceeding message with 'tool_calls'</code>：像上面那样，先把模型自己的工具请求加进 <code>messages</code>，再加结果。如果循环停不下来，总要返回一个简短的结果字符串，并限制轮数。</span></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在轮到你</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en">Write a second tool, such as one that saves a note, and add its JSON to <code>tools</code>.</span><span class="zh">再写一个工具，比如保存备注，并把它的 JSON 加进 <code>tools</code>。</span></span></label><label><input type="checkbox"><span><span class="en">Test a message with no email and check that no tool runs.</span><span class="zh">测试一条没有邮箱的消息，确认没有工具运行。</span></span></label></div>
+
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• A model turns text into text. <b>Your code</b> does everything else.<br>• <b>Context</b>: put what it must know into the system prompt, and tell it to admit gaps.<br>• <b>Memory</b>: calls are stateless, so resend the history every time.<br>• <b>Tool</b>: function + description + code that runs it. The description decides when it is used.<br>• <b>Loop</b>: keep calling while the model asks for tools. The model decides <i>whether</i> to act.</p><p class="zh" style="margin:0">• 模型只把文字变成文字，其余都靠<b>你的代码</b>。<br>• <b>上下文</b>：把它必须知道的放进系统提示词，并要求它承认不知道。<br>• <b>记忆</b>：调用是无状态的，所以每次都重发历史。<br>• <b>工具</b>：函数 + 描述 + 运行它的代码，描述决定何时被使用。<br>• <b>循环</b>：模型还在请求工具就继续调用，由模型决定<i>要不要</i>行动。</p></div>
+<div class="card"><p class="en" style="margin:0">• A model turns text into text; <b>your code</b> does everything else.<br>• <b>Context</b> goes in the system prompt; tell the model to admit gaps.<br>• <b>Memory</b>: calls are stateless, so resend the history.<br>• <b>Tool</b>: function + description + code that runs it. The description decides when it is used.<br>• <b>Loop</b>: keep calling while the model asks for tools.</p><p class="zh" style="margin:0">• 模型只把文字变成文字，其余都靠<b>你的代码</b>。<br>• <b>上下文</b>放进系统提示词，并要求模型承认不知道。<br>• <b>记忆</b>：调用无状态，所以重发历史。<br>• <b>工具</b>：函数 + 描述 + 运行它的代码，描述决定何时使用。<br>• <b>循环</b>：模型还在请求工具就继续调用。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Agentic</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"goals":{"en":["Give a model context through the system prompt","Add memory by resending the history each call","Turn a function and its description into a tool","Write a loop that keeps calling while the model asks for tools"],"zh":["用系统提示词给模型背景信息","每次调用都重发历史来实现记忆","把函数和它的描述变成工具","写一个循环：模型还要工具就继续调用"]},"prev":["03-first-api-calls.html"],"tools":{"en":"Python 3.10+, the openai and gradio packages, an OpenAI API key","zh":"Python 3.10+、openai 与 gradio 包、OpenAI API 密钥"},"know":{"en":"You can call an LLM from Python and read a JSON reply.","zh":"能用 Python 调用大模型并读懂 JSON 回复。"},"mins":30,"offline":false}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=8290ab6e"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/05-autonomy-and-tools.js?v=2cc60b69"></script></body></html>
+<script src="js/05-autonomy-and-tools.js?v=e4b53b1a"></script></body></html>

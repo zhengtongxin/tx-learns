@@ -9,10 +9,4 @@ document.addEventListener('DOMContentLoaded',function(){
   {en:'Pick the biggest model "to be safe" without testing a smaller one',zh:'不测试小模型，“为了保险”直接选最大的',a:'b',ex:{en:'You may pay twenty times more for no gain.',zh:'你可能多花二十倍的钱，却没有任何好处。'},hint:{en:'Did you check whether the small one passes?',zh:'你查过小模型能不能通过吗？'}}],
   [{k:'g',en:'Good habit',zh:'好习惯'},{k:'b',en:'Bad habit',zh:'坏习惯'}],{en:'Habit',zh:'做法'});
  predict($('t3'),{q:{en:'A user says the twin felt slow at lunch time. Which field in your log line helps you find that call?',zh:'有用户说午饭时分身很慢。你的日志行里哪个字段能帮你找到那次调用？'},opts:[{k:'a',en:'ms, the time the model call took',zh:'ms，模型调用花的时间'},{k:'b',en:'model, the id of the model',zh:'model，模型的 id'},{k:'c',en:'event, the word model_call',zh:'event，也就是 model_call 这个词'}],a:'a',ex:{en:'Sort or search the log lines by ms to find the slowest calls, then look at their token counts.',zh:'按 ms 排序或搜索日志行，就能找到最慢的调用，再看它们的 token 数。'},hint:{en:'Which field measures time?',zh:'哪个字段衡量时间？'}});
- game($('t4'),[
-  {en:'Send only the last ten messages',zh:'只发最近十条消息',a:'s',ex:{en:'Fewer input tokens on every chat.',zh:'每次聊天的输入 token 都更少。'},hint:{en:'Does it add or remove tokens?',zh:'它增加还是减少 token？'}},
-  {en:'Paste the whole fact sheet into every prompt, three times',zh:'把整份事实资料在每个提示里贴三遍',a:'c',ex:{en:'Repeated text is paid for again and again.',zh:'重复的文字要一遍又一遍地付钱。'},hint:{en:'Who pays for each repeated token?',zh:'每个重复的 token 谁来付钱？'}},
-  {en:'Use the smallest size that passes the test',zh:'用能通过测试的最小大小',a:'s',ex:{en:'Smaller sizes charge less per token.',zh:'小模型每个 token 收费更少。'},hint:{en:'Which size charges least?',zh:'哪个大小收费最少？'}},
-  {en:'Keep a long, chatty system prompt "just in case"',zh:'“以防万一”保留一个又长又啰嗦的系统提示',a:'c',ex:{en:'The system prompt is sent on every single call.',zh:'系统提示每一次调用都要发送。'},hint:{en:'How many times is it sent?',zh:'它会被发送多少次？'}}],
-  [{k:'s',en:'Saves money',zh:'省钱'},{k:'c',en:'Costs more',zh:'多花钱'}],{en:'Choice',zh:'做法'});
 });
