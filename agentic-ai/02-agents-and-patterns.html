@@ -30,7 +30,7 @@ send_email(body)</span></div>
 <span class="lab">Python · agent.py</span>
 <div class="codebox" data-file="agent.py" data-lang="python"><span class="dim"># sketch: ask_llm and run_tool are stand-ins, not a real library
 goal = "Singapore to Tokyo: total for 2 tickets in SGD, email it, then answer"
-tools = ["search_price", "get_rate", "calculate", "send_email", "final_answer"]
+tools = ["search_price", "get_rate", "calculate", "send_email", "final_answer"]  # each also carries a description the LLM reads (Lesson 5)
 history = [goal]                          # the log the LLM reads
 </span><span class="chg">for turn in range(8):                     # step limit: a guardrail
     choice = ask_llm(history, tools)    # the LLM picks the next tool
@@ -49,7 +49,7 @@ history = [goal]                          # the log the LLM reads
 <h2><span class="en">Step 3 · Five workflow patterns</span><span class="zh">第 3 步 · 五种工作流模式</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Most workflows are built from five shapes.</p>
 <p class="zh" style="margin:0">大多数工作流由五种形状搭成。</p></div>
-<div class="card"><p class="en" style="margin:0">• <b>Prompt chaining:</b> a fixed sequence of small calls. Outline → article → translation.<br>• <b>Routing:</b> classify the input, send it to a specialist. Billing vs tech vs sales.<br>• <b>Parallelization:</b> independent pieces run at once, then combine. Security, style and speed checks.<br>• <b>Orchestrator-worker:</b> a boss LLM splits the task at run time. “Fix this bug” may touch 2 files or 7.<br>• <b>Evaluator-optimizer:</b> one LLM writes, another judges, loop until it passes.</p><p class="zh" style="margin:0">• <b>提示链：</b>一串固定顺序的小调用。大纲 → 文章 → 翻译。<br>• <b>路由：</b>先分类，再交给专家。账单、技术、销售。<br>• <b>并行化：</b>独立部分同时运行，再汇总。安全、风格、性能检查。<br>• <b>编排者-工作者：</b>“老板”大模型在运行时拆任务。“修这个 bug”可能涉及 2 个或 7 个文件。<br>• <b>评估者-优化者：</b>一个大模型写，另一个评判，循环到通过。</p></div>
+<div class="card"><p class="en" style="margin:0">• <b>Prompt chaining:</b> a fixed sequence of small calls. Outline → article → translation.<br>• <b>Routing:</b> classify the input, send it to a specialist. Billing vs tech vs sales.<br>• <b>Parallelization:</b> independent pieces run at once, then combine. Security, style and speed checks.<br>• <b>Orchestrator-worker:</b> one LLM call, the orchestrator, splits the task at run time and hands each piece to another LLM call, a worker. “Fix this bug” may touch 2 files or 7.<br>• <b>Evaluator-optimizer:</b> one LLM writes, another judges, loop until it passes.</p><p class="zh" style="margin:0">• <b>提示链：</b>一串固定顺序的小调用。大纲 → 文章 → 翻译。<br>• <b>路由：</b>先分类，再交给专家。账单、技术、销售。<br>• <b>并行化：</b>独立部分同时运行，再汇总。安全、风格、性能检查。<br>• <b>编排者-工作者：</b>一次大模型调用（编排者）在运行时拆任务，把每一块交给另一次大模型调用（工作者）。“修这个 bug”可能涉及 2 个或 7 个文件。<br>• <b>评估者-优化者：</b>一个大模型写，另一个评判，循环到通过。</p></div>
 <div id="t4a"></div>
 <div class="sc" id="g4"></div>
 
@@ -70,4 +70,4 @@ history = [goal]                          # the log the LLM reads
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"changed":{"en":"Added a decision table for workflow versus agent.","zh":"加入了“工作流还是智能体”的决策表。"},"goals":{"en":["Tell a workflow from an agent by who picks the next step","Name the five workflow patterns","Decide between a single call, a workflow and an agent using a metric"],"zh":["按“谁决定下一步”区分工作流和智能体","说出五种工作流模式","用指标决定该用单次调用、工作流还是智能体"]},"prev":["01-agentic-workflow.html"],"tools":{"en":"Only a browser","zh":"只需要浏览器"},"know":{"en":"The idea of an agentic workflow from earlier lessons.","zh":"了解前面的课里的智能体工作流概念。"},"mins":15,"offline":true}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=8290ab6e"></script><script src="../assets/site.js?v=4ca28843"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/02-agents-and-patterns.js?v=0f26df9a"></script></body></html>
+<script src="js/02-agents-and-patterns.js?v=443c2af2"></script></body></html>

@@ -29,13 +29,18 @@ check = </span><span class="chg">result.final_output</span><span class="dim">   
 <h2><span class="en">Step 2 · The checker is just an <code>if</code></span><span class="zh">第 2 步 · 检查员其实就是一个 <code>if</code></span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Once the answer is data, a safety check is ordinary Python: run the writer, run the checker, decide. It works in any framework.</p>
 <p class="zh" style="margin:0">答案一旦变成数据，安全检查就是普通的 Python：跑写手、跑检查员、做判断。在任何框架里都能用。</p></div>
-<div class="codebox" data-file="check.py" data-lang="python"><span class="dim">draft = (await Runner.run(writer, "Write this month's email")).final_output
+<div class="codebox" data-file="check.py" data-lang="python"><span class="dim">writer = Agent(name="Writer", instructions="You write friendly emails for a coffee shop.", model="gpt-5.4-mini")
+
+def send_message(subject, body):          # stand-in: swap in your real email sender
+    print("SENT:", subject)
+
+draft = (await Runner.run(writer, "Write this month's email")).final_output
 check = (await Runner.run(checker, draft)).final_output
 
 </span><span class="chg">if check.has_placeholders or not check.is_friendly or check.price_mentioned != "S$8.50":</span><span class="dim">
     print("Not sending, fix the draft first")
 else:
-    send_message("This month's breakfast set", draft)   # a plain helper that sends the email</span></div>
+    send_message("This month's breakfast set", draft)</span></div>
 <div class="try" id="p3"></div>
 <div class="sc" id="g1"></div>
 
@@ -50,8 +55,9 @@ async def shop_email_check(ctx, agent, message):
     bad = check.has_placeholders or not check.is_friendly or check.price_mentioned != "S$8.50"
     return GuardrailFunctionOutput(</span><span class="chg">output_info={"check": check}, tripwire_triggered=bad</span><span class="dim">)
 
+# the same writer as Step 2, now with the guardrail attached
 writer = Agent(name="Writer", instructions="You write friendly emails for a coffee shop.",
-               output_guardrails=[shop_email_check])
+               model="gpt-5.4-mini", output_guardrails=[shop_email_check])
 try:
     result = await Runner.run(writer, "Write this month's email")
 </span><span class="chg">except OutputGuardrailTripwireTriggered:</span><span class="dim">

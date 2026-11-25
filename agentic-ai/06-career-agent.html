@@ -10,12 +10,15 @@
 <p class="en" style="margin:0">• <b>record_user_details</b>: someone wants to get in touch, so save their email.<br>• <b>record_unknown_question</b>: the twin could not answer, so log the question and learn what is missing.</p>
 <p class="zh" style="margin:0">Alex 的职业分身要做两件实事，何时做只靠文字来决定：</p>
 <p class="zh" style="margin:0">• <b>record_user_details</b>：有人想联系，保存他们的邮箱。<br>• <b>record_unknown_question</b>：分身答不上来，记录问题，了解还缺什么资料。</p></div>
-<div class="codebox" data-file="tools.py" data-lang="python"><span class="dim"># push(): sends a phone notification through Pushover (set up under Step 4)
+<div class="codebox" data-file="tools.py" data-lang="python"><span class="dim"># push(): Pushover is a service that sends a notification to your phone (set up under Step 4)
 import os, requests
 from dotenv import load_dotenv
 load_dotenv(override=True)
 
 def push(message):
+    if not os.getenv("PUSHOVER_USER"):           # no Pushover account yet: print the message instead
+        print("Push:", message)
+        return
     payload = {"user": os.getenv("PUSHOVER_USER"), "token": os.getenv("PUSHOVER_TOKEN"), "message": message}
     requests.post("https://api.pushover.net/1/messages.json", data=payload)
 
@@ -56,8 +59,8 @@ def record_unknown_question(question):
 <div class="chat"><div class="pills" id="lines"></div><div class="codebox" id="pr" style="min-height:48px"></div><div id="vis"></div><div id="vm"></div></div>
 
 <h2><span class="en">Step 4 · From a tool name to a real call, then ship</span><span class="zh">第 4 步 · 从工具名到真正的调用，再上线</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">The model returns only a tool's <b>name as text</b>. Your code turns it into a call. <code>**arguments</code> unpacks a dictionary into named inputs. For a public app, look the name up in a dictionary of allowed tools instead of <code>globals()</code>, so the model can never call anything else.</p>
-<p class="zh" style="margin:0">模型返回的只是工具的<b>文字名字</b>，由你的代码变成调用。<code>**arguments</code> 把字典展开成带名字的输入。公开应用里，请在允许工具的字典里按名字查找，而不要用 <code>globals()</code>，这样模型永远调不到别的函数。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">The model returns only a tool's <b>name as text</b>. Your code turns it into a call. <code>**arguments</code> unpacks a dictionary into named inputs. For a public app, look the name up in a dictionary of allowed tools, so the model can never call anything else. (A common shortcut, <code>globals()</code>, searches every name your program has defined, which is too much to hand a stranger.)</p>
+<p class="zh" style="margin:0">模型返回的只是工具的<b>文字名字</b>，由你的代码变成调用。<code>**arguments</code> 把字典展开成带名字的输入。公开应用里，请在允许工具的字典里按名字查找，这样模型永远调不到别的函数。（常见的捷径 <code>globals()</code> 会在程序定义过的所有名字里查找，交给陌生人就太多了。）</p></div>
 <div class="codebox" data-file="chat.py" data-lang="python"><span class="dim">import json
 
 # inside the loop over the model's tool calls (as in Lesson 5):
@@ -67,7 +70,7 @@ tool = ALLOWED.get(call.function.name)                      # text name -> funct
 arguments = json.loads(call.function.arguments)             # e.g. {"email": "mei@example.com"}
 result = tool(**arguments) if tool else "Unknown tool"</span></div>
 <div class="try" id="p4"></div>
-<div class="cl"><label><input type="checkbox"><span><span class="en">Push: sign up at pushover.net, create an API token and put <code>PUSHOVER_USER</code> and <code>PUSHOVER_TOKEN</code> in <code>.env</code> (check current pricing).</span><span class="zh">推送：在 pushover.net 注册，创建 API token，把 <code>PUSHOVER_USER</code> 和 <code>PUSHOVER_TOKEN</code> 放进 <code>.env</code>（价格以官网为准）。</span></span></label><label><input type="checkbox"><span><span class="en">Deploy: add packages with <code>uv add gradio openai pypdf python-dotenv requests</code>, test with <code>uv run app.py</code>, then host it (for example Hugging Face Spaces) with your keys in its secrets settings, never in code.</span><span class="zh">部署：用 <code>uv add gradio openai pypdf python-dotenv requests</code> 添加包，用 <code>uv run app.py</code> 测试，再托管（例如 Hugging Face Spaces），密钥放在它的密钥设置里，绝不写进代码。</span></span></label></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en">Push: sign up at pushover.net, create an API token and put <code>PUSHOVER_USER</code> and <code>PUSHOVER_TOKEN</code> in <code>.env</code> (check current pricing).</span><span class="zh">推送：在 pushover.net 注册，创建 API token，把 <code>PUSHOVER_USER</code> 和 <code>PUSHOVER_TOKEN</code> 放进 <code>.env</code>（价格以官网为准）。</span></span></label><label><input type="checkbox"><span><span class="en">Deploy: <code>app.py</code> in the project files is the chat page, drawn by Gradio (a library that turns a Python function into a web page). Add packages with <code>uv add gradio openai pypdf python-dotenv requests</code> (uv is a Python package manager), test with <code>uv run app.py</code>, then host it (for example Hugging Face Spaces, free hosting for small AI apps) with your keys in its secrets settings, never in code.</span><span class="zh">部署：项目文件里的 <code>app.py</code> 就是聊天页面，由 Gradio（把 Python 函数变成网页的库）画出来。用 <code>uv add gradio openai pypdf python-dotenv requests</code> 添加包（uv 是 Python 的包管理工具），用 <code>uv run app.py</code> 测试，再托管（例如 Hugging Face Spaces，面向小型 AI 应用的免费托管），密钥放在它的密钥设置里，绝不写进代码。</span></span></label></div>
 <div class="callout warn"><b class="lbl"><span class="en">Privacy and abuse</span><span class="zh">隐私与滥用</span></b><span class="en">Visitors' emails are personal data: store them carefully. A public tool that buzzes your phone can be spammed, so cap how often it fires.</span><span class="zh">访客的邮箱是个人数据，要妥善保存。会让你手机震动的公开工具可能被刷屏，所以要限制触发频率。</span></div>
 
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>

@@ -38,6 +38,7 @@ box_tools = [save_file, run_python]</span></div>
 <div class="teach"><b class="lbl"><span class="en">Try one coder first</span><span class="zh">先试一个程序员</span></b><p class="en" style="margin:0">Give a single <code>coder</code> agent <code>box_tools</code> and ask: “How many 20-cent coins pay for 1,000 cups of kopi at S$1.80?” It writes a script, runs it and reports the printed number (9,000), not a guess.</p><p class="zh" style="margin:0">给单个 <code>coder</code> 智能体 <code>box_tools</code>，问：“付 1,000 杯 kopi（每杯 S$1.80）需要多少个 20 分硬币？”它会写脚本、运行，并报告打印出的数字（9,000），而不是猜。</p></div>
 <div class="codebox" data-file="crew.py" data-lang="python"><span class="dim">from tools.box import box_tools
 
+# a method of your crew class (Step 2 shows the whole class)
 @agent
 def coder(self) -> Agent:
     return Agent(config=self.agents_config["coder"], </span><span class="chg">tools=box_tools,</span><span class="dim"> verbose=True)</span></div>
@@ -90,7 +91,8 @@ class TabTeam:
     agents_config = "config/agents.yaml"
     tasks_config = "config/tasks.yaml"
 
-    # one @agent method per role, one @task method per task
+    # one @agent method per role, one @task method per task.
+    # backend_dev, frontend_dev and tester get tools=box_tools; the lead only writes the design
 
     @crew
     def crew(self) -> Crew:

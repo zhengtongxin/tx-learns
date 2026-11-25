@@ -11,12 +11,12 @@
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">An API key is a password that also bills your card. Never paste it into code. Put it in a <code>.env</code> file in the project root, <b>save</b> it, and let Python read it from there.</p>
 <p class="zh" style="margin:0">API 密钥是个会扣你信用卡的密码。不要写进代码，放在项目根目录的 <code>.env</code> 文件里，<b>保存</b>后让 Python 从那里读取。</p></div>
 <div class="codebox" data-file=".env" data-lang="env"><span class="chg">OPENAI_API_KEY=sk-...your-key...</span></div>
-<div class="callout warn"><b class="lbl"><span class="en">Never share your key</span><span class="zh">不要泄露密钥</span></b><span class="en">Don't commit <code>.env</code> to Git, paste it in chat or screenshot it. If it leaks, delete it in your account and make a new one.</span><span class="zh">不要把 <code>.env</code> 提交到 Git、贴到聊天里或截图。一旦泄露，立刻在账户里删除并重建。</span></div>
+<div class="callout warn"><b class="lbl"><span class="en">Never share your key</span><span class="zh">不要泄露密钥</span></b><span class="en">Don't save <code>.env</code> into Git (the tool that keeps and shares versions of your code), paste it in chat or screenshot it. If it leaks, delete it in your account and make a new one.</span><span class="zh">不要把 <code>.env</code> 存进 Git（保存并分享代码版本的工具）、贴到聊天里或截图。一旦泄露，立刻在账户里删除并重建。</span></div>
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 2 · Make your first call</span><span class="zh">第 2 步 · 完成第一次调用</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">An <b>LLM API</b> is a function you call over the internet: <b>messages</b> in, text out. Four lines do the work: load the key, create a <b>client</b> (your connection to the model), send the messages, read the reply. Each message is a <b>dictionary</b> (labelled values in curly braces) with a <b>role</b> and <b>content</b>. Each call starts fresh: the model remembers nothing between calls.</p>
-<p class="zh" style="margin:0"><b>LLM API</b> 是一个通过网络调用的函数：输入<b>消息</b>，输出文本。四行就够：加载密钥、创建<b>客户端</b>（你与模型的连接）、发送消息、读取回复。每条消息是一个<b>字典</b>（花括号里带标签的值），含<b>角色</b>和<b>内容</b>。每次调用都从零开始：模型在两次调用之间什么都不记得。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">An <b>LLM API</b> is a function you call over the internet: <b>messages</b> in, text out. Four lines do the work: load the key, create a <b>client</b> (your connection to the model), send the messages, read the reply. Each message is a <b>dictionary</b> (labelled values in curly braces) with a <b>role</b> (who is speaking; <code>user</code> is you, and Lesson 5 adds the others) and <b>content</b>. Each call starts fresh: the model remembers nothing between calls.</p>
+<p class="zh" style="margin:0"><b>LLM API</b> 是一个通过网络调用的函数：输入<b>消息</b>，输出文本。四行就够：加载密钥、创建<b>客户端</b>（你与模型的连接）、发送消息、读取回复。每条消息是一个<b>字典</b>（花括号里带标签的值），含<b>角色</b>（谁在说话；<code>user</code> 就是你，其他角色在第 5 课出现）和<b>内容</b>。每次调用都从零开始：模型在两次调用之间什么都不记得。</p></div>
 <div class="codebox" data-file="first_call.ipynb" data-lang="python"><span class="dim"># once, in a terminal: pip install openai python-dotenv
 import os
 from dotenv import load_dotenv
@@ -56,8 +56,8 @@ print(verdict)</span></div>
 <div class="try" id="p3"></div>
 
 <h2><span class="en">If something breaks</span><span class="zh">遇到问题时</span></h2>
-<details><summary><span class="en"><code>load_dotenv</code> printed <code>False</code></span><span class="zh"><code>load_dotenv</code> 输出了 <code>False</code></span></summary>
-<p class="en">It did not find the file. Check it is named exactly <code>.env</code>, sits in the project root and is saved.</p><p class="zh">没找到文件。检查文件名恰好是 <code>.env</code>、在项目根目录且已保存。</p></details>
+<details><summary><span class="en">It stops with <code>OPENAI_API_KEY not found</code></span><span class="zh">程序停下并显示 <code>OPENAI_API_KEY not found</code></span></summary>
+<p class="en">Python did not find the file. Check it is named exactly <code>.env</code>, sits in the project root and is saved.</p><p class="zh">Python 没找到文件。检查文件名恰好是 <code>.env</code>、在项目根目录且已保存。</p></details>
 <details><summary><span class="en"><code>NameError</code> or <code>ImportError</code></span><span class="zh"><code>NameError</code> 或 <code>ImportError</code></span></summary>
 <p class="en">Run cells top to bottom. For <code>ImportError</code>, make sure the notebook's <b>kernel</b> (the Python running behind it) is your project's virtual environment, then install the package there.</p><p class="zh">从上到下按顺序运行单元格。遇到 <code>ImportError</code>，确认笔记本的<b>内核</b>（背后运行的 Python）是项目的虚拟环境，再在其中安装缺少的包。</p></details>
 
@@ -71,4 +71,4 @@ print(verdict)</span></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"changed":{"en":"Clearer steps for keeping an API key safe.","zh":"把保管 API 密钥的步骤写得更清楚。"},"goals":{"en":["Keep an API key in .env and load it safely","Make an LLM call and read the reply text","Chain three calls by passing one reply into the next prompt","Pick a small or strong model for each step"],"zh":["把 API 密钥放进 .env 并安全加载","调用一次大模型并取出回复文字","把上一次的回复放进下一次的提示词，串起三次调用","为每一步选小模型或强模型"]},"prev":["02-agents-and-patterns.html"],"tools":{"en":"Python 3.10+, the openai and python-dotenv packages, an OpenAI API key","zh":"Python 3.10+、openai 与 python-dotenv 包、OpenAI API 密钥"},"know":{"en":"Basic Python: variables, functions, running a script.","zh":"会基础 Python：变量、函数、运行脚本。"},"mins":25,"offline":false}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=8290ab6e"></script><script src="../assets/site.js?v=4ca28843"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/03-first-api-calls.js?v=0542ddf2"></script></body></html>
+<script src="js/03-first-api-calls.js?v=58249b27"></script></body></html>

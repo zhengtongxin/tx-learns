@@ -14,7 +14,7 @@ window.TRACK={id:'ai-leader',title:{en:'AI Leader',zh:'AI 领导者'},topics:[
   {k:'c',file:'10-scaling-laws-for-business.html',title:{en:"Scaling laws for business",zh:"商业视角的规模定律"}}]},
  {n:3,level:3,title:{en:"Leading the change",zh:"带领变革"},items:[
   {k:'f',file:'11-new-ideas-and-traps.html',title:{en:"New ideas and traps",zh:"新点子与陷阱"}},
-  {k:'c',title:{en:"Who does what: organisation, rules and hiring for AI",zh:"谁来做什么：组织、规则与 AI 招聘"},file:'12-org-governance-and-hiring.html'},
+  {k:'c',title:{en:"AI roles and rules",zh:"AI 分工与规则"},file:'12-org-governance-and-hiring.html'},
   {k:'c',file:'13-a-roadmap-with-room-for-research.html',title:{en:"AI roadmap with research room",zh:"留出研发空间的路线图"}},
   {k:'c',file:'14-getting-people-to-adopt.html',title:{en:"Driving AI adoption",zh:"推动 AI 落地"}},
   {k:'c',file:'15-proving-roi.html',title:{en:"Proving AI ROI",zh:"证明 AI 回报"}}]}

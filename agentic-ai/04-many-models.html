@@ -50,7 +50,15 @@ answer = response.choices[0].message.content</span></div>
 <div class="card"><p class="en" style="margin:0"><b>#1</b> Both matter and it really depends on the situation and many factors.<br><b>#2</b> Trust. A truth nobody believes changes nothing, while trust lets a society keep finding and correcting its mistakes.<br><b>#3</b> Truth, because trust built on lies eventually collapses.</p><p class="zh" style="margin:0"><b>#1</b> 两者都重要，这真的取决于具体情况和许多因素。<br><b>#2</b> 信任。没人相信的真相改变不了什么，而信任能让社会不断发现并纠正自己的错误。<br><b>#3</b> 真相，因为建立在谎言上的信任终将崩塌。</p></div>
 <div class="try" id="p5"></div>
 <div class="codebox" data-file="judge.py" data-lang="python"><span class="dim">import json
-# from the earlier steps: question, competitors (model names), answers (replies, same order)
+# the whole script, continuing from step 2: client is already created
+def ask(prompt, model):
+    r = client.chat.completions.create(model=model, messages=[{"role": "user", "content": prompt}])
+    return r.choices[0].message.content
+
+question = ask("Write one hard, open question about society. Reply with only the question.", "gpt-5.4-mini")
+competitors = ["gpt-5.4-nano", "gpt-5.4-mini"]            # model names
+answers = [ask(question, name) for name in competitors]   # replies, in the same order
+
 together = ""
 for number, answer in enumerate(answers, start=1):
     together += f"# Response from competitor {number}\n\n{answer}\n\n"
@@ -59,11 +67,12 @@ judge = f"""Rank these {len(answers)} competitors by clarity and strength of arg
 {question}
 
 {together}
-Reply only with JSON, best first, like {{"results": ["2", "3", "1"]}}."""
+Reply only with JSON, best first, like {{"results": ["2", "1"]}}."""
 
-</span><span class="chg">reply = '{"results": ["2", "3", "1"]}'       # what the judge sends back
+</span><span class="chg">reply = ask(judge, "gpt-5.4")                # the judge's JSON, e.g. {"results": ["2", "1"]}
 results = json.loads(reply)["results"]       # JSON text -> a Python list
-winner = competitors[int(results[0]) - 1]</span></div>
+winner = competitors[int(results[0]) - 1]
+print(winner)</span></div>
 <div class="callout warn"><b class="lbl"><span class="en">Know the limits</span><span class="zh">了解局限</span></b><span class="en">A judge is one more model, so its ranking is an opinion. Use a strong model, hide who wrote what, and spot-check.</span><span class="zh">裁判也是一个模型，排名只是一种意见。用强模型，隐藏回答者身份，并抽查结果。</span></div>
 
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>

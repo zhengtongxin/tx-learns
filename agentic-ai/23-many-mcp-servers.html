@@ -48,7 +48,8 @@ async with MCPServerStdio(params=search, client_session_timeout_seconds=60, tool
 <h2><span class="en">Step 3 · Own notes and live systems</span><span class="zh">第 3 步 · 自己的笔记与实时系统</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li>In <b>agentic RAG</b> the agent itself decides what to store and when to search. The qdrant server gives it <code>qdrant-store</code> and <code>qdrant-find</code>; notes are found by meaning, via <b>embeddings</b> (numbers standing for what a note means).</li><li>Run 1 searches the web and stores; Run 2 has no internet, only the notes.</li><li>A <b>live system</b> is a company's own MCP server, local or remote (a URL). If its key is missing, skip it so the rest still works; <code>AsyncExitStack</code> opens servers one by one and closes them all.</li></ul>
 <ul class="zh" style="margin:0;padding-left:18px"><li><b>智能体式 RAG</b> 里，由智能体自己决定存什么、何时搜。qdrant 服务端给它 <code>qdrant-store</code> 和 <code>qdrant-find</code>；笔记按含义被找到，靠的是<b>嵌入</b>（代表笔记含义的一串数字）。</li><li>第 1 次运行上网搜索并存下；第 2 次没有网络，只有笔记。</li><li><b>实时系统</b>是公司自己的 MCP 服务端，本地或远程（一个 URL）。缺密钥就跳过它，其余照常工作；<code>AsyncExitStack</code> 逐个打开服务端，最后统一关闭。</li></ul></div>
-<div class="codebox" data-file="many_servers.py" data-lang="python"><span class="dim">from pathlib import Path
+<div class="codebox" data-file="many_servers.py" data-lang="python"><span class="dim"># same file as Step 2: os, Agent, Runner, MCPServerStdio, search and only_search come from there
+from pathlib import Path
 from contextlib import AsyncExitStack
 from agents.mcp import MCPServerStreamableHttp
 </span><span class="chg">vectors = {"command": "uvx", "args": ["mcp-server-qdrant"],
@@ -59,7 +60,7 @@ async with MCPServerStdio(params=search, tool_filter=only_search, client_session
            MCPServerStdio(params=vectors, client_session_timeout_seconds=120) as v:
     a = Agent(name="buyer", instructions=NOTES, model="gpt-4o-mini", mcp_servers=[s, v])
     await Runner.run(a, "Find current wholesale prices for condensed milk in Singapore and remember them.")
-# Run 2: no web, only the notes
+# Run 2: no web, only the notes. To check it is not guessing, also ask for a price you never stored: it should say it has none
 async with MCPServerStdio(params=vectors, client_session_timeout_seconds=120) as v:
     a = Agent(name="buyer", instructions=NOTES, model="gpt-4o-mini", mcp_servers=[v])
     print((await Runner.run(a, "From your notes: what does condensed milk cost wholesale?")).final_output)
