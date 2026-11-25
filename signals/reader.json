@@ -2,109 +2,109 @@
  "lessons": {
   "agentic-ai/01-agentic-workflow.html": {
    "score": 6,
-   "at": "2026-11-25T09:34:56.356Z",
+   "at": "2026-11-25T12:06:10.415Z",
    "confusing": [
     {
-     "where": "Step 3 · Build it, item 4 (Tools)",
-     "why": "Nothing says how to connect either tool: where the key goes, which Marketstack operation to pick, which sheet and columns to use. I would be stuck at the first credential prompt."
+     "where": "Step 1 · What an agent is made of",
+     "why": "LLM is the first term on the page and it is never spelled out. A newcomer has to guess it means the text AI."
     },
     {
-     "where": "Step 3 · Build it, item 5",
-     "why": "Closing price of what? The simulated example switches to a bond ETF, but the build never names one, so I could not reproduce the run."
+     "where": "Step 3 · Build it",
+     "why": "Credential and key are used as if known. Where to get the free Marketstack key is never said."
     },
     {
-     "where": "Takeaways",
-     "why": "Database-backed memory is used here for the first time and never explained."
+     "where": "Step 3 · Build it",
+     "why": "The step asks about AAPL, but the trace in Step 2 is about a bond ETF. Two examples make a newcomer wonder which one to run. Ticker symbol is also unexplained."
     }
    ]
   },
   "agentic-ai/02-agents-and-patterns.html": {
-   "score": 7,
-   "at": "2026-11-25T09:34:56.356Z",
+   "score": 8,
+   "at": "2026-11-25T12:06:10.415Z",
    "confusing": [
     {
-     "where": "Step 1 · Be the agent (answer after Search price)",
-     "why": "The goal is Singapore to Tokyo, yet the price is in USD, and the reason given for searching first is weak: the rate could be looked up first just as well."
-    },
-    {
-     "where": "Step 2 · Workflow vs agent (agent.py sketch)",
-     "why": "The tools list is passed in, but nothing says how the model learns what each tool does. Lesson 5 answers that later, so I was left guessing."
-    },
-    {
      "where": "Step 3 · Five workflow patterns",
-     "why": "Boss LLM and worker are not defined. The bug example is clear, but I could not say what a worker is."
+     "why": "This is the densest sentence on the page. Orchestrator and worker are both LLM calls, so a newcomer has to re-read to see who does what."
+    },
+    {
+     "where": "agent.py code note",
+     "why": "Lesson 5 is the Autonomy and tools page, which is tagged Tools and memory · Lesson 1. A reader who looks for Lesson 5 under this topic finds nothing."
+    },
+    {
+     "where": "Step 4 · Choose the simplest design",
+     "why": "Traces gets a definition but guardrails does not. The Takeaways only hint at it with a step limit."
     }
    ]
   },
   "agentic-ai/03-first-api-calls.html": {
    "score": 6,
-   "at": "2026-11-25T09:34:56.356Z",
+   "at": "2026-11-25T12:06:10.415Z",
    "confusing": [
     {
-     "where": "If something breaks",
-     "why": "The Step 2 code never prints that value: load_dotenv(override=True) sits on its own line and is not the last line of the cell, so a notebook shows nothing. The symptom I was told to look for will not "
+     "where": "Step 2 · Make your first call",
+     "why": "The key is never passed in, and the page does not say where OpenAI() finds it. Lesson 4 passes api_key explicitly, so the difference looks random."
     },
     {
-     "where": "Step 1 · Keep your key safe (callout)",
-     "why": "Git and committing are used without any explanation."
+     "where": "Step 3 · Chain three calls",
+     "why": "Mini is called small here, but Lesson 4's table calls gpt-5.4-mini Mid. The code uses mini for both the question and the answer, and the figure says small and mid."
     },
     {
      "where": "Step 2 · Make your first call",
-     "why": "Only the user role is shown, and I don't know what other roles exist. Lesson 5 brings in system without saying it is a role."
+     "why": "The package is named python-dotenv but imported as dotenv. A newcomer who installs the wrong name gets an ImportError with no explanation."
     }
    ]
   },
   "agentic-ai/04-many-models.html": {
-   "score": 6,
-   "at": "2026-11-25T09:34:56.356Z",
+   "score": 7,
+   "at": "2026-11-25T12:06:10.415Z",
    "confusing": [
     {
-     "where": "Step 3 · judge.py code",
-     "why": "The judge prompt is built and then never sent to a model. The reply is typed in by hand, so I could not see where the ranking comes from in real code."
+     "where": "Step 3 · A model judges the rest",
+     "why": "Lesson 2 defines parallelization as pieces that run at once. The judge code calls the models one after another in a list comprehension, so the word does not match the code."
     },
     {
-     "where": "Step 3 · judge.py code (comment)",
-     "why": "question, competitors and answers are never built in this lesson, and no earlier step here creates them. The code uses them before anything builds them."
+     "where": "Step 3 · A model judges the rest",
+     "why": "Nothing says what happens if the judge adds a sentence before the JSON. json.loads then raises an error and the script stops."
     },
     {
-     "where": "Step 3 · Learn",
-     "why": "There is no full script in this lesson, only fragments, so I was hunting for a file that is not there."
+     "where": "Step 2 · One code shape, three swaps",
+     "why": "A local model still needs a key value, and the page does not say why. The reader thinks the key is unused."
     }
    ]
   },
   "agentic-ai/05-autonomy-and-tools.html": {
    "score": 7,
-   "at": "2026-11-25T09:34:56.356Z",
+   "at": "2026-11-25T12:06:10.415Z",
    "confusing": [
     {
-     "where": "Step 4 · The loop (Common error)",
-     "why": "The loop in the code has no cap at all: while not done: runs as long as the model keeps asking. The advice and the code I would copy disagree."
+     "where": "Step 4 · The loop",
+     "why": "After five rounds, if the model still asks for tools, chat() returns the last message's content, which is often empty. The lesson says the limit stops it but never says what the user gets back."
     },
     {
-     "where": "Step 2 · Context and memory (code)",
-     "why": "The code takes history but never adds the new message or the reply to it, so I cannot see how the memory grows. The text says your code resends the whole conversation, and I want to see that line."
+     "where": "Step 3 · A tool: let the model ask",
+     "why": "The code block looks broken on its own. The quiz below asks you to fill in the blank, but the text above the code does not say that."
     },
     {
-     "where": "Step 3 · tools.py (code)",
-     "why": "I can't tell what tool_call_id is for, or why the model needs it back."
+     "where": "Step 2 · Context and memory",
+     "why": "The file has to exist first. The lesson never says to make a twin folder with a summary.txt in it."
     }
    ]
   },
   "agentic-ai/06-career-agent.html": {
-   "score": 6,
-   "at": "2026-11-25T09:34:56.356Z",
+   "score": 7,
+   "at": "2026-11-25T12:06:10.415Z",
    "confusing": [
     {
-     "where": "Step 1 · Two tools, two jobs (code comment)",
-     "why": "Pushover is named without saying what it is. The project card says the push is printed when there is no Pushover account, but the body never shows a print, so I could not tell what I should see in the"
+     "where": "Step 3 · The prompt decides the behaviour",
+     "why": "Step 1's game uses Sam for a pizza question and Lee for a thank-you, but this figure gives Sam a poem and Lee a question about being real. Same names, different messages."
     },
     {
-     "where": "Step 4 · From a tool name to a real call",
-     "why": "globals() is used before it is explained. The quiz explains it only after I answer."
+     "where": "Step 1 · Two tools, two jobs",
+     "why": "Pushover setup is in the checklist after Step 4, not in a step. A reader who skips the checklist thinks the phone buzz works."
     },
     {
-     "where": "Now make it yours (Deploy)",
-     "why": "uv, Gradio and Hugging Face Spaces are never explained, and the body never shows app.py, the file that runs the chat page. I could not build the page from the lesson alone."
+     "where": "Step 2 · The description is the trigger",
+     "why": "required is explained, but this line is not. It is a JSON schema term that a newcomer cannot guess."
     }
    ]
   },
