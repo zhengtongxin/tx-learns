@@ -5,7 +5,7 @@
 // plain-language summary. No links, branch names or error details; retired agents and blank entries are dropped.
 const AGENTS = ['writer', 'copy-check', 'reader', 'reviewer', 'scope-guard', 'ui-check', 'live-check', 'optimizer', 'improver', 'news', 'quality', 'recall'];
 const STATES = ['ok', 'flag', 'fail', 'skip'];
-const HISTORY = 12; // newest runs per agent the page can show; keeps the public answer small
+const HISTORY = 5; // the page's feed shows the 5 newest runs across all agents, so no agent needs more than 5; keeps the public answer small
 const clean = t => String(t || '').replace(/\bOn [\w./-]+: /g, '').replace(/https?:\/\/\S+/g, '').slice(0, 300);
 const entry = e => ({ state: e.state, summary: clean(e.summary), at: e.at });
 const real = e => e && STATES.includes(e.state) && e.at && clean(e.summary).trim();
