@@ -36,19 +36,19 @@ send_email(body)</span></div>
 <p class="en">And the agent. Nothing fixes the order: the LLM reads the log and picks the next tool, again and again, until it asks to stop.</p>
 <p class="zh">再看智能体。顺序没有写死：大模型读日志、选下一个工具，一轮又一轮，直到它自己要求停下。</p>
 <span class="lab">Python · agent.py</span>
-<div class="codebox" data-file="agent.py" data-lang="python"><span class="dim"># sketch: ask_model and run_tool are stand-ins, not a real library
+<div class="codebox" data-file="agent.py" data-lang="python"><span class="dim"># sketch: ask_llm and run_tool are stand-ins, not a real library
 goal = "Singapore to Tokyo: total for 2 tickets in SGD, email it, then answer"   # what Uncle Lim asked for
 tools = ["search_price", "get_rate", "calculate", "send_email", "final_answer"]   # the menu the model picks from
 history = [goal]                          # the log the LLM reads
 </span><span class="chg">for turn in range(8):                     # range(8) is the step limit: a guardrail
-    choice = ask_model(history, tools)    # the LLM's choice: choice.name is the tool, choice.args its inputs
+    choice = ask_llm(history, tools)    # the LLM's choice: choice.name is the tool, choice.args its inputs
     if choice.name == "final_answer":
         break
     result = run_tool(choice.name, choice.args)   # your code runs the chosen tool
     history.append(result)                # the LLM sees this next turn</span></div>
-<p class="en">People define “agent” in three ways. They are not rivals: they are <b>one idea at three zoom levels</b>.</p>
-<p class="zh">人们用三种方式定义“智能体”。它们不是互相竞争，而是<b>同一个想法的三个放大层级</b>。</p>
-<div class="rule2"><div><b><span class="en">1 · Does work for you</span><span class="zh">1 · 替你干活</span></b><span class="en">Zoom level: outside. A goal goes in and a result comes out; the inside is a black box. Said by Sam Altman: an AI system that can do work for you independently.</span><span class="zh">放大层级：从外面看。目标进去、结果出来，里面是个黑盒。Sam Altman 的说法：能独立替你完成工作的 AI 系统。</span></div><div><b><span class="en">2 · LLM controls the flow</span><span class="zh">2 · 大模型掌控流程</span></b><span class="en">Zoom in once: an LLM decides which steps run and in what order (in an agent, the LLM picks the next step; a fixed workflow is the cousin where your code does). A common view since late 2024 (Anthropic, Hugging Face).</span><span class="zh">放大一层：由大模型决定运行哪些步骤、什么顺序（在智能体里由大模型选下一步；固定工作流则是由你的代码来选的“近亲”）。这是自 2024 年底以来的常见看法（Anthropic、Hugging Face）。</span></div><div><b><span class="en">3 · Tools in a loop</span><span class="zh">3 · 循环中的工具</span></b><span class="en">Zoom in again: the LLM calls tools, reads the result and repeats until the goal is met. Today's view: an LLM with tools, in a loop, to achieve a goal. This is what you played.</span><span class="zh">再放大一层：大模型调用工具、读取结果，重复直到目标达成。当前主流：带着工具、在循环中为达成目标而运行的大模型。这就是你刚才玩的。</span></div></div>
+<p class="en">People define “agent” in three ways. They are not rivals: they are <b>one idea at three zoom levels</b>. Remember view 3 first; it is the one you can build.</p>
+<p class="zh">人们用三种方式定义“智能体”。它们不是互相竞争，而是<b>同一个想法的三个放大层级</b>。先记住第 3 种，它是你能亲手搭出来的。</p>
+<div class="rule2"><div><b><span class="en">1 · Does work for you</span><span class="zh">1 · 替你干活</span></b><span class="en">Zoom level: outside. A goal goes in and a result comes out; the inside is a black box. Said by Sam Altman: an AI system that can do work for you independently.</span><span class="zh">放大层级：从外面看。目标进去、结果出来，里面是个黑盒。Sam Altman 的说法：能独立替你完成工作的 AI 系统。</span></div><div><b><span class="en">2 · LLM controls the flow</span><span class="zh">2 · 大模型掌控流程</span></b><span class="en">Zoom in once: an LLM decides which steps run and in what order (in an agent, the LLM picks the next step; a fixed workflow is the cousin where your code does). A common view since late 2024: Anthropic and Hugging Face both described agents as systems where the LLM directs its own steps.</span><span class="zh">放大一层：由大模型决定运行哪些步骤、什么顺序（在智能体里由大模型选下一步；固定工作流则是由你的代码来选的“近亲”）。这是自 2024 年底以来的常见看法：Anthropic 和 Hugging Face 都把智能体描述为由大模型自己安排步骤的系统。</span></div><div><b><span class="en">3 · Tools in a loop</span><span class="zh">3 · 循环中的工具</span></b><span class="en">Zoom in again: the LLM calls tools, reads the result and repeats until the goal is met. Today's view: an LLM with tools, in a loop, to achieve a goal. This is what you played.</span><span class="zh">再放大一层：大模型调用工具、读取结果，重复直到目标达成。当前主流：带着工具、在循环中为达成目标而运行的大模型。这就是你刚才玩的。</span></div></div>
 <div class="try" id="p2"></div>
 <div class="callout tip"><b class="lbl"><span class="en">Remember this</span><span class="zh">记住这句</span></b><span class="en"><b>An agent is an LLM with tools, running in a loop, to achieve a goal.</b></span><span class="zh"><b>智能体 = 带着工具、在循环中运行、为达成目标而工作的大模型。</b></span></div>
 <div class="try" id="p2b"></div>

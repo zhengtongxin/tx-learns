@@ -37,6 +37,7 @@ def ping_phone(text: str) -> str:
 @tool
 def ask_human(instructions: str) -> str:
     """Ask me to do something only a human can do (login, captcha), with exact steps."""
+    # runs only after the pause in Step 3: you did the step, then approved
     return "The human says it's done. Continue."</span><span class="dim">
 
 mcp_servers = {
@@ -46,6 +47,8 @@ mcp_servers = {
 }
 
 # keep each session open so the browser remembers its tabs
+# (these await lines must sit inside an async function or a notebook cell;
+#  the package wraps them in open_toolbox)
 client = MultiServerMCPClient(mcp_servers)
 stack = AsyncExitStack()
 mcp_tools = []
@@ -92,6 +95,7 @@ worker = create_agent(
 
 errand = "Find three kopitiams within 2 km of Tiong Bahru that open before 7am and sell half-boiled eggs. Write them to kopi.md and ping my phone with the best one."
 cfg = {"configurable": {"thread_id": "errand-1"}}
+# run inside an async def (or a notebook cell), because of await
 res = await worker.ainvoke({"messages": [{"role": "user", "content": errand}]}, cfg)
 
 </span><span class="chg">if "__interrupt__" in res:
@@ -103,8 +107,8 @@ res = await worker.ainvoke({"messages": [{"role": "user", "content": errand}]}, 
 <p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
 <div class="codebox" data-file="output" data-lang="text">Kaki wants to: Tool execution requires approval
 
-Tool: write_file
-Args: {'path': 'kopi.md', 'content': '...'}</div>
+Tool: ping_phone
+Args: {'text': 'Best pick: ...'}</div>
 <div class="try" id="p3"></div>
 
 <h2><span class="en">Step 4 · The checker: does “done” mean done?</span><span class="zh">第 4 步 · 检查员：“做完了”真的做完了吗？</span></h2>
@@ -126,7 +130,8 @@ async def run_errand(errand: str, done_means: str, cfg: dict, tries: int = 3):
     for _ in range(tries):
         res = await worker.ainvoke(msg, cfg)
         if "__interrupt__" in res:
-            return res                      # let the screen show an Approve button
+            return res                      # paused: returns the raw result (a dict), not a tuple
+            # (the package settles pauses inside, so it always returns (reply, feedback))
         reply = res["messages"][-1].content
 </span><span class="chg">        used = [c["name"] for m in res["messages"] for c in (getattr(m, "tool_calls", None) or [])]
         v = await checker.ainvoke(
@@ -139,7 +144,7 @@ async def run_errand(errand: str, done_means: str, cfg: dict, tries: int = 3):
 <div class="try" id="p4"></div>
 <div class="sc" id="g4"></div>
 
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en"><b>One session, one task.</b> A stdio MCP session has to be opened and closed in the <i>same</i> asyncio task. I opened it in one place and closed it from another (a Gradio callback), and got confusing cancel-scope errors. The fix is one background task that owns the sessions: it opens them, waits on an <code>Event</code>, and unwinds when told to stop. <b>Two pauses, two decisions.</b> If the worker pauses on two tools at once, one “approve” is not enough: send one decision per call, as the <code>* len(asks)</code> does. <b>Infinite polishing.</b> Without <code>tries</code> and <code>ModelCallLimitMiddleware</code>, a strict checker plus an eager worker can loop for a long time and cost real money. Keep both limits on.</span><span class="zh"><b>一个会话，一个任务。</b>stdio 的 MCP 会话必须在<i>同一个</i> asyncio 任务里打开和关闭。我在一个地方打开，却在另一个地方（Gradio 的回调）关闭，结果得到莫名其妙的 cancel-scope 错误。解决办法是用一个后台任务专门负责会话：它打开会话，等待一个 <code>Event</code>，被通知停止时再收尾。<b>两个暂停，两个决定。</b>如果跑腿的同时在两个工具前暂停，一个“批准”不够：每个调用都要一个决定，就像 <code>* len(asks)</code> 做的那样。<b>无止境的打磨。</b>没有 <code>tries</code> 和 <code>ModelCallLimitMiddleware</code>，严格的检查员加上积极的跑腿者可能循环很久，花掉真金白银。两个上限都要开着。</span></div>
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en"><b>One session, one task.</b> A stdio MCP session has to be opened and closed in the <i>same</i> asyncio task. I opened it in one place and closed it from another (a Gradio callback), and got confusing cancel-scope errors. The fix is one background task that owns the sessions: it opens them, waits on an <code>Event</code>, and unwinds when told to stop. (A <i>task</i> is one piece of async code the event loop runs; a <i>cancel scope</i> is the guard around a block that lets it be cancelled, and it must be entered and left in the same task.) The package does it with <code>open_toolbox</code>: <code>async with open_toolbox("workspace") as all_tools:</code> opens and closes the sessions in one place. <b>Two pauses, two decisions.</b> If the worker pauses on two tools at once, one “approve” is not enough: send one decision per call, as the <code>* len(asks)</code> does. <b>Infinite polishing.</b> Without <code>tries</code> and <code>ModelCallLimitMiddleware</code>, a strict checker plus an eager worker can loop for a long time and cost real money. Keep both limits on.</span><span class="zh"><b>一个会话，一个任务。</b>stdio 的 MCP 会话必须在<i>同一个</i> asyncio 任务里打开和关闭。我在一个地方打开，却在另一个地方（Gradio 的回调）关闭，结果得到莫名其妙的 cancel-scope 错误。解决办法是用一个后台任务专门负责会话：它打开会话，等待一个 <code>Event</code>，被通知停止时再收尾。（<i>任务</i>是事件循环运行的一段异步代码；<i>cancel scope</i> 是包住一段代码、让它能被取消的保护范围，必须在同一个任务里进入和离开。）示例包用 <code>open_toolbox</code> 做到这一点：<code>async with open_toolbox("workspace") as all_tools:</code> 在同一个地方打开并关闭会话。<b>两个暂停，两个决定。</b>如果跑腿的同时在两个工具前暂停，一个“批准”不够：每个调用都要一个决定，就像 <code>* len(asks)</code> 做的那样。<b>无止境的打磨。</b>没有 <code>tries</code> 和 <code>ModelCallLimitMiddleware</code>，严格的检查员加上积极的跑腿者可能循环很久，花掉真金白银。两个上限都要开着。</span></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Write your own errand.</b> Pick something small you do each week and write its “done means” line first. Run it through <code>run_errand</code>.</span><span class="zh"><b>写你自己的差事。</b>选一件你每周都做的小事，先写好它的“完成标准”，再交给 <code>run_errand</code>。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Reject once.</b> Reject the ping with a message like “not before 8am” and watch Kaki change its plan.</span><span class="zh"><b>拒绝一次。</b>用“8 点前不要推送”之类的留言拒绝那次推送，看 Kaki 怎么改计划。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Give it a face.</b> Put a small Gradio screen on top: an errand box, a “done means” box, the todo list and an Approve button.</span><span class="zh"><b>给它一个界面。</b>在上面加一个简单的 Gradio 界面：差事输入框、“完成标准”输入框、待办清单和一个批准按钮。</span></span></label></div>
 <div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the Kopi Corner assistant remembers each regular across visits, like Auntie Suria greeting a customer with “the usual”, and asks Uncle Lim before it does anything outside the shop. The next problem is that it cannot talk to the supplier's own agent.</span><span class="zh">现在 Kopi Corner 助手能跨次记住每位熟客，就像 Suria 阿姨一句“老样子”招呼客人，而且在做任何店外的事之前先问林叔。下一个问题是：它没法和供应商自己的智能体对话。</span></div>
