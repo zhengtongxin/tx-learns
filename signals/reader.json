@@ -1963,6 +1963,42 @@
      "why": "The record keeps file names, sources, dates and a version number, not the text that was read, so a changed text with no version bump cannot be shown."
     }
    ]
+  },
+  "ai-fde/24-an-agent-on-a-managed-runtime.html": {
+   "score": 6,
+   "at": "2026-11-25T13:59:12.604Z",
+   "confusing": [
+    {
+     "where": "Step 2",
+     "why": "The progress is kept in JOBS, a dict in the session's memory, which the same step says is lost when the session ends. No route shows it either."
+    },
+    {
+     "where": "Step 2",
+     "why": "Nothing in the lesson starts a job or checks it, so Step 2 cannot be tested as written."
+    },
+    {
+     "where": "Step 3",
+     "why": "The note changes nothing. The payout is just capped at S$800, so a send-back always pays at once and looks like a bug."
+    }
+   ]
+  },
+  "ai-fde/25-the-handover-copilot.html": {
+   "score": 5,
+   "at": "2026-11-25T13:59:12.604Z",
+   "confusing": [
+    {
+     "where": "Step 2 code",
+     "why": "copilot_api uses ask and run_tool, and copilot_agent uses run_tool from another file. None is imported, so the code fails with NameError as written. The box is titled copilot_agent.py but holds three "
+    },
+    {
+     "where": "Takeaways",
+     "why": "Steps are stored in STEPS, but no route returns them and copilot.js shows only the answer."
+    },
+    {
+     "where": "Step 2",
+     "why": "TOOLS has no such tools, yet the sort game lists “Send a large payout back with a note”."
+    }
+   ]
   }
  }
 }
