@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded',function(){
  /* 4 · patterns */
  trace($('t4a'),[
   {k:'you',en:'A customer message arrives: “My app keeps crashing.”',zh:'一条客户消息到来：“我的应用一直崩溃。”'},
-  {k:'llm',en:'Router: this is a technical problem.',zh:'路由器：这是一个技术问题。',why:{en:'The router (an LLM) reads it and classifies what kind of request it is.',zh:'路由器（一个大模型）读取消息，判断这是哪类请求。'}},
+  {k:'llm',en:'Router: this is a technical problem.',zh:'路由器：这是一个技术问题。',why:{en:'The router (an LLM) only picks a label from a list you fixed in advance: Billing, Tech or Sales. The routes stay fixed in code, so this is still a workflow, not an agent.',zh:'路由器（一个大模型）只是从你提前定好的清单（账单、技术、销售）里挑一个标签。路线仍由代码固定，所以这依然是工作流，不是智能体。'}},
   {k:'code',en:'Sends the message to Tech support only.',zh:'只把消息交给技术支持。',why:{en:'It sends the message to one specialist. Billing and Sales are not used.',zh:'它把消息交给一位专家，账单和销售这次都不用。'}},
   {k:'llm',en:'Tech support writes the reply.',zh:'技术支持写出回复。',why:{en:'The specialist answers. Each specialist stays focused on its own job.',zh:'专家作答。每位专家只专注于自己的工作。'}}]);
  trace($('t4b'),[
