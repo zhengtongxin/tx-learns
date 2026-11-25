@@ -222,16 +222,6 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 .full>summary::-webkit-details-marker,.morebox>summary::-webkit-details-marker,.feed summary::-webkit-details-marker{display:none}
 .full>summary::before,.morebox>summary::before{content:"+ ";font-family:var(--mono)}.full[open]>summary::before,.morebox[open]>summary::before{content:"− "}
 .full>p{max-width:640px;margin:8px 0 0;font-size:14.5px;line-height:1.7;color:var(--mut)}
-.story{list-style:none;margin:22px 0 0;padding:0;max-width:700px}
-.story li{display:grid;grid-template-columns:28px 1fr;gap:0 10px;padding:10px 0;font-size:14.5px;line-height:1.65;color:var(--mut)}
-.story li>b{font:700 12px var(--mono);color:var(--acc2);padding-top:3px}.story strong{color:var(--fg)}
-.story li>span:not([class]){display:none}
-.ba{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin:10px 0 14px;padding-left:38px}
-.ba>div{font-size:13.5px;line-height:1.6;border-left:2px solid var(--line);padding-left:14px}
-.ba .lbl{display:block;font:700 10px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-top:8px}
-.ba p{margin:2px 0 6px;max-width:none;font-size:13.5px;color:var(--mut);line-height:1.6}
-.ba .lbl+p+.lbl{color:var(--acc2)}.ba .lbl+p+.lbl+p{color:var(--fg)}
-.ba ins{text-decoration:none;background:color-mix(in srgb,var(--acc) 22%,transparent);border-radius:3px;padding:0 2px}
 .eco .start{margin-top:10px;font-size:14.5px;color:var(--mut)}
 .bcn.rec a{border-left:2px solid var(--acc);border-radius:0 8px 8px 0}
 #cgrid2{margin-top:0}
@@ -248,15 +238,25 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 .eco details.full{margin-top:34px;border-top:1px solid var(--line)}
 #guards{grid-template-columns:1fr;max-width:min(760px,100%);margin-left:auto;margin-right:auto}.morebox .guards{margin-top:0}
 .eco .feed summary,.eco .full>summary,.eco .morebox>summary{font-weight:600}
-@media(max-width:900px){.flow{gap:26px}.ba{grid-template-columns:1fr;padding-left:0}}
+@media(max-width:900px){.flow{gap:26px}}
 @media(max-width:560px){.pnav{gap:0 18px}}
+/* guardrails and concepts: short labels, the explanation in the shared popup */
+#guards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:8px 12px;max-width:none;margin:26px 0 0;border:0}
+#guards .guard{display:flex;flex-direction:row;text-align:left;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--glass);cursor:pointer;outline:none;transition:border-color .2s,background-color .2s}
+#guards .guard:hover,#guards .guard:focus-visible,#guards .guard.nhot{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 8%,var(--glass))}
+#guards .guard .gt b{font-size:14px;line-height:1.35}
+#guards .guard .stat{flex:none;width:auto;margin:0;padding:2px 8px;gap:5px}#guards .guard .gt{flex:1;min-width:0;text-align:left}
+#guards .guard .stat span{display:none}
+.tip .nstat{margin:0;font:12px var(--mono);color:var(--mut)}.tip .nstat b{color:var(--ok);font-size:14px}
+.bcn.nhot,.bcn:has(.nhot){border-color:var(--acc)}.bcn a{transition:background-color .2s}
+@media(prefers-reduced-motion:reduce){#guards .guard,.bcn a{transition:none}}
 </style><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://tx-learns.vercel.app/ecosystem.html","url":"https://tx-learns.vercel.app/ecosystem.html","name":"How TX Learns works","description":"My learning notes, turned into lessons by AI. They go live after automatic checks and review, get watched afterwards, and a merge that breaks the site is rolled back automatically.","inLanguage":["en","zh"],"isPartOf":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"How TX Learns works","item":"https://tx-learns.vercel.app/ecosystem.html"}]}]}</script></head><body>
 <main class="wide eco">
 <header class="stage compact eco-hero"><div class="orb"></div>
 <span class="eyebrow"><span class="en">Behind the scenes · system view</span><span class="zh">幕后 · 系统视图</span></span>
 <h1 class="mega"><span class="en">From something I learn to a page you can read.</span><span class="zh">从我学到的东西，到你能读的一页。</span></h1>
 <p class="sub"><span class="en">My learning notes, turned into lessons by AI. They go live after automatic checks and review, get watched afterwards, and a merge that breaks the site is rolled back automatically.</span><span class="zh">我的学习笔记，由 AI 整理成课。经过自动检查和审阅后发布，上线后继续巡检；弄坏网站的合并会被自动回滚。</span></p>
-<nav class="pnav" aria-label="On this page"><a href="#system"><span class="en">System</span><span class="zh">系统</span></a><a href="#story"><span class="en">A real lesson</span><span class="zh">真实案例</span></a><a href="#guardrails"><span class="en">Guardrails</span><span class="zh">护栏</span></a><a href="#concepts"><span class="en">Ideas</span><span class="zh">概念</span></a><a href="#changes"><span class="en">Changes</span><span class="zh">更新</span></a></nav>
+<nav class="pnav" aria-label="On this page"><a href="#system"><span class="en">System</span><span class="zh">系统</span></a><a href="#guardrails"><span class="en">Guardrails</span><span class="zh">护栏</span></a><a href="#concepts"><span class="en">Ideas</span><span class="zh">概念</span></a><a href="#changes"><span class="en">Changes</span><span class="zh">更新</span></a></nav>
 </header>
 
 <section id="system">
@@ -276,24 +276,6 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 <p class="kb" id="kb"></p>
 </section>
 
-<section id="story">
-<h2><span class="en">One real lesson, start to finish</span><span class="zh">一篇真实的课，从头到尾</span></h2>
-<p><span class="en">The AI Production lesson <a href="ai-production/23-agent-runtime-in-minutes.html">An agent runtime in minutes</a>, on 23 Nov 2026. This is what the intern agent changed between the first draft and the published page.</span><span class="zh">AI 生产路线里的《<a href="ai-production/23-agent-runtime-in-minutes.html">几分钟上线一个智能体运行时</a>》，2026 年 11 月 23 日。下面是实习生 agent 在第一版草稿和正式发布之间改了什么。</span></p>
-<ol class="story">
-<li><b>1</b><span class="en"><strong>Notes.</strong> Raw notes in a folder called agent-runtime-in-minutes.</span><span class="zh"><strong>笔记。</strong>一个叫 agent-runtime-in-minutes 的文件夹，里面是原始笔记。</span></li>
-<li><b>2</b><span class="en"><strong>First draft.</strong> The content creator agent wrote the lesson in the site's story voice.</span><span class="zh"><strong>第一版。</strong>内容创作者 agent 用网站的讲故事口吻写成这一课。</span></li>
-<li><b>3</b><span class="en"><strong>The intern got lost.</strong> It added plain-word help where a newcomer would stall. Three of its changes:</span><span class="zh"><strong>实习生读不懂的地方。</strong>它在新手会卡住的地方补上大白话。其中三处：</span></li>
-</ol>
-<div class="ba">
-<div><span class="lbl"><span class="en">Before</span><span class="zh">之前</span></span><p><span class="en">An <b>agent</b> with a system prompt.</span><span class="zh">一个带系统提示词的<b>智能体</b>。</span></p><span class="lbl"><span class="en">After</span><span class="zh">之后</span></span><p><span class="en">An <b>agent</b> with a system prompt <ins>(the standing instructions that tell it who it is and how to answer)</ins>.</span><span class="zh">一个带系统提示词<ins>（先给它的一段固定指示，告诉它是谁、该怎么回答）</ins>的<b>智能体</b>。</span></p></div>
-<div><span class="lbl"><span class="en">Before</span><span class="zh">之前</span></span><p><span class="en">…and a data-models library.</span><span class="zh">……和一个数据模型库。</span></p><span class="lbl"><span class="en">After</span><span class="zh">之后</span></span><p><span class="en">…and a data-models library <ins>(pydantic, which checks that your data has the right shape)</ins>.</span><span class="zh">……和一个数据模型库<ins>（pydantic，检查你的数据形状对不对）</ins>。</span></p></div>
-<div><span class="lbl"><span class="en">Before</span><span class="zh">之前</span></span><p><span class="en">Switch on observability in the console, so that traces can be recorded later.</span><span class="zh">在控制台里打开可观测性，这样之后才能记录调用轨迹。</span></p><span class="lbl"><span class="en">After</span><span class="zh">之后</span></span><p><span class="en">Switch on observability in the console. <ins>The service then keeps a record of each call, called a trace, that you can read later.</ins></span><span class="zh">在控制台里打开可观测性。<ins>服务会记下每次调用的过程，这份记录叫轨迹，之后可以读。</ins></span></p></div>
-</div>
-<ol class="story" start="4">
-<li><b>4</b><span class="en"><strong>The usual checks.</strong> The same checks as every change ran, and auto-merge published it once the two required checks were green.</span><span class="zh"><strong>照常检查。</strong>和每个改动一样的检查跑了一遍，两项必需检查都通过后，自动合并把它发布了。</span></li>
-<li><b>5</b><span class="en"><strong>What checks cannot catch.</strong> They see wording, code, links and rules. Whether the lesson teaches what I actually need is still my own read.</span><span class="zh"><strong>检查查不到的。</strong>它们看得到措辞、代码、链接和规则。这一课是不是教了我真正需要的东西，还得我自己读。</span></li>
-</ol>
-</section>
 
 <section id="guardrails">
 <h2><span class="en">Guardrails</span><span class="zh">护栏</span></h2>
@@ -523,7 +505,25 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     var x=Math.max(10,Math.min(r.left+r.width/2-tw/2,W-tw-10)),y=r.bottom+8;
     if(y+th>innerHeight-8&&r.top-th-8>60)y=r.top-th-8;
     TIP.style.left=(x+scrollX)+'px';TIP.style.top=(y+scrollY)+'px';el.classList.add('hot')}
-  function hideTip(){PIN='';TIP.classList.remove('on','pin');document.querySelectorAll('#ov .hot').forEach(function(x){x.classList.remove('hot')})}
+  // Short labels with the explanation in the shared popup: hover or focus shows it, click or tap pins it, Escape closes it.
+  // link=1: a link (concepts). On a touch screen the first tap shows the note and the link inside it opens the lesson.
+  function wireNote(el,title,html,link){
+    var touch=window.matchMedia('(hover:none)');
+    function show(pin){TIP.classList.toggle('pin',!!pin);TIP.style.setProperty('--h','var(--acc)');
+      TIP.innerHTML='<button class="x" aria-label="Close">×</button><h5>'+title+'</h5>'+html;TIP.querySelector('.x').onclick=hideTip;
+      document.querySelectorAll('#ov .hot,.nhot').forEach(function(x){x.classList.remove('hot','nhot')});
+      TIP.classList.add('on');var r=el.getBoundingClientRect(),tw=TIP.offsetWidth,th=TIP.offsetHeight,W=document.documentElement.clientWidth;
+      var x=Math.max(10,Math.min(r.left+r.width/2-tw/2,W-tw-10)),y=r.bottom+8;
+      if(y+th>innerHeight-8&&r.top-th-8>60)y=r.top-th-8;
+      TIP.style.left=(x+scrollX)+'px';TIP.style.top=(y+scrollY)+'px';el.classList.add('nhot');PIN=pin?'_note':''}
+    el.addEventListener('mouseenter',function(){if(!PIN)show(0)});el.addEventListener('mouseleave',function(){if(!PIN)hideTip()});
+    el.addEventListener('focus',function(){if(!PIN)show(0)});el.addEventListener('blur',function(){if(!PIN)hideTip()});
+    el.addEventListener('click',function(ev){ev.stopPropagation();
+      if(link&&!touch.matches)return;
+      if(link)ev.preventDefault();
+      if(PIN==='_note'&&el.classList.contains('nhot'))hideTip();else show(1)});
+    if(!link)el.addEventListener('keydown',function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();el.click()}})}
+  function hideTip(){PIN='';TIP.classList.remove('on','pin');document.querySelectorAll('#ov .hot,.nhot').forEach(function(x){x.classList.remove('hot','nhot')})}
   document.addEventListener('click',function(ev){if(PIN&&!TIP.contains(ev.target))hideTip()});
   document.addEventListener('keydown',function(ev){if(ev.key==='Escape')hideTip()});
 
@@ -557,7 +557,8 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     ['Agents never push to the site','agent 从不直接推送到网站','0','pushes to main','次直接推送到 main','Everything goes through a pull request.','一切都走 pull request。'],
     ['No silent failures, no noise','不会悄悄失败，也不吵','1','digest a day','条每日汇总','A failure, stuck PR or rollback messages me at once.','失败、PR 卡住或回滚会马上通知我。']];
   (function(){
-    document.getElementById('guards').innerHTML=G.map(function(g,i){return '<li class="guard"><span class="gn">'+(i+1)+'</span><span class="gt"><b>'+t(g[0],g[1])+'</b> <span class="gl">'+t(g[5],g[6])+'</span></span><span class="stat"><b>'+g[2]+'</b> <span>'+t(g[3],g[4])+'</span></span></li>'}).join('')})();
+    document.getElementById('guards').innerHTML=G.map(function(g,i){return '<li class="guard" tabindex="0" role="button" aria-label="'+esc(g[0])+'" data-i="'+i+'"><span class="gt"><b>'+t(g[0],g[1])+'</b></span><span class="stat"><b>'+g[2]+'</b> <span>'+t(g[3],g[4])+'</span></span></li>'}).join('');
+    document.querySelectorAll('#guards .guard').forEach(function(el){var g=G[el.dataset.i];wireNote(el,t(g[0],g[1]),'<p>'+t(g[5],g[6])+'</p><p class="nstat"><b>'+g[2]+'</b> '+t(g[3],g[4])+'</p>',0)})})();
 
 
   function kg(h,items){return '<div class="kg"><b>'+h+'</b>'+items.join('')+'</div>'}
@@ -583,9 +584,11 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 
   (function(){var g=document.getElementById('cgrid'),g2=document.getElementById('cgrid2'),C=window.BUILD_CONCEPTS||[],REC=['workflows','roles','guardrails','evals','cicd','approval'];
     function card(c,rec){var soon=c.status==='soon',l=c.lessons[0];
-      return '<li class="bcn'+(soon?' soon':'')+(rec?' rec':'')+'""><a href="'+esc(l.d+'/'+l.f)+'"><span class="ic" aria-hidden="true">'+c.icon+'</span><span class="bt"><b>'+t(esc(c.title.en),esc(c.title.zh))+'</b><span class="bu">'+t(esc(c.use.en),esc(c.use.zh))+'</span></span></a></li>'}
+      return '<li class="bcn'+(soon?' soon':'')+(rec?' rec':'')+'" data-c="'+esc(c.id)+'"><a href="'+esc(l.d+'/'+l.f)+'"><span class="ic" aria-hidden="true">'+c.icon+'</span><span class="bt"><b>'+t(esc(c.title.en),esc(c.title.zh))+'</b></span></a></li>'}
     var R=REC.map(function(id){return C.filter(function(c){return c.id===id})[0]}).filter(Boolean),O=C.filter(function(c){return REC.indexOf(c.id)<0});
     g.innerHTML=R.map(function(c){return card(c,1)}).join('');g2.innerHTML=O.map(function(c){return card(c,0)}).join('');
+    document.querySelectorAll('.bcn').forEach(function(li){var c=C.filter(function(x){return x.id===li.dataset.c})[0],a=li.querySelector('a'),l=c.lessons[0];
+      wireNote(a,t(esc(c.title.en),esc(c.title.zh)),'<p>'+t(esc(c.use.en),esc(c.use.zh))+'</p><p><a href="'+esc(l.d+'/'+l.f)+'">'+t('Open the lesson →','打开这一课 →')+'</a></p>',1)});
     })();
   
   function draw(data){
