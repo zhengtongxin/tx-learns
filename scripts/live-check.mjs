@@ -115,7 +115,7 @@ try {
       const kind = p === 'index.html' ? 'home' : /^[\w-]+\/\d\d-/.test(p) ? 'lesson' : 'other';
       await page.waitForFunction(k => {
         if (document.fonts && document.fonts.status === 'loading') return false;
-        if (k === 'home') { const a = document.querySelector('[data-sum="topics"]'), b = document.querySelector('[data-sum="lessons"]'); return !!(a && b && a.textContent.trim() && b.textContent.trim() && a.textContent.trim() !== '0'); }
+        if (k === 'home') { const a = document.querySelector('[data-sum="topics"]'), b = document.querySelector('[data-sum="lessons"]'); return !!(a && b && a.dataset.count && b.dataset.count && a.textContent.trim() === a.dataset.count && b.textContent.trim() === b.dataset.count && a.dataset.count !== '0'); } /* wait for the count-up animation (1.2 s) to finish, or the totals are read half way */
         if (k === 'lesson') return !!(document.querySelector('.tag') && document.querySelector('h1'));
         return document.body && document.body.innerText.trim().length > 0;
       }, kind, { timeout: 6000, polling: 100 }).catch(() => {});
