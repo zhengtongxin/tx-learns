@@ -1,106 +1,110 @@
 {
  "lessons": {
   "agentic-ai/01-agentic-workflow.html": {
-   "score": 7,
-   "at": "2026-11-25T08:41:48.914Z",
+   "score": 6,
+   "at": "2026-11-25T09:05:29.262Z",
    "confusing": [
     {
-     "where": "Step 1, Learn",
-     "why": "The figure right below shows five boxes (tools is one box), so a newcomer counts and gets a different number."
+     "where": "Step 1 · What an agent is made of",
+     "why": "LLM is never spelled out in this lesson (Lesson 2 does it), and 'loop' is used before Step 2 explains think, act, observe."
     },
     {
-     "where": "Before you start",
-     "why": "Marketstack is asked for here and used in Step 1, but it is never described as a service that returns market prices until later."
+     "where": "Step 3 · Build it",
+     "why": "The intro lists an OpenAI key, a Marketstack key and a Google account, but the build steps never say where each one goes inside n8n, so a newcomer stalls at the first credential prompt."
+    },
+    {
+     "where": "Step 2 · Watch it run (widget trace)",
+     "why": "ETF and closing price are used with no gloss, so the first example is about a fund the reader has never met."
     }
    ]
   },
   "agentic-ai/02-agents-and-patterns.html": {
-   "score": 6,
-   "at": "2026-11-25T08:41:48.914Z",
+   "score": 7,
+   "at": "2026-11-25T09:05:29.262Z",
    "confusing": [
     {
-     "where": "Step 2, Learn",
-     "why": "Three definitions, then 'agentic system' and 'workflow' in Step 3, all in one section. I could not tell which label to keep."
+     "where": "Step 2 · Workflow vs agent (code sketch)",
+     "why": "ask_llm and run_tool are never defined or linked to the real client from Lesson 3, so the reader cannot tell what a real call looks like here."
     },
     {
-     "where": "Step 3, Learn",
-     "why": "The Remember box says an agent is an LLM with tools in a loop, but a workflow also counts as an agentic system. I could not tell whether a workflow is an agent."
+     "where": "Takeaways",
+     "why": "guardrail is used as a known word; the only hint is a code comment."
     },
     {
      "where": "Now make it yours",
-     "why": "The first real model call is taught in lesson 3, so this asks for something not yet taught."
+     "why": "baseline is jargon and is not explained."
     }
    ]
   },
   "agentic-ai/03-first-api-calls.html": {
    "score": 7,
-   "at": "2026-11-25T08:41:48.914Z",
+   "at": "2026-11-25T09:05:29.262Z",
    "confusing": [
     {
-     "where": "Step 2, code and Learn",
-     "why": "The key is read into openai_api_key and checked, then never passed in. Only the 'Match each line' quiz says OpenAI() reads OPENAI_API_KEY by itself, so I wondered where the key went."
+     "where": "Step 2 · Make your first call",
+     "why": "role is never explained: the reader does not learn that user is what you type and system holds the instructions, so the messages list is unclear."
     },
     {
-     "where": "Step 3, call 3 code",
-     "why": "Call 1 asked for one hard, open question. An open question has no single correct answer, so the word 'correct' confused me, and the trace still says 'Correct.'"
+     "where": "Step 3 · Chain three calls",
+     "why": "nano and full are not tied to the names in the code (gpt-5.4-nano, gpt-5.4-mini, gpt-5.4), so the reader must guess which name is full."
     },
     {
-     "where": "What you need",
-     "why": "kernel first appears in this paragraph and is only explained at the very end, under ImportError. The promise is broken."
+     "where": "Step 3 · Chain three calls (code)",
+     "why": "A triple-quoted multi-line f-string appears with no explanation of why it spans lines."
     }
    ]
   },
   "agentic-ai/04-many-models.html": {
    "score": 6,
-   "at": "2026-11-25T08:41:48.914Z",
+   "at": "2026-11-25T09:05:29.262Z",
    "confusing": [
     {
-     "where": "Step 5, Learn",
-     "why": "It points to a click-through widget rather than text. The question (truth or trust) also has nothing to do with the shop, so I did not see why the judge was tested on it."
+     "where": "Step 3 · A model judges the rest (code)",
+     "why": "competitors and answers are never built in any code on the page; the trace lists the steps but no code makes them, so the snippet cannot run from this page."
     },
     {
-     "where": "Step 5, judge prompt",
-     "why": "Doubled braces inside an f-string are never explained. Lesson 3 explained f-strings with single braces, so {{ looked like a typo."
+     "where": "Step 3 · A model judges the rest (code)",
+     "why": "The judge prompt is built but never sent. The next line is a fixed string, so the reader cannot see where the judge is called."
     },
     {
-     "where": "Step 4, Learn",
-     "why": "The seven steps appear only in the click-through. The text shows no code for the competition, so a reader who does not click cannot follow it."
+     "where": "Step 2 · One code shape, three swaps (Local models)",
+     "why": "GB is not explained: it is roughly the download size and the memory the model needs on your laptop."
     }
    ]
   },
   "agentic-ai/05-autonomy-and-tools.html": {
    "score": 7,
-   "at": "2026-11-25T08:41:48.914Z",
+   "at": "2026-11-25T09:05:29.262Z",
    "confusing": [
     {
-     "where": "Hero tag",
-     "why": "Lessons 1 to 4 are Foundations, and this one is 'Lesson 1' again. Lesson 6 then says 'as in Lesson 5', so I could not tell which number was right."
+     "where": "Step 2 · Context and memory (code)",
+     "why": "history is used as a list of earlier messages, but its shape is never described, so the reader has to guess how it is built."
     },
     {
-     "where": "Step ①, Learn",
-     "why": "The code reads a PDF, but the twin shipped with lesson 6 has linkedin.txt, and this lesson never says a .txt copy works."
+     "where": "Step 4 · The loop (common error)",
+     "why": "The advice says to cap the rounds, but the while loop in the code has no cap, so the reader cannot see where the cap goes."
     },
     {
-     "where": "Step ②, code",
-     "why": "client is not created in this lesson, and the shape of history is never shown, so the snippet cannot run as written."
+     "where": "Step 4 · The loop (code)",
+     "why": "Step 3 made a dict with name, description and parameters; Step 4 wraps it in type and function with no reason given."
     }
    ]
   },
   "agentic-ai/06-career-agent.html": {
-   "score": 5,
-   "at": "2026-11-25T08:41:48.914Z",
+   "score": 6,
+   "at": "2026-11-25T09:05:29.262Z",
    "confusing": [
     {
-     "where": "Step 1 quiz (js/06-career-agent.js)",
-     "why": "The story says Sam asks for a poem and Lee asks whether the twin is a real person. The quiz has Sam asking about pizza and Lee saying thanks, so the same visitor has two different messages."
+     "where": "Step 1 · Two tools, two jobs (code)",
+     "why": "Pushover is named only in a code comment and never explained; its cost appears only in Step 4."
     },
     {
-     "where": "Hero, Where we left off",
-     "why": "The Alex box is labelled 'Side case', yet the text calls it the main thread. What changed then switches to the Kopi Corner assistant, so I could not tell what the lesson built."
+     "where": "Step 4 · From a tool name to a real call",
+     "why": "globals() is a Python built-in that is never introduced, so the reader cannot see why it is unsafe."
     },
     {
-     "where": "Step 5, B",
-     "why": "Lesson 5 Step ① builds the system prompt, but no sentence sends it to context.py (only a card says context.py loads the data). The lesson-number reference is also off."
+     "where": "Now make it yours (Deploy)",
+     "why": "uv is never introduced, and the page never says where app.py comes from or which folder to start in."
     }
    ]
   },
