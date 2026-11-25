@@ -1,25 +1,34 @@
 #!/usr/bin/env node
 /* Deterministic triage before the AI review (no model, free). Exit 0 when a unified diff changes only generated files:
    sitemap.xml, vercel.json, assets/related.json, and the lines of a page that `check-pages.mjs --fix` writes (?v= hashes,
-   the updated date, canonical link, JSON-LD, lesson-data). Then the reviewer comments "no AI review needed" instead of
+   the updated date, canonical link, JSON-LD, lesson-data; a page line must be one of those tags). Then the reviewer comments "no AI review needed" instead of
    running Sonnet. Exit 1 when anything else changed (the review runs as usual), 2 on bad input.
    Usage: node scripts/review-triage.mjs <diff-file> */
 import { readFileSync } from 'node:fs';
 const file = process.argv[2];
 if (!file) { console.error('usage: review-triage.mjs <diff-file>'); process.exit(2); }
 const GEN_FILES = new Set(['sitemap.xml', 'vercel.json', 'assets/related.json']);
-const GEN_LINE = /\?v=[0-9a-f]{6,}|name="updated"|rel="canonical"|application\/ld\+json|id="lesson-data"|\bdateModified\b/;
+const PAGE_GEN = /<meta name="updated"|<link rel="canonical"|<script type="application\/ld\+json"|<script type="application\/json" id="lesson-data"|"dateModified":/;
 const HASH = /\?v=[0-9a-f]{6,}/g;
 let path = null, seen = 0, minus = [], plus = [];
-// A line with only a ?v= hash counts as generated when its hash-free text is also on the other side of the diff (same line, new hash).
+// A line with a ?v= hash counts as generated when its hash-free text is also on the other side of the diff (same line, new hash).
 const flush = () => { const m = minus.map(l => l.replace(HASH, '')).sort().join('\n'), p = plus.map(l => l.replace(HASH, '')).sort().join('\n'); minus = []; plus = []; return m === p; };
+const no = why => { console.log(`not generated-only: ${path} (${why})`); process.exit(1); };
 for (const line of readFileSync(file, 'utf8').split('\n')) {
-  if (line.startsWith('diff --git ')) { if (!flush()) { console.log(`not generated-only: ${path} (a changed line is not just a new hash)`); process.exit(1); } path = line.split(' b/')[1]; seen++; continue; }
-  if (/^(index |--- |\+\+\+ |@@ |new file|deleted file|similarity|rename|old mode|new mode)/.test(line) || !/^[+-]/.test(line)) continue;
+  if (line.startsWith('diff --git ')) {
+    if (!flush()) no('a changed line is not just a new hash');
+    const m = /^diff --git a\/(.+) b\/(.+)$/.exec(line);
+    if (!m || m[1] !== m[2]) { path = line; no('a rename or odd header'); }
+    path = m[2]; seen++; continue;
+  }
+  // Anything that is not a plain text edit (binary, mode change, rename, new or deleted file) needs a real review.
+  if (/^(Binary files |GIT binary patch|old mode |new mode |rename |copy |new file mode|deleted file mode|similarity index)/.test(line) && !GEN_FILES.has(path)) no('binary, mode, rename or file added/removed');
+  if (/^(index |--- a\/|--- \/dev\/null|\+\+\+ b\/|\+\+\+ \/dev\/null|@@ )/.test(line) || !/^[+-]/.test(line)) continue;
   if (GEN_FILES.has(path)) continue;
-  if (path && path.endsWith('.html') && /\?v=[0-9a-f]{6,}/.test(line) && !/name="updated"|rel="canonical"|application\/ld\+json|id="lesson-data"/.test(line)) { (line[0] === '-' ? minus : plus).push(line.slice(1)); continue; }
-  if (path && path.endsWith('.html') && GEN_LINE.test(line)) continue;
-  console.log(`not generated-only: ${path}`); process.exit(1);
+  const html = path && path.endsWith('.html');
+  if (html && /\?v=[0-9a-f]{6,}/.test(line) && !PAGE_GEN.test(line)) { (line[0] === '-' ? minus : plus).push(line.slice(1)); continue; }
+  if (html && PAGE_GEN.test(line)) continue;
+  no('a changed line is not generated');
 }
-if (!flush()) { console.log(`not generated-only: ${path} (a changed line is not just a new hash)`); process.exit(1); }
+if (!flush()) no('a changed line is not just a new hash');
 console.log(seen ? 'generated files only' : 'empty diff'); process.exit(seen ? 0 : 1);
