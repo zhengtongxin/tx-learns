@@ -2,109 +2,105 @@
  "lessons": {
   "agentic-ai/01-agentic-workflow.html": {
    "score": 7,
-   "at": "2026-11-25T07:08:22.541Z",
+   "at": "2026-11-25T07:17:47.618Z",
    "confusing": [
     {
-     "where": "Step 3 · Build it yourself, step 5",
-     "why": "The steps name the nodes but not what to fill in: no credential fields, no sheet to append to, no system message for the agent. I could not build it from this page alone."
+     "where": "Step 3 · 4. Attach model + memory",
+     "why": "The stepper says to attach the model and memory but never says where. A newcomer in n8n does not know the model, memory and tools plug into the small sockets under the AI Agent node."
     },
     {
-     "where": "Title and Step 1",
-     "why": "Lesson 2 uses 'workflow' for a route that your code fixes and 'agent' for one where the model picks the steps. This lesson's n8n build is the second kind, so the title's wording confused me."
-    },
-    {
-     "where": "Check questions after Step 3",
-     "why": "This question repeats the one before it (which step brought in the closing price). It adds no new idea, so it reads as padding."
+     "where": "Step 2 · Learn",
+     "why": "The lesson says the model asks for a tool but never says how it knows which tool to ask for. The reader is left wondering how the choice is made."
     }
    ]
   },
   "agentic-ai/02-agents-and-patterns.html": {
-   "score": 7,
-   "at": "2026-11-25T07:08:22.541Z",
+   "score": 6,
+   "at": "2026-11-25T07:17:47.618Z",
    "confusing": [
     {
-     "where": "Step 2 · the three views",
-     "why": "View 2 says the LLM controls the flow, and the same box calls a workflow its 'cousin'. I could not tell from these three what counts as an agent, and the views overlap."
+     "where": "Step 4 · Routing (watch it run)",
+     "why": "Step 2 and Step 3 say an agent is the kind where the LLM picks the next step. Here an LLM picks the branch and the lesson still calls it a workflow. The rule stops working."
     },
     {
-     "where": "Step 4 · routing card",
-     "why": "The router is a model that picks one branch, which sounds like the model choosing the next step. The reason it is still a workflow (the options are fixed) is only in this small note."
+     "where": "Step 2 · zoom level 2 and Step 3",
+     "why": "Zoom level 2 uses the phrase 'LLM controls the flow' for agents, and Step 3 uses 'agentic systems' for workflows too. A newcomer cannot tell which word means what."
     },
     {
-     "where": "Step 2 · view 1",
-     "why": "I do not know where this quote comes from or when it was said, so I cannot tell if it is a definition the field agrees on or one person's phrase."
+     "where": "Step 2 · zoom level 2",
+     "why": "A newcomer cannot check this claim and it does not help them build anything. The company names and date add noise."
     }
    ]
   },
   "agentic-ai/03-first-api-calls.html": {
-   "score": 8,
-   "at": "2026-11-25T07:08:22.541Z",
+   "score": 6,
+   "at": "2026-11-25T07:17:47.618Z",
    "confusing": [
     {
-     "where": "Step 2 · Learn",
-     "why": "The code box has more than four lines, and the lesson does not say which four are meant, so I had to guess."
+     "where": "Step 2 · code",
+     "why": "The code checks the key and then never passes it. The only explanation that OpenAI() reads OPENAI_API_KEY by itself is in a quiz answer, after the quiz, so the reader is confused first."
     },
     {
-     "where": "Step 3 · the chain figure",
-     "why": "Call 2 passes the question straight in with no f-string, so the figure contradicts the code just below it."
+     "where": "What you need (callout)",
+     "why": "The lesson explains what a virtual environment is but never says how to create or activate one. A beginner will stop here."
     },
     {
-     "where": "What changed",
-     "why": "Ah Seng is not introduced in this lesson, and a cup passed along a line does not explain why each reply must be pasted in by hand."
+     "where": "Where we left off",
+     "why": "Lesson 1 already built an n8n agent that answers Uncle Lim through a chat window. This line says the assistant cannot answer anyone yet, so the story contradicts itself."
     }
    ]
   },
   "agentic-ai/04-many-models.html": {
    "score": 6,
-   "at": "2026-11-25T07:08:22.541Z",
+   "at": "2026-11-25T07:17:47.618Z",
    "confusing": [
     {
-     "where": "Step 4 · the competition",
-     "why": "The lesson describes seven steps but shows no code for the calls to the models or the loop over them. I only saw the steps in a trace and the judge prompt."
+     "where": "Step 4 · Learn",
+     "why": "Lesson 2 defined parallelization as running pieces at the same time. The code below is a plain for loop, and the note under it says the loop runs one call after another. The reader gets two meanings."
     },
     {
-     "where": "Step 4 and the callout in Step 5",
-     "why": "Step 4 calls sending to many models 'parallelization', but the loop in the callout later says the models are called one at a time. I could not tell whether the demo is parallel."
+     "where": "Step 5 · judge prompt",
+     "why": "'Rubric' appears in brackets and is never explained. It is a common word in AI writing, and a newcomer will not know it."
     },
     {
-     "where": "Step 5 · reading the verdict",
-     "why": "The judge prompt is built, but no line sends it to a model. The reply is a hard-coded string, so I never saw how the real reply arrives."
+     "where": "Step 4 · quiz",
+     "why": "Nobody in the lesson asked this question, so the quiz feels random. The answer is about order, which the Learn text already says."
     }
    ]
   },
   "agentic-ai/05-autonomy-and-tools.html": {
    "score": 7,
-   "at": "2026-11-25T07:08:22.541Z",
+   "at": "2026-11-25T07:17:47.618Z",
    "confusing": [
     {
-     "where": "Before you start (the prerequisites)",
-     "why": "The first code box installs pypdf (its comment says so), and the list does not mention it, so the first run would fail with a missing package."
+     "where": "Common errors · loop never ends",
+     "why": "The chat loop in Step 4 has no counter. Lesson 2 showed a step limit with range(8), but this loop does not use one, so the fix is not shown."
     },
     {
-     "where": "Step ② · memory",
-     "why": "The lesson says Gradio passes the history to the function, but no code connects chat() to a window, so I do not know how to run it or see it in a browser."
+     "where": "Step 1 · Learn (context)",
+     "why": "No steps say how to export a PDF, and the code needs pypdf. The next lesson's package uses linkedin.txt, so the two lessons disagree."
     },
     {
-     "where": "Common errors",
-     "why": "The lesson tells me to cap the rounds with a counter, but the loop code has no counter, so I cannot see where it goes."
+     "where": "Requirements (page data)",
+     "why": "Gradio is listed as a requirement, and the text mentions Gradio's ChatInterface, but no step installs or runs it. The reader does not know whether to use it."
     }
    ]
   },
   "agentic-ai/06-career-agent.html": {
-   "score": 7,
-   "at": "2026-11-25T07:08:22.541Z",
+   "score": 6,
+   "at": "2026-11-25T07:17:47.618Z",
    "confusing": [
     {
-     "where": "Step 1 · the sorting game",
-     "why": "The game's visitors do not match the story. The story has Sam ask for a poem and Lee ask whether it is a real person, but the game has Lee thank the twin and Sam ask about pizza. I had to stop and che"
+     "where": "Step 1 · visitor quiz",
+     "why": "Lee and Sam appear in the story with other messages (Lee asks if the twin is a real person, Sam asks for a poem), but the quiz reuses their names for different messages. The reader thinks something is"
     },
     {
-     "where": "Before you start and Step 5",
-     "why": "Step 5 A presents Pushover as a required setup, but the package note calls it optional, and the prerequisites say 'free Pushover account' right after 'small one-time fee'. I do not know whether I must"
+     "where": "Step 1 · tools.py",
+     "why": "push() is defined in push.py, but tools.py never imports it. The code will fail with a NameError."
     },
     {
-     "where": "Step 5 · file split",
-     "why": "app.py is named as the home for the chat code, but no part of this page shows it, so I was left to find it in starter/ or final/ without knowing what to look for."
+     "where": "Step 5 · B. Split the code by job",
+     "why": "Step 4's code is labelled chat.py, and this step says the same loop goes in app.py. The reader does not know which file to create."
     }
    ]
   },
