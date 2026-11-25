@@ -83,11 +83,17 @@
   },
   "reviewer": {
    "state": "flag",
-   "summary": "PR #253: ⚠️ Fix before merging scripts/review-triage.mjs: binary, file-mode and rename-only diffs are treated as \"generated files only\", so they would get a free ✅ and auto-merge unreviewed. Also a nit: the header-line regex can skip real content lines that start with \"-- \" or \"++ \". Lesson page change",
+   "summary": "PR #253: ⚠️ Fix before merging scripts/review-triage.mjs: the PAGE_GEN regex is not anchored, so any added line that merely contains a generated-tag fragment skips the AI review and gets an automatic ✅. Anchor it to whole tags and add eval cases for text mixed with those fragments. The lesson page chan",
    "link": "https://github.com/zhengtongxin/tx-learns/pull/253",
-   "at": "2026-11-25T03:41:49.250Z",
-   "runs": 309,
+   "at": "2026-11-25T03:43:53.822Z",
+   "runs": 310,
    "history": [
+    {
+     "state": "flag",
+     "summary": "PR #253: ⚠️ Fix before merging scripts/review-triage.mjs: the PAGE_GEN regex is not anchored, so any added line that merely contains a generated-tag fragment skips the AI review and gets an automatic ✅. Anchor it to whole tags and add eval cases for text mixed with those fragments. The lesson page chan",
+     "link": "https://github.com/zhengtongxin/tx-learns/pull/253",
+     "at": "2026-11-25T03:43:53.822Z"
+    },
     {
      "state": "flag",
      "summary": "PR #253: ⚠️ Fix before merging scripts/review-triage.mjs: binary, file-mode and rename-only diffs are treated as \"generated files only\", so they would get a free ✅ and auto-merge unreviewed. Also a nit: the header-line regex can skip real content lines that start with \"-- \" or \"++ \". Lesson page change",
@@ -153,19 +159,8 @@
      "summary": "PR #248: ✅ Ready to merge Workflow-only change: MERGE_TOKEN opens bot PRs, by-hand check starts are skipped when it is set, and review.yml skips the early review on writer/ PR opens. Logic and shell checked; CLAUDE.md matches. The page check complaint comes from a stale branch base (a page that exists on m",
      "link": "https://github.com/zhengtongxin/tx-learns/pull/248",
      "at": "2026-11-25T02:49:33.691Z"
-    },
-    {
-     "state": "ok",
-     "summary": "PR #233: ✅ Ready to merge The new lesson \"Working with the tech team on AI choices\" in ai-leader is correct and wired into lessons.js and the track page. The widget script uses the shared helpers correctly, and EN and 中文 match. Nothing needed fixing. One tiny nit: the Step 2 table columns are slightly",
-     "link": "https://github.com/zhengtongxin/tx-learns/pull/233",
-     "at": "2026-11-25T02:49:27.131Z"
     }
-   ],
-   "now": {
-    "at": "2026-11-25T03:42:33.166Z",
-    "run": "45541819413",
-    "link": "https://github.com/zhengtongxin/tx-learns/actions/runs/45541819413"
-   }
+   ]
   },
   "writer": {
    "state": "ok",
@@ -629,5 +624,5 @@
    ]
   }
  },
- "updated": "2026-11-25T03:43:22.287Z"
+ "updated": "2026-11-25T03:43:53.822Z"
 }
