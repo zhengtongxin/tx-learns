@@ -109,9 +109,6 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 .guard .stat{display:flex;align-items:baseline;gap:8px;padding:0;border:0;text-align:right}.guard .stat b{font:700 20px var(--mono);color:var(--ok)}.guard .stat span{font:11.5px var(--mono);color:var(--mut);max-width:150px;text-align:left}
 .sub3{margin:44px 0 6px;font:600 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
 .feed li{padding:14px 6px}.rule-line{margin-top:72px}
-.cl-day{margin:30px 0 8px;font-size:13px;letter-spacing:.06em;color:var(--mut);border-bottom:1px solid var(--line);padding-bottom:6px}
-.cl-list{list-style:none;margin:0;padding:0}.cl-list li{padding:9px 0 9px 16px;border-left:3px solid var(--acc);margin:8px 0;font-size:14.5px;line-height:1.65}.cl-list a{font-weight:600;white-space:nowrap}
-.more-btn{margin-top:22px;padding:9px 16px;border-radius:8px;border:1px solid var(--acc);background:transparent;color:var(--fg);font:inherit;font-size:14px;cursor:pointer}.more-btn:hover,.more-btn:focus-visible{background:color-mix(in srgb,var(--acc) 15%,transparent)}
 @media(max-width:760px){.eco section{margin-top:72px}.guard{grid-template-columns:28px 1fr;padding:15px 0}.guard .stat{grid-column:2;justify-content:flex-start;text-align:left}.statusbar{padding:12px 14px}.olist .it{padding:13px 0 13px 34px}.olist .it::before{top:19px}.olist .it[data-n]::before,.olist .it.g::before{top:14px}.key{margin-top:26px}}
 /* phone: the diagrams become ordered lists */
 .olist{display:none;list-style:none;margin:16px 0 0;padding:0}
@@ -226,7 +223,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 .ba ins{text-decoration:none;background:color-mix(in srgb,var(--acc) 22%,transparent);border-radius:3px;padding:0 2px}
 .eco .start{margin-top:10px;font-size:14.5px;color:var(--mut)}
 .bcn.rec a{border-left:2px solid var(--acc);border-radius:0 8px 8px 0}
-.cgrid+.morebox{margin-top:6px}
+#cgrid2{margin-top:0}
 .health{list-style:none;margin:6px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:0 26px}
 .health li{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
 .health .dot{width:8px;height:8px;border-radius:50%;background:var(--mut);flex:none}
@@ -248,17 +245,43 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 <span class="eyebrow"><span class="en">Behind the scenes · system view</span><span class="zh">幕后 · 系统视图</span></span>
 <h1 class="mega"><span class="en">From something I learn to a page you can read.</span><span class="zh">从我学到的东西，到你能读的一页。</span></h1>
 <p class="sub"><span class="en">My learning notes, turned into lessons by AI. They go live after automatic checks and review, get watched afterwards, and a merge that breaks the site is rolled back automatically.</span><span class="zh">我的学习笔记，由 AI 整理成课。经过自动检查和审阅后发布，上线后继续巡检；弄坏网站的合并会被自动回滚。</span></p>
-<nav class="pnav" aria-label="On this page"><a href="#system"><span class="en">System</span><span class="zh">系统</span></a><a href="#guardrails"><span class="en">Guardrails</span><span class="zh">护栏</span></a><a href="#concepts"><span class="en">Ideas</span><span class="zh">概念</span></a><a href="#changes"><span class="en">Changes</span><span class="zh">更新</span></a></nav>
+<nav class="pnav" aria-label="On this page"><a href="#system"><span class="en">System</span><span class="zh">系统</span></a><a href="#story"><span class="en">A real lesson</span><span class="zh">真实案例</span></a><a href="#guardrails"><span class="en">Guardrails</span><span class="zh">护栏</span></a><a href="#concepts"><span class="en">Ideas</span><span class="zh">概念</span></a><a href="#changes"><span class="en">Changes</span><span class="zh">更新</span></a></nav>
 </header>
 
 <section id="system">
-<h2><span class="en">The system</span><span class="zh">整个系统</span></h2>
-<p><span class="en">Read left to right. The numbers follow one lesson from my notes to your screen. Tap or hover an agent for details.</span><span class="zh">从左往右读。数字跟着一课，从我的笔记走到你的屏幕。点一下或移到 agent 上看详情。</span></p>
+<h2><span class="en">How a lesson gets made</span><span class="zh">一课是怎么做出来的</span></h2>
+<p><span class="en">Five steps, then the full system. Read it left to right. The numbers follow one lesson from my notes to your screen. Tap or hover an agent for details.</span><span class="zh">先是五步，再是完整系统。从左往右读。数字跟着一课，从我的笔记走到你的屏幕。点一下或移到 agent 上看详情。</span></p>
+<ol class="flow">
+<li><b>1</b><h3><span class="en">Notes</span><span class="zh">笔记</span></h3><p><span class="en">I drop raw notes in a folder on a notes branch.</span><span class="zh">我把原始笔记放进笔记分支上的一个文件夹。</span></p><i class="ty me"><span class="en">Me</span><span class="zh">我</span></i></li>
+<li><b>2</b><h3><span class="en">AI draft</span><span class="zh">AI 草稿</span></h3><p><span class="en">The content creator agent turns them into a lesson for a newcomer and opens one pull request.</span><span class="zh">内容创作者 agent 把它们写成给新手的一课，并开一个 pull request。</span></p><i class="ty ai">AI</i></li>
+<li><b>3</b><h3><span class="en">Review and preview</span><span class="zh">审阅与预览</span></h3><p><span class="en">An intern agent reads it as a newcomer, a backend agent checks code and facts, scripts guard copy and links, and Vercel builds a preview.</span><span class="zh">实习生 agent 以新手身份读，后端 agent 查代码和事实，脚本守住文字和链接，Vercel 生成预览。</span></p><i class="ty ai">AI</i><i class="ty sc"><span class="en">Script</span><span class="zh">脚本</span></i></li>
+<li><b>4</b><h3><span class="en">Publish</span><span class="zh">发布</span></h3><p><span class="en">When the two required checks are green, auto-merge puts it on the live site.</span><span class="zh">两项必需检查都通过后，自动合并把它放上线上网站。</span></p><i class="ty pf"><span class="en">Platform</span><span class="zh">平台</span></i></li>
+<li><b>5</b><h3><span class="en">Keep checking</span><span class="zh">持续检查</span></h3><p><span class="en">A script opens the live site after each merge and rolls a breaking merge back. Weekly jobs look for slow drift.</span><span class="zh">每次合并后，脚本会打开线上网站，弄坏它的合并会被回滚。每周的任务找缓慢出现的问题。</span></p><i class="ty sc"><span class="en">Script</span><span class="zh">脚本</span></i></li>
+</ol>
 <div class="panel" id="ov-panel"><svg id="ov" viewBox="0 0 1100 600" role="group" aria-label="System diagram: input, notes, AI agents, GitHub, Vercel, readers"></svg></div>
 <ol class="olist" id="ov-list"></ol>
 <p class="conn" id="conn"></p>
 <div class="key" id="key"></div>
 <p class="kb" id="kb"></p>
+</section>
+
+<section id="story">
+<h2><span class="en">One real lesson, start to finish</span><span class="zh">一篇真实的课，从头到尾</span></h2>
+<p><span class="en">The AI Production lesson <a href="ai-production/23-agent-runtime-in-minutes.html">An agent runtime in minutes</a>, on 23 Nov 2026. This is what the intern agent changed between the first draft and the published page.</span><span class="zh">AI 生产路线里的《<a href="ai-production/23-agent-runtime-in-minutes.html">几分钟上线一个智能体运行时</a>》，2026 年 11 月 23 日。下面是实习生 agent 在第一版草稿和正式发布之间改了什么。</span></p>
+<ol class="story">
+<li><b>1</b><span class="en"><strong>Notes.</strong> Raw notes in a folder called agent-runtime-in-minutes.</span><span class="zh"><strong>笔记。</strong>一个叫 agent-runtime-in-minutes 的文件夹，里面是原始笔记。</span></li>
+<li><b>2</b><span class="en"><strong>First draft.</strong> The content creator agent wrote the lesson in the site's story voice.</span><span class="zh"><strong>第一版。</strong>内容创作者 agent 用网站的讲故事口吻写成这一课。</span></li>
+<li><b>3</b><span class="en"><strong>The intern got lost.</strong> It added plain-word help where a newcomer would stall. Three of its changes:</span><span class="zh"><strong>实习生读不懂的地方。</strong>它在新手会卡住的地方补上大白话。其中三处：</span></li>
+</ol>
+<div class="ba">
+<div><span class="lbl"><span class="en">Before</span><span class="zh">之前</span></span><p><span class="en">An <b>agent</b> with a system prompt.</span><span class="zh">一个带系统提示词的<b>智能体</b>。</span></p><span class="lbl"><span class="en">After</span><span class="zh">之后</span></span><p><span class="en">An <b>agent</b> with a system prompt <ins>(the standing instructions that tell it who it is and how to answer)</ins>.</span><span class="zh">一个带系统提示词<ins>（先给它的一段固定指示，告诉它是谁、该怎么回答）</ins>的<b>智能体</b>。</span></p></div>
+<div><span class="lbl"><span class="en">Before</span><span class="zh">之前</span></span><p><span class="en">…and a data-models library.</span><span class="zh">……和一个数据模型库。</span></p><span class="lbl"><span class="en">After</span><span class="zh">之后</span></span><p><span class="en">…and a data-models library <ins>(pydantic, which checks that your data has the right shape)</ins>.</span><span class="zh">……和一个数据模型库<ins>（pydantic，检查你的数据形状对不对）</ins>。</span></p></div>
+<div><span class="lbl"><span class="en">Before</span><span class="zh">之前</span></span><p><span class="en">Switch on observability in the console, so that traces can be recorded later.</span><span class="zh">在控制台里打开可观测性，这样之后才能记录调用轨迹。</span></p><span class="lbl"><span class="en">After</span><span class="zh">之后</span></span><p><span class="en">Switch on observability in the console. <ins>The service then keeps a record of each call, called a trace, that you can read later.</ins></span><span class="zh">在控制台里打开可观测性。<ins>服务会记下每次调用的过程，这份记录叫轨迹，之后可以读。</ins></span></p></div>
+</div>
+<ol class="story" start="4">
+<li><b>4</b><span class="en"><strong>The usual checks.</strong> The same checks as every change ran, and auto-merge published it once the two required checks were green.</span><span class="zh"><strong>照常检查。</strong>和每个改动一样的检查跑了一遍，两项必需检查都通过后，自动合并把它发布了。</span></li>
+<li><b>5</b><span class="en"><strong>What checks cannot catch.</strong> They see wording, code, links and rules. Whether the lesson teaches what I actually need is still my own read.</span><span class="zh"><strong>检查查不到的。</strong>它们看得到措辞、代码、链接和规则。这一课是不是教了我真正需要的东西，还得我自己读。</span></li>
+</ol>
 </section>
 
 <section id="guardrails">
@@ -271,7 +294,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 <h2><span class="en">Ideas to learn</span><span class="zh">可以学的概念</span></h2>
 <p><span class="en">What the site is built from. Tap one for the lesson that explains it.</span><span class="zh">网站用到的想法。点一下进入讲解它的课。</span></p>
 <ul class="cgrid" id="cgrid"></ul>
-<details class="morebox" id="cmore"><summary></summary><ul class="cgrid" id="cgrid2"></ul></details>
+<ul class="cgrid" id="cgrid2"></ul>
 </section>
 
 <section id="changes">
@@ -280,12 +303,10 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 <ul class="health" id="health"></ul>
 <h3 class="sub3"><span class="en">Latest agent runs</span><span class="zh">agent 最近运行</span></h3>
 <ul class="feed" id="feed"></ul>
-<h3 class="sub3"><span class="en">Site updates</span><span class="zh">网站更新</span></h3>
-<div id="clog"></div>
 </section>
 </main>
 <div class="tip" id="tip" role="tooltip"></div>
-<script src="changelog.js"></script><script src="tracks.js?v=2bfa1a40"></script><script src="assets/build-concepts.js?v=cf202fe2"></script><script src="assets/site.js?v=85ce92dd"></script>
+<script src="tracks.js?v=2bfa1a40"></script><script src="assets/build-concepts.js?v=cf202fe2"></script><script src="assets/site.js?v=85ce92dd"></script>
 <script>
 (function(){
   function t(en,zh){return '<span class="en">'+en+'</span><span class="zh">'+zh+'</span>'}
@@ -527,7 +548,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     var el=document.getElementById('feed');
     if(!all.length){LASTF='';el.innerHTML='<li class="empty">'+(live?t('Nothing yet. The first agent run will show up here.','还没有动态。第一次运行后会显示在这里。'):t('Live activity shows on the published site.','实时动态只在线上网站显示。'))+'</li>';return}
     var fh=all.slice(0,5).map(function(x){var a=NAME[x.id]||{ic:'··',en:x.id,zh:x.id},st=PILL[x.h.state]?x.h.state:'';
-      return '<li class="fi"><details><summary><span class="dot '+st+'"></span><span class="tx"><b>'+t(a.en,a.zh)+'</b> · '+(PILL[st]||'')+'</span><span class="tm">'+ago(x.h.at)+'</span></summary><p class="fd"><span class="fl">'+t('Detail (written in English)','详情（英文原文）')+'</span> '+esc(x.h.summary)+'</p></details></li>'}).join('');if(fh!==LASTF){LASTF=fh;el.innerHTML=fh}}
+      return '<li class="fi"><details open><summary><span class="dot '+st+'"></span><span class="tx"><b>'+t(a.en,a.zh)+'</b> · '+(PILL[st]||'')+'</span><span class="tm">'+ago(x.h.at)+'</span></summary><p class="fd"><span class="fl">'+t('Detail (written in English)','详情（英文原文）')+'</span> '+esc(x.h.summary)+'</p></details></li>'}).join('');if(fh!==LASTF){LASTF=fh;el.innerHTML=fh}}
 
   function drawHealth(S,live){var el=document.getElementById('health');
     function worst(ids){var o={fail:4,flag:3,run:2,ok:1},best='',n=0;ids.forEach(function(id){var s=S[id];if(!s)return;var k=stOf(s);if(!k)return;n++;if((o[k]||0)>(o[best]||0))best=k});return n?best:''}
@@ -540,15 +561,8 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
       return '<li class="bcn'+(soon?' soon':'')+(rec?' rec':'')+'""><a href="'+esc(l.d+'/'+l.f)+'"><span class="ic" aria-hidden="true">'+c.icon+'</span><span class="bt"><b>'+t(esc(c.title.en),esc(c.title.zh))+'</b><span class="bu">'+t(esc(c.use.en),esc(c.use.zh))+'</span></span></a></li>'}
     var R=REC.map(function(id){return C.filter(function(c){return c.id===id})[0]}).filter(Boolean),O=C.filter(function(c){return REC.indexOf(c.id)<0});
     g.innerHTML=R.map(function(c){return card(c,1)}).join('');g2.innerHTML=O.map(function(c){return card(c,0)}).join('');
-    document.querySelector('#cmore summary').innerHTML=t('Show the other '+O.length+' ideas','展开其余 '+O.length+' 个概念')})();
-  (function(){var el=document.getElementById('clog'),L=(window.CHANGELOG||[]).slice(),MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],N=8;
-    L.sort(function(a,b){return a.date<b.date?1:a.date>b.date?-1:0});
-    function day(d){var p=d.split('-');return t((+p[2])+' '+MO[p[1]-1]+' '+p[0],p[0]+' 年 '+(+p[1])+' 月 '+(+p[2])+' 日')}
-    function draw(all){var cur='',o='';L.slice(0,all?L.length:N).forEach(function(x){if(x.date!==cur){if(cur)o+='</ul>';cur=x.date;o+='<h4 class="cl-day">'+day(x.date)+'</h4><ul class="cl-list">'}
-        o+='<li>'+t(esc(x.en),esc(x.zh))+(x.files||[]).map(function(f){return ' <a href="'+esc(f)+'">'+t('See it →','去看看 →')+'</a>'}).join('')+'</li>'});
-      if(cur)o+='</ul>';if(!all&&L.length>N)o+='<button class="more-btn" id="clmore">'+t('Show all '+L.length+' updates','显示全部 '+L.length+' 条更新')+'</button>';
-      el.innerHTML=o;var b=document.getElementById('clmore');if(b)b.onclick=function(){draw(true)}}
-    draw(false)})();
+    })();
+  
   function draw(data){
     var live=!!(data&&data.connected),S=(data&&data.agents)||{};
     var c=document.getElementById('conn'),why=data&&data.reason;
