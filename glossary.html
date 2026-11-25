@@ -9,7 +9,7 @@
 .gl-sec>h2{margin:0 0 6px}
 .gl-note{margin:0 0 16px;color:var(--mut);font-size:15px}
 /* concept map: one node per theme, its terms inside */
-.themes{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:clamp(48px,7vw,84px);row-gap:76px;margin-top:18px}
+.themes{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:clamp(64px,8vw,110px);row-gap:92px;margin-top:18px}
 .theme{position:relative;padding:14px 16px 16px;border:1px solid color-mix(in srgb,var(--h) 55%,var(--line));border-top:3px solid var(--h);border-radius:14px;background:color-mix(in srgb,var(--h) 7%,var(--glass));scroll-margin-top:70px}
 .theme[data-p=models]{grid-area:1/1}.theme[data-p=agents]{grid-area:1/2}.theme[data-p=tools]{grid-area:1/3}
 .theme[data-p=evals]{grid-area:2/1}.theme[data-p=safety]{grid-area:2/2}.theme[data-p=memory]{grid-area:2/3}.theme[data-p=delivery]{grid-area:3/2}
@@ -82,19 +82,34 @@ html[data-theme=light] .gl-m .tg{color:color-mix(in srgb,var(--h) 30%,var(--fg))
 
     /* arrows: the original flows, drawn from where the nodes actually sit */
     var flow=document.createElement('div');flow.className='cflow';flow.setAttribute('aria-hidden','true');themesEl.appendChild(flow);
-    var EDGES=[['models','agents','h',{en:'calls',zh:'调用'}],['agents','tools','h',{en:'uses',zh:'使用'}],['agents','safety','v',{en:'kept in line by',zh:'受其约束'}],['tools','memory','v',{en:'reads from',zh:'读取'}],['safety','delivery','v',{en:'shipped by',zh:'由其上线'}],['agents','evals','d',{en:'scored by',zh:'由其评分'}]];
+    /* [from, side, along 0..1, to, side, along 0..1, label, dashed, arrows at both ends] */
+    var EDGES=[
+      ['agents','l',.5,'models','r',.5,{en:'calls',zh:'调用'},0,1],
+      ['agents','r',.5,'tools','l',.5,{en:'uses',zh:'使用'},0,0],
+      ['tools','b',.5,'memory','t',.5,{en:'reads · writes',zh:'读 · 写'},0,1],
+      ['agents','b',.85,'memory','t',.2,{en:'retrieves',zh:'检索'},0,0],
+      ['evals','t',.3,'models','b',.3,{en:'scores model',zh:'评测模型'},1,0],
+      ['evals','t',.75,'agents','b',.15,{en:'scores agent',zh:'评测智能体'},1,0],
+      ['safety','t',.5,'agents','b',.5,{en:'guards agent + tools',zh:'约束智能体和工具'},1,0],
+      ['safety','b',.5,'delivery','t',.5,{en:'safe to ship',zh:'安全才上线'},0,0],
+      ['evals','b',.7,'delivery','l',.4,{en:'tests pass',zh:'测试过关'},0,0],
+      ['delivery','l',.6,'evals','b',.3,{en:'traces back',zh:'追踪回流'},1,0]];
+    var NORM={t:[0,-1],b:[0,1],l:[-1,0],r:[1,0]};
+    function pt(n,side,f){return side==='l'?[n.l,n.t+(n.b-n.t)*f]:side==='r'?[n.r,n.t+(n.b-n.t)*f]:side==='t'?[n.l+n.w*f,n.t]:[n.l+n.w*f,n.b]}
     function draw(){
       if(window.innerWidth<=700){flow.innerHTML='';return}
       var R=themesEl.getBoundingClientRect(),P={};
-      order.forEach(function(id){var e=document.getElementById('theme-'+id);if(e){var b=e.getBoundingClientRect();P[id]={l:b.left-R.left,r:b.right-R.left,t:b.top-R.top,b:b.bottom-R.top,w:b.width,cx:(b.left+b.right)/2-R.left,cy:(b.top+b.bottom)/2-R.top}}});
+      order.forEach(function(id){var e=document.getElementById('theme-'+id);if(e){var b=e.getBoundingClientRect();P[id]={l:b.left-R.left,r:b.right-R.left,t:b.top-R.top,b:b.bottom-R.top,w:b.width}}});
       var p='',lb='',G=4;
-      EDGES.forEach(function(e){var a=P[e[0]],z=P[e[1]];if(!a||!z)return;var d,lx,ly,cls='e';
-        if(e[2]==='h'){var y=Math.round((Math.max(a.t,z.t)+Math.min(a.b,z.b))/2);d='M'+(a.r+G)+' '+y+'H'+(z.l-G);lx=(a.r+z.l)/2;ly=y}
-        else if(e[2]==='v'){var x=Math.round(a.cx);d='M'+x+' '+(a.b+G)+'V'+(z.t-G);lx=x;ly=(a.b+z.t)/2}
-        else{var x1=Math.round(a.l+a.w*0.16),y1=a.b+G,x2=Math.round(z.cx),y2=z.t-G,m=(y2-y1)*0.55;d='M'+x1+' '+y1+'C'+x1+' '+(y1+m)+' '+x2+' '+(y2-m)+' '+x2+' '+y2;lx=(x1+x2)/2;ly=(y1+y2)/2;cls='e d'}
-        p+='<path class="'+cls+'" d="'+d+'" marker-end="url(#ar)"/>';
-        lb+='<div class="el" style="left:'+lx.toFixed(1)+'px;top:'+ly.toFixed(1)+'px">'+bi(e[3])+'</div>'});
-      flow.innerHTML='<svg><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z"/></marker></defs>'+p+'</svg>'+lb}
+      EDGES.forEach(function(e){var a=P[e[0]],z=P[e[3]];if(!a||!z)return;
+        var s0=pt(a,e[1],e[2]),e0=pt(z,e[4],e[5]),ns=NORM[e[1]],ne=NORM[e[4]];
+        var x1=s0[0]+ns[0]*G,y1=s0[1]+ns[1]*G,x2=e0[0]+ne[0]*G,y2=e0[1]+ne[1]*G;
+        var k=Math.max(24,Math.min(Math.hypot(x2-x1,y2-y1)*0.5,110));
+        var c1x=x1+ns[0]*k,c1y=y1+ns[1]*k,c2x=x2+ne[0]*k,c2y=y2+ne[1]*k;
+        var lx=(x1+3*c1x+3*c2x+x2)/8,ly=(y1+3*c1y+3*c2y+y2)/8;
+        p+='<path class="e'+(e[7]?' d':'')+'" d="M'+x1.toFixed(1)+' '+y1.toFixed(1)+'C'+c1x.toFixed(1)+' '+c1y.toFixed(1)+' '+c2x.toFixed(1)+' '+c2y.toFixed(1)+' '+x2.toFixed(1)+' '+y2.toFixed(1)+'" marker-end="url(#ar)"'+(e[8]?' marker-start="url(#ar)"':'')+'/>';
+        lb+='<div class="el" style="left:'+lx.toFixed(1)+'px;top:'+ly.toFixed(1)+'px">'+bi(e[6])+'</div>'});
+      flow.innerHTML='<svg><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z"/></marker></defs>'+p+'</svg>'+lb}
     draw();window.addEventListener('resize',draw);
     if(window.ResizeObserver){var ro=new ResizeObserver(function(){requestAnimationFrame(draw)});ro.observe(themesEl);[].forEach.call(themesEl.querySelectorAll('.theme'),function(n){ro.observe(n)})}
     window.addEventListener('load',draw);
