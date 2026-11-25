@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded',function(){
  var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
- predict($('p1'),{q:{en:'Why does each test line carry a category?',zh:'为什么每条测试都要有类别？'},opts:[{k:'a',en:'So you can see which kind of question is weak, not just one average',zh:'这样你能看出哪一类问题弱，而不只是一个平均数'},{k:'b',en:'The retriever needs the category to search',zh:'检索器需要类别才能搜索'}],a:'a',ex:{en:'An average can hide that holistic questions fail while direct facts shine.',zh:'平均数可能掩盖“整体性问题全错、直接事实全对”这件事。'},hint:{en:'Think about what you do with the numbers afterwards.',zh:'想想拿到数字之后你要做什么。'}});
  predict($('p2'),{q:{en:'A keyword first appears in the third retrieved chunk. What is its reciprocal rank?',zh:'某个关键词第一次出现在检索到的第三块里。它的倒数名次是多少？'},opts:[{k:'a',en:'1/3, about 0.33',zh:'1/3，约 0.33'},{k:'b',en:'3',zh:'3'}],a:'a',ex:{en:'Reciprocal rank is 1 divided by the rank. Rank 1 gives 1, rank 3 gives about 0.33, missing gives 0.',zh:'倒数名次就是 1 除以名次。第 1 名得 1，第 3 名约得 0.33，没找到得 0。'},hint:{en:'"Reciprocal" means one over the number.',zh:'“倒数”就是用 1 去除。'}});
  game($('g3'),[
   {en:'The page about lift repairs never shows up in the top 10.',zh:'电梯维修那一页从没出现在前 10 名里。',a:'r',ex:{en:'Missing chunks lower MRR and coverage.',zh:'缺少块会拉低 MRR 和覆盖率。'},hint:{en:'Is the problem in the search or the writing?',zh:'问题出在搜索还是写作？'}},

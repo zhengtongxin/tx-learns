@@ -5,56 +5,21 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/agentic-ai/15-agents-as-graphs.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/agentic-ai/15-agents-as-graphs.html","url":"https://tx-learns.vercel.app/agentic-ai/15-agents-as-graphs.html","name":"Agents as graphs","alternateName":"把智能体画成图","description":"A graph is just functions on a shared pad, joined by arrows. Build one with state, nodes, edges, loops and memory.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"Graphs and state","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Agentic","url":"https://tx-learns.vercel.app/agentic-ai/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Agentic","item":"https://tx-learns.vercel.app/agentic-ai/index.html"},{"@type":"ListItem","position":3,"name":"Agents as graphs","item":"https://tx-learns.vercel.app/agentic-ai/15-agents-as-graphs.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Graphs and state · Lesson 1</span><span class="zh">图与状态 · 第 1 课</span></span><h1><span class="en">Agents as graphs</span><span class="zh">把智能体画成图</span></h1><p class="meta"><span class="en">Turn your agent loop into a map of stations and arrows · ~25 min · hands-on</span><span class="zh">把智能体循环画成档口和箭头组成的地图 · 约 25 分钟 · 动手实践</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time Aina's coding team wrote and tested a small shop tool for Uncle Lim. Today the Kopi Corner assistant gets tangled: Auntie Suria's orders, Ah Seng's drinks and Kak Ros's noodles all pass things along through hand-written <code>if</code> lines. We fix it by drawing the flow as a graph that shares one order pad.</p>
-<p class="zh" style="margin:0">上次 Aina 的编码团队为林叔写好并测试了一个小工具。今天 Kopi Corner 助手的流程乱了：Suria 阿姨的订单、Ah Seng 的饮料、Ros 姐的面档，全靠手写的 <code>if</code> 互相传话。我们把流程画成共享一块订单板的图来解决。</p></div>
-<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en" style="margin:0">You are helping <b>Auntie Lan</b>, who runs the counter at a busy kopitiam in Bedok. Orders come in all morning. Every order goes on one <b>order pad</b> that everybody can read. Food goes to the kitchen stall, drinks go to the drinks station, and the slip always comes back to the counter to check nothing is missing. This kitchen is a <b>graph</b>. In this lesson you rebuild it in code with <b>LangGraph</b>: plain functions that read and write a shared pad, joined by arrows. This is Auntie Lan's counter in Bedok: the same pattern as Kopi Corner's order pad.</p>
-<p class="zh" style="margin:0">你在帮 <b>兰姨</b>，她在勿洛一家热闹的咖啡店管柜台。整个早上订单不断。每张订单都记在一块大家都看得到的<b>订单板</b>上：吃的送去厨房档口，喝的送去饮料站，单子做完一定会回到柜台，检查有没有漏。这间厨房就是一张<b>图</b>。这节课你用 <b>LangGraph</b> 把它写成代码：一堆读写同一块板子的普通函数，用箭头连起来。这是勿洛兰姨的柜台：和 Kopi Corner 的订单板是同一个套路。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Key point</span><span class="zh">要点</span></b><p class="en" style="margin:0">A <b>graph</b> is plain functions (<b>nodes</b>) reading and writing one shared <b>state</b>, joined by arrows (<b>edges</b>). Think of a kopitiam order pad that every station can read. LangGraph runs it for you, so you stop hand-writing the <code>if</code> chains between steps.</p><p class="zh" style="margin:0"><b>图</b>就是一组普通函数（<b>节点</b>）读写同一份<b>状态</b>，再用箭头（<b>边</b>）连起来。可以想成咖啡店里每个档口都看得到的订单板。LangGraph 替你运行它，你不用再手写步骤之间的 <code>if</code>。</p></div>
+<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim">pip install langchain langchain-openai langgraph langgraph-checkpoint-sqlite python-dotenv</span></div>
 
-<h2><span class="en">Step 0 · The layer under the graph</span><span class="zh">第 0 步 · 图底下的那一层</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Before arrows, you need the parts they connect. LangChain's lowest layer is a thin wrapper around a model provider: one chat-model object, messages, tools and structured output. Think of it as the stoves and pans. You can cook with them, but you light each fire yourself. With a tool, the model only <i>asks</i> for it. At this layer <b>you</b> write the loop that runs the tool and calls the model again. Graphs remove exactly that boilerplate.</p>
-<p class="zh" style="margin:0 0 8px">画箭头之前，先认识箭头要连起来的零件。LangChain 最底层只是对模型服务商的一层薄封装：一个聊天模型对象、消息、工具和结构化输出。可以把它想成炉灶和锅：能煮，但每把火都得自己点。用工具时，模型只是<i>提出请求</i>；在这一层，运行工具再重新调用模型的循环要<b>你自己</b>写。图要去掉的正是这些重复代码。</p></div>
-<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim">pip install langchain langchain-openai langgraph langgraph-checkpoint-sqlite python-dotenv
-</span></div>
-<div class="codebox" data-file="graph_basics.py" data-lang="python"><span class="dim">from langchain_openai import ChatOpenAI
-from langchain_core.tools import tool
-from pydantic import BaseModel, Field
-
-llm = ChatOpenAI(model="gpt-5.4-mini")      # reads OPENAI_API_KEY
-print(llm.invoke("One sentence: what is a kopitiam?").content)
-
-</span><span class="chg">@tool
-def menu_price(item: str) -> float:
-    """Price in S$ of a drink or dish on today's menu."""
-    return {"kopi o": 1.6, "roti canai": 1.5, "nasi lemak": 4.0}.get(item.lower(), 0.0)</span><span class="dim">
-
-class Order(BaseModel):
-    item: str = Field(description="What the customer wants")
-    qty: int = Field(description="How many")
-
-</span><span class="chg">parser = llm.with_structured_output(Order)</span><span class="dim">
-print(parser.invoke("Boss, bagi tiga roti canai"))   # Order(item='roti canai', qty=3)</span></div>
-<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
-<div class="codebox" data-file="output" data-lang="text">A kopitiam is a traditional coffee shop in Malaysia and Singapore.
-Order(item='roti canai', qty=3)</div>
-<div class="try" id="p0"></div>
-
-<h2><span class="en">Step 1 · State and reducers: the order pad</span><span class="zh">第 1 步 · 状态与 reducer：订单板</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A graph starts with one question: what does everybody get to read? That is the <b>state</b>, the order pad. Auntie Lan never wipes it. New lines are <i>added</i> under the old ones, and the rule for how old and new combine is called a <b>reducer</b>. A field with the <code>add_messages</code> reducer is appended to. A plain field with no reducer is simply replaced by the latest write.</p>
-<p class="zh" style="margin:0 0 8px">图的第一个问题是：大家都能读到什么？这就是<b>状态（state）</b>，也就是订单板。兰姨从不擦掉它，新的内容是<i>加</i>在旧内容下面的，而“旧的和新的怎么合并”的规则叫 <b>reducer</b>。带 <code>add_messages</code> 的字段会追加；没有 reducer 的普通字段，则直接被最新一次写入覆盖。</p></div>
-<div class="codebox" data-file="state.py" data-lang="python"><span class="dim">from typing import Annotated
+<h2><span class="en">Step 1 · State, nodes and edges</span><span class="zh">第 1 步 · 状态、节点和边</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li><b>State</b> is the pad everyone reads. A <b>reducer</b> says how old and new combine: <code>add_messages</code> appends; a plain field is overwritten by the last write.</li><li>A <b>node</b> is a function that returns only the keys it changes. An <b>edge</b> says who goes next; <code>START</code> and <code>END</code> are the doors.</li><li>Always five steps: define state, create builder, add nodes, add edges, compile.</li></ul>
+<ul class="zh" style="margin:0;padding-left:18px"><li><b>状态</b>就是大家都读的订单板。<b>reducer</b> 决定新旧内容怎么合并：<code>add_messages</code> 追加；普通字段被最后一次写入覆盖。</li><li><b>节点</b>是只返回自己所改键的函数。<b>边</b>说明下一个轮到谁；<code>START</code> 和 <code>END</code> 是进门和出门。</li><li>步骤永远是五步：定义状态、创建构建器、加节点、加边、编译。</li></ul></div>
+<div class="codebox" data-file="graph.py" data-lang="python"><span class="dim">import random
+from typing import Annotated
 from typing_extensions import TypedDict
+from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 
 class Pad(TypedDict):
 </span><span class="chg">    messages: Annotated[list, add_messages]   # reducer: append, never overwrite
-    malay: str                                # no reducer: last write wins</span></div>
-<div class="sc" id="g1"></div>
-
-<h2><span class="en">Step 2 · Nodes and edges: the smallest graph</span><span class="zh">第 2 步 · 节点与边：最小的图</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The recipe never changes: define the state, make a builder, add nodes, add edges, compile. A <b>node</b> is a plain function. It reads the pad and returns <i>only the keys it changes</i>. An <b>edge</b> is an arrow saying who goes next. <code>START</code> and <code>END</code> are the door in and the door out. This first graph has no model at all, which is the point: a graph is just functions.</p>
-<p class="zh" style="margin:0 0 8px">做法永远是这五步：定义状态、创建构建器、加节点、加边、编译。<b>节点</b>是一个普通函数，读订单板，并且<i>只返回它改动的键</i>。<b>边</b>是说下一个轮到谁的箭头。<code>START</code> 和 <code>END</code> 是进门和出门。这第一张图里完全没有模型，这正是重点：图只是一堆函数。</p></div>
-<div class="codebox" data-file="graph.py" data-lang="python"><span class="dim">import random
-from langgraph.graph import StateGraph, START, END
+    malay: str                                # no reducer: last write wins</span><span class="dim">
 
 def auntie(state: Pad) -> dict:
     shout = random.choice(["Kopi siap!", "Roti dah habis!", "Tunggu sekejap!"])
@@ -68,15 +33,23 @@ app = g.compile()                    # compile</span><span class="dim">
 
 out = app.invoke({"messages": [{"role": "user", "content": "order"}]})
 print(out["messages"][-1].content)</span></div>
-<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
-<div class="codebox" data-file="output" data-lang="text">One roti canai, coming right up. Anything to drink?</div>
+<div class="sc" id="g1"></div>
 <div class="sc" id="g2"></div>
 
-<h2><span class="en">Step 3 · A fork and a loop: conditional edges</span><span class="zh">第 3 步 · 分叉与回环：条件边</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Real kitchens choose. If the model asked for a tool, the slip goes to the tools station. If not, it moves on. That choice is a <b>conditional edge</b>. Two ready-made pieces do the work: <code>ToolNode</code> runs whatever tools the model asked for, and <code>tools_condition</code> answers <code>"tools"</code> or <code>END</code>. The edge from tools back to the counter is the <b>loop</b>. Here we also add a <code>translate</code> node that fills <code>malay</code>.</p>
-<p class="zh" style="margin:0 0 8px">真正的厨房要做选择。如果模型请求了工具，单子就送去工具档口；没有的话就往下走。这个选择就是<b>条件边</b>。两个现成的零件负责干活：<code>ToolNode</code> 运行模型请求的所有工具，<code>tools_condition</code> 回答 <code>"tools"</code> 或 <code>END</code>。从工具档口回到柜台的那条边就是<b>回环</b>。这里还加了一个 <code>translate</code> 节点，用来填 <code>malay</code>。</p></div>
-<figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="Graph: the counter node sends to the tools node and back in a loop, or on to translate, then ends"><defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box" x="20" y="80" width="150" height="60" rx="12"/><text class="en" x="95.0" y="115.0">Counter</text><text class="zh" x="95.0" y="115.0">柜台</text><rect class="box new" x="290" y="15" width="150" height="60" rx="12"/><text class="en" x="365.0" y="50.0">Tools</text><text class="zh" x="365.0" y="50.0">工具档口</text><rect class="box" x="290" y="145" width="150" height="60" rx="12"/><text class="en" x="365.0" y="180.0">Translate</text><text class="zh" x="365.0" y="180.0">翻译</text><rect class="box soft" x="560" y="80" width="140" height="60" rx="12"/><text class="en" x="630.0" y="115.0">Done</text><text class="zh" x="630.0" y="115.0">完成</text><path class="lnk hot" d="M170 95 L290 50" marker-end="url(#ar)"/><path class="lnk" d="M290 30 C230 -5 120 20 100 80" marker-end="url(#ar)"/><path class="lnk" d="M170 125 L290 170" marker-end="url(#ar)"/><path class="lnk" d="M440 175 C500 175 520 150 590 140" marker-end="url(#ar)"/><text class="en sm" x="190" y="62">tool?</text><text class="zh sm" x="190" y="62">要工具？</text><text class="en sm" x="205" y="168">no tool</text><text class="zh sm" x="205" y="168">不要工具</text><text class="en sm" x="160" y="14">loop back</text><text class="zh sm" x="160" y="14">回环</text></svg><figcaption><span class="en">The counter either sends the slip to the tools station (and it comes back) or moves on to translate. That fork is the conditional edge.</span><span class="zh">柜台要么把单子送去工具档口（做完再回来），要么往下走到翻译。这个分叉就是条件边。</span></figcaption></figure>
-<div class="codebox" data-file="tools_graph.py" data-lang="python"><span class="dim">from langgraph.prebuilt import ToolNode, tools_condition
+<h2><span class="en">Step 2 · A fork and a loop</span><span class="zh">第 2 步 · 分叉与回环</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li>A <b>conditional edge</b> chooses the next node. <code>tools_condition</code> answers <code>"tools"</code> or <code>END</code>; <code>ToolNode</code> runs the tools the model asked for.</li><li>An edge from the tools node back to the model is a <b>loop</b>.</li></ul>
+<ul class="zh" style="margin:0;padding-left:18px"><li><b>条件边</b>选择下一个节点。<code>tools_condition</code> 回答 <code>"tools"</code> 或 <code>END</code>；<code>ToolNode</code> 运行模型请求的工具。</li><li>从工具节点指回模型的边就是<b>回环</b>。</li></ul></div>
+@@FIG@@
+<div class="codebox" data-file="tools_graph.py" data-lang="python"><span class="dim">from langchain_openai import ChatOpenAI
+from langchain_core.tools import tool
+from langgraph.prebuilt import ToolNode, tools_condition
+
+llm = ChatOpenAI(model="gpt-5.4-mini")      # reads OPENAI_API_KEY
+
+@tool
+def menu_price(item: str) -> float:
+    """Price in S$ of a drink or dish on today's menu."""
+    return {"kopi o": 1.6, "roti canai": 1.5, "nasi lemak": 4.0}.get(item.lower(), 0.0)
 
 tools = [menu_price]
 llm_t = llm.bind_tools(tools)
@@ -97,13 +70,12 @@ g.add_edge(START, "counter")
 </span><span class="chg">g.add_conditional_edges("counter", tools_condition, {"tools": "tools", END: "translate"})
 g.add_edge("tools", "counter")          # the loop: back to the counter</span><span class="dim">
 g.add_edge("translate", END)
-app = g.compile()
-# app.get_graph().draw_mermaid_png() draws it, to check the arrows</span></div>
+app = g.compile()</span></div>
 <div class="try" id="p3"></div>
 
-<h2><span class="en">Step 4 · Memory across runs: checkpoints</span><span class="zh">第 4 步 · 跨次运行的记忆：检查点</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The reducer only works <i>inside one run</i>. Call <code>invoke</code> twice and the second call starts with a blank pad. To remember between calls, compile with a <b>checkpointer</b> and pass a <code>thread_id</code>. It is like giving every table its own order pad. A checkpoint is saved at every step, so you can even look back and resume from an earlier moment.</p>
-<p class="zh" style="margin:0 0 8px">reducer 只在<i>一次运行内部</i>起作用。调用两次 <code>invoke</code>，第二次又从一块空白的板子开始。想在多次调用之间记住东西，就要在编译时加上<b>检查点（checkpointer）</b>，并传入 <code>thread_id</code>。就像给每张桌子一块自己的订单板。每一步都会存一个检查点，所以你还能回头看，甚至从更早的时刻重新开始。</p></div>
+<h2><span class="en">Step 3 · Memory across runs</span><span class="zh">第 3 步 · 跨次运行的记忆</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li>A reducer works only <i>inside one run</i>. For memory across calls, compile with a <b>checkpointer</b> and pass a <code>thread_id</code>: one pad per table.</li><li><code>MemorySaver</code> vanishes on restart; <code>SqliteSaver</code> keeps a file. Every step is saved, so you can resume from an earlier one.</li></ul>
+<ul class="zh" style="margin:0;padding-left:18px"><li>reducer 只在<i>一次运行内部</i>有效。想跨调用记住东西，编译时加上<b>检查点</b>并传入 <code>thread_id</code>：每张桌子一块板。</li><li><code>MemorySaver</code> 重启就没了；<code>SqliteSaver</code> 存成文件。每一步都被保存，所以能从更早的一步继续。</li></ul></div>
 <div class="codebox" data-file="memory_graph.py" data-lang="python"><span class="dim">from langgraph.checkpoint.memory import MemorySaver
 from langgraph.checkpoint.sqlite import SqliteSaver
 
@@ -114,34 +86,18 @@ print(app.invoke({"messages": [{"role": "user", "content": "My usual, please?"}]
 
 # survives restarts: a file instead of memory, used inside its with-block
 with SqliteSaver.from_conn_string("pads.db") as saver:
-    durable = g.compile(checkpointer=saver)
-
-# time travel: every step was saved
-history = list(app.get_state_history(table5))      # newest first
-old = history[len(history) // 2]
-cfg = {"configurable": {"thread_id": "table-5",
-                        "checkpoint_id": old.config["configurable"]["checkpoint_id"]}}
-app.invoke(None, cfg)                              # resume from that earlier moment</span></div>
-<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
-<div class="codebox" data-file="output" data-lang="text">Welcome back, Mei Ling! Kopi kosong, as usual?</div>
+    durable = g.compile(checkpointer=saver)</span></div>
 <div class="try" id="p4"></div>
 <div class="try" id="p4b"></div>
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I thought: “the state has <code>messages</code>, so why does it forget?” The reducer only combines updates <i>inside one run</i>. Remembering across runs is the checkpointer's job, keyed by <code>thread_id</code>. Another time <code>malay</code> was never set: I had forgotten the mapping on the conditional edge, so “no tools” went straight to END.</span><span class="zh">我当时的想法是：“状态里明明有 <code>messages</code>，为什么还会忘？”其实 reducer 只在<i>一次运行内部</i>合并更新，跨次运行的记忆是检查点的工作，靠 <code>thread_id</code> 区分。还有一次 <code>malay</code> 一直没被设置：我忘了给条件边写映射，“不用工具”直接去了 END。</span></div>
-<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Draw your own kitchen.</b> Pick a place with stations (a clinic, a school office) and sketch it as state, nodes and edges before you code anything.</span><span class="zh"><b>画你自己的厨房。</b>选一个有好几个档口的地方（诊所、学校办公室），先画成状态、节点和边，再写代码。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Print the picture.</b> Run <code>app.get_graph().draw_mermaid_png()</code> and check that your arrows match what you meant.</span><span class="zh"><b>把图画出来。</b>运行 <code>app.get_graph().draw_mermaid_png()</code>，检查箭头和你想的一样。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Break the memory on purpose.</b> Use two different <code>thread_id</code> values and watch the second table forget.</span><span class="zh"><b>故意弄断记忆。</b>用两个不同的 <code>thread_id</code>，看第二张桌子怎么忘记。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the Kopi Corner assistant runs its flow as a graph: Ah Seng's drinks and Kak Ros's noodles hang off one shared order pad, like Auntie Suria's pad at the counter. The next problem is that the graph forgets everything between runs.</span><span class="zh">现在 Kopi Corner 助手把流程跑成了图：Ah Seng 的饮料和 Ros 姐的面都挂在同一块订单板上，就像 Suria 阿姨柜台上的那块。下一个问题是：图在两次运行之间什么都不记得。</span></div>
-<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
-<div class="card"><p class="en" style="margin:0">• <b><code>ModuleNotFoundError: No module named 'langgraph.checkpoint.sqlite'</code></b>: The SQLite saver is a separate package. Fix: <code>pip install langgraph-checkpoint-sqlite</code>.<br>• <b><code>langgraph.errors.GraphRecursionError: Recursion limit of 25 reached</code></b>: The graph keeps looping between nodes. Fix: check the condition that should lead to <code>END</code>, or raise <code>recursion_limit</code> on purpose.<br>• <b><code>ValueError: Checkpointer requires one or more of the following 'configurable' keys: thread_id</code></b>: You compiled with memory but called the graph without a thread. Fix: pass <code>{"configurable": {"thread_id": "..."}}</code>.</p>
-<p class="zh" style="margin:0">• <b><code>ModuleNotFoundError: No module named 'langgraph.checkpoint.sqlite'</code></b>：SQLite 存档器是单独的包。解决：<code>pip install langgraph-checkpoint-sqlite</code>。<br>• <b><code>langgraph.errors.GraphRecursionError: Recursion limit of 25 reached</code></b>：图在节点之间一直打转。解决：检查通向 <code>END</code> 的条件，或有意调大 <code>recursion_limit</code>。<br>• <b><code>ValueError: Checkpointer requires one or more of the following 'configurable' keys: thread_id</code></b>：你编译时加了记忆，调用时却没给会话编号。解决：传入 <code>{"configurable": {"thread_id": "..."}}</code>。</p></div>
-<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• A graph is just <b>functions on a shared pad</b>, joined by arrows.<br>• <b>State</b> is the pad. A <b>reducer</b> decides how old and new combine: <code>add_messages</code> appends, a plain field is replaced.<br>• A <b>node</b> returns only the keys it changes. An <b>edge</b> says who goes next.<br>• A <b>conditional edge</b> chooses the next node. An edge back to an earlier node makes a <b>loop</b>.<br>• <code>tools_condition</code> answers <code>"tools"</code> or <code>END</code>. Pass a mapping to send “no tools” elsewhere.<br>• The reducer works inside one run. A <b>checkpointer</b> plus <code>thread_id</code> remembers across runs.<br>• <code>MemorySaver</code> vanishes on restart. <code>SqliteSaver</code> keeps a file.</p><p class="zh" style="margin:0">• 图只是<b>读写同一块板子的函数</b>，用箭头连起来。<br>• <b>状态</b>就是订单板。<b>reducer</b> 决定新旧内容怎么合并：<code>add_messages</code> 追加，普通字段被覆盖。<br>• <b>节点</b>只返回它改动的键。<b>边</b>说明下一个轮到谁。<br>• <b>条件边</b>选择下一个节点。指回前面节点的边就形成<b>回环</b>。<br>• <code>tools_condition</code> 回答 <code>"tools"</code> 或 <code>END</code>。想把“不用工具”送去别处，就要传映射。<br>• reducer 只在一次运行内部有效。<b>检查点</b>加 <code>thread_id</code> 才能跨次记住。<br>• <code>MemorySaver</code> 重启就没了，<code>SqliteSaver</code> 会存成文件。</p></div>
 
-<h3><span class="en">Recap</span><span class="zh">三句回顾</span></h3>
-<div class="card"><p class="en" style="margin:0">• A graph is state + nodes + edges: nodes change the state, edges decide what runs next.<br>• Tools and loops are just a node and a conditional edge back to the model.<br>• A checkpointer plus a <code>thread_id</code> gives the graph memory you can resume.</p>
-<p class="zh" style="margin:0">• 图 = 状态 + 节点 + 边：节点修改状态，边决定下一步运行谁。<br>• 工具和循环只是一个节点，加一条条件边回到模型。<br>• 存档器加上 <code>thread_id</code>，就给了图可以恢复的记忆。</p></div>
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Draw your own kitchen.</b> Pick a place with stations (a clinic, a school office) and sketch it as state, nodes and edges before you code.</span><span class="zh"><b>画你自己的厨房。</b>选一个有多个档口的地方（诊所、学校办公室），先画成状态、节点和边，再写代码。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a second tool</b> and watch the loop run twice.</span><span class="zh"><b>再加一个工具</b>，看回环跑两轮。</span></span></label></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A graph is functions on a shared pad, joined by arrows.<br>• A reducer decides how old and new state combine: <code>add_messages</code> appends, a plain field is replaced.<br>• A node returns only the keys it changes; a conditional edge picks the next node; an edge back makes a loop.<br>• A checkpointer plus <code>thread_id</code> remembers across runs; <code>SqliteSaver</code> survives restarts.</p><p class="zh" style="margin:0">• 图就是读写共享板子的函数，用箭头连起来。<br>• reducer 决定新旧状态怎么合并：<code>add_messages</code> 追加，普通字段被替换。<br>• 节点只返回它改动的键；条件边选下一个节点；指回前面的边形成回环。<br>• 检查点加 <code>thread_id</code> 才能跨次记住；<code>SqliteSaver</code> 重启后仍在。</p></div>
+
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Agentic</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"goals":{"en":["Define graph state and a reducer such as add_messages","Write nodes and edges for the smallest graph","Add a conditional edge to make a fork and a loop","Keep memory across runs with a checkpointer and thread_id"],"zh":["定义图的状态，并用 add_messages 这样的 reducer","为最小的图写节点和边","加条件边，做出分叉和循环","用 checkpointer 和 thread_id 跨次运行保留记忆"]},"prev":["05-autonomy-and-tools.html","07-agents-sdk-basics.html"],"tools":{"en":"Python 3.10+, langchain, langgraph, langchain-openai, an OpenAI API key","zh":"Python 3.10+、langchain、langgraph、langchain-openai、OpenAI API 密钥"},"know":{"en":"You know what a tool call is and how state is passed along.","zh":"知道什么是工具调用，以及状态怎样传递。"},"mins":40,"offline":false}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=8290ab6e"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/15-agents-as-graphs.js?v=cc3ffc72"></script></body></html>
+<script src="js/15-agents-as-graphs.js?v=62f1212f"></script></body></html>

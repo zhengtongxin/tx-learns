@@ -5,17 +5,13 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/ai-fde/14-a-memory-over-mcp.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-fde/14-a-memory-over-mcp.html","url":"https://tx-learns.vercel.app/ai-fde/14-a-memory-over-mcp.html","name":"Memory over MCP","alternateName":"基于 MCP 的记忆","description":"Give the claims agent a long-term memory through a small MCP server: save facts with a source and a date, look them up on the next claim, and watch for stale notes.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Knowledge and memory","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI FDE","url":"https://tx-learns.vercel.app/ai-fde/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI FDE","item":"https://tx-learns.vercel.app/ai-fde/index.html"},{"@type":"ListItem","position":3,"name":"Memory over MCP","item":"https://tx-learns.vercel.app/ai-fde/14-a-memory-over-mcp.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Knowledge and memory · Lesson 2</span><span class="zh">知识与记忆 · 第 2 课</span></span><h1><span class="en">Memory over MCP</span><span class="zh">基于 MCP 的记忆</span></h1><p class="meta"><span class="en">Give the agent a long-term memory it reaches through an MCP server, so it can recall a customer’s past claims · ~25 min · concept + one runnable idea</span><span class="zh">给智能体一个通过 MCP 服务端访问的长期记忆，让它能回想起客户过去的理赔 · 约 25 分钟 · 概念 + 一个能跑的想法</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the pilot could look up the right clause in the policy manual before deciding. Today it fails when Mr Tan files a second lost-bag claim: it starts from nothing, though Auntie Siew remembers him. We fix it by putting a memory behind an MCP server that the pilot can call.</p>
-<p class="zh" style="margin:0">上回，试点在判定前能先到保单手册里查出对应的条款。今天的问题是：Tan 先生第二次提交丢行李理赔时，它又从零开始，而 Siew 阿姨一眼就认得他。我们的办法是把记忆放在一个 MCP 服务端后面，让试点随时调用。</p></div>
-<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">Every claim, the agent starts from nothing. Auntie Siew, at the front desk, does not: she remembers that Mr Tan filed two lost-bag claims and always had full receipts. Mei Ling wants the agent to have that kind of memory. She will not build it into the agent. She will put it behind an <b>MCP server</b>, a small program that offers tools the agent can plug into. If you have not met MCP, think of it as a standard wall socket for tools.</p>
-<p class="zh" style="margin:0">每一份理赔，智能体都是从零开始。前台的 Siew 阿姨不是：她记得 Tan 先生提过两次丢行李的理赔，而且收据一向齐全。Mei Ling 想让智能体也有这样的记忆。她不打算把记忆造进智能体里，而是放在一个 <b>MCP 服务端</b>后面，也就是一个小程序，提供智能体可以接上的工具。如果你没见过 MCP，就把它想成工具的标准插座。</p></div>
-
-<div class="callout tip"><b class="lbl"><span class="en">Words in this lesson</span><span class="zh">这一课用到的词</span></b><span class="en"><b>MCP</b>: a standard way for an agent to use tools that live in another program, so one tool server works with many agents.<br><b>stdio</b>: the server runs as a child program and talks over its input and output, with no network port.<br><b>Memory note</b>: a short line the agent saves about a customer, to be read in a later claim.</span><span class="zh"><b>MCP</b>：智能体使用另一个程序里的工具的标准方式，同一个工具服务可以配给很多智能体。<br><b>stdio</b>：服务作为子程序运行，通过输入输出交谈，不开网络端口。<br><b>记忆笔记</b>：智能体存下的关于某位客户的一句话，下一份理赔时再读。</span></div>
-<h2><span class="en">Step 1 · A small memory server</span><span class="zh">第 1 步 · 一个小小的记忆服务端</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The server has two tools: one saves a note about a customer, one returns all notes for that customer. Notes live in a file, so they survive after the agent stops. The tool’s docstring is what the model reads to decide when to use it. The <code>@mcp.tool()</code> line is a decorator: it tells the server to offer the function below as a tool. Install with <code>pip install mcp</code>.</p>
-<p class="zh" style="margin:0 0 8px">服务端只有两个工具：一个给客户存一条笔记，一个返回该客户的全部笔记。笔记存在文件里，所以智能体停了它们也还在。工具的说明文字（docstring）就是模型用来判断何时使用它的依据。<code>@mcp.tool()</code> 这一行是装饰器，它告诉服务端把下面这个函数当作工具提供出去。用 <code>pip install mcp</code> 安装。</p></div>
-<div class="codebox" data-file="memory_server.py" data-lang="python"><span class="dim"># memory_server.py
-import json, os
+<h2><span class="en">Step 1 · A memory server</span><span class="zh">第 1 步 · 记忆服务端</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">An agent forgets everything between claims. Put the memory in an <b>MCP server</b> (a small program that offers tools to any agent) and it survives.</p>
+<ul class="en"><li>Two tools: save a note, get all notes for a customer.</li><li>Notes sit in a file, so they outlive the agent.</li><li>Each note carries a source (the claim id) and a date the server stamps itself.</li></ul>
+<p class="zh" style="margin:0">智能体在两份理赔之间会忘掉一切。把记忆放进 <b>MCP 服务端</b>（一个给任何智能体提供工具的小程序），它就能留下来。</p>
+<ul class="zh"><li>两个工具：存一条笔记，取出某客户的全部笔记。</li><li>笔记存在文件里，智能体停了还在。</li><li>每条笔记带出处（理赔编号）和由服务端自己盖的日期。</li></ul></div>
+<div class="codebox" data-file="memory_server.py" data-lang="python"><span class="dim"># pip install mcp
+import json, os, datetime
 from mcp.server.fastmcp import FastMCP
 
 FILE = "memory.json"
@@ -25,10 +21,11 @@ def load():
     return json.load(open(FILE)) if os.path.exists(FILE) else {}
 
 </span><span class="chg">@mcp.tool()
-def save_note(customer_id: str, fact: str) -&gt; str:
-    """Save one fact about a customer, so the next claim can use it."""
+def save_note(customer_id: str, fact: str, source: str) -&gt; str:
+    """Save one fact about a customer. source is the claim id it comes from."""
     data = load()
-    data.setdefault(customer_id, []).append({"fact": fact})
+    data.setdefault(customer_id, []).append(
+        {"fact": fact, "source": source, "saved": datetime.date.today().isoformat()})
     json.dump(data, open(FILE, "w"), indent=2)
     return "saved"
 
@@ -41,114 +38,50 @@ if __name__ == "__main__":
     mcp.run(transport="stdio")</span></div>
 <div class="try" id="p1"></div>
 
-<h2><span class="en">Step 2 · Connect the agent over MCP</span><span class="zh">第 2 步 · 通过 MCP 把智能体接上</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The agent starts the server as a child program, and the two talk through <code>stdio</code> (plain text in and out, like a pipe). The agent asks which tools the server has. You never write a <code>save_note</code> function on the agent’s side. Each claim starts a new agent and a new server process. The notes still carry over, because they are in the file. The functions are <code>async</code>: the agent waits for the server, and <code>await</code> means “wait here for the answer”. Run them with <code>asyncio.run(...)</code>. Install with <code>pip install openai-agents</code>.</p>
-<p class="zh" style="margin:0 0 8px">智能体把服务端当作子程序启动，两者通过 <code>stdio</code> 交谈（就是纯文字的进出，像一根管子）。智能体会问服务端有哪些工具。你不用在智能体这边写 <code>save_note</code> 函数。每份理赔都会启动一个新的智能体和新的服务端进程，笔记依然能传下去，因为它们在文件里。函数前的 <code>async</code> 表示它要等服务端回话；<code>await</code> 的意思是“在这里等结果”。用 <code>asyncio.run(...)</code> 来运行它们。用 <code>pip install openai-agents</code> 安装。</p></div>
-<figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="The agent calls two tools on a memory server it started, and the server reads and writes a notes file"><defs><marker id="ah14" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><path class="lnk hot" d="M185 85L275 85" marker-end="url(#ah14)"/><path class="lnk" d="M275 110L185 110" marker-end="url(#ah14)"/><path class="lnk" d="M445 95L535 95" marker-end="url(#ah14)"/><rect class="box soft" x="15" y="60" width="170" height="70" rx="10"/><text class="en" x="100" y="99">The agent</text><text class="zh" x="100" y="99">智能体</text><rect class="box new" x="275" y="60" width="170" height="70" rx="10"/><text class="en" x="360" y="91">Memory server</text><text class="zh" x="360" y="91">记忆服务端</text><text class="en sm" x="360" y="108">save_note · get_notes</text><text class="zh sm" x="360" y="108">save_note · get_notes</text><rect class="box soft" x="535" y="60" width="170" height="70" rx="10"/><text class="en" x="620" y="91">notes.json</text><text class="zh" x="620" y="91">notes.json</text><text class="en sm" x="620" y="108">survives restarts</text><text class="zh sm" x="620" y="108">重启后还在</text><text class="en sm" x="230" y="76">tool call</text><text class="zh sm" x="230" y="76">调用工具</text><text class="en sm" x="230" y="128">notes back</text><text class="zh sm" x="230" y="128">返回笔记</text><text class="en sm" x="490" y="86">write / read</text><text class="zh sm" x="490" y="86">写入 / 读取</text><text class="en sm" x="360" y="175">The agent starts the server as a child program</text><text class="zh sm" x="360" y="175">智能体把服务端当子程序启动</text></svg><figcaption><span class="en">The agent starts the memory server and talks to it over MCP; only the server touches the notes file.</span><span class="zh">智能体启动记忆服务端，通过 MCP 与它对话；只有服务端会碰笔记文件。</span></figcaption></figure>
-<div class="codebox" data-file="agent_client.py" data-lang="python"><span class="dim">import asyncio, json
+<h2><span class="en">Step 2 · Connect the agent</span><span class="zh">第 2 步 · 接上智能体</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">The agent starts the server as a child program and talks to it over <code>stdio</code>; you never write <code>save_note</code> on the agent's side. Two lines of instructions do the rest: read notes before deciding, save at most two facts after.</p>
+<p class="zh" style="margin:0">智能体把服务端当子程序启动，通过 <code>stdio</code> 对话；智能体这边不用写 <code>save_note</code>。两行指令搞定其余：决定前先读笔记，决定后最多存两条事实。</p></div>
+<div class="codebox" data-file="agent_client.py" data-lang="python"><span class="dim"># pip install openai-agents
+import asyncio, json
 from agents import Agent, Runner
-</span><span class="chg">from agents.mcp import MCPServerStdio
+from agents.mcp import MCPServerStdio
 
 memory_params = {"command": "python", "args": ["memory_server.py"]}
+</span><span class="chg">
+INSTRUCTIONS = """You decide travel insurance claims for Kaya Travel Cover.
+Before you decide, call get_notes with the claim's customer_id.
+Treat a note as a lead and check it against today's claim.
+After you decide, call save_note at most twice: a short fact, and the claim id as source.
+Facts only: never a guess, never card or passport numbers.
+Reply with JSON only: {"action": "approve" or "decline" or "refer", "payout": number in S$, "reason": short}"""</span><span class="dim">
 
-BASE = """You decide travel insurance claims for Kaya Travel Cover.
-Reply with JSON only: {"action": "approve" or "decline" or "refer", "payout": a number in S$, "reason": two or three short sentences}"""
-
-async def run_claim(claim, instructions):
+async def run_claim(claim):
     async with MCPServerStdio(params=memory_params, client_session_timeout_seconds=60) as server:
-        agent = Agent(name="Claims agent", instructions=instructions,
+        agent = Agent(name="Claims agent", instructions=INSTRUCTIONS,
                       model="gpt-5.4-mini", mcp_servers=[server])
         result = await Runner.run(agent, json.dumps(claim))
-    return json.loads(result.final_output)</span></div>
+    return json.loads(result.final_output)
+
+claim = {"id": "C042", "customer_id": "K-0412", "story": "My bag was lost again. Receipts attached.", "amount": 380}
+print(asyncio.run(run_claim(claim)))</span></div>
 <div class="try" id="p2"></div>
-
-<h2><span class="en">Step 3 · Write down what is worth remembering</span><span class="zh">第 3 步 · 记下值得记住的</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A memory that keeps everything is as bad as a desk piled with paper. Tell the agent what to save: a few facts that help on a future claim. Leave out anything private (card or passport numbers) and anything that is only a feeling or a guess. After it decides, the agent saves at most two notes.</p>
-<p class="zh" style="margin:0 0 8px">什么都留的记忆，就像堆满纸的桌子一样糟。告诉智能体该存什么：几条对以后的理赔有帮助的事实。私密的东西（银行卡号、护照号）和只是感觉或猜测的东西都不要。决定之后，智能体最多存两条笔记。</p></div>
-<div class="codebox" data-file="agent_client.py" data-lang="python"><span class="chg">SAVE = """
-After you decide, call save_note at most twice with short facts that would help on this
-customer's next claim. Never save card or passport numbers, and never save a guess."""
-
-claim1 = {"id": "C041", "customer_id": "K-0412", "customer": "Mr Tan",
-          "story": "My checked bag never arrived. Receipts for everything inside are attached.", "amount": 420}
-print(asyncio.run(run_claim(claim1, BASE + SAVE)))</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">{'action': 'approve', 'payout': 420, 'reason': 'First bag claim, receipts match.'}</div>
 <p class="en">Which of these should the agent save?</p>
 <p class="zh">下面哪些该让智能体存起来？</p><div class="sc" id="g1"></div>
 
-<h2><span class="en">Step 4 · Look the notes up first</span><span class="zh">第 4 步 · 先查笔记</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Saving is half the job. On the next claim from the same customer the agent must read the notes <i>before</i> it decides. Add one line to the instructions, and the agent will call <code>get_notes</code> with the customer id from the claim.</p>
-<p class="zh" style="margin:0 0 8px">只存不够。同一位客户的下一份理赔，智能体必须在决定<i>之前</i>先读笔记。在指令里加一行，智能体就会用理赔里的客户编号去调用 <code>get_notes</code>。</p></div>
-<div class="codebox" data-file="agent_client.py" data-lang="python"><span class="chg">LOOK = "\nBefore you decide, call get_notes with the claim's customer_id."
-
-claim2 = {"id": "C042", "customer_id": "K-0412", "customer": "Mr Tan",
-          "story": "My bag was lost again on the flight home. Receipts attached.", "amount": 380}
-print(asyncio.run(run_claim(claim2, BASE + LOOK + SAVE)))</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">{'action': 'refer', 'payout': 0, 'reason': 'Second lost-bag claim in a short time; the earlier note says one prior claim, C041.'}</div>
-<div class="try" id="p3"></div>
-
-<h2><span class="en">Step 5 · Facts only, with a source and a date</span><span class="zh">第 5 步 · 只存事实，带出处和日期</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A note can go out of date: “receipts always complete” was true last year. So every note carries where it came from (the claim id) and the day it was saved. The server stamps the date itself, because the agent should not guess it. The agent then treats an old note as a lead to check, not a fact to trust.</p>
-<p class="zh" style="margin:0 0 8px">笔记会过时：“收据一向齐全”是去年的事实。所以每条笔记都带上出处（理赔编号）和存入的日期。日期由服务端自己盖章，因为不该让智能体去猜。这样智能体就把旧笔记当成待核实的线索，而不是可以直接相信的事实。</p></div>
-<div class="codebox" data-file="memory_server.py" data-lang="python"><span class="dim">import datetime   # at the top of memory_server.py
-
-@mcp.tool()
-def save_note(customer_id: str, fact: str, </span><span class="chg">source: str</span><span class="dim">) -&gt; str:
-    """Save one fact about a customer. </span><span class="chg">source is the claim id the fact comes from.</span><span class="dim">"""
-    data = load()
-    data.setdefault(customer_id, []).append({"fact": fact, </span><span class="chg">"source": source,
-                                             "saved": datetime.date.today().isoformat()</span><span class="dim">})
-    json.dump(data, open(FILE, "w"), indent=2)
-    return "saved"
-
-# in the agent's instructions
-SAVE = """
-After you decide, call save_note at most twice, with a short </span><span class="chg">fact</span><span class="dim"> and the claim id as </span><span class="chg">source</span><span class="dim">.
-</span><span class="chg">Facts only: never a guess, never card or passport numbers.</span><span class="dim">"""
-</span><span class="chg">LOOK = """
-Before you decide, call get_notes with the claim's customer_id. Each note has a saved date.
-Treat a note as a lead, and check it against today's claim. Say in your reason when you used one."""</span></div>
+<h2><span class="en">Step 3 · Notes are leads, not facts</span><span class="zh">第 3 步 · 笔记是线索，不是事实</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0"><li>A note can go stale, so the date matters: an old note is something to check.</li><li>Memory helps on repeat customers and does nothing on one-off claims.</li><li>To test it, run the same claims with and without memory and compare agreement with handlers. Delete <code>memory.json</code> between runs.</li></ul>
+<ul class="zh" style="margin:0"><li>笔记会过时，所以日期很重要：旧笔记要拿来核实。</li><li>记忆对回头客有帮助，对只来一次的理赔没用。</li><li>要测试，就用同样的理赔分别在有、无记忆下运行，比较与理赔员的一致程度。两次运行之间删掉 <code>memory.json</code>。</li></ul></div>
 <div class="try" id="p4"></div>
 
-<h2><span class="en">Step 6 · Does memory actually help?</span><span class="zh">第 6 步 · 记忆真的有用吗？</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Do not guess: run both on the same claims. Agent A has only a payout tool. Agent B has the payout tool and memory. Count how often each agrees with the handlers. Usually memory helps on repeat customers and on claims where history matters, and does nothing on one-off claims. It also adds a new way to be wrong: an old note that is no longer true. Agent B also saves notes while it runs, so delete <code>memory.json</code> before you compare again.</p>
-<p class="zh" style="margin:0 0 8px">别靠猜：在同样的理赔上两个都跑一遍。智能体 A 只有一个赔付工具。智能体 B 有赔付工具，再加上记忆。数一数各自和理赔员一致的次数。通常记忆对回头客、对历史重要的理赔有帮助，对只来一次的理赔毫无作用。它还带来一种新的出错方式：一条已经不再成立的旧笔记。智能体 B 运行时也会存笔记，所以每次重新比较前，先删掉 <code>memory.json</code>。</p></div>
-<div class="codebox" data-file="memory_test.py" data-lang="python"><span class="dim">from agents import function_tool
-
-@function_tool
-def payout(amount: float, limit: float) -&gt; float:
-    """The amount to pay: the claim amount, capped at the policy limit."""
-    return min(amount, limit)
-
-key = json.load(open("answer_key/handler_decisions.json"))    # {claim id: handler's action}
-
-async def agreement(claims, with_memory):
-    right = 0
-    async with MCPServerStdio(params=memory_params, client_session_timeout_seconds=60) as server:
-        for c in claims:
-            </span><span class="chg">agent = Agent(name="Claims agent", model="gpt-5.4-mini", tools=[payout],
-                          instructions=BASE + (LOOK + SAVE if with_memory else ""),
-                          mcp_servers=[server] if with_memory else [])</span><span class="dim">
-            result = await Runner.run(agent, json.dumps(c))
-            right += json.loads(result.final_output)["action"] == key[c["id"]]
-    return right / len(claims)
-
-# claims = the list of claim dicts from before, each with an "id"
-# print(await agreement(claims, False), await agreement(claims, True))   # in a notebook</span></div>
-<p class="en">Where does memory help? Sort the situations.</p>
-<p class="zh">记忆在哪里有帮助？给这些情形分一分。</p><div class="sc" id="g2"></div>
-
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我当时想错了</span></b><span class="en">My agent stored too much, including guesses like “seems nervous”. Later claims trusted them. Now every note needs a source and a date, and the instructions say “facts only”.</span><span class="zh">我的智能体存得太多，连“看起来很紧张”这种猜测也存了，后来的理赔还相信它们。现在每条笔记都要有出处和日期，指令里写明“只存事实”。</span></div>
-
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Delete a note</b> from <code>memory.json</code> and see what changes on the next claim.</span><span class="zh"><b>从 <code>memory.json</code> 删掉一条笔记</b>，看下一份理赔有什么变化。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a wrong note</b> and see whether the agent trusts it.</span><span class="zh"><b>加一条错误的笔记</b>，看智能体会不会相信。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Write a rule for when a note expires</b>, for example after twelve months.</span><span class="zh"><b>写一条笔记何时过期的规则</b>，比如十二个月之后。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the pilot can recall that Mr Tan filed two lost-bag claims, and, like Auntie Siew, still checks this year’s receipts before trusting the note. The next problem is wiring that memory into the real pilot and deciding who owns the records, the notes and the policy data.</span><span class="zh">现在试点能想起 Tan 先生提过两次丢行李的理赔，并且和 Siew 阿姨一样，信这条笔记之前仍会先核对今年的收据。下一个问题是把这份记忆接进真正的试点，并定下理赔记录、笔记和保单数据各归谁。</span></div>
-<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2><div class="card"><p class="en" style="margin:0 0 12px"><code>ModuleNotFoundError: No module named 'mcp'</code><br>Cause: the MCP library is not installed. Fix: <code>pip install mcp openai-agents</code>.</p><p class="zh" style="margin:0 0 12px"><code>ModuleNotFoundError: No module named 'mcp'</code><br>原因：没有安装 MCP 库。解决：<code>pip install mcp openai-agents</code>。</p><p class="en" style="margin:0 0 12px"><code>McpError: Connection closed</code><br>Cause: the memory server crashed on start, often from a typo in <code>memory_server.py</code>. Fix: run <code>python memory_server.py</code> alone and read its error.</p><p class="zh" style="margin:0 0 12px"><code>McpError: Connection closed</code><br>原因：记忆服务启动时崩溃了，多半是 <code>memory_server.py</code> 里有笔误。解决：单独运行 <code>python memory_server.py</code> 看它的报错。</p><p class="en" style="margin:0 0 12px"><code>FileNotFoundError: [Errno 2] No such file or directory: 'python'</code><br>Cause: the client cannot find the command that starts the server. Fix: give the full path of your Python in the server settings.</p><p class="zh" style="margin:0 0 12px"><code>FileNotFoundError: [Errno 2] No such file or directory: 'python'</code><br>原因：客户端找不到启动服务的命令。解决：在服务设置里写 Python 的完整路径。</p></div>
-<h2><span class="en">Recap</span><span class="zh">小结</span></h2><div class="card"><p class="en" style="margin:0">• Put the memory behind MCP, so any agent can read and write it the same way.<br>• Save a short note after each claim, and read the notes before the next one.<br>• A note is a lead, not a fact: check it against today's claim.</p><p class="zh" style="margin:0">• 把记忆放在 MCP 后面，任何智能体都能用同样的方式读写。<br>• 每份理赔之后存一条短笔记，下一份之前先读笔记。<br>• 笔记只是线索，不是事实：要和今天这份理赔核对。</p></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Add a wrong note</b> to <code>memory.json</code> and see whether the agent trusts it.</span><span class="zh"><b>在 <code>memory.json</code> 里加一条错误笔记</b>，看智能体会不会相信。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Write a rule for when a note expires</b>, for example after twelve months.</span><span class="zh"><b>写一条笔记何时过期的规则</b>，比如十二个月之后。</span></span></label></div>
+<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2><div class="card"><p class="en" style="margin:0 0 12px"><code>ModuleNotFoundError: No module named 'mcp'</code><br>Fix: <code>pip install mcp openai-agents</code>.</p><p class="zh" style="margin:0 0 12px"><code>ModuleNotFoundError: No module named 'mcp'</code><br>解决：<code>pip install mcp openai-agents</code>。</p><p class="en" style="margin:0 0 12px"><code>McpError: Connection closed</code><br>Cause: the server crashed on start. Fix: run <code>python memory_server.py</code> alone and read its error.</p><p class="zh" style="margin:0 0 12px"><code>McpError: Connection closed</code><br>原因：服务端启动时崩溃。解决：单独运行 <code>python memory_server.py</code> 看报错。</p></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• MCP is a plug: the memory lives in a server, not inside the agent.<br>• Notes survive because they are stored outside the agent’s conversation.<br>• Tell the agent what to save and what never to save.<br>• Store facts only, each with a source and a date.<br>• Look the notes up before deciding, and treat them as leads.<br>• Memory helps where history matters and does nothing on one-off claims.<br>• A stale note is a new risk, so decide when notes expire.</p><p class="zh" style="margin:0">• MCP 是个插头：记忆住在服务端，不在智能体内部。<br>• 笔记能留下来，因为它们存在智能体对话之外。<br>• 告诉智能体该存什么、绝不能存什么。<br>• 只存事实，每条都带出处和日期。<br>• 决定之前先查笔记，并把它们当成线索。<br>• 记忆在历史重要的地方有用，对只来一次的理赔没用。<br>• 过时的笔记是新的风险，所以要定好笔记何时过期。</p></div>
+<div class="card"><p class="en" style="margin:0">• Put memory behind MCP, outside the agent's conversation.<br>• Tell the agent what to save and what never to save.<br>• Store facts only, each with a source and a date.<br>• Read notes before deciding, and treat them as leads.<br>• Decide when a note expires.</p><p class="zh" style="margin:0">• 把记忆放在 MCP 后面，放在智能体对话之外。<br>• 告诉智能体该存什么、绝不能存什么。<br>• 只存事实，每条带出处和日期。<br>• 决定前先读笔记，并把它们当线索。<br>• 定好笔记何时过期。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI FDE</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"prev":["13-agentic-rag-over-a-manual.html"],"tools":{"en":"Python 3, the openai-agents and mcp packages, an OpenAI API key","zh":"Python 3、openai-agents 和 mcp 包、OpenAI API 密钥"},"know":{"en":"agents, tools and MCP from the AI Agentic track.","zh":"AI Agentic 路线里的智能体、工具和 MCP。"},"mins":40,"offline":false,"goals":{"en":["Keep agent memory in an MCP server outside the conversation","Tell the agent what to save and what never to save","Store facts with a source and a date","Look notes up before deciding and treat them as leads"],"zh":["把智能体的记忆放在对话之外的 MCP 服务器里","告诉智能体该存什么、绝不能存什么","存事实时附上来源和日期","决定前先查笔记，并把笔记当线索"]}}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=37968fc4"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/14-a-memory-over-mcp.js?v=e95b1f2a"></script></body></html>
+<script src="js/14-a-memory-over-mcp.js?v=8386b599"></script></body></html>

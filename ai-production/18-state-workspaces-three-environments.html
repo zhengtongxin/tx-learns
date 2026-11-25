@@ -5,34 +5,18 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/ai-production/18-state-workspaces-three-environments.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-production/18-state-workspaces-three-environments.html","url":"https://tx-learns.vercel.app/ai-production/18-state-workspaces-three-environments.html","name":"State and three environments","alternateName":"状态与三套环境","description":"Run development, test and production as three copies of the same stack from one set of files, without copy-pasting configs.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"Infrastructure as code","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Production","url":"https://tx-learns.vercel.app/ai-production/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Production","item":"https://tx-learns.vercel.app/ai-production/index.html"},{"@type":"ListItem","position":3,"name":"State and three environments","item":"https://tx-learns.vercel.app/ai-production/18-state-workspaces-three-environments.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Infrastructure as code · Lesson 2</span><span class="zh">基础设施即代码 · 第 2 课</span></span><h1><span class="en">State and three environments</span><span class="zh">状态与三套环境</span></h1><p class="meta"><span class="en">Run development, test and production as three copies of the same stack from one set of files, without copy-pasting configs · ~35 min · hands-on</span><span class="zh">用同一套文件把开发、测试和生产跑成同一个架构的三份副本，不用复制粘贴配置 · 约 35 分钟 · 动手实践</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the product was described in files. Today it fails when Mr Ong wants dev, test and prod, and Mei Ling's first idea, copying the folder three times, would drift apart by Friday. We fix it by using one config, one variable and one workspace with its own state for each environment.</p>
-<p class="zh" style="margin:0">上回，产品已经写成了文件。今天 Ong 先生想要开发、测试和生产三套环境，而 Mei Ling 的第一个主意，把文件夹复制三份，到周五就会各走各的。我们的办法是用一份配置、一个变量，每套环境一个带独立状态的工作区。</p></div>
-<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0"><b>Mei Ling</b> now has the twin described in files. <b>Mr Ong</b> wants three copies: <b>dev</b> for experiments, <b>test</b> for <b>Auntie Siti</b> to try, and <b>prod</b> for everyone. Her first idea is to copy the folder three times. <b>Kumar</b> shakes his head: "Three copies of a plan drift apart by Friday. One berth plan, three berths."</p>
-<p class="zh" style="margin:0"><b>Mei Ling</b> 现在已经把分身写成了文件。<b>Ong 先生</b>要三份：<b>dev</b> 给人做实验，<b>test</b> 给 <b>Siti 阿姨</b>试用，<b>prod</b> 给所有人。她的第一个想法是把文件夹复制三份。<b>Kumar</b> 摇头：“三份图纸到周五就各改各的了。一张泊位图，三个泊位。”</p></div>
-<h2><span class="en">Step 1 · One folder, and a variable called environment</span><span class="zh">第 1 步 · 一个文件夹，和一个叫 environment 的变量</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Keep one folder of config: a provider file, a variables file, a main file with the resources (memory bucket, site bucket, function role, function, gateway and CDN) and an outputs file (the code below leaves out the gateway, CDN and outputs blocks to keep it short; the next lesson reads their outputs). Then add a variable called <code>environment</code> and feed it into <b>every name</b>. That is what stops dev and prod from colliding: they are the same files with a different word in the names.</p>
-<p class="zh" style="margin:0">只留一个配置文件夹：一个提供者文件、一个变量文件、一个放资源的主文件（记忆存储桶、网站存储桶、函数角色、函数、网关和 CDN），再加一个输出文件（下面的代码为了简短，省略了网关、CDN 和输出的部分；下一课的部署脚本会读取它们的输出）。然后添加一个叫 <code>environment</code> 的变量，把它放进<b>每一个名字</b>里。这样 dev 和 prod 才不会撞车：它们是同样的文件，只是名字里的那个词不同。</p></div>
-<div class="codebox" data-file="folder-layout"><span class="dim">infra/              (next to the backend/ and frontend/ folders)
-  providers.tf    which cloud, which region
-  variables.tf    the knobs (below)
-  main.tf         memory bucket, site bucket, function role, function, gateway, CDN
-  outputs.tf      the addresses we want to print
-</span></div>
-<div class="codebox" data-file="variables.tf" data-lang="hcl"><span class="dim"># variables.tf
-</span><span class="chg">variable "environment" {
-  type        = string
-  description = "dev, test or prod"
+<h2><span class="en">Step 1 · One config, an environment variable, unique names</span><span class="zh">第 1 步 · 一份配置、一个环境变量、唯一的名字</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Keep one folder of config and add a variable called <code>environment</code> (dev, test or prod). Feed it into <b>every name</b>, so the three environments are the same files with a different word in the names. Bucket names must also be unique across everyone's accounts, so build them from project, environment and your account id. A <code>local</code> is a named shortcut; a <code>data</code> block asks the cloud for a fact instead of creating something.</p>
+<p class="zh" style="margin:0">只留一个配置文件夹，加一个叫 <code>environment</code> 的变量（dev、test 或 prod）。把它放进<b>每一个名字</b>里，这样三个环境就是同样的文件、名字里只差一个词。存储桶名字还必须在所有人的账号里唯一，所以由项目、环境和你的账号 id 拼成。<code>local</code> 是起了名的快捷方式；<code>data</code> 块是向云查询一个事实，而不是创建东西。</p></div>
+<div class="codebox" data-file="variables.tf + main.tf" data-lang="hcl"><span class="chg">variable "environment" {
+  type = string
   validation {
     condition     = contains(["dev", "test", "prod"], var.environment)
     error_message = "environment must be dev, test or prod."
   }
-}</span></div>
-<div class="try" id="t0"></div>
-<h2><span class="en">Step 2 · Names that never clash</span><span class="zh">第 2 步 · 永远不会撞车的名字</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">A bucket name must be unique across <b>everybody's</b> accounts, not only yours. So build each name from three parts: the project, the environment and your account id. A <b>local</b> value is a named shortcut inside the config, so the pattern is written once. The <code>data</code> block asks the cloud for a fact (here, your account id) instead of creating something.</p>
-<p class="zh" style="margin:0">存储桶的名字必须在<b>所有人</b>的账号里都唯一，而不只是在你的账号里。所以每个名字由三部分拼成：项目、环境和你的账号 id。<b>local</b> 值是配置里一个起了名的快捷方式，这样命名规则只要写一次。<code>data</code> 块是向云查询一个事实（这里是你的账号 id），而不是创建东西。</p></div>
-<div class="codebox" data-file="main.tf" data-lang="hcl"><span class="dim"># main.tf
-</span><span class="chg">data "aws_caller_identity" "me" {}
+}
+
+data "aws_caller_identity" "me" {}
 
 locals {
   prefix = "wharf-twin-${var.environment}"
@@ -41,46 +25,21 @@ locals {
 
 resource "aws_s3_bucket" "memory" {
   bucket = "${local.prefix}-memory-${local.suffix}"
-}
-
-resource "aws_s3_bucket" "site" {
-  bucket = "${local.prefix}-site-${local.suffix}"
 }</span></div>
-<div class="try" id="t1"></div>
-<h2><span class="en">Step 3 · State, and one state per workspace</span><span class="zh">第 3 步 · 状态，以及每个工作区一份状态</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The <b>state</b> is a file where Terraform writes down which real resources match which lines of your config. On every <code>plan</code> it compares three things: your files, the state, and what really exists. A <b>workspace</b> is a named copy of the state. You start in one called <code>default</code>. Make one per environment, and each keeps its own state file.</p>
-<p class="zh" style="margin:0 0 8px"><b>状态</b>是一个文件，Terraform 在里面记下哪些真实资源对应你配置里的哪几行。每次 <code>plan</code> 它都会比较三样东西：你的文件、状态，以及实际存在的东西。<b>工作区</b>是状态的一份有名字的副本。你一开始在一个叫 <code>default</code> 的工作区里。每个环境建一个，各自保管自己的状态文件。</p>
-<p class="en" style="margin:0">With local state, the files sit under <code>terraform.tfstate.d/</code>, one folder per workspace.</p>
-<p class="zh" style="margin:0">用本地状态时，这些文件放在 <code>terraform.tfstate.d/</code> 下面，每个工作区一个文件夹。</p></div>
+<div class="try" id="t0"></div>
+<h2><span class="en">Step 2 · State and one workspace per environment</span><span class="zh">第 2 步 · 状态，以及每个环境一个工作区</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The <b>state</b> records which real resources match which lines of config. A <b>workspace</b> is a named copy of the state, so make one per environment. To deploy, select the workspace <i>and</i> pass the same name as the variable. If they disagree, the plan tries to <b>replace prod's things with dev's</b>, so print the workspace and read the plan before every apply. And never hand-edit what the config owns: the next plan will try to undo it.</p>
+<p class="zh" style="margin:0 0 8px"><b>状态</b>记录哪些真实资源对应配置的哪几行。<b>工作区</b>是状态的一份有名字的副本，所以每个环境建一个。部署时要选中工作区，<i>并且</i>把同样的名字作为变量传入。两者不一致，plan 会想<b>把 prod 的东西换成 dev 的</b>，所以每次 apply 前先打印工作区、读 plan。配置管着的东西别手工改：下一次 plan 会想把它改回去。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 244" role="img" aria-label="One config feeds three workspaces, dev, test and prod, each with its own state"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box" x="20" y="94.0" width="200" height="56" rx="12"/><text class="en" x="120.0" y="118.0">One config</text><text class="zh" x="120.0" y="118.0">一份配置</text><text class="en sm" x="120.0" y="136.0">same code for all</text><text class="zh sm" x="120.0" y="136.0">三套共用同一份</text><rect class="box" x="460" y="20" width="240" height="56" rx="12"/><text class="en" x="580.0" y="44.0">dev workspace</text><text class="zh" x="580.0" y="44.0">dev 工作区</text><text class="en sm" x="580.0" y="62.0">its own state</text><text class="zh sm" x="580.0" y="62.0">自己的状态</text><path class="lnk" d="M222 122.0 C340.0 122.0 340.0 48.0 457 48.0" marker-end="url(#ah)"/><rect class="box" x="460" y="94" width="240" height="56" rx="12"/><text class="en" x="580.0" y="118.0">test workspace</text><text class="zh" x="580.0" y="118.0">test 工作区</text><text class="en sm" x="580.0" y="136.0">its own state</text><text class="zh sm" x="580.0" y="136.0">自己的状态</text><path class="lnk" d="M222 122.0 C340.0 122.0 340.0 122.0 457 122.0" marker-end="url(#ah)"/><rect class="box" x="460" y="168" width="240" height="56" rx="12"/><text class="en" x="580.0" y="192.0">prod workspace</text><text class="zh" x="580.0" y="192.0">prod 工作区</text><text class="en sm" x="580.0" y="210.0">its own state</text><text class="zh sm" x="580.0" y="210.0">自己的状态</text><path class="lnk" d="M222 122.0 C340.0 122.0 340.0 196.0 457 196.0" marker-end="url(#ah)"/></svg><figcaption><span class="en">One plan, three berths: the code is shared, the logbook (state) is separate for each environment.</span><span class="zh">一张图，三个泊位：代码共用，每套环境的工作日志（状态）各记各的。</span></figcaption></figure>
-<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim">terraform init
-</span><span class="chg">terraform workspace new dev
-terraform workspace new test
-terraform workspace new prod</span><span class="dim">
-terraform workspace list
-#   default
-#   dev
-#   test
-# * prod          the star marks the one you are in
-
-ls terraform.tfstate.d/      # dev  prod  test   (each holds its own state file)</span></div>
-<div class="try" id="t2"></div>
-<h2><span class="en">Step 4 · Switch, check, apply</span><span class="zh">第 4 步 · 切换、检查、再 apply</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">To deploy an environment you do two things that must agree: select its workspace, and pass its name as the variable. If they disagree, the plan compares dev-named files with prod's state, and it wants to <b>replace prod's things with dev's</b>. So always print the current workspace first, and read the plan before you apply.</p>
-<p class="zh" style="margin:0">部署一个环境要做两件必须一致的事：选中它的工作区，并把它的名字作为变量传进去。如果两者不一致，plan 会拿 dev 名字的文件去和 prod 的状态比较，结果是想<b>把 prod 的东西换成 dev 的</b>。所以永远先打印当前工作区，apply 之前先读 plan。</p></div>
-<div class="codebox" data-file="terminal" data-lang="bash"><span class="chg">terraform workspace select -or-create dev
+<div class="codebox" data-file="terminal" data-lang="bash"><span class="chg">terraform workspace new dev        # once per environment
+terraform workspace select -or-create dev
 terraform workspace show                    # always print it before you apply
 terraform plan  -var="environment=dev"
 terraform apply -var="environment=dev"</span></div>
-<div class="codebox" data-file="output">dev
-Plan: 8 to add, 0 to change, 0 to destroy.
-Apply complete! Resources: 8 added, 0 changed, 0 destroyed.</div>
 <div class="try" id="t3"></div>
-<h2><span class="en">Step 5 · Per-environment settings</span><span class="zh">第 5 步 · 每个环境自己的设置</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Environments should share a shape but not every setting. Dev can use a small, cheap model and prod a bigger one. Put the choice in a <b>map</b> (a lookup table) keyed by environment name, and pick from it with one line. The function below also needs its role, so that is included. The role has two parts: <code>assume_role_policy</code> says who may wear it (only the function service, <code>lambda.amazonaws.com</code>), and the separate <code>aws_iam_role_policy</code> says what it may do: call the model, read and write its own memory bucket, and write logs. Without that second part the function cannot call the model.</p>
-<p class="zh" style="margin:0">各环境应该结构一样，但不必每项设置都一样。dev 可以用小而便宜的模型，prod 用更大的。把这个选择放进一张以环境名为键的<b>映射表</b>（map，查找表）里，再用一行去取。下面的函数还需要它的角色，所以也一起写出来。角色分两部分：<code>assume_role_policy</code> 说谁可以穿上它（只有函数服务 <code>lambda.amazonaws.com</code>），另一个 <code>aws_iam_role_policy</code> 说它能做什么：调用模型、读写自己的记忆存储桶、写日志。没有这第二部分，函数就调不了模型。</p>
-<p class="en" style="margin:0">Optional: a custom domain through DNS is one more resource per environment, with the environment name in the address.</p>
-<p class="zh" style="margin:0">可选项：用 DNS 配自定义域名，每个环境再多一个资源，地址里带上环境名。</p></div>
+<h2><span class="en">Step 3 · Per-environment settings</span><span class="zh">第 3 步 · 每个环境自己的设置</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Environments share a shape, not every setting. Put the choice in a <b>map</b> (a lookup table) keyed by environment name and pick from it with one line: a small, cheap model in dev, a bigger one in prod.</p>
+<p class="zh" style="margin:0">各环境结构一样，但不必每项设置都一样。把选择放进以环境名为键的<b>映射表</b>（查找表），用一行去取：dev 用小而便宜的模型，prod 用更大的。</p></div>
 <div class="codebox" data-file="variables.tf" data-lang="hcl"><span class="dim">variable "model_ids" {
   type = map(string)
   default = {
@@ -91,73 +50,19 @@ Apply complete! Resources: 8 added, 0 changed, 0 destroyed.</div>
 }
 
 locals {
-  </span><span class="chg">model_id = var.model_ids[var.environment]</span><span class="dim">
-}
-</span></div>
-<div class="codebox" data-file="main.tf" data-lang="hcl"><span class="dim">resource "aws_iam_role" "twin" {
-  name = "${local.prefix}-twin-role"
-  assume_role_policy = jsonencode({
-    Version   = "2012-10-17"
-    Statement = [{ Effect = "Allow", Action = "sts:AssumeRole",
-                   Principal = { Service = "lambda.amazonaws.com" } }]
-  })
-}
-
-resource "aws_iam_role_policy" "twin" {
-  name = "${local.prefix}-twin-access"
-  role = aws_iam_role.twin.id
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      { Effect = "Allow", Action = ["bedrock:InvokeModel"], Resource = "*" },
-      { Effect = "Allow", Action = ["s3:GetObject", "s3:PutObject"],
-        Resource = "${aws_s3_bucket.memory.arn}/*" },
-      { Effect = "Allow", Action = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
-        Resource = "*" }]
-  })
-}
-
-resource "aws_lambda_function" "twin" {
-  function_name    = "${local.prefix}-twin"
-  role             = aws_iam_role.twin.arn
-  handler          = "server.handler"
-  runtime          = "python3.12"
-  filename         = "${path.module}/../backend/twin.zip"
-  source_code_hash = filebase64sha256("${path.module}/../backend/twin.zip")
-  timeout          = 30
-  memory_size      = 512
-  environment {
-    variables = {
-      </span><span class="chg">MODEL_ID      = local.model_id</span><span class="dim">
-      MEMORY_BUCKET = aws_s3_bucket.memory.bucket
-    }
-  }
+  </span><span class="chg">model_id = var.model_ids[var.environment]     # then: MODEL_ID = local.model_id</span><span class="dim">
 }</span></div>
 <div class="sc" id="t4"></div>
-<h2><span class="en">Step 6 · Never hand-edit what the config owns</span><span class="zh">第 6 步 · 配置管着的东西，别手工去改</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">If you change a resource by hand in the console, the real thing no longer matches the files. The next <code>plan</code> notices and proposes to <b>undo your hand edit</b>. The healthy habit: change the file, plan, apply. And when nothing has changed, running <code>plan</code> twice in a row should say "No changes". That is how you know the files and reality agree.</p>
-<p class="zh" style="margin:0">如果你在控制台里手工改了某个资源，真实的东西就和文件对不上了。下一次 <code>plan</code> 会发现，并提议<b>撤销你的手工改动</b>。健康的习惯是：改文件、plan、apply。而什么都没改的时候，连续跑两次 <code>plan</code> 应该都说“No changes”。这样你就知道文件和现实是一致的。</p></div>
-<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim">$ terraform plan -var="environment=dev"
-  # aws_lambda_function.twin will be updated in-place
-  ~ resource "aws_lambda_function" "twin" {
-      </span><span class="chg">~ memory_size = 1024 -> 512</span><span class="dim">      # someone set 1024 in the console; the file says 512
-    }
-Plan: 0 to add, 1 to change, 0 to destroy.</span></div>
-<div class="try" id="t5"></div>
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en"><b>Three slips.</b> I once applied in the wrong workspace; now the deploy script prints the current workspace every time. My bucket names clashed, because they must be globally unique, so I added the account id. And I edited a resource by hand in the console, so the next plan wanted to undo it.</span><span class="zh"><b>三个失误。</b>我有一次在错误的工作区里 apply 了；现在部署脚本每次都会打印当前的工作区。我的存储桶名字撞了，因为它们必须全局唯一，所以我加上了账号 id。我还在控制台里手工改了一个资源，结果下一次 plan 想把它改回去。</span></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Deploy dev, change one variable,</b> deploy test, and compare the outputs.</span><span class="zh"><b>部署 dev，改一个变量，</b>再部署 test，比较两边的输出。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Run plan twice</b> and confirm it says "No changes".</span><span class="zh"><b>连跑两次 plan</b>，确认它说“No changes”。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Find the state file</b> and describe what is in it.</span><span class="zh"><b>找到状态文件</b>，描述一下里面有什么。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now one berth plan builds dev, test and prod, each with its own names and its own state, so Auntie Siti can try test while prod stays untouched. The next problem is that each environment still takes eight commands in the right order, and nobody can prove a deleted copy stopped billing.</span><span class="zh">现在一份泊位图就能建出开发、测试和生产，各有自己的名字和状态，Auntie Siti 可以试用测试环境而生产环境丝毫不受影响。下一个问题是每套环境仍要按顺序敲八条命令，也没人能证明删掉的副本已经不再计费。</span></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Deploy dev, change one variable,</b> deploy test, and compare the outputs.</span><span class="zh"><b>部署 dev，改一个变量，</b>再部署 test，比较两边的输出。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Run plan twice</b> and confirm it says "No changes".</span><span class="zh"><b>连跑两次 plan</b>，确认它说“No changes”。</span></span></label></div>
 <h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
-<div class="card"><p class="en" style="margin:0">• <code>Error: Invalid value for variable</code> The environment is not one of dev, test or prod. <b>Fix:</b> Pass <code>-var="environment=dev"</code> exactly.<br>• <code>Error: Workspace "test" doesn't exist</code> The workspace was never created. <b>Fix:</b> Run <code>terraform workspace new test</code>, or use <code>select -or-create</code>.<br>• <code>Error: reading ZIP file</code> <code>twin.zip</code> is not built yet. <b>Fix:</b> Build the zip first, then plan again.</p><p class="zh" style="margin:0">• <code>Error: Invalid value for variable</code> 环境不是 dev、test、prod 之一。 <b>解决：</b>准确传入 <code>-var="environment=dev"</code>。<br>• <code>Error: Workspace "test" doesn't exist</code> 这个工作区还没有创建。 <b>解决：</b>运行 <code>terraform workspace new test</code>，或使用 <code>select -or-create</code>。<br>• <code>Error: reading ZIP file</code> <code>twin.zip</code> 还没有构建。 <b>解决：</b>先构建压缩包，再重新 plan。</p></div>
-<div class="callout tip"><b class="lbl"><span class="en">Recap</span><span class="zh">小结</span></b><span class="en">One set of files, three workspaces: dev, test and prod each keep their own state.<br>Names carry the environment, so copies never collide.<br>Print the workspace before every apply.</span><span class="zh">一套文件、三个工作区：dev、test、prod 各有自己的状态。<br>名字里带上环境，副本之间就不会冲突。<br>每次 apply 前都先打印当前工作区。</span></div>
-<div class="callout tip"><b class="lbl"><span class="en">Plain words</span><span class="zh">白话词汇</span></b><span class="en"><b>Workspace</b>: a separate copy of the state, so the same files can build dev, test and prod. <b>Drift</b>: the real cloud no longer matches the files.</span><span class="zh"><b>工作区（workspace）</b>：状态的独立副本，让同一套文件能分别建出 dev、test、prod。<b>漂移（drift）</b>：真实的云和文件不再一致。</span></div>
+<div class="card"><p class="en" style="margin:0">• <code>Invalid value for variable</code> <b>Fix:</b> Pass <code>-var="environment=dev"</code> exactly.<br>• <code>Workspace "test" doesn't exist</code> <b>Fix:</b> Run <code>terraform workspace new test</code>, or use <code>select -or-create</code>.<br>• <code>reading ZIP file</code> <code>twin.zip</code> is not built yet. <b>Fix:</b> Build the zip, then plan again.</p><p class="zh" style="margin:0">• <code>Invalid value for variable</code> <b>解决：</b>准确传入 <code>-var="environment=dev"</code>。<br>• <code>Workspace "test" doesn't exist</code> <b>解决：</b>运行 <code>terraform workspace new test</code>，或用 <code>select -or-create</code>。<br>• <code>reading ZIP file</code> <code>twin.zip</code> 还没构建。 <b>解决：</b>先构建压缩包，再 plan。</p></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• One folder of config drives all environments: same code, three states.<br>• A variable called <code>environment</code> feeds every name, so dev, test and prod never collide.<br>• Bucket names are global, so add the account id.<br>• State records which real resources match the config, and each workspace has its own.<br>• Select the workspace and pass the same environment name, and print the workspace before you apply.<br>• Use a map for per-environment settings, such as a smaller model in dev and a bigger one in prod.<br>• Never hand-edit what the config owns: the next plan will try to undo it.</p><p class="zh" style="margin:0">• 一个配置文件夹驱动所有环境：同样的代码，三份状态。<br>• 一个叫 <code>environment</code> 的变量进入每一个名字，所以 dev、test、prod 永远不会撞车。<br>• 存储桶名字是全局的，所以要加上账号 id。<br>• 状态记录哪些真实资源对应配置，每个工作区有自己的一份。<br>• 选好工作区，传同样的环境名，apply 之前先打印工作区。<br>• 每个环境不同的设置用映射表，比如 dev 用小模型、prod 用大模型。<br>• 配置管着的东西别手工改：下一次 plan 会想把它改回去。</p></div>
+<div class="card"><p class="en" style="margin:0">• One folder of config drives every environment: same code, one state per workspace.<br>• An <code>environment</code> variable in every name stops collisions; add the account id for global bucket names.<br>• Select the workspace, pass the same name, and print the workspace before you apply.<br>• Use a map for per-environment settings.<br>• Never hand-edit what the config owns.</p><p class="zh" style="margin:0">• 一个配置文件夹驱动所有环境：同样的代码，每个工作区一份状态。<br>• 每个名字里放 <code>environment</code> 变量防止撞车；全局的桶名再加账号 id。<br>• 选好工作区，传同样的名字，apply 前先打印工作区。<br>• 每个环境不同的设置用映射表。<br>• 配置管着的东西别手工改。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Production</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"goals":{"en":["Drive dev, test and prod from one folder of config","Feed an environment variable into every name so they never collide","Add the account id to globally unique bucket names","Select the workspace and print it before every apply"],"zh":["用一个配置文件夹驱动开发、测试和生产三个环境","把环境变量放进每个名称，避免冲突","在全局唯一的存储桶名里加上账号 id","每次 apply 前选好工作区并打印出来"]},"prev":["14-digital-twin-live.html","17-why-console-clicking-does-not-scale.html"],"tools":{"en":"Terraform, AWS CLI logged in, the twin code from earlier lessons","zh":"Terraform、已登录的 AWS 命令行工具、前面几课写的分身代码"},"know":{"en":"You can write a short Terraform file and run init, plan and apply.","zh":"能写简短的 Terraform 文件，会运行 init、plan 和 apply。"},"mins":40,"offline":false}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=afade96e"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/18-state-workspaces-three-environments.js?v=65df26be"></script></body></html>
+<script src="js/18-state-workspaces-three-environments.js?v=eb518595"></script></body></html>

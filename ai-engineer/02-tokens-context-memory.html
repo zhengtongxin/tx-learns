@@ -5,42 +5,20 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/ai-engineer/02-tokens-context-memory.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-engineer/02-tokens-context-memory.html","url":"https://tx-learns.vercel.app/ai-engineer/02-tokens-context-memory.html","name":"Tokens, context, memory","alternateName":"token、上下文与记忆","description":"A model remembers nothing between calls. Learn what tokens are and how a chat fakes memory by replaying itself.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Talking to models","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Engineer","url":"https://tx-learns.vercel.app/ai-engineer/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Engineer","item":"https://tx-learns.vercel.app/ai-engineer/index.html"},{"@type":"ListItem","position":3,"name":"Tokens, context, memory","item":"https://tx-learns.vercel.app/ai-engineer/02-tokens-context-memory.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Talking to models · Lesson 2</span><span class="zh">和模型对话 · 第 2 课</span></span><h1><span class="en">Tokens, context, memory</span><span class="zh">token、上下文与记忆</span></h1><p class="meta"><span class="en">A model remembers nothing between calls. A chat only looks like memory because you replay it · ~15 min · hands-on</span><span class="zh">模型在两次调用之间什么都不记得，聊天看起来有记忆，是因为你把它重放了一遍 · 约 15 分钟 · 动手实践</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the helper could answer one notice question from one call. Today it fails when a neighbour asks a follow-up, like “And on Sunday?”, because it has forgotten the first question. We fix it by sending the whole chat again every turn and counting what that costs.</p>
-<p class="zh" style="margin:0">上回助手能用一次调用回答一条通知问题。今天它的毛病是邻居追问“那星期天呢？”时，它已经忘了第一个问题。解决办法是每一轮都把整段对话再发一遍，并算清这样做的成本。</p></div>
-<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en" style="margin:0"><b>Wei Jie</b> builds a little chat helper for the phone-repair counter. A customer says “Hi, I'm Mei and my screen is cracked,” then asks “What did I say was wrong?” The helper has no idea. Wei Jie finds out why, and learns to count the cost of every word he sends. The repair-counter chat is a side case: the same resend-the-list loop lets the Block 12 helper follow a neighbour's follow-up.</p>
-<p class="zh" style="margin:0"><b>Wei Jie</b> 给手机维修柜台做了个小聊天助手。顾客先说“你好，我是 Mei，屏幕裂了”，接着问“我刚才说哪里坏了？”助手完全不知道。Wei Jie 要弄清为什么，还要学会算清自己发出的每个字的成本。 维修柜台的聊天是支线案例：同样的“把列表再发一遍”循环，让 Block 12 助手能接住邻居的追问。</p></div>
-
-<h2><span class="en">Step 1 · Tokens: what the model really reads</span><span class="zh">第 1 步 · token：模型真正读的东西</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Models do not read letters or words. They read <b>tokens</b>: chunks of text turned into numbers. A common word is often one token. A rare word or a name splits into several. You can look with <code>tiktoken</code> (install it with <code>pip install tiktoken</code>): <code>encode</code> turns text into token numbers and <code>decode</code> turns a number back into its text chunk. Why care? Price is per token (in and out), and the context window (the most tokens one call can hold, explained in Step 5) is a limit counted in tokens.</p>
-<p class="zh" style="margin:0 0 8px">模型读的不是字母或单词，而是 <b>token</b>：被切成小块并变成数字的文本。常见的词往往是一个 token，生僻词或人名会被拆成几个。你可以用 <code>tiktoken</code>（<code>pip install tiktoken</code> 安装）看一看：<code>encode</code> 把文字变成 token 编号，<code>decode</code> 把编号变回对应的文字块。为什么要在意？因为价格按 token 算（输入和输出都算），上下文窗口（一次调用最多能装下的 token 数，第 5 步会讲）的上限也是按 token 数的。</p></div>
-<div class="codebox" data-file="count_tokens.py" data-lang="python"><span class="dim">import tiktoken
+<h2><span class="en">Step 1 · Tokens: what the model reads</span><span class="zh">第 1 步 · token：模型读的东西</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Models read <b>tokens</b>, not letters or words: text chunks turned into numbers. A common word is often one token; a rare word or name splits into several. Price and the context window (the most tokens one call can hold) are both counted in tokens.</p>
+<p class="zh" style="margin:0 0 8px">模型读的是 <b>token</b>，不是字母或单词：被切成小块并变成数字的文本。常见词往往是一个 token，生僻词或人名会拆成几个。价格和上下文窗口（一次调用最多能装的 token 数）都按 token 计。</p></div>
+<div class="codebox" data-file="count_tokens.py" data-lang="python"><span class="dim"># pip install tiktoken
+import tiktoken
 </span><span class="chg">enc = tiktoken.get_encoding("o200k_base")</span><span class="dim">
 ids = </span><span class="chg">enc.encode("Two teh peng, one chicken rice, less chilli please")</span><span class="dim">
 for i in ids:
-    print(i, repr(enc.decode([i])))</span></div>
-<div class="codebox" data-file="output" data-lang="text">&lt;id&gt; 'Two'
-&lt;id&gt; ' te'
-&lt;id&gt; 'h'
-&lt;id&gt; ' peng'
-&lt;id&gt; ','
-&lt;id&gt; ' one'
-&lt;id&gt; ' chicken'
-&lt;id&gt; ' rice'
-&lt;id&gt; ','
-&lt;id&gt; ' less'
-&lt;id&gt; ' chilli'
-&lt;id&gt; ' please'
-# shape only: each &lt;id&gt; is a number, and the exact pieces depend on the tokenizer</div>
+    print(i, repr(enc.decode([i])))   # each id and its text chunk</span></div>
 <div class="try" id="p1"></div>
-
 <h2><span class="en">Step 2 · A model has no memory</span><span class="zh">第 2 步 · 模型没有记忆</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Every call is <b>stateless</b>, like tapping into a gate: it does not know you tapped in yesterday. Wei Jie told the model what was wrong with the phone in one call and asked about it in the next, and got nothing. The second call never contained the first. Try it below.</p>
-<p class="zh" style="margin:0 0 8px">每次调用都是<b>无状态</b>的，就像刷卡过闸机：它不知道你昨天刷过。Wei Jie 在一次调用里告诉模型手机哪里坏了，下一次调用再问，结果一无所知，因为第二次调用里根本没有第一次的内容。下面试试。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Every call is <b>stateless</b>, like tapping a gate: it does not know you tapped yesterday. A chat app &ldquo;remembers&rdquo; by sending the whole conversation so far on <b>every</b> turn. Try it below.</p>
+<p class="zh" style="margin:0 0 8px">每次调用都是<b>无状态</b>的，就像刷卡过闸机：它不知道你昨天刷过。聊天应用靠<b>每一轮</b>都把到目前为止的整段对话发出去来“记住”。下面试试。</p></div>
 <div class="chat" id="mem"></div>
-
-<h2><span class="en">Step 3 · Memory is the whole chat, sent again</span><span class="zh">第 3 步 · 记忆就是把整段对话再发一遍</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A chat app “remembers” by sending the whole conversation so far on <b>every</b> turn. The model just predicts the most likely next tokens. If the text says “I fix phones” earlier, the likeliest answer to “what do I do?” contains “fix phones”.</p>
-<p class="zh" style="margin:0 0 8px">聊天应用靠<b>每一轮</b>都把到目前为止的整段对话发出去来“记住”。模型只是预测最可能的下一批 token。如果前面的文字里有“我修手机”，那么回答“我是做什么的？”时，最可能的答案就会包含“修手机”。</p></div>
 <figure class="fig"><svg class="fig-h" viewBox="0 0 720 190" role="img" aria-label="Memory is the whole message list sent again each turn">
 <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9a9aa8"/></marker></defs>
 <rect class="box soft" x="2" y="40" width="134" height="70" rx="12"/>
@@ -63,18 +41,9 @@ for i in ids:
 <path class="lnk hot" d="M651,112 C651,165 69,165 69,114" marker-end="url(#ah)"/>
 <text class="en sm" x="360" y="162">append the reply, send all again</text><text class="zh sm" x="360" y="162">追加回复，整个再发</text>
 </svg><svg class="fig-v" viewBox="0 0 360 344" aria-hidden="true"><defs><marker id="ahv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9a9aa8"/></marker></defs><rect class="box soft" x="50" y="10" width="220" height="70" rx="12"/><text class="en" x="160" y="41.0">Message list</text><text class="en sm" x="160" y="62.0">every turn so far</text><text class="zh" x="160" y="41.0">消息列表</text><text class="zh sm" x="160" y="62.0">到目前的每一轮</text><rect class="box soft" x="50" y="126" width="220" height="70" rx="12"/><text class="en" x="160" y="157.0">Model call</text><text class="en sm" x="160" y="178.0">reads all of it</text><text class="zh" x="160" y="157.0">模型调用</text><text class="zh sm" x="160" y="178.0">读完整个列表</text><rect class="box soft" x="50" y="242" width="220" height="70" rx="12"/><text class="en" x="160" y="273.0">Reply</text><text class="en sm" x="160" y="294.0">new answer</text><text class="zh" x="160" y="273.0">回复</text><text class="zh sm" x="160" y="294.0">新的答案</text><path class="lnk" d="M160,83 L160,123" marker-end="url(#ahv)"/><path class="lnk" d="M160,199 L160,239" marker-end="url(#ahv)"/><path class="lnk hot" d="M270,277 L335,277 L335,45 L273,45" marker-end="url(#ahv)"/><text class="en sm" x="180" y="336">append the reply, send all again</text><text class="zh sm" x="180" y="336">追加回复，整个再发</text></svg><figcaption><span class="en">The model remembers nothing: your list is the memory, and it grows each turn.</span><span class="zh">模型什么也不记得：你的列表就是记忆，而且每轮都在变长。</span></figcaption></figure>
-<div class="codebox" data-file="messages.py" data-lang="python"><span class="dim">messages = [
-    {"role": "system", "content": "You are a helpful assistant"},
-    </span><span class="chg">{"role": "user", "content": "Hi, I'm Wei Jie and I fix phones."},
-    {"role": "assistant", "content": "Hi Wei Jie! How can I help?"},</span><span class="dim">
-    {"role": "user", "content": "What do I do for a living?"},
-]</span></div>
-<div class="try" id="p3"></div>
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I thought the model remembered me between sessions. It does not. When a product seems to remember you, the product stored it and sent it again.</span><span class="zh">我以为模型在不同会话之间会记得我。其实不会。产品看起来记得你，是因为产品自己存了下来，再发给模型。</span></div>
-
-<h2><span class="en">Step 4 · You write the loop</span><span class="zh">第 4 步 · 循环由你来写</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">So you manage memory yourself. Keep a list. Append the user message, call the model, append the reply, repeat. The list is the memory. This reuses the call from the last lesson.</p>
-<p class="zh" style="margin:0 0 8px">所以记忆要你自己管理。留一个列表：加入用户消息，调用模型，加入回复，如此循环。这个列表就是记忆。调用方式沿用上一课。</p></div>
+<h2><span class="en">Step 3 · You write the loop</span><span class="zh">第 3 步 · 循环由你来写</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Keep a list. Append the user message, call the model, append the reply, repeat. The list is the memory.</p>
+<p class="zh" style="margin:0 0 8px">留一个列表：加入用户消息，调用模型，加入回复，如此循环。这个列表就是记忆。</p></div>
 <div class="codebox" data-file="remember.py" data-lang="python"><span class="dim">from openai import OpenAI
 client = OpenAI()
 </span><span class="chg">history = [{"role": "system", "content": "You are a helpful assistant"}]</span><span class="dim">
@@ -86,24 +55,21 @@ def chat(text):
     </span><span class="chg">history.append({"role": "assistant", "content": answer})</span><span class="dim">
     return answer</span></div>
 <div class="try" id="p4"></div>
-
-<h2><span class="en">Step 5 · The cost and the cap</span><span class="zh">第 5 步 · 成本与上限</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Each turn re-sends everything, so a long chat costs more with every turn. The <b>context window</b> is the cap, counted in tokens. When a chat grows past it, something must be dropped or summarised. Putting facts into the messages is also how you give a model knowledge it never had. That idea leads straight to retrieval (RAG, retrieval-augmented generation: look up the right text first, then put it in the prompt) later.</p>
-<p class="zh" style="margin:0 0 8px">每一轮都要把全部内容重发，所以聊得越长，每一轮越贵。<b>上下文窗口</b>就是上限，按 token 计数。对话超出时，必须丢掉一些或做摘要。把事实放进消息里，也是给模型它原本没有的知识的办法，这个想法后面会直接通向检索（RAG，检索增强生成：先查出相关文字，再放进提示词）。</p></div>
+<h2><span class="en">Step 4 · The cost and the cap</span><span class="zh">第 4 步 · 成本与上限</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Each turn re-sends everything, so a long chat costs more every turn. The <b>context window</b> is the cap: past it, you must drop or summarise old turns. Putting facts into the messages is also how you give a model knowledge it never had, which leads to retrieval (RAG) later.</p>
+<p class="zh" style="margin:0 0 8px">每一轮都要把全部内容重发，所以聊得越长越贵。<b>上下文窗口</b>就是上限：超出时，必须丢掉或总结旧的对话。把事实放进消息里，也是给模型它原本没有的知识的办法，后面的检索（RAG）就由此而来。</p></div>
 <p class="en">What happens to the cost? Pick for each case.</p>
 <p class="zh">每种情况下成本会怎样？逐个选择。</p><div class="sc" id="g5"></div>
-
 <h2><span class="en">Common errors</span><span class="zh">常见报错</span></h2>
-<div class="card"><p class="en" style="margin:0">• <code>ModuleNotFoundError: No module named 'X'</code>. The package is not installed in the environment this notebook uses. Run <code>pip install X</code> in a cell, then restart the kernel.<br>• <code>BadRequestError: ... maximum context length ... Please reduce the length of the messages</code>. The history grew past the model's context limit. Trim or summarise old messages before you send.<br>• <code>NameError: name 'client' is not defined</code>. A cell ran before the one that creates it. Run the cells from top to bottom.</p><p class="zh" style="margin:0">• <code>ModuleNotFoundError: No module named 'X'</code>：当前笔记本的环境没装这个包。在单元格里运行 <code>pip install X</code>，然后重启内核。<br>• <code>BadRequestError: ... maximum context length ... Please reduce the length of the messages</code>：聊天记录超过了模型的上下文上限。发送前先裁掉或总结旧消息。<br>• <code>NameError: name 'client' is not defined</code>：定义它的单元格还没运行。请从上到下依次运行单元格。</p></div>
+<div class="card"><p class="en" style="margin:0">• <code>BadRequestError: ... maximum context length</code>. The history outgrew the limit. Trim or summarise old messages before sending.<br>• <code>NameError: name 'client' is not defined</code>. Run cells top to bottom.</p><p class="zh" style="margin:0">• <code>BadRequestError: ... maximum context length</code>：聊天记录超过了上限。发送前先裁掉或总结旧消息。<br>• <code>NameError: name 'client' is not defined</code>：请从上到下依次运行单元格。</p></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Ask with and without history.</b> Send the same follow-up with and without the earlier turns and compare the answers.</span><span class="zh"><b>带历史和不带历史各问一次。</b>同一个追问，分别带上和不带之前的对话，比较答案。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Count tokens.</b> Count a short message, then the same message with typos.</span><span class="zh"><b>数 token。</b>数一条短消息，再数加了错别字的同一条。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a meter.</b> Make the chat loop print how many tokens the history holds so far.</span><span class="zh"><b>加个计数器。</b>让聊天循环打印到目前为止历史里有多少 token。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the helper keeps a list of messages and sends it all each turn, so when Mdm Tan asks “And on Sunday?” it knows she meant the lift notice, like Uncle Raj re-pinning last week's notice. The next problem is that one call is still one step: choosing the right notices and then writing a tidy announcement takes two calls chained together.</span><span class="zh">现在助手会保存一个消息列表，每轮整个发出去，所以 Tan 太太问“那星期天呢？”时它知道她指的是电梯通知，就像 Raj 叔叔把上周的通知重新贴上。下一个问题是：一次调用仍然只是一步，先挑出对的通知、再写出一条整齐的公告，需要把两次调用串起来。</span></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Ask with and without history.</b> Send the same follow-up both ways and compare.</span><span class="zh"><b>带历史和不带历史各问一次。</b>同一个追问，两种方式，比较答案。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a meter.</b> Print how many tokens the history holds after each turn.</span><span class="zh"><b>加个计数器。</b>每轮之后打印历史里有多少 token。</span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• Models read <b>tokens</b>, not letters or words.<br>• Price and the context limit are both counted in tokens, in and out.<br>• Rare words, names and typos split into more tokens, so they cost more.<br>• Every call is <b>stateless</b>. The model remembers nothing between calls.<br>• “Memory” is the app sending the whole conversation again each turn.<br>• Long chats cost more every turn and hit the context window.<br>• You manage the history: append, call, append, repeat.</p><p class="zh" style="margin:0">• 模型读的是 <b>token</b>，不是字母或单词。<br>• 价格和上下文上限都按 token 计，输入输出都算。<br>• 生僻词、人名和错别字会被拆成更多 token，所以更贵。<br>• 每次调用都是<b>无状态</b>的，两次调用之间模型什么都不记得。<br>• “记忆”就是应用每一轮把整段对话再发一遍。<br>• 长对话每一轮都更贵，还会撞上上下文窗口。<br>• 历史由你来管理：加入、调用、加入，再循环。</p></div>
+<div class="card"><p class="en" style="margin:0">• Models read <b>tokens</b>; price and the context limit are counted in them.<br>• Rare words, names and typos split into more tokens.<br>• Every call is <b>stateless</b>: &ldquo;memory&rdquo; is the app resending the conversation.<br>• You manage the history: append, call, append, repeat.<br>• Long chats cost more every turn and eventually hit the context window.</p><p class="zh" style="margin:0">• 模型读的是 <b>token</b>，价格和上下文上限都按它计。<br>• 生僻词、人名和错别字会拆成更多 token。<br>• 每次调用都<b>无状态</b>：“记忆”就是应用把对话重发一遍。<br>• 历史由你管理：加入、调用、加入，再循环。<br>• 长对话每轮更贵，最终会撞上上下文窗口。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"goals":{"en":["Explain why price and the context limit are counted in tokens","Say why rare words and typos cost more tokens","Show that chat memory is the app resending the history each turn","Manage history by appending, calling and appending again"],"zh":["说明为什么价格和上下文上限都按 token 计算","说清为什么生僻词和错别字更费 token","说明聊天的“记忆”其实是应用每轮重发整段对话","用追加、调用、再追加的方式管理历史"]},"prev":["01-what-an-llm-call-is.html"],"tools":{"en":"Python 3.10+, the openai and tiktoken packages, an OpenAI API key","zh":"Python 3.10+、openai 和 tiktoken 包、OpenAI API 密钥"},"know":{"en":"You can make one model call.","zh":"会发一次模型调用。"},"mins":25,"offline":false}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=dcd48bec"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/02-tokens-context-memory.js?v=31f66fc1"></script></body></html>
+<script src="js/02-tokens-context-memory.js?v=78739660"></script></body></html>

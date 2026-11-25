@@ -10,8 +10,6 @@ document.addEventListener('DOMContentLoaded',function(){
   {en:'<code>print(response.choices[0].message.content)</code>',zh:'<code>print(response.choices[0].message.content)</code>',a:'rd',ex:{en:'It digs the text out of the response object and prints it.',zh:'它从响应对象中取出文字并打印。'},hint:{en:'Which line only reads what came back?',zh:'哪一行只是读取返回的内容？'}}],
   [{k:'key',en:'Loads the key',zh:'加载密钥'},{k:'cl',en:'Makes the client',zh:'创建客户端'},{k:'call',en:'Sends the call',zh:'发送调用'},{k:'rd',en:'Reads the reply',zh:'读取回复'}],{en:'Line',zh:'代码行'});
 
- predict($('p2'),{q:{en:'Call 1 is “My name is Aina.” Call 2, sent on its own, is “What is my name?”. What can the model do?',zh:'第 1 次调用是“我叫 Aina。”，第 2 次单独发送“我叫什么？”。模型能做到什么？'},opts:[{k:'a',en:'Answer “Aina”',zh:'答出“Aina”'},{k:'b',en:'Not know, because call 1 is not in the messages',zh:'不知道，因为第 1 次调用不在消息里'}],a:'b',ex:{en:'The model remembers nothing between calls. Anything it should know must be inside the messages you send.',zh:'模型在两次调用之间什么都不记得。它需要知道的内容，必须写在你发送的消息里。'},hint:{en:'Does the second call contain the first message?',zh:'第二次调用里包含第一条消息吗？'}});
-
  trace($('t3'),[
   {k:'code',en:'Call 1 (<code>gpt-5.4-mini</code>): sends “Write one hard, open question a customer might ask a kopitiam helper. Reply with only the question.”',zh:'第 1 次调用（<code>gpt-5.4-mini</code>）：发送“写一个顾客可能问咖啡店小帮手的难题，要开放式的。只回复问题本身。”',why:{en:'This is the whole prompt. The model sees nothing else.',zh:'这就是完整的提示词，模型看不到任何别的内容。'}},
   {k:'llm',en:'Why is my kopi dearer than last week, and can you promise the price will not go up again?',zh:'为什么我的咖啡比上星期贵了？你能保证价钱不会再涨吗？',why:{en:'We save this reply in a variable called <b>question</b>. The next call will use it.',zh:'把这条回复存进名为 <b>question</b> 的变量，下一次调用要用它。'}},
@@ -22,9 +20,4 @@ document.addEventListener('DOMContentLoaded',function(){
 
  predict($('p3'),{q:{en:'Why do we paste the question and the answer into the third call?',zh:'为什么要把问题和答案粘贴进第三次调用？'},opts:[{k:'a',en:'Each call is independent; the model only knows what is in the messages',zh:'每次调用相互独立，模型只知道消息里有的内容'},{k:'b',en:'The model remembers everything, but it is faster this way',zh:'模型什么都记得，只是这样更快'},{k:'c',en:'It makes the model cheaper',zh:'这样模型更便宜'}],a:'a',ex:{en:'No memory between calls, so you carry information forward yourself. That is the heart of chaining.',zh:'调用之间没有记忆，所以信息要由你自己带到下一步。这正是串联的核心。'},hint:{en:'Look at the call 3 step in the log: where does the judge get the question from?',zh:'看日志里第 3 次调用那一步：评判者从哪里拿到题目？'}});
 
- game($('g4'),[
-  {en:'Answer a quick, simple fact.',zh:'回答一个简单的小事实。',a:'nano',ex:{en:'nano is cheapest and fine for quick facts and simple tasks.',zh:'nano 最便宜，简单问答和任务够用。'},hint:{en:'Which size is the cheapest?',zh:'哪个尺寸最便宜？'}},
-  {en:'Write the question and the answer.',zh:'负责出题与作答。',a:'mini',ex:{en:'mini is balanced, a good fit for writing the question and answer.',zh:'mini 均衡，适合出题与作答。'},hint:{en:'A balanced middle size fits.',zh:'选均衡的中间档。'}},
-  {en:'Judge whether the answer is correct, the step where judgment matters.',zh:'评判答案是否正确，这一步需要判断力。',a:'full',ex:{en:'full is the strongest, so it is used where judgment matters.',zh:'full 最强，用在需要判断力的地方。'},hint:{en:'Which size is strongest?',zh:'哪个尺寸最强？'}}],
-  [{k:'nano',en:'nano',zh:'nano'},{k:'mini',en:'mini',zh:'mini'},{k:'full',en:'full',zh:'full'}],{en:'Step',zh:'步骤'});
 });

@@ -5,16 +5,12 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/agentic-ai/14-coding-team.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/agentic-ai/14-coding-team.html","url":"https://tx-learns.vercel.app/agentic-ai/14-coding-team.html","name":"Coding team","alternateName":"编程团队","description":"Four agents design, build, put a screen on and test a small app, running their own code inside a safe box.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Multi-agent teams","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Agentic","url":"https://tx-learns.vercel.app/agentic-ai/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Agentic","item":"https://tx-learns.vercel.app/agentic-ai/index.html"},{"@type":"ListItem","position":3,"name":"Coding team","item":"https://tx-learns.vercel.app/agentic-ai/14-coding-team.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Multi-agent teams · Project</span><span class="zh">多智能体团队 · 项目</span></span><h1><span class="en">Coding team</span><span class="zh">编程团队</span></h1><p class="meta"><span class="en">Four agents design, build, put a screen on and test a small app, running their own code inside a safe box · ~35 min · hands-on</span><span class="zh">四个智能体设计、编写、加上界面并测试一个小应用，还在安全的盒子里运行自己写的代码 · 约 35 分钟 · 动手实践</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the assistant could research a market as a team, but nobody could build the shop's own tools. Today it fails when Uncle Lim wants a small tab tool, like Uncle Rahim's credit notebook, and Aina has no free evening to code it. We fix it with a team of four agents that writes and tests it in a safe box.</p>
-<p class="zh" style="margin:0">上回助手能以团队方式做市场调研，但没人能做店里自己的小工具。今天的问题是：Lim 叔叔想要一个像 Rahim 叔叔赊账本那样的小工具，而 Aina 没空花一晚上去写。我们的办法是让四个智能体组成团队，在安全盒子里写好并测试。</p></div>
-<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en"style="margin:0">A small <b>mamak</b> (a 24-hour curry and tea stall; it stands in for Uncle Lim's shop here) wants a simple <b>tab</b> system. Uncle Raju drinks teh tarik every morning and settles up on Friday. The owner needs to open a tab, add a cash top-up, record each order against the menu price, refuse an order that would push the balance below zero, and show what is owed and a history of every entry. Rather than write it alone, the owner builds a crew the way a small dev shop would split the work: a <b>lead</b> designs, a <b>backend dev</b> writes the module, a <b>frontend dev</b> builds the screen and a <b>tester</b> checks it. Uncle Raju's tab does the same job as Uncle Rahim's credit notebook at Kopi Corner.</p>
-<p class="zh"style="margin:0">一家小 <b>mamak</b>（24 小时营业的咖喱和茶档，在这里代表 Lim 叔叔的店）想要一个简单的<b>赊账本</b>系统。Raju 大叔每天早上喝拉茶，星期五结账。老板需要：开一个账户、加现金充值、按菜单价格记录每份订单、拒绝会让余额变成负数的订单，并显示欠款和每一笔记录。老板没有自己动手，而是像一家小型开发公司那样分工，搭了一个团队：<b>负责人</b>做设计，<b>后端开发</b>写模块，<b>前端开发</b>做界面，<b>测试员</b>来检查。Raju 叔叔的赊账本，和 Rahim 叔叔在 Kopi Corner 的赊账本是同一回事。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Key point</span><span class="zh">要点</span></b><p class="en" style="margin:0">A coding team splits one job into roles (lead, backend, frontend, tester) and lets each agent <b>run</b> its code in a throwaway Docker box, so it reads real results instead of guessing. Our example: a tab system for a mamak stall.</p><p class="zh" style="margin:0">编程团队把一个任务拆成角色（负责人、后端、前端、测试员），并让每个智能体在用完即弃的 Docker 盒子里<b>运行</b>自己的代码，读真实结果而不是靠猜。示例：mamak 档口的赊账系统。</p></div>
 
 <h2><span class="en">Step 1 · A safe box where code can run</span><span class="zh">第 1 步 · 一个能安全运行代码的盒子</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">A coding agent should not only <i>write</i> code. It should <i>run</i> it and read what happens, the way you do. But code written by a model should not run loose on your laptop. So the tools run it inside <b>Docker</b>, a program that starts a throwaway container, like a fresh empty room that is thrown away afterwards. The container only sees one <code>sandbox</code> folder (in the package, <code>final/sandbox</code>).</p><p class="en"style="margin:0">Two tools are enough: <code>save_file</code> writes a file into the sandbox, and <code>run_python</code> runs it in a new container and returns what it printed. Return the error output too, not only the normal output, or a crash looks like silence. You need Docker Desktop installed and running.</p>
-<p class="zh"style="margin:0 0 8px">写代码的智能体不该只是<i>写</i>代码，还应该像你一样<i>运行</i>它，并读结果。但模型写的代码不该在你的电脑上随便跑。所以工具把代码放进 <b>Docker</b> 里运行。Docker 会启动一个用完即弃的容器，像一间全新的空房间，用完就扔。容器只能看到一个 <code>sandbox</code>（沙盒）文件夹（在示例包里是 <code>final/sandbox</code>）。</p><p class="zh"style="margin:0">两个工具就够了：<code>save_file</code> 把文件写进沙盒，<code>run_python</code> 在新容器里运行它并返回打印的内容。除了正常输出，也要把错误输出一起返回，否则程序崩溃在智能体看来就像一片寂静。你需要安装并启动 Docker Desktop。</p></div>
-<div class="codebox" data-file="tools/box.py" data-lang="python"><span class="dim"># tools/box.py
-import subprocess
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li>Model-written code should not run loose on your laptop. Run it in <b>Docker</b>, a throwaway container that sees only one <code>sandbox</code> folder.</li><li>Two tools are enough: <code>save_file</code> writes a file, <code>run_python</code> runs it and returns what it printed.</li><li>Return the error output too, or a crash looks like silence. Docker Desktop must be running.</li></ul>
+<ul class="zh" style="margin:0;padding-left:18px"><li>模型写的代码不该在你的电脑上随便跑。放进 <b>Docker</b> 里运行：一个用完即弃的容器，只能看到一个 <code>sandbox</code> 文件夹。</li><li>两个工具就够了：<code>save_file</code> 写文件，<code>run_python</code> 运行并返回打印的内容。</li><li>错误输出也要返回，否则崩溃就像一片寂静。Docker Desktop 必须在运行。</li></ul></div>
+<div class="codebox" data-file="tools/box.py" data-lang="python"><span class="dim">import subprocess
 from pathlib import Path
 from crewai.tools import tool
 
@@ -39,23 +35,7 @@ def run_python(filename: str) -> str:
 
 box_tools = [save_file, run_python]</span></div>
 <div class="try" id="p1"></div>
-
-<h2><span class="en">Step 2 · Warm up with one coder</span><span class="zh">第 2 步 · 先用一个程序员热身</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">Before four roles, try one. A single <code>coder</code> agent gets the two box tools. The warm-up job: “Print how many 20-cent coins you need to pay for 1,000 cups of kopi at S$1.80 each, and run it.”</p><p class="en"style="margin:0">The point is not the sum. It is that the agent writes the script, runs it, reads the printed number and puts <i>that</i> in its answer, instead of guessing. (The right answer is 9,000 coins.)</p>
-<p class="zh"style="margin:0 0 8px">四个角色之前，先试一个。单个 <code>coder</code> 智能体拿到这两个盒子工具。热身任务：“打印付 1,000 杯 kopi（每杯 S$1.80）需要多少个 20 分的硬币，并运行它。”</p><p class="zh"style="margin:0">重点不在这道算术，而在于智能体会写脚本、运行、读到打印出的数字，并把<i>那个数字</i>放进答案，而不是靠猜。（正确答案是 9,000 个硬币。）</p>
-<p class="en"style="margin:8px 0 0">Save the script below as <code>warmup.py</code> and run <code>python warmup.py</code> from the <code>final</code> folder. In the full crew the same idea is a method inside the <code>TabTeam</code> class (Step 3): <code>@agent</code> marks a method that builds one agent, and <code>self.agents_config</code> reads <code>config/agents.yaml</code>.</p>
-<p class="zh"style="margin:8px 0 0">把下面的脚本存成 <code>warmup.py</code>，在 <code>final</code> 文件夹里运行 <code>python warmup.py</code>。在完整团队里，同样的做法是 <code>TabTeam</code> 类（第 3 步）里的一个方法：<code>@agent</code> 标记“创建一个智能体”的方法，<code>self.agents_config</code> 读取 <code>config/agents.yaml</code>。</p></div>
-<div class="codebox" data-file="warmup.py" data-lang="python"><span class="dim">from dotenv import load_dotenv
-from crewai import Agent, Crew, Task
-from tools.box import box_tools
-
-load_dotenv(override=True)   # reads your API key from .env, as in earlier lessons
-coder = Agent(role="Python coder", goal="Write a script, run it, report the number",
-              backstory="You never guess a number you can compute.",
-              llm="openai/gpt-4o-mini", </span><span class="chg">tools=box_tools,</span><span class="dim"> verbose=True)
-job = Task(description="Print how many 20-cent coins pay for 1,000 cups of kopi at S$1.80 each, and run it.",
-           expected_output="The number the script printed", agent=coder)
-print(Crew(agents=[coder], tasks=[job]).kickoff().raw)</span></div>
+<div class="teach"><b class="lbl"><span class="en">Try one coder first</span><span class="zh">先试一个程序员</span></b><p class="en" style="margin:0">Give a single <code>coder</code> agent <code>box_tools</code> and ask: “How many 20-cent coins pay for 1,000 cups of kopi at S$1.80?” It writes a script, runs it and reports the printed number (9,000), not a guess.</p><p class="zh" style="margin:0">给单个 <code>coder</code> 智能体 <code>box_tools</code>，问：“付 1,000 杯 kopi（每杯 S$1.80）需要多少个 20 分硬币？”它会写脚本、运行，并报告打印出的数字（9,000），而不是猜。</p></div>
 <div class="codebox" data-file="crew.py" data-lang="python"><span class="dim">from tools.box import box_tools
 
 @agent
@@ -63,10 +43,10 @@ def coder(self) -> Agent:
     return Agent(config=self.agents_config["coder"], </span><span class="chg">tools=box_tools,</span><span class="dim"> verbose=True)</span></div>
 <div class="try" id="p2"></div>
 
-<h2><span class="en">Step 3 · Split the work into four roles</span><span class="zh">第 3 步 · 把工作分给四个角色</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px"><code>agents.yaml</code> now has four entries. Only the <b>lead</b> gets the stronger, pricier model, because a good design pays off all the way down the chain. The others use the cheaper one. The <code>llm:</code> line sets which model that agent calls. The crew lesson before this one (roles, tasks and crews) gave everyone the cheap <code>gpt-4o-mini</code>; here only the lead gets <code>gpt-4o</code>. <code>frontend_dev</code> and <code>tester</code> both use <code>gpt-4o-mini</code>.</p><p class="en"style="margin:0"><code>tasks.yaml</code> chains the roles with <code>context</code> from the last lesson, so each role sees only the earlier work it needs. The design feeds the code. The code feeds both the screen and the tests. (Gradio, in the screen task, is a Python library that turns a few lines into a simple web page.)</p>
-<p class="zh"style="margin:0 0 8px"><code>agents.yaml</code> 现在有四项。只有<b>负责人</b>用更强也更贵的模型，因为好的设计会在整条链上带来回报，其余角色用便宜的模型。<code>llm:</code> 这一行决定该智能体调用哪个模型。上一节团队课（角色、任务与团队）让所有角色都用便宜的 <code>gpt-4o-mini</code>；这里只有负责人用 <code>gpt-4o</code>。<code>frontend_dev</code> 和 <code>tester</code> 也都用 <code>gpt-4o-mini</code>。</p><p class="zh"style="margin:0"><code>tasks.yaml</code> 用上一课的 <code>context</code> 把角色串起来，每个角色只看到它需要的前面成果。设计供代码使用，代码同时供界面和测试使用。（界面任务里的 Gradio 是一个 Python 库，几行代码就能做出简单的网页。）</p></div>
-<figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="A lead hands the design to a backend dev, whose code goes to a frontend dev and a tester, and the tester runs it in a safe box"><defs><marker id="ah14" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box soft" x="15" y="80" width="130" height="60" rx="12"/><text class="en" x="80.0" y="107.0">Lead</text><text class="zh" x="80.0" y="107.0">负责人</text><text class="sm en" x="80.0" y="125.0">designs it</text><text class="sm zh" x="80.0" y="125.0">做设计</text><rect class="box new" x="185" y="80" width="130" height="60" rx="12"/><text class="en" x="250.0" y="107.0">Backend dev</text><text class="zh" x="250.0" y="107.0">后端开发</text><text class="sm en" x="250.0" y="125.0">writes the module</text><text class="sm zh" x="250.0" y="125.0">写模块</text><rect class="box new" x="365" y="20" width="130" height="60" rx="12"/><text class="en" x="430.0" y="47.0">Frontend dev</text><text class="zh" x="430.0" y="47.0">前端开发</text><text class="sm en" x="430.0" y="65.0">builds the screen</text><text class="sm zh" x="430.0" y="65.0">做界面</text><rect class="box new" x="365" y="140" width="130" height="60" rx="12"/><text class="en" x="430.0" y="167.0">Tester</text><text class="zh" x="430.0" y="167.0">测试员</text><text class="sm en" x="430.0" y="185.0">writes and runs tests</text><text class="sm zh" x="430.0" y="185.0">写并运行测试</text><rect class="box soft" x="555" y="140" width="145" height="60" rx="12"/><text class="en" x="627.5" y="167.0">Safe box</text><text class="zh" x="627.5" y="167.0">安全盒子</text><text class="sm en" x="627.5" y="185.0">code runs here</text><text class="sm zh" x="627.5" y="185.0">代码在这里运行</text><line class="lnk" x1="145" y1="110" x2="185" y2="110" marker-end="url(#ah14)"/><line class="lnk" x1="315" y1="100" x2="365" y2="60" marker-end="url(#ah14)"/><line class="lnk" x1="315" y1="120" x2="365" y2="160" marker-end="url(#ah14)"/><line class="lnk hot" x1="495" y1="170" x2="555" y2="170" marker-end="url(#ah14)"/></svg><figcaption><span class="en">The design feeds the code; the code feeds both the screen and the tests, and the tests run inside the safe box.</span><span class="zh">设计供代码使用；代码同时供界面和测试使用，测试在安全盒子里运行。</span></figcaption></figure>
+<h2><span class="en">Step 2 · Split the work into four roles</span><span class="zh">第 2 步 · 把工作分给四个角色</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li><code>agents.yaml</code> has four entries. Only the <b>lead</b> gets the stronger model (<code>llm:</code>), because a good design pays off down the chain.</li><li><code>tasks.yaml</code> chains roles with <code>context</code>: design feeds code, code feeds both the screen (Gradio, a Python library for simple web pages) and the tests.</li></ul>
+<ul class="zh" style="margin:0;padding-left:18px"><li><code>agents.yaml</code> 有四项。只有<b>负责人</b>用更强的模型（<code>llm:</code>），因为好的设计会在整条链上带来回报。</li><li><code>tasks.yaml</code> 用 <code>context</code> 串起角色：设计供代码使用，代码同时供界面（Gradio，做简单网页的 Python 库）和测试使用。</li></ul></div>
+@@FIG@@
 <div class="codebox" data-file="agents.yaml" data-lang="yaml"><span class="dim"># config/agents.yaml
 lead:
   role: Engineering lead for a {module_name} module
@@ -81,15 +61,12 @@ backend_dev:
   goal: Implement the design exactly, as {module_name}.py, and save it to the sandbox.
   backstory: Careful, writes clean self-contained code.
   </span><span class="chg">llm: openai/gpt-4o-mini</span><span class="dim">
-# frontend_dev and tester look similar (both llm: openai/gpt-4o-mini)
-
-</span></div>
+# frontend_dev and tester look similar (both gpt-4o-mini)</span></div>
 <div class="codebox" data-file="tasks.yaml" data-lang="yaml"><span class="dim"># config/tasks.yaml
 design_task:
   description: Write the design for {module_name}. Markdown only, no code.
   expected_output: A design with class name, methods and signatures.
   agent: lead
-  output_file: sandbox/design.md
 
 code_task:
   description: Implement the design and save it as {module_name}.py.
@@ -107,16 +84,13 @@ test_task:
   description: Write a test file for {module_name}, run it and summarise pass or fail.
   expected_output: A short test report.
   agent: tester
-  </span><span class="chg">context: [code_task]</span><span class="dim">
-  output_file: sandbox/test_report.md</span></div>
-<p class="en">The crew class that loads these two files (<code>crew.py</code>, shortened):</p><p class="zh">加载这两个文件的团队类（<code>crew.py</code>，已缩短）：</p>
+  </span><span class="chg">context: [code_task]</span></div>
 <div class="codebox" data-file="crew.py" data-lang="python"><span class="dim">@CrewBase
 class TabTeam:
     agents_config = "config/agents.yaml"
     tasks_config = "config/tasks.yaml"
 
-    # one @agent method each: lead, backend_dev, frontend_dev, tester
-    # one @task method each: design_task, code_task, ui_task, test_task
+    # one @agent method per role, one @task method per task
 
     @crew
     def crew(self) -> Crew:
@@ -125,11 +99,10 @@ class TabTeam:
 <p class="en">Which role does each job? Sort them.</p><p class="zh">每项工作该由哪个角色来做？请分类。</p>
 <div class="sc" id="g1"></div>
 
-<h2><span class="en">Step 4 · One kickoff, a working app</span><span class="zh">第 4 步 · 一次启动，得到一个能用的应用</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">The requirements go in as one block of plain text, with the module name next to it. The test prices are fixed (<code>teh_tarik</code>, <code>kopi_o</code>, <code>roti_canai</code>) so the tester has something to check against. <code>get_price(item)</code> is just a small price lookup that the backend dev is asked to write into the module.</p><p class="en"style="margin:0">After a run the sandbox holds the design, the module, the screen, the tests and the test report. Run it with <code>python main.py</code> from the <code>final</code> folder (<code>TabTeam</code> is the class from Step 3; <code>@agent</code> marks each agent method). Then, inside <code>final/sandbox</code>, run <code>pip install gradio</code> and <code>python app.py</code> for a working little screen. That is the payoff: four roles, one kickoff.</p>
-<p class="zh"style="margin:0 0 8px">需求作为一整段普通文字传入，旁边再放模块名。测试价格是固定的（<code>teh_tarik</code>、<code>kopi_o</code>、<code>roti_canai</code>），这样测试员才有依据去检查。<code>get_price(item)</code> 只是一个简单的查价函数，需求要求后端开发把它写进模块里。</p><p class="zh"style="margin:0">运行结束后，沙盒里有设计、模块、界面、测试和测试报告。先在 <code>final</code> 文件夹里运行 <code>python main.py</code>（<code>TabTeam</code> 就是第 3 步的那个类；<code>@agent</code> 标记每个智能体方法）。再在 <code>final/sandbox</code> 里运行 <code>pip install gradio</code> 和 <code>python app.py</code>，就能得到一个能用的小界面。这就是回报：四个角色，一次启动。</p></div>
-<div class="codebox" data-file="main.py" data-lang="python"><span class="dim"># main.py
-REQS = """
+<h2><span class="en">Step 3 · One kickoff, live docs, a working app</span><span class="zh">第 3 步 · 一次启动、实时文档、一个能用的应用</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li>Pass the requirements as plain text plus a module name. Fixed test prices give the tester something to check.</li><li>Afterwards the sandbox holds the design, module, screen, tests and a report. Run <code>pip install gradio</code> and <code>python app.py</code> inside it.</li><li>A model may know an old version of a library. <b>MCP</b> plugs in outside tools; <code>mcps=</code> gives only the frontend dev a live-docs server.</li></ul>
+<ul class="zh" style="margin:0;padding-left:18px"><li>需求以普通文字加模块名传入。固定的测试价格让测试员有依据可查。</li><li>运行后沙盒里有设计、模块、界面、测试和报告。在里面运行 <code>pip install gradio</code> 和 <code>python app.py</code>。</li><li>模型可能只认识库的旧版本。<b>MCP</b> 用来接入外部工具；<code>mcps=</code> 只给前端开发一个实时文档服务。</li></ul></div>
+<div class="codebox" data-file="main.py" data-lang="python"><span class="dim">REQS = """
 A tab system for regular customers at a drinks stall.
 Open a tab, top up cash, record orders (item, qty) using get_price(item),
 with fixed test prices: teh_tarik 2.00, kopi_o 1.60, roti_canai 1.50 (S$).
@@ -138,44 +111,22 @@ Report balance, items ordered, and a full history.
 """
 
 def run():
-    TabTeam().crew().</span><span class="chg">kickoff(inputs={
-        "requirements": REQS,
-        "module_name": "tabs",
-    })</span></div>
-<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
-<div class="codebox" data-file="output" data-lang="text">$ python main.py
-...
-$ ls sandbox
-design.md   tabs.py   app.py   test_tabs.py   test_report.md
+    TabTeam().crew().</span><span class="chg">kickoff(inputs={"requirements": REQS, "module_name": "tabs"})</span><span class="dim">
 
-$ head -3 sandbox/test_report.md
-# Test report
-4 tests run, 4 passed</div>
-<div class="try" id="p4"></div>
-
-<h2><span class="en">Step 5 · Give the frontend dev live docs through MCP</span><span class="zh">第 5 步 · 通过 MCP 给前端开发实时文档</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en"style="margin:0 0 8px">A model learnt a library at some point in the past, so the frontend dev may write screen code for an old version of Gradio. <b>MCP</b> is a standard plug for outside tools (it gets its own topic later). In recent CrewAI versions, you hand an agent a list of MCP server addresses with <code>mcps=</code>. This one serves up-to-date library docs.</p><p class="en"style="margin:0">Give it only to the roles that need it, such as the frontend dev below (the lead can get it the same way). The backend dev writes plain Python and does not.</p>
-<p class="zh"style="margin:0 0 8px">模型是在过去某个时间学到一个库的，所以前端开发可能会按旧版 Gradio 写界面代码。<b>MCP</b> 是连接外部工具的标准插头（后面有专门的主题）。在较新的 CrewAI 版本里，你用 <code>mcps=</code> 给智能体一份 MCP 服务地址列表。这个服务提供最新的库文档。</p><p class="zh"style="margin:0">只给需要的角色，比如下面的前端开发（负责人也可以用同样的方式拿到）。后端开发写的是普通 Python，不需要。</p></div>
-<div class="codebox" data-file="crew.py" data-lang="python"><span class="dim">@agent
+# in crew.py, only the frontend dev gets live library docs
+@agent
 def frontend_dev(self) -> Agent:
-    return Agent(
-        config=self.agents_config["frontend_dev"],
-        tools=box_tools,
-        </span><span class="chg">mcps=["https://mcp.context7.com/mcp"],</span><span class="dim">   # up-to-date library docs
-    )</span></div>
+    return Agent(config=self.agents_config["frontend_dev"], tools=box_tools,
+                 </span><span class="chg">mcps=["https://mcp.context7.com/mcp"]</span><span class="dim">)</span></div>
+<div class="try" id="p4"></div>
 <div class="try" id="p5"></div>
 
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en">• <b>Docker was not running.</b> The run tool came back empty and the agent happily said “the code ran fine”. The first run also has to download the image (the ready-made Python setup a container starts from), so it is slow once.<br>• <b>I returned only normal output.</b> A crash then looked like silence. I added the error output and the agent could finally read its own tracebacks and fix them.<br>• <b>An MCP bug.</b> In the pinned version, tools from an HTTPS MCP server whose names contain a hyphen could not be called. The library tidied the tool name (for example, swapping the hyphens), then sent that changed name back to a server that only knew the original. A small patch fixed it, and I must check it again after any upgrade. Lesson: when a tool “exists” but always fails, look at the exact name being sent.<br>• <b>I did not clear the sandbox.</b> The tester tested yesterday's file.</span><span class="zh">• <b>Docker 没有启动。</b>运行工具返回了空内容，智能体还高兴地说“代码运行正常”。第一次运行还要下载镜像（容器启动时用的现成 Python 环境），所以只有第一次很慢。<br>• <b>我只返回了正常输出。</b>程序崩溃就像一片寂静。加上错误输出以后，智能体终于能读到自己的报错并修好它。<br>• <b>一个 MCP 的 bug。</b>在锁定的版本里，名字带连字符的 HTTPS MCP 工具没法调用。库先把工具名“整理”了一下（比如换掉连字符），再把改过的名字送回只认原名的服务器。一个小补丁解决了问题，每次升级后都要再检查一遍。教训：工具“存在”却总是失败时，去看实际发送出去的名字。<br>• <b>我没有清空沙盒。</b>测试员测的是昨天的文件。</span></div>
-<div class="callout"><b class="lbl"><span class="en">Check before you trust it</span><span class="zh">相信之前先核对</span></b><span class="en">Passing tests only means the code matches what the tester thought to check. Before the mamak uses it with real money, the owner tries a few tabs by hand.</span><span class="zh">测试通过只说明代码符合测试员想到要检查的内容。在 mamak 用它处理真钱之前，老板要亲手试几个账户。</span></div>
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en">I did not clear the sandbox, so the tester tested yesterday's file. And with Docker stopped, the agent happily said “the code ran fine”.</span><span class="zh">我没有清空沙盒，测试员测的是昨天的文件。Docker 没启动时，智能体还高兴地说“代码运行正常”。</span></div>
 
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Change the requirements</b> to a small tool you want: a habit tracker, a stock counter. Keep it to one module with one main class.</span><span class="zh"><b>换掉需求</b>，做一个你想要的小工具：习惯打卡、库存计数。保持一个模块、一个主类。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Empty the sandbox folder</b> before every run, then check the tester used a fresh file.</span><span class="zh"><b>每次运行前清空沙盒文件夹</b>，再确认测试员用的是新文件。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Break the code on purpose</b> and watch the error output come back to the agent.</span><span class="zh"><b>故意把代码弄坏</b>，看错误输出怎样回到智能体手里。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the assistant's team can write and test a small shop tool, like a tab for Uncle Rahim's credit notebook: a lead designs, a backend dev codes, a frontend dev builds the screen, and a tester runs it in a safe box. The next problem is that the flows get tangled, with steps waiting on each other and looping back.</span><span class="zh">现在助手的团队能写出并测试一个小小的店用工具，比如替 Rahim 叔叔的赊账本做一个账户：负责人做设计，后端开发写代码，前端开发做界面，测试员在安全盒子里运行。下一个问题是：流程变得纠缠不清，步骤互相等待，还会绕回头。</span></div>
-<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
-<div class="card"><p class="en" style="margin:0">• <b><code>docker: command not found</code></b>: The sandbox tool starts a container, so Docker must be installed and running. Fix: install Docker Desktop and start it first.<br>• <b><code>FileNotFoundError: sandbox/design.md</code></b>: A later task ran before the design existed. Fix: give the task <code>context: [design_task]</code> so it waits for it.<br>• <b><code>The tester reports ImportError for the module</code></b>: The code file was saved under a different name. Fix: use the same <code>{module_name}</code> in every task.</p>
-<p class="zh" style="margin:0">• <b><code>docker: command not found</code></b>：沙盒工具要启动容器，所以必须装好并运行 Docker。解决：安装 Docker Desktop 并先启动它。<br>• <b><code>FileNotFoundError: sandbox/design.md</code></b>：后面的任务先于设计文档运行了。解决：给任务加上 <code>context: [design_task]</code>，让它等设计完成。<br>• <b><code>The tester reports ImportError for the module</code></b>：代码文件保存成了别的名字。解决：每个任务里都用同一个 <code>{module_name}</code>。</p></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Change the requirements</b> to a small tool you want, kept to one module with one main class.</span><span class="zh"><b>换掉需求</b>，做一个你想要的小工具，保持一个模块、一个主类。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Break the code on purpose</b> and watch the error output reach the agent.</span><span class="zh"><b>故意把代码弄坏</b>，看错误输出怎样回到智能体手里。</span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• A coding agent should run its code and read the result, not guess.<br>• Run model-written code in a throwaway Docker container that sees one folder.<br>• Return the error output as well as the normal output, so crashes are visible.<br>• Split the job into roles: design, backend, frontend, tests. Give the stronger model to the design role.<br>• <code>context</code> lets each role see only the earlier work it needs.<br>• <code>mcps=</code> plugs live library docs into only the roles that need them.<br>• Clear the sandbox between runs, and when a tool always fails, check the exact name it is called by.</p><p class="zh" style="margin:0">• 写代码的智能体应该运行自己的代码并读结果，而不是靠猜。<br>• 模型写的代码要放在只能看到一个文件夹的用完即弃 Docker 容器里运行。<br>• 除了正常输出，也要返回错误输出，崩溃才看得见。<br>• 把工作分成角色：设计、后端、前端、测试。更强的模型给设计角色。<br>• <code>context</code> 让每个角色只看到它需要的前面成果。<br>• <code>mcps=</code> 只给需要的角色接入实时库文档。<br>• 每次运行之间清空沙盒；工具总是失败时，检查它被调用时的确切名字。</p></div>
+<div class="card"><p class="en" style="margin:0">• A coding agent should run its code and read the result, not guess.<br>• Run model-written code in a throwaway Docker container that sees one folder.<br>• Return error output too, so crashes are visible.<br>• Split roles; give the stronger model to the design role.<br>• <code>mcps=</code> plugs live docs into only the roles that need them.</p><p class="zh" style="margin:0">• 写代码的智能体应该运行代码并读结果，而不是靠猜。<br>• 模型写的代码放在只能看到一个文件夹的用完即弃 Docker 容器里运行。<br>• 也要返回错误输出，崩溃才看得见。<br>• 拆分角色；更强的模型给设计角色。<br>• <code>mcps=</code> 只给需要的角色接入实时文档。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Agentic</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>

@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded',function(){
- var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ var $=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
 
  game($('g1'),[
   {en:'A manual section on how used items are valued',zh:'手册里关于旧物品如何估值的一段',a:'b',ex:{en:'Rules the agent needs to look up belong here.',zh:'智能体需要查的规则，就放在这里。'},hint:{en:'Is it a rule or fact the agent must check?',zh:'它是智能体要核对的规则或事实吗？'}},
@@ -18,15 +18,6 @@ document.addEventListener('DOMContentLoaded',function(){
   {en:'“used bag value”',zh:'“used bag value”',a:'g',ex:{en:'Three words, one fact.',zh:'三个词，一个事实。'},hint:{en:'Does it ask for one fact?',zh:'它只问一个事实吗？'}},
   {en:'“claim”',zh:'“claim”',a:'n',ex:{en:'Too vague: it matches nothing in particular.',zh:'太含糊，没有特指任何东西。'},hint:{en:'What exactly would it find?',zh:'它到底能找到什么？'}},
   {en:'“typhoon warning dates”',zh:'“typhoon warning dates”',a:'g',ex:{en:'Short, and it points at the dates the agent needs.',zh:'简短，并且指向智能体需要的日期。'},hint:{en:'Does it name the missing fact?',zh:'它点明缺的那个事实了吗？'}}],[{k:'g',en:'Good search',zh:'好搜索'},{k:'n',en:'Noisy search',zh:'噪音大的搜索'}],{en:'Query',zh:'搜索词'});
-
- game($('g3'),[
-  {en:'How is a two-year-old lost bag valued?',zh:'一个用了两年的丢失行李怎么估值？',a:'o',ex:{en:'M6.1 answers it alone.',zh:'M6.1 一段就够了。'},hint:{en:'Is one section enough?',zh:'一段够吗？'}},
-  {en:'Flight cancelled on 21 August in the north; was there a warning?',zh:'8 月 21 日北部航班取消；当时有警报吗？',a:'m',ex:{en:'It needs E2 for the dates and M2.3 for the rule.',zh:'要 E2 看日期，还要 M2.3 看规则。'},hint:{en:'Does it need a date and a rule?',zh:'它既要日期又要规则吗？'}},
-  {en:'Which section covers lost luggage?',zh:'哪一段讲丢失行李？',a:'o',ex:{en:'One search for the right section.',zh:'搜一次就能找到对应的段落。'},hint:{en:'Is it one lookup?',zh:'是查一次吗？'}},
-  {en:'Hotel after a strike, and the policy was bought after the strike was announced',zh:'罢工后的酒店费用，而保单是罢工宣布后才买的',a:'m',ex:{en:'It needs E1 for the date and M4.2 for the exclusion, joined.',zh:'要 E1 看日期，再和 M4.2 的除外条款连起来。'},hint:{en:'Two facts that must meet?',zh:'有两个事实要碰在一起吗？'}},
-  {en:'How are used items valued?',zh:'旧物品怎么估值？',a:'o',ex:{en:'One section answers it.',zh:'一段就能回答。'},hint:{en:'Is one section enough?',zh:'一段够吗？'}}],[{k:'o',en:'One search is enough',zh:'一次搜索就够'},{k:'m',en:'Needs two or more',zh:'要两次或更多'}],{en:'Question',zh:'问题'});
-
- predict($('p3'),{q:{en:'One-shot retrieval gets 22 of 25 claims right with 1 model call each. The agent gets 24 right but uses about 3 calls each. What does Mei Ling do?',zh:'一次性检索 25 份理赔对 22 份，每份 1 次调用。智能体对 24 份，但每份约 3 次调用。Mei Ling 该怎么做？'},opts:[{k:'a',en:'Use the agent for every claim',zh:'每份理赔都用智能体'},{k:'b',en:'Use one-shot first, and the agent only for claims where one-shot says refer or is not enough',zh:'先用一次性检索，只有它转交或不够用的理赔才交给智能体'},{k:'c',en:'Never use the agent: it costs more',zh:'从不用智能体：它更贵'}],a:'b',ex:{en:'Most claims are simple, so the cheap path handles them. The extra calls go only where one shot fails.',zh:'大多数理赔很简单，便宜的路线就能处理。多出来的调用只花在一次检索不行的地方。'},hint:{en:'Pay for extra searches only when you need them.',zh:'只有需要时，才为多出来的搜索付钱。'}});
 
  predict($('p4'),{q:{en:'You cap the agent at 1 search. On Mr Tan’s claim it finds the strike note but not the rule. What should it do?',zh:'你把智能体限制在 1 次搜索。处理 Tan 先生的理赔时，它找到了罢工笔记，却没找到规则。它该怎么办？'},opts:[{k:'a',en:'Approve: a strike sounds like a covered reason',zh:'批准：罢工听起来像是赔付的理由'},{k:'b',en:'Refer to a handler, because a fact is missing',zh:'转交给理赔员，因为缺一个事实'},{k:'c',en:'Decline anyway',zh:'照样拒赔'}],a:'b',ex:{en:'It only has half the facts. The rules say to reply refer when it does not have what it needs, so a person decides.',zh:'它只掌握一半的事实。规则说缺少所需事实时回答转交，由人来决定。'},hint:{en:'Guessing either way could be wrong.',zh:'不管往哪边猜，都可能错。'}});
 });

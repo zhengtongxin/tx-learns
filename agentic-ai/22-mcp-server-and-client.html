@@ -5,52 +5,41 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/agentic-ai/22-mcp-server-and-client.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/agentic-ai/22-mcp-server-and-client.html","url":"https://tx-learns.vercel.app/agentic-ai/22-mcp-server-and-client.html","name":"MCP server and client","alternateName":"MCP 服务端与客户端","description":"Turn your own notebook into an MCP server, then use it from an agent and from a plain script.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"MCP","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Agentic","url":"https://tx-learns.vercel.app/agentic-ai/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Agentic","item":"https://tx-learns.vercel.app/agentic-ai/index.html"},{"@type":"ListItem","position":3,"name":"MCP server and client","item":"https://tx-learns.vercel.app/agentic-ai/22-mcp-server-and-client.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">MCP · Lesson 2</span><span class="zh">MCP · 第 2 课</span></span><h1><span class="en">MCP server and client</span><span class="zh">MCP 服务端与客户端</span></h1><p class="meta"><span class="en">Turn your own notebook into a tool any agent can plug in · ~30 min · hands-on</span><span class="zh">把你自己的小本子变成任何智能体都能接上的工具 · 约 30 分钟 · 动手实践</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the Kopi Corner assistant could plug in other people's tools through MCP. Today it fails because Aina's own order pad has no plug, so nothing outside the counter can ask what is on order 12. We fix it by wrapping the order pad as an MCP server and calling it from a client.</p>
-<p class="zh" style="margin:0">上回 Kopi Corner 助手已经能通过 MCP 接上别人写的工具。今天的问题是：Aina 自己的点单本没有插头，柜台以外的程序没法问“12 号单点了什么”。我们把点单本包成 MCP 服务端，再从客户端去调用它。</p></div>
-<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en" style="margin:0">The mamak near your office has a little notebook for regulars' credit. <b>Uncle Rahim</b> writes each regular's tab in it: what they owe, what they ordered, and a note like "Mr Tan: only teh-O, no sugar". Today you turn that notebook into your <b>own MCP server</b>. Then an agent can ask "what does Mr Tan owe?", and a plain script can read his page without any model at all. At Kopi Corner, Aina wraps the order pad the same way.</p>
-<p class="zh" style="margin:0">你公司附近的嘛嘛档有一本记熟客赊账的小本子。<b>Rahim 叔</b>在里面给每位熟客记账：欠多少、点过什么，还有一句备注，比如“Tan 先生：只要无糖的 teh-O”。今天你要把这本小本子变成<b>你自己的 MCP 服务端</b>。之后，智能体可以问“Tan 先生欠多少？”，一个普通脚本也能完全不用模型就读到他那一页。 在 Kopi Corner，Aina 用同样的办法把点单本包起来。</p></div>
-<h2><span class="en">Step 1 · Wrap the notebook as tools</span><span class="zh">第 1 步 · 把小本子包成工具</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The notebook is plain Python with nothing MCP in it. The official <code>mcp</code> package gives you <code>FastMCP</code>: put <code>@mcp.tool()</code> on a function and it becomes a tool another program can call. You do not have to read the notebook line by line: the tools only call its <code>get</code>, <code>add</code>, <code>pay</code> and <code>report</code> methods. Install it with the version cap in the first line of the code (<code>mcp[cli]&lt;2</code>); the last callout says why.</p><p class="zh" style="margin:0 0 8px">这本小本子只是普通的 Python，里面没有任何 MCP。官方的 <code>mcp</code> 包提供 <code>FastMCP</code>：在函数上加 <code>@mcp.tool()</code>，它就成了别的程序可以调用的工具。你不必逐行读这本小本子：工具只会用到它的 <code>get</code>、<code>add</code>、<code>pay</code> 和 <code>report</code> 方法。安装时用代码第一行的版本限制 <code>mcp[cli]&lt;2</code>，原因写在最后的“我踩过的坑”里。</p><p class="en" style="margin:0 0 8px">The model never sees your code. It sees the <b>name, the docstring and the type hints</b>. So write those as if you were explaining the tool to a new waiter.</p><p class="zh" style="margin:0 0 8px">模型看不到你的代码，它看到的只有<b>名字、文档字符串和类型标注</b>。所以要像给新来的服务员讲解那样，认真写好它们。</p></div>
-<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim">pip install "mcp[cli]&lt;2" openai-agents python-dotenv
+<div class="teach"><b class="lbl"><span class="en">Key point</span><span class="zh">要点</span></b><p class="en" style="margin:0">Any plain Python can become an MCP server: put <code>@mcp.tool()</code> on a function and any agent, or a plain script, can call it. Example: a mamak's tab book for regulars (what each owes, what they ordered).</p><p class="zh" style="margin:0">任何普通 Python 都能变成 MCP 服务端：在函数上加 <code>@mcp.tool()</code>，任何智能体或普通脚本都能调用它。示例：mamak 档口的熟客账本（每人欠多少、点过什么）。</p></div>
 
-</span></div>
-<div class="codebox" data-file="tabs.py" data-lang="python"><span class="dim"># tabs.py  (the notebook, dimmed: plain Python you already have; the bright part is new)
+<h2><span class="en">Step 1 · Wrap the tab book as a server</span><span class="zh">第 1 步 · 把账本包成服务端</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li>The official <code>mcp</code> package gives <code>FastMCP</code>. The model never sees your code, only the <b>name, docstring and type hints</b>: write them for a new waiter.</li><li>A <b>tool</b> is an action the <i>model</i> decides to call. A <b>resource</b> is read-only data at a URI (<code>tabs://book/tan</code>) that the <i>app</i> fetches.</li><li>End the file with <code>mcp.run(transport="stdio")</code>. Never <code>print</code> to stdout: it is the wire.</li></ul>
+<ul class="zh" style="margin:0;padding-left:18px"><li>官方 <code>mcp</code> 包提供 <code>FastMCP</code>。模型从不看到你的代码，只看到<b>名字、文档字符串和类型标注</b>：要像给新服务员讲解一样去写。</li><li><b>工具</b>是由<i>模型</i>决定调用的动作。<b>资源</b>是 URI（<code>tabs://book/tan</code>）上的只读数据，由<i>应用</i>去取。</li><li>文件最后写 <code>mcp.run(transport="stdio")</code>。千万别往标准输出 <code>print</code>：那是通信线路。</li></ul></div>
+<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim">pip install "mcp[cli]&lt;2" openai-agents python-dotenv</span></div>
+<div class="codebox" data-file="tabs.py" data-lang="python"><span class="dim"># tabs.py: the plain notebook, nothing MCP in it
 import json, pathlib
 FILE = pathlib.Path("tabs.json")
 PRICES = {"roti telur": 2.5, "teh-o": 1.8}
-
 class Tab:
     def __init__(self, name):
         self.name = name.lower()
         d = self._load().get(self.name, {})
-        self.balance, self.items, self.note = d.get("balance", 0.0), d.get("items", []), d.get("note", "")
+        self.balance, self.items = d.get("balance", 0.0), d.get("items", [])
     @staticmethod
     def _load(): return json.loads(FILE.read_text()) if FILE.exists() else {}
     @classmethod
     def get(cls, name): return cls(name)
     def _save(self):
         book = self._load()
-        book[self.name] = {"balance": self.balance, "items": self.items, "note": self.note}
+        book[self.name] = {"balance": self.balance, "items": self.items}
         FILE.write_text(json.dumps(book))
     def add(self, item, qty):
         self.items.append([item, qty]); self.balance += PRICES.get(item.lower(), 0) * qty
         self._save(); return self.balance
-    def pay(self, amount):
-        self.balance -= amount; self._save(); return self.balance
     def report(self):
-        return json.dumps({"name": self.name, "balance": self.balance, "items": self.items, "note": self.note})
-
-</span></div>
-<div class="codebox" data-file="tab_server.py" data-lang="python"><span class="dim"># tab_server.py
-</span><span class="chg">from mcp.server.fastmcp import FastMCP
+        return json.dumps({"name": self.name, "balance": self.balance, "items": self.items})</span></div>
+<div class="codebox" data-file="tab_server.py" data-lang="python"><span class="chg">from mcp.server.fastmcp import FastMCP
 from tabs import Tab
-
 mcp = FastMCP("tab_book")
 
 @mcp.tool()
 async def get_balance(name: str) -> float:
     """How much this regular currently owes, in S$.
-
     Args:
         name: the regular's name as written in the book
     """
@@ -59,7 +48,6 @@ async def get_balance(name: str) -> float:
 @mcp.tool()
 async def add_order(name: str, item: str, qty: int) -> float:
     """Add an order to a regular's tab and return the new balance.
-
     Args:
         name: the regular's name
         item: menu item, e.g. 'roti telur'
@@ -67,98 +55,57 @@ async def add_order(name: str, item: str, qty: int) -> float:
     """
     return Tab.get(name).add(item, qty)
 
-@mcp.tool()
-async def settle(name: str, amount: float) -> float:
-    """Record a cash payment and return what is still owed."""
-    return Tab.get(name).pay(amount)</span></div>
-<div class="try" id="p1"></div>
-<h2><span class="en">Step 2 · Tools versus resources</span><span class="zh">第 2 步 · 工具和资源</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>tool</b> is an action the <i>model</i> decides to call. A <b>resource</b> is read-only data with an address (a URI, an address written like a web link, such as <code>tabs://book/tan</code>). The <i>app</i> decides to fetch it, which is handy for pasting context straight into a prompt.</p><p class="zh" style="margin:0 0 8px"><b>工具</b>是由<i>模型</i>决定要不要调用的动作。<b>资源</b>是有地址（URI，一种像网址一样的地址写法，比如 <code>tabs://book/tan</code>）的只读数据，由<i>应用</i>决定去取，很适合把背景资料直接贴进提示词。</p><p class="en" style="margin:0 0 8px">Then end the file with <code>mcp.run(transport="stdio")</code>. That is the whole server: decorated functions plus one line to start it.</p><p class="zh" style="margin:0 0 8px">最后用 <code>mcp.run(transport="stdio")</code> 收尾。整个服务端就是：加了装饰器的函数，再加一行启动。</p></div>
-<div class="codebox" data-file="tab_server.py" data-lang="python"><span class="dim"># tab_server.py, continued
-</span><span class="chg">@mcp.resource("tabs://book/{name}")
+@mcp.resource("tabs://book/{name}")
 async def tab_page(name: str) -> str:
-    """The full page for one regular: items, balance and note, as JSON."""
+    """The full page for one regular: items and balance, as JSON."""
     return Tab.get(name).report()
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")</span></div>
-<p class="en">Tool (the model decides) or resource (the app fetches)? Sort each case.</p>
-<p class="zh">工具（模型决定）还是资源（应用去取）？逐个分类。</p>
+<div class="try" id="p1"></div>
+<p class="en">Tool (the model decides) or resource (the app fetches)? Sort each case.</p><p class="zh">工具（由模型决定）还是资源（由应用去取）？请逐项分类。</p>
 <div class="sc" id="g2"></div>
-<h2><span class="en">Step 3 · Use it from an agent</span><span class="zh">第 3 步 · 从智能体里使用它</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Your server is now just another server. The agent framework starts it as a subprocess, exactly like a third-party one from the last lesson. Tell the agent in its instructions to use the tab tools and never to guess numbers. The <code>async with</code> block must run inside an <code>async def</code> (or a notebook cell).</p><p class="zh" style="margin:0 0 8px">你的服务端现在和别的服务端没有区别。智能体框架会把它当作子进程启动，和上一课的第三方服务端一模一样。在指令里告诉智能体：用账本工具，不要瞎猜数字。<code>async with</code> 这段要放在 <code>async def</code> 里（或笔记本的单元格里）运行。</p></div>
+
+<h2><span class="en">Step 2 · Use it from an agent and from a raw client</span><span class="zh">第 2 步 · 从智能体和原始客户端使用它</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li>Your server is now just another server: the agent framework starts it as a subprocess. Set <code>cwd</code> so it finds <code>tabs.py</code>.</li><li>A raw client does four things: open the transport, open a <b>session</b>, call <code>initialize()</code>, then ask. It needs no model, so reading a resource costs no tool call.</li></ul>
+<ul class="zh" style="margin:0;padding-left:18px"><li>你的服务端现在就是又一个服务端：智能体框架把它当子进程启动。设好 <code>cwd</code>，它才找得到 <code>tabs.py</code>。</li><li>原始客户端做四件事：打开传输、打开<b>会话</b>、调用 <code>initialize()</code>、再提问。它不需要模型，所以读资源不花任何工具调用。</li></ul></div>
 <div class="codebox" data-file="tab_agent.py" data-lang="python"><span class="dim">from agents import Agent, Runner, trace
 from agents.mcp import MCPServerStdio
-
+# run inside an async def or a notebook cell
 </span><span class="chg">params = {"command": "uv", "args": ["run", "tab_server.py"],
           "cwd": "/path/to/tab_project"}   # the folder that holds tab_server.py and tabs.py</span><span class="dim">
-
 async with MCPServerStdio(params=params, client_session_timeout_seconds=30) as tab_book:
-    print([t.name for t in await tab_book.list_tools()])
     agent = Agent(name="cashier",
                   instructions="You manage regulars' tabs. Use the tab tools; never guess numbers.",
                   model="gpt-4o-mini", mcp_servers=[tab_book])
     with trace("cashier"):
         res = await Runner.run(agent, "Mr Tan had 2 roti telur and a teh-O. Add it, then tell me his balance.")
 print(res.final_output)</span></div>
-<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
-<div class="codebox" data-file="output" data-lang="text">['get_balance', 'add_order', 'settle']
-Mr Tan's tab now stands at S$6.80 (2 roti telur and 1 teh-O).</div>
 <div class="try" id="p3"></div>
-<h2><span class="en">Step 4 · A raw client, no agent</span><span class="zh">第 4 步 · 不用智能体的原始客户端</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Underneath, a client does four things: open the transport, open a <b>session</b>, call <code>initialize()</code>, then ask. This is what the agent framework did for you in Step 3.</p><p class="zh" style="margin:0 0 8px">说到底，客户端只做四件事：打开通道、打开<b>会话</b>、调用 <code>initialize()</code>，然后提问。第 3 步里智能体框架替你做的就是这些。</p><p class="en" style="margin:0 0 8px">Use it when you do not need a model. <code>read_tab</code> fetches Mr Tan's page so you can paste it into a prompt, and that costs no tool call at all.</p><p class="zh" style="margin:0 0 8px">不需要模型的时候就用它。<code>read_tab</code> 取出 Tan 先生那一页，你可以把它贴进提示词，完全不用一次工具调用。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="A raw MCP client opens a transport, opens a session, calls initialize, then calls read_tab on the tab-book server without any model"><defs><marker id="ah22" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box" x="20" y="25" width="150" height="50" rx="10"/><text class="en" x="95.0" y="54.0">1 Open transport</text><text class="zh" x="95.0" y="54.0">1 打开通道</text><rect class="box" x="200" y="25" width="150" height="50" rx="10"/><text class="en" x="275.0" y="54.0">2 Open session</text><text class="zh" x="275.0" y="54.0">2 打开会话</text><rect class="box" x="380" y="25" width="150" height="50" rx="10"/><text class="en" x="455.0" y="54.0">3 initialize()</text><text class="zh" x="455.0" y="54.0">3 初始化</text><rect class="box" x="560" y="25" width="140" height="50" rx="10"/><text class="en" x="630.0" y="54.0">4 read_tab</text><text class="zh" x="630.0" y="54.0">4 调用 read_tab</text><path class="lnk" d="M170 50L200 50" marker-end="url(#ah22)"/><path class="lnk" d="M350 50L380 50" marker-end="url(#ah22)"/><path class="lnk" d="M530 50L560 50" marker-end="url(#ah22)"/><rect class="box new" x="200" y="140" width="320" height="55" rx="10"/><text class="en" x="360.0" y="171.5">Tab-book MCP server</text><text class="zh" x="360.0" y="171.5">账本 MCP 服务端</text><path class="lnk hot" d="M630 75L630 167L520 167" marker-end="url(#ah22)"/><text class="en sm" x="110" y="172">no model needed</text><text class="zh sm" x="110" y="172">不需要模型</text></svg><figcaption><span class="en">A client is four small steps. The tab-book server answers the same way for an agent or a plain script.</span><span class="zh">客户端就是四个小步骤。无论来自智能体还是普通脚本，账本服务端的回答方式都一样。</span></figcaption></figure>
-<div class="codebox" data-file="tab_client.py" data-lang="python"><span class="dim"># tab_client.py
-import mcp
+<div class="codebox" data-file="tab_client.py" data-lang="python"><span class="dim">import mcp
 from mcp import StdioServerParameters
 from mcp.client.stdio import stdio_client
 
 params = StdioServerParameters(command="uv", args=["run", "tab_server.py"], env=None)
-
 </span><span class="chg">async def read_tab(name: str) -> str:
     async with stdio_client(params) as (read, write):
         async with mcp.ClientSession(read, write) as session:
             await session.initialize()
             res = await session.read_resource(f"tabs://book/{name}")
-            return res.contents[0].text
-
-async def list_tool_names() -> list[str]:
-    async with stdio_client(params) as (read, write):
-        async with mcp.ClientSession(read, write) as session:
-            await session.initialize()
-            return [t.name for t in (await session.list_tools()).tools]</span></div>
+            return res.contents[0].text</span></div>
 <div class="try" id="p4"></div>
-<h2><span class="en">Step 5 · MCP tools as plain function tools</span><span class="zh">第 5 步 · 把 MCP 工具变成普通函数工具</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Sometimes you want the MCP tools without keeping a server object in the agent, for example to mix them into a framework that only takes plain functions. With the raw session you can call any tool by name, then wrap it. Every call here starts the server again from scratch, which costs a moment, so this suits occasional calls, not a tight loop.</p><p class="zh" style="margin:0 0 8px">有时你想用 MCP 的工具，却不想在智能体里留着服务端对象，比如要把它们混进一个只接受普通函数的框架。有了原始会话，就能按名字调用任何工具，再包一层。这里每次调用都会把服务端重新启动一遍，要花一点时间，所以适合偶尔调用，不适合密集循环。</p></div>
-<div class="codebox" data-file="tab_tool.py" data-lang="python"><span class="dim">from agents import function_tool
 
-</span><span class="chg">async def call_tool(tool: str, args: dict):
-    async with stdio_client(params) as (read, write):
-        async with mcp.ClientSession(read, write) as session:
-            await session.initialize()
-            return await session.call_tool(tool, args)
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en">I pinned nothing, then the 2.0 release removed <code>mcp.server.fastmcp</code>: keep <code>mcp&lt;2</code>. And a server started from the wrong folder died on import, so all I saw was a timeout.</span><span class="zh">我没有锁定版本，结果 2.0 版移除了 <code>mcp.server.fastmcp</code>：要保持 <code>mcp&lt;2</code>。另外服务端从错误的文件夹启动，会在导入时崩掉，我看到的只有超时。</span></div>
 
-@function_tool
-async def get_balance_plain(name: str) -> str:
-    """How much a regular currently owes, in S$."""
-    return (await call_tool("get_balance", {"name": name})).content[0].text</span></div>
-<div class="try" id="p5"></div>
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我踩过的坑</span></b><span class="en">Three things cost me time. First, <code>mcp&lt;2</code> matters: <code>from mcp.server.fastmcp import FastMCP</code> is the classic import, and the 2.0 release removed that module. Some third-party servers import it without capping their dependency, so with <code>uvx</code> I add <code>--with "mcp&lt;2"</code>. Second, run the server from the right folder. My server imports a local <code>tabs.py</code>, and if the subprocess starts elsewhere it dies on import, and all I see is a timeout. Set <code>cwd</code> in the params, as in Step 3. Third, "Tan" and "tan" were different pages until <code>Tab</code> lowercased the name. On Windows in Jupyter, the raw <code>stdio_client</code> needs the <code>errlog=subprocess.DEVNULL</code> trick too (with <code>import subprocess</code> at the top; it throws away the server's error text so Jupyter does not choke).</span><span class="zh">三件事浪费了我不少时间。第一，<code>mcp&lt;2</code> 很重要：<code>from mcp.server.fastmcp import FastMCP</code> 是经典写法，而 2.0 版把这个模块删掉了。有些第三方服务端没有限制依赖版本也用这个导入，所以用 <code>uvx</code> 时我会加上 <code>--with "mcp&lt;2"</code>。第二，要在正确的文件夹里运行服务端。我的服务端要导入本地的 <code>tabs.py</code>，子进程在别处启动就会在导入时崩掉，而我只看到超时。要像第 3 步那样在参数里设置 <code>cwd</code>。第三，在 <code>Tab</code> 把名字转成小写之前，“Tan”和“tan”是两页不同的账。在 Windows 的 Jupyter 里，原始的 <code>stdio_client</code> 同样需要 <code>errlog=subprocess.DEVNULL</code> 这个办法（文件开头要有 <code>import subprocess</code>；它把服务端的报错文字丢掉，免得 Jupyter 出问题）。</span></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Wrap your own notebook.</b> Pick a small list you keep (books lent, plants watered) and give it two tools and one resource.</span><span class="zh"><b>包装你自己的小本子。</b>挑一份你自己记的小清单（借出的书、浇过水的花），给它两个工具和一个资源。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Break the docstring.</b> Delete the docstring of one tool and ask the agent something that needs it. See how the model's choice changes.</span><span class="zh"><b>故意删掉文档字符串。</b>删掉一个工具的文档字符串，再问一个需要它的问题，看看模型的选择有什么变化。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Wrong folder.</b> Start the client from another folder and watch the timeout. Then fix it with <code>cwd=</code>.</span><span class="zh"><b>故意走错文件夹。</b>在别的文件夹里启动客户端，看看超时是什么样子，再用 <code>cwd=</code> 修好。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the order pad at Kopi Corner can become an MCP server the same way as the tab book: Aina, a plain script and the assistant all ask "what is on order 12?" through the same plug and get the same shaped answer. The next problem is that one server is not enough, because Uncle Lim's usual, the news and supplier prices all live elsewhere.</span><span class="zh">现在 Kopi Corner 的点单本可以像这本账本一样变成 MCP 服务端：Aina、一个普通脚本和助手都通过同一个插口问“12 号单点了什么”，得到同样格式的回答。下一个问题是一个服务端不够：Lim 叔的惯常点单、新闻和供货价格都在别处。</span></div>
-<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
-<div class="card"><p class="en" style="margin:0">• <b><code>ModuleNotFoundError: No module named 'mcp'</code></b>: The package is not installed here. Fix: <code>pip install "mcp[cli]&lt;2"</code> (keep the quotes).<br>• <b><code>McpError: Connection closed</code></b>: The server crashed on start, often an import error or <code>print</code> to stdout. Fix: run <code>python tab_server.py</code> alone to see the error, and use <code>print(..., file=sys.stderr)</code>.<br>• <b><code>FileNotFoundError: tabs.json</code></b>: The server started in a different folder. Fix: use an absolute path, or set <code>cwd</code> in the server parameters.</p>
-<p class="zh" style="margin:0">• <b><code>ModuleNotFoundError: No module named 'mcp'</code></b>：这里没装这个包。解决：<code>pip install "mcp[cli]&lt;2"</code>（引号要保留）。<br>• <b><code>McpError: Connection closed</code></b>：服务一启动就崩了，常见原因是导入错误，或往标准输出里 <code>print</code>。解决：单独运行 <code>python tab_server.py</code> 看错误，调试输出改用 <code>print(..., file=sys.stderr)</code>。<br>• <b><code>FileNotFoundError: tabs.json</code></b>：服务是在另一个文件夹启动的。解决：用绝对路径，或在服务参数里设置 <code>cwd</code>。</p></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Wrap your own notebook.</b> Pick a small list you keep and give it two tools and one resource.</span><span class="zh"><b>包装你自己的笔记本。</b>选一份你常记的小清单，给它两个工具和一个资源。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Break the docstring.</b> Delete one tool's docstring and see how the model's choice changes.</span><span class="zh"><b>弄坏文档字符串。</b>删掉一个工具的文档字符串，看模型的选择怎么变。</span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• A server is decorated functions plus <code>mcp.run()</code>. A client is a session plus <code>list_tools</code>, <code>call_tool</code> and <code>read_resource</code>.<br>• The model sees the name, docstring and type hints, never your code. Write them with care.<br>• <b>Tools</b> are actions the model calls. <b>Resources</b> are read-only data the app fetches by URI.<br>• Your own server plugs into an agent exactly like a third-party one.<br>• A raw client needs no model, so reading a resource costs no tool call.<br>• Any MCP tool can be wrapped as a plain function tool through a session.<br>• Pin <code>mcp&lt;2</code>, start the server in the right folder, and normalise names like "Tan" and "tan".</p><p class="zh" style="margin:0">• 服务端就是加了装饰器的函数加上 <code>mcp.run()</code>；客户端就是一个会话加上 <code>list_tools</code>、<code>call_tool</code> 和 <code>read_resource</code>。<br>• 模型看到的是名字、文档字符串和类型标注，看不到你的代码，所以要认真写。<br>• <b>工具</b>是模型调用的动作；<b>资源</b>是应用按 URI 去取的只读数据。<br>• 你自己的服务端接入智能体的方式，和第三方服务端完全一样。<br>• 原始客户端不需要模型，所以读取资源不用一次工具调用。<br>• 任何 MCP 工具都可以通过会话包装成普通函数工具。<br>• 固定 <code>mcp&lt;2</code>，在正确的文件夹启动服务端，并统一“Tan”和“tan”这类名字的写法。</p></div>
+<div class="card"><p class="en" style="margin:0">• A server is decorated functions plus <code>mcp.run()</code>; a client is a session plus <code>list_tools</code>, <code>call_tool</code> and <code>read_resource</code>.<br>• The model sees only the name, docstring and type hints.<br>• Tools are actions the model calls; resources are read-only data the app fetches by URI.<br>• Your own server plugs in like a third-party one; a raw client needs no model.<br>• Pin <code>mcp&lt;2</code>, start in the right folder, never print to stdout.</p><p class="zh" style="margin:0">• 服务端就是加了装饰器的函数加 <code>mcp.run()</code>；客户端就是会话加 <code>list_tools</code>、<code>call_tool</code> 和 <code>read_resource</code>。<br>• 模型只看到名字、文档字符串和类型标注。<br>• 工具是模型调用的动作；资源是应用按 URI 取的只读数据。<br>• 你自己的服务端和第三方的接法一样；原始客户端不需要模型。<br>• 锁定 <code>mcp&lt;2</code>，在正确的文件夹启动，别往标准输出 print。</p></div>
 
-<h3><span class="en">Recap</span><span class="zh">三句回顾</span></h3>
-<div class="card"><p class="en" style="margin:0">• A server turns plain functions into tools with <code>@mcp.tool()</code> and pages with <code>@mcp.resource()</code>.<br>• A client connects, lists the tools and calls them by name.<br>• Never print to stdout in a stdio server: it is the wire.</p>
-<p class="zh" style="margin:0">• 服务用 <code>@mcp.tool()</code> 把普通函数变成工具，用 <code>@mcp.resource()</code> 变成页面。<br>• 客户端负责连接、列出工具，并按名字调用。<br>• stdio 服务里不要往标准输出打印：那是通信线路。</p></div>
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Agentic</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"goals":{"en":["Write an MCP server from decorated functions and mcp.run()","Write a raw client with list_tools, call_tool and read_resource","Choose between a tool and a resource","Plug your own server into an agent like any other"],"zh":["用带装饰器的函数和 mcp.run() 写一个 MCP 服务器","用 list_tools、call_tool 和 read_resource 写一个原始客户端","在工具和资源之间做选择","把自己的服务器像别的服务器一样接入智能体"]},"prev":["21-why-mcp.html","07-agents-sdk-basics.html"],"tools":{"en":"Python 3.10+, mcp[cli], openai-agents, an OpenAI API key","zh":"Python 3.10+、mcp[cli]、openai-agents、OpenAI API 密钥"},"know":{"en":"You know what MCP is and why it exists.","zh":"知道 MCP 是什么、为什么存在。"},"mins":40,"offline":false}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=8290ab6e"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/22-mcp-server-and-client.js?v=8ab50db0"></script></body></html>
+<script src="js/22-mcp-server-and-client.js?v=267b0dbc"></script></body></html>

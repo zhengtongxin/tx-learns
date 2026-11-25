@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded',function(){
  var $=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
 
- predict($('p1'),{q:{en:'Jason asks: "We have 30 months of supplier invoices. How do we let the model answer questions from them?" Which layer is that question about?',zh:'Jason 问：“我们有 30 个月的供应商发票，怎样让模型根据它们回答问题？”这个问题属于哪一层？'},opts:[{k:'a',en:'Layer 1, chips and cloud',zh:'第 1 层，芯片与云'},{k:'b',en:'Layer 2, models',zh:'第 2 层，模型'},{k:'c',en:'Layer 3, tools and platforms',zh:'第 3 层，工具与平台'},{k:'d',en:'Layer 4, applications',zh:'第 4 层，应用'}],a:'c',ex:{en:'Connecting a model to your own files is the job of layer 3, usually with retrieval (RAG).',zh:'把模型接到自己的文件上，是第 3 层的活，通常靠检索（RAG）。'},hint:{en:'The question is about connecting to your files, not about picking the brain.',zh:'这个问题问的是怎么接上自己的文件，不是选哪个“大脑”。'}});
+ predict($('p1'),{q:{en:'A manager asks: "We have 30 months of supplier invoices. How do we let the model answer questions from them?" Which layer is that question about?',zh:'经理问：“我们有 30 个月的供应商发票，怎样让模型根据它们回答问题？”这个问题属于哪一层？'},opts:[{k:'a',en:'Layer 1, chips and cloud',zh:'第 1 层，芯片与云'},{k:'b',en:'Layer 2, models',zh:'第 2 层，模型'},{k:'c',en:'Layer 3, tools and platforms',zh:'第 3 层，工具与平台'},{k:'d',en:'Layer 4, applications',zh:'第 4 层，应用'}],a:'c',ex:{en:'Connecting a model to your own files is the job of layer 3, usually with retrieval (RAG).',zh:'把模型接到自己的文件上，是第 3 层的活，通常靠检索（RAG）。'},hint:{en:'The question is about connecting to your files, not about picking the brain.',zh:'这个问题问的是怎么接上自己的文件，不是选哪个“大脑”。'}});
 
  game($('g1'),[
   {en:'A rented room of AI chips, billed by the hour',zh:'按小时收费、租来的一屋子 AI 芯片',a:'1',ex:{en:'Machines that train and run models are layer 1.',zh:'训练和运行模型的机器属于第 1 层。'},hint:{en:'Is it hardware you rent?',zh:'它是租来的硬件吗？'}},
@@ -12,7 +12,5 @@ document.addEventListener('DOMContentLoaded',function(){
   {en:'A model sold only through a paid API (closed)',zh:'只通过付费 API 出售的模型（闭源）',a:'2',ex:{en:'Closed or open, a model is layer 2.',zh:'无论闭源还是开放，模型都在第 2 层。'},hint:{en:'Closed or open, what is it?',zh:'不管闭源还是开放，它是什么？'}}],
   [{k:'1',en:'1 Chips and cloud',zh:'1 芯片与云'},{k:'2',en:'2 Models',zh:'2 模型'},{k:'3',en:'3 Tools and platforms',zh:'3 工具与平台'},{k:'4',en:'4 Applications',zh:'4 应用'}],{en:'Product',zh:'产品'});
 
- predict($('p2'),{q:{en:'A salesperson says: "Our new agent builder is a whole new category of AI." Where does it sit on the map?',zh:'销售说：“我们的新智能体搭建器是全新的 AI 类别。”它在图上哪里？'},opts:[{k:'a',en:'A fifth layer of its own',zh:'自己单独的第 5 层'},{k:'b',en:'Layer 3, next to retrieval and workflow builders',zh:'第 3 层，和检索、流程搭建器并列'}],a:'b',ex:{en:'New names mostly land on a layer that already exists. The layers change slowly; the names change monthly.',zh:'新名字多半落在已有的层上。层变得慢，名字每个月都在变。'},hint:{en:'An agent builder connects models to tools.',zh:'智能体搭建器的作用是把模型连到工具上。'}});
 
- predict($('p3'),{q:{en:'Someone says: "Open models are free, so let us use one." What is missing?',zh:'有人说：“开放模型是免费的，我们用一个吧。”漏掉了什么？'},opts:[{k:'a',en:'Nothing: open means no cost',zh:'没漏：开放就是没成本'},{k:'b',en:'Someone still has to run it: machines, people and time cost money',zh:'还得有人来运行：机器、人力和时间都要钱'}],a:'b',ex:{en:'Open means you may run it yourself. Running it is the cost.',zh:'开放是指你可以自己运行，而运行本身就是成本。'},hint:{en:'Who keeps the machine on?',zh:'谁来让机器一直开着？'}});
 });

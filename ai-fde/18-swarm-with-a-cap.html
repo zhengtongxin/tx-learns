@@ -5,15 +5,11 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/ai-fde/18-swarm-with-a-cap.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-fde/18-swarm-with-a-cap.html","url":"https://tx-learns.vercel.app/ai-fde/18-swarm-with-a-cap.html","name":"Capped swarm","alternateName":"有上限的智能体群","description":"Build a dashboard page that starts a dispatch with a cap you choose, shows each claim's progress, and ends with a summary read from records instead of written by a model.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"Pausing and working in parallel","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI FDE","url":"https://tx-learns.vercel.app/ai-fde/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI FDE","item":"https://tx-learns.vercel.app/ai-fde/index.html"},{"@type":"ListItem","position":3,"name":"Capped swarm","item":"https://tx-learns.vercel.app/ai-fde/18-swarm-with-a-cap.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Pausing and working in parallel · Project</span><span class="zh">暂停与并行 · 项目</span></span><h1><span class="en">Capped swarm</span><span class="zh">有上限的智能体群</span></h1><p class="meta"><span class="en">Start a dispatch from the dashboard, choose how many agents work at once, and see each claim’s progress · ~30 min · hands-on</span><span class="zh">从看板上开始一次调度，选同时有几个智能体在干，并看到每份理赔的进度 · 约 30 分钟 · 动手实践</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the pilot’s dispatcher could run many claims at once, but only from Mei Ling’s laptop. Today it fails because Aisha and Mr Goh will never open a terminal. We fix it with a dashboard page: a box for how many agents, a start button, and a panel that shows every claim.</p>
-<p class="zh" style="margin:0">上回，试点的调度器能同时跑很多份理赔，但只能在 Mei Ling 的笔记本上。今天的问题是：Aisha 和 Goh 先生永远不会打开终端。我们的办法是在看板上做一个页面：一个选智能体数量的输入框、一个开始按钮，还有一个显示每份理赔的面板。</p></div>
-<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">Mei Ling’s dispatcher works, but only from her laptop. Aisha and Mr Goh will never open a terminal. So she gives it a page on the dashboard: one box to choose how many agents run at once, one button to start, and a panel that shows every claim and where it stands. When the run ends, Aisha gets a short summary of what is waiting for her. This project reuses the dispatcher from the last lesson, saved as <code>dispatcher.py</code>, and your claims agent and claim list saved as <code>desk.py</code>. Its <code>load_claims()</code> returns the day’s claims and its <code>decide(claim)</code> returns the decision and what that call cost in US dollars.</p>
-<p class="zh" style="margin:0">Mei Ling 的调度器能用了，但只能在她的笔记本上跑。Aisha 和 Goh 先生永远不会打开终端。所以她在看板上给它做一个页面：一个输入框，用来选同时跑几个智能体，一个按钮开始，一个面板显示每份理赔和它停在哪。运行结束时，Aisha 会收到一份简短的总结，写着有什么在等她。这个项目沿用上一课的调度器（存为 <code>dispatcher.py</code>），以及你的理赔智能体和理赔列表（存为 <code>desk.py</code>）。其中 <code>load_claims()</code> 返回当天的理赔，<code>decide(claim)</code> 返回判定结果，以及这次调用花了多少美元。</p></div>
-
-<div class="callout tip"><b class="lbl"><span class="en">Words in this lesson</span><span class="zh">这一课用到的词</span></b><span class="en"><b>Service</b>: a program that keeps running and answers requests, so a web page can start the agent.<br><b>Endpoint</b>: one address of the service, such as <code>/health</code>, that does one job.<br><b>Cap</b>: the largest number of agents a dispatch may run at once.</span><span class="zh"><b>服务</b>：一直运行、响应请求的程序，网页可以通过它启动智能体。<br><b>接口</b>：服务的一个地址，比如 <code>/health</code>，只做一件事。<br><b>上限</b>：一次派发最多同时运行的智能体数量。</span></div>
-<h2><span class="en">Step 1 · A queue page with a start button</span><span class="zh">第 1 步 · 带开始按钮的队列页</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The service is a small web server. Its start endpoint checks the number first: a whole number from 1 to 25, with 3 as the default. Anything else is turned away before any agent starts. Then it launches the dispatch in the background and answers straight away with a run id, so the page does not hang for minutes. We use FastAPI; install it with <code>pip install fastapi uvicorn</code> and start the server with <code>uvicorn service:app</code>. <code>asyncio.to_thread</code> runs a call that just waits, like the model call, on a helper thread, so the server can answer other requests in the meantime.</p>
-<p class="zh" style="margin:0 0 8px">这个服务是一个小小的网页服务器。它的开始接口先检查数字：1 到 25 的整数，默认 3。别的值在任何智能体启动之前就会被拒绝。然后它在后台启动调度，并立刻回一个运行编号，页面不会卡上好几分钟。我们用 FastAPI，用 <code>pip install fastapi uvicorn</code> 安装，用 <code>uvicorn service:app</code> 启动服务器。<code>asyncio.to_thread</code> 会把一个只是在等的调用（比如模型调用）放到辅助线程上跑，这样服务器在等的时候还能回应别的请求。</p></div>
+<h2><span class="en">Step 1 · A start button that validates and locks</span><span class="zh">第 1 步 · 会校验、会上锁的开始按钮</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b>
+<ul class="en" style="margin:0"><li>This reuses the dispatcher from the last lesson (<code>dispatcher.py</code>) and your claims agent (<code>desk.py</code>, with <code>load_claims()</code> and <code>decide(claim)</code>).</li><li>A small FastAPI service wraps it: <code>pip install fastapi uvicorn</code>, run with <code>uvicorn service:app</code>.</li><li>The start endpoint validates the cap first (a whole number 1 to 25, default 3), launches the dispatch in the background and answers at once with a run id.</li><li>Only one dispatch at a time: a second start gets a clear 409, so runs never share a rate limit or mix results.</li></ul>
+<ul class="zh" style="margin:0"><li>这里沿用上一课的调度器（<code>dispatcher.py</code>）和你的理赔智能体（<code>desk.py</code>，含 <code>load_claims()</code> 和 <code>decide(claim)</code>）。</li><li>用一个小小的 FastAPI 服务把它包起来：<code>pip install fastapi uvicorn</code>，用 <code>uvicorn service:app</code> 运行。</li><li>开始接口先校验上限（1 到 25 的整数，默认 3），在后台启动调度，并立刻返回一个运行编号。</li><li>一次只跑一个调度：第二次开始会得到清楚的 409，这样各次运行不会共用速率限制，结果也不会混在一起。</li></ul></div>
+<figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="A start request is refused if a run is already in progress; otherwise the dispatcher starts"><defs><marker id="ah18" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><path class="lnk" d="M185 105L265 105" marker-end="url(#ah18)"/><path class="lnk hot" d="M455 90L525 50" marker-end="url(#ah18)"/><path class="lnk" d="M455 120L525 165" marker-end="url(#ah18)"/><rect class="box soft" x="15" y="75" width="170" height="60" rx="10"/><text class="en" x="100" y="109">Start button</text><text class="zh" x="100" y="109">开始按钮</text><rect class="box new" x="265" y="75" width="190" height="60" rx="10"/><text class="en" x="360" y="101">current is set?</text><text class="zh" x="360" y="101">current 已有值？</text><text class="en sm" x="360" y="118">one run at a time</text><text class="zh sm" x="360" y="118">一次一个</text><rect class="box" x="525" y="15" width="180" height="60" rx="10"/><text class="en" x="615" y="49">Dispatcher starts</text><text class="zh" x="615" y="49">调度器开始</text><rect class="box soft" x="525" y="140" width="180" height="60" rx="10"/><text class="en" x="615" y="166">Refused, with</text><text class="zh" x="615" y="166">拒绝，并提示</text><text class="en sm" x="615" y="183">a clear message</text><text class="zh sm" x="615" y="183">原因</text><text class="en sm" x="480" y="52">no</text><text class="zh sm" x="480" y="52">没有</text><text class="en sm" x="480" y="160">yes</text><text class="zh sm" x="480" y="160">有</text></svg><figcaption><span class="en">Like a single-lane counter: the next start waits until the stamp is free.</span><span class="zh">像只有一条队的柜台：下一个开始要等图章空出来。</span></figcaption></figure>
 <div class="codebox" data-file="service.py" data-lang="python"><span class="chg"># service.py
 import asyncio, sqlite3, uuid
 from fastapi import FastAPI, HTTPException
@@ -21,24 +17,27 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 from dispatcher import dispatch
 from desk import load_claims, decide
-
 app = FastAPI()
-
+current = None                       # the id of the run that is working, if any
 class Start(BaseModel):
     n: int = Field(default=3, ge=1, le=25)          # 1 to 25 agents at once
-
 async def agent(claim):
     decision, cost = await asyncio.to_thread(decide, claim)   # the model call blocks, so use a thread
     return decision
-
-async def run_dispatch(n):
-    await dispatch(load_claims(), agent, lambda claim_id, status: None, n)
-
+async def run_dispatch(run, n):
+    global current
+    try:
+        await dispatch(load_claims(), agent, lambda claim_id, status: None, n)
+    finally:
+        current = None               # free the lane, even if the run failed
 @app.post("/dispatch")
 async def start(body: Start):
-    asyncio.create_task(run_dispatch(body.n))
-    return {"run": uuid.uuid4().hex[:8]}
-
+    global current
+    if current:                      # no await between this check and the next line, so no race
+        raise HTTPException(409, "A dispatch is already running. Wait for it to finish.")
+    current = uuid.uuid4().hex[:8]
+    asyncio.create_task(run_dispatch(current, body.n))
+    return {"run": current}
 PAGE = """&lt;h1&gt;Queue&lt;/h1&gt;
 &lt;label&gt;Agents at once &lt;input id="n" type="number" min="1" max="25" value="3"&gt;&lt;/label&gt;
 &lt;button id="go"&gt;Start dispatch&lt;/button&gt; &lt;p id="msg"&gt;&lt;/p&gt;
@@ -49,43 +48,19 @@ go.onclick = async () =&gt; {
   msg.textContent = r.ok ? "Started." : "Could not start.";
 };
 &lt;/script&gt;"""
-
 @app.get("/", response_class=HTMLResponse)
 def page():
     return PAGE</span></div>
-<div class="try" id="p1"></div>
-
-<h2><span class="en">Step 2 · Only one dispatch at a time</span><span class="zh">第 2 步 · 一次只跑一个调度</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Two dispatches at once would share the same rate limit and mix their results, so nobody could tell which run a number belongs to. Keep one variable, <code>current</code>, holding the run that is working. If it is set, a second start is refused with a clear message. Like a single-lane counter: the next customer waits until the stamp is free.</p>
-<p class="zh" style="margin:0 0 8px">两个调度同时跑，会共用同一个速率限制，结果还会混在一起，没人分得清某个数字属于哪一次。用一个变量 <code>current</code> 记着正在干的那次运行。如果它有值，第二次开始就会被拒绝，并给出清楚的提示。就像只有一个窗口的柜台：下一位客人要等图章空出来。</p></div>
-<figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="A start request is refused if a run is already in progress; otherwise the dispatcher starts"><defs><marker id="ah18" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><path class="lnk" d="M185 105L265 105" marker-end="url(#ah18)"/><path class="lnk hot" d="M455 90L525 50" marker-end="url(#ah18)"/><path class="lnk" d="M455 120L525 165" marker-end="url(#ah18)"/><rect class="box soft" x="15" y="75" width="170" height="60" rx="10"/><text class="en" x="100" y="109">Start button</text><text class="zh" x="100" y="109">开始按钮</text><rect class="box new" x="265" y="75" width="190" height="60" rx="10"/><text class="en" x="360" y="101">current is set?</text><text class="zh" x="360" y="101">current 已有值？</text><text class="en sm" x="360" y="118">one run at a time</text><text class="zh sm" x="360" y="118">一次一个</text><rect class="box" x="525" y="15" width="180" height="60" rx="10"/><text class="en" x="615" y="49">Dispatcher starts</text><text class="zh" x="615" y="49">调度器开始</text><rect class="box soft" x="525" y="140" width="180" height="60" rx="10"/><text class="en" x="615" y="166">Refused, with</text><text class="zh" x="615" y="166">拒绝，并提示</text><text class="en sm" x="615" y="183">a clear message</text><text class="zh sm" x="615" y="183">原因</text><text class="en sm" x="480" y="52">no</text><text class="zh sm" x="480" y="52">没有</text><text class="en sm" x="480" y="160">yes</text><text class="zh sm" x="480" y="160">有</text></svg><figcaption><span class="en">Like a single-lane counter: the next start waits until the stamp is free.</span><span class="zh">像只有一条队的柜台：下一个开始要等图章空出来。</span></figcaption></figure>
-<div class="codebox" data-file="service.py" data-lang="python"><span class="chg">current = None                       # the id of the run that is working, if any
-
-async def run_dispatch(run, n):
-    global current
-    try:
-        await dispatch(load_claims(), agent, lambda claim_id, status: None, n)
-    finally:
-        current = None               # free the lane, even if the run failed
-
-@app.post("/dispatch")
-async def start(body: Start):
-    global current
-    if current:                      # no await between this check and the next line, so no race
-        raise HTTPException(409, "A dispatch is already running. Wait for it to finish.")
-    current = uuid.uuid4().hex[:8]
-    asyncio.create_task(run_dispatch(current, body.n))
-    return {"run": current}</span></div>
 <div class="try" id="p2"></div>
 
-<h2><span class="en">Step 3 · A run panel from records</span><span class="zh">第 3 步 · 来自记录的运行面板</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The panel needs somewhere to read from, so every change is written to a small table, one row per claim per run. The panel asks for that table and draws it. Have the page keep the run id from the start reply and ask <code>/runs/{run id}</code> every couple of seconds; you add that small script yourself, the way Step 5 adds its check. Because the rows are the truth, a page reload or a second browser shows the same thing. SQLite is built into Python; use your hosted database if you have one.</p>
-<p class="zh" style="margin:0 0 8px">面板得有地方可读，所以每次变化都写进一张小表，每次运行里每份理赔一行。面板读取这张表并画出来。让页面保存开始接口返回的运行编号，每隔几秒去请求 <code>/runs/{运行编号}</code>；这段小脚本要你自己加，做法和第 5 步加检查一样。因为这些行就是事实，刷新页面或换一个浏览器，看到的都一样。SQLite 是 Python 自带的；如果你有托管数据库，也可以用它。</p></div>
+<h2><span class="en">Step 2 · A panel and summary from records</span><span class="zh">第 2 步 · 来自记录的面板和总结</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b>
+<ul class="en" style="margin:0"><li>Write every status change to a table, one row per claim per run. The panel reads the table, so a reload or a second browser shows the same thing.</li><li>The finishing summary is a count over that table, never a model's words, so it cannot disagree with what happened.</li><li>A payout over the S$800 limit is not “approved” yet: it waits for a signature.</li></ul>
+<ul class="zh" style="margin:0"><li>把每次状态变化写进一张表，每次运行里每份理赔一行。面板读这张表，所以刷新页面或换个浏览器，看到的都一样。</li><li>收尾总结是对这张表的计数，不是模型写的话，所以不会和实际发生的事对不上。</li><li>超过 S$800 限额的赔付还不算“已批准”：它在等人签字。</li></ul></div>
 <div class="codebox" data-file="service.py" data-lang="python"><span class="chg">db = sqlite3.connect("runs.db", check_same_thread=False)
 db.execute("""CREATE TABLE IF NOT EXISTS claim_runs (
     run TEXT, claim TEXT, status TEXT, action TEXT, payout REAL,
     PRIMARY KEY (run, claim))""")
-
 def save(run, claim_id, **fields):          # fields: status, action or payout, set by our own code
     db.execute("INSERT OR IGNORE INTO claim_runs (run, claim, status) VALUES (?, ?, 'waiting')",
                (run, claim_id))
@@ -93,7 +68,6 @@ def save(run, claim_id, **fields):          # fields: status, action or payout, 
         db.execute(f"UPDATE claim_runs SET {column} = ? WHERE run = ? AND claim = ?",
                    (value, run, claim_id))
     db.commit()
-
 async def run_dispatch(run, n):
     global current
     async def agent_for_run(claim):
@@ -106,21 +80,10 @@ async def run_dispatch(run, n):
     finally:
         current = None
 
-@app.get("/runs/{run}")
-def panel(run: str):
-    rows = db.execute("SELECT claim, status, action, payout FROM claim_runs WHERE run = ?", (run,))
-    return [{"claim": c, "status": s, "action": a, "payout": p} for c, s, a, p in rows]</span></div>
-<div class="try" id="p3"></div>
-
-<h2><span class="en">Step 4 · A finishing summary from records</span><span class="zh">第 4 步 · 由记录得出的收尾总结</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">When the run ends, handlers want five numbers, not a trace: approved, declined, referred, payouts waiting for sign-off, and claims left for a handler. Count them with a query. “Referred” means the agent itself passed the claim on; “left for a handler” means it failed twice. A big approval, over the S$800 limit, is not “approved” yet: it waits for a signature.</p>
-<p class="zh" style="margin:0 0 8px">运行结束时，理赔员要的是五个数字，而不是一堆追踪记录：批准、拒赔、转交、等着签字的赔付，以及留给理赔员的理赔。用一条查询把它们数出来。“转交”是智能体自己把理赔交了出去；“留给理赔员”是它失败了两次。超过 S$800 限额的大额批准还不算“已批准”：它在等人签字。</p></div>
-<div class="codebox" data-file="service.py" data-lang="python"><span class="chg">SIGNOFF_LIMIT = 800
-
+SIGNOFF_LIMIT = 800
 def count(run, where, *args):
     return db.execute(f"SELECT COUNT(*) FROM claim_runs WHERE run = ? AND {where}",
                       (run, *args)).fetchone()[0]
-
 @app.get("/runs/{run}/summary")
 def summary(run: str):
     return {
@@ -133,58 +96,28 @@ def summary(run: str):
 <p class="en">Where does each claim land in the summary? Sort them.</p>
 <p class="zh">每份理赔在总结里归到哪一栏？来分一分。</p><div class="sc" id="g1"></div>
 
-<h2><span class="en">Step 5 · Say so when the agent is not running</span><span class="zh">第 5 步 · 智能体没在运行时要说出来</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A button that does nothing is the worst button. When the page opens it asks the service if it is alive. The page itself comes from this same service, so the check matters most when Aisha opens a saved copy of it. If there is no answer, the button is switched off and the page says why, in words Auntie Siew could read to Kumar over the phone. Add the small <code>/health</code> endpoint and change the page’s script to use it.</p>
-<p class="zh" style="margin:0 0 8px">什么都不做的按钮是最糟的按钮。页面打开时，会先问服务还活着没有。页面本身也来自同一个服务，所以这个检查最有用的情况，是 Aisha 打开的是一份保存下来的副本。没有回应，就把按钮关掉，并用 Siew 阿姨可以在电话里读给 Kumar 听的话说明原因。加一个小小的 <code>/health</code> 接口，并让页面的脚本用上它。</p></div>
+<h2><span class="en">Step 3 · Say so when the service is down</span><span class="zh">第 3 步 · 服务没开时要说出来</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">A button that does nothing is the worst button. On load the page asks <code>/health</code>; with no answer it switches the button off and says why in plain words.</p>
+<p class="zh" style="margin:0">什么都不做的按钮是最糟的按钮。页面加载时先问 <code>/health</code>；没有回应，就把按钮关掉，并用大白话说明原因。</p></div>
 <div class="codebox" data-file="service.py" data-lang="python"><span class="chg">@app.get("/health")
 def health():
     return {"ok": True, "busy": current is not None}</span><span class="dim">
-
 # in PAGE's script, before the go.onclick line:</span><span class="chg">
 fetch("/health").then(r =&gt; r.json()).catch(() =&gt; null).then(h =&gt; {
   if (!h) { go.disabled = true; msg.textContent = "The agent service is not running. Ask Kumar to start it."; }
   else if (h.busy) { msg.textContent = "A dispatch is already running."; }
-});</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">$ uvicorn service:app --port 8000
-INFO:     Started server process [4121]
-INFO:     Uvicorn running on http://127.0.0.1:8000</div>
+});</span></div>
 <div class="try" id="p5"></div>
 
-<h2><span class="en">Step 6 · Record cost and time for every claim</span><span class="zh">第 6 步 · 为每份理赔记下成本和用时</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">To compare three caps on the same queue, you need what each claim cost and how long it took, <em>against the run it happened in</em>. Add four columns: cost, seconds, and when the claim started and finished. Fill them when the claim finishes. Then a run’s total cost, its slowest claim and its own run time are one query away. The total run time is the span from the first start to the last finish, because claims overlap.</p>
-<p class="zh" style="margin:0 0 8px">要拿同一个队列比较三种上限，你需要知道每份理赔花了多少钱、用了多久，而且<em>记在它所属的那次运行下面</em>。加四列：成本、秒数，以及理赔开始和结束的时间，理赔完成时填进去。这样一次运行的总成本、最慢的那份理赔和整次运行的用时，一条查询就能得到。整次运行的总用时是从第一个开始到最后一个结束的跨度，因为各份理赔是重叠进行的。</p></div>
-<div class="codebox" data-file="service.py" data-lang="python"><span class="chg">for column in ("cost_usd REAL", "secs REAL", "started REAL", "finished REAL"):
-    try:
-        db.execute(f"ALTER TABLE claim_runs ADD COLUMN {column}")
-    except sqlite3.OperationalError:
-        pass                                  # the column is already there
-
-import time
-
-# in run_dispatch, replace agent_for_run with this:
-    async def agent_for_run(claim):
-        started = time.time()
-        decision, cost = await asyncio.to_thread(decide, claim)
-        save(run, claim["id"], action=decision["action"], payout=float(decision.get("payout") or 0),
-             cost_usd=cost, started=started, finished=time.time(), secs=time.time() - started)
-        return decision
-
-# one run's totals, including its own run time:
-# SELECT SUM(cost_usd), MAX(secs), MAX(finished) - MIN(started) FROM claim_runs WHERE run = ?</span></div>
-<div class="try" id="p6"></div>
-
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我当时想错了</span></b><span class="en">My first summary was written by a model, and now and then it disagreed with the records: it said 11 approved when the table had 10. Building the summary from the records fixed that, and it is faster and free.</span><span class="zh">我的第一版总结是让模型写的，偶尔和记录对不上：它说批准了 11 份，表里只有 10 份。改成由记录生成总结之后问题就没了，而且更快、不花钱。</span></div>
-
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Compare three cap settings</b> on the same queue: time, total cost and any rate-limit errors.</span><span class="zh"><b>比较三种上限设置</b>，用同一个队列：用时、总成本和速率限制的错误。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Stop a dispatch halfway</b> and start it again. Which claims run twice, and how would you avoid it?</span><span class="zh"><b>把一次调度中途停掉</b>再重新开始。哪些理赔会被跑两遍，你怎么避免？</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add an “oldest first” versus “biggest first”</b> option to the page, and sort the claims before dispatching.</span><span class="zh"><b>给页面加一个“最早的先做”与“金额最大的先做”的选项</b>，在调度前先给理赔排序。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now Aisha picks 5 agents, clicks start before the kettle boils, and reads a summary of what waits for her stamp, while Mr Goh checks the count against the table. The next problem is the quality of the explanations: the scoreboard says whether decisions match, but nobody can read a hundred of them a day.</span><span class="zh">现在 Aisha 选 5 个智能体，水还没烧开就点了开始，再读一份写着有什么在等她盖章的总结，Goh 先生则拿数字去对表。下一个问题是解释的质量：计分板只说判定对不对得上，而一天一百份解释没人读得完。</span></div>
-<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2><div class="card"><p class="en" style="margin:0 0 12px"><code>ModuleNotFoundError: No module named 'fastapi'</code><br>Cause: not installed. Fix: <code>pip install fastapi uvicorn</code>.</p><p class="zh" style="margin:0 0 12px"><code>ModuleNotFoundError: No module named 'fastapi'</code><br>原因：没有安装。解决：<code>pip install fastapi uvicorn</code>。</p><p class="en" style="margin:0 0 12px"><code>ERROR: [Errno 48] Address already in use</code><br>Cause: another copy of the service holds port 8000. Fix: stop it, or start with <code>--port 8001</code>.</p><p class="zh" style="margin:0 0 12px"><code>ERROR: [Errno 48] Address already in use</code><br>原因：另一份服务占着 8000 端口。解决：停掉它，或者用 <code>--port 8001</code> 启动。</p><p class="en" style="margin:0 0 12px"><code>sqlite3.ProgrammingError: SQLite objects created in a thread can only be used in that same thread</code><br>Cause: the connection is shared across threads without the setting. Fix: open it with <code>check_same_thread=False</code> and keep writes short.</p><p class="zh" style="margin:0 0 12px"><code>sqlite3.ProgrammingError: SQLite objects created in a thread can only be used in that same thread</code><br>原因：连接在多个线程里共用，却没设这个参数。解决：用 <code>check_same_thread=False</code> 打开，并让每次写入都短。</p></div>
-<h2><span class="en">Recap</span><span class="zh">小结</span></h2><div class="card"><p class="en" style="margin:0">• Wrap the dispatcher in a small service with a page, so a person can press one button.<br>• Store each run in a database, with its cost and time, so the scoreboard can read it.<br>• A health endpoint tells the page when the service is not running or busy.</p><p class="zh" style="margin:0">• 把派发器包进一个带页面的小服务，让人只需按一个按钮。<br>• 每次运行连同成本和耗时存进数据库，计分板才读得到。<br>• 健康检查接口让页面知道服务有没有在运行、是不是忙着。</p></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Compare three cap settings</b> on the same queue: time, total cost and any rate-limit errors.</span><span class="zh"><b>比较三种上限设置</b>，用同一个队列：用时、总成本和速率限制的错误。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a <code>GET /runs/{run}</code> endpoint</b> that returns the rows, and poll it from the page.</span><span class="zh"><b>加一个 <code>GET /runs/{run}</code> 接口</b>返回这些行，并让页面定时去请求。</span></span></label></div>
+<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2><div class="card"><p class="en" style="margin:0 0 12px"><code>ERROR: [Errno 48] Address already in use</code><br>Fix: stop the other copy, or start with <code>--port 8001</code>.</p><p class="zh" style="margin:0 0 12px"><code>ERROR: [Errno 48] Address already in use</code><br>解决：停掉另一份服务，或者用 <code>--port 8001</code> 启动。</p><p class="en" style="margin:0 0 12px"><code>sqlite3.ProgrammingError: SQLite objects created in a thread can only be used in that same thread</code><br>Fix: open the connection with <code>check_same_thread=False</code> and keep writes short.</p><p class="zh" style="margin:0 0 12px"><code>sqlite3.ProgrammingError: SQLite objects created in a thread can only be used in that same thread</code><br>解决：用 <code>check_same_thread=False</code> 打开连接，并让每次写入都短。</p></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• A cap is a safety feature: validate it (1 to 25) before any agent starts.<br>• One dispatch at a time keeps the results clean; refuse a second start with a clear message.<br>• Write every status change to a table so the panel, a reload and a second browser all agree.<br>• Build the summary from records, not from a model.<br>• If the agent service is down, the button says so instead of doing nothing.<br>• Record cost and time per claim against its run, so caps can be compared fairly.<br>• Handlers read the summary, not the traces.</p><p class="zh" style="margin:0">• 上限是一道安全措施：任何智能体启动前先校验它（1 到 25）。<br>• 一次只跑一个调度，结果才干净；第二次开始要用清楚的提示拒绝。<br>• 把每次状态变化写进一张表，面板、刷新页面和另一个浏览器看到的就一致。<br>• 总结由记录生成，不由模型来写。<br>• 智能体服务没开时，按钮要说明，而不是什么都不做。<br>• 按所属运行记下每份理赔的成本和用时，这样才能公平比较不同的上限。<br>• 理赔员读的是总结，不是追踪记录。</p></div>
+<div class="card"><p class="en" style="margin:0">• A cap is a safety feature: validate it (1 to 25) before any agent starts.<br>• One dispatch at a time; refuse a second start with a clear message.<br>• Write every status change to a table so panel, reload and second browser agree.<br>• Build the summary from records, not from a model.<br>• If the service is down, the button says so.</p><p class="zh" style="margin:0">• 上限是一道安全措施：任何智能体启动前先校验它（1 到 25）。<br>• 一次只跑一个调度；第二次开始用清楚的提示拒绝。<br>• 把每次状态变化写进一张表，面板、刷新页面和另一个浏览器就一致。<br>• 总结由记录生成，不由模型来写。<br>• 服务没开时，按钮要说明。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI FDE</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"prev":["15-agent-that-remembers-customers.html","17-swarms-of-agents-in-parallel.html"],"tools":{"en":"Python 3, FastAPI and uvicorn, SQLite (comes with Python), your desk.py","zh":"Python 3、FastAPI 和 uvicorn、SQLite（Python 自带）、你的 desk.py"},"know":{"en":"Running agents in parallel (Lesson 17).","zh":"并行运行智能体。"},"mins":50,"offline":false,"goals":{"en":["Validate a cap from 1 to 25 before any agent starts","Allow one dispatch at a time and refuse a second start with a clear message","Write every status change to a table so every view agrees","Build the summary from records, not from a model"],"zh":["在任何智能体启动前校验 1 到 25 的上限","一次只允许一次分发，第二次启动时给出明确提示","把每次状态变化写入表格，让所有视图一致","用记录而不是模型来生成总结"]}},"j":{"goal":{"en":"Start a dispatch from the dashboard, choose how many agents work at once, and see each claim’s progress.","zh":"在看板上启动一次派发，选择同时有几个智能体工作，并看到每份理赔的进度。"},"deliver":{"en":"A FastAPI service (service.py) with a validated cap, one dispatch at a time, a run panel and summary read from records, and cost and time per claim.","zh":"一个 FastAPI 服务（service.py）：有经过校验的上限、同一时间只跑一次派发、从记录读取的运行面板和总结，以及每份理赔的成本与用时。"},"level":3,"mins":45,"accept":{"en":["python try_dispatcher.py prints 3 agents, 10 agents and 25 agents with the time falling (about 8.6, 3.2, 1.5 seconds) and {'done': 25} each time.","A cap below 1 or above 25 (for example {\"n\": 0} or {\"n\": 26}) answers 422 before any agent starts.","Pressing start twice answers 409 'A dispatch is already running.'","The panel and a page reload show the same rows, and the five summary groups add up to 25 claims.","With the service stopped, the saved page disables the button and says why."],"zh":["python try_dispatcher.py 打印 3、10、25 个智能体，用时递减（约 8.6、3.2、1.5 秒），每次都是 {'done': 25}。","上限小于 1 或大于 25（例如 {\"n\": 0}、{\"n\": 26}）时，在任何智能体启动前返回 422。","连按两次开始，第二次返回 409 “A dispatch is already running.”。","面板和刷新后的页面显示相同的行，五组汇总加起来是 25 个理赔。","服务停止后，保存的页面把按钮置灰并说明原因。"]},"fail":[{"en":"Many claims show failed. You are hitting the provider’s rate limit, so lower the cap.","zh":"很多理赔显示 failed。你撞上了服务商的速率限制，把上限调低。"},{"en":"The summary and the table disagree because a model wrote the summary. Count it from the rows instead.","zh":"总结和表格对不上，因为总结是模型写的。改成从记录里数。"},{"en":"Two dispatches overlap and their numbers mix. Keep one current run and refuse a second start.","zh":"两次派发重叠，数字混在一起。只保留一个当前运行，拒绝第二次启动。"}],"stretch":[{"en":"Compare the run time and cost of caps 3, 10 and 25 using /runs/\u003crun>/totals.","zh":"用 /runs/\u003crun>/totals 比较上限 3、10、25 的运行时间和成本。"},{"en":"Add a Stop button that lets running claims finish and starts no new ones.","zh":"加一个停止按钮：让正在跑的理赔跑完，不再启动新的。"}],"pkg":{"dir":"packages/ai-fde/18-swarm-with-a-cap","files":["README.txt","requirements.txt","env.example","final/data/claims.json","final/data/policies.json","final/data/policy_wording.txt","final/desk.py","final/dispatcher.py","final/fake_model.py","final/service.py","final/try_dispatcher.py","starter/desk.py","starter/dispatcher.py","starter/fake_model.py","starter/service.py","starter/try_dispatcher.py"],"note":{"en":"Run python try_dispatcher.py first (no key), then DRY_RUN=1 uvicorn service:app inside final/. starter/ has the same data files as final/.","zh":"先运行 python try_dispatcher.py（不需要密钥），再在 final/ 里运行 DRY_RUN=1 uvicorn service:app。starter/ 的数据文件与 final/ 相同。"}},"solution":{"en":"The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with dispatcher.py, service.py and try_dispatcher.py. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.","zh":"完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从dispatcher.py、service.py、try_dispatcher.py看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"}},"f":["README.txt","env.example","final/data/claims.json","final/data/policies.json","final/data/policy_wording.txt","final/desk.py","final/dispatcher.py","final/fake_model.py","final/service.py","final/try_dispatcher.py","requirements.txt","starter/data/claims.json","starter/data/policies.json","starter/data/policy_wording.txt","starter/desk.py","starter/dispatcher.py","starter/fake_model.py","starter/service.py","starter/try_dispatcher.py"]}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=37968fc4"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/18-swarm-with-a-cap.js?v=e5be4258"></script></body></html>
+<script src="js/18-swarm-with-a-cap.js?v=abbc157b"></script></body></html>

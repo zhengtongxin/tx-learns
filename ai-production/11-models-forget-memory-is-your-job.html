@@ -5,13 +5,9 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/ai-production/11-models-forget-memory-is-your-job.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-production/11-models-forget-memory-is-your-job.html","url":"https://tx-learns.vercel.app/ai-production/11-models-forget-memory-is-your-job.html","name":"Models forget","alternateName":"模型会忘","description":"See why a chat model seems to forget, and add the memory yourself.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"An AI twin with memory","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Production","url":"https://tx-learns.vercel.app/ai-production/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Production","item":"https://tx-learns.vercel.app/ai-production/index.html"},{"@type":"ListItem","position":3,"name":"Models forget","item":"https://tx-learns.vercel.app/ai-production/11-models-forget-memory-is-your-job.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">An AI twin with memory · Lesson 1</span><span class="zh">有记忆的 AI 分身 · 第 1 课</span></span><h1><span class="en">Models forget</span><span class="zh">模型会忘</span></h1><p class="meta"><span class="en">See why a chat model seems to forget, and add the memory yourself · ~30 min · hands-on</span><span class="zh">看清为什么聊天模型好像会忘事，并自己把记忆加上去 · 约 30 分钟 · 动手实践</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the product ran on the wharf's own cloud account, answering every visitor from scratch. Today Auntie Siti says "I'm Siti" and, one message later, the twin has no idea. We fix it by sending the earlier messages each time and saving each session to a file.</p>
-<p class="zh" style="margin:0">上回产品跑在码头自己的云账号上，对每位访客都从零开始回答。今天 Siti 阿姨说了“我是 Siti”，下一条消息时，分身却什么都不知道。我们的办法是每次都带上之前的消息，并把每个会话存成一个文件。</p></div>
-<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">At every shift change the wharf uses a <b>handover book</b>, so the night crew knows what the day crew did. <b>Mei Ling</b> wants a <b>digital twin</b>: a chat page that answers visitors the way she would, even when she is off shift. She builds it, and <b>Auntie Siti</b> tests it first. She says "I'm Siti" in one message, asks "what's my name?" in the next, and the twin has no idea.</p>
-<p class="zh" style="margin:0">码头每次换班都有一本<b>交接簿</b>，让夜班知道日班做了什么。<b>Mei Ling</b> 想做一个<b>数字分身</b>：一个聊天页面，即使她下班了，也能像她一样回答访客。她做好之后，<b>Siti 阿姨</b>第一个来试。她在一条消息里说“我是 Siti”，下一条问“我叫什么名字？”，分身一点头绪都没有。</p></div>
-<h2><span class="en">Step 1 · The first version has no memory</span><span class="zh">第 1 步 · 第一个版本没有记忆</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Start with the two halves you know: a FastAPI backend that calls the model, and a page that talks to it. The backend takes one message, sends it to the model and returns the reply. That is all it does, and each call is a brand new conversation. The <code>session_id</code> field is sent, but nothing uses it yet. Step 3 starts using it.</p>
-<p class="zh" style="margin:0 0 8px">从你已经熟悉的两半开始：一个调用模型的 FastAPI 后端，和一个跟它说话的页面。后端收到一条消息，发给模型，再把回复返回。它只做这些，而且每次调用都是一场全新的对话。<code>session_id</code> 字段已经发过来了，但现在还没有用到，第 3 步才开始用它。</p></div>
+<h2><span class="en">Step 1 · The model keeps nothing</span><span class="zh">第 1 步 · 模型什么都不留</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">A chat model is <b>stateless</b>: every call starts blank. A chat looks continuous only because the app sends the earlier messages again. In this first version, each call sends one message, so the twin cannot remember a name from the call before.</p>
+<p class="zh" style="margin:0">聊天模型是<b>无状态</b>的：每次调用都从空白开始。聊天看起来连贯，只是因为应用把之前的消息又发了一遍。这个第一版每次只发一条消息，所以分身记不住上一次调用里的名字。</p></div>
 <div class="codebox" data-file="api/index.py" data-lang="python"><span class="dim">from fastapi import FastAPI
 from pydantic import BaseModel
 from openai import OpenAI
@@ -30,69 +26,11 @@ def chat(body: Chat):
         messages=[{"role": "user", "content": body.message}],   # only this one message
     )</span><span class="dim">
     return {"reply": result.choices[0].message.content}</span></div>
-<div class="codebox" data-file="output">say: My name is Siti.   → reply: Nice to meet you, Siti!
-say: What is my name?   → reply: I do not know your name yet.</div>
 <div class="try" id="t0"></div>
-<h2><span class="en">Step 2 · A chat page with the Next.js app router</span><span class="zh">第 2 步 · 用 Next.js 应用路由写聊天页面</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Next.js has two ways to organise pages. The newer <b>app router</b> uses folders: a file called <code>page.tsx</code> inside <code>app/twin/</code> becomes the address <code>/twin</code>. Components run on the server unless the file starts with <code>"use client"</code>, and a chat box needs that, because it reacts to clicks and typing. The older <b>pages router</b> used a <code>pages/</code> folder instead. <code>useState</code> is React's way to keep a value, like the reply, between clicks. The tags in the code, like <code>&lt;main&gt;</code>, are JSX: JavaScript that writes the page. Each page load makes up a <b>session id</b> that is sent along with every message, so a refresh starts a new session. The page sends messages to <code>/api/chat</code>, the route from step 1, so the page and the API must share one address. The container lesson shows how.</p>
-<p class="zh" style="margin:0 0 8px">Next.js 有两种组织页面的方式。较新的<b>应用路由（app router）</b>靠文件夹：<code>app/twin/</code> 里的 <code>page.tsx</code> 就成了地址 <code>/twin</code>。组件默认在服务器上运行，除非文件开头写了 <code>"use client"</code>，而聊天框需要它，因为要响应点击和输入。较老的<b>页面路由（pages router）</b>用的是 <code>pages/</code> 文件夹。<code>useState</code> 是 React 用来在两次点击之间保存一个值（比如回复）的办法。代码里像 <code>&lt;main&gt;</code> 这样的标签叫 JSX，是用来写页面的 JavaScript。每次打开页面（刷新也算）会生成一个<b>会话 id</b>，随每条消息一起发送。页面把消息发到 <code>/api/chat</code>，也就是第 1 步写的那条路由，所以页面和 API 要共用一个地址（容器那一课讲了怎么做）。</p></div>
-<div class="codebox" data-file="pages/twin.tsx" data-lang="js"><span class="chg">"use client";</span><span class="dim">
-import { useState } from "react";
-
-export default function Twin() {
-  const [sessionId] = useState(() => crypto.randomUUID());
-  const [text, setText] = useState("");
-  const [reply, setReply] = useState("");
-
-  async function send() {
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ session_id: sessionId, message: text }),
-    });
-    const data = await res.json();
-    setReply(data.reply);
-  }
-
-  return (
-    &lt;main&gt;
-      &lt;input value={text} onChange={(e) =&gt; setText(e.target.value)} /&gt;
-      &lt;button onClick={send}&gt;Send&lt;/button&gt;
-      &lt;p&gt;{reply}&lt;/p&gt;
-    &lt;/main&gt;
-  );
-}</span></div>
-<div class="try" id="t1"></div>
-<h2><span class="en">Step 3 · Send the earlier messages every time</span><span class="zh">第 3 步 · 每次都把之前的消息一起发</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The model is <b>stateless</b>: it keeps nothing between calls. The chat looks continuous only because the app sends the whole conversation each time. So keep a list of messages per session id. Add the new user message, send the list, then add the model's reply to it. This version holds the lists in a Python dictionary.</p>
-<p class="zh" style="margin:0 0 8px">模型是<b>无状态（stateless）</b>的：两次调用之间它什么也不记。聊天看起来连贯，只是因为应用每次都把整段对话发过去。所以要为每个会话 id 保存一份消息列表：加入新的用户消息，把列表发出去，再把模型的回复也加进列表。这个版本把列表放在一个 Python 字典里。</p></div>
-<figure class="fig"><svg viewBox="0 0 720 196" role="img" aria-label="Memory: chat page, server and model; the server loads and saves the session file, and sends the whole history each time"><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box soft" x="20" y="30" width="180" height="56" rx="12"/><text class="en" x="110.0" y="63.0">Chat page</text><text class="zh" x="110.0" y="63.0">聊天页面</text><text class="en sm" x="110" y="112">sends a session id</text><text class="zh sm" x="110" y="112">带上会话编号</text><path class="lnk hot" d="M202 58H267" marker-end="url(#ar)"/><rect class="box new" x="270" y="30" width="180" height="56" rx="12"/><text class="en" x="360.0" y="63.0">Server</text><text class="zh" x="360.0" y="63.0">服务器</text><path class="lnk hot" d="M452 58H517" marker-end="url(#ar)"/><rect class="box soft" x="520" y="30" width="180" height="56" rx="12"/><text class="en" x="610.0" y="63.0">Model</text><text class="zh" x="610.0" y="63.0">模型</text><text class="en sm" x="610" y="112">sees all, keeps nothing</text><text class="zh sm" x="610" y="112">看到全部，不留存</text><rect class="box new" x="272" y="136" width="176" height="38" rx="10"/><text class="en" x="360" y="160">Session file</text><text class="zh" x="360" y="160">会话文件</text><path class="lnk hot" d="M360 94V134" marker-end="url(#ar)"/></svg><figcaption><span class="en">The model forgets every call, so the server loads the saved history, sends all of it, then saves the reply.</span><span class="zh">模型每次调用都会忘记，所以服务器先读出保存的历史，整段发过去，再把回复存回去。</span></figcaption></figure>
-<div class="codebox" data-file="api/index.py" data-lang="python"><span class="dim">from fastapi import FastAPI
-from pydantic import BaseModel
-from openai import OpenAI
-
-app = FastAPI()
-client = OpenAI()
-</span><span class="chg">histories = {}          # session id → list of messages</span><span class="dim">
-
-class Chat(BaseModel):
-    session_id: str
-    message: str
-
-@app.post("/api/chat")
-def chat(body: Chat):
-    </span><span class="chg">history = histories.setdefault(body.session_id, [])
-    history.append({"role": "user", "content": body.message})</span><span class="dim">
-    result = client.chat.completions.create(model="gpt-5.4-mini", messages=</span><span class="chg">history</span><span class="dim">)
-    reply = result.choices[0].message.content
-    </span><span class="chg">history.append({"role": "assistant", "content": reply})</span><span class="dim">
-    return {"reply": reply}</span></div>
-<div class="codebox" data-file="output">say: My name is Siti.   → reply: Nice to meet you, Siti!
-say: What is my name?   → reply: Your name is Siti.</div>
-<div class="try" id="t2"></div>
-<h2><span class="en">Step 4 · Save each session as a file</span><span class="zh">第 4 步 · 把每个会话存成文件</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A dictionary lives in the program's memory, so a restart wipes it. Write each session to its own <b>JSON file</b> on disk instead, named after the session id. Because the id comes from the browser, check that it holds only safe characters before it goes into a file name, or a visitor could aim at other files. The file is easy to open and read like a log.</p>
-<p class="zh" style="margin:0 0 8px">字典活在程序的内存里，重启一次就清空了。改成把每个会话写进磁盘上各自的 <b>JSON 文件</b>，文件名用会话 id。因为 id 来自浏览器，放进文件名之前要检查它只含安全的字符，否则访客可能指向别的文件。这个文件很容易打开，像日志一样读。</p></div>
+<h2><span class="en">Step 2 · Send the history, saved per session</span><span class="zh">第 2 步 · 发送历史，按会话保存</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en"><li>Keep a list of messages per <b>session id</b> (the page makes one with <code>crypto.randomUUID()</code>). Add the user message, send the whole list, add the reply.</li><li>A Python dictionary dies on restart, so write each session to its own <b>JSON file</b>.</li><li>The id comes from the browser, so check it holds only safe characters before using it as a file name.</li></ul>
+<ul class="zh"><li>为每个<b>会话 id</b> 保存一份消息列表（页面用 <code>crypto.randomUUID()</code> 生成）。加入用户消息，发出整个列表，再加入回复。</li><li>Python 字典一重启就没了，所以把每个会话写进各自的 <b>JSON 文件</b>。</li><li>id 来自浏览器，用作文件名之前要检查它只含安全字符。</li></ul></div>
+<figure class="fig"><svg viewBox="0 0 720 196" role="img" aria-label="Memory: chat page, server and model; the server loads and saves the session file, and sends the whole history each time"><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box soft" x="20" y="30" width="180" height="56" rx="12"/><text class="en" x="110.0" y="63.0">Chat page</text><text class="zh" x="110.0" y="63.0">聊天页面</text><text class="en sm" x="110" y="112">sends a session id</text><text class="zh sm" x="110" y="112">带上会话编号</text><path class="lnk hot" d="M202 58H267" marker-end="url(#ar)"/><rect class="box new" x="270" y="30" width="180" height="56" rx="12"/><text class="en" x="360.0" y="63.0">Server</text><text class="zh" x="360.0" y="63.0">服务器</text><path class="lnk hot" d="M452 58H517" marker-end="url(#ar)"/><rect class="box soft" x="520" y="30" width="180" height="56" rx="12"/><text class="en" x="610.0" y="63.0">Model</text><text class="zh" x="610.0" y="63.0">模型</text><text class="en sm" x="610" y="112">sees all, keeps nothing</text><text class="zh sm" x="610" y="112">看到全部，不留存</text><rect class="box new" x="272" y="136" width="176" height="38" rx="10"/><text class="en" x="360" y="160">Session file</text><text class="zh" x="360" y="160">会话文件</text><path class="lnk hot" d="M360 94V134" marker-end="url(#ar)"/></svg><figcaption><span class="en">The server loads the saved history, sends all of it, then saves the reply.</span><span class="zh">服务器先读出保存的历史，整段发过去，再把回复存回去。</span></figcaption></figure>
 <div class="codebox" data-file="memory.py" data-lang="python"><span class="dim">import json
 import re
 from pathlib import Path
@@ -111,36 +49,36 @@ def load_history(session_id: str) -> list:
 
 def save_history(session_id: str, history: list) -> None:
     session_file(session_id).write_text(json.dumps(history, ensure_ascii=False), encoding="utf-8")</span></div>
+<div class="codebox" data-file="api/index.py" data-lang="python"><span class="dim">from memory import load_history, save_history
+
+@app.post("/api/chat")
+def chat(body: Chat):
+    </span><span class="chg">history = load_history(body.session_id)
+    history.append({"role": "user", "content": body.message})</span><span class="dim">
+    result = client.chat.completions.create(model="gpt-5.4-mini", messages=</span><span class="chg">history</span><span class="dim">)
+    reply = result.choices[0].message.content
+    </span><span class="chg">history.append({"role": "assistant", "content": reply})
+    save_history(body.session_id, history)</span><span class="dim">
+    return {"reply": reply}</span></div>
 <div class="try" id="t3"></div>
-<h2><span class="en">Step 5 · Do not let it grow forever</span><span class="zh">第 5 步 · 别让它无限增长</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Every call sends the whole history, so a long chat costs more with every message, and one day it will not fit at all. Decide what to keep. The simplest rule is to send only the last 20 messages. Also decide how long files live and who may read them: a conversation is personal data.</p>
-<p class="zh" style="margin:0 0 8px">每次调用都发送整段历史，所以聊得越长，每条消息越贵，总有一天会装不下。要决定保留什么。最简单的规则是只发最近 20 条消息。还要决定文件保留多久、谁能读：对话是个人数据。</p></div>
-<div class="codebox" data-file="api/index.py" data-lang="python"><span class="dim"># uses client (step 1) and load_history / save_history (step 4)
-def reply_to(session_id: str, message: str) -> str:
-    history = load_history(session_id)
-    history.append({"role": "user", "content": message})
-    result = client.chat.completions.create(
+<h2><span class="en">Step 3 · Do not let it grow forever</span><span class="zh">第 3 步 · 别让它无限增长</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en"><li>Every call sends the whole history, so a long chat costs more with every message.</li><li>Send only the latest part, such as the last 20 messages. The file keeps everything.</li><li>A conversation is personal data: decide how long files live and who can read them.</li></ul>
+<ul class="zh"><li>每次调用都发整段历史，所以聊得越长，每条消息越贵。</li><li>只发最近的部分，比如最近 20 条消息。文件里保留全部。</li><li>对话是个人数据：要决定文件保留多久、谁能读。</li></ul></div>
+<div class="codebox" data-file="api/index.py" data-lang="python"><span class="dim">    result = client.chat.completions.create(
         model="gpt-5.4-mini",
         messages=</span><span class="chg">history[-20:]</span><span class="dim">,      # only the latest 20 go to the model
-    )
-    reply = result.choices[0].message.content
-    history.append({"role": "assistant", "content": reply})
-    save_history(session_id, history)   # the file keeps everything
-    return reply</span></div>
+    )</span></div>
 <div class="sc" id="t4"></div>
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en"><b>I thought the model remembered.</b> The chat looked continuous, so I assumed it did. In truth, only the messages my code sent made it seem so. I also let the history grow forever, which costs more with every message. And a new version of Tailwind (a styling helper) broke my styles until I read its migration note.</span><span class="zh"><b>我以为模型会记得。</b>聊天看起来很连贯，所以我就这么以为了。其实只是我的代码发出去的那些消息让它看起来连贯。我还让历史无限增长，每条消息都更贵。另外，写样式的工具 Tailwind 出了新版本，把我的样式搞坏了，直到我读了迁移说明才好。</span></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Run with and without memory</b> and compare the same three questions.</span><span class="zh"><b>分别在有记忆和无记忆的情况下运行</b>，对比同样的三个问题。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Cap the history at the last 20 messages.</b></span><span class="zh"><b>把历史限制在最近 20 条消息。</b></span></span></label><label><input type="checkbox"><span><span class="en"><b>Open the JSON file</b> and read a conversation like a log.</span><span class="zh"><b>打开 JSON 文件</b>，像读日志一样读一段对话。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the twin remembers a chat, like the night crew reading the handover book, and Auntie Siti's name comes back. The next problem is that it still sounds like a polite stranger and gives vague answers about what Mei Ling actually works on.</span><span class="zh">现在分身记得住一段对话，就像夜班同事读交接本，Siti 阿姨的名字也记起来了。下一个问题是它听起来仍像个客气的陌生人，被问到 Mei Ling 到底做什么时，回答含糊。</span></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Ask the same three questions</b> with and without memory and compare.</span><span class="zh"><b>问同样的三个问题</b>，对比有记忆和无记忆的结果。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Open a session's JSON file</b> and read it like a log.</span><span class="zh"><b>打开一个会话的 JSON 文件</b>，像读日志一样读它。</span></span></label></div>
 <h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
-<div class="card"><p class="en" style="margin:0">• <code>422 Unprocessable Entity</code> The JSON body has no <code>session_id</code> (or no <code>message</code>). <b>Fix:</b> send <code>{session_id, message}</code> as JSON with <code>Content-Type: application/json</code>.<br>• <code>ValueError: bad session id</code> The id has characters the safe-name rule refuses. <b>Fix:</b> Use <code>crypto.randomUUID()</code>; it only has letters, digits and dashes.<br>• <code>The twin forgets after a deploy</code> Memory lived in a dictionary or a local folder that is wiped. <b>Fix:</b> Move it somewhere that lasts (the next lessons do this).</p><p class="zh" style="margin:0">• <code>422 Unprocessable Entity</code> JSON 请求体里没有 <code>session_id</code>（或没有 <code>message</code>）。<b>解决：</b>以 JSON 发送 <code>{session_id, message}</code>，并带上 <code>Content-Type: application/json</code>。<br>• <code>ValueError: bad session id</code> id 里有安全命名规则不允许的字符。 <b>解决：</b>使用 <code>crypto.randomUUID()</code>，它只含字母、数字和短横线。<br>• <code>The twin forgets after a deploy</code> 记忆放在会被清空的字典或本地文件夹里。 <b>解决：</b>把它放到能持久保存的地方（后面的课会做）。</p></div>
-<div class="callout tip"><b class="lbl"><span class="en">Recap</span><span class="zh">小结</span></b><span class="en">Models keep nothing between calls, so your code must send the past.<br>A session id plus a saved history gives the twin its memory.<br>Send only the latest part to the model, and keep the full record on disk.</span><span class="zh">模型在两次调用之间什么都不记得，所以要由你的代码把过去发回去。<br>会话 id 加上保存的历史，就给了分身记忆。<br>只把最近的部分发给模型，完整记录留在磁盘上。</span></div>
+<div class="card"><p class="en" style="margin:0">• <code>422 Unprocessable Entity</code>: the body lacks <code>session_id</code> or <code>message</code>. <b>Fix:</b> send both as JSON.<br>• <code>ValueError: bad session id</code>: unsafe characters. <b>Fix:</b> use <code>crypto.randomUUID()</code>.<br>• The twin forgets after a deploy: files lived in a wiped folder. <b>Fix:</b> store them somewhere that lasts (the next lessons do).</p><p class="zh" style="margin:0">• <code>422 Unprocessable Entity</code>：请求体缺少 <code>session_id</code> 或 <code>message</code>。 <b>解决：</b>两者都以 JSON 发送。<br>• <code>ValueError: bad session id</code>：含不安全字符。 <b>解决：</b>用 <code>crypto.randomUUID()</code>。<br>• 部署后分身忘事：文件放在会被清空的文件夹。 <b>解决：</b>存到能持久保存的地方（后面的课会做）。</p></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• A chat model is stateless: every call starts blank.<br>• Memory is your stored messages plus a session id.<br>• Send the earlier messages with each new call.<br>• Save sessions to files so a restart does not wipe them, and check the session id first.<br>• Cap the history, because long chats cost more with every message.<br>• In the Next.js app router, folders define routes, and a component needs "use client" to react to typing.<br>• Decide what to keep, for how long, and who can read it.</p><p class="zh" style="margin:0">• 聊天模型是无状态的：每次调用都从空白开始。<br>• 记忆就是你存下的消息加上一个会话 id。<br>• 每次新调用都带上之前的消息。<br>• 把会话存成文件，重启才不会清空，并且先检查会话 id。<br>• 限制历史长度，因为聊得越长每条消息越贵。<br>• 在 Next.js 应用路由里，文件夹决定路由，组件要写 "use client" 才能响应输入。<br>• 要决定保留什么、保留多久、谁能读。</p></div>
+<div class="card"><p class="en" style="margin:0">• A chat model is stateless: every call starts blank.<br>• Memory is your stored messages plus a session id, sent with each call.<br>• Save sessions to files and check the id before using it as a name.<br>• Cap what you send; keep the full record on disk.<br>• Decide what to keep, for how long, and who can read it.</p><p class="zh" style="margin:0">• 聊天模型是无状态的：每次调用都从空白开始。<br>• 记忆就是你存下的消息加会话 id，随每次调用发出。<br>• 把会话存成文件，用作文件名前先检查 id。<br>• 限制发送的量；完整记录留在磁盘上。<br>• 要决定保留什么、保留多久、谁能读。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Production</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"goals":{"en":["Explain why a chat model is stateless","Store messages with a session id and send them with each new call","Save sessions to files so a restart does not wipe them","Cap the history to control cost"],"zh":["说明为什么聊天模型是无状态的","用会话 id 存储消息，并在每次新调用时带上","把会话存进文件，重启也不会丢","限制历史长度来控制成本"]},"prev":[],"tools":{"en":"Python 3 with fastapi, openai, Node, an OpenAI API key","zh":"装有 fastapi、openai 的 Python 3、Node、OpenAI API 密钥"},"know":{"en":"You can run a small FastAPI app and a simple page that calls it.","zh":"能运行小型 FastAPI 应用和调用它的简单页面。"},"mins":35,"offline":false}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=afade96e"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/11-models-forget-memory-is-your-job.js?v=d2eb297e"></script></body></html>
+<script src="js/11-models-forget-memory-is-your-job.js?v=969e0b83"></script></body></html>

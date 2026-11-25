@@ -5,89 +5,20 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/agentic-ai/20-own-agent-loop.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/agentic-ai/20-own-agent-loop.html","url":"https://tx-learns.vercel.app/agentic-ai/20-own-agent-loop.html","name":"Your own agent loop","alternateName":"自写智能体循环","description":"You build a coordinator agent that runs five workers, checks their pages in a browser and finishes on its own.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"Framework tour","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Agentic","url":"https://tx-learns.vercel.app/agentic-ai/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Agentic","item":"https://tx-learns.vercel.app/agentic-ai/index.html"},{"@type":"ListItem","position":3,"name":"Your own agent loop","item":"https://tx-learns.vercel.app/agentic-ai/20-own-agent-loop.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Framework tour · Project</span><span class="zh">框架巡礼 · 项目</span></span><h1><span class="en">Your own agent loop</span><span class="zh">自写智能体循环</span></h1><p class="meta"><span class="en">You build a coordinator agent that runs five workers, checks their pages in a browser and finishes on its own · ~45 min · project</span><span class="zh">你做一个总协调智能体：指挥五个工人、在浏览器里检查页面，并能自己收工 · 约 45 分钟 · 项目</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the Kopi Corner assistant could be rebuilt in several frameworks and compared. Today it fails when Aina needs to see exactly why it did something, because a framework hides the loop. We fix it by writing the loop ourselves: one coordinator agent that starts workers, watches a board and finishes on its own.</p>
-<p class="zh" style="margin:0">上回 Kopi Corner 助手已经能用好几种框架重建并比较。今天的问题是：Aina 想看清它为什么这样做，框架却把循环藏了起来。我们自己写这个循环：一个总协调智能体，负责启动工人、盯着任务板，并自己收工。</p></div>
-<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en" style="margin:0">Your school is holding a fair, and <b>Lina</b> wants a small website: one page for each of five booths (pancakes, a ring toss, face painting, a book swap, a plant sale), each with a tiny interactive widget. Five pages, five builders working at once, plus one <b>coordinator</b>. Think of the person running the fair on the day: sets the look first (same colours, same fonts), gives each booth one job, watches the sign-up board while everyone works, <b>checks each booth before opening</b>, sends back anything wrong (once only) and writes the programme at the end. The five builders are the single-framework workers from the last lesson. The coordinator is itself an <b>agent</b>, not a Python <code>for</code> loop. Aina's counter works the same way: Auntie Suria is the coordinator, and Ah Seng and Kak Ros are two builders working from one board.</p>
-<p class="zh" style="margin:0">学校要办义卖会，<b>Lina</b> 想做一个小网站：五个摊位（煎饼、套圈、脸部彩绘、换书、卖植物）各一页，每页一个小小的互动组件。五个页面、五个同时开工的建造者，再加一个<b>总协调</b>。想想当天负责义卖会的人：先定好外观（同样的颜色和字体），给每个摊位派一份活，大家干活时盯着报名板，<b>开门前逐个检查摊位</b>，有问题就退回去（只退一次），最后写节目单。五个建造者就是上一课里各框架的工人，总协调本身是一个<b>智能体</b>，不是 Python 的 <code>for</code> 循环。Aina 的柜台也是这样：Suria 阿姨是总协调，Ah Seng 和 Kak Ros 是两位按同一块板干活的建造者。</p></div>
-<h2><span class="en">Step 1 · The agent decides, the tools do the mechanics</span><span class="zh">第 1 步 · 智能体做决定，工具做机械活</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Each worker already has its own <b>inner loop</b> (read the board, plan, do, tick off). Your new code is the <b>outer loop</b>: an agent with a handful of tools. The rule that makes it work: anything brittle and exact (starting processes, timeouts, checking files) goes into a tool. Anything that is a choice (what each builder makes, whether a page is good enough, who to send back) is left to the model.</p><p class="zh" style="margin:0 0 8px">每个工人已经有自己的<b>内层循环</b>（读任务板、规划、执行、打勾）。你要写的新代码是<b>外层循环</b>：一个带几个工具的智能体。让它跑得通的规则是：脆弱又精确的事（启动进程、超时、检查文件）放进工具；属于判断的事（每个建造者做什么、页面够不够好、退回谁）留给模型。</p></div>
-<div class="sc" id="g1"></div>
-<h2><span class="en">Step 2 · Four tools and one coordinator</span><span class="zh">第 2 步 · 四个工具，一个总协调</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Build the tools first, then the agent that uses them. The code below is a sketch, so do not run it yet: <code>team</code> (starts and watches the builders), <code>board</code> (the shared task board) and <code>judge</code> (the page inspector from step 4) are helpers you set up first; the code starts with tiny stand-ins so you can read it on its own. Starting a builder returns at once, so all five run in parallel. Waiting is a separate tool, so the coordinator decides when to wait. Cap the whole loop with <code>max_llm_calls</code> so it cannot run forever.</p><p class="zh" style="margin:0 0 8px">先做工具，再做用它们的智能体。下面的代码只是草图，先别运行：<code>team</code>（启动并监看建造者）、<code>board</code>（共享任务板）和 <code>judge</code>（第 4 步的页面检查员）都是要先搭好的帮手；代码开头放了几个小小的替身，方便单独阅读。启动建造者会立刻返回，所以五个可以并行。等待是单独的工具，由总协调决定什么时候等。用 <code>max_llm_calls</code> 给整个循环设上限，它就不会无限运行。</p></div>
-<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim">pip install "google-adk[mcp]" rich python-dotenv
+<div class="teach"><b class="lbl"><span class="en">Key point</span><span class="zh">要点</span></b><p class="en" style="margin:0">Frameworks hide the loop, so write the outer one yourself: a <b>coordinator agent</b> with a few tools that starts workers, watches a shared board, inspects each result and stops. Example: five builders each make one booth page for a school fair site.</p><p class="zh" style="margin:0">框架把循环藏起来了，所以自己写外层循环：一个带几件工具的<b>总协调智能体</b>，负责启动工人、盯着共享的任务板、检查每个成果，然后收工。示例：五位建造者各做校园义卖会网站的一个摊位页面。</p></div>
 
-import asyncio, subprocess
-</span></div>
-<div class="codebox" data-file="coordinator.py" data-lang="python"><span class="dim">from google.adk.agents import LlmAgent
+<h2><span class="en">Step 1 · The agent decides, the tools do the mechanics</span><span class="zh">第 1 步 · 智能体做决定，工具做机械活</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li>Each worker already has an inner loop. Your new code is the <b>outer loop</b>: an agent with a handful of tools.</li><li>Anything brittle and exact (starting processes, timeouts, checking files) goes into a tool. Anything that is a choice (what to build, whether a page is good enough, who to send back) is left to the model.</li></ul>
+<ul class="zh" style="margin:0;padding-left:18px"><li>每个工人已经有自己的内层循环。你新写的是<b>外层循环</b>：一个带几件工具的智能体。</li><li>凡是脆弱又精确的事（启动进程、超时、检查文件）放进工具；凡是需要选择的事（做什么、页面够不够好、打回谁）交给模型。</li></ul></div>
+<div class="sc" id="g1"></div>
+
+<h2><span class="en">Step 2 · A fresh inspector, then the coordinator</span><span class="zh">第 2 步 · 全新的检查员，再是总协调</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li>To check a page, start a <b>new, short-lived agent</b> with a real browser (the Playwright MCP server) and one <code>report</code> tool. A fresh agent per page keeps each session small. No report means “no verdict”, which counts as failing.</li><li>The coordinator's tools: start a builder (returns at once, so all five run in parallel), wait (its own tool, so the coordinator decides when), inspect, send back.</li><li>Cap the loop with <code>max_llm_calls</code> so it cannot run forever.</li></ul>
+<ul class="zh" style="margin:0;padding-left:18px"><li>检查页面时，启动一个<b>全新、短命的智能体</b>，配真实浏览器（Playwright MCP 服务）和一个 <code>report</code> 工具。每个页面一个新智能体，会话就不会膨胀。没有汇报就是“没有结论”，算作不通过。</li><li>总协调的工具：启动建造者（立即返回，所以五个并行）、等待（单独一个工具，由总协调决定何时等）、检查、打回。</li><li>用 <code>max_llm_calls</code> 给循环封顶，防止永远跑下去。</li></ul></div>
+<div class="codebox" data-file="inspector.py" data-lang="python"><span class="dim">from google.adk.agents import LlmAgent
 from google.adk.agents.run_config import RunConfig
 from google.adk.runners import InMemoryRunner
-
-# stand-ins, so the sketch reads on its own (the real ones do the work):
-class Board:
-    def add_goal(self, text): ...            # writes one goal row, returns its id
-class Team:
-    pending = []                             # worker processes still running
-    def slug(self, framework): ...           # folder name for a framework
-    def start(self, framework, goal): ...    # subprocess.Popen, output to DEVNULL
-    async def wait_all(self, timeout): ...   # until all exit, or the timeout
-    def status(self): ...                    # who finished, who did not
-    def fix_once(self, framework, problem): ...
-board, team = Board(), Team()
-
-def make_tools(team):
-</span><span class="chg">    def start_builder(framework: str, booth: str) -> str:
-        """Start one framework's worker on one booth page. Returns immediately."""
-        goal = board.add_goal(f"Build the {booth} page in site/{team.slug(framework)}/")
-        team.start(framework, goal)          # subprocess.Popen, output sent to DEVNULL
-        return f"{framework} is building {booth}"
-
-    async def wait_for_builders() -> str:
-        """Block until every started worker exits or times out. Returns the status."""
-        await team.wait_all(timeout=300)
-        return team.status()
-
-    async def inspect_page(slug: str) -> str:
-        """Open one finished page in a real browser and report whether it works."""
-        return str(await judge(slug))   # judge() is built in Step 4
-
-    def send_back(framework: str, problem: str) -> str:
-        """Give one worker a single fix task that describes the problem."""
-        return team.fix_once(framework, problem)</span><span class="dim">
-
-    return [start_builder, wait_for_builders, inspect_page, send_back]
-
-</span><span class="chg">coordinator = LlmAgent(name="fair_coordinator", model="gemini-2.5-flash",
-    instruction="Build the fair site with your team: start every builder, wait, inspect each page, "
-                "send back at most one fix per page, then finish.",
-    tools=make_tools(team))</span><span class="dim">
-# run_async(..., run_config=RunConfig(max_llm_calls=80)) caps the outer loop</span></div>
-<div class="try" id="p2"></div>
-<h2><span class="en">Step 3 · The board is the only channel</span><span class="zh">第 3 步 · 任务板是唯一的通道</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The coordinator never talks to a builder directly. It starts them and the <b>shared board</b> does the rest: each builder claims its goal, writes its own steps under it and ticks them off. That also gives you a live view. The same worker file runs in two modes, chosen by two lines at the top. The loop at the bottom is the coordinator's side and is only the display: it redraws the live view until every builder has exited.</p><p class="zh" style="margin:0 0 8px">总协调从不直接和建造者说话。它负责启动，其余交给<b>共享任务板</b>：每个建造者领自己的目标，在下面写自己的步骤并打勾。这也让你有了实时视图。同一个工人文件有两种运行方式，由顶部两行决定。底部的循环是总协调那一侧，只负责显示：它不停刷新实时视图，直到所有建造者都退出。</p></div>
-<figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="The coordinator starts five builders; the builders claim and tick goals on a shared board; the coordinator reads the board to redraw its live view"><defs><marker id="ah20" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box soft" x="40" y="85" width="170" height="50" rx="10"/><text class="en" x="125.0" y="114.0">Coordinator agent</text><text class="zh" x="125.0" y="114.0">总协调智能体</text><rect class="box" x="300" y="20" width="200" height="50" rx="10"/><text class="en" x="400.0" y="49.0">Five builders</text><text class="zh" x="400.0" y="49.0">五个建造者</text><rect class="box new" x="300" y="150" width="200" height="50" rx="10"/><text class="en" x="400.0" y="179.0">Shared board</text><text class="zh" x="400.0" y="179.0">共享任务板</text><path class="lnk" d="M210 100L300 50" marker-end="url(#ah20)"/><text class="en sm" x="235" y="62">starts</text><text class="zh sm" x="235" y="62">启动</text><path class="lnk hot" d="M400 70L400 150" marker-end="url(#ah20)"/><text class="en sm" x="470" y="115">claim, tick off</text><text class="zh sm" x="470" y="115">领取、打勾</text><path class="lnk" d="M300 175L125 175L125 135" marker-end="url(#ah20)"/><text class="en sm" x="212" y="194">reads, redraws live view</text><text class="zh sm" x="212" y="194">读取并刷新实时视图</text></svg><figcaption><span class="en">The coordinator never talks to a builder. It starts them and reads the board they all write to.</span><span class="zh">总协调从不直接和建造者说话：它负责启动，再读取大家共同写入的任务板。</span></figcaption></figure>
-<div class="codebox" data-file="worker.py" data-lang="python"><span class="dim">import sys
-</span><span class="chg">TASK_ID = int(sys.argv[1]) if len(sys.argv) > 2 else None
-BOARD = sys.argv[2] if len(sys.argv) > 2 else "board.db"</span><span class="dim">
-# no args   -> seed my own demo goal and run alone
-# with args -> claim TASK_ID on the shared board, build that page, exit
-
-import asyncio
-from rich.live import Live
-# render_board() draws the board as a table; team.pending is the list of running workers (stand-ins from Step 2)
-with Live(render_board(), refresh_per_second=4) as live:
-</span><span class="chg">    while any(p.poll() is None for p in team.pending):
-        live.update(render_board())          # five coloured goals filling in together
-        await asyncio.sleep(0.25)</span></div>
-<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
-<div class="codebox" data-file="output" data-lang="text">pancakes     [####....]
-ring toss    [#####...]
-face paint   [##......]
-book swap    [########] done
-plant sale   [###.....]</div>
-<div class="try" id="p3"></div>
-<h2><span class="en">Step 4 · A fresh inspector for every page</span><span class="zh">第 4 步 · 每个页面一个全新的检查员</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">To check a page, start a <b>new, short-lived agent</b> with a real browser (the Playwright MCP server) and one <code>report</code> tool that records the verdict. A fresh agent per page keeps each browser session small, so one confusing page cannot eat the whole budget. If nobody reports, the answer is “no verdict”, which counts as failing.</p><p class="zh" style="margin:0 0 8px">检查页面时，启动一个<b>全新、短命的智能体</b>，给它真正的浏览器（Playwright MCP 服务）和一个记录结论的 <code>report</code> 工具。每个页面用一个新智能体，浏览器会话就小，一个让人困惑的页面也吃不掉整个预算。如果没人汇报，结果就是“没有结论”，算作不通过。</p></div>
-<div class="codebox" data-file="inspector.py" data-lang="python"><span class="dim">from google.adk.tools.mcp_tool import McpToolset, StdioConnectionParams
+from google.adk.tools.mcp_tool import McpToolset, StdioConnectionParams
 from mcp import StdioServerParameters
 from google.genai import types
 
@@ -106,36 +37,69 @@ async def judge(uri: str) -> dict:
         """Record whether the page loads and the widget works, with one short note."""
         verdict.update(works=works, note=note)
         return {"ok": True}</span><span class="dim">
-
     browser = McpToolset(connection_params=StdioConnectionParams(
         server_params=StdioServerParameters(command="npx",
             args=["-y", "@playwright/mcp@latest", "--browser", "chrome", "--isolated"]),
-</span><span class="chg">        timeout=30.0))                       # the first browser call starts slowly</span><span class="dim">
+        timeout=30.0))                       # the first browser call starts slowly
     inspector = LlmAgent(name="inspector", model="gemini-2.5-flash",
         instruction=f"Open {uri}, try the widget, check the console, then call report.",
         tools=[browser, report])
     try:
-</span><span class="chg">        await run_once(inspector, max_llm_calls=25)</span><span class="dim">
+        await run_once(inspector, max_llm_calls=25)
     finally:
         await browser.close()
 </span><span class="chg">    return verdict or {"works": False, "note": "no verdict"}</span></div>
 <div class="try" id="p4"></div>
-<h2><span class="en">Step 5 · Guardrails that make it finish</span><span class="zh">第 5 步 · 让它能收工的护栏</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A team of agents can burn money and time forever. Put a limit on everything, and decide in advance what happens when something fails. Sort these safeguards by the problem they solve. One more safeguard: a plain fallback template, written when a model call for a page fails, so there is always a front page.</p><p class="zh" style="margin:0 0 8px">一队智能体可能永远烧钱烧时间。给每件事都设上限，并提前决定出问题时怎么办。把这些保护措施按它们解决的问题分类。还有一道保护：某个页面的模型调用失败时，写入一份朴素的备用模板，保证总有首页。</p></div>
-<div class="sc" id="g5"></div>
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我踩过的坑</span></b><span class="en"><b>“Event loop is closed” on exit.</b> Python runs every async job on one scheduler called the event loop. asyncio has its own way of starting other programs (called subprocess transports), and mixing that with a long-running agent loop left things to clean up after the loop had already shut down. Plain <code>subprocess.Popen</code> for workers, plus closing the MCP toolset <i>inside</i> the loop (the <code>finally</code> in Step 4), fixed it. <b>Output tearing the live view.</b> Framework banners printed by workers broke the rich display. Sending their output to <code>DEVNULL</code> (a hole that swallows the text) is fine because they report through the board anyway. <b>Cost.</b> Five workers plus inspectors add up fast, so I keep the two model names (coordinator and workers) in one config read from environment variables, and drop to cheaper models while experimenting. Also, the default 5-second MCP timeout was too short for the first browser call, so I raised it to 30.</span><span class="zh"><b>退出时出现“Event loop is closed”。</b>Python 把所有异步任务都交给一个叫事件循环（event loop）的调度器。把 asyncio 自己启动程序的方式（子进程传输）和长时间运行的智能体循环混用，循环关闭后还留着没清理的东西。工人改用普通的 <code>subprocess.Popen</code>，并在循环<i>里面</i>关闭 MCP 工具集（第 4 步的 <code>finally</code>），就解决了。<b>输出撕裂实时视图。</b>工人打印的框架横幅会弄乱 rich 的显示。把它们的输出丢到 <code>DEVNULL</code>（一个吞掉文字的“黑洞”）就行，反正它们是通过任务板汇报的。<b>成本。</b>五个工人加检查员，花费涨得很快，所以我把两个模型名（总协调和工人）放在一个由环境变量读取的配置里，实验时换成便宜的模型。另外，MCP 默认 5 秒超时对第一次打开浏览器太短，我调到了 30 秒。</span></div>
-<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Print the team first.</b> Add one line that prints each framework and booth before anything starts, so you see the plan without spending anything. If a worker file is missing, that builder is simply not on the team.</span><span class="zh"><b>先把团队打印出来。</b>在任何东西启动前加一行，打印每个框架和摊位，这样不花钱就能看到计划。如果缺一个工人文件，那个建造者就不在队里。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Break one page on purpose.</b> Watch the coordinator send it back once, and see that a page still broken afterwards stays visible instead of looping.</span><span class="zh"><b>故意弄坏一个页面。</b>看总协调把它退回一次，再看修完仍然有问题的页面会被留在那里，而不是反复重试。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Swap in cheaper models.</b> Change only the config file and compare cost and quality.</span><span class="zh"><b>换成便宜的模型。</b>只改配置文件，比较成本和质量。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the Kopi Corner assistant runs on a loop Aina wrote herself and can read line by line: Auntie Suria's role is the coordinator, and Ah Seng and Kak Ros tick their orders off one shared board. The next problem is that every tool is still wired in by hand, so each new one means new glue code.</span><span class="zh">现在 Kopi Corner 助手跑在 Aina 自己写的循环上，每一行都读得懂：Suria 阿姨的角色是总协调，Ah Seng 和 Kak Ros 在同一块任务板上给订单打勾。下一个问题是：每个工具仍然靠手工接线，每加一个就要写新的胶水代码。</span></div>
-<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
-<div class="card"><p class="en" style="margin:0">• <b><code>google.genai.errors.ClientError: 429 RESOURCE_EXHAUSTED</code></b>: Five workers called the model at once and hit the rate limit. Fix: start them a few seconds apart or cap them with <code>max_llm_calls</code>.<br>• <b><code>sqlite3.OperationalError: database is locked</code></b>: Workers write to the board at the same time. Fix: use a short timeout and retry, or write one row per step.<br>• <b><code>A worker never finishes (no error)</code></b>: Nothing stops it. Fix: <code>team.wait_all(timeout=300)</code> then kill what is left.</p>
-<p class="zh" style="margin:0">• <b><code>google.genai.errors.ClientError: 429 RESOURCE_EXHAUSTED</code></b>：五个工人同时调用模型，触到了频率限制。解决：错开几秒启动，或用 <code>max_llm_calls</code> 限制次数。<br>• <b><code>sqlite3.OperationalError: database is locked</code></b>：几个工人同时写任务板。解决：设置较短的超时再重试，或每一步只写一行。<br>• <b><code>A worker never finishes (no error)</code></b>：没有东西让它停下。解决：用 <code>team.wait_all(timeout=300)</code>，到时把剩下的进程结束掉。</p></div>
-<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• The outer loop is an <b>agent</b> with a few tools. The agent chooses, the tools do the exact mechanics.<br>• Start workers without waiting, so they run together. Waiting is its own tool.<br>• The shared board is the only channel between coordinator and workers.<br>• Use a fresh, short-lived inspector with a real browser for each page.<br>• Bound everything: LLM calls, worker time, inspection time and one fix per page.<br>• Kill the whole process tree on timeout, and keep a plain fallback so there is always a front page.<br>• Keep model names in one config so experiments stay cheap.</p><p class="zh" style="margin:0">• 外层循环是一个带几个工具的<b>智能体</b>：智能体做选择，工具做精确的机械活。<br>• 启动工人时不要等，这样它们能同时跑。等待是单独的工具。<br>• 共享任务板是总协调和工人之间唯一的通道。<br>• 每个页面用一个全新、短命、带真实浏览器的检查员。<br>• 给一切设上限：模型调用次数、工人时间、检查时间，以及每个页面只修一次。<br>• 超时要杀掉整个进程树，并准备朴素的备用页面，保证总有首页。<br>• 把模型名放在一个配置里，实验才不贵。</p></div>
+<div class="codebox" data-file="coordinator.py" data-lang="python"><span class="dim"># stand-ins so the sketch reads on its own (the real ones do the work):
+class Board:
+    def add_goal(self, text): ...            # writes one goal row, returns its id
+class Team:
+    def slug(self, framework): ...           # folder name for a framework
+    def start(self, framework, goal): ...    # subprocess.Popen, output to DEVNULL
+    async def wait_all(self, timeout): ...   # until all exit, or the timeout
+    def status(self): ...                    # who finished, who did not
+    def fix_once(self, framework, problem): ...
+board, team = Board(), Team()
 
-<h3><span class="en">Recap</span><span class="zh">三句回顾</span></h3>
-<div class="card"><p class="en" style="margin:0">• The outer loop is an agent with a few tools; the tools do the exact mechanics.<br>• The shared board is the only channel between coordinator and workers.<br>• Bound everything: calls, time, fixes per page.</p>
-<p class="zh" style="margin:0">• 外层循环是一个带几个工具的智能体；精确的机械活交给工具。<br>• 共享任务板是总协调和工人之间唯一的通道。<br>• 每样东西都要设上限：调用次数、时间、每页的修改次数。</p></div>
+def make_tools(team):
+</span><span class="chg">    def start_builder(framework: str, booth: str) -> str:
+        """Start one framework's worker on one booth page. Returns immediately."""
+        goal = board.add_goal(f"Build the {booth} page in site/{team.slug(framework)}/")
+        team.start(framework, goal)
+        return f"{framework} is building {booth}"
+    async def wait_for_builders() -> str:
+        """Block until every started worker exits or times out. Returns the status."""
+        await team.wait_all(timeout=300)
+        return team.status()
+    async def inspect_page(slug: str) -> str:
+        """Open one finished page in a real browser and report whether it works."""
+        return str(await judge(slug))
+    def send_back(framework: str, problem: str) -> str:
+        """Give one worker a single fix task that describes the problem."""
+        return team.fix_once(framework, problem)</span><span class="dim">
+    return [start_builder, wait_for_builders, inspect_page, send_back]
+
+</span><span class="chg">coordinator = LlmAgent(name="fair_coordinator", model="gemini-2.5-flash",
+    instruction="Build the fair site with your team: start every builder, wait, inspect each page, "
+                "send back at most one fix per page, then finish.",
+    tools=make_tools(team))</span></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · The board and the guardrails</span><span class="zh">第 3 步 · 任务板与护栏</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li>The coordinator never talks to a builder directly. Each builder claims its goal on the <b>shared board</b>, writes its steps under it and ticks them off. The same board gives you a live view.</li><li>A team of agents can burn money and time forever. Limit everything, and decide in advance what happens on failure.</li></ul>
+<ul class="zh" style="margin:0;padding-left:18px"><li>总协调从不直接和建造者对话。每位建造者在<b>共享任务板</b>上认领目标，在下面写自己的步骤并逐项勾掉。同一块板子还能做实时显示。</li><li>一群智能体可能永远烧钱烧时间。每样东西都设上限，并提前决定失败时怎么办。</li></ul></div>
+<figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="The coordinator starts five builders; the builders claim and tick goals on a shared board; the coordinator reads the board to redraw its live view"><defs><marker id="ah20" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box soft" x="40" y="85" width="170" height="50" rx="10"/><text class="en" x="125.0" y="114.0">Coordinator agent</text><text class="zh" x="125.0" y="114.0">总协调智能体</text><rect class="box" x="300" y="20" width="200" height="50" rx="10"/><text class="en" x="400.0" y="49.0">Five builders</text><text class="zh" x="400.0" y="49.0">五个建造者</text><rect class="box new" x="300" y="150" width="200" height="50" rx="10"/><text class="en" x="400.0" y="179.0">Shared board</text><text class="zh" x="400.0" y="179.0">共享任务板</text><path class="lnk" d="M210 100L300 50" marker-end="url(#ah20)"/><text class="en sm" x="235" y="62">starts</text><text class="zh sm" x="235" y="62">启动</text><path class="lnk hot" d="M400 70L400 150" marker-end="url(#ah20)"/><text class="en sm" x="470" y="115">claim, tick off</text><text class="zh sm" x="470" y="115">领取、打勾</text><path class="lnk" d="M300 175L125 175L125 135" marker-end="url(#ah20)"/><text class="en sm" x="212" y="194">reads, redraws live view</text><text class="zh sm" x="212" y="194">读取并刷新实时视图</text></svg><figcaption><span class="en">The coordinator never talks to a builder. It starts them and reads the board they all write to.</span><span class="zh">总协调从不直接和建造者说话：它负责启动，再读取大家共同写入的任务板。</span></figcaption></figure>
+<div class="try" id="p3"></div>
+<p class="en">Sort these safeguards by the problem they solve.</p><p class="zh">把这些保险措施按它们解决的问题分类。</p>
+<div class="sc" id="g5"></div>
+
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en">Worker banners tore the live view apart until I sent their output to <code>DEVNULL</code>. And the default 5-second MCP timeout was too short for the first browser call, so I raised it to 30.</span><span class="zh">工人打印的横幅把实时显示撕得七零八落，直到我把它们的输出送进 <code>DEVNULL</code>。默认 5 秒的 MCP 超时对第一次浏览器调用太短，我调成了 30 秒。</span></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Break one page on purpose.</b> Watch the coordinator send it back once, then leave it visibly broken instead of looping.</span><span class="zh"><b>故意弄坏一个页面。</b>看总协调打回一次，之后明显地留着不管，而不是反复重试。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Swap in cheaper models</b> by changing only one config and compare cost and quality.</span><span class="zh"><b>换成更便宜的模型</b>，只改一处配置，比较成本和质量。</span></span></label></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• The outer loop is an agent with a few tools: the agent chooses, the tools do the exact mechanics.<br>• Start workers without waiting so they run together; waiting is its own tool.<br>• The shared board is the only channel between coordinator and workers.<br>• Use a fresh, short-lived inspector with a real browser for each page.<br>• Bound everything: model calls, worker time, one fix per page, plus a plain fallback page.</p><p class="zh" style="margin:0">• 外层循环是一个带几件工具的智能体：智能体做选择，工具做精确的机械活。<br>• 启动工人时不等待，让它们同时跑；等待是单独的工具。<br>• 共享任务板是总协调和工人之间唯一的通道。<br>• 每个页面用一个全新、短命、带真实浏览器的检查员。<br>• 一切都设上限：模型调用、工人时间、每页只修一次，再加一个朴素的兜底页面。</p></div>
+
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Agentic</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>

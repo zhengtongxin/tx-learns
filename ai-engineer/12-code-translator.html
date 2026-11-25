@@ -5,24 +5,14 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/ai-engineer/12-code-translator.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-engineer/12-code-translator.html","url":"https://tx-learns.vercel.app/ai-engineer/12-code-translator.html","name":"Code translator","alternateName":"代码翻译器","description":"Ask models to translate slow Python into fast C++, then compile, run and time the result to compare models on a task with an objective score.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Choosing the right model","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Engineer","url":"https://tx-learns.vercel.app/ai-engineer/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Engineer","item":"https://tx-learns.vercel.app/ai-engineer/index.html"},{"@type":"ListItem","position":3,"name":"Code translator","item":"https://tx-learns.vercel.app/ai-engineer/12-code-translator.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Choosing the right model · Project</span><span class="zh">选对模型 · 项目</span></span><h1><span class="en">Code translator</span><span class="zh">代码翻译器</span></h1><p class="meta"><span class="en">You will turn slow Python into fast C++ with a model, and score models by what actually runs · ~30 min · hands-on</span><span class="zh">你会用模型把慢的 Python 变成快的 C++，并按真正跑出来的结果给模型打分 · 约 30 分钟 · 动手实践</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the helper learnt to pick a model with its own questions, but a person still judged the answers. Today Ah Boy's Python price script takes twenty seconds a run, and fast C++ with the same output can be judged by a stopwatch. We fix it by asking several models to translate, then compiling, running and timing each.</p>
-<p class="zh" style="margin:0">上回助手学会用自己的题挑模型，但答案还是靠人来判断。今天 Ah Boy 的 Python 报价脚本每次要跑二十秒，而输出相同的快速 C++ 可以用秒表来评判。我们的办法是让几个模型各翻译一次，再逐个编译、运行、计时。</p></div>
-<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en" style="margin:0"><b>Ah Boy</b> has a Python script that works out the best resale price for his second-hand phones, and it takes twenty seconds on every run. <b>Wei Jie</b> builds him a translator: give it Python, get back fast C++ that prints the same output. It is also a neat test for the last lesson, because the score is objective: does it run, and how fast. The winner of this timing test is the model the helper can trust with code.</p>
-<p class="zh" style="margin:0"><b>Ah Boy</b> 有个 Python 脚本，用来算二手手机的最佳转售价，每次要跑二十秒。<b>Wei Jie</b> 给他做了个翻译器：输入 Python，得到打印同样结果的快速 C++。它也是上一课的好测试，因为分数是客观的：能不能跑，跑得多快。这场计时赛的赢家，就是助手可以放心交给它写代码的模型。</p></div>
+<h2><span class="en">Step 1 · The compile command and the prompt</span><span class="zh">第 1 步 · 编译命令和提示词</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">C++ must be compiled before it runs. The flags matter: <code>-O3</code> optimises hard, <code>-march=native</code> uses your chip's features, <code>-flto</code> optimises across the program. Forget them and you see almost no speedup. In the prompt, warn the model that Python integers never overflow but C++ ones wrap around silently, so use 64-bit types. Models wrap code in markdown fences (lines starting with three backticks): strip them before saving.</p>
+<p class="zh" style="margin:0 0 8px">C++ 要先编译才能运行。参数很重要：<code>-O3</code> 全力优化，<code>-march=native</code> 用上你芯片的特性，<code>-flto</code> 跨整个程序优化。忘了加，几乎看不到加速。提示词里要提醒模型：Python 整数不会溢出，C++ 的会悄悄回绕，所以要用 64 位类型。模型喜欢把代码包在 markdown 围栏里（以三个反引号开头的行），保存前要去掉。</p></div>
+<div class="codebox" data-file="prompts.py" data-lang="python"><span class="chg">COMPILE = ["g++", "-O3", "-march=native", "-flto", "main.cpp", "-o", "main"]
+RUN = ["./main"]
 
-<h2><span class="en">Step 1 · The compile command comes first</span><span class="zh">第 1 步 · 先搞定编译命令</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">C++ must be compiled before it runs, and the right compiler depends on your machine. You can paste a short report of your operating system, chip and installed tools to a model and ask what to use. Then write down the exact commands yourself. The flags matter: <code>-O3</code> optimises hard, <code>-march=native</code> uses your own chip's features and <code>-flto</code> optimises across the whole program. Wei Jie forgot them once and saw almost no speedup.</p>
-<p class="zh" style="margin:0 0 8px">C++ 要先编译才能运行，而合适的编译器取决于你的机器。你可以把操作系统、芯片和已安装工具的简短报告贴给模型，问该用什么。然后自己把确切的命令记下来。参数很重要：<code>-O3</code> 全力优化，<code>-march=native</code> 用上你自己芯片的特性，<code>-flto</code> 跨整个程序优化。Wei Jie 有一次忘了加，结果几乎没有加速。</p></div>
-<div class="codebox" data-file="build_config.py" data-lang="python"><span class="chg">COMPILE = ["g++", "-O3", "-march=native", "-flto", "main.cpp", "-o", "main"]
-RUN = ["./main"]</span></div>
-<div class="try" id="p1"></div>
-
-<h2><span class="en">Step 2 · The prompt, and cleaning the reply</span><span class="zh">第 2 步 · 提示词，以及清理回复</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The system message asks for fast C++, code only, same output. The user message carries the Python and one warning that is easy to miss: Python integers never overflow, but C++ ones do: a number too big for its box wraps around to a wrong value, with no error. So use 64-bit or wider types (bigger boxes). Models like to wrap code in markdown fences (the lines that start with three backticks), so strip them before saving, or the compiler chokes on the backticks.</p>
-<p class="zh" style="margin:0 0 8px">system 消息要求：快速 C++，只要代码，输出相同。user 消息带上 Python 代码，还有一条容易漏掉的提醒：Python 的整数不会溢出，C++ 的会：数字超出它的“盒子”就会绕回一个错误的值，而且不报错。所以要用 64 位或更宽的类型（更大的盒子）。模型喜欢把代码包在 markdown 围栏里（以三个反引号开头的那几行），保存前要去掉，否则编译器会被反引号噎住。</p></div>
-<div class="codebox" data-file="prompts.py" data-lang="python"><span class="chg">SYSTEM = """Convert the given Python into fast C++.
-Reply with code only. It must print exactly the same output.
-Add comments only where they really help."""
+SYSTEM = """Convert the given Python into fast C++.
+Reply with code only. It must print exactly the same output."""
 
 def make_user_prompt(python_code):
     return ("Translate this to C++ that prints the same output. "
@@ -31,11 +21,11 @@ def make_user_prompt(python_code):
 def strip_fences(reply):
     lines = [ln for ln in reply.splitlines() if not ln.strip().startswith("```")]
     return "\n".join(lines)</span></div>
+<div class="try" id="p1"></div>
 <div class="try" id="p2"></div>
-
-<h2><span class="en">Step 3 · Ask, compile, run, time</span><span class="zh">第 3 步 · 提问、编译、运行、计时</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">One helper does the whole chain for any model: ask, strip, write <code>main.cpp</code>, compile, run and time. Another runs the Python for comparison. Now every model gets two objective numbers, and nothing relies on how the code looks. On a loop that sums a series millions of times, Python took about twenty seconds and one model's C++ finished in about 0.08 seconds.</p>
-<p class="zh" style="margin:0 0 8px">一个函数对任何模型完成整条链：提问、去围栏、写入 <code>main.cpp</code>、编译、运行、计时。另一个函数运行 Python 做对照。这样每个模型都有两个客观数字，不靠代码好不好看。在一个把级数求和几百万次的循环上，Python 花了约二十秒，某个模型写的 C++ 约 0.08 秒就跑完。</p></div>
+<h2><span class="en">Step 2 · Ask, compile, run, time</span><span class="zh">第 2 步 · 提问、编译、运行、计时</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">One helper runs the whole chain for any model: ask, strip, write <code>main.cpp</code>, compile, run, time. Another runs the Python for comparison. Every model gets two objective numbers, whatever the code looks like.</p>
+<p class="zh" style="margin:0 0 8px">一个函数对任何模型完成整条链：提问、去围栏、写入 <code>main.cpp</code>、编译、运行、计时。另一个运行 Python 做对照。不管代码好不好看，每个模型都有两个客观数字。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 130" role="img" aria-label="Five steps for each model: ask, clean the reply, compile, run and time, then compare the output with Python."><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box new" x="10" y="40" width="116" height="56" rx="12"/><text class="en" x="68" y="73">Ask model</text><text class="zh" x="68" y="73">问模型</text><rect class="box new" x="156" y="40" width="116" height="56" rx="12"/><text class="en" x="214" y="65">Clean the</text><text class="en" x="214" y="81">reply</text><text class="zh" x="214" y="65">清理</text><text class="zh" x="214" y="81">回复</text><rect class="box new" x="302" y="40" width="116" height="56" rx="12"/><text class="en" x="360" y="73">Compile</text><text class="zh" x="360" y="73">编译</text><rect class="box new" x="448" y="40" width="116" height="56" rx="12"/><text class="en" x="506" y="65">Run and</text><text class="en" x="506" y="81">time it</text><text class="zh" x="506" y="65">运行并</text><text class="zh" x="506" y="81">计时</text><rect class="box new" x="594" y="40" width="116" height="56" rx="12"/><text class="en" x="652" y="65">Same output</text><text class="en" x="652" y="81">as Python?</text><text class="zh" x="652" y="65">输出和</text><text class="zh" x="652" y="81">Python 相同？</text><path class="lnk" d="M126 68 H153" marker-end="url(#ar)"/><path class="lnk" d="M272 68 H299" marker-end="url(#ar)"/><path class="lnk" d="M418 68 H445" marker-end="url(#ar)"/><path class="lnk" d="M564 68 H591" marker-end="url(#ar)"/></svg><figcaption><span class="en">Every model goes through the same chain, so the timings are fair.</span><span class="zh">每个模型都走同一条链，所以计时是公平的。</span></figcaption></figure>
 <div class="codebox" data-file="run_both.py" data-lang="python"><span class="dim">import subprocess, time
 from openai import OpenAI      # pip install openai; set OPENAI_API_KEY (calls cost money)
@@ -59,18 +49,18 @@ def timed(cmd):
 def run_python(path):
     return timed(["python", path])</span></div>
 <div class="try" id="p3"></div>
-
-<h2><span class="en">Step 4 · Verify the output, then rank the models</span><span class="zh">第 4 步 · 核对输出，再给模型排名</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Fast is worthless if it is wrong, so compare the printed output with Python's, line for line. Wei Jie first trusted the output and two models silently printed a wrong number. Use a harder program too: save one as hard_program.py. It could be a random-number generator feeding a search with big numbers, because sloppy translations break there. Then rank by speedup divided by cost (tokens used times the price per token, from your usage page), not by speed alone. A simple hard_program.py:</p>
-<p class="zh" style="margin:0 0 8px">快但错了毫无价值，所以要把打印的输出和 Python 的逐行对比。Wei Jie 起初相信了输出，结果有两个模型悄悄打印了错误的数字。再加一个更难的程序：存成 hard_program.py，可以是用随机数生成器喂给一个涉及大数的搜索，因为马虎的翻译会在这里露馅。然后按加速倍数除以成本（用掉的 token 数乘以每个 token 的价格，见用量页面）来排名，不要只看速度。下面是一个简单的 hard_program.py：</p></div>
-<div class="codebox" data-file="hard_program.py" data-lang="python"><span class="dim"># hard_program.py: a random-number generator feeding a big-number search
+<h2><span class="en">Step 3 · Verify the output, then rank</span><span class="zh">第 3 步 · 核对输出，再排名</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Fast is worthless if wrong: compare the printed output with Python's. Use a hard program too, since sloppy translations break on big numbers. Rank by speedup divided by cost (tokens used times price), not speed alone.</p>
+<p class="zh" style="margin:0 0 8px">快但错了毫无价值：把打印的输出和 Python 的对比。再用一个难的程序，因为马虎的翻译会在大数上露馅。按加速倍数除以成本（用掉的 token 数乘以价格）排名，不要只看速度。</p></div>
+<div class="codebox" data-file="compare.py" data-lang="python"><span class="dim"># hard_program.py: a random-number generator feeding a big-number loop
 x, total = 12345, 0
 for _ in range(5_000_000):
     x = (x * 1103515245 + 12345) % 2147483648
     total += x % 1000
-print(total)   # prints one number; the C++ must print the same one
-</span></div>
-<div class="codebox" data-file="compare.py" data-lang="python"><span class="dim">py_out, py_time = run_python("hard_program.py")
+print(total)
+</span>
+<span class="dim"># --- compare.py ---
+py_out, py_time = run_python("hard_program.py")
 hard_code = open("hard_program.py").read()
 
 </span><span class="chg">for model in ["gpt-4.1", "gpt-4.1-mini", "gpt-4.1-nano"]:    # your shortlist
@@ -81,21 +71,14 @@ hard_code = open("hard_program.py").read()
         print(model, "WRONG OUTPUT", out)
     else:
         print(model, f"ok, {py_time / took:.0f}x faster")</span></div>
-<div class="codebox" data-file="output" data-lang="text">gpt-4.1 ok, 38x faster
-gpt-4.1-mini WRONG OUTPUT 2497651204
-gpt-4.1-nano failed to compile</div>
 <p class="en">What does each result tell you about the model?</p>
 <p class="zh">每个结果说明这个模型怎么样？</p><div class="sc" id="g4"></div>
-
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I trusted the output without comparing it to the Python output, and two models quietly printed a wrong number. I also forgot the optimisation flags and saw almost no speedup. Now the check against Python runs every time, and the flags live in one place.</span><span class="zh">我没拿输出和 Python 的输出对比就相信了它，结果有两个模型悄悄打印了错误的数字。我还忘了优化参数，几乎没看到加速。现在每次都和 Python 对一遍，参数也只放在一处。</span></div>
-
 <h2><span class="en">Common errors</span><span class="zh">常见报错</span></h2>
-<div class="card"><p class="en" style="margin:0">• <code>error: 'x' was not declared in this scope</code> from <code>g++</code>. The model's C++ is wrong. Show the compiler error back to the model, or try another model.<br>• The C++ prints a different number. Integers overflowed or the maths changed. Ask for fixed-size types such as <code>long long</code> and compare outputs exactly.<br>• <code>FileNotFoundError: 'g++'</code>. The compiler is not installed. Install it (for example <code>sudo apt install g++</code>) or change <code>COMPILE</code> to your compiler.</p><p class="zh" style="margin:0">• <code>g++</code> 报 <code>error: 'x' was not declared in this scope</code>：模型写的 C++ 有错。把编译器的报错发回给模型，或换一个模型。<br>• C++ 打印出不同的数字：整数溢出，或算法变了。要求用 <code>long long</code> 这类定长类型，并逐字比较输出。<br>• <code>FileNotFoundError: 'g++'</code>：没装编译器。安装它（例如 <code>sudo apt install g++</code>），或把 <code>COMPILE</code> 改成你的编译器。</p></div>
+<div class="card"><p class="en" style="margin:0">• <code>error: ... was not declared in this scope</code>. The model's C++ is wrong. Show the error back to the model, or try another.<br>• <code>FileNotFoundError: 'g++'</code>. Install the compiler or change <code>COMPILE</code>.</p><p class="zh" style="margin:0">• <code>error: ... was not declared in this scope</code>：模型写的 C++ 有错。把报错发回给模型，或换一个。<br>• <code>FileNotFoundError: 'g++'</code>：安装编译器，或改 <code>COMPILE</code>。</p></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Port a loop you wrote</b> to Rust or C++ and compare timings.</span><span class="zh"><b>把你写过的一个循环</b>移植到 Rust 或 C++，比较耗时。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add an automatic check</b> that the outputs match, as in step 4.</span><span class="zh"><b>加一个自动检查，</b>确认输出一致，像第 4 步那样。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Rank three models</b> by speedup divided by cost.</span><span class="zh"><b>把三个模型按</b>加速倍数除以成本排名。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the helper can rank models by a score nobody argues with: Ah Boy's script compiled, run, same output, seconds on the clock. The next problem is that it still knows nothing about the estate; ask who handles lift complaints and it invents a name.</span><span class="zh">助手现在能用没人争论的分数给模型排名：Ah Boy 的脚本编译、运行、输出相同，再看秒数。下一个问题是它对这个组屋区仍一无所知：问谁负责电梯投诉，它会编出一个名字。</span></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Port a loop you wrote</b> to C++ or Rust and compare timings.</span><span class="zh"><b>把你写过的一个循环</b>移植到 C++ 或 Rust，比较耗时。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Rank three models</b> by speedup divided by cost.</span><span class="zh"><b>把三个模型</b>按加速倍数除以成本排名。</span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• Pick models by running them on a task with an objective score.<br>• Compile with optimisation flags, or you will see almost no speedup.<br>• Tell the model about integer overflow when translating from Python.<br>• Strip markdown fences before compiling.<br>• Always compare the output with Python's, not just whether it compiles.<br>• A hard test program separates models that an easy one cannot.<br>• Speedups can be huge, but only for correct code.<br>• Rank by speedup divided by cost: a cheap open model can come close.</p><p class="zh" style="margin:0">• 选模型，就让它们去跑一个有客观分数的任务。<br>• 编译时要加优化参数，不然几乎看不到加速。<br>• 从 Python 翻译时，要提醒模型整数溢出的问题。<br>• 编译前先去掉 markdown 围栏。<br>• 一定要把输出和 Python 的对比，不能只看能不能编译。<br>• 难的测试程序能分出简单程序分不出的模型。<br>• 加速可以很惊人，但只对正确的代码成立。<br>• 按加速倍数除以成本排名：便宜的开源模型也可能很接近。</p></div>
+<div class="card"><p class="en" style="margin:0">• Pick models by running them on a task with an objective score.<br>• Compile with optimisation flags, or the speedup disappears.<br>• Warn about integer overflow, and strip markdown fences before compiling.<br>• Always compare the output with Python's, not just whether it compiles.<br>• Rank by speedup divided by cost; a cheap open model can come close.</p><p class="zh" style="margin:0">• 选模型，就让它们去跑一个有客观分数的任务。<br>• 编译要加优化参数，不然加速就没了。<br>• 提醒整数溢出，编译前去掉 markdown 围栏。<br>• 一定要把输出和 Python 的对比，不能只看能不能编译。<br>• 按加速倍数除以成本排名；便宜的开源模型也可能很接近。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>

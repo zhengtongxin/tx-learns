@@ -5,14 +5,9 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/ai-engineer/07-shop-assistant-that-acts.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-engineer/07-shop-assistant-that-acts.html","url":"https://tx-learns.vercel.app/ai-engineer/07-shop-assistant-that-acts.html","name":"Shop assistant","alternateName":"店铺助手","description":"Combine a chat model, database tools, a picture and a voice into one assistant that looks up prices, shows the place and speaks the answer.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Many models, one app","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Engineer","url":"https://tx-learns.vercel.app/ai-engineer/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Engineer","item":"https://tx-learns.vercel.app/ai-engineer/index.html"},{"@type":"ListItem","position":3,"name":"Shop assistant","item":"https://tx-learns.vercel.app/ai-engineer/07-shop-assistant-that-acts.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Many models, one app · Project</span><span class="zh">多个模型，一个应用 · 项目</span></span><h1><span class="en">Shop assistant</span><span class="zh">店铺助手</span></h1><p class="meta"><span class="en">You will join a chat model, a database, a picture and a voice into one assistant · ~30 min · hands-on</span><span class="zh">你会把聊天模型、数据库、图片和声音合成一个助手 · 约 30 分钟 · 动手实践</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the helper could look up one price through a tool. Today it fails when a neighbour wants the price, a picture of the place and a spoken answer at the same desk. We fix it by combining the tools, picture and voice into one assistant.</p>
-<p class="zh" style="margin:0">上回助手能通过工具查到一个价格。今天它的毛病是邻居在同一个柜台前，既要价格，又要看地方的图片，还要听口头回答。解决办法是把工具、图片和声音合成一个助手。</p></div>
-<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en" style="margin:0"><b>Uncle Raj</b> sells seats on weekend coach trips from the bus interchange, and people keep asking him the same price questions. <b>Wei Jie</b> builds him a desk assistant: it answers prices from a database, shows a picture of the place being discussed and speaks the reply. It uses the three lessons before it. The coach-trip desk is a side case: it is the helper's price, picture and voice skills pointed at Uncle Raj's weekend trips.</p>
-<p class="zh" style="margin:0"><b>Raj 叔叔</b>在巴士转换站卖周末旅游巴士的座位，总有人反复问同样的价格问题。<b>Wei Jie</b> 给他做了个柜台助手：从数据库回答价格，显示正在谈到的地方的图片，并把回复读出来。它用到了前面三课的内容。 旅游巴士柜台是支线案例：它是助手的价格、图片和声音本领，用在 Raj 叔叔的周末行程上。</p></div>
-
-<h2><span class="en">Step 1 · The brief, the voice of the desk and the data</span><span class="zh">第 1 步 · 需求、柜台的口吻和数据</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The finished shape is: user text, then the chat loop (model plus database tools), then the reply text, then a picture of the place and speech of the reply, all on one screen. Build it in small, testable pieces. Start with the system message: short, polite, accurate, and willing to say “I don't know”. Then the data: a SQLite table of trip prices. Gradio runs your callbacks on worker threads, and SQLite by default refuses a connection used from a thread other than the one that made it, so the connection below is opened with <code>check_same_thread=False</code>.</p>
-<p class="zh" style="margin:0 0 8px">成品的形状是：用户文字，然后聊天循环（模型加数据库工具），然后回复文字，再然后是地点图片和回复的语音，全部放在一个界面里。把它拆成小而可测试的部分来做。先写 system 消息：简短、有礼貌、准确，不确定就说“我不知道”。再准备数据：一张 SQLite 的旅游价格表。Gradio 在工作线程里运行回调，而 SQLite 默认不允许在创建连接的线程之外使用它，所以下面的连接用 <code>check_same_thread=False</code> 打开。</p></div>
+<h2><span class="en">Step 1 · The data and the tools</span><span class="zh">第 1 步 · 数据和工具</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Shape: user text, then the chat loop (model plus database tools), then reply text, a picture of the place and speech, on one screen. Build it in small pieces. Start with a short, accurate system message that allows &ldquo;I don&rsquo;t know&rdquo;, and a SQLite table of trip prices. Gradio calls you from worker threads, so open SQLite with <code>check_same_thread=False</code>.</p>
+<p class="zh" style="margin:0 0 8px">形状：用户文字，然后聊天循环（模型加数据库工具），然后是回复文字、地点图片和语音，全在一个界面里。拆成小块来做。先写简短准确、允许说“我不知道”的 system 消息，再准备一张 SQLite 的行程价格表。Gradio 在工作线程里调用你，所以 SQLite 要用 <code>check_same_thread=False</code> 打开。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 150" role="img" aria-label="The finished desk assistant">
 <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9a9aa8"/></marker></defs>
 <rect class="box soft" x="2" y="40" width="134" height="70" rx="12"/>
@@ -41,17 +36,17 @@
 <path class="lnk" d="M333,75 L387,75" marker-end="url(#ah)"/>
 <path class="lnk hot" d="M527,75 L581,75" marker-end="url(#ah)"/>
 </svg><figcaption><span class="en">One text question goes through the tool loop; the picture and voice are extra calls on the reply.</span><span class="zh">一条文字问题走完工具循环；图片和声音是对回复额外发起的调用。</span></figcaption></figure>
-<div class="codebox" data-file="prompt_tools.py" data-lang="python"><span class="chg">system_message = """You are the desk assistant for Uncle Raj's weekend coach trips.
+<div class="codebox" data-file="prompt_tools.py" data-lang="python"><span class="chg">system_message = """You are the desk assistant for weekend coach trips.
 Be short, polite and accurate. Use the tools for prices.
 If you are not sure, say you do not know."""
 
 import sqlite3
-db = sqlite3.connect("trips.db", check_same_thread=False)   # Gradio calls us from worker threads
+db = sqlite3.connect("trips.db", check_same_thread=False)
 db.execute("CREATE TABLE IF NOT EXISTS prices (place TEXT PRIMARY KEY, price REAL)")
 db.execute("INSERT OR IGNORE INTO prices VALUES ('sentosa', 48), ('mandai', 62), ('changi', 55)")
 db.commit()
 
-looked_up = []   # places the tools touched during this question (one list for the whole program)
+looked_up = []   # places the tools touched during this question
 
 def get_price(place):
     looked_up.append(place)
@@ -63,10 +58,9 @@ def set_price(place, price):
     db.commit()
     return f"{place} is now S${price}"</span></div>
 <div class="try" id="p1"></div>
-
 <h2><span class="en">Step 2 · The tools and the chat loop</span><span class="zh">第 2 步 · 工具和聊天循环</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Describe each function to the model and run the loop from the last lesson: ask, run what was requested, answer, and repeat while the model keeps asking. A customer may ask about two trips in one sentence, so handle many calls and chained calls. Print each call while testing so you can see what the model asked for. A <code>dispatch</code> table maps the tool name to the function. <code>finish_reason</code> says why the model stopped: <code>"tool_calls"</code> means it wants tools run first, anything else means the answer is ready.</p><p class="en" style="margin:0 0 8px">A tool description is a hint to the model, not a lock: “Staff only” does not stop a customer from asking for a price change. The real guard is to keep <code>set_price</code> out of the customer's tool list and give it only to a separate staff screen. Here it stays in the list so you can test it.</p>
-<p class="zh" style="margin:0 0 8px">把每个函数向模型描述一遍，再跑上一课的循环：请求、执行被请求的调用、回答，模型继续请求就继续。顾客可能一句话问两个行程，所以要处理多个调用和连续调用。测试时把每个调用打印出来，看看模型到底请求了什么。用一张 <code>dispatch</code> 表把工具名映射到函数。<code>finish_reason</code> 说明模型为什么停下：<code>"tool_calls"</code> 表示它想先运行工具，其他值表示答案已经好了。</p><p class="zh" style="margin:0 0 8px">工具描述只是给模型的提示，不是锁：写上“Staff only”并不能阻止顾客要求改价。真正的防线是把 <code>set_price</code> 从顾客的工具列表里拿掉，只给单独的员工界面用。这里为了方便测试，把它留在列表里。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Describe each function, then run the loop from the last lesson: ask, run what was requested, answer, repeat. A customer may ask about two trips in one sentence, so handle many calls. A <code>dispatch</code> table maps tool name to function. A description is a hint, not a lock: the real guard is keeping <code>set_price</code> out of the customer's tool list (it stays here only for testing).</p>
+<p class="zh" style="margin:0 0 8px">描述每个函数，再跑上一课的循环：请求、执行、回答、重复。顾客可能一句话问两个行程，所以要处理多个调用。<code>dispatch</code> 表把工具名映射到函数。描述只是提示，不是锁：真正的防线是把 <code>set_price</code> 从顾客的工具列表里拿掉（这里留着只为测试）。</p></div>
 <div class="codebox" data-file="tool_chat.py" data-lang="python"><span class="dim">import json
 from openai import OpenAI
 client = OpenAI()
@@ -92,13 +86,11 @@ def run_chat(history):
             messages.append({"role": "tool", "tool_call_id": call.id, "content": result})
         reply = client.chat.completions.create(model=MODEL, messages=messages, tools=tools)
     return reply.choices[0].message.content</span></div>
-<div class="codebox" data-file="output" data-lang="text">tool call: get_price {"place": "Sentosa"}</div>
 <div class="try" id="p2"></div>
-
-<h2><span class="en">Step 3 · A picture when needed, and a voice</span><span class="zh">第 3 步 · 图片需要时才画，再加声音</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Add the two helpers: one draws a pop-art style picture of a place, one turns the reply into audio. The trap is calling them on every message. A picture costs money and takes seconds, so draw only when a tool actually looked up a place. That is what <code>looked_up</code> is for. Only the last place is drawn (<code>looked_up[-1]</code>), because one picture per reply is enough. <code>looked_up</code> is one shared list, cleared at the start of each question, so this demo suits one desk with one customer at a time; with several customers at once you would keep it per session. The voice is cheap enough to run on every reply.</p>
-<p class="zh" style="margin:0 0 8px">加入两个辅助函数：一个画地点的波普风格图片，一个把回复变成音频。陷阱是每条消息都调用它们。图片花钱又要几秒，所以只有工具真的查过某个地点才画。这就是 <code>looked_up</code> 的用处。只画最后一个地点（<code>looked_up[-1]</code>），因为每条回复一张图就够了。<code>looked_up</code> 是一个共用的列表，每次提问开头清空，所以这个演示适合一个柜台一次一位顾客；多位顾客同时用时，要改成每个会话各存一份。语音便宜，每条回复都读也行。</p></div>
-<div class="codebox" data-file="image_voice.py" data-lang="python"><span class="dim">import base64
+<h2><span class="en">Step 3 · Picture, voice and the screen</span><span class="zh">第 3 步 · 图片、声音和界面</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Draw a picture only when a tool actually looked up a place (<code>looked_up</code>): images cost money and seconds. Voice is cheap enough for every reply. In <code>gr.Blocks</code>, send runs <b>two</b> callbacks: the first only adds the user's message, the second calls the model and updates chat, image and audio. One callback doing both would let two writers overwrite the same history.</p>
+<p class="zh" style="margin:0 0 8px">只有工具真的查过地点（<code>looked_up</code>）才画图：图片花钱又要几秒。语音便宜，每条回复都读也行。在 <code>gr.Blocks</code> 里，发送按顺序运行<b>两个</b>回调：第一个只加入用户消息，第二个调用模型并更新聊天、图片和音频。一个回调包办两件事，会让两个写入者互相覆盖同一份历史。</p></div>
+<div class="codebox" data-file="screen.py" data-lang="python"><span class="dim">import base64, gradio as gr
 from io import BytesIO
 from PIL import Image
 
@@ -112,18 +104,12 @@ def speak(text):
     with open("reply.mp3", "wb") as f:
         f.write(audio.content)
     return "reply.mp3"
-
-</span><span class="chg">def answer_everything(history):
+</span><span class="chg">
+def answer_everything(history):
     looked_up.clear()
     text = run_chat(history)
     picture = draw(looked_up[-1]) if looked_up else None
-    return text, picture, speak(text)</span></div>
-<div class="try" id="p3"></div>
-
-<h2><span class="en">Step 4 · The screen, with two callbacks</span><span class="zh">第 4 步 · 界面，用两个回调</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Use <code>gr.Blocks</code>: a row with the chatbot on the left and an image panel on the right, a text box underneath and an audio player for the reply. The send action runs <b>two</b> callbacks in order. The first only puts the user's message into the chat, so it shows up straight away. The second calls the model and then updates the chat, the image and the audio. Wei Jie first tried one callback that did everything, and two callbacks fought over the same history list: each returned <code>history + [its own message]</code>, so whichever finished last overwrote the other's message.</p>
-<p class="zh" style="margin:0 0 8px">用 <code>gr.Blocks</code>：一行里左边是聊天框、右边是图片面板，下面是文本框，再加一个播放回复的音频播放器。发送动作按顺序运行<b>两个</b>回调。第一个只把用户的消息放进聊天，所以马上就能看到。第二个调用模型，然后更新聊天、图片和音频。Wei Jie 起初用一个回调包办一切，结果两个回调抢着改同一个历史列表：各自都返回 <code>history + [自己的消息]</code>，后完成的那个就把另一个的消息覆盖掉了。</p></div>
-<div class="codebox" data-file="screen.py" data-lang="python"><span class="dim">import gradio as gr
+    return text, picture, speak(text)</span><span class="dim">
 
 with gr.Blocks() as screen:
     with gr.Row():
@@ -131,8 +117,8 @@ with gr.Blocks() as screen:
         picture = gr.Image(height=400)
     audio = gr.Audio(autoplay=True)
     box = gr.Textbox(label="Ask about a coach trip")
-
-    </span><span class="chg">def add_user(text, history):
+</span><span class="chg">
+    def add_user(text, history):
         return "", history + [{"role": "user", "content": text}]
 
     def answer(history):
@@ -143,18 +129,15 @@ with gr.Blocks() as screen:
     box.submit(add_user, [box, chatbot], [box, chatbot]).then(answer, chatbot, [chatbot, picture, audio])</span><span class="dim">
 
 screen.launch()</span></div>
+<div class="try" id="p3"></div>
 <p class="en">Where does each piece of the finished assistant live?</p>
 <p class="zh">成品助手的每一块在哪里？</p><div class="sc" id="g4"></div>
-
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I generated an image on every message. It cost money and was slow, so now it only happens when a tool looked up a place. I also had two callbacks fighting over the same history list (each returned <code>history + [its own message]</code>, so the later one overwrote the earlier), until I split “add the user message” from “get the answer”.</span><span class="zh">我曾经每条消息都生成一张图，又花钱又慢，现在只在工具查过地点时才生成。我还让两个回调抢同一个历史列表（各自返回 <code>history + [自己的消息]</code>，后到的覆盖先到的），直到把“加入用户消息”和“得到回答”拆开。</span></div>
-
 <h2><span class="en">Common errors</span><span class="zh">常见报错</span></h2>
-<div class="card"><p class="en" style="margin:0">• The loop never ends or calls the same tool again and again. The loop above has no step cap yet. Wrap it as <code>for _ in range(5):</code> instead of <code>while</code>: stop after five rounds and return what you have.<br>• <code>KeyError: 'place'</code>. The model sent different argument names than the function expects. Make the tool description name the exact parameters.<br>• <code>AuthenticationError: Incorrect API key provided</code>. The key is missing, has a stray space or newline, or the <code>.env</code> file was not loaded. Add <code>import os</code> and <code>from dotenv import load_dotenv; load_dotenv()</code> at the top, print <code>len(os.getenv('OPENAI_API_KEY'))</code>, fix the file, then restart the notebook.</p><p class="zh" style="margin:0">• 循环不停，或一直重复调用同一个工具：上面的循环还没有步数上限。把 <code>while</code> 改成 <code>for _ in range(5):</code>：五轮之后就停，返回已有的结果。<br>• <code>KeyError: 'place'</code>：模型传来的参数名和函数要的不一致。在工具描述里写清准确的参数名。<br>• <code>AuthenticationError: Incorrect API key provided</code>：密钥缺失、首尾有空格或换行，或者 <code>.env</code> 没有加载。在文件顶部加上 <code>import os</code> 和 <code>from dotenv import load_dotenv; load_dotenv()</code>，打印 <code>len(os.getenv('OPENAI_API_KEY'))</code>，改好文件，再重启笔记本。</p></div>
+<div class="card"><p class="en" style="margin:0">• A loop that never ends or repeats one tool. Cap it: <code>for _ in range(5):</code> instead of <code>while</code>.<br>• <code>KeyError: 'place'</code>. The model used other argument names. Name the exact parameters in the tool description.</p><p class="zh" style="margin:0">• 循环不停或一直重复同一个工具：加上限，用 <code>for _ in range(5):</code> 代替 <code>while</code>。<br>• <code>KeyError: 'place'</code>：模型用了别的参数名。在工具描述里写清准确的参数名。</p></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Add a “book a trip” tool</b> that writes a row in a second table.</span><span class="zh"><b>加一个“订行程”工具，</b>往第二张表写一行。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Print every tool call</b> to the console so you can see what the model asked for.</span><span class="zh"><b>把每个工具调用打印到控制台，</b>看模型到底请求了什么。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Replace the database with a CSV</b> and see what changes.</span><span class="zh"><b>把数据库换成 CSV，</b>看看有什么变化。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the desk answers coach-trip prices from a database, shows a picture of the place and reads the reply aloud, so Uncle Raj stops repeating himself at the noticeboard. The picture is drawn only when needed, to keep the bill down. The next problem is that every message still goes to a paid API, which adds up across a whole estate.</span><span class="zh">现在这个柜台能从数据库回答旅游巴士的价格，显示地方的图片，并把回复读出来，Raj 叔叔不用再在公告板前重复同样的话。图片只在需要时才画，免得账单飙升。下一个问题是：每条消息仍然要付费调用 API，整个社区用起来费用会累积。</span></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Add a &ldquo;book a trip&rdquo; tool</b> that writes a row in a second table.</span><span class="zh"><b>加一个“订行程”工具</b>，往第二张表写一行。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Replace the database with a CSV</b> and see what changes.</span><span class="zh"><b>把数据库换成 CSV</b>，看看有什么变化。</span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• Chat model plus tools plus other media models makes an assistant that does things.<br>• Build it in small, testable pieces, one at a time.<br>• Handle many and chained tool calls with a loop.<br>• Print tool calls while testing.<br>• Call image generation only when a tool actually looked something up.<br>• Split “add the user message” from “get the answer” in the screen.<br>• Cost control matters: images and long histories add up.<br>• This is the bridge into agents.</p><p class="zh" style="margin:0">• 聊天模型加工具，再加其他媒体模型，就成了会动手的助手。<br>• 拆成小而可测试的部分，一块一块地做。<br>• 用循环处理多个、连续的工具调用。<br>• 测试时把工具调用打印出来。<br>• 只有工具真的查过东西，才调用图片生成。<br>• 界面里把“加入用户消息”和“得到回答”拆开。<br>• 成本要控制：图片和很长的历史会越积越多。<br>• 这是通往智能体的桥梁。</p></div>
+<div class="card"><p class="en" style="margin:0">• Chat model plus tools plus media models makes an assistant that does things.<br>• Build in small, testable pieces; print tool calls while testing.<br>• Handle many and chained tool calls with a loop.<br>• Generate an image only when a tool looked something up.<br>• Split &ldquo;add the user message&rdquo; from &ldquo;get the answer&rdquo; in the screen.</p><p class="zh" style="margin:0">• 聊天模型加工具，再加媒体模型，就成了会动手的助手。<br>• 拆成小而可测试的部分；测试时打印工具调用。<br>• 用循环处理多个、连续的工具调用。<br>• 只有工具真的查过东西，才生成图片。<br>• 界面里把“加入用户消息”和“得到回答”拆开。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>

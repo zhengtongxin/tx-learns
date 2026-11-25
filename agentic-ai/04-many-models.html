@@ -6,31 +6,19 @@
 <div class="wrap"><nav class="side"></nav><main>
 
 <div class="hero"><span class="tag"><span class="en">Foundations · Lesson 4</span><span class="zh">基础 · 第 4 课</span></span><h1><span class="en">Many models, one API</span><span class="zh">多模型同一 API</span></h1><p class="meta"><span class="en">Choose the right model, call any provider with the same code, let a model judge the rest · ~12 min · hands-on</span><span class="zh">选对模型，用同一套代码调用任何厂商，再让模型当裁判 · 约 12 分钟 · 动手实操</span></p></div>
-
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the Kopi Corner assistant could answer a customer through one model call. Today that is brittle and costly: if the provider is slow or dear, Auntie Suria's counter waits. We fix it by switching provider with three changed values and sending easy questions to a cheaper model.</p>
-<p class="zh" style="margin:0">上回 Kopi Corner 助手能用一次模型调用回答顾客。今天这样做既脆弱又费钱：厂商一慢或涨价，Suria 阿姨的柜台就得干等。我们的办法是只改三个值就能换厂商，并把简单的问题交给更便宜的模型。</p></div>
-<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">Uncle Lim wants a helper that answers customers' questions for Kopi Corner. His niece <b>Aina</b> builds it. Last lesson she called one model. Now she must choose the right model for each job, try other providers without rewriting her code, and let a model rank the answers so she can see which one is best.</p>
-<p class="zh" style="margin:0">Lim 叔叔想要一个替 Kopi Corner 回答顾客问题的助手，由他的侄女 <b>Aina</b> 来做。上一课她只调用了一个模型。现在她要为每项任务选对模型，换别的厂商时不重写代码，还要让一个模型给回答排名，看看哪个最好。</p></div>
-
-<div class="callout"><b class="lbl"><span class="en">By the end you can</span><span class="zh">学完你能</span></b><span class="en">• Pick a small, mid, large, Groq or local model for a given job.<br>• Switch an OpenAI-client call to another provider by changing exactly three values.<br>• Run a model on your own machine with Ollama and call it with the same client.<br>• Read a judge model's JSON ranking and name the model that came first.</span><span class="zh">• 为给定任务选出小、中、大、Groq 或本地模型。<br>• 只改三个值，就把一次 OpenAI 客户端调用切换到另一家厂商。<br>• 用 Ollama 在自己电脑上运行模型，并用同一个客户端调用它。<br>• 读懂裁判模型返回的 JSON 排名，并说出排第一的模型。</span></div>
-
 <h2><span class="en">Step 1 · Pick the right model</span><span class="zh">第 1 步 · 选对模型</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Providers sell models in sizes. Small ones are fast and cheap, big ones think harder. Three more options sit outside that ladder: DeepSeek (strong and cheap), Groq (open-source models on very fast hardware) and Ollama (open-source models on your own machine). <b>Open-source</b> means the model's files are public, so anyone can run them.</p>
-<p class="zh" style="margin:0">厂商按大小出售模型：小的又快又便宜，大的思考更深入。另外还有三种不在这个阶梯里的选择：DeepSeek（强而便宜）、Groq（在极快硬件上运行开源模型）和 Ollama（在你自己电脑上运行开源模型）。<b>开源</b>是指模型文件公开，谁都可以自己运行。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Small models are fast and cheap, big ones think harder. Outside that ladder: DeepSeek (strong, cheap), Groq (<b>open-source</b> models, whose files are public, on very fast hardware) and Ollama (open-source models on your own machine).</p>
+<p class="zh" style="margin:0">小模型又快又便宜，大模型思考更深入。阶梯之外：DeepSeek（强而便宜）、Groq（在极快硬件上运行<b>开源</b>模型，即文件公开的模型）和 Ollama（在你自己电脑上运行开源模型）。</p></div>
 <div style="overflow-x:auto"><table><thead><tr><th><span class="en">Provider</span><span class="zh">厂商</span></th><th><span class="en">Small · fast</span><span class="zh">小 · 快</span></th><th><span class="en">Mid · balanced</span><span class="zh">中 · 均衡</span></th><th><span class="en">Large · smartest</span><span class="zh">大 · 最强</span></th></tr></thead><tbody>
 <tr><td>OpenAI</td><td>gpt-5.4-nano</td><td>gpt-5.4-mini</td><td>gpt-5.4</td></tr>
 <tr><td>Anthropic</td><td>Claude Haiku</td><td>Claude Sonnet</td><td>Claude Opus</td></tr>
 <tr><td>Google</td><td>Gemini Flash-Lite</td><td>Gemini Flash</td><td>Gemini Pro</td></tr></tbody></table></div>
-<p class="meta"><span class="en">Outside the ladder: DeepSeek V4 (strong and cheap), Groq (open-source models on very fast hardware), Ollama (open-source models on your own machine).</span><span class="zh">阶梯之外：DeepSeek V4（强而便宜）、Groq（在极快硬件上运行的开源模型）、Ollama（在你自己电脑上运行的开源模型）。</span></p>
-<p class="en"><b>Your turn.</b> Pick the best option for each job.</p>
-<p class="zh"><b>轮到你了。</b>为每项任务选最合适的选项。</p>
 <div class="sc" id="g1"></div>
 
 <h2><span class="en">Step 2 · One code shape, three swaps</span><span class="zh">第 2 步 · 同一种代码，只换三样</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Almost every provider offers an <b>endpoint</b> (the web address, <code>base_url</code>, your code sends its requests to) that speaks the same language as OpenAI. So you reuse the same <code>OpenAI</code> client and only change where it points. To switch provider you change only <b>three values</b>: the <b>key</b> (whose account pays), the <b>endpoint</b> (<code>base_url</code>; where the request is sent) and the <b>model name</b> (which brain answers). Everything else stays exactly the same. In the code, <code>os.getenv("OPENAI_API_KEY")</code> reads the key from an <b>environment variable</b>, a named setting kept outside your code (Lesson 3 loaded it from <code>.env</code>), so the key itself is never typed into the script.</p>
-<p class="zh" style="margin:0 0 8px">几乎每家厂商都提供与 OpenAI 说同一种“语言”的<b>接口</b>（endpoint，也就是你的代码发送请求的网址，即 <code>base_url</code>）。所以你可以复用同一个 <code>OpenAI</code> 客户端，只改它指向的地址。换厂商只需要改<b>三个值</b>：<b>密钥</b>（用谁的账户付费）、<b>接口地址</b>（<code>base_url</code>，请求发往哪里）和<b>模型名</b>（由哪个模型回答）。其余全部保持不变。代码里的 <code>os.getenv("OPENAI_API_KEY")</code> 从<b>环境变量</b>（保存在代码之外、带名字的设置）里读取密钥（第 3 课已用 <code>.env</code> 加载），所以密钥本身不会写进脚本。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Almost every provider has an <b>endpoint</b> (the web address your code sends requests to) that speaks OpenAI's language. Reuse the same <code>OpenAI</code> client and change only <b>three values</b>: the <b>key</b> (whose account pays), the <b>base_url</b> (where the request goes) and the <b>model name</b> (which brain answers). Keys come from an <b>environment variable</b>, a named setting kept outside your code (Lesson 3 loaded it from <code>.env</code>).</p>
+<p class="zh" style="margin:0">几乎每家厂商都有说 OpenAI 那套“语言”的<b>接口</b>（endpoint，你的代码发送请求的网址）。复用同一个 <code>OpenAI</code> 客户端，只改<b>三个值</b>：<b>密钥</b>（谁的账户付费）、<b>base_url</b>（请求发往哪里）和<b>模型名</b>（由哪个模型回答）。密钥来自<b>环境变量</b>（保存在代码之外、带名字的设置，第 3 课用 <code>.env</code> 加载过）。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="One OpenAI client sends the same request to OpenAI, Groq or a local Ollama by swapping three values"><defs><marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box new" x="10" y="70" width="200" height="80" rx="10"/><text class="en" x="110" y="106">Same OpenAI client</text><text class="zh" x="110" y="106">同一个 OpenAI 客户端</text><text class="en sm" x="110" y="130">one code shape</text><text class="zh sm" x="110" y="130">同一种代码形状</text><text class="en sm" x="110" y="184">swap key, base_url, model</text><text class="zh sm" x="110" y="184">只换密钥、地址、模型名</text><path class="lnk" d="M210 110L478 36" marker-end="url(#a4)"/><rect class="box soft" x="480" y="14" width="230" height="44" rx="10"/><text class="en" x="595" y="41">OpenAI (cloud)</text><text class="zh" x="595" y="41">OpenAI（云端）</text><path class="lnk hot" d="M210 110L478 109" marker-end="url(#a4)"/><rect class="box soft" x="480" y="87" width="230" height="44" rx="10"/><text class="en" x="595" y="114">Groq (fast open models)</text><text class="zh" x="595" y="114">Groq（极速开源模型）</text><path class="lnk" d="M210 110L478 182" marker-end="url(#a4)"/><rect class="box soft" x="480" y="160" width="230" height="44" rx="10"/><text class="en" x="595" y="187">Ollama (your machine)</text><text class="zh" x="595" y="187">Ollama（你的电脑）</text></svg><figcaption><span class="en">Switching provider changes where the request goes, not how your code is written.</span><span class="zh">换厂商只改请求发往哪里，不改代码怎么写。</span></figcaption></figure>
-<span class="lab"><span class="en">Python · compare.py (OpenAI)</span><span class="zh">Python · compare.py（OpenAI）</span></span>
 <div class="codebox" data-file="compare.py" data-lang="python"><span class="dim">import os
 from openai import OpenAI
 
@@ -40,109 +28,53 @@ response = client.chat.completions.create(
     </span><span class="chg">model="gpt-5.4-nano"</span><span class="dim">,
     messages=messages)
 answer = response.choices[0].message.content</span></div>
-<p class="en">These are the three values for each provider. Only the highlighted values above ever change.</p>
-<p class="zh">下面是各家厂商的三个值。上面的代码里只有高亮的部分会变。</p>
 <div style="overflow-x:auto"><table><thead><tr><th><span class="en">Provider</span><span class="zh">厂商</span></th><th><span class="en">Key</span><span class="zh">密钥</span></th><th><code>base_url</code></th><th><span class="en">Model name</span><span class="zh">模型名</span></th></tr></thead><tbody>
-<tr><td>OpenAI</td><td><code>OPENAI_API_KEY</code></td><td><span class="en">none (the default)</span><span class="zh">不需要（默认）</span></td><td><code>gpt-5.4-nano</code></td></tr>
-<tr><td>Anthropic</td><td><code>ANTHROPIC_API_KEY</code></td><td><code>https://api.anthropic.com/v1/</code></td><td><code>claude-sonnet-4-6</code></td></tr>
+<tr><td>OpenAI</td><td><code>OPENAI_API_KEY</code></td><td><span class="en">none (default)</span><span class="zh">不需要（默认）</span></td><td><code>gpt-5.4-nano</code></td></tr>
 <tr><td>Gemini</td><td><code>GOOGLE_API_KEY</code></td><td><code>https://generativelanguage.googleapis.com/v1beta/openai/</code></td><td><code>gemini-3.1-flash-lite</code></td></tr>
-<tr><td>DeepSeek</td><td><code>DEEPSEEK_API_KEY</code></td><td><code>https://api.deepseek.com/v1</code></td><td><code>deepseek-v4-flash</code></td></tr>
 <tr><td>Groq</td><td><code>GROQ_API_KEY</code></td><td><code>https://api.groq.com/openai/v1</code></td><td><code>openai/gpt-oss-120b</code></td></tr>
 <tr><td>Ollama</td><td><span class="en">any placeholder</span><span class="zh">任意占位值</span></td><td><code>http://localhost:11434/v1</code></td><td><code>llama3.2</code></td></tr></tbody></table></div>
-<p class="meta"><span class="en">Google's key is named GOOGLE_API_KEY. Open-source model names can contain a slash.</span><span class="zh">Google 的密钥名为 GOOGLE_API_KEY。开源模型的名称可能含有斜杠。</span></p>
-<p class="en">Aina wants to move the code above from <b>OpenAI</b> to <b>Groq</b>. For each line, choose <b>Keep</b> or <b>Edit</b>.</p>
-<p class="zh">Aina 想把上面的代码从 <b>OpenAI</b> 改成 <b>Groq</b>。对每一行选择<b>保持</b>或<b>修改</b>。</p>
+<p class="en">Move the code above to <b>Groq</b>: for each line, choose Keep or Edit.</p>
+<p class="zh">把上面的代码改成 <b>Groq</b>：对每一行选择保持或修改。</p>
 <div class="sc" id="g2"></div>
-<span class="lab"><span class="en">Python · compare.py (Groq)</span><span class="zh">Python · compare.py（Groq）</span></span>
-<div class="codebox" data-file="other_provider.py" data-lang="python"><span class="dim">import os
-from openai import OpenAI
-
-client = OpenAI(
-    </span><span class="chg">api_key=os.getenv("GROQ_API_KEY")</span><span class="dim">,
-    </span><span class="chg">base_url="https://api.groq.com/openai/v1"</span><span class="dim">)
-
-response = client.chat.completions.create(
-    </span><span class="chg">model="openai/gpt-oss-120b"</span><span class="dim">,
-    messages=messages)
-answer = response.choices[0].message.content</span></div>
-<p class="meta"><span class="en">The finished Groq version. Highlighted = the three values you changed.</span><span class="zh">改好的 Groq 版本。高亮 = 你改的三个值。</span></p>
-<div class="try" id="p2"></div>
-
-<h2><span class="en">Step 3 · Run a model on your own machine</span><span class="zh">第 3 步 · 在自己的电脑上运行模型</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Ollama is the same trick with the server on your laptop: free, private and offline. A <b>server</b> is a program that waits for requests and answers them. <code>localhost</code> means “this computer”, and <code>11434</code> is the <b>port</b> (a numbered door on your computer) Ollama listens on, so <code>http://localhost:11434</code> reaches Ollama on your own machine. The setup is a short checklist, then the call looks like any other provider.</p>
-<p class="zh" style="margin:0">Ollama 用的是同样的办法，只是服务器就在你的笔记本上：免费、私密、可离线。<b>服务器</b>是一个等着接收请求并作答的程序。<code>localhost</code> 的意思是“这台电脑”，<code>11434</code> 是 Ollama 监听的<b>端口</b>（电脑上带编号的“门”），所以 <code>http://localhost:11434</code> 指向你自己电脑上的 Ollama。安装只是一份简短清单，之后的调用和其他厂商一样。</p></div>
-<div class="cl"><label><input type="checkbox"><span><span class="en">Install Ollama: download it from ollama.com and run the installer.</span><span class="zh">安装 Ollama：从 ollama.com 下载并运行安装程序。</span></span></label><label><input type="checkbox"><span><span class="en">Download a small model with the command below. Other handy commands: <code>ollama ls</code> lists your models, <code>ollama rm &lt;name&gt;</code> deletes one.</span><span class="zh">用下面的命令下载一个小模型。其他常用命令：<code>ollama ls</code> 列出已有模型，<code>ollama rm &lt;名称&gt;</code> 删除模型。</span></span></label><label><input type="checkbox"><span><span class="en">Check it is running: open <code>http://localhost:11434</code>. You should see “Ollama is running”. If not, run <code>ollama serve</code> in a terminal.</span><span class="zh">确认它在运行：打开 <code>http://localhost:11434</code>，应当看到 “Ollama is running”。如果没有，在终端运行 <code>ollama serve</code>。</span></span></label><label><input type="checkbox"><span><span class="en">Call it like any other provider, with the code below.</span><span class="zh">像调用其他厂商一样调用它，用下面的代码。</span></span></label></div>
-<span class="lab"><span class="en">Shell · terminal</span><span class="zh">Shell · 终端</span></span>
-<div class="codebox" data-file="terminal" data-lang="bash">ollama pull llama3.2</div>
-<span class="lab"><span class="en">Python · compare.py (Ollama)</span><span class="zh">Python · compare.py（Ollama）</span></span>
-<div class="codebox" data-file="compare.py" data-lang="python"><span class="dim"># same compare.py: it reuses the OpenAI import and the messages list from above
-</span><span class="chg">ollama = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")</span>
+<div class="teach"><b class="lbl"><span class="en">Local models</span><span class="zh">本地模型</span></b><p class="en" style="margin:0"><b>Ollama</b> runs a model on your laptop: free, private, offline. After installing it from ollama.com, run <code>ollama pull llama3.2</code>. <code>localhost:11434</code> is your own machine's <b>port</b> (a numbered door) for Ollama. Pick models of about 3 GB or less; avoid names ending in <code>:cloud</code>, which are hosted.</p>
+<p class="zh" style="margin:0"><b>Ollama</b> 在你的笔记本上运行模型：免费、私密、可离线。从 ollama.com 安装后，运行 <code>ollama pull llama3.2</code>。<code>localhost:11434</code> 是你自己电脑上 Ollama 的<b>端口</b>（带编号的“门”）。选 3 GB 左右或更小的模型；避开以 <code>:cloud</code> 结尾的名称，那是托管服务。</p></div>
+<div class="codebox" data-file="compare.py" data-lang="python"><span class="chg">ollama = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")   # key is a placeholder</span>
 <span class="dim">ollama.chat.completions.create(model="llama3.2", messages=messages)</span></div>
-<div class="callout warn"><b class="lbl"><span class="en">Mind the size</span><span class="zh">注意大小</span></b><span class="en">Many Ollama models are far too big for a home computer. Start with ones around 3 GB (gigabytes of disk space) or less, such as llama3.2. Avoid names ending in <code>:cloud</code>, which are a hosted service, not local.</span><span class="zh">很多 Ollama 模型对家用电脑来说太大。先从 3 GB（千兆字节的磁盘空间）左右或更小的开始，例如 llama3.2。避开以 <code>:cloud</code> 结尾的名称，那是托管服务，不是本地运行。</span></div>
-<div class="try" id="p3"></div>
 
-<h2><span class="en">Step 4 · Build the competition</span><span class="zh">第 4 步 · 搭建模型擂台</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Aina's script does seven things in a fixed order. Each step needs something the step before it made, so the order cannot change. One script can hold more than one pattern: feeding one call's output into the next is <b>prompt chaining</b>, and sending the same question to many models independently is <b>parallelization</b>. The walk-through marks which is which. Go one step at a time.</p>
-<p class="zh" style="margin:0">Aina 的脚本按固定顺序做七件事。每一步都要用到前一步产生的东西，所以顺序不能换。一个脚本里可以同时有多种模式：把一次调用的输出喂给下一次是<b>提示链</b>，把同一个问题独立地发给多个模型是<b>并行化</b>。走读过程里会标出各是哪一种。一步一步走一遍。</p></div>
+<h2><span class="en">Step 3 · A model judges the rest</span><span class="zh">第 3 步 · 让模型当裁判</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Send one question to several models, then ask a strong model to rank the answers. Writing the question with one call and feeding it to the next is <b>prompt chaining</b>; asking every model independently is <b>parallelization</b>. The judge must reply in strict <b>JSON</b> (plain text of labels and values, like <code>{"best": 2}</code>) so code can read it. Step through the script.</p>
+<p class="zh" style="margin:0">把一个问题发给多个模型，再让强模型给回答排名。用一次调用写出问题再喂给下一次是<b>提示链</b>；让每个模型独立作答是<b>并行化</b>。裁判必须返回严格的 <b>JSON</b>（由标签和值组成的纯文本，如 <code>{"best": 2}</code>），代码才能读取。一步步走一遍脚本。</p></div>
 <div id="t4"></div>
-<div class="try" id="p4"></div>
-
-<h2><span class="en">Step 5 · Be the judge</span><span class="zh">第 5 步 · 当一次裁判</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The question was written by the model in the first step of the Step 4 walk-through, because Aina asked it for a hard, open question to stress-test her customer helper. It came back as: <i>“Which matters more to a society, truth or trust? Answer in two sentences.”</i> Real customers will ask easier things, but the same ranking works for them. A judge model must reply in strict <b>JSON</b> (a plain-text format of labels and values, like <code>{"best": 2}</code>) so code can read it. Then the code maps numbers back to names.</p>
-<p class="zh" style="margin:0 0 8px">这个问题是第 4 步走读里第一步的模型写的，因为 Aina 让它出一道难的开放题，用来给顾客助手做压力测试。它给出的是：<i>“对一个社会来说，真相和信任哪个更重要？用两句话回答。”</i>真实顾客问的会简单些，但同样的排名办法照样适用。裁判模型必须返回严格的 <b>JSON</b>（一种由标签和值组成的纯文本格式，比如 <code>{"best": 2}</code>），代码才能读取。然后代码把编号映射回模型名称。</p></div>
-<p class="en">First, be the judge yourself, using <b>clarity and strength of argument</b>. Three answers came back:</p>
-<p class="zh">先自己当裁判，标准是<b>表达清晰度和论证力度</b>。回来了三个回答：</p>
+<p class="en">Be the judge yourself, on <b>clarity and strength of argument</b>. Three answers to “Which matters more to a society, truth or trust?”:</p>
+<p class="zh">先自己当裁判，标准是<b>表达清晰度和论证力度</b>。对“对一个社会来说，真相和信任哪个更重要？”的三个回答：</p>
 <div class="card"><p class="en" style="margin:0"><b>#1</b> Both matter and it really depends on the situation and many factors.<br><b>#2</b> Trust. A truth nobody believes changes nothing, while trust lets a society keep finding and correcting its mistakes.<br><b>#3</b> Truth, because trust built on lies eventually collapses.</p><p class="zh" style="margin:0"><b>#1</b> 两者都重要，这真的取决于具体情况和许多因素。<br><b>#2</b> 信任。没人相信的真相改变不了什么，而信任能让社会不断发现并纠正自己的错误。<br><b>#3</b> 真相，因为建立在谎言上的信任终将崩塌。</p></div>
 <div class="try" id="p5"></div>
-<p class="en">A judge using that judging rule (a rubric) would reply <code>{"results": ["2", "3", "1"]}</code>. The judge only does that because the prompt tells it to. Here is the prompt, with the answers already glued in as “Response from competitor N”:</p>
-<p class="zh">按这个评判标准（rubric），裁判会返回 <code>{"results": ["2", "3", "1"]}</code>。裁判之所以这样回复，是因为提示词要求它这样做。下面是提示词，各回答已经拼成“Response from competitor N”放在里面：</p>
-<span class="lab"><span class="en">Python · compare.py (the judge prompt)</span><span class="zh">Python · compare.py（裁判提示词）</span></span>
-<div class="codebox" data-file="judge.py" data-lang="python"><span class="dim"># the setup the Step 4 walk-through built, shortened to run on its own
-competitors = ["model-A", "model-B", "model-C"]
-question = "Which matters more to a society, truth or trust? Answer in two sentences."
-answers = ["Both matter and it really depends on the situation and many factors.",
-           "Trust. A truth nobody believes changes nothing, while trust lets a society keep finding and correcting its mistakes.",
-           "Truth, because trust built on lies eventually collapses."]
+<div class="codebox" data-file="judge.py" data-lang="python"><span class="dim">import json
+# from the earlier steps: question, competitors (model names), answers (replies, same order)
 together = ""
 for number, answer in enumerate(answers, start=1):
     together += f"# Response from competitor {number}\n\n{answer}\n\n"
 
-judge = f"""You are judging a competition between {len(competitors)} competitors.
-Rank them by clarity and strength of argument for this question:
+judge = f"""Rank these {len(answers)} competitors by clarity and strength of argument for this question:
 {question}
 
 {together}
+Reply only with JSON, best first, like {{"results": ["2", "3", "1"]}}."""
 
-Reply only with JSON, best first, like {{"results": ["2", "3", "1"]}}.
-"""</span></div>
-<p class="en">Now read a verdict in code.</p>
-<p class="zh">现在来读代码里的裁判结论。</p>
-<span class="lab"><span class="en">Python · compare.py (reading the verdict)</span><span class="zh">Python · compare.py（读取结论）</span></span>
-<div class="codebox" data-file="judge_loop.py" data-lang="python"><span class="dim">import json
-# competitors is the list from the cell above
-reply = '{"results": ["2", "3", "1"]}'     # the judge's reply: text in JSON form, best first
-</span><span class="chg">results = json.loads(reply)["results"]       # JSON text -> a Python list: ["2", "3", "1"]
-competitor = competitors[int(results[0]) - 1]</span></div>
-<div class="try" id="p5b"></div>
-<div class="callout"><b class="lbl"><span class="en">One after another</span><span class="zh">逐个运行</span></b><span class="en">A plain <code>for</code> loop calls the models one at a time, so total time is the sum. <i>Optional:</i> truly parallel calls need <code>async</code> (code that starts many calls without waiting for each to finish). The pattern “parallelization” is about the idea, independent calls, not how this loop is written.</span><span class="zh">普通的 <code>for</code> 循环一次只调用一个模型，总耗时是各次之和。（选读）真正并行需要 <code>async</code>（不必等一个调用结束就能发起许多调用的写法）。“并行”模式讲的是思路：彼此独立的调用，而不是这个循环的写法。</span></div>
-<div class="callout warn"><b class="lbl"><span class="en">Know the limits</span><span class="zh">了解局限</span></b><span class="en">A judge is one more model, so its ranking is an opinion. Use a strong model, hide who wrote what, and spot-check the result.</span><span class="zh">裁判也是一个模型，所以它的排名只是一种意见。请用强模型，隐藏回答者身份，并抽查结果。</span></div>
-
-<h2><span class="en">Step 6 · Name the patterns</span><span class="zh">第 6 步 · 认出其中的模式</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">You met five workflow patterns in Lesson 2: prompt chaining, routing, parallelization, orchestrator-worker and evaluator-optimizer. Sending one task to several models and evaluating the results is a common way to raise quality where accuracy is critical. Careful: a judge that ranks the answers once is only the evaluator half of evaluator-optimizer. The full pattern needs a loop that sends the feedback back to the producer. Which pattern does each part of this script use?</p>
-<p class="zh" style="margin:0">第 2 课你认识了五种工作流模式：提示链、路由、并行化、编排者-工作者和评估者-优化者。把同一个任务发给多个模型再评估结果，是在准确性至关重要的场景下提升质量的常用办法。注意：裁判只排一次名，只是评估者-优化者里“评估者”那一半。完整的模式还需要一条把反馈送回生成者的回路。这段脚本的每个部分用的是哪一种模式？</p></div>
-<div class="sc" id="g6"></div>
-<div class="try" id="p6"></div>
+</span><span class="chg">reply = '{"results": ["2", "3", "1"]}'       # what the judge sends back
+results = json.loads(reply)["results"]       # JSON text -> a Python list
+winner = competitors[int(results[0]) - 1]</span></div>
+<div class="callout warn"><b class="lbl"><span class="en">Know the limits</span><span class="zh">了解局限</span></b><span class="en">A judge is one more model, so its ranking is an opinion. Use a strong model, hide who wrote what, and spot-check.</span><span class="zh">裁判也是一个模型，排名只是一种意见。用强模型，隐藏回答者身份，并抽查结果。</span></div>
 
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en">Take your Lesson 3 script and switch it to a second provider by changing only the three values.</span><span class="zh">拿上一课的脚本，只改三个值，把它切换到第二家厂商。</span></span></label><label><input type="checkbox"><span><span class="en">Send one question to two or three models and print each answer next to its model name.</span><span class="zh">把同一个问题发给两三个模型，并把每个回答和模型名一起打印出来。</span></span></label><label><input type="checkbox"><span><span class="en">Ask a stronger model to rank the answers as JSON, then print the name of the winner.</span><span class="zh">让一个更强的模型以 JSON 给回答排名，然后打印赢家的名字。</span></span></label><label><input type="checkbox"><span><span class="en">Optional: install Ollama and add a local model to the competition. One key is enough to practise; you do not need every provider.</span><span class="zh">可选：安装 Ollama，把一个本地模型加进擂台。一个密钥就足够练习，不需要用遍所有厂商。</span></span></label></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en">Switch your Lesson 3 script to a second provider by changing only the three values.</span><span class="zh">只改三个值，把第 3 课的脚本切换到第二家厂商。</span></span></label><label><input type="checkbox"><span><span class="en">Send one question to two or three models and ask a stronger one to rank the answers as JSON.</span><span class="zh">把同一个问题发给两三个模型，再让更强的模型以 JSON 给答案排名。</span></span></label></div>
 
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the assistant can switch provider and send easy questions, like “Open today?”, to a small cheap model while Auntie Suria's tricky catering questions go to a larger one, with a judge model showing which answers rank best. The next problem is that it can only talk, not do: it still cannot save an order or note a regular's preference.</span><span class="zh">现在助手能切换厂商，把“今天开不开？”这类简单问题交给便宜的小模型，Suria 阿姨那些复杂的外烩问题则交给更大的模型，还有裁判模型告诉我们哪些回答排名最好。下一个问题是：它只会说，不会做，还不能记下订单或熟客的口味。</span></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• Pick the size to match the job: small for volume, large for hard thinking, local for privacy.<br>• Switching providers means changing <code>base_url</code>, the key and the model name.<br>• Ask a judge for JSON so your code can read the ranking.<br>• You do not need every provider. One key is enough to practise.</p><p class="zh" style="margin:0">• 按任务选大小：量大用小模型，难题用大模型，隐私用本地模型。<br>• 换厂商只需改 <code>base_url</code>、密钥和模型名。<br>• 让裁判返回 JSON，代码才能读取排名。<br>• 不需要用遍所有厂商，一个密钥就足够练习。</p></div>
+<div class="card"><p class="en" style="margin:0">• Match size to the job: small for volume, large for hard thinking, local for privacy.<br>• Switching providers means changing the key, <code>base_url</code> and model name.<br>• Ollama runs the same client against your own machine.<br>• Ask a judge for JSON so your code can read the ranking.</p><p class="zh" style="margin:0">• 按任务选大小：量大用小模型，难题用大模型，隐私用本地模型。<br>• 换厂商只需改密钥、<code>base_url</code> 和模型名。<br>• Ollama 用同一个客户端指向你自己的电脑。<br>• 让裁判返回 JSON，代码才能读取排名。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Agentic</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"goals":{"en":["Pick a model size for volume, hard thinking or privacy","Switch provider by changing base_url, key and model name","Run a model on your own machine","Ask a judge model for JSON so code can read the ranking"],"zh":["按批量、深度思考或隐私选模型大小","只改 base_url、密钥和模型名就能换服务商","在自己的电脑上运行一个模型","让评审模型返回 JSON，代码就能读出排名"]},"prev":["03-first-api-calls.html"],"tools":{"en":"Python 3.10+, the openai package, API keys for the providers you try (Groq, Google, etc.), optional Ollama installed locally","zh":"Python 3.10+、openai 包、你要试的服务商 API 密钥（Groq、Google 等），可选本地安装 Ollama"},"know":{"en":"You can already make one LLM call from Python.","zh":"已经能用 Python 调用一次大模型。"},"mins":25,"offline":false}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=8290ab6e"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/04-many-models.js?v=5e30ef1f"></script></body></html>
+<script src="js/04-many-models.js?v=fa213a5e"></script></body></html>

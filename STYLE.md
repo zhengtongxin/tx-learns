@@ -1,7 +1,6 @@
 # Lesson style guide
 
-Every lesson on this site follows this guide. It exists so nobody has to ask twice for the human touch.
-The model lessons are `agentic-ai/05-autonomy-and-tools.html`, `06-career-agent.html` and `07-agents-sdk-basics.html`.
+Every lesson on this site follows this guide. Succinct, sleek, key point first.
 
 ## Who we write for
 
@@ -10,36 +9,29 @@ Assume they are smart, busy and have never seen this topic. If a sentence needs 
 
 ## The shape of a lesson
 
-1. **Hero.** Tag `<Topic> · Lesson N` (or `<Topic> · Project`), a plain title, and a meta line. **Titles are short noun phrases**: 2 to 5 words in English, about 4 to 10 characters in 中文, the key concept only, never a sentence, no colons, no trailing clause ("and ...", "for your ..."), and no "Project:" prefix (the Project chip already says so). Example: "Proving AI ROI", not "Proving the return: measurable ROI from AI":
-   one sentence on what changes for the reader, then time and type (`~20 min · hands-on`).
-2. **The story** (`.story`). One running example with a named character and a concrete goal.
-   Every step moves that same example forward. Pick our own names and situations, never the source's.
-3. **Steps** (`<h2>Step N · ...`). Each step is:
-   - **Learn** (`.teach`): the idea in 2 to 4 short sentences, with one everyday analogy when it helps.
-   - **Show**: a small code box (`.codebox`, with the changed lines in `.chg`) or a diagram.
-   - **Test** (`.try` predict, or `.sc` sorting game): the reader commits to an answer before seeing it.
-     Every answer gets a one-line "why" and a hint for the wrong choice.
-4. **What I got wrong** (optional `.callout warn`). A real mistake TX made and how it was fixed.
-5. **Now make it yours** (`.cl` checklist). Two or three things to try on their own.
-6. **Takeaways** (`.card`). Five to seven bullets, one idea each.
+Succinct and sleek. Lead with the key point, then stop. A lesson should read in a few minutes.
 
-## The running setting
+1. **Hero.** Tag `<Topic> · Lesson N` (or `<Topic> · Project`), a plain title, and a meta line. **Titles are short noun phrases**: 2 to 5 words in English, about 4 to 10 characters in 中文, the key concept only, never a sentence, no colons, no trailing clause, no "Project:" prefix. Under it: one sentence on what the reader will be able to do, then time and type (`~10 min · hands-on`).
+2. **Steps** (`<h2>Step N · ...`). Two to four steps. Each is:
+   - **Learn** (`.teach`): the key point first, in 1 to 3 short sentences. A bullet list beats a paragraph. An analogy only if it makes the idea click faster.
+   - **Show**: only the code or diagram that carries the point. Few lines.
+   - **Test** (`.try` predict, or `.sc` sorting game): one per lesson is enough; add more only where they teach something new. Every answer gets a one-line "why".
+3. **Story: optional.** Default is no story. Keep one only when it makes the concept click faster than plain words would. Then it is 1 to 3 sentences, Singapore-set, directly on the point, and does not need to continue from lesson to lesson. No cast lists, no "Where we left off", no "What changed", no "Back at ..." boxes.
+4. **What I got wrong** (optional `.callout warn`, one or two sentences). Keep only a mistake that teaches.
+5. **Now make it yours** (`.cl` checklist). Two things to try.
+6. **Takeaways** (`.card`). Three to five bullets, one idea each.
 
-Each track has its own setting. AI Agentic uses the kopitiam below; the AI Engineer track uses a Singapore HDB estate (see `ai-engineer/STORY.md`, which has its own cast, props and "Back at the void deck" callout). The AI FDE track uses a Tanjong Pagar shophouse insurer (`ai-fde/STORY.md`, "Back at the shophouse"). Never mix settings.
+**Length.** Aim for roughly 600 to 1,000 words of visible prose per lesson in each language (widget scripts excluded). Cut padding, repetition, hedging and recaps. Say each thing once, at the point it matters.
 
-### The kopitiam thread (AI Agentic)
+## Settings
 
-Kopi Corner, Uncle Lim's kopitiam in Singapore, is the recurring setting. Every lesson ends with one short "Back at the kopitiam" callout (`.callout tip`, EN and 中文) that ties its idea to the shop, just before the takeaways. Keep the cast and props the same:
-
-- People: Uncle Lim (towkay), Auntie Suria (counter, remembers regulars), Aina (his niece, the builder), Ah Seng (drinks), Kak Ros (noodles), Uncle Rahim (mamak credit notebook).
-- Props: the order pad (shared state), the chalkboard menu (tool list), the "ting!" bell (handoff), the QR sign (cashless payment), kopi, teh, kaya toast.
-- A lesson's own story can use another setting. The callout is the bridge back.
+There is no required running story or cast. A track may keep a short `STORY.md` for names it likes to reuse, but lessons never depend on it, and each lesson must make sense on its own. If a story is used, it is Singapore-set.
 
 ## Writing rules
 
-- Short sentences, one idea each. Paragraphs of three sentences or fewer.
-- Say why before how. Open each step with the problem it solves.
-- Use "you". Write like you are explaining to a friend next to you, not like documentation.
+- Key point first. Short sentences, one idea each. Paragraphs of two sentences or fewer; bullets where they help.
+- Cut padding, repetition, hedging, recaps and scene-setting.
+- Use "you". Plain words, like explaining to a friend, not documentation.
 - Build before you use. Code in a step never calls a function, agent or variable that a later step creates. If the story needs it, build that piece in an earlier step.
 - No walls of code. Show the few lines that matter; the rest is dimmed or left out.
 - English and 中文 must say the same thing. Every `.en` block has a matching `.zh` block. Chinese should read naturally, not as a word-for-word translation.
@@ -59,8 +51,8 @@ The site records what TX learnt, in TX's own words. It never reproduces where it
 
 ## Checklist before a lesson is done
 
-- [ ] One running story from start to end
-- [ ] Every step has Learn, Show and Test
+- [ ] Key point first; nothing that does not earn its place (no story unless it speeds understanding)
+- [ ] Every step has Learn and Show, and the lesson has at least one Test
 - [ ] A newcomer could follow it without the source
 - [ ] EN and 中文 match
 - [ ] Code runs as written (correct package names, imports, `await` placement)
@@ -68,12 +60,3 @@ The site records what TX learnt, in TX's own words. It never reproduces where it
 - [ ] Added to the track's `lessons.js` with a `file`
 - [ ] Widget code is in `<track>/js/NN-slug.js` (loaded after `assets/teach.js`), not an inline `<script>`
 - [ ] `node scripts/check-copy.mjs`, `node scripts/check-counts.mjs` and `node scripts/check-pages.mjs --fix` pass (the last one also stamps the lesson's "updated" date)
-
-## One story per track
-
-Each track has one artifact that grows (AI Agentic: the Kopi Corner assistant; AI Engineer: the Block 12 helper; AI FDE: the claims desk pilot; AI Production: the wharf product). The plan is in each track's `STORY.md`. A lesson:
-
-- opens with a **Where we left off** box (`<div class="callout thread">`): "Last time ___ could ___. Today it fails when ___. We fix it by ___.";
-- keeps its own scenario as a side case when it is not the main thread, with one line tying it back;
-- closes with a **What changed** box (`<div class="callout tip">`) in place of the old "Back at the ..." callout: "Now ___ can ___. The next problem is ___.", naming a concrete person or prop;
-- shows each key idea as a small diagram (`<figure class="fig">` with inline SVG, `.box`/`.lnk` classes, a `<text class="en">` and `<text class="zh">` per label) where the lesson is mostly code.

@@ -5,37 +5,20 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/ai-engineer/15-retrieval-chain-end-to-end.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-engineer/15-retrieval-chain-end-to-end.html","url":"https://tx-learns.vercel.app/ai-engineer/15-retrieval-chain-end-to-end.html","name":"End-to-end retrieval chain","alternateName":"端到端检索链","description":"Answer questions from your own documents in about ten lines: a retriever, a prompt with one rule, and a model.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Retrieval (RAG)","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Engineer","url":"https://tx-learns.vercel.app/ai-engineer/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Engineer","item":"https://tx-learns.vercel.app/ai-engineer/index.html"},{"@type":"ListItem","position":3,"name":"End-to-end retrieval chain","item":"https://tx-learns.vercel.app/ai-engineer/15-retrieval-chain-end-to-end.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Retrieval (RAG) · Lesson 3</span><span class="zh">检索增强（RAG） · 第 3 课</span></span><h1><span class="en">End-to-end retrieval chain</span><span class="zh">端到端检索链</span></h1><p class="meta"><span class="en">You will connect the store to a model and get a chatbot that answers from your files in about ten lines · ~15 min · concept</span><span class="zh">你会把向量库接到模型上，用大约十行代码得到一个照着你的文件回答的聊天机器人 · 约 15 分钟 · 概念课</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the helper had a searchable store of Auntie Lim's file but no voice. Today a resident's question has to become an answer built from that file. We fix it by chaining a retriever, a prompt and a model.</p>
-<p class="zh" style="margin:0">上回助手有了可搜索的 Lim 阿姨档案库，却还不会开口。今天居民的问题要变成一个用这份档案拼出来的回答。我们的办法是把检索器、提示词和模型接成一条链。</p></div>
-<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0"><b>Wei Jie</b> has the council store from the last lesson sitting in a folder. He expects the last part to be the hard part. It turns out to be short. He ends with a chat page where <b>Auntie Lim</b> can type a resident's question and see an answer built from her own files.</p>
-<p class="zh" style="margin:0"><b>Wei Jie</b> 上一课做好的理事会向量库，就放在一个文件夹里。他以为最后这部分会最难，结果很短。最后他得到一个聊天页面，<b>Lim 阿姨</b>可以在上面输入居民的问题，看到用她自己的文件拼出来的回答。</p></div>
-
-<h2><span class="en">Step 1 · The retriever: search, then take the top few</span><span class="zh">第 1 步 · 检索器：搜索，取最前面几条</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The store already knows how to find close chunks. A retriever is just a thin wrapper that hands back the top few for a question. You call it with <code>.invoke()</code>. The model object you meet next has the same <code>.invoke()</code>. LangChain mostly gives every piece one common shape, so pieces snap together.</p>
-<p class="zh" style="margin:0 0 8px">向量库本来就会找相近的块。检索器只是薄薄的一层包装，针对一个问题返回最靠前的几块。你用 <code>.invoke()</code> 来调用它。下一步见到的模型对象也有同样的 <code>.invoke()</code>。LangChain 大多让每个零件都有统一的形状，所以零件很好拼。</p></div>
-<div class="codebox" data-file="retrieve.py" data-lang="python"><span class="dim">from langchain_chroma import Chroma
+<h2><span class="en">Step 1 · Retriever and prompt</span><span class="zh">第 1 步 · 检索器和提示词</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A retriever wraps the store and returns the top few chunks for a question. The prompt then has two jobs:</p><p class="zh" style="margin:0 0 8px">检索器包在向量库外面，针对一个问题返回最靠前的几块。提示词有两个任务：</p>
+<ul class="en"><li>hold a slot for those chunks;</li><li>carry one rule: answer from the context, or say "I do not know". Without it, the model guesses.</li></ul><ul class="zh"><li>留一个位置放这些块；</li><li>带上一条规则：照内容回答，没有就说“我不知道”。没有它，模型就会瞎猜。</li></ul>
+<p class="en" style="margin:0">Set temperature to 0 for facts: the model then always picks the most likely word.</p><p class="zh" style="margin:0">回答事实时把 temperature 设成 0：模型每次都选最可能的词。</p></div>
+<div class="codebox" data-file="chain.py" data-lang="python"><span class="dim">from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_openai import ChatOpenAI
 
 embedder = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")   # same one as when building
 store = Chroma(persist_directory="council_db", embedding_function=embedder)
 
-</span><span class="chg">retriever = store.as_retriever(search_kwargs={"k": 4})   # top 4 similar chunks
+</span><span class="chg">retriever = store.as_retriever(search_kwargs={"k": 4})   # top 4 chunks
 
-found = retriever.invoke("Who fixes a stuck lift?")
-for chunk in found:
-    print(chunk.metadata["source"])</span></div>
-<div class="codebox" data-file="output" data-lang="text">hafiz.md
-lifts.md
-fees.md
-notices.md</div>
-<div class="try" id="p1"></div>
-
-<h2><span class="en">Step 2 · The prompt with one rule, and temperature 0</span><span class="zh">第 2 步 · 只有一条规则的提示词，和 temperature 0</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The prompt has two jobs. It holds a slot for the found chunks. And it carries the rule: answer from this context, and say "I don't know" if it is not there. Without that rule the model falls back on guessing. Temperature is how adventurous the next-word pick is: at 0 the model always picks the most likely word. For answering facts, set it to 0.</p>
-<p class="zh" style="margin:0 0 8px">提示词有两个任务。一是留一个位置放找到的块。二是带上规则：照这些内容回答，不在里面就说“我不知道”。没有这条规则，模型就会退回去瞎猜。temperature 是选下一个词时有多“大胆”：设成 0，模型每次都选最可能的那个词。回答事实时，把它设成 0。</p></div>
-<div class="codebox" data-file="chain.py" data-lang="python"><span class="dim">from langchain_openai import ChatOpenAI
-
-</span><span class="chg">TEMPLATE = """You help residents with questions about the town council.
+TEMPLATE = """You help residents with questions about the town council.
 Answer using only the context below.
 If the answer is not in the context, say you do not know.
 
@@ -45,11 +28,10 @@ Context:
 llm = ChatOpenAI(model="gpt-4.1-mini", temperature=0)</span></div>
 <div class="try" id="p2"></div>
 
-<h2><span class="en">Step 3 · The whole chain in a handful of lines</span><span class="zh">第 3 步 · 整条链只要几行</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Now join the parts. Retrieve for the question, paste the chunks into the template, add the chat history and the new question, and invoke the model. That is "search, paste, answer". Hand the function to a Gradio chat page and you have a council chatbot. The history is passed whole, so the model can still read earlier turns.</p>
-<p class="zh" style="margin:0 0 8px">现在把几个零件接起来。针对问题检索，把块贴进模板，加上聊天记录和新问题，然后调用模型。这就是“搜索、粘贴、回答”。把这个函数交给 Gradio 的聊天页面，一个理事会聊天机器人就有了。聊天记录是整段传进去的，所以模型还能读到前面的对话。</p></div>
+<h2><span class="en">Step 2 · The chain</span><span class="zh">第 2 步 · 整条链</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Search, paste, answer: retrieve for the question, paste the chunks into the template, add the history and the new question, call the model. Retrievers and models both use <code>.invoke()</code>, so they snap together.</p><p class="zh" style="margin:0">搜索、粘贴、回答：针对问题检索，把块贴进模板，加上聊天记录和新问题，再调用模型。检索器和模型都用 <code>.invoke()</code>，所以很好拼接。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 130" role="img" aria-label="The retrieval chain: the question goes to the retriever, the chunks go into a prompt with one rule and the chat history, and the model writes the answer."><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box soft" x="10" y="40" width="116" height="56" rx="12"/><text class="en" x="68" y="73">Question</text><text class="zh" x="68" y="73">问题</text><rect class="box new" x="156" y="40" width="116" height="56" rx="12"/><text class="en" x="214" y="65">Retriever</text><text class="en" x="214" y="81">(top few)</text><text class="zh" x="214" y="65">检索器</text><text class="zh" x="214" y="81">（取前几条）</text><rect class="box new" x="302" y="40" width="116" height="56" rx="12"/><text class="en" x="360" y="65">Prompt: chunks,</text><text class="en" x="360" y="81">rule, history</text><text class="zh" x="360" y="65">提示词：块、</text><text class="zh" x="360" y="81">规则、历史</text><rect class="box new" x="448" y="40" width="116" height="56" rx="12"/><text class="en" x="506" y="65">Model</text><text class="en" x="506" y="81">(temperature 0)</text><text class="zh" x="506" y="65">模型</text><text class="zh" x="506" y="81">（temperature 0）</text><rect class="box soft" x="594" y="40" width="116" height="56" rx="12"/><text class="en" x="652" y="73">Answer</text><text class="zh" x="652" y="73">回答</text><path class="lnk" d="M126 68 H153" marker-end="url(#ar)"/><path class="lnk" d="M272 68 H299" marker-end="url(#ar)"/><path class="lnk" d="M418 68 H445" marker-end="url(#ar)"/><path class="lnk" d="M564 68 H591" marker-end="url(#ar)"/></svg><figcaption><span class="en">Four parts joined in order make the whole chain.</span><span class="zh">四个部分依次接起来，就是整条链。</span></figcaption></figure>
-<div class="codebox" data-file="chat.py" data-lang="python"><span class="dim"># pip install gradio: a small library that makes a chat page; open the link it prints
+<div class="codebox" data-file="chat.py" data-lang="python"><span class="dim"># pip install gradio: makes a chat page; open the link it prints
 import gradio as gr
 
 </span><span class="chg">def answer(question, history):
@@ -64,33 +46,19 @@ gr.ChatInterface(answer, type="messages").launch()</span></div>
 <p class="en">Which piece does each job in the chain?</p>
 <p class="zh">链里每个零件各负责什么？</p><div class="sc" id="g3"></div>
 
-<h2><span class="en">Step 4 · Where it still breaks: follow-up questions</span><span class="zh">第 4 步 · 它还会坏在哪：追问</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Retrieval only sees the latest question. Ask "Who is the lift officer?" and it works. Then ask "And what about his manager?". The word "his" means nothing to the store, so it fetches nothing useful. The history helps the model but not the search. The fix, rewriting the question before searching, comes in the project lesson.</p>
-<p class="zh" style="margin:0 0 8px">检索只看最新的那个问题。问“电梯负责人是谁？”没问题。接着问“那他的上司呢？”，“他”对向量库毫无意义，所以什么有用的也检索不到。聊天记录能帮到模型，却帮不到搜索。解法是在搜索之前改写问题，会在项目那一课里做。</p></div>
-<div class="codebox" data-file="probe.py" data-lang="python"><span class="dim">answer("Who is the lift officer?", [])
-# good: finds his page
-
-answer("And what about his manager?", history)
-# search text is just "And what about his manager?"
-# -> chunks about managers in general, or none that fit</span></div>
+<h2><span class="en">Step 3 · Where it breaks: follow-ups</span><span class="zh">第 3 步 · 坏在哪：追问</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Search sees only the latest question. "Who is the lift officer?" works. "And what about his manager?" does not: "his" means nothing to the store. History helps the model, not the search. The fix is rewriting the question before searching.</p><p class="zh" style="margin:0">搜索只看最新的问题。“电梯负责人是谁？”没问题；“那他的上司呢？”就不行：“他”对向量库毫无意义。聊天记录能帮到模型，帮不到搜索。解法是搜索前先改写问题。</p></div>
 <div class="try" id="p4"></div>
 
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I believed RAG needed a big framework. The framework only saves a few lines. The idea is "search, paste, answer", and I could write it with no framework at all.</span><span class="zh">我以为 RAG 需要一个很大的框架。其实框架只省几行代码。真正的想法是“搜索、粘贴、回答”，不用框架我也能写出来。</span></div>
-
-<h2><span class="en">Common errors</span><span class="zh">常见报错</span></h2>
-<div class="card"><p class="en" style="margin:0">• <code>chromadb ... Embedding dimension 1536 does not match collection dimensionality 384</code>. You embedded with a different model than the one that built the store. Use the same embedder for both, or delete the store folder and rebuild.<br>• The chat says "I do not know" for a question the files answer. Retrieval found the wrong chunks. Print the chunks first and raise <code>k</code> or fix the chunking.<br>• <code>OSError: Cannot find empty port in range: 7860-7860</code>. An older screen is still running. Stop the old cell (or restart the kernel), or pass <code>server_port=7861</code>.</p><p class="zh" style="margin:0">• <code>Embedding dimension 1536 does not match collection dimensionality 384</code>：建库和查询用了不同的嵌入模型。两边用同一个，或者删掉库文件夹重建。<br>• 文件里明明有答案，聊天却说“不知道”：检索拿错了片段。先打印片段，再调大 <code>k</code> 或改切块。<br>• <code>OSError: Cannot find empty port in range: 7860-7860</code>：上一个界面还在运行。停掉旧单元格（或重启内核），或者传入 <code>server_port=7861</code>。</p></div>
+<div class="callout warn"><b class="lbl"><span class="en">Common errors</span><span class="zh">常见报错</span></b><span class="en"><code>Embedding dimension 1536 does not match collection dimensionality 384</code>: the store and the query used different embedders. Use one for both, or rebuild the store. "I do not know" for a question the files answer: print the chunks, then raise <code>k</code> or fix the chunking.</span><span class="zh"><code>Embedding dimension 1536 does not match collection dimensionality 384</code>：建库和查询用了不同的嵌入模型。两边用同一个，或重建库。文件里有答案却说“不知道”：先打印片段，再调大 <code>k</code> 或改切块。</span></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Ask three questions:</b> one answered in the files, one that is not, and one follow-up with "he" or "she". Note which fail.</span><span class="zh"><b>问三个问题：</b>一个文件里有答案的、一个没有的、一个带“他”或“她”的追问。记下哪些失败。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Change k</b> (how many chunks) and watch quality and cost.</span><span class="zh"><b>改变 k</b>（取几块），观察质量和费用。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Print the retrieved chunks</b> beside each answer, to see where it came from.</span><span class="zh"><b>把检索到的块</b>和每个回答一起打印出来，看看答案出自哪里。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Auntie Lim can type a resident's question into a chat page and read an answer built from her own file, or "not in our file". The next problem is knowing if it is any good: Wei Jie has only three nice-looking answers, and a follow-up like "and her manager?" already breaks it.</span><span class="zh">Lim 阿姨现在可以在聊天页面输入居民的问题，读到用她自己的档案拼出的回答，档案里没有就说“我们的档案里没有”。下一个问题是怎么知道它到底好不好：Wei Jie 手上只有三个看着不错的回答，而“那她的上司呢？”这样的追问已经让它出错。</span></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Ask three questions:</b> one in the files, one not, one follow-up with "he" or "she". Note which fail.</span><span class="zh"><b>问三个问题：</b>文件里有的、没有的、带“他”或“她”的追问。记下哪些失败。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Print the retrieved chunks</b> beside each answer, and change <code>k</code>.</span><span class="zh"><b>把检索到的块</b>和每个回答一起打印出来，并改变 <code>k</code>。</span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• A retrieval chain is a retriever, a prompt and a model.<br>• Retrievers and models both use <code>.invoke()</code>, so they snap together.<br>• The prompt must say: answer from the context, otherwise say you do not know.<br>• Use temperature 0 when answering facts.<br>• Follow-up questions are the weak spot, because search sees only the latest question.<br>• The idea is search, paste, answer. A framework only saves lines.</p><p class="zh" style="margin:0">• 检索链就是检索器、提示词和模型。<br>• 检索器和模型都用 <code>.invoke()</code>，所以很好拼接。<br>• 提示词必须写明：照内容回答，没有就说不知道。<br>• 回答事实时用 temperature 0。<br>• 追问是弱点，因为搜索只看最新的问题。<br>• 核心是搜索、粘贴、回答。框架只是省几行代码。</p></div>
-
-<h2><span class="en">Recap</span><span class="zh">小结</span></h2>
-<div class="card"><p class="en" style="margin:0">1. Retrieve the closest chunks, put them in the prompt, and let the model answer from them.<br>2. Show the sources, so a resident can check the answer.<br>3. When an answer is wrong, look at the retrieved chunks before changing the prompt.</p><p class="zh" style="margin:0">1. 取出最近的块，放进提示里，让模型照着回答。<br>2. 把来源显示出来，居民就能自己核对。<br>3. 答案不对时，先看取回的块，再去改提示。</p></div>
+<div class="card"><p class="en" style="margin:0">• A retrieval chain is a retriever, a prompt and a model: search, paste, answer.<br>• The prompt must say: answer from the context, otherwise say you do not know.<br>• Use temperature 0 for facts.<br>• Follow-ups are the weak spot, because search sees only the latest question.</p><p class="zh" style="margin:0">• 检索链就是检索器、提示词和模型：搜索、粘贴、回答。<br>• 提示词必须写明：照内容回答，没有就说不知道。<br>• 回答事实时用 temperature 0。<br>• 追问是弱点，因为搜索只看最新的问题。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"goals":{"en":["Join a retriever, a prompt and a model into one chain","Write a prompt that says to answer from the context or admit it does not know","Set temperature 0 for factual answers","Explain why follow-up questions are the weak spot"],"zh":["把检索器、提示词和模型接成一条链","写出“只据上下文回答，否则说不知道”的提示词","为事实类回答设 temperature 为 0","说明为什么追问是薄弱环节"]},"prev":["05-chat-screen-in-minutes.html","14-chunks-embeddings-vector-stores.html"],"tools":{"en":"Python 3.10+, langchain, chromadb, gradio, sentence-transformers, an OpenAI API key","zh":"Python 3.10+、langchain、chromadb、gradio、sentence-transformers、OpenAI API 密钥"},"know":{"en":"The vector store you built before.","zh":"你之前做好的向量库。"},"mins":30,"offline":false}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=dcd48bec"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/15-retrieval-chain-end-to-end.js?v=6d07526e"></script></body></html>
+<script src="js/15-retrieval-chain-end-to-end.js?v=1e6bbf3a"></script></body></html>

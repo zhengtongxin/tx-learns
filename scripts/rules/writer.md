@@ -2,14 +2,16 @@
 
 Reader: a smart newcomer to AI. Voice: TX's, plain, "you", short sentences (one idea each, paragraphs of 3 or fewer).
 
-Shape: hero (tag `<Topic> · Lesson N` or `<Topic> · Project`, plain title (short noun phrase: 2-5 words EN, 4-10 characters 中文, no sentence, no colon, no trailing clause, no `Project:` prefix), one-line meta with `~N min · type`) → `.story` with one named character and goal → "Where we left off" box (`callout thread`: Last time ___ could ___. Today it fails when ___. We fix it by ___.) → steps `<h2>Step N · ...` each with Learn (`.teach`, 2-4 sentences, one everyday analogy) + Show (small `.codebox`, changed lines in `.chg`, or a diagram) + Test (`.try` predict or `.sc` game; every answer gets a one-line why and a hint) → optional "What I got wrong" (`callout warn`, keep TX's real confusions) → "Now make it yours" (`.cl`, 2-3 things) → "What changed" box (`callout tip`: Now ___ can ___. The next problem is ___.) → takeaways (`.card`, 5-7 bullets).
+Shape (succinct and sleek, key point first, roughly 600-1,000 words of prose per language): hero (tag `<Topic> · Lesson N` or `<Topic> · Project`, plain title (short noun phrase: 2-5 words EN, 4-10 characters 中文, no sentence, no colon, no trailing clause, no `Project:` prefix), one-line meta with `~N min · type`) → 2-4 steps `<h2>Step N · ...`, each Learn (`.teach`, key point first, 1-3 sentences or bullets) + Show (only the few code lines or the diagram that carry the point) + Test (`.try` predict or `.sc` game; at least one per lesson; every answer gets a one-line why) → optional one-or-two-sentence "What I got wrong" (`callout warn`) → "Now make it yours" (`.cl`, 2 things) → takeaways (`.card`, 3-5 bullets).
+
+Story is optional and off by default: add one only if it makes the concept click faster; then 1-3 sentences, Singapore-set, on the point. No cast lists, no "Where we left off" / "What changed" / "Back at ..." boxes, no padding, recaps or hedging.
 
 Rules:
-- Say why before how. Explain every term before using it. No wall of code.
+- Key point first. Explain every term before using it. No wall of code.
 - Build before use: no step's code calls anything a later step creates. Code boxes are complete enough to run (imports, right package names, `await` only where allowed).
 - Every `.en` has a matching natural `.zh` (also in `{en,zh}` script strings). Widget code goes in `<track>/js/NN-slug.js`, never inline.
 - Source-neutral: never name a platform, program, instructor or student; never write the C-word "course" / 课程; no week, day or "Project N" numbering; invent your own names, prompts and examples; rewrite code comments and variable names. Tool names (OpenAI, MCP...) are fine.
-- Track setting: use `<track>/STORY.md` if it exists (never mix settings). AI Agentic uses the kopitiam cast (Uncle Lim, Auntie Suria, Aina, Ah Seng, Kak Ros, Uncle Rahim).
+- No track-wide story or cast is required; each lesson stands alone.
 - Counts are never typed: every number comes from `lessons.js`. Order is easiest first: topic `level` 1-3 never goes down the list.
 - Start from `agentic-ai/_template.html`; fill `<title>`, description and `og:` tags.
 

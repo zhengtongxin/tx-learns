@@ -4,17 +4,13 @@
 <meta name="updated" content="2026-11-25">
 <link rel="canonical" href="https://tx-learns.vercel.app/ai-fde/05-open-models-local-and-token-cost.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-fde/05-open-models-local-and-token-cost.html","url":"https://tx-learns.vercel.app/ai-fde/05-open-models-local-and-token-cost.html","name":"Open models and token cost","alternateName":"开源模型与成本","description":"Try open-weight and local models on the same claims, shrink the prompt to save tokens, and judge every model on accuracy, cost and speed against a lazy baseline.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Picking the model for the job","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI FDE","url":"https://tx-learns.vercel.app/ai-fde/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI FDE","item":"https://tx-learns.vercel.app/ai-fde/index.html"},{"@type":"ListItem","position":3,"name":"Open models and token cost","item":"https://tx-learns.vercel.app/ai-fde/05-open-models-local-and-token-cost.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
-<div class="hero"><span class="tag"><span class="en">Picking the model for the job · Lesson 2</span><span class="zh">为任务挑模型 · 第 2 课</span></span><h1><span class="en">Open models and token cost</span><span class="zh">开源模型与成本</span></h1><p class="meta"><span class="en">Cut the prompt, try models you can host or run yourself, and judge them on accuracy, cost and speed together · ~25 min · concept with one runnable idea</span><span class="zh">把提示词剪短，试试能托管或自己运行的模型，并把准确率、成本和速度放在一起评判 · 约 25 分钟 · 概念课，附一个可动手的做法</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the pilot had a table of frontier models, and Mr Goh worried about the bill. Today Kumar also asks whether claims can be read without ever leaving the shophouse. We fix it by trimming the prompt and trying open models on a hosting service and on the old desktop.</p>
-<p class="zh" style="margin:0">上回试点有了一张云端大模型的对比表，Goh 先生还在担心账单。今天 Kumar 又问：理赔能不能不出店屋就被读完。我们的办法是缩短提示词，并在托管服务和那台旧台式机上试开源模型。</p></div>
-<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">After the first comparison, two people at Kaya Travel Cover speak up. Mr Goh worries about the bill. Kumar, the one-person IT team, asks whether claims could be read by a model that never leaves the shophouse. Mei Ling has two answers to try. An <b>open-weight model</b> is one whose learned numbers (its “weights”) are published, so anyone can host it or run it. And a shorter prompt costs less on every model. She tests both on the same 25 claims.</p>
-<p class="zh" style="margin:0">第一轮比较之后，Kaya Travel Cover 有两个人开口了。Goh 先生担心账单。Kumar（一人 IT 部门）问：理赔能不能交给一个永远不出店屋的模型来读？Mei Ling 有两条路可试。<b>开放权重模型</b>是把学到的那些数字（“权重”）公开了的模型，谁都能托管或自己运行。另外，更短的提示词在每个模型上都更省钱。她在同样的 25 份理赔上把两样都试一遍。</p></div>
+<div class="hero"><span class="tag"><span class="en">Picking the model for the job · Lesson 2</span><span class="zh">为任务挑模型 · 第 2 课</span></span><h1><span class="en">Open models and token cost</span><span class="zh">开源模型与成本</span></h1><p class="meta"><span class="en">Cut the prompt, try models you can host or run yourself, and judge them on accuracy, cost and speed together · ~20 min · concept with one runnable idea</span><span class="zh">把提示词剪短，试试能托管或自己运行的模型，并把准确率、成本和速度放在一起评判 · 约 20 分钟 · 概念课，附一个可动手的做法</span></p></div>
 
-<h2><span class="en">Step 1 · Make a smaller prompt</span><span class="zh">第 1 步 · 做一份更小的提示词</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The full prompt pastes the whole policy wording into every call, and you pay for every word, every time. Most of it is irrelevant to any one claim. A baggage claim does not need the medical section. So give each claim type only its own sections, and write the JSON without spaces and line breaks. This assumes you tagged each claim with a <code>type</code> (<code>delay</code>, <code>baggage</code> or <code>medical</code>) and split the wording into a file of sections.</p>
-<p class="zh" style="margin:0 0 8px">完整的提示词每次调用都把整份保单条款贴进去，每个字每次都要花钱。而对某一份理赔来说，大部分内容用不上。行李理赔不需要医疗那一节。所以只给每种理赔类型它自己的那几节，JSON 也不要空格和换行。这里假设你给每份理赔标了 <code>type</code>（<code>delay</code>、<code>baggage</code> 或 <code>medical</code>），并把条款拆成了一个分节文件。</p></div>
+<h2><span class="en">Step 1 · Send fewer tokens</span><span class="zh">第 1 步 · 少发 token</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0"><li>Models bill and slow down by <b>tokens</b> (about four letters of English). The full prompt pastes the whole wording into every call, and most of it is irrelevant to one claim.</li><li>Give each claim type only its own sections, and write the JSON compactly. Then check accuracy: trimming can cut the one section a claim needed.</li></ul>
+<ul class="zh" style="margin:0"><li>模型按 <b>token</b>（英文约四个字母）收费，也按 token 变慢。完整提示词每次都把整份条款贴进去，而对一份理赔来说大部分用不上。</li><li>只给每种理赔类型它自己的那几节，JSON 也写得紧凑些。然后检查准确率：剪得太狠可能把某份理赔需要的那一节剪掉。</li></ul></div>
 <div class="codebox" data-file="bench.py" data-lang="python"><span class="dim"># bench.py, continued (build_prompt, claims, POLICIES and key are from the last lesson)
-# each claim now has a type, e.g. {"id": "C007", "type": "baggage", "policy_id": "P003", ...}
+# each claim now has a type: "delay", "baggage" or "medical"
 WORDING_PARTS = json.load(open("data/wording_sections.json"))   # {"delays": "...", "baggage": "...", ...}
 
 </span><span class="chg">SECTIONS = {"delay": ["delays", "limits"],
@@ -22,41 +18,34 @@ WORDING_PARTS = json.load(open("data/wording_sections.json"))   # {"delays": "..
             "medical": ["medical", "limits"]}
 
 def compact(data):
-    return json.dumps(data, separators=(",", ":"))   # drops the spaces that json.dumps adds by default
+    return json.dumps(data, separators=(",", ":"))   # drops the spaces json.dumps adds
 
 def small_prompt(claim):
     wording = "\n".join(WORDING_PARTS[name] for name in SECTIONS[claim["type"]])
-    policy = compact(POLICIES[claim["policy_id"]])
     return f"""Travel claims desk. Relevant wording:
 {wording}
-Policy: {policy}
+Policy: {compact(POLICIES[claim["policy_id"]])}
 Claim: {compact(claim)}
-JSON only: {{"action": "approve" or "decline" or "refer", "payout": number in S$, "reason": two short sentences}}"""</span></div>
-<p class="en">A baggage claim comes in. Which parts of the prompt should it keep?</p>
-<p class="zh">来了一份行李理赔。提示词里哪些该保留？</p><div class="sc" id="g1"></div>
+JSON only: {{"action": "approve" or "decline" or "refer", "payout": number in S$, "reason": two short sentences}}"""</span><span class="dim">
 
-<h2><span class="en">Step 2 · Measure what you saved</span><span class="zh">第 2 步 · 量一量省了多少</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>token</b> is a small piece of text, about four letters in English. Models are billed and slowed down by tokens, so count them before and after. A quick estimate is the number of characters divided by four. The exact count comes back from the gateway in each reply. A smaller prompt helps every model, but it can also cut the one section a claim needed. Check accuracy after trimming, not only cost.</p>
-<p class="zh" style="margin:0 0 8px"><b>token</b> 是一小段文字，英文里大约四个字母。模型按 token 收费，也按 token 变慢，所以前后各数一次。快速估算就是字符数除以四。精确的数每次回复里网关都会给你。更小的提示词对每个模型都有好处，但也可能把某份理赔恰好需要的那一节剪掉。剪完之后要看准确率，不能只看成本。</p></div>
-<div class="codebox" data-file="bench.py" data-lang="python"><span class="dim">def rough_tokens(text):
+def rough_tokens(text):
     return len(text) // 4          # about four characters per token
 
 full = sum(rough_tokens(build_prompt(c)) for c in claims) / len(claims)
 small = sum(rough_tokens(small_prompt(c)) for c in claims) / len(claims)
-</span><span class="chg">print(f"full {full:.0f} tokens, small {small:.0f} tokens, saved {1 - small / full:.0%}")</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">full 612 tokens, small 188 tokens, saved 69%</div>
-<div class="try" id="p1"></div>
+print(f"full {full:.0f} tokens, small {small:.0f} tokens, saved {1 - small / full:.0%}")</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字会不同）</span></p><div class="codebox" data-file="output" data-lang="text">full 612 tokens, small 188 tokens, saved 69%</div>
+<p class="en">A baggage claim comes in. Which parts of the prompt should it keep?</p>
+<p class="zh">来了一份行李理赔。提示词里哪些该保留？</p><div class="sc" id="g1"></div>
 
-<h2><span class="en">Step 3 · Open models on a hosting service</span><span class="zh">第 3 步 · 托管服务上的开放模型</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">You do not need your own big computer to use an open model. A <b>hosting service</b> runs it for you and charges per token, usually much less than a frontier model. Several providers can serve the same open model at different prices and speeds. The gateway from the last lesson reaches them with the same code. This time <code>ask</code> replaces <code>decide</code> from the last lesson. It does the same job and also times each call. It takes the client and prompt as inputs, so Step 4 can reuse it.</p>
-<p class="zh" style="margin:0 0 8px">用开放模型不需要自己有一台大电脑。<b>托管服务</b>替你运行，按 token 收费，通常比前沿模型便宜得多。同一个开放模型可以由好几家服务商提供，价格和速度各不相同。上一课的网关用同样的代码就能连上它们。这次 <code>ask</code> 替代上一课的 <code>decide</code>：做同样的事，还会给每次调用计时。它把客户端和提示词作为输入，这样第 4 步可以复用。</p></div>
+<h2><span class="en">Step 2 · Open models: hosted or local</span><span class="zh">第 2 步 · 开放模型：托管或本地</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0"><li>An <b>open-weight model</b> has published weights, so anyone can host or run it.</li><li>A <b>hosting service</b> runs it for you, per token, usually far cheaper than a frontier model. The gateway from the last lesson reaches it with the same code.</li><li><b>Ollama</b> runs small open models on your own machine: nothing is billed and no claim leaves the building. The price is speed, disk and memory.</li></ul>
+<ul class="zh" style="margin:0"><li><b>开放权重模型</b>公开了权重，谁都能托管或运行。</li><li><b>托管服务</b>替你运行，按 token 收费，通常比前沿模型便宜得多。上一课的网关用同样的代码就能连上。</li><li><b>Ollama</b> 在你自己的机器上运行小型开放模型：不收费，理赔也不会离开这栋楼。代价是速度，以及磁盘和内存。</li></ul></div>
+<figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="The same pilot code calls a frontier lab, a hosting service or Ollama on the old desktop, and all three are scored on accuracy, cost and speed"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><path class="lnk" d="M160 100L260 45" marker-end="url(#ah)"/><path class="lnk" d="M160 110L260 110" marker-end="url(#ah)"/><path class="lnk hot" d="M160 120L260 175" marker-end="url(#ah)"/><path class="lnk" d="M430 45L570 95" marker-end="url(#ah)"/><path class="lnk" d="M430 110L570 110" marker-end="url(#ah)"/><path class="lnk" d="M430 175L570 125" marker-end="url(#ah)"/><rect class="box soft" x="20" y="80" width="140" height="60" rx="12"/><text class="en" x="90.0" y="105.5">Pilot code</text><text class="zh" x="90.0" y="105.5">试点代码</text><text class="en sm" x="90.0" y="122.5">same call shape</text><text class="zh sm" x="90.0" y="122.5">同样的调用</text><rect class="box" x="260" y="20" width="170" height="50" rx="12"/><text class="en" x="345.0" y="49.0">Frontier lab</text><text class="zh" x="345.0" y="49.0">云端大模型</text><rect class="box" x="260" y="85" width="170" height="50" rx="12"/><text class="en" x="345.0" y="105.5">Hosting service</text><text class="zh" x="345.0" y="105.5">托管服务</text><text class="en sm" x="345.0" y="122.5">open model</text><text class="zh sm" x="345.0" y="122.5">开源模型</text><rect class="box new" x="260" y="150" width="170" height="50" rx="12"/><text class="en" x="345.0" y="170.5">Ollama</text><text class="zh" x="345.0" y="170.5">Ollama</text><text class="en sm" x="345.0" y="187.5">old desktop</text><text class="zh sm" x="345.0" y="187.5">旧台式机</text><rect class="box" x="570" y="80" width="130" height="60" rx="12"/><text class="en" x="635.0" y="105.5">Side by side</text><text class="zh" x="635.0" y="105.5">并排对比</text><text class="en sm" x="635.0" y="122.5">accuracy, cost, speed</text><text class="zh sm" x="635.0" y="122.5">准确、成本、速度</text></svg><figcaption><span class="en">Only the address changes, so the same 25 claims show what each choice costs in accuracy, money and waiting.</span><span class="zh">只换了地址，所以同样 25 份理赔就能看出每种选择在准确率、金钱和等待上的代价。</span></figcaption></figure>
 <div class="codebox" data-file="bench.py" data-lang="python"><span class="dim"># bench.py, continued
 import time
+from openai import OpenAI
 
-# check the exact names on your gateway's model list; you can add more
-</span><span class="chg">OPEN_MODELS = ["meta-llama/llama-3.3-70b-instruct",
-               "qwen/qwen-2.5-72b-instruct",
-               "mistralai/mistral-small-3.2-24b-instruct"]</span><span class="dim">
-
+# ask replaces last lesson's decide: same job, but it takes the client and times the call
 def ask(client, model, prompt):
     start = time.perf_counter()
     reply = client.chat.completions.create(
@@ -66,56 +55,42 @@ def ask(client, model, prompt):
     decision = json.loads(text[text.index("{"): text.rindex("}") + 1])
     return decision, reply.usage.prompt_tokens, reply.usage.completion_tokens, seconds
 
-# client is the gateway from Lesson 4: run_all(gateway, "openai/gpt-5.4-mini")
 def run_all(client, model):
-    return [(c["id"], *ask(client, model, small_prompt(c))) for c in claims]</span></div>
-<div class="try" id="p2"></div>
+    return [(c["id"], *ask(client, model, small_prompt(c))) for c in claims]
 
-<h2><span class="en">Step 4 · Models on your own computer</span><span class="zh">第 4 步 · 在自己电脑上跑模型</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><b>Ollama</b> is a free app that downloads small open models and runs them on your own machine. It speaks the same OpenAI-style language, so <code>ask</code> works unchanged: just point the client at your own computer. No tokens are billed and no claim leaves the building, which is what Kumar wanted. The price is speed, and disk and memory to hold the model.</p>
-<p class="zh" style="margin:0 0 8px"><b>Ollama</b> 是个免费应用，能下载小型开放模型，在你自己的机器上运行。它说的也是 OpenAI 那一套话，所以 <code>ask</code> 原封不动就能用：只要把客户端指向你自己的电脑。不按 token 收费，理赔也不会离开这栋楼，这正是 Kumar 想要的。代价是速度，以及放模型所需的磁盘和内存。</p></div>
-<figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="The same pilot code calls a frontier lab, a hosting service or Ollama on the old desktop, and all three are scored on accuracy, cost and speed"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><path class="lnk" d="M160 100L260 45" marker-end="url(#ah)"/><path class="lnk" d="M160 110L260 110" marker-end="url(#ah)"/><path class="lnk hot" d="M160 120L260 175" marker-end="url(#ah)"/><path class="lnk" d="M430 45L570 95" marker-end="url(#ah)"/><path class="lnk" d="M430 110L570 110" marker-end="url(#ah)"/><path class="lnk" d="M430 175L570 125" marker-end="url(#ah)"/><rect class="box soft" x="20" y="80" width="140" height="60" rx="12"/><text class="en" x="90.0" y="105.5">Pilot code</text><text class="zh" x="90.0" y="105.5">试点代码</text><text class="en sm" x="90.0" y="122.5">same call shape</text><text class="zh sm" x="90.0" y="122.5">同样的调用</text><rect class="box" x="260" y="20" width="170" height="50" rx="12"/><text class="en" x="345.0" y="49.0">Frontier lab</text><text class="zh" x="345.0" y="49.0">云端大模型</text><rect class="box" x="260" y="85" width="170" height="50" rx="12"/><text class="en" x="345.0" y="105.5">Hosting service</text><text class="zh" x="345.0" y="105.5">托管服务</text><text class="en sm" x="345.0" y="122.5">open model</text><text class="zh sm" x="345.0" y="122.5">开源模型</text><rect class="box new" x="260" y="150" width="170" height="50" rx="12"/><text class="en" x="345.0" y="170.5">Ollama</text><text class="zh" x="345.0" y="170.5">Ollama</text><text class="en sm" x="345.0" y="187.5">old desktop</text><text class="zh sm" x="345.0" y="187.5">旧台式机</text><rect class="box" x="570" y="80" width="130" height="60" rx="12"/><text class="en" x="635.0" y="105.5">Side by side</text><text class="zh" x="635.0" y="105.5">并排对比</text><text class="en sm" x="635.0" y="122.5">accuracy, cost, speed</text><text class="zh sm" x="635.0" y="122.5">准确、成本、速度</text></svg><figcaption><span class="en">Only the address changes, so the same 25 claims show what each choice costs in accuracy, money and waiting.</span><span class="zh">只换了地址，所以同样 25 份理赔就能看出每种选择在准确率、金钱和等待上的代价。</span></figcaption></figure>
-<div class="codebox" data-file="terminal" data-lang="bash">ollama pull llama3.2
-ollama pull qwen2.5:3b</div>
-<div class="codebox" data-file="bench.py" data-lang="python"><span class="chg">local = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")   # localhost is this computer; the key is ignored, but the library needs one
-LOCAL_MODELS = ["llama3.2", "qwen2.5:3b"]</span><span class="dim">
+# hosted: the gateway from the last lesson (check exact names on its model list)
+</span><span class="chg">OPEN_MODELS = ["meta-llama/llama-3.3-70b-instruct", "qwen/qwen-2.5-72b-instruct"]</span><span class="dim">
 
-results = run_all(local, LOCAL_MODELS[0])      # same function, now running on your own machine</span></div>
+# local: run `ollama pull llama3.2` once, then point the client at this computer
+</span><span class="chg">local = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")   # the key is ignored, but the library needs one
+results = run_all(local, "llama3.2")</span></div>
 <p class="en">Where does each description fit best?</p>
 <p class="zh">下面每一条更适合哪边？</p><div class="sc" id="g2"></div>
 
-<h2><span class="en">Step 5 · Accuracy, cost and speed side by side</span><span class="zh">第 5 步 · 把准确率、成本和速度并排放</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">One number is never enough. A model can be the most accurate and also slow and dear. Print one line per model with all three. Later you can plot accuracy against cost, accuracy against speed, then all three at once. A model is worth dropping when another one is as good or better on every measure.</p>
-<p class="zh" style="margin:0 0 8px">只看一个数永远不够。一个模型可能最准，也最慢最贵。每个模型打印一行，三项都带上。之后可以画准确率对成本、准确率对速度的图，最后三项一起看。如果另一个模型在每一项上都不输，这个模型就可以淘汰了。</p></div>
+<h2><span class="en">Step 3 · Accuracy, cost and speed side by side</span><span class="zh">第 3 步 · 把准确率、成本和速度并排放</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0"><li>One number is never enough: print accuracy, cost and speed per model. Drop a model when another is as good or better on every measure.</li><li>Also print the <b>baseline</b>, the score of a lazy answer such as “approve everything”. Your model is only worth what it adds on top.</li></ul>
+<ul class="zh" style="margin:0"><li>只看一个数永远不够：每个模型都印出准确率、成本和速度。如果另一个模型每一项都不输，这个就可以淘汰。</li><li>再印出<b>基线</b>，也就是偷懒答案（比如“全部批准”）的得分。模型的价值只看它在这之上多加了多少。</li></ul></div>
 <div class="codebox" data-file="bench.py" data-lang="python"><span class="dim">def summary(name, price, results):
     right = sum(matches(decision, key[cid]) for cid, decision, _, _, _ in results)
     </span><span class="chg">cost = sum(tin * price[0] + tout * price[1] for _, _, tin, tout, _ in results) / 1_000_000 / len(results) * 1000
     secs = sum(s for *_, s in results) / len(results)
-    print(f"{name:42} {right}/{len(results)} right  US${cost:.2f} per 1,000  {secs:.1f}s per claim")</span><span class="dim">
+    print(f"{name:20} {right}/{len(results)} right  US${cost:.2f} per 1,000  {secs:.1f}s per claim")</span><span class="dim">
 
-# local models cost nothing per token, so their price is (0, 0)
-summary("llama3.2 (local)", (0, 0), results)</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">llama3.2 (local)                           17/25 right  US$0.00 per 1,000  6.8s per claim</div>
+summary("llama3.2 (local)", (0, 0), results)   # local models cost nothing per token
+
+approve_share = sum(1 for want in key.values() if want["action"] == "approve") / len(key)
+print(f"approving everything scores {approve_share:.0%}")</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字会不同）</span></p><div class="codebox" data-file="output" data-lang="text">llama3.2 (local)     17/25 right  US$0.00 per 1,000  6.8s per claim
+approving everything scores 56%</div>
 <div class="try" id="p3"></div>
 
-<h2><span class="en">Step 6 · Check the lazy baseline</span><span class="zh">第 6 步 · 对照偷懒的基线</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>baseline</b> is the score of a trivial answer. If most claims are approvals, a “model” that approves everything already looks decent. Your real model is only worth something by how much it adds on top. Always print the baseline next to the scores.</p>
-<p class="zh" style="margin:0 0 8px"><b>基线</b>就是一个偷懒答案的得分。如果大多数理赔都是批准，一个“全部批准”的模型看上去就已经不差。你的真模型值多少，只看它在这之上多加了多少。分数旁边永远要印出基线。</p></div>
-<div class="codebox" data-file="bench.py" data-lang="python"><span class="chg">approve_share = sum(1 for want in key.values() if want["action"] == "approve") / len(key)
-print(f"approving everything scores {approve_share:.0%}")</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">approving everything scores 56%</div>
-<div class="try" id="p4"></div>
-
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我当时想错了</span></b><span class="en">I forgot the “approve everything” baseline. About 60% of our claims are approvals, so a lazy model looked decent until I compared it with the trivial answer. Now the baseline is always the first line I print.</span><span class="zh">我忘了“全部批准”这条基线。我们大约 60% 的理赔是批准的，所以一个偷懒的模型看起来还不错，直到我拿它和最简单的答案比。现在基线永远是我打印的第一行。</span></div>
-
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Trim the prompt another way</b> (shorter reasons, fewer policy fields) and see if accuracy drops.</span><span class="zh"><b>换一种方式剪提示词</b>（理由更短、保单字段更少），看准确率会不会掉。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Try the free route</b> (local models, no paid tokens) and compare it with a hosted one.</span><span class="zh"><b>试试免费的路</b>（本地模型，不花 token 钱），和托管的比一比。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Work out the cost of 1,000 claims</b> on each model.</span><span class="zh"><b>算出每个模型处理 1,000 份理赔的成本。</b></span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the pilot has a shorter prompt and a table that puts accuracy, cost and speed side by side for cloud, hosted and local models, so Kumar can see what the old desktop under the ceiling fan would cost in waiting. The next problem is turning that table into one decision: which model, and why.</span><span class="zh">现在试点有了更短的提示词，还有一张把云端、托管和本地模型的准确率、成本、速度并排放的表，Kumar 看得出吊扇下那台旧台式机要付出多少等待的代价。下一个问题是把这张表变成一个决定：选哪个模型，为什么。</span></div>
-<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2><div class="card"><p class="en" style="margin:0 0 12px"><code>openai.APIConnectionError: Connection error.</code><br>Cause: Ollama is not running, so nothing answers on port 11434. Fix: start the Ollama app (or run <code>ollama serve</code>) and try again.</p><p class="zh" style="margin:0 0 12px"><code>openai.APIConnectionError: Connection error.</code><br>原因：Ollama 没在运行，11434 端口没人应答。解决：打开 Ollama 应用（或运行 <code>ollama serve</code>）再试。</p><p class="en" style="margin:0 0 12px"><code>openai.NotFoundError: model 'llama3.2' not found, try pulling it first</code><br>Cause: the model was never downloaded. Fix: run <code>ollama pull llama3.2</code> once.</p><p class="zh" style="margin:0 0 12px"><code>openai.NotFoundError: model 'llama3.2' not found, try pulling it first</code><br>原因：这个模型从来没下载过。解决：运行一次 <code>ollama pull llama3.2</code>。</p><p class="en" style="margin:0 0 12px"><code>json.decoder.JSONDecodeError: Expecting value</code><br>Cause: small local models often add chatter around the JSON. Fix: shorten the prompt, repeat "JSON only", and count a bad reply as a wrong answer instead of crashing.</p><p class="zh" style="margin:0 0 12px"><code>json.decoder.JSONDecodeError: Expecting value</code><br>原因：小的本地模型常在 JSON 周围加闲话。解决：缩短提示、重复“只要 JSON”，并把坏的回复算作错误答案，而不是让程序崩溃。</p></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Trim the prompt another way</b> (shorter reasons, fewer policy fields) and see if accuracy drops.</span><span class="zh"><b>换一种方式剪提示词</b>（理由更短、保单字段更少），看准确率会不会掉。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Work out the cost of 1,000 claims</b> on each model.</span><span class="zh"><b>算出每个模型处理 1,000 份理赔的成本。</b></span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• Shorter prompts are cheaper and faster, but can hide a fact a claim needs. Check accuracy after trimming.<br>• Tokens are what you pay for. Count them before and after.<br>• Open-weight models on a hosting service are cheaper, and several providers can serve the same one.<br>• A local model costs nothing per token and keeps data at home, but it is slower and needs disk and memory.<br>• Open and local models can be close on easy claims and clearly worse on hard ones.<br>• Always compare with the trivial baseline.<br>• Judge models on accuracy, cost and speed together.</p><p class="zh" style="margin:0">• 更短的提示词更便宜更快，但可能藏起某份理赔需要的事实。剪完要检查准确率。<br>• 你付钱买的是 token，前后都数一数。<br>• 托管服务上的开放权重模型更便宜，同一个模型还可以有好几家服务商。<br>• 本地模型每个 token 不花钱、数据留在家里，但更慢，也要磁盘和内存。<br>• 开放和本地模型在简单理赔上可以很接近，在难的理赔上明显更差。<br>• 永远要和最简单的基线比。<br>• 把准确率、成本和速度放在一起评判模型。</p></div>
+<div class="card"><p class="en" style="margin:0">• Shorter prompts are cheaper and faster; check accuracy after trimming.<br>• Open-weight models on a hosting service are cheaper; a local one costs nothing per token and keeps data home, but is slower.<br>• Judge models on accuracy, cost and speed together.<br>• Always compare with the trivial baseline.</p><p class="zh" style="margin:0">• 更短的提示词更便宜更快；剪完要检查准确率。<br>• 托管服务上的开放权重模型更便宜；本地模型每个 token 不花钱、数据留在家里，但更慢。<br>• 把准确率、成本和速度放在一起评判模型。<br>• 永远要和最简单的基线比。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI FDE</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"prev":["04-frontier-models-on-real-claims.html"],"tools":{"en":"Python 3, the openai package, Ollama with a small model pulled (qwen2.5:3b), the gateway key from Lesson 4","zh":"Python 3、openai 包、Ollama（拉取小模型 qwen2.5:3b）、前面几课的网关密钥"},"know":{"en":"Your bench.py from Lesson 4 and what a token is.","zh":"前面几课的 bench.py，以及 token 是什么。"},"mins":40,"offline":false,"goals":{"en":["Count tokens before and after trimming a prompt and check accuracy","Compare hosted open-weight models and a local model","Judge models on accuracy, cost and speed together","Compare against the trivial baseline"],"zh":["在精简提示词前后数 token，并检查准确率","对比托管的开源权重模型和本地模型","把准确率、成本和速度放在一起评价模型","和最简单的基线做对比"]}}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=37968fc4"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/05-open-models-local-and-token-cost.js?v=c3bd966e"></script></body></html>
+<script src="js/05-open-models-local-and-token-cost.js?v=80589964"></script></body></html>

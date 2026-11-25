@@ -5,28 +5,22 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/agentic-ai/17-personal-helper-that-remembers.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/agentic-ai/17-personal-helper-that-remembers.html","url":"https://tx-learns.vercel.app/agentic-ai/17-personal-helper-that-remembers.html","name":"Personal memory helper","alternateName":"个人记忆助手","description":"Build Kaki: a helper that runs errands, asks before it acts, and has a checker that decides when the job is really done.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"Graphs and state","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Agentic","url":"https://tx-learns.vercel.app/agentic-ai/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Agentic","item":"https://tx-learns.vercel.app/agentic-ai/index.html"},{"@type":"ListItem","position":3,"name":"Personal memory helper","item":"https://tx-learns.vercel.app/agentic-ai/17-personal-helper-that-remembers.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Graphs and state · Project</span><span class="zh">图与状态 · 项目</span></span><h1><span class="en">Personal memory helper</span><span class="zh">个人记忆助手</span></h1><p class="meta"><span class="en">You build a helper that does errands, asks before it acts and checks its own work · ~40 min · project</span><span class="zh">你做一个会跑腿、行动前先问你、还会检查自己成果的助手 · 约 40 分钟 · 项目</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the Kopi Corner assistant gained memory, tools and web search inside its graph. Today it still forgets each person: Uncle Lim's regular who wants “the usual” is a stranger every visit. We fix it by building one helper that remembers, asks first and checks its own work.</p>
-<p class="zh" style="margin:0">上次 Kopi Corner 助手在图里有了记忆、工具和联网搜索。今天它还是记不住每个人：林叔那位要“老样子”的熟客，每次来都像陌生人。我们做一个会记事、先问再做、还会自查的助手来解决。</p></div>
-<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en" style="margin:0">Meet <b>Kaki</b> (like “my kaki”, my buddy). You give Kaki an errand and a line saying what <b>done means</b>: <i>“Find three kopitiams within 2 km of Tiong Bahru that open before 7am and sell half-boiled eggs. Write them to <code>kopi.md</code> and ping my phone with the best one.”</i> Kaki is a small shop with two people. A <b>worker</b> goes out and does the errand. A <b>checker</b> reads the report against your “done means” line. And before anything leaves the shop, like a ping to your phone, the worker has to <b>ask you first</b>. Kaki is a side case: swap his errand for Auntie Suria's regulars and he becomes the Kopi Corner assistant.</p>
-<p class="zh" style="margin:0">认识 <b>Kaki</b>（就是“我的 kaki”，我的伙伴）。你给 Kaki 一件差事，再写一句<b>怎样算完成</b>：<i>“在 Tiong Bahru 周围 2 公里内找三家早上 7 点前开门、有卖半熟蛋的咖啡店，写进 <code>kopi.md</code>，再把最好的一家推送到我的手机。”</i>Kaki 像一家有两个人的小店：<b>跑腿的</b>出去办事，<b>检查员</b>对照你的“完成标准”读他的报告。而任何要离开店里的动作，比如推送到你手机，跑腿的必须<b>先问你</b>。Kaki 是个支线案例：把他的差事换成 Suria 阿姨的熟客，他就是 Kopi Corner 助手。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Key point</span><span class="zh">要点</span></b><p class="en" style="margin:0">A helper you can trust has three parts: a <b>worker</b> that runs the errand with tools, a <b>pause</b> that asks you before anything leaves the shop, and a <b>checker</b> that tests the result against a “done means” line. Our helper is Kaki (Singlish for “buddy”). Errand: <i>find three kopitiams near Tiong Bahru that open before 7am, write them to <code>kopi.md</code>, ping my phone with the best one.</i></p><p class="zh" style="margin:0">值得信任的助手有三部分：用工具跑腿的<b>执行者</b>、在任何东西离开店之前先问你的<b>暂停</b>，以及按“完成标准”检查结果的<b>检查员</b>。我们的助手叫 Kaki（新加坡口语里的“伙伴”）。任务：<i>找出中峇鲁附近三家 7 点前营业的咖啡店，写进 <code>kopi.md</code>，并把最好的一家推送到我手机。</i></p></div>
+<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim">pip install langchain langchain-openai langgraph langchain-community langchain-mcp-adapters python-dotenv
+# also Node + npx. env: OPENAI_API_KEY, SERPER_API_KEY, PUSHOVER_USER, PUSHOVER_TOKEN</span></div>
 
-<h2><span class="en">Step 1 · Tools first: your own, ready-made and MCP</span><span class="zh">第 1 步 · 先备工具：自己写的、现成的和 MCP</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A worker is only as good as its toolbox, so build that first. Kaki gets a search tool, a Wikipedia tool, two functions you write (<code>ping_phone</code> and <code>ask_human</code>), plus a browser and a file tool from MCP servers. The browser has to keep its state, like open tabs and cookies, between calls. So you keep the MCP sessions <b>open</b> with <code>client.session(name)</code> and <code>load_mcp_tools(session)</code>, instead of the default open-per-call.</p>
-<p class="zh" style="margin:0 0 8px">跑腿的本事取决于工具箱，所以先备工具。Kaki 有一个搜索工具、一个维基百科工具、你自己写的两个函数（<code>ping_phone</code> 和 <code>ask_human</code>），再加上来自 MCP 服务的浏览器和文件工具。浏览器在两次调用之间要保持状态，比如打开的标签页和 cookie。所以要用 <code>client.session(name)</code> 加 <code>load_mcp_tools(session)</code> 让 MCP 会话一直<b>开着</b>，而不是默认的每次调用才开一次。</p></div>
-<div class="codebox" data-file="terminal" data-lang="bash"><span class="dim">pip install langchain langchain-openai langgraph langchain-community langchain-mcp-adapters wikipedia gradio python-dotenv
-# also Node + npx. env: OPENAI_API_KEY, SERPER_API_KEY, PUSHOVER_USER, PUSHOVER_TOKEN
-</span></div>
+<h2><span class="en">Step 1 · Tools first</span><span class="zh">第 1 步 · 先备工具</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li>A worker is only as good as its toolbox: a search tool, two functions you write (<code>ping_phone</code>, <code>ask_human</code>) and a browser from an MCP server.</li><li>A browser must keep tabs and cookies between calls, so keep its MCP session <b>open</b> with <code>client.session(name)</code> and <code>load_mcp_tools(session)</code>.</li></ul>
+<ul class="zh" style="margin:0;padding-left:18px"><li>执行者的能力取决于工具箱：一个搜索工具、两个你自己写的函数（<code>ping_phone</code>、<code>ask_human</code>），以及来自 MCP 服务的浏览器。</li><li>浏览器要在多次调用之间保留标签页和 cookie，所以用 <code>client.session(name)</code> 和 <code>load_mcp_tools(session)</code> 让 MCP 会话保持<b>开启</b>。</li></ul></div>
 <div class="codebox" data-file="tools.py" data-lang="python"><span class="dim">import os, requests
 from contextlib import AsyncExitStack
 from langchain_core.tools import tool
-from langchain_community.tools import GoogleSerperRun, WikipediaQueryRun
-from langchain_community.utilities import GoogleSerperAPIWrapper, WikipediaAPIWrapper
+from langchain_community.tools import GoogleSerperRun
+from langchain_community.utilities import GoogleSerperAPIWrapper
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_mcp_adapters.tools import load_mcp_tools
 
 search = GoogleSerperRun(api_wrapper=GoogleSerperAPIWrapper())
-wiki = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())
-
 </span><span class="chg">@tool
 def ping_phone(text: str) -> str:
     """Send a short push notification to my phone."""
@@ -37,42 +31,31 @@ def ping_phone(text: str) -> str:
 @tool
 def ask_human(instructions: str) -> str:
     """Ask me to do something only a human can do (login, captcha), with exact steps."""
-    # runs only after the pause in Step 3: you did the step, then approved
     return "The human says it's done. Continue."</span><span class="dim">
 
-mcp_servers = {
+# run inside an async function or a notebook cell
+client = MultiServerMCPClient({
     "browser": {"transport": "stdio", "command": "npx", "args": ["@playwright/mcp@latest", "--isolated"]},
-    "files":   {"transport": "stdio", "command": "npx",
-                "args": ["-y", "@modelcontextprotocol/server-filesystem", "/abs/path/to/workspace"]},
-}
-
-# keep each session open so the browser remembers its tabs
-# (these await lines must sit inside an async function or a notebook cell;
-#  the package wraps them in open_toolbox)
-client = MultiServerMCPClient(mcp_servers)
+})
 stack = AsyncExitStack()
-mcp_tools = []
-for name in mcp_servers:
-    session = await stack.enter_async_context(client.session(name))
-    mcp_tools += await load_mcp_tools(session)
-</span><span class="chg">all_tools = [search, wiki, ping_phone, ask_human] + mcp_tools</span></div>
+session = await stack.enter_async_context(client.session("browser"))   # stays open
+</span><span class="chg">all_tools = [search, ping_phone, ask_human] + await load_mcp_tools(session)</span></div>
 <div class="try" id="p1"></div>
 
-<h2><span class="en">Step 2 · The worker: one agent, a stack of middleware</span><span class="zh">第 2 步 · 跑腿的：一个智能体加一叠中间件</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The worker is one <code>create_agent</code> with <code>all_tools</code>. Its safety comes from middleware you met last lesson: a visible todo plan, hiding emails and card numbers, a cap on model calls to stop runaway cost, and a pause before risky tools. A checkpointer lets it remember the errand across turns. The prompt says what to do when a page needs a login: call <code>ask_human</code> with exact steps.</p>
-<p class="zh" style="margin:0 0 8px">跑腿的就是一个带着 <code>all_tools</code> 的 <code>create_agent</code>。它的安全靠上一课见过的中间件：看得见的待办计划、隐藏邮箱和银行卡号、限制模型调用次数以免费用失控，以及在危险工具前暂停。检查点让它能跨回合记住这件差事。提示词写明了遇到要登录的页面怎么办：用 <code>ask_human</code> 并写清具体步骤。</p></div>
+<h2><span class="en">Step 2 · The worker, and asking first</span><span class="zh">第 2 步 · 执行者与先问一声</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li>The worker is one <code>create_agent</code> with <code>all_tools</code> and middleware: a visible plan, hidden emails and card numbers, a cap on model calls, and a pause before risky tools. A checkpointer remembers the errand across turns.</li><li>With <code>HumanInTheLoopMiddleware</code> the run <b>pauses</b> before a listed tool and the result holds <code>__interrupt__</code>. Resume with one decision per paused call: approve, reject with a message, or edit.</li></ul>
+<ul class="zh" style="margin:0;padding-left:18px"><li>执行者就是一个带 <code>all_tools</code> 和中间件的 <code>create_agent</code>：可见的计划、隐藏邮箱和银行卡号、限制模型调用次数、危险工具前先暂停。检查点让它跨轮记住任务。</li><li>用 <code>HumanInTheLoopMiddleware</code>，运行会在列出的工具前<b>暂停</b>，结果里带 <code>__interrupt__</code>。恢复时每个暂停的调用给一个决定：批准、附消息拒绝或修改。</li></ul></div>
 <div class="codebox" data-file="helper.py" data-lang="python"><span class="dim">from datetime import datetime
 from langchain.agents import create_agent
 from langchain.agents.middleware import (
     HumanInTheLoopMiddleware, ModelCallLimitMiddleware, PIIMiddleware, TodoListMiddleware,
 )
 from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.types import Command
 
 RUNNER_PROMPT = """You are Kaki, a practical helper who runs errands for me.
-Read pages with the browser (snapshot first, click only when needed), search when useful,
-and save anything you produce into the workspace. If a page needs a login or captcha,
+Read pages with the browser, search when useful. If a page needs a login or captcha,
 call ask_human with exact steps. Stop when the 'done means' line is satisfied."""
-
 worker = create_agent(
     model="openai:gpt-5.4-mini",
     tools=all_tools,
@@ -85,35 +68,22 @@ worker = create_agent(
 </span><span class="chg">        HumanInTheLoopMiddleware(interrupt_on={"ping_phone": True, "ask_human": True}),</span><span class="dim">
     ],
     checkpointer=InMemorySaver(),
-)</span></div>
-<div class="sc" id="g2"></div>
+)
 
-<h2><span class="en">Step 3 · Ask first: human-in-the-loop</span><span class="zh">第 3 步 · 先问再做：人在回路中</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">With <code>HumanInTheLoopMiddleware</code> the run <b>pauses</b> just before a listed tool. The result then contains <code>__interrupt__</code>. You look at what Kaki wants to do and resume with a <code>Command</code> holding one decision per paused call: approve, reject with a message, or edit the arguments first. A rejection does not end the run. Kaki reads your message and carries on, which feels very natural.</p>
-<p class="zh" style="margin:0 0 8px">有了 <code>HumanInTheLoopMiddleware</code>，运行会在列出的工具<b>之前暂停</b>。结果里会出现 <code>__interrupt__</code>。你先看 Kaki 想做什么，再用 <code>Command</code> 恢复，里面给每个暂停的调用一个决定：批准、附上留言拒绝，或者先修改参数。拒绝不会让运行结束，Kaki 会读你的留言然后继续，用起来很自然。</p></div>
-<div class="codebox" data-file="approve.py" data-lang="python"><span class="dim">from langgraph.types import Command
-
-errand = "Find three kopitiams within 2 km of Tiong Bahru that open before 7am and sell half-boiled eggs. Write them to kopi.md and ping my phone with the best one."
 cfg = {"configurable": {"thread_id": "errand-1"}}
-# run inside an async def (or a notebook cell), because of await
-res = await worker.ainvoke({"messages": [{"role": "user", "content": errand}]}, cfg)
-
+res = await worker.ainvoke({"messages": [{"role": "user", "content": "Find three kopitiams near Tiong Bahru open before 7am. Ping me the best."}]}, cfg)
 </span><span class="chg">if "__interrupt__" in res:
     asks = res["__interrupt__"][0].value["action_requests"]
     print("Kaki wants to:", asks[0]["description"])
     res = await worker.ainvoke(Command(resume={"decisions": [{"type": "approve"}] * len(asks)}), cfg)
-    # or: {"type": "reject", "message": "Don't ping me after 10pm"}
-    # or: {"type": "edit", ...} to change the arguments first</span></div>
-<p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
-<div class="codebox" data-file="output" data-lang="text">Kaki wants to: Tool execution requires approval
-
-Tool: ping_phone
-Args: {'text': 'Best pick: ...'}</div>
+    # or {"type": "reject", "message": "Don't ping me after 10pm"}</span></div>
+<div class="sc" id="g2"></div>
 <div class="try" id="p3"></div>
+<div class="sc" id="g4"></div>
 
-<h2><span class="en">Step 4 · The checker: does “done” mean done?</span><span class="zh">第 4 步 · 检查员：“做完了”真的做完了吗？</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Workers can say “done!” too early. The checker is just a model that returns a structured <code>Verdict</code>: feedback, whether it is done, and whether a human is needed. The loop around it is plain Python, not a graph. One detail matters a lot: give the checker the <b>list of tools actually called</b>. Otherwise the worker can simply <i>say</i> “notification sent” without ever calling the tool.</p>
-<p class="zh" style="margin:0 0 8px">跑腿的可能太早说“做完了！”。检查员只是一个返回结构化 <code>Verdict</code> 的模型：反馈、是否完成、是否需要人介入。外面的循环是普通 Python，不是图。有个细节非常重要：要把<b>实际调用过的工具列表</b>交给检查员。否则跑腿的可以只是<i>嘴上说</i>“通知已发送”，却从没调用过工具。</p></div>
+<h2><span class="en">Step 3 · The checker: does “done” mean done?</span><span class="zh">第 3 步 · 检查员：“完成”真的完成了吗？</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li>Workers say “done!” too early. The checker is a model that returns a structured <code>Verdict</code>; the retry loop is plain Python, capped by <code>tries</code>.</li><li>Give the checker the <b>list of tools actually called</b>, or the worker can <i>say</i> “notification sent” without calling the tool.</li></ul>
+<ul class="zh" style="margin:0;padding-left:18px"><li>执行者总爱过早喊“做完了！”。检查员是个返回结构化 <code>Verdict</code> 的模型；重试循环是普通 Python，用 <code>tries</code> 封顶。</li><li>要把<b>实际调用过的工具列表</b>交给检查员，否则执行者可以只<i>说</i>“通知已发送”，却根本没调用工具。</li></ul></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="Worker does the errand; checker reads the report; the human approves anything that leaves the shop; a memory file is read and written"><defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><rect class="box" x="20" y="75" width="130" height="60" rx="12"/><text class="en" x="85.0" y="110.0">Worker</text><text class="zh" x="85.0" y="110.0">跑腿的</text><rect class="box soft" x="210" y="15" width="140" height="56" rx="12"/><text class="en" x="280.0" y="48.0">Ask you first</text><text class="zh" x="280.0" y="48.0">先问你</text><rect class="box" x="410" y="15" width="130" height="56" rx="12"/><text class="en" x="475.0" y="48.0">Ping phone</text><text class="zh" x="475.0" y="48.0">推送手机</text><rect class="box new" x="210" y="140" width="140" height="56" rx="12"/><text class="en" x="280.0" y="173.0">Checker</text><text class="zh" x="280.0" y="173.0">检查员</text><rect class="box soft" x="410" y="140" width="130" height="56" rx="12"/><text class="en" x="475.0" y="173.0">Done</text><text class="zh" x="475.0" y="173.0">完成</text><rect class="box new" x="570" y="75" width="130" height="60" rx="12"/><text class="en" x="635.0" y="103.0">kopi.md</text><text class="zh" x="635.0" y="103.0">kopi.md</text><text class="en sm" x="635.0" y="120.0">memory</text><text class="zh sm" x="635.0" y="120.0">记忆</text><path class="lnk" d="M150 90 L210 55" marker-end="url(#ar)"/><path class="lnk" d="M350 43 L410 43" marker-end="url(#ar)"/><path class="lnk hot" d="M150 125 L210 160" marker-end="url(#ar)"/><path class="lnk hot" d="M350 168 L410 168" marker-end="url(#ar)"/><path class="lnk" d="M210 185 C150 200 80 190 80 135" marker-end="url(#ar)"/><text class="en sm" x="150" y="208">not done: redo</text><text class="zh sm" x="150" y="208">没完成：重做</text><path class="lnk" d="M150 105 C300 105 450 105 570 105" stroke-dasharray="5 4" marker-end="url(#ar)"/><text class="en sm" x="360" y="98">reads and writes</text><text class="zh sm" x="360" y="98">读写</text></svg><figcaption><span class="en">The worker never sends anything out without asking you, the checker reads the report against your done-means line, and kopi.md keeps what it learned for next time.</span><span class="zh">跑腿的没问你之前不会把任何东西发出去，检查员对照“完成标准”读报告，kopi.md 把学到的留给下次。</span></figcaption></figure>
 <div class="codebox" data-file="summary.py" data-lang="python"><span class="dim">from pydantic import BaseModel, Field
 from langchain_openai import ChatOpenAI
@@ -130,8 +100,7 @@ async def run_errand(errand: str, done_means: str, cfg: dict, tries: int = 3):
     for _ in range(tries):
         res = await worker.ainvoke(msg, cfg)
         if "__interrupt__" in res:
-            return res                      # paused: returns the raw result (a dict), not a tuple
-            # (the package settles pauses inside, so it always returns (reply, feedback))
+            return res                      # paused: handle as in Step 2
         reply = res["messages"][-1].content
 </span><span class="chg">        used = [c["name"] for m in res["messages"] for c in (getattr(m, "tool_calls", None) or [])]
         v = await checker.ainvoke(
@@ -142,21 +111,14 @@ async def run_errand(errand: str, done_means: str, cfg: dict, tries: int = 3):
         msg = {"messages": [{"role": "user", "content": f"Not done yet. Feedback: {v.feedback}. Keep going."}]}
     return reply, "gave up after max tries"</span></div>
 <div class="try" id="p4"></div>
-<div class="sc" id="g4"></div>
 
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en"><b>One session, one task.</b> A stdio MCP session has to be opened and closed in the <i>same</i> asyncio task. I opened it in one place and closed it from another (a Gradio callback), and got confusing cancel-scope errors. The fix is one background task that owns the sessions: it opens them, waits on an <code>Event</code>, and unwinds when told to stop. (A <i>task</i> is one piece of async code the event loop runs; a <i>cancel scope</i> is the guard around a block that lets it be cancelled, and it must be entered and left in the same task.) The package does it with <code>open_toolbox</code>: <code>async with open_toolbox("workspace") as all_tools:</code> opens and closes the sessions in one place. <b>Two pauses, two decisions.</b> If the worker pauses on two tools at once, one “approve” is not enough: send one decision per call, as the <code>* len(asks)</code> does. <b>Infinite polishing.</b> Without <code>tries</code> and <code>ModelCallLimitMiddleware</code>, a strict checker plus an eager worker can loop for a long time and cost real money. Keep both limits on.</span><span class="zh"><b>一个会话，一个任务。</b>stdio 的 MCP 会话必须在<i>同一个</i> asyncio 任务里打开和关闭。我在一个地方打开，却在另一个地方（Gradio 的回调）关闭，结果得到莫名其妙的 cancel-scope 错误。解决办法是用一个后台任务专门负责会话：它打开会话，等待一个 <code>Event</code>，被通知停止时再收尾。（<i>任务</i>是事件循环运行的一段异步代码；<i>cancel scope</i> 是包住一段代码、让它能被取消的保护范围，必须在同一个任务里进入和离开。）示例包用 <code>open_toolbox</code> 做到这一点：<code>async with open_toolbox("workspace") as all_tools:</code> 在同一个地方打开并关闭会话。<b>两个暂停，两个决定。</b>如果跑腿的同时在两个工具前暂停，一个“批准”不够：每个调用都要一个决定，就像 <code>* len(asks)</code> 做的那样。<b>无止境的打磨。</b>没有 <code>tries</code> 和 <code>ModelCallLimitMiddleware</code>，严格的检查员加上积极的跑腿者可能循环很久，花掉真金白银。两个上限都要开着。</span></div>
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en">I opened a stdio MCP session in one asyncio task and closed it in another, which gave confusing cancel-scope errors. Open and close it in the same task. And without <code>tries</code> and a call limit, a strict checker plus an eager worker can loop and cost real money.</span><span class="zh">我在一个 asyncio 任务里打开 stdio MCP 会话，却在另一个任务里关闭，得到一堆莫名其妙的取消范围错误。要在同一个任务里打开和关闭。另外，没有 <code>tries</code> 和调用上限，严格的检查员加上积极的执行者可能一直循环，花掉真金白银。</span></div>
+
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Write your own errand.</b> Pick something small you do each week and write its “done means” line first. Run it through <code>run_errand</code>.</span><span class="zh"><b>写你自己的差事。</b>选一件你每周都做的小事，先写好它的“完成标准”，再交给 <code>run_errand</code>。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Reject once.</b> Reject the ping with a message like “not before 8am” and watch Kaki change its plan.</span><span class="zh"><b>拒绝一次。</b>用“8 点前不要推送”之类的留言拒绝那次推送，看 Kaki 怎么改计划。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Give it a face.</b> Put a small Gradio screen on top: an errand box, a “done means” box, the todo list and an Approve button.</span><span class="zh"><b>给它一个界面。</b>在上面加一个简单的 Gradio 界面：差事输入框、“完成标准”输入框、待办清单和一个批准按钮。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the Kopi Corner assistant remembers each regular across visits, like Auntie Suria greeting a customer with “the usual”, and asks Uncle Lim before it does anything outside the shop. The next problem is that it cannot talk to the supplier's own agent.</span><span class="zh">现在 Kopi Corner 助手能跨次记住每位熟客，就像 Suria 阿姨一句“老样子”招呼客人，而且在做任何店外的事之前先问林叔。下一个问题是：它没法和供应商自己的智能体对话。</span></div>
-<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2>
-<div class="card"><p class="en" style="margin:0">• <b><code>ValueError: ... thread_id ... checkpointer</code></b>: Pausing for approval needs a checkpointer and the same <code>thread_id</code> on resume. Fix: reuse the same <code>cfg</code> in both calls.<br>• <b><code>KeyError: '__interrupt__'</code></b>: You read the pause before checking it exists. Fix: test <code>if "__interrupt__" in res</code> first, as the lesson does.<br>• <b><code>The phone never buzzes after approval</code></b>: <code>PUSHOVER_USER</code> or <code>PUSHOVER_TOKEN</code> is missing. Fix: add both to <code>.env</code>.</p>
-<p class="zh" style="margin:0">• <b><code>ValueError: ... thread_id ... checkpointer</code></b>：暂停等待批准需要存档器，恢复时也要用同一个 <code>thread_id</code>。解决：两次调用用同一个 <code>cfg</code>。<br>• <b><code>KeyError: '__interrupt__'</code></b>：你没检查就去读暂停信息。解决：像课里那样，先判断 <code>if "__interrupt__" in res</code>。<br>• <b><code>The phone never buzzes after approval</code></b>：没有 <code>PUSHOVER_USER</code> 或 <code>PUSHOVER_TOKEN</code>。解决：把两个都加进 <code>.env</code>。</p></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Write your own errand.</b> Write its “done means” line first, then run it through <code>run_errand</code>.</span><span class="zh"><b>写你自己的任务。</b>先写“完成标准”，再用 <code>run_errand</code> 运行。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Reject once</b> with “not before 8am” and watch Kaki change its plan.</span><span class="zh"><b>拒绝一次</b>，理由写“早上 8 点前别发”，看 Kaki 怎么改计划。</span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• Give a helper an errand <b>and</b> a “done means” line. It makes finishing checkable.<br>• Build the toolbox first. Keep MCP sessions open when a browser must remember its state.<br>• The worker is one <code>create_agent</code> with middleware: plan, hide personal data, limit calls, pause before risky tools.<br>• <b>Human-in-the-loop</b> pauses before a listed tool. Resume with one decision per paused call: approve, reject or edit.<br>• The checker is a structured-output model. Show it the tools actually called, so “I sent it” needs proof.<br>• Always cap the loop: <code>tries</code> and a model-call limit.<br>• A stdio MCP session must be opened and closed in the same asyncio task.</p><p class="zh" style="margin:0">• 给助手一件差事，<b>再加</b>一句“完成标准”，完成与否才能被检查。<br>• 先备好工具箱。浏览器需要记住状态时，让 MCP 会话一直开着。<br>• 跑腿的就是一个带中间件的 <code>create_agent</code>：计划、隐藏个人信息、限制调用、危险工具前暂停。<br>• <b>人在回路中</b>会在列出的工具前暂停。恢复时每个暂停的调用一个决定：批准、拒绝或修改。<br>• 检查员是一个结构化输出的模型。把实际调用过的工具给它看，“我发了”才需要证据。<br>• 循环一定要设上限：<code>tries</code> 和模型调用次数限制。<br>• stdio 的 MCP 会话必须在同一个 asyncio 任务里打开和关闭。</p></div>
+<div class="card"><p class="en" style="margin:0">• Give a helper an errand <b>and</b> a “done means” line: it makes finishing checkable.<br>• The worker is one <code>create_agent</code> with tools and middleware that sets the limits.<br>• Human-in-the-loop pauses before risky tools; resume with one approve, reject or edit per call.<br>• The checker sees the tools actually called, so “I sent it” needs proof.<br>• Always cap the loop: <code>tries</code> and a model-call limit.</p><p class="zh" style="margin:0">• 给助手任务的同时给一条“完成标准”：这样完成与否才可检查。<br>• 执行者就是一个带工具和中间件（设定边界）的 <code>create_agent</code>。<br>• 人在回路在危险工具前暂停；恢复时每个调用给一个批准、拒绝或修改。<br>• 检查员能看到实际调用的工具，所以“我发了”需要证据。<br>• 永远给循环设上限：<code>tries</code> 和模型调用上限。</p></div>
 
-<h3><span class="en">Recap</span><span class="zh">三句回顾</span></h3>
-<div class="card"><p class="en" style="margin:0">• A worker agent is a model, a toolbox and middleware that sets the limits.<br>• Human-in-the-loop pauses before risky tools and resumes with approve, reject or edit.<br>• A checker agent reads the result before you trust it.</p>
-<p class="zh" style="margin:0">• 跑腿的智能体 = 模型 + 工具箱 + 设定边界的中间件。<br>• 人在回路会在危险工具之前暂停，再以批准、拒绝或修改继续。<br>• 结果交给你之前，先让检查员智能体读一遍。</p></div>
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Agentic</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>

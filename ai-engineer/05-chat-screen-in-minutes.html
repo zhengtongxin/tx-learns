@@ -5,42 +5,31 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/ai-engineer/05-chat-screen-in-minutes.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-engineer/05-chat-screen-in-minutes.html","url":"https://tx-learns.vercel.app/ai-engineer/05-chat-screen-in-minutes.html","name":"Quick chat screen","alternateName":"快速聊天界面","description":"Use Gradio to turn a Python function into a web page, then a streaming chat screen, and see why you rebuild the messages every turn.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Many models, one app","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Engineer","url":"https://tx-learns.vercel.app/ai-engineer/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Engineer","item":"https://tx-learns.vercel.app/ai-engineer/index.html"},{"@type":"ListItem","position":3,"name":"Quick chat screen","item":"https://tx-learns.vercel.app/ai-engineer/05-chat-screen-in-minutes.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Many models, one app · Lesson 2</span><span class="zh">多个模型，一个应用 · 第 2 课</span></span><h1><span class="en">Quick chat screen</span><span class="zh">快速聊天界面</span></h1><p class="meta"><span class="en">You will put a real chat screen on your model without learning front-end · ~15 min · hands-on</span><span class="zh">你会不用学前端，就给自己的模型配上一个真正的聊天界面 · 约 15 分钟 · 动手实践</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the helper could switch models behind one function, but only Wei Jie could use it, from a terminal. Today it fails when Mdm Tan wants to try it and will not type commands. We fix it by wrapping the function in a Gradio chat screen.</p>
-<p class="zh" style="margin:0">上回助手能在一个函数后面切换模型，但只有 Wei Jie 能用，还得在终端里。今天它的毛病是 Tan 太太想试试，却不肯敲命令。解决办法是用 Gradio 聊天界面把这个函数包起来。</p></div>
-<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0"><b>Mdm Tan</b> wants to try the shop helper Wei Jie is building, but she will not type commands in a terminal. <b>Wei Jie</b> does not want to spend a month on web design either. He reaches for Gradio, which builds a web page straight from plain Python, and has a chat screen for her in minutes.</p>
-<p class="zh" style="margin:0"><b>Tan 太太</b>想试试 Wei Jie 正在做的店铺助手，但她不会在终端里敲命令。<b>Wei Jie</b> 也不想花一个月学网页设计。他拿起 Gradio，它能直接用普通 Python 生成网页，几分钟就给她做出了聊天界面。</p></div>
-
 <h2><span class="en">Step 1 · Any function becomes a form</span><span class="zh">第 1 步 · 任何函数都能变成表单</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A UI is just a wrapper around a function. Gradio starts a small web server and serves a page that calls your function. <code>gr.Interface(fn, inputs, outputs)</code> is the simplest level. Wei Jie began with a silly function that shouts text in capitals, then swapped in a model call. Useful options: <code>inbrowser=True</code> opens the page for you. <code>auth=(user, password)</code> adds a login (keep the password in <code>.env</code>, not in the notebook). <code>share=True</code> makes a temporary public link, which also exposes your laptop's code to anyone with it.</p>
-<p class="zh" style="margin:0 0 8px">界面只是函数外面的一层包装。Gradio 会启动一个小型网页服务器，提供一个会调用你函数的页面。<code>gr.Interface(fn, inputs, outputs)</code> 是最简单的一档。Wei Jie 先写了个把文字变大写的傻函数，再换成模型调用。常用选项：<code>inbrowser=True</code> 自动打开页面；<code>auth=(user, password)</code> 加登录（密码放 <code>.env</code>，别写进 notebook）；<code>share=True</code> 生成临时公开链接，同时也会把你电脑上的代码暴露给拿到链接的任何人。</p></div>
-<div class="codebox" data-file="screen_once.py" data-lang="python"><span class="dim">import gradio as gr
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A UI is a wrapper around a function. Gradio starts a small web server and serves a page that calls it. <code>gr.Interface(fn, inputs, outputs)</code> is the simplest level. Options: <code>inbrowser=True</code> opens the page; <code>auth=(user, password)</code> adds a login (password in <code>.env</code>); <code>share=True</code> makes a temporary public link that also exposes your running code to anyone with it.</p>
+<p class="zh" style="margin:0 0 8px">界面是函数外面的一层包装。Gradio 启动一个小型网页服务器，提供一个调用它的页面。<code>gr.Interface(fn, inputs, outputs)</code> 是最简单的一档。选项：<code>inbrowser=True</code> 自动打开页面；<code>auth=(user, password)</code> 加登录（密码放 <code>.env</code>）；<code>share=True</code> 生成临时公开链接，拿到链接的人也能接触到你正在运行的代码。</p></div>
+<div class="codebox" data-file="screen_once.py" data-lang="python"><span class="dim"># pip install gradio openai
+import gradio as gr
 from openai import OpenAI
 client = OpenAI()
 MODEL = "gpt-5-mini"
-
-def shout(text):
-    return text.upper()
 
 def ask_once(text):
     reply = client.chat.completions.create(model=MODEL, messages=[{"role": "user", "content": text}])
     return reply.choices[0].message.content
 
-# first try: gr.Interface(fn=shout, inputs="text", outputs="text").launch()
-# then swap in the model call:
 </span><span class="chg">gr.Interface(fn=ask_once, inputs="text", outputs="text").launch(inbrowser=True)</span></div>
-<div class="codebox" data-file="output" data-lang="text">* Running on local URL:  http://127.0.0.1:7860</div>
 <div class="try" id="p1"></div>
-
 <h2><span class="en">Step 2 · A chat screen, and why memory bites</span><span class="zh">第 2 步 · 聊天界面，以及“没记忆”的麻烦</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><code>gr.ChatInterface(fn)</code> gives you a chatbot in a few lines. Your function receives <code>(message, history)</code>. Remember that models are stateless: Gradio hands you the history, and <b>you</b> rebuild the messages list every turn. Use <code>yield</code> instead of <code>return</code> and Gradio shows words as they arrive. (A generator is a function that yields many times.)</p>
-<p class="zh" style="margin:0 0 8px"><code>gr.ChatInterface(fn)</code> 几行代码就给你一个聊天机器人。你的函数会收到 <code>(message, history)</code>。别忘了模型是无状态的：Gradio 把历史交给你，每一轮的 messages 列表要<b>你</b>自己重建。用 <code>yield</code> 代替 <code>return</code>，Gradio 就会边收边显示。（生成器就是会多次 yield 的函数。）</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><code>gr.ChatInterface(fn)</code> gives you a chatbot. Your function receives <code>(message, history)</code>. Models are stateless, so <b>you</b> rebuild the messages list every turn from that history. <code>yield</code> instead of <code>return</code> streams words as they arrive.</p>
+<p class="zh" style="margin:0 0 8px"><code>gr.ChatInterface(fn)</code> 给你一个聊天机器人。你的函数会收到 <code>(message, history)</code>。模型无状态，所以每一轮都要<b>你</b>从这份历史重建 messages 列表。用 <code>yield</code> 代替 <code>return</code>，文字就边到边显示。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 190" role="img" aria-label="A Gradio chat screen wraps your function">
 <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9a9aa8"/></marker></defs>
 <rect class="box soft" x="2" y="40" width="134" height="70" rx="12"/>
 <text class="en" x="69" y="71">Browser</text>
-<text class="en sm" x="69" y="92">Mdm Tan types</text>
+<text class="en sm" x="69" y="92">You type</text>
 <text class="zh" x="69" y="71">浏览器</text>
-<text class="zh sm" x="69" y="92">Tan 太太打字</text>
+<text class="zh sm" x="69" y="92">你打字</text>
 <rect class="box new" x="196" y="40" width="134" height="70" rx="12"/>
 <text class="en" x="263" y="71">Gradio screen</text>
 <text class="en sm" x="263" y="92">small web server</text>
@@ -74,25 +63,17 @@ def ask_once(text):
         yield text</span><span class="dim">
 
 gr.ChatInterface(fn=chat, type="messages").launch()</span></div>
-<div class="codebox" data-file="output" data-lang="text">* Running on local URL:  http://127.0.0.1:7860</div>
 <div class="try" id="p2"></div>
-
 <h2><span class="en">Step 3 · The system message is the product</span><span class="zh">第 3 步 · system 消息就是产品</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Same screen, same model: only the system message decides what the assistant is like. Wei Jie wrote one for the shop: be friendly, nudge people towards items on sale, and show one example reply (<b>one-shot prompting</b>). Change that text while testing and the behaviour changes at once. For testing, a quick global variable is fine.</p>
-<p class="zh" style="margin:0 0 8px">同一个界面、同一个模型：助手是什么样，全由 system 消息决定。Wei Jie 给小店写了一条：友好，引导顾客留意特价商品，再给一个示范回复（<b>单样本提示</b>）。测试时改这段文字，行为立刻就变。测试阶段用个全局变量图快，没问题。</p></div>
-<div class="codebox" data-file="persona.py" data-lang="python"><span class="chg">system_message = """You are the helper of Mdm Tan's provision shop.
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Same screen, same model: the system message decides what the assistant is like. A one-shot example in it shows the style you want. You can also extend it <b>for one turn only</b>, say adding today's stock when the message mentions umbrellas. That is the seed of retrieval (RAG) later.</p>
+<p class="zh" style="margin:0 0 8px">同一个界面、同一个模型：助手是什么样，由 system 消息决定。在里面放一个示范，就能给出想要的风格。你也可以<b>只为这一轮</b>扩充它，比如消息提到雨伞时加上今天的库存。这就是后面检索（RAG）的种子。</p></div>
+<div class="codebox" data-file="persona.py" data-lang="python"><span class="chg">system_message = """You are the helper of a provision shop.
 Be friendly and brief. Mention items on sale when they fit.
 Example:
 Customer: Do you have rice?
 You: Yes! 5 kg bags are on sale this week, a good deal."""</span><span class="dim">
 
-# run the screen again and chat: the same code now behaves differently</span></div>
-<div class="try" id="p3"></div>
-
-<h2><span class="en">Step 4 · Inject context for one turn</span><span class="zh">第 4 步 · 只为这一轮注入背景信息</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">You can also change the system message <b>for one turn only</b>. If the customer's message mentions “umbrella”, add one extra sentence for that call, such as today's stock. Nothing is stored for later turns. Putting extra facts into a single call like this is cheap and powerful, and it is the seed of retrieval (RAG) later in this track.</p>
-<p class="zh" style="margin:0 0 8px">你也可以<b>只为这一轮</b>改动 system 消息。顾客的消息里提到“雨伞”，就为这次调用多加一句，比如今天的库存。后面的轮次不会留下任何东西。像这样把额外事实放进单次调用，又便宜又好用，也是后面检索（RAG）的种子。</p></div>
-<div class="codebox" data-file="history.py" data-lang="python"><span class="dim">def chat(message, history):
+def chat(message, history):
     past = [{"role": h["role"], "content": h["content"]} for h in history]
     </span><span class="chg">system = system_message
     if "umbrella" in message.lower():
@@ -100,33 +81,21 @@ You: Yes! 5 kg bags are on sale this week, a good deal."""</span><span class="di
     messages = [{"role": "system", "content": system}] + past + [{"role": "user", "content": message}]
     # ...the same streaming loop as before</span></div>
 <div class="try" id="p4"></div>
-
-<h2><span class="en">Step 5 · Your own layout with Blocks</span><span class="zh">第 5 步 · 用 Blocks 自己排版</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">When the ready-made screen is not enough, <code>gr.Blocks()</code> lets you build your own: rows, columns, a chatbot, an image box, buttons and callbacks. That is level three. You do not need it yet. Just know it is there, so you can see the ladder: <code>Interface</code>, then <code>ChatInterface</code>, then <code>Blocks</code>. The next lessons and the project use it.</p>
-<p class="zh" style="margin:0 0 8px">现成的界面不够用时，<code>gr.Blocks()</code> 让你自己搭：行、列、聊天框、图片框、按钮和回调。这是第三档。你现在还用不上，只要知道有它，就看清了这个阶梯：<code>Interface</code>，然后 <code>ChatInterface</code>，然后 <code>Blocks</code>。后面的课和项目会用到它。</p></div>
-<div class="codebox" data-file="blocks.py" data-lang="python"><span class="dim">with gr.Blocks() as screen:
-    </span><span class="chg">with gr.Row():
-        chatbot = gr.Chatbot(type="messages")
-        picture = gr.Image()</span><span class="dim">
-    box = gr.Textbox(label="Ask the shop helper")</span><span class="dim">
-
-screen.launch()   # without this, nothing shows</span></div>
+<h2><span class="en">Step 4 · Three levels of Gradio</span><span class="zh">第 4 步 · Gradio 的三档</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Ladder: <code>Interface</code> (one function), then <code>ChatInterface</code> (a chatbot), then <code>gr.Blocks()</code> (your own rows, columns, chatbot, image box and buttons). You do not need <code>Blocks</code> yet.</p>
+<p class="zh" style="margin:0 0 8px">阶梯：<code>Interface</code>（一个函数），然后 <code>ChatInterface</code>（聊天机器人），然后 <code>gr.Blocks()</code>（自己搭行、列、聊天框、图片框和按钮）。你现在还用不上 <code>Blocks</code>。</p></div>
 <p class="en">Which level of Gradio fits each need?</p>
 <p class="zh">每种需求适合 Gradio 的哪一档？</p><div class="sc" id="g5"></div>
-
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">Gradio's history items carry extra keys, but the API wants only <code>role</code> and <code>content</code>, so I had to clean them first. I also left <code>share=True</code> on and forgot the link was public.</span><span class="zh">Gradio 给的历史条目带有额外的键，而 API 只要 <code>role</code> 和 <code>content</code>，所以要先清理。我还开着 <code>share=True</code> 忘了关，链接其实是公开的。</span></div>
-
 <h2><span class="en">Common errors</span><span class="zh">常见报错</span></h2>
-<div class="card"><p class="en" style="margin:0">• <code>OSError: Cannot find empty port in range: 7860-7860</code>. An older screen is still running. Stop the old cell (or restart the kernel), or pass <code>server_port=7861</code>.<br>• A blank reply or <code>TypeError</code> about <code>history</code>. The chat function must take <code>(message, history)</code> in that order, and the screen needs <code>type="messages"</code>.<br>• <code>AuthenticationError: Incorrect API key provided</code>. The key is missing, has a stray space or newline, or the <code>.env</code> file was not loaded. Print <code>len(os.getenv('OPENAI_API_KEY'))</code>, fix the file, then restart the notebook.</p><p class="zh" style="margin:0">• <code>OSError: Cannot find empty port in range: 7860-7860</code>：上一个界面还在运行。停掉旧单元格（或重启内核），或者传入 <code>server_port=7861</code>。<br>• 回复为空，或出现和 <code>history</code> 有关的 <code>TypeError</code>：聊天函数的参数必须是 <code>(message, history)</code> 这个顺序，界面也要设 <code>type="messages"</code>。<br>• <code>AuthenticationError: Incorrect API key provided</code>：密钥缺失、首尾有空格或换行，或者 <code>.env</code> 没有加载。先打印 <code>len(os.getenv('OPENAI_API_KEY'))</code>，改好文件，再重启笔记本。</p></div>
+<div class="card"><p class="en" style="margin:0">• <code>OSError: Cannot find empty port</code>. An older screen is still running. Stop it or pass <code>server_port=7861</code>.<br>• A <code>TypeError</code> about <code>history</code>. The function must take <code>(message, history)</code> in that order, with <code>type="messages"</code>. History items carry extra keys, so keep only <code>role</code> and <code>content</code>.</p><p class="zh" style="margin:0">• <code>OSError: Cannot find empty port</code>：上一个界面还在运行。停掉它，或传入 <code>server_port=7861</code>。<br>• 和 <code>history</code> 有关的 <code>TypeError</code>：参数必须是 <code>(message, history)</code> 这个顺序，并设 <code>type="messages"</code>。历史条目带额外的键，只保留 <code>role</code> 和 <code>content</code>。</p></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Add a dropdown</b> that picks between two models.</span><span class="zh"><b>加一个下拉菜单，</b>在两个模型之间选择。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a radio button</b> that changes the reply tone, such as formal or cheerful.</span><span class="zh"><b>加一个单选按钮，</b>切换回复语气，比如正式或欢快。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a login</b> with <code>auth</code>, with the password in <code>.env</code>.</span><span class="zh"><b>用 <code>auth</code> 加一个登录，</b>密码放在 <code>.env</code> 里。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now Mdm Tan opens the helper as a chat screen in her browser, like the counter in her shop, and a system message taped by the till tells it how to treat customers. The next problem is that when she asks the price of a tin of sardines it makes one up, because it has no way to look anything up.</span><span class="zh">现在 Tan 太太在浏览器里就能打开聊天界面用助手，就像她店里的柜台，贴在收银机旁的 system 消息告诉它怎么待客。下一个问题是：她问一罐沙丁鱼多少钱时，它会编一个价格，因为它没有办法去查任何东西。</span></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Add a dropdown</b> that picks between two models.</span><span class="zh"><b>加一个下拉菜单</b>，在两个模型之间选择。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a login</b> with <code>auth</code>, password in <code>.env</code>.</span><span class="zh"><b>用 <code>auth</code> 加登录</b>，密码放在 <code>.env</code> 里。</span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• A UI is a wrapper around a function.<br>• <code>ChatInterface</code> gives you a chatbot in about ten lines.<br>• Models are stateless: rebuild the messages from the history every turn.<br>• Clean history items down to <code>role</code> and <code>content</code>.<br>• <code>yield</code> streams the words as they arrive.<br>• The system message is the product's personality.<br>• Injecting extra context for one turn is cheap and powerful.<br>• <code>share=True</code> makes your code reachable by anyone with the link.</p><p class="zh" style="margin:0">• 界面是函数外面的一层包装。<br>• <code>ChatInterface</code> 大约十行代码就能给你一个聊天机器人。<br>• 模型无状态：每一轮都要从历史重建 messages。<br>• 把历史条目清理成只有 <code>role</code> 和 <code>content</code>。<br>• <code>yield</code> 让文字边到边显示。<br>• system 消息就是产品的性格。<br>• 为单轮注入额外背景，又便宜又好用。<br>• <code>share=True</code> 会让拿到链接的人都能接触到你的代码。</p></div>
+<div class="card"><p class="en" style="margin:0">• A UI is a wrapper around a function.<br>• <code>ChatInterface</code> gives you a chatbot in about ten lines.<br>• Models are stateless: rebuild the messages from the history every turn.<br>• The system message is the product's personality; extra context can be added for one turn.<br>• <code>share=True</code> makes your code reachable by anyone with the link.</p><p class="zh" style="margin:0">• 界面是函数外面的一层包装。<br>• <code>ChatInterface</code> 大约十行代码就是一个聊天机器人。<br>• 模型无状态：每一轮都从历史重建 messages。<br>• system 消息就是产品的性格，也可以只为一轮加额外背景。<br>• <code>share=True</code> 会让拿到链接的人都能接触到你的代码。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"goals":{"en":["Build a chatbot screen in about ten lines with ChatInterface","Rebuild the messages from history every turn","Stream words with yield","Share your app through a link with share=True"],"zh":["用 ChatInterface 十来行代码搭出聊天界面","每一轮都从历史重建 messages","用 yield 流式输出文字","用 share=True 通过链接分享你的应用"]},"prev":["01-what-an-llm-call-is.html","04-comparing-frontier-local-models.html"],"tools":{"en":"Python 3.10+, gradio and openai packages, an OpenAI API key","zh":"Python 3.10+、gradio 和 openai 包、OpenAI API 密钥"},"know":{"en":"A helper function that calls a model.","zh":"有一个调用模型的辅助函数。"},"mins":25,"offline":false}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=dcd48bec"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/05-chat-screen-in-minutes.js?v=c53017f9"></script></body></html>
+<script src="js/05-chat-screen-in-minutes.js?v=94f95bec"></script></body></html>

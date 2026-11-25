@@ -5,19 +5,16 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/ai-fde/19-a-judge-with-a-reference-answer.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-fde/19-a-judge-with-a-reference-answer.html","url":"https://tx-learns.vercel.app/ai-fde/19-a-judge-with-a-reference-answer.html","name":"Judge with a reference","alternateName":"带参考答案的评委","description":"Use a second model to grade the agent's explanations against a handler's reason, then check the judge against a person, measure its noise and count its cost.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"Improving and securing","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI FDE","url":"https://tx-learns.vercel.app/ai-fde/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI FDE","item":"https://tx-learns.vercel.app/ai-fde/index.html"},{"@type":"ListItem","position":3,"name":"Judge with a reference","item":"https://tx-learns.vercel.app/ai-fde/19-a-judge-with-a-reference-answer.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Improving and securing · Lesson 1</span><span class="zh">改进与加固 · 第 1 课</span></span><h1><span class="en">Judge with a reference</span><span class="zh">带参考答案的评委</span></h1><p class="meta"><span class="en">Grade the agent’s explanations automatically, and know how far to trust the grades · ~25 min · concept with one runnable idea</span><span class="zh">自动给智能体的解释打分，并知道这些分数能信到什么程度 · 约 25 分钟 · 概念课，带一段能跑的代码</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the pilot’s queue could be run from the dashboard and scored on whether its decisions match the handlers’. Today it fails when Mr Goh asks for the reasons: Aisha cannot read a hundred explanations a day. We fix it by asking a second model, a judge, to grade each one against the handler’s own reason.</p>
-<p class="zh" style="margin:0">上回，试点的队列能从看板上跑，也能按判定是否和理赔员一致来打分。今天的问题是 Goh 先生要看理由：Aisha 一天读不完一百份解释。我们的办法是请第二个模型当评委，对照理赔员自己的理由给每份打分。</p></div>
-<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">The scoreboard tells Mei Ling whether the agent’s <em>decision</em> matches the handlers’. But Mr Goh also reads the agent’s <em>explanation</em>, and he wants it to give the same grounds a handler would. Aisha cannot read a hundred explanations a day. So Mei Ling asks a second model to grade them. This lesson uses <code>bench.py</code> from the scoreboard lesson (<code>gateway</code>, <code>key</code>, <code>held_claims</code>, <code>small_prompt</code>, <code>ask</code>). It assumes each entry in <code>key</code> also holds the handler’s <code>reason</code>; add it if yours does not.</p>
-<p class="zh" style="margin:0">计分板告诉 Mei Ling，智能体的<em>判定</em>和理赔员的是否一致。但 Goh 先生还要看智能体的<em>解释</em>，他要它给出和理赔员一样的理由。Aisha 一天读不完一百份解释。于是 Mei Ling 请第二个模型来打分。这一课用到计分板那课的 <code>bench.py</code>（<code>gateway</code>、<code>key</code>、<code>held_claims</code>、<code>small_prompt</code>、<code>ask</code>）。它假设 <code>key</code> 里每一项还带着理赔员的 <code>reason</code>（理由）；你的没有就补上。</p></div>
-
-<div class="callout tip"><b class="lbl"><span class="en">Words in this lesson</span><span class="zh">这一课用到的词</span></b><span class="en"><b>Judge</b>: a second model that reads an answer and a reference answer and gives a score.<br><b>Noise</b>: how much a score moves when you run the same thing again; a change smaller than this means nothing.<br><b>Agreement</b>: how often the judge and a person give the same verdict.</span><span class="zh"><b>评委</b>：第二个模型，读一份回答和参考答案，然后打分。<br><b>噪声</b>：同样的东西再跑一次，分数会晃动多少；比这小的变化没有意义。<br><b>一致率</b>：评委和人给出同样结论的比例。</span></div>
-<h2><span class="en">Step 1 · Put the two reasons side by side</span><span class="zh">第 1 步 · 把两个理由摆在一起</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Grading “is this a good explanation?” by feel gives wobbly answers. Grading “does it match what an expert wrote?” is much steadier. The expert’s text is the <b>reference answer</b>, like a marking scheme a teacher holds while marking. So for every held-out claim (one kept back from tuning, as in the scoreboard lesson) we keep two texts: the agent’s explanation and the handler’s reason.</p>
-<p class="zh" style="margin:0 0 8px">凭感觉给“这是不是好解释”打分，答案会晃来晃去。给“它和专家写的是否一致”打分，就稳得多。专家写的那段文字就是<b>参考答案</b>，像老师改卷时手边的评分标准。所以每份留出的理赔（就是计分板那课里不拿来调校的那些），我们留两段文字：智能体的解释，和理赔员的理由。</p></div>
+<h2><span class="en">Step 1 · Judge against a reference answer</span><span class="zh">第 1 步 · 对照参考答案来评判</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b>
+<ul class="en" style="margin:0"><li>Grading “is this a good explanation?” by feel wobbles. Grading “does it match what an expert wrote?” is steadier. The expert text is the <b>reference answer</b>.</li><li>A <b>judge</b> is a second model (a different one from the agent) that returns a grade A to F, a score 0 to 3, and two yes/no checks: same grounds, same section of the wording. The checks make a grade explainable.</li><li>If letter and number disagree, the letter wins: it came from the rubric.</li></ul>
+<ul class="zh" style="margin:0"><li>凭感觉给“这是不是好解释”打分会晃。给“它和专家写的是否一致”打分更稳。专家写的文字就是<b>参考答案</b>。</li><li><b>评委</b>是第二个模型（和智能体用不同的模型），返回 A 到 F 的等级、0 到 3 的分数，以及两项是非检查：理由是否一致，引用的是否同一节条款。有了检查，等级才说得清楚。</li><li>字母和数字对不上时，以字母为准：它是按评分标准给的。</li></ul>
+<p class="en" style="margin:8px 0 0">This uses <code>bench.py</code> from the scoreboard lesson (<code>gateway</code>, <code>key</code>, <code>held_claims</code>, <code>small_prompt</code>, <code>ask</code>); each <code>key</code> entry also needs the handler's <code>reason</code>.</p>
+<p class="zh" style="margin:8px 0 0">这里用到计分板那课的 <code>bench.py</code>（<code>gateway</code>、<code>key</code>、<code>held_claims</code>、<code>small_prompt</code>、<code>ask</code>）；<code>key</code> 的每一项还要有理赔员的 <code>reason</code>（理由）。</p></div>
+<figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="The judge reads the claim and both reasons, and returns a grade and two yes or no checks"><defs><marker id="ah19" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><path class="lnk" d="M225 55L295 100" marker-end="url(#ah19)"/><path class="lnk" d="M225 165L295 120" marker-end="url(#ah19)"/><path class="lnk hot" d="M435 110L505 110" marker-end="url(#ah19)"/><rect class="box soft" x="15" y="25" width="210" height="60" rx="10"/><text class="en" x="120" y="51">Handler’s reason</text><text class="zh" x="120" y="51">理赔员的理由</text><text class="en sm" x="120" y="68">the reference</text><text class="zh sm" x="120" y="68">参考答案</text><rect class="box soft" x="15" y="135" width="210" height="60" rx="10"/><text class="en" x="120" y="169">Agent’s reason</text><text class="zh" x="120" y="169">智能体的理由</text><rect class="box new" x="295" y="80" width="140" height="60" rx="10"/><text class="en" x="365" y="106">The judge</text><text class="zh" x="365" y="106">评委</text><text class="en sm" x="365" y="123">another model</text><text class="zh sm" x="365" y="123">另一个模型</text><rect class="box" x="505" y="80" width="200" height="60" rx="10"/><text class="en" x="605" y="106">Grade A / B / C / F</text><text class="zh" x="605" y="106">等级 A / B / C / F</text><text class="en sm" x="605" y="123">+ two yes/no checks</text><text class="zh sm" x="605" y="123">+ 两项是非检查</text></svg><figcaption><span class="en">The judge compares the agent’s reason with the handler’s; the two checks make the grade explainable.</span><span class="zh">评委把智能体的理由与理赔员的对照；两项检查让等级说得清楚。</span></figcaption></figure>
 <div class="codebox" data-file="judge.py" data-lang="python"><span class="chg"># judge.py
 import json
 from bench import gateway, key, held_claims, small_prompt, ask
-
 AGENT = "anthropic/claude-haiku-5-5"
 JUDGE = "anthropic/claude-sonnet-5-5"      # a different model from the agent
 
@@ -27,121 +24,74 @@ def collect():
         decision, tin, tout, secs = ask(gateway, AGENT, small_prompt(claim))
         pairs.append({"id": claim["id"],
                       "agent_reason": decision["reason"],
-                      "handler_reason": key[claim["id"]]["reason"],
-                      "agent_tokens": (tin, tout)})
+                      "handler_reason": key[claim["id"]]["reason"]})
     return pairs
+pairs = collect()
 
-pairs = collect()</span></div>
-<div class="try" id="p1"></div>
-
-<h2><span class="en">Step 2 · Ask the judge for a grade and two checks</span><span class="zh">第 2 步 · 让评委给一个等级和两项检查</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The judge gets only what it needs. It returns a grade (A, B, C or F), a score from 0 to 3, and two yes/no checks: same grounds, and same section of the policy wording. The checks make a grade explainable. If a letter and a number ever disagree, the letter wins, because the letter came from the rubric.</p>
-<p class="zh" style="margin:0 0 8px">评委只拿到它需要的东西。它返回一个等级（A、B、C 或 F）、一个 0 到 3 的分数，以及两项是非检查：理由是否一致，保单条款引用的是否同一节。有了检查，等级才说得清楚。如果字母和数字对不上，以字母为准，因为字母是按评分标准给的。</p></div>
-<figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="The judge reads the claim and both reasons, and returns a grade and two yes or no checks"><defs><marker id="ah19" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><path class="lnk" d="M225 55L295 100" marker-end="url(#ah19)"/><path class="lnk" d="M225 165L295 120" marker-end="url(#ah19)"/><path class="lnk hot" d="M435 110L505 110" marker-end="url(#ah19)"/><rect class="box soft" x="15" y="25" width="210" height="60" rx="10"/><text class="en" x="120" y="51">Handler’s reason</text><text class="zh" x="120" y="51">理赔员的理由</text><text class="en sm" x="120" y="68">the reference</text><text class="zh sm" x="120" y="68">参考答案</text><rect class="box soft" x="15" y="135" width="210" height="60" rx="10"/><text class="en" x="120" y="169">Agent’s reason</text><text class="zh" x="120" y="169">智能体的理由</text><rect class="box new" x="295" y="80" width="140" height="60" rx="10"/><text class="en" x="365" y="106">The judge</text><text class="zh" x="365" y="106">评委</text><text class="en sm" x="365" y="123">another model</text><text class="zh sm" x="365" y="123">另一个模型</text><rect class="box" x="505" y="80" width="200" height="60" rx="10"/><text class="en" x="605" y="106">Grade A / B / C / F</text><text class="zh" x="605" y="106">等级 A / B / C / F</text><text class="en sm" x="605" y="123">+ two yes/no checks</text><text class="zh sm" x="605" y="123">+ 两项是非检查</text></svg><figcaption><span class="en">The judge compares the agent’s reason with the handler’s; the two checks make the grade explainable.</span><span class="zh">评委把智能体的理由与理赔员的对照；两项检查让等级说得清楚。</span></figcaption></figure>
-<div class="codebox" data-file="judge.py" data-lang="python"><span class="dim"># judge.py, continued
-</span><span class="chg">GRADE_SCORE = {"A": 3, "B": 2, "C": 1, "F": 0}
-
+GRADE_SCORE = {"A": 3, "B": 2, "C": 1, "F": 0}
 def judge_prompt(pair):
     return f"""You grade how well a claims agent explained a decision.
 The handler's reason is the reference answer. Compare the agent's explanation with it.
-
 Handler's reason: {pair["handler_reason"]}
 Agent's explanation: {pair["agent_reason"]}
-
 A = same grounds and the same section of the policy wording
 B = same grounds, but no section named, or a different one
 C = some overlap, but the main ground is different
 F = different grounds, or it contradicts the handler
-Reply with JSON only: {{"grade": "A" or "B" or "C" or "F", "score": 3 or 2 or 1 or 0, "same_grounds": true or false, "same_section": true or false}}"""
-
-def judge_one(pair):
-    verdict, tin, tout, secs = ask(gateway, JUDGE, judge_prompt(pair))
-    verdict["score"] = GRADE_SCORE[verdict["grade"]]     # the letter wins
-    return verdict, (tin, tout)
-
+Reply with JSON only: {{"grade": "A" or "B" or "C" or "F", "same_grounds": true or false, "same_section": true or false}}"""
 def judge_all(pairs):
-    verdicts, spent = {}, [0, 0]
+    verdicts = {}
     for p in pairs:
-        verdict, (tin, tout) = judge_one(p)
+        verdict, tin, tout, secs = ask(gateway, JUDGE, judge_prompt(p))
+        verdict["score"] = GRADE_SCORE[verdict["grade"]]     # the letter wins
         verdicts[p["id"]] = verdict
-        spent[0] += tin
-        spent[1] += tout
-    return verdicts, spent</span></div>
-<p class="en">What goes into the judge’s prompt? Sort the items.</p>
+    return verdicts</span></div>
+<p class="en">What goes into the judge's prompt? Sort the items.</p>
 <p class="zh">评委的提示词里该放什么？来分一分。</p><div class="sc" id="g1"></div>
-<div class="try" id="p2"></div>
 
-<h2><span class="en">Step 3 · Check the judge against a person</span><span class="zh">第 3 步 · 拿人来检查评委</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A judge is just another model, so it can be wrong in its own ways. Grade ten of the explanations yourself first, without looking at its grades, and save them in <code>answer_key/my_grades.json</code> as <code>{"C007": 2, ...}</code>. Then measure how often you agree, exactly and within one point. Also look for a lean: does the judge give higher marks to longer explanations than you do?</p>
-<p class="zh" style="margin:0 0 8px">评委也只是另一个模型，它有它自己的出错方式。先自己给其中十份解释打分，别看它的分数，存进 <code>answer_key/my_grades.json</code>，格式是 <code>{"C007": 2, ...}</code>。然后算你们有多常一致：完全相同，以及相差不超过一分。还要找一找有没有偏向：评委是不是比你更偏爱长的解释？</p></div>
+<h2><span class="en">Step 2 · Check the judge against a person</span><span class="zh">第 2 步 · 拿人来检查评委</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b>
+<ul class="en" style="margin:0"><li>A judge can be wrong in its own ways. Grade ten explanations yourself first, without looking at its grades, and save them as <code>{"C007": 2, ...}</code> in <code>answer_key/my_grades.json</code>.</li><li>Measure how often you agree, exactly and within one point.</li><li>Look for a lean: does it score longer explanations higher than you do?</li></ul>
+<ul class="zh" style="margin:0"><li>评委有它自己的出错方式。先自己给十份解释打分，别看它的分数，按 <code>{"C007": 2, ...}</code> 的格式存进 <code>answer_key/my_grades.json</code>。</li><li>算你们有多常一致：完全相同，以及相差不超过一分。</li><li>找一找有没有偏向：它是不是比你更偏爱长的解释？</li></ul></div>
 <div class="codebox" data-file="judge.py" data-lang="python"><span class="dim"># judge.py, continued
-verdicts, spent = judge_all(pairs)
+verdicts = judge_all(pairs)
 </span><span class="chg">human = json.load(open("answer_key/my_grades.json"))    # {claim id: 0 to 3}, graded by you first
-
 def agreement(verdicts):
     ids = [i for i in human if i in verdicts]
     exact = sum(verdicts[i]["score"] == human[i] for i in ids)
     near = sum(abs(verdicts[i]["score"] - human[i]) &lt;= 1 for i in ids)
     return exact / len(ids), near / len(ids)
-
 def length_gap(verdicts, pairs):
     ranked = sorted(pairs, key=lambda p: len(p["agent_reason"]))
     ids = [p["id"] for p in ranked[len(ranked) // 2:] if p["id"] in human]   # the longer half
     return sum(verdicts[i]["score"] - human[i] for i in ids) / len(ids)      # above 0: kinder than you
-
 print(agreement(verdicts), length_gap(verdicts, pairs))
-
-# if the gap is above 0, add this line to judge_prompt and measure again:
-# "Length earns nothing. A short explanation with the right grounds can score A."</span></div>
+# if the gap is above 0, add to judge_prompt: "Length earns nothing. A short explanation with the right grounds can score A."</span></div>
 <div class="try" id="p3"></div>
 
-<h2><span class="en">Step 4 · Measure the noise</span><span class="zh">第 4 步 · 量一量噪声</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Ask the same judge the same questions three times and the scores still move a little. That movement is the <b>noise</b>. Like a bathroom scale that shows 60.2 kg, then 60.5 kg: a loss of 0.1 kg means nothing. The rule is simple. Only a change bigger than the noise counts as a real change.</p>
-<p class="zh" style="margin:0 0 8px">让同一个评委把同样的题目问三遍，分数还是会有一点晃动。这个晃动就是<b>噪声</b>。就像浴室的体重秤，先显示 60.2 公斤，再显示 60.5 公斤：瘦了 0.1 公斤说明不了什么。规则很简单：只有比噪声大的变化，才算真的变化。</p></div>
+<h2><span class="en">Step 3 · Measure the noise</span><span class="zh">第 3 步 · 量一量噪声</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Ask the same judge the same questions three times and the scores still move. That movement is the <b>noise</b>, like a bathroom scale showing 60.2 kg, then 60.5 kg. Only a change bigger than the noise is real.</p>
+<p class="zh" style="margin:0">让同一个评委把同样的题目问三遍，分数还是会晃动。这个晃动就是<b>噪声</b>，就像体重秤先显示 60.2 公斤，再显示 60.5 公斤。只有比噪声大的变化才是真的。</p></div>
 <div class="codebox" data-file="judge.py" data-lang="python"><span class="dim"># judge.py, continued
 </span><span class="chg">def mean_score(verdicts):
     return sum(v["score"] for v in verdicts.values()) / len(verdicts)
-
 runs = [judge_all(pairs) for _ in range(3)]            # the same judge, the same pairs, three times
-means = [mean_score(v) for v, _ in runs]
+means = [mean_score(v) for v in runs]
 noise = max(means) - min(means)
-moved = sum(len({v[p["id"]]["score"] for v, _ in runs}) &gt; 1 for p in pairs)
-print("means", means, "noise", noise, "claims whose score moved:", moved, "of", len(pairs))
-
+print("means", means, "noise", noise)
 def real_change(before, after):
-    return abs(after - before) &gt; noise</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">means [3.6, 3.8, 3.7] noise 0.19999999999999996 claims whose score moved: 6 of 20</div>
+    return abs(after - before) &gt; noise</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">means [3.6, 3.8, 3.7] noise 0.19999999999999996</div>
 <div class="try" id="p4"></div>
 
-<h2><span class="en">Step 5 · Count the judge’s cost on its own line</span><span class="zh">第 5 步 · 把评委的花费单独记一行</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A judge makes its own model calls, so it has its own bill. A stronger judge reading two texts can cost as much as the agent that wrote one. If you lump them together, you cannot tell which to cut. The prices below are examples; use your gateway’s price list.</p>
-<p class="zh" style="margin:0 0 8px">评委自己也要调用模型，所以它有自己的账单。一个更强的评委读两段文字，花的钱可能和写出一段文字的智能体一样多。要是把两笔混在一起，你就不知道该砍哪一笔。下面的价格只是例子；请用你的网关的价格表。</p></div>
-<div class="codebox" data-file="judge.py" data-lang="python"><span class="dim"># judge.py, continued
-</span><span class="chg">AGENT_PRICE = (1.0, 5.0)       # US$ per million tokens, in and out: examples only
-JUDGE_PRICE = (3.0, 15.0)
-
-def dollars(tokens, price):
-    return (tokens[0] * price[0] + tokens[1] * price[1]) / 1_000_000
-
-agent_tokens = (sum(p["agent_tokens"][0] for p in pairs), sum(p["agent_tokens"][1] for p in pairs))
-n = len(pairs)
-print("agent per claim:", dollars(agent_tokens, AGENT_PRICE) / n)
-print("judge per claim:", dollars(spent, JUDGE_PRICE) / n)</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">agent per claim: 0.0121
-judge per claim: 0.0064</div>
-<div class="try" id="p5"></div>
-
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我当时想错了</span></b><span class="en">I trusted the judge before checking it. Then I read twenty of its grades myself, and it was favouring long explanations. A neat paragraph that wandered around the point got the same grade as a short one that nailed it.</span><span class="zh">我还没检查评委，就先信了它。后来我自己读了它的二十个评分，发现它偏爱长的解释。一段绕来绕去的漂亮文字，拿到的等级和一句话说中要点的解释一样。</span></div>
-
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Grade ten explanations yourself</b> before looking at the judge, then compare.</span><span class="zh"><b>先自己给十份解释打分</b>，再去看评委的，然后对比。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Remove the handler’s reason</b> from the prompt and see how the judge’s grades and the noise change.</span><span class="zh"><b>把理赔员的理由从提示词里拿掉</b>，看评委的等级和噪声有什么变化。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Report the judge’s cost per claim</b> next to the agent’s.</span><span class="zh"><b>把评委每份理赔的花费</b>和智能体的并排报告出来。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the judge grades every explanation against the handler’s reason, and Aisha re-grades ten by hand to check the judge, as Mr Goh would mark an exam paper. The next problem is improvement: someone tweaks the agent’s instructions every week, and nobody knows whether it helped.</span><span class="zh">现在评委对照理赔员的理由给每份解释打分，Aisha 再亲手复核十份来检查评委，就像 Goh 先生改卷子那样。下一个问题是改进：每个星期都有人调智能体的指令，没人知道有没有用。</span></div>
-<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2><div class="card"><p class="en" style="margin:0 0 12px"><code>json.decoder.JSONDecodeError: Expecting value</code><br>Cause: the judge wrote a paragraph instead of the JSON verdict. Fix: ask for JSON only, and count an unreadable verdict as missing, not as a score.</p><p class="zh" style="margin:0 0 12px"><code>json.decoder.JSONDecodeError: Expecting value</code><br>原因：评委写了一段话，而不是 JSON 评分。解决：只要 JSON；读不出来的评分算缺失，不要当作分数。</p><p class="en" style="margin:0 0 12px"><code>KeyError: 'score'</code><br>Cause: the verdict has a different field name than the code expects. Fix: put the exact field names in the judge prompt and check them in code.</p><p class="zh" style="margin:0 0 12px"><code>KeyError: 'score'</code><br>原因：评分里的字段名和代码预期的不一样。解决：在评委提示里写明字段名，并在代码里检查。</p><p class="en" style="margin:0 0 12px"><code>ZeroDivisionError: division by zero</code><br>Cause: <code>pairs</code> is empty, so there are no claims to average over. Fix: check that <code>collect()</code> found the saved runs.</p><p class="zh" style="margin:0 0 12px"><code>ZeroDivisionError: division by zero</code><br>原因：<code>pairs</code> 是空的，没有理赔可以求平均。解决：确认 <code>collect()</code> 找到了保存的运行。</p></div>
-<h2><span class="en">Recap</span><span class="zh">小结</span></h2><div class="card"><p class="en" style="margin:0">• A judge model scores answers against a reference answer, so you can test more than the exact match.<br>• Measure the judge itself: does it agree with people, and does it just like long answers?<br>• Run twice to find the noise, and only trust changes bigger than that.</p><p class="zh" style="margin:0">• 评委模型对照参考答案打分，所以能测的不只是完全一样。<br>• 要测评委本身：它和人一致吗？是不是只偏爱长答案？<br>• 跑两次找出噪声，只相信比噪声大的变化。</p></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Remove the handler's reason</b> from the prompt and see how the grades and the noise change.</span><span class="zh"><b>把理赔员的理由从提示词里拿掉</b>，看等级和噪声有什么变化。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Report the judge's cost per claim</b> next to the agent's, on its own line.</span><span class="zh"><b>把评委每份理赔的花费</b>和智能体的并排、单独记一行。</span></span></label></div>
+<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2><div class="card"><p class="en" style="margin:0 0 12px"><code>json.decoder.JSONDecodeError: Expecting value</code><br>Cause: the judge wrote a paragraph, not JSON. Fix: ask for JSON only, and count an unreadable verdict as missing.</p><p class="zh" style="margin:0 0 12px"><code>json.decoder.JSONDecodeError: Expecting value</code><br>原因：评委写了一段话，不是 JSON。解决：只要 JSON；读不出来的评分算缺失。</p><p class="en" style="margin:0 0 12px"><code>KeyError: 'grade'</code><br>Cause: the verdict uses a different field name. Fix: put the exact field names in the prompt and check them in code.</p><p class="zh" style="margin:0 0 12px"><code>KeyError: 'grade'</code><br>原因：评分里的字段名不一样。解决：在提示里写明字段名，并在代码里检查。</p></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• Give a judge a reference answer; it is far steadier than grading by feel.<br>• Ask for a grade plus checks, so every grade can be explained.<br>• Use a different model as the judge from the one being judged.<br>• Check the judge against a person before you trust it, and look for a lean such as favouring length.<br>• Scores move between runs, so only a change bigger than the noise counts.<br>• Record the judge’s cost separately from the agent’s.</p><p class="zh" style="margin:0">• 给评委一份参考答案；它比凭感觉打分稳得多。<br>• 要等级，也要检查项，这样每个等级都说得清楚。<br>• 评委用的模型，要和被评的模型不同。<br>• 信任评委之前，先拿人来检查它，并找找有没有偏向，比如偏爱长文。<br>• 每轮分数会晃动，只有比噪声大的变化才算数。<br>• 评委的花费要和智能体的分开记。</p></div>
+<div class="card"><p class="en" style="margin:0">• Give a judge a reference answer; it is far steadier than grading by feel.<br>• Ask for a grade plus checks, so every grade can be explained.<br>• Use a different model as the judge from the one being judged.<br>• Check the judge against a person first, and look for a lean such as favouring length.<br>• Only a change bigger than the noise counts.</p><p class="zh" style="margin:0">• 给评委一份参考答案；它比凭感觉打分稳得多。<br>• 要等级，也要检查项，这样每个等级都说得清楚。<br>• 评委用的模型，要和被评的模型不同。<br>• 先拿人来检查评委，并找找有没有偏向，比如偏爱长文。<br>• 只有比噪声大的变化才算数。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI FDE</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"prev":["10-right-and-wrong-answers-that-cost-differently.html","11-tracing-and-experiments.html"],"tools":{"en":"Python 3, the openai package, the gateway key, your bench.py","zh":"Python 3、openai 包、网关密钥、你的 bench.py"},"know":{"en":"Scoring answers and running a bench.","zh":"给答案打分和跑评测。"},"mins":40,"offline":false,"goals":{"en":["Give a judge model a reference answer for steadier grades","Ask for a grade plus checks so each grade can be explained","Check the judge against a person and look for a lean such as favouring length","Treat only changes bigger than run-to-run noise as real"],"zh":["给评审模型一份参考答案，让评分更稳定","要求给出评分加检查项，让每个分数都可解释","拿评审和真人对照，查看是否偏爱长答案之类的倾向","只把大于每次运行波动的变化当作真实变化"]}}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=37968fc4"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/19-a-judge-with-a-reference-answer.js?v=3218d25d"></script></body></html>
+<script src="js/19-a-judge-with-a-reference-answer.js?v=49f93b43"></script></body></html>

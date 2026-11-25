@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded',function(){
  var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
- predict($('t1'),{q:{en:'Why launch the planner once before adding the sandbox?',zh:'为什么加沙盒之前，要先把规划智能体启动一次？'},opts:[{k:'a',en:'So that if something breaks later, you know it was the new part',zh:'这样之后出了问题，你就知道是新加的部分'},{k:'b',en:'Because the runtime requires it',zh:'因为运行时要求这样'},{k:'c',en:'To make the plan longer',zh:'为了让计划更长'}],a:'a',ex:{en:'One change at a time keeps the blame small.',zh:'一次只改一样，查错的范围就小。'},hint:{en:'What helps you find a bug?',zh:'什么能帮你找 bug？'}});
  predict($('t2'),{q:{en:'Why does the tool call the sandbox instead of running the code in the agent\'s own process?',zh:'为什么工具把代码交给沙盒，而不是在智能体自己的进程里运行？'},opts:[{k:'a',en:'The code is written by a model, so it should run in a sealed box',zh:'代码是模型写的，应该放在封闭的盒子里运行'},{k:'b',en:'Sandboxes are always faster',zh:'沙盒总是更快'},{k:'c',en:'Python cannot run anywhere else',zh:'Python 在别处跑不了'}],a:'a',ex:{en:'Model-written code could do anything. A sandbox keeps the damage inside the box.',zh:'模型写的代码什么都可能做。沙盒把影响限制在盒子里面。'},hint:{en:'Who wrote the code?',zh:'代码是谁写的？'}});
  game($('t3'),[
   {en:'"You may use code if you like."',zh:'“你想用的话可以用代码。”',a:'b',ex:{en:'It is optional, so the agent skipped the check.',zh:'它是可选的，所以智能体跳过了验证。'},hint:{en:'Is it required?',zh:'它是必须的吗？'}},
@@ -9,11 +8,4 @@ document.addEventListener('DOMContentLoaded',function(){
   {en:'"Be careful and confident."',zh:'“要小心，要自信。”',a:'b',ex:{en:'It checks nothing. Confidence is not a test.',zh:'它什么也没检查。自信不是测试。'},hint:{en:'Can anyone verify it?',zh:'有人能验证它吗？'}}],
   [{k:'g',en:'Makes the check happen',zh:'能让验证发生'},{k:'b',en:'Leaves it to chance',zh:'靠运气'}],{en:'Prompt line',zh:'提示词'});
  predict($('t4'),{q:{en:'The plan shows the cyan "Write Python code" step ticked, but the answer is still wrong. What is the best next move?',zh:'计划里青色的“Write Python code”步骤已经打钩，但答案还是错的。最好的下一步是什么？'},opts:[{k:'a',en:'Read the code the agent ran and its printed output; maybe the code checked the wrong thing',zh:'读智能体跑的代码和它打印的输出；也许代码检查错了东西'},{k:'b',en:'Trust the tick',zh:'相信那个钩'},{k:'c',en:'Delete the sandbox',zh:'删掉沙盒'}],a:'a',ex:{en:'A tick means the step ran, not that the check was a good one. Read what it really tested.',zh:'打钩只表示这一步跑过了，不表示验证本身是好的。要读它到底测了什么。'},hint:{en:'Does a tick prove the test was good?',zh:'打钩能证明测试写得好吗？'}});
- game($('t5'),[
-  {en:'Which tool was called, and in what order',zh:'调用了哪个工具，顺序如何',a:'y',ex:{en:'It shows how the agent decided.',zh:'它显示了智能体是怎么决定的。'},hint:{en:'Is it in the trace?',zh:'轨迹里有吗？'}},
-  {en:'How long each step took',zh:'每一步用了多久',a:'y',ex:{en:'It points to the slowest step.',zh:'它能指出最慢的一步。'},hint:{en:'Can you spot the slow one?',zh:'能看出哪个慢吗？'}},
-  {en:'How many tokens were used',zh:'用了多少 token',a:'y',ex:{en:'Tokens drive the cost.',zh:'token 决定成本。'},hint:{en:'What do you pay for?',zh:'你为什么付钱？'}},
-  {en:'Whether the answer is correct',zh:'答案是否正确',a:'n',ex:{en:'A trace shows what happened, not whether it was right. That is what the code check is for.',zh:'轨迹显示发生了什么，不显示对不对。验证对错是代码检查的事。'},hint:{en:'Does a recording judge the result?',zh:'录像会评判结果吗？'}}],
-  [{k:'y',en:'In the trace',zh:'轨迹里有'},{k:'n',en:'Not in the trace',zh:'轨迹里没有'}],{en:'Item',zh:'项目'});
- predict($('t6'),{q:{en:'Why write the clean-up list before you start deleting?',zh:'为什么要在开始删之前先写清理清单？'},opts:[{k:'a',en:'So nothing is missed, and nothing needed is removed by mistake',zh:'这样不会漏掉，也不会误删需要的东西'},{k:'b',en:'Lists make the bill smaller by themselves',zh:'清单本身就能让账单变小'},{k:'c',en:'The console demands it',zh:'控制台要求这样'}],a:'a',ex:{en:'A written list is calm and complete. Deleting from memory misses things.',zh:'写好的清单冷静又完整。凭记忆删会漏掉东西。'},hint:{en:'Why not rely on memory?',zh:'为什么不靠记忆？'}});
 });

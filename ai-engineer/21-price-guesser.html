@@ -5,14 +5,8 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/ai-engineer/21-price-guesser.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-engineer/21-price-guesser.html","url":"https://tx-learns.vercel.app/ai-engineer/21-price-guesser.html","name":"Price guesser","alternateName":"价格估算器","description":"Build a price guesser that reads a gadget description and answers with an estimate, then line up classic, frontier and tuned predictors by error, cost and speed.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"Predicting with data","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Engineer","url":"https://tx-learns.vercel.app/ai-engineer/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Engineer","item":"https://tx-learns.vercel.app/ai-engineer/index.html"},{"@type":"ListItem","position":3,"name":"Price guesser","item":"https://tx-learns.vercel.app/ai-engineer/21-price-guesser.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Predicting with data · Project</span><span class="zh">用数据做预测 · 项目</span></span><h1><span class="en">Price guesser</span><span class="zh">价格估算器</span></h1><p class="meta"><span class="en">You will build a screen that guesses a gadget's price and shows how good each guesser is, in accuracy, cost and speed · ~30 min · hands-on</span><span class="zh">你会做出一个估价界面，并展示每个预测器在准确度、成本和速度上的表现 · 约 30 分钟 · 动手实践</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the helper could compare guessers, but only one notebook at a time. Today it fails when Mdm Tan wants one answer from a text box and a sense of how far to trust it. We fix it by putting every guesser in one table and one small screen.</p>
-<p class="zh" style="margin:0">上回，帮手能比较各种估价者，但一次只能在一个笔记本里做。今天的难题是 Mdm Tan 想在一个输入框里得到一个答案，还要知道该信几分。我们把所有估价者放进一张表，再配一个小界面。</p></div>
-<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en" style="margin:0"><b>Ah Boy</b> is tired of pricing every new trade-in by hand. <b>Wei Jie</b> ties the last three lessons into one tool: type a description, get an estimated price, and see how much to trust it. The answer is never "the smartest model wins". It is a table that shows what each guesser costs for what it gets right. This screen is the helper's first price-checking tool, built from the last three lessons.</p>
-<p class="zh" style="margin:0"><b>Ah Boy</b> 厌倦了给每件新收来的旧货手工定价。<b>Wei Jie</b> 把前三课串成一个工具：输入描述，得到估价，并知道该信几分。答案从来不是“最聪明的模型赢”，而是一张表，显示每个预测器的成本，换来多少准确度。这个界面是帮手第一个会查价的工具，用前三课的东西搭成。</p></div>
-
-<h2><span class="en">Step 1 · Load the lite data and keep the scoring board</span><span class="zh">第 1 步 · 加载 lite 数据，沿用计分板</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Start with the small "lite" dataset from the cleaning lesson, so each run takes seconds. Then extend the shared <code>evaluate</code>: besides the average error, count the guesses that land within a tolerance (say $40 or 20% of the real price), and (in the predictors below) count how many replies could not be read. Note the change from the last lessons: this <code>evaluate</code> takes rows with a <code>text</code> and a <code>price</code>, so every guesser takes plain text, and it returns a small dictionary instead of one number. One test set, one board, every guesser.</p>
-<p class="zh" style="margin:0 0 8px">先用整理数据那课的小号“lite”数据集，每次运行只要几秒。然后扩展共用的 <code>evaluate</code>：除了平均误差，还要数一数落在容忍范围内的猜测（比如误差不超过 40 美元或真实价格的 20%），并在下面的预测器里数一数有多少回复读不出来。注意和前几课的不同：这个 <code>evaluate</code> 接收带 <code>text</code> 和 <code>price</code> 的行，所以每个预测器都接收纯文本，返回的也是一个小字典，而不是单个数字。一个测试集、一块计分板、所有预测器共用。</p></div>
+<h2><span class="en">Step 1 · One board with a hit rate</span><span class="zh">第 1 步 · 带命中率的计分板</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Use the small "lite" dataset so each run takes seconds. Extend <code>evaluate</code>: besides average error, count guesses within a tolerance ($40 or 20% of the real price). Every guesser now takes plain text and <code>evaluate</code> returns a small dictionary.</p><p class="zh" style="margin:0">用小号“lite”数据集，每次运行只要几秒。扩展 <code>evaluate</code>：除了平均误差，还数一数落在容忍范围内的猜测（40 美元或真实价格的 20%）。现在每个预测器都接收纯文本，<code>evaluate</code> 返回一个小字典。</p></div>
 <div class="codebox" data-file="setup_eval.py" data-lang="python"><span class="dim">from datasets import load_dataset
 
 lite = load_dataset("your-name/gadget-prices-lite")     # built in the cleaning lesson
@@ -26,37 +20,23 @@ train, test = lite["train"], lite["test"]
         if err <= tol_dollars or err <= tol_pct * row["price"]:
             hits += 1
     return {"avg_error": sum(errors) / len(errors), "hit_rate": hits / len(errors)}</span></div>
-<div class="try" id="p1"></div>
 
-<h2><span class="en">Step 2 · The baselines and their scores</span><span class="zh">第 2 步 · 基线与它们的分数</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Rebuild the three classic guessers from the baseline lesson: the constant average, word counts plus linear regression, and a random forest. This time each takes plain text, so they all fit the same shape. Save each score in a small dictionary: it becomes the table in step 5.</p>
-<p class="zh" style="margin:0 0 8px">重新做出基线那课的三个传统预测器：常数平均值、词频加线性回归、随机森林。这次每个都接收纯文本，形状一致。把每个分数存进一个小字典：它会变成第 5 步的表格。</p></div>
-<div class="codebox" data-file="classic.py" data-lang="python"><span class="dim">from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.linear_model import LinearRegression
+<h2><span class="en">Step 2 · Classic and frontier guessers</span><span class="zh">第 2 步 · 传统和大模型预测器</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Rebuild the classic guessers (average, forest) as plain-text functions, then add the frontier model. Models do not always obey "number only": you may get "About $120 maybe". Parse defensively: count failed parses and fall back to the average, instead of silently scoring zero.</p><p class="zh" style="margin:0">把传统预测器（平均值、森林）重做成纯文本函数，再加上大模型。模型并不总听“只回答数字”：你可能收到“About $120 maybe”。要防御式解析：数一数解析失败的次数并用平均价兜底，而不是悄悄记成零。</p></div>
+<div class="codebox" data-file="pricers.py" data-lang="python"><span class="dim">import re
+from openai import OpenAI
+from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.ensemble import RandomForestRegressor
 
+client = OpenAI()
 counter = CountVectorizer(max_features=1500, stop_words="english")
 X = counter.fit_transform(train["text"])
-y = train["price"]
-average = sum(y) / len(y)
-linear = LinearRegression().fit(X, y)
-forest = RandomForestRegressor(n_estimators=100, n_jobs=-1, random_state=42).fit(X, y)
-</span><span class="chg">def average_pricer(text): return average
-def linear_pricer(text):  return float(linear.predict(counter.transform([text]))[0])
-def forest_pricer(text):  return float(forest.predict(counter.transform([text]))[0])
-
-scores = {}
-for name, fn in [("average", average_pricer), ("linear", linear_pricer), ("forest", forest_pricer)]:
-    scores[name] = evaluate(fn, test)</span></div>
-<div class="try" id="p2"></div>
-
-<h2><span class="en">Step 3 · The frontier predictor, parsed defensively</span><span class="zh">第 3 步 · 云端大模型预测器，防御式解析</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Send the description with a one-line instruction and parse a number from the reply. Models do not always obey "price only": you may get "About $120 maybe". Wei Jie's first version failed to parse such replies and scored them as zero, which quietly ruined the average. Now a failed parse is counted separately, and a fallback (the training average) is used.</p>
-<p class="zh" style="margin:0 0 8px">把描述加一行指令发过去，从回复里解析出数字。模型并不总听“只回答价格”：你可能收到“About $120 maybe”。Wei Jie 第一版解析不了这种回复，就当成零，悄悄毁掉了平均误差。现在解析失败会单独计数，并使用备用值（训练集平均价）。</p></div>
-<div class="codebox" data-file="frontier.py" data-lang="python"><span class="dim">import re
-from openai import OpenAI
-client = OpenAI()
+average = sum(train["price"]) / len(train)
+forest = RandomForestRegressor(n_estimators=100, n_jobs=-1, random_state=42).fit(X, train["price"])
 </span><span class="chg">unparsed = 0
+
+def average_pricer(text): return average
+def forest_pricer(text):  return float(forest.predict(counter.transform([text]))[0])
 
 def frontier_pricer(text):
     global unparsed
@@ -70,25 +50,8 @@ def frontier_pricer(text):
     return float(found.group().replace(",", ""))</span></div>
 <div class="try" id="p3"></div>
 
-<h2><span class="en">Step 4 · A tuned small model</span><span class="zh">第 4 步 · 微调的小模型</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Fine-tune a hosted small model on 100 examples, as in the last lesson, then wrap the resulting model name in a <code>tuned_pricer</code> with the same shape as every other guesser. We try hosted tuning here because it is the quickest way to see what tuning does; the next lesson moves to a small open model you can run and own yourself. With so few examples, expect only a small gain. It is still worth knowing, because a cheap tuned model can be more consistent.</p>
-<p class="zh" style="margin:0 0 8px">像上一课那样，用 100 条样例微调一个托管的小模型，再把得到的模型名包进 <code>tuned_pricer</code>，形状和其他预测器一样。这里用托管微调，是因为它最快能看到微调的效果；下一课会换成你能自己运行、自己拥有的小型开源模型。样例这么少，只能期待小幅提升。但仍然值得知道，因为便宜的微调模型可能更稳定。</p></div>
-<div class="codebox" data-file="tuned.py" data-lang="python"><span class="chg">TUNED_MODEL = "ft:your-small-model:your-org::abc123"      # name returned by your tuning job
-
-def tuned_pricer(text):
-    global unparsed
-    reply = client.chat.completions.create(model=TUNED_MODEL, messages=[
-        {"role": "user", "content": "Estimate the price: " + text}])
-    found = re.search(r"\d[\d,]*\.?\d*", reply.choices[0].message.content)
-    if not found:
-        unparsed += 1
-        return average
-    return float(found.group().replace(",", ""))</span></div>
-<div class="try" id="p4"></div>
-
-<h2><span class="en">Step 5 · One table, three numbers</span><span class="zh">第 5 步 · 一张表，三个数字</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Put every guesser in one table: name, average error, cost per 1,000 guesses and seconds per guess. The usual pattern is random worse than average, then linear, then forest and neural net, then a prompted frontier model on top, with tuning helping a little. The cheapest acceptable winner is often a classic model. The most accurate is often the frontier or tuned model. That trade-off is the whole lesson.</p>
-<p class="zh" style="margin:0 0 8px">把所有预测器放进一张表：名字、平均误差、每 1000 次猜测的成本、每次猜测的秒数。常见规律是：随机比平均差，然后依次是线性、森林和神经网络，最上面是提示词大模型，微调略有帮助。最便宜的“够用”赢家通常是传统模型，最准的通常是大模型或微调模型。这种取舍就是这一课的重点。</p></div>
+<h2><span class="en">Step 3 · One table, three numbers</span><span class="zh">第 3 步 · 一张表，三个数字</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Put every guesser in one table: average error, cost per 1,000 guesses, seconds per guess. A hosted model tuned on 100 examples fits the same shape as any other guesser, with a small gain at best. The cheapest acceptable winner is often a classic model; the most accurate is often the frontier or tuned model. That trade-off is the lesson.</p><p class="zh" style="margin:0">把所有预测器放进一张表：平均误差、每 1000 次猜测的成本、每次猜测的秒数。用 100 条样例微调的托管模型，形状和其他预测器一样，最多只有小幅提升。最便宜的“够用”赢家通常是传统模型，最准的通常是大模型或微调模型。这种取舍就是这一课。</p></div>
 <div class="codebox" data-file="compare.py" data-lang="python"><span class="dim">import time
 </span><span class="chg">def row_for(name, fn, cost_per_1000):
     start = time.time()
@@ -99,13 +62,11 @@ def tuned_pricer(text):
 table = [row_for("average", average_pricer, 0.0), row_for("forest", forest_pricer, 0.0),
          row_for("frontier", frontier_pricer, 1.5)]       # use your own price list
 print("unreadable replies:", unparsed)</span></div>
-<div class="codebox" data-file="output" data-lang="text">unreadable replies: 3</div>
 <p class="en">For each situation, which guesser would you pick?</p>
 <p class="zh">每种情况下，你会选哪个预测器？</p><div class="sc" id="g5"></div>
 
-<h2><span class="en">Step 6 · A tiny screen where they disagree</span><span class="zh">第 6 步 · 一个让它们“吵起来”的小界面</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Wrap it in a small Gradio screen (Gradio is a Python library that turns a function into a web page): a text box in, the estimated price out, with the other guessers' answers beside it and a warning when they spread far apart. When they disagree a lot, that is a sign to be careful. A guesser that is only off by a little everywhere is easier to trust.</p>
-<p class="zh" style="margin:0 0 8px">用 Gradio（一个能把函数变成网页的 Python 库）包成一个小界面：左边输入文字，输出估价，旁边列出其他预测器的答案，分歧很大时还会给出警告。当它们分歧很大，就是该小心的信号。一个到处都只差一点点的预测器，反而更容易信任。</p></div>
+<h2><span class="en">Step 4 · A small screen where they disagree</span><span class="zh">第 4 步 · 一个让它们“吵起来”的小界面</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Wrap the guessers in a Gradio screen: text in, estimate out, the others' answers beside it, and a warning when they spread far apart. Disagreement is a sign to check by hand.</p><p class="zh" style="margin:0">用 Gradio 把预测器包成一个界面：输入文字，输出估价，旁边列出其他预测器的答案，分歧很大时给出警告。分歧大就是该人工看看的信号。</p></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="A description goes to three guessers; a compare step shows their estimates and spread on a small screen"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9a9aa8"/></marker></defs><rect class="box soft" x="15" y="80" width="120" height="60" rx="12"/><text class="en" x="75.0" y="115.0">Description</text><text class="zh" x="75.0" y="115.0">商品描述</text><rect class="box " x="200" y="20" width="150" height="46" rx="12"/><text class="en" x="275.0" y="48.0">Baseline</text><text class="zh" x="275.0" y="48.0">基线</text><rect class="box " x="200" y="87" width="150" height="46" rx="12"/><text class="en" x="275.0" y="115.0">Frontier model</text><text class="zh" x="275.0" y="115.0">云端大模型</text><rect class="box " x="200" y="154" width="150" height="46" rx="12"/><text class="en" x="275.0" y="182.0">Tuned small model</text><text class="zh" x="275.0" y="182.0">微调小模型</text><line class="lnk" x1="135" y1="100" x2="200" y2="45" marker-end="url(#ah)"/><line class="lnk" x1="135" y1="110" x2="200" y2="110" marker-end="url(#ah)"/><line class="lnk" x1="135" y1="120" x2="200" y2="177" marker-end="url(#ah)"/><line class="lnk" x1="350" y1="43" x2="420" y2="100" marker-end="url(#ah)"/><line class="lnk" x1="350" y1="110" x2="420" y2="110" marker-end="url(#ah)"/><line class="lnk" x1="350" y1="177" x2="420" y2="120" marker-end="url(#ah)"/><rect class="box new" x="420" y="75" width="130" height="70" rx="12"/><text class="en" x="485.0" y="106.0">Compare</text><text class="zh" x="485.0" y="106.0">对比</text><text class="en sm" x="485.0" y="124.0">spread = trust</text><text class="zh sm" x="485.0" y="124.0">差距 = 信任度</text><line class="lnk hot" x1="550" y1="110" x2="580" y2="110" marker-end="url(#ah)"/><rect class="box soft" x="580" y="60" width="125" height="100" rx="12"/><text class="en" x="642.5" y="106.0">Screen</text><text class="zh" x="642.5" y="106.0">界面</text><text class="en sm" x="642.5" y="124.0">estimate + flag</text><text class="zh sm" x="642.5" y="124.0">估价 + 提醒</text></svg><figcaption><span class="en">Guessers that agree earn trust; guessers far apart tell you to look closer.</span><span class="zh">估得一致就多一分信任，差得远就提醒你多看两眼。</span></figcaption></figure>
 <div class="codebox" data-file="screen.py" data-lang="python"><span class="dim">import gradio as gr
 </span><span class="chg">GUESSERS = {"average": average_pricer, "forest": forest_pricer, "frontier": frontier_pricer}
@@ -121,22 +82,16 @@ gr.Interface(fn=guess_all, inputs=gr.Textbox(label="Describe the gadget"),
                       gr.Textbox(label="Trust")]).launch()</span></div>
 <div class="try" id="p6"></div>
 
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I forgot replies like "About $120 maybe". The parse failed and the guess counted as zero, which made the frontier model look terrible. I added a fallback and a count of unparsed replies, so I can see the problem instead of hiding it.</span><span class="zh">我忘了处理“About $120 maybe”这样的回复。解析失败，猜测被当成零，让大模型看起来糟糕透顶。我加了备用值和“读不出来的回复”计数，这样问题看得见，而不是被藏起来。</span></div>
-
-<h2><span class="en">Common errors</span><span class="zh">常见报错</span></h2>
-<div class="card"><p class="en" style="margin:0">• <code>ValueError: could not convert string to float</code> from a model reply. Ask for the number only and keep the pattern that pulls it out. Count the misses.<br>• <code>NotFoundError: model 'ft:...' does not exist</code>. The tuned model id is a placeholder. Paste the name your tuning job returned.<br>• Tolerance scores that look great but the average error is bad. A hit rate hides large misses. Report both numbers.</p><p class="zh" style="margin:0">• 模型回复报 <code>ValueError: could not convert string to float</code>：要求只回数字，保留取数字的正则，并统计取不到的次数。<br>• <code>NotFoundError: model 'ft:...' does not exist</code>：微调模型的 id 还是占位符。粘贴你的微调任务返回的名字。<br>• 容差命中率很好看，平均误差却很差：命中率会掩盖大的失误。两个数字都要报告。</p></div>
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I forgot replies like "About $120 maybe". The failed parse counted as zero and made the frontier model look terrible. Now I keep a fallback and a count.</span><span class="zh">我忘了处理“About $120 maybe”这样的回复。解析失败被记成零，让大模型看起来糟糕透顶。现在我留了备用值和计数。</span></div>
+<div class="callout warn"><b class="lbl"><span class="en">Common errors</span><span class="zh">常见报错</span></b><span class="en"><code>ValueError: could not convert string to float</code>: ask for the number only, keep the regex, count misses. A great hit rate with a bad average error hides large misses: report both.</span><span class="zh"><code>ValueError: could not convert string to float</code>：要求只回数字，保留正则，统计取不到的次数。命中率很好但平均误差很差，说明大的失误被掩盖了：两个数字都要报告。</span></div>
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Add your own category</b> of items and re-run the table.</span><span class="zh"><b>加入你自己的商品类别，</b>重新跑一遍表格。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Show a confidence band</b> by running the predictor three times and taking the spread.</span><span class="zh"><b>显示置信区间：</b>让预测器跑三次，取它们的差距。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Decide a rule</b> for when a guess is good enough to act on.</span><span class="zh"><b>定一条规则：</b>什么时候一个估价好到可以据此行动。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the helper takes a description from Mdm Tan or Ah Boy, shows each guesser's estimate side by side and flags it when they disagree. The next problem is that the cloud model costs money per guess and does not know Ah Boy's own price tags; the next lesson shrinks a small open model to learn them.</span><span class="zh">现在帮手能接收 Mdm Tan 或 Ah Boy 输入的描述，把各估价者的结果并排摆出来，彼此差得远就亮起提醒。下一个问题是云端大模型每次估价要花钱，而且不懂 Ah Boy 自己的价签；下一课教你把小型开源模型缩到能学会它们。</span></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Add your own category</b> of items and re-run the table.</span><span class="zh"><b>加入你自己的商品类别，</b>重新跑一遍表格。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Decide a rule</b> for when a guess is good enough to act on.</span><span class="zh"><b>定一条规则：</b>什么时候一个估价好到可以据此行动。</span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• Always report accuracy, cost and speed together.<br>• Use the same test set for every guesser.<br>• Start with the lite data so each run is quick.<br>• Parse model replies defensively, with a fallback and a count of failures.<br>• Classic models are often the cheapest acceptable winner.<br>• Frontier and tuned models are often the most accurate, at a cost.<br>• Disagreement between guessers is a useful warning.</p><p class="zh" style="margin:0">• 永远把准确度、成本和速度放在一起报告。<br>• 所有预测器共用同一个测试集。<br>• 先用 lite 数据，每次运行才快。<br>• 防御式解析模型回复：有备用值，也数一数失败次数。<br>• 传统模型常常是最便宜的“够用”赢家。<br>• 大模型和微调模型常常最准，但要花钱。<br>• 预测器之间的分歧是有用的警告。</p></div>
-
-<h2><span class="en">Recap</span><span class="zh">小结</span></h2>
-<div class="card"><p class="en" style="margin:0">1. Put every guesser behind the same function so they can be compared.<br>2. Report error, cost and unreadable replies together.<br>3. Pick the one that fits the budget, not only the one with the lowest error.</p><p class="zh" style="margin:0">1. 把每个估价器放在同一个函数后面，才能互相比较。<br>2. 误差、成本和读不出的回复要一起报告。<br>3. 选合预算的那个，而不只是误差最低的那个。</p></div>
+<div class="card"><p class="en" style="margin:0">• Report accuracy, cost and speed together, on the same test set.<br>• Parse model replies defensively, with a fallback and a failure count.<br>• Classic models are often the cheapest acceptable winner; frontier and tuned models are often the most accurate, at a cost.<br>• Disagreement between guessers is a useful warning.</p><p class="zh" style="margin:0">• 准确度、成本和速度要放在一起报告，并用同一个测试集。<br>• 防御式解析模型回复：有备用值，也数失败次数。<br>• 传统模型常常是最便宜的“够用”赢家；大模型和微调模型常常最准，但要花钱。<br>• 预测器之间的分歧是有用的警告。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"goals":{"en":["Report accuracy, cost and speed together","Run every guesser on the same test set, starting with the lite data","Parse model replies defensively with a fallback and a failure count","Treat disagreement between guessers as a warning"],"zh":["把准确率、成本和速度放在一起报告","所有预测器用同一个测试集，先用精简数据","稳妥地解析模型回复：有备用值并统计失败次数","把预测器之间的分歧当作警告"]},"prev":["18-curating-and-cleaning-a-dataset.html","19-baselines-average-linear-forest.html","20-neural-nets-and-frontier-as-predictors.html"],"tools":{"en":"Python 3.10+, datasets, scikit-learn, openai, gradio, an OpenAI API key","zh":"Python 3.10+、datasets、scikit-learn、openai、gradio、OpenAI API 密钥"},"know":{"en":"Your dataset, baselines and frontier guesser.","zh":"你的数据集、基线和云端模型预测器。"},"mins":50,"offline":false},"j":{"goal":{"en":"Build a screen that guesses a gadget's price and shows each guesser's accuracy, cost and speed.","zh":"做一个估价界面，并展示每个预测器的准确度、成本和速度。"},"deliver":{"en":"A scoring table for the average, linear, forest and frontier guessers, plus a small screen where they can disagree.","zh":"一张给平均值、线性、森林和大模型预测器打分的表，加一个让它们各抒己见的小界面。"},"level":3,"mins":30,"accept":{"en":["python test_offline.py in final/ prints an ok line and needs no key.","python price_guesser.py table prints one row per guesser with average error, hit rate, cost and seconds.","The order from worst to best is average, then linear, then forest.","A reply like 'About $120 maybe' is parsed to 120.","Unreadable replies are counted separately and not scored as zero."],"zh":["在 final/ 里运行 python test_offline.py，打印 ok 行，不需要密钥。","python price_guesser.py table 每个估价器一行，含平均误差、命中率、成本和秒数。","从差到好的顺序是：平均值、线性、随机森林。","像 “About $120 maybe” 这样的回复会被解析成 120。","读不懂的回复单独计数，不当作零分。"]},"fail":[{"en":"A failed parse scored as zero makes the frontier model look terrible. Use a fallback and count the failures.","zh":"解析失败就当零分，会让大模型看起来很糟。要用备用值，并统计失败次数。"},{"en":"FileNotFoundError for data/train.jsonl means make_data.py has not been run yet.","zh":"data/train.jsonl 找不到，说明还没运行 make_data.py。"},{"en":"A model-not-found error means the model name was retired. Set FRONTIER_MODEL to a current one.","zh":"提示模型不存在，是模型名已下线。把 FRONTIER_MODEL 改成当前可用的。"}],"stretch":[{"en":"Add your own category of items and re-run the table.","zh":"加入你自己的商品类别，重新跑表。"},{"en":"Run the frontier guesser three times and show the spread as a confidence band.","zh":"让大模型预测器跑三次，把差距当作置信区间显示出来。"},{"en":"Write a rule for when a guess is good enough to act on.","zh":"定一条规则：什么时候一个估价好到可以据此行动。"}],"pkg":{"dir":"packages/ai-engineer/21-price-guesser","files":["README.txt","requirements.txt","env.example","final/price_guesser.py","final/make_data.py","final/test_offline.py","final/data/train.jsonl","final/data/test.jsonl","starter/price_guesser.py","starter/make_data.py","starter/test_offline.py"],"note":{"en":"The classic guessers need no key. A key is only for the frontier row. The listings are invented. The starter has its own copy of data/.","zh":"传统预测器不需要密钥，只有大模型那一行要。商品数据是虚构的。starter 里有自己的 data/ 副本。"}},"solution":{"en":"The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with price_guesser.py, make_data.py and test_offline.py. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.","zh":"完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从price_guesser.py、make_data.py、test_offline.py看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"}},"f":["README.txt","env.example","final/data/test.jsonl","final/data/train.jsonl","final/make_data.py","final/price_guesser.py","final/test_offline.py","requirements.txt","starter/data/test.jsonl","starter/data/train.jsonl","starter/make_data.py","starter/price_guesser.py","starter/test_offline.py"]}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=dcd48bec"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/21-price-guesser.js?v=3a656a52"></script></body></html>
+<script src="js/21-price-guesser.js?v=824746f4"></script></body></html>

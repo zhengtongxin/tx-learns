@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded',function(){
  var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
- predict($('t0'),{q:{en:'Which should you delete first: the CDN, or the site bucket it serves files from?',zh:'先删哪个：CDN，还是它取文件的那个网站存储桶？'},opts:[{k:'a',en:'The CDN, because it points at the bucket',zh:'CDN，因为它指向存储桶'},{k:'b',en:'The bucket, because it holds the files',zh:'存储桶，因为文件在它那里'},{k:'c',en:'Either: order never matters',zh:'随便哪个：顺序无所谓'}],a:'a',ex:{en:'Whatever points at another thing goes first; deleting the bucket first leaves the CDN pointing at nothing.',zh:'指向别的东西的先删；先删存储桶，CDN 就会指向一片空。'},hint:{en:'Which one depends on the other?',zh:'哪一个依赖另一个？'}});
  game($('t1'),[
   {en:'A teammate can read what the setup is before it changes',zh:'队友能在改动之前读到搭建是什么样',a:'c',ex:{en:'Text can be reviewed like any other file.',zh:'文字可以像别的文件一样被审阅。'},hint:{en:'Can you read a click?',zh:'你能“阅读”一次点击吗？'}},
   {en:'A second copy is just another run',zh:'再来一份，只是再跑一遍',a:'c',ex:{en:'The same files make the same setup again.',zh:'同样的文件会再做出同样的搭建。'},hint:{en:'Do you need to remember anything?',zh:'你需要记住什么吗？'}},

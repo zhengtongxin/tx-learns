@@ -5,98 +5,75 @@
 <link rel="canonical" href="https://tx-learns.vercel.app/ai-fde/15-agent-that-remembers-customers.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=b9e47474"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-fde/15-agent-that-remembers-customers.html","url":"https://tx-learns.vercel.app/ai-fde/15-agent-that-remembers-customers.html","name":"Customer-memory agent","alternateName":"记得客户的智能体","description":"Build a returning-customer flow: the agent keeps notes per customer, reads them on the next claim, shows the handler what it used, and never writes to read-only data.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Knowledge and memory","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI FDE","url":"https://tx-learns.vercel.app/ai-fde/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI FDE","item":"https://tx-learns.vercel.app/ai-fde/index.html"},{"@type":"ListItem","position":3,"name":"Customer-memory agent","item":"https://tx-learns.vercel.app/ai-fde/15-agent-that-remembers-customers.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Knowledge and memory · Project</span><span class="zh">知识与记忆 · 项目</span></span><h1><span class="en">Customer-memory agent</span><span class="zh">记得客户的智能体</span></h1><p class="meta"><span class="en">Build a returning-customer flow with three data sources, each with its own owner and its own rule · ~30 min · hands-on</span><span class="zh">做一个回头客流程，用三个数据源，每个有各自的主人和各自的规则 · 约 30 分钟 · 动手实践</span></p></div>
-<div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the pilot could save and read customer notes through a small memory server. Today it fails when Mr Tan’s second claim arrives: notes, claims records and policy data are mixed together, and nobody knows who may change what. We fix it by keeping three stores apart, each with its own owner.</p>
-<p class="zh" style="margin:0">上回，试点能通过一个小记忆服务端存取客户笔记。今天的问题是：Tan 先生的第二份理赔进来时，笔记、理赔记录和保单数据混在一起，没人说得清谁能改什么。我们的办法是把三个存储分开，各有各的主人。</p></div>
-<div class="story"><b class="lbl"><span class="en">The story</span><span class="zh">故事</span></b><p class="en" style="margin:0">Mr Tan files a claim for a lost bag. A month later he files another. Auntie Siew greets him by name, but the agent treats him like a stranger. Mei Ling wants the second claim to go faster and be better explained. The tricky part is not the notes. It is deciding <b>who owns what</b>: the claims records, the agent’s own notes, and the policy data that nobody on the desk should change by accident.</p>
-<p class="zh" style="margin:0">Tan 先生提交了一份丢行李的理赔。一个月后，他又提交了一份。Siew 阿姨叫得出他的名字，但智能体把他当陌生人。Mei Ling 希望第二份理赔更快、解释得更清楚。难点不在笔记本身，而在<b>谁拥有什么</b>：理赔记录、智能体自己的笔记，以及柜台上谁都不该不小心改动的保单数据。</p></div>
-
-<div class="callout tip"><b class="lbl"><span class="en">Words in this lesson</span><span class="zh">这一课用到的词</span></b><span class="en"><b>Reference data</b>: facts a person keeps, such as policy limits; the agent may read them but never change them.<br><b>Notes</b>: what the agent writes about each customer; they help later claims and a person can read them.<br><b>Read-only</b>: a connection that can look but cannot change anything.</span><span class="zh"><b>参考数据</b>：由人维护的事实，比如保单限额；智能体可以读，但绝不能改。<br><b>笔记</b>：智能体对每位客户写下的内容；对以后的理赔有帮助，人也能读。<br><b>只读</b>：只能看、不能改任何东西的连接。</span></div>
-<h2><span class="en">Step 1 · Three stores, kept apart</span><span class="zh">第 1 步 · 三个存储，分开放</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Keep three separate stores. <b>Records</b> (<code>claims.db</code>) are the system of record: what was decided and paid. <b>Memory</b> (<code>memory.db</code>) is the agent’s own notes, keyed by customer. <b>Reference</b> (<code>reference.db</code>) holds policy data, which the agent may only read. If the memory is lost or wrong, the records are untouched. Each store is a SQLite file: a small database kept in one file, with no server to run. Run <code>make_reference.py</code> once first, because the read-only connection needs the file to exist already. Install with <code>pip install openai</code>.</p>
-<p class="zh" style="margin:0 0 8px">把三个存储分开。<b>记录</b>（<code>claims.db</code>）是权威记录：决定了什么、赔了多少。<b>记忆</b>（<code>memory.db</code>）是智能体自己的笔记，按客户编号存放。<b>参考数据</b>（<code>reference.db</code>）放保单资料，智能体只能读。记忆丢了或错了，记录也不受影响。每个存储都是一个 SQLite 文件：装在一个文件里的小型数据库，不需要单独运行服务器。先运行一次 <code>make_reference.py</code>，因为只读连接要求文件已经存在。用 <code>pip install openai</code> 安装。</p></div>
+<h2><span class="en">Step 1 · Three stores, three owners</span><span class="zh">第 1 步 · 三个存储，三个主人</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b>
+<ul class="en" style="margin:0"><li><b>Records</b> (<code>claims.db</code>): what was decided and paid. Owner: the handlers. This is the truth.</li><li><b>Memory</b> (<code>memory.db</code>): the agent's own notes per customer. Owner: the agent. A helpful guess, safe to delete.</li><li><b>Reference</b> (<code>reference.db</code>): policy limits. Owner: the people who maintain it. The agent only reads it.</li></ul>
+<ul class="zh" style="margin:0"><li><b>记录</b>（<code>claims.db</code>）：决定了什么、赔了多少。主人：理赔员。这是事实。</li><li><b>记忆</b>（<code>memory.db</code>）：智能体按客户写的笔记。主人：智能体。是有用的参考，可以删。</li><li><b>参考数据</b>（<code>reference.db</code>）：保单上限。主人：维护它的人。智能体只读。</li></ul></div>
 <figure class="fig"><svg viewBox="0 0 720 220" role="img" aria-label="The agent reads claims records, reads and writes its own notes, and only reads reference data"><defs><marker id="ah15" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9a9aa8"/></marker></defs><path class="lnk" d="M300 150L150 79" marker-end="url(#ah15)"/><path class="lnk hot" d="M360 150L360 79" marker-end="url(#ah15)"/><path class="lnk" d="M420 150L570 79" marker-end="url(#ah15)"/><rect class="box soft" x="15" y="15" width="210" height="64" rx="10"/><text class="en" x="120" y="43">Claims records</text><text class="zh" x="120" y="43">理赔记录</text><text class="en sm" x="120" y="60">owner: the handlers</text><text class="zh sm" x="120" y="60">归理赔员</text><rect class="box new" x="255" y="15" width="210" height="64" rx="10"/><text class="en" x="360" y="43">Agent notes</text><text class="zh" x="360" y="43">智能体笔记</text><text class="en sm" x="360" y="60">owner: the agent</text><text class="zh sm" x="360" y="60">归智能体</text><rect class="box soft" x="495" y="15" width="210" height="64" rx="10"/><text class="en" x="600" y="43">Reference data</text><text class="zh" x="600" y="43">参考数据</text><text class="en sm" x="600" y="60">owner: its maintainers</text><text class="zh sm" x="600" y="60">归维护者</text><rect class="box" x="255" y="150" width="210" height="56" rx="10"/><text class="en" x="360" y="182">The agent</text><text class="zh" x="360" y="182">智能体</text><text class="en sm" x="180" y="125">looks up</text><text class="zh sm" x="180" y="125">查询</text><text class="en sm" x="372" y="118">reads + writes</text><text class="zh sm" x="372" y="118">读 + 写</text><text class="en sm" x="545" y="125">read only (mode=ro)</text><text class="zh sm" x="545" y="125">只读 (mode=ro)</text></svg><figcaption><span class="en">Three stores kept apart: the agent may write only its own notes.</span><span class="zh">三个分开的存储：智能体只能写自己的笔记。</span></figcaption></figure>
-<div class="codebox" data-file="make_reference.py" data-lang="python"><span class="dim"># make_reference.py: run once by a person (Kumar), never by the agent
+<div class="codebox" data-file="make_reference.py" data-lang="python"><span class="dim"># make_reference.py: run once by a person, never by the agent
 import sqlite3
 setup = sqlite3.connect("reference.db")
 setup.execute("CREATE TABLE IF NOT EXISTS policies (id TEXT PRIMARY KEY, cover TEXT, limit_amt REAL)")
 setup.execute("INSERT OR REPLACE INTO policies VALUES ('P003', 'trip cancellation and lost baggage', 2000)")
 setup.commit()
 
-# desk.py: the agent's side
+# desk.py: the agent's side (pip install openai)
 import json, datetime, sqlite3
 from openai import OpenAI
 
 client = OpenAI()
-</span><span class="chg">db  = sqlite3.connect("claims.db")      # records: owned by the handlers
-mem = sqlite3.connect("memory.db")      # notes: owned by the agent
+</span><span class="chg">db  = sqlite3.connect("claims.db")      # records: the handlers' truth
+mem = sqlite3.connect("memory.db")      # notes: the agent's own
 ref = sqlite3.connect("file:reference.db?mode=ro", uri=True)   # reference: read only
 
 db.execute("""CREATE TABLE IF NOT EXISTS claims (id TEXT PRIMARY KEY, customer_id TEXT, story TEXT,
-              amount REAL, action TEXT, payout REAL, reason TEXT, notes_used TEXT)""")
+              amount REAL, action TEXT, payout REAL, reason TEXT)""")
 mem.execute("CREATE TABLE IF NOT EXISTS notes (customer_id TEXT, note TEXT, claim_id TEXT, saved TEXT)")</span></div>
 <div class="try" id="p1"></div>
 
-<h2><span class="en">Step 2 · After each claim, write a short note</span><span class="zh">第 2 步 · 每份理赔之后，写一条短笔记</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">When a claim is decided, ask the model what the memory should keep. Give it clear limits: at most two notes, facts only, nothing private. Each note is stored with the claim it came from and the date, so a handler can trace it later.</p>
-<p class="zh" style="margin:0 0 8px">理赔决定之后，问模型记忆该留下什么。给它明确的限制：最多两条，只要事实，不要私密信息。每条笔记都连同出处理赔和日期存下来，理赔员以后能追溯。</p></div>
-<div class="codebox" data-file="memory.py" data-lang="python"><span class="chg">def write_notes(claim, decision):
-    prompt = f"""A claim was just decided. Write at most two short notes that the claims desk
-may want the next time this customer files. Facts only, taken from the claim and decision below.
-No guesses, no card or passport numbers.
-Reply with JSON only: {{"notes": ["...", "..."]}} (an empty list is fine)
-
-Claim: {json.dumps(claim)}
-Decision: {json.dumps(decision)}"""
-    reply = client.chat.completions.create(
-        model="gpt-5.4-mini", messages=[{"role": "user", "content": prompt}],
-        response_format={"type": "json_object"})
-    return json.loads(reply.choices[0].message.content)["notes"]
-
-def remember(claim, decision):
-    for note in write_notes(claim, decision):
-        mem.execute("INSERT INTO notes VALUES (?, ?, ?, ?)",
-                    (claim["customer_id"], note, claim["id"], datetime.date.today().isoformat()))
-    mem.commit()</span></div>
-<div class="try" id="p2"></div>
-
-<h2><span class="en">Step 3 · Before a claim, read that customer’s notes</span><span class="zh">第 3 步 · 理赔之前，读这位客户的笔记</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Reading is a lookup by customer id. Then the notes go into the prompt, marked as leads to check, not as proof. The policy cover and limit come from the read-only reference store. The agent only returns an answer; the code decides what to save.</p>
-<p class="zh" style="margin:0 0 8px">读取就是按客户编号查一下。然后把笔记放进提示词，并标明它们是待核实的线索，不是证据。保单的赔付范围和上限来自只读的参考数据。智能体只返回答案，存什么由代码决定。</p></div>
+<h2><span class="en">Step 2 · Read notes, decide, write notes</span><span class="zh">第 2 步 · 读笔记、决定、写笔记</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b>
+<ul class="en" style="margin:0"><li>Before a claim: look up that customer's notes and put them in the prompt as leads to check, not proof.</li><li>After a claim: ask the model for at most two factual notes, stored with the claim id and date.</li><li>The code decides what is saved; the agent only returns an answer.</li></ul>
+<ul class="zh" style="margin:0"><li>理赔之前：查这位客户的笔记，放进提示词，作为待核实的线索，不是证据。</li><li>理赔之后：让模型写最多两条事实笔记，连同理赔编号和日期存下来。</li><li>存什么由代码决定；智能体只返回答案。</li></ul></div>
 <div class="codebox" data-file="memory.py" data-lang="python"><span class="chg">def recall(customer_id):
     rows = mem.execute("SELECT note, claim_id, saved FROM notes WHERE customer_id = ? ORDER BY saved",
                        (customer_id,)).fetchall()
     return [f"{note} (claim {cid}, saved {saved})" for note, cid, saved in rows]
 
-def decide(claim, notes):
-    cover, limit_amt = ref.execute("SELECT cover, limit_amt FROM policies WHERE id = ?",
-                                   (claim["policy_id"],)).fetchone()
-    prompt = f"""You decide travel insurance claims for Kaya Travel Cover.
-Policy cover: {cover}. Limit: S${limit_amt}.
-Notes from this customer's earlier claims (leads to check against today's claim, not proof): {json.dumps(notes)}
-The claim: {json.dumps(claim)}
-If a note helped you, say so in the reason.
-Reply with JSON only: {{"action": "approve" or "decline" or "refer", "payout": a number in S$, "reason": two or three short sentences}}"""
+def ask(prompt):
     reply = client.chat.completions.create(
         model="gpt-5.4-mini", messages=[{"role": "user", "content": prompt}],
         response_format={"type": "json_object"})
-    return json.loads(reply.choices[0].message.content)</span></div>
-<div class="try" id="p3"></div>
+    return json.loads(reply.choices[0].message.content)
 
-<h2><span class="en">Step 4 · A fresh queue: first claim, then the second</span><span class="zh">第 4 步 · 全新的队列：先第一份，再第二份</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">One function ties it together: read the notes, decide, save the claim to the records, then write new notes. We also save the notes the agent read next to the decision. Step 5 uses that to show the handler. Delete <code>memory.db</code> and <code>claims.db</code> first so the queue is fresh.</p>
-<p class="zh" style="margin:0 0 8px">用一个函数把它们串起来：读笔记、做决定、把理赔存进记录、再写新笔记。我们还把智能体读过的笔记和决定存在一起，第 5 步用它给理赔员看。先删掉 <code>memory.db</code> 和 <code>claims.db</code>，让队列是全新的。</p></div>
-<div class="codebox" data-file="memory.py" data-lang="python"><span class="chg">def process(claim):
-    notes = recall(claim["customer_id"])
-    decision = decide(claim, notes)
-    db.execute("INSERT OR REPLACE INTO claims VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+def decide(claim, notes):
+    cover, limit_amt = ref.execute("SELECT cover, limit_amt FROM policies WHERE id = ?",
+                                   (claim["policy_id"],)).fetchone()
+    return ask(f"""You decide travel insurance claims. Policy cover: {cover}. Limit: S${limit_amt}.
+Notes from earlier claims (leads, not proof): {json.dumps(notes)}
+Claim: {json.dumps(claim)}
+Reply with JSON only: {{"action": "approve" or "decline" or "refer", "payout": number in S$, "reason": short}}""")
+
+def remember(claim, decision):
+    notes = ask(f"""Write at most two short factual notes for the next time this customer files.
+No guesses, no card or passport numbers. Reply with JSON only: {{"notes": ["..."]}}
+Claim: {json.dumps(claim)}  Decision: {json.dumps(decision)}""")["notes"]
+    for note in notes:
+        mem.execute("INSERT INTO notes VALUES (?, ?, ?, ?)",
+                    (claim["customer_id"], note, claim["id"], datetime.date.today().isoformat()))
+    mem.commit()
+
+def process(claim):
+    decision = decide(claim, recall(claim["customer_id"]))
+    db.execute("INSERT OR REPLACE INTO claims VALUES (?, ?, ?, ?, ?, ?, ?)",
                (claim["id"], claim["customer_id"], claim["story"], claim["amount"],
-                decision["action"], decision["payout"], decision["reason"], json.dumps(notes)))
+                decision["action"], decision["payout"], decision["reason"]))
     db.commit()
     remember(claim, decision)
     return decision
 
 c1 = {"id": "C041", "customer_id": "K-0412", "policy_id": "P003",
-      "story": "My checked bag never arrived. Receipts for everything inside are attached.", "amount": 420}
+      "story": "My checked bag never arrived. Receipts attached.", "amount": 420}
 c2 = {"id": "C042", "customer_id": "K-0412", "policy_id": "P003",
       "story": "My bag was lost again on the flight home. Receipts attached.", "amount": 380}
 print(process(c1))
@@ -104,48 +81,24 @@ print(process(c2))</span></div><p class="en" style="margin:10px 0 2px"><b>Expect
 {'action': 'refer', 'payout': 0, 'reason': 'The note shows a lost-bag claim, C041, only days ago. A handler should check.'}</div>
 <div class="try" id="p4"></div>
 
-<h2><span class="en">Step 5 · Show the handler what the agent used</span><span class="zh">第 5 步 · 让理赔员看到智能体用了什么</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A decision that rests on invisible notes is hard to trust. Aisha should see, on the claim page, which notes the agent read. If a note is wrong, she can see it and fix it. For the pilot, a printout is enough.</p>
-<p class="zh" style="margin:0 0 8px">一个靠看不见的笔记做出的决定，很难让人信任。Aisha 应该能在理赔页面上看到智能体读了哪些笔记。如果某条笔记错了，她看得到，也能改。试点阶段，打印出来就够了。</p></div>
-<div class="codebox" data-file="show_claim.py" data-lang="python"><span class="chg">def show_claim(claim_id):
-    action, payout, reason, used = db.execute(
-        "SELECT action, payout, reason, notes_used FROM claims WHERE id = ?", (claim_id,)).fetchone()
-    print(f"{claim_id}  {action}  S${payout}")
-    print("  why:", reason)
-    print("  notes the agent read:")
-    for note in json.loads(used) or ["(none)"]:
-        print("   -", note)
-
-show_claim("C042")</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">C042  refer  S$0
-  why: The note shows a lost-bag claim, C041, only days ago. A handler should check.
-  notes the agent read:
-   - Lost-bag claim C041, S$420 approved (claim C041, saved 2026-11-24)</div>
-<div class="try" id="p5"></div>
-
-<h2><span class="en">Step 6 · Three sources, three owners</span><span class="zh">第 6 步 · 三个数据源，三个主人</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Now name the owners. <b>Records</b> belong to the handlers: they are the truth. <b>Memory</b> belongs to the agent: it is a helpful guess that can be deleted. <b>Reference data</b> belongs to the people who maintain it, and the agent only reads it. “Read only” must be enforced by <b>permissions</b>, not by an instruction. In Step 1 the reference store was opened with <code>mode=ro</code>, so even a bug cannot write to it.</p>
-<p class="zh" style="margin:0 0 8px">现在给它们定主人。<b>记录</b>属于理赔员：它是事实。<b>记忆</b>属于智能体：它是有用的参考，可以删掉。<b>参考数据</b>属于维护它的人，智能体只读。“只读”必须靠<b>权限</b>来保证，而不是靠一句指令。第 1 步里参考数据是用 <code>mode=ro</code> 打开的，所以哪怕有 bug 也写不进去。</p></div>
+<h2><span class="en">Step 3 · Enforce read-only with permissions</span><span class="zh">第 3 步 · 用权限保证只读</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">“Read only” must come from <b>permissions</b>, not from an instruction. The reference store was opened with <code>mode=ro</code>, so even a bug cannot change a policy limit.</p>
+<p class="zh" style="margin:0">“只读”必须靠<b>权限</b>来保证，而不是靠一句指令。参考数据是用 <code>mode=ro</code> 打开的，所以哪怕有 bug 也改不了保单上限。</p></div>
 <div class="codebox" data-file="memory_guard.py" data-lang="python"><span class="chg">try:
     ref.execute("UPDATE policies SET limit_amt = 99999 WHERE id = 'P003'")
 except sqlite3.OperationalError as e:
-    print("blocked:", e)          # attempt to write a readonly database</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers and wording will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字和措辞会不同）</span></p><div class="codebox" data-file="output" data-lang="text">blocked: attempt to write a readonly database</div>
-<p class="en">Who owns each of these?</p>
-<p class="zh">下面这些各归谁？</p><div class="sc" id="g1"></div>
+    print("blocked:", e)</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b></p><div class="codebox" data-file="output" data-lang="text">blocked: attempt to write a readonly database</div>
 <div class="try" id="p6"></div>
 
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我当时想错了</span></b><span class="en">I let the agent write to reference data once. I had only told it in the instructions not to. Read-only really means read-only: enforce it with permissions.</span><span class="zh">我曾经让智能体写进了参考数据一次，我只是在指令里叫它别写。只读就是真正的只读：要用权限来保证。</span></div>
-
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Add a note about a preference</b> (such as “prefers email”) and test that it gets used.</span><span class="zh"><b>加一条偏好笔记</b>（比如“喜欢用邮件”），测试它会不会被用上。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Show the handler which notes were read</b> on a page, not only a printout.</span><span class="zh"><b>让理赔员看到读了哪些笔记</b>，做在页面上，而不只是打印。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add a “forget this customer” action</b> that clears their notes but not their claim records.</span><span class="zh"><b>加一个“忘掉这位客户”的操作</b>，清掉他的笔记，但不动他的理赔记录。</span></span></label></div>
-<div class="callout tip"><b class="lbl"><span class="en">What changed</span><span class="zh">这一课之后</span></b><span class="en">Now the pilot meets Mr Tan’s second claim with his first one in hand, Aisha can see which notes it used, and the policy data stays read-only, like the binder Kumar locked in the cabinet. The next problem is the S$1,200 payout: it needs Aisha’s sign-off, and she may be at lunch for hours.</span><span class="zh">现在试点处理 Tan 先生的第二份理赔时，手里已有第一份的记录，Aisha 看得到它用了哪些笔记，保单数据也是只读的，就像 Kumar 锁进柜子的保单册。下一个问题是那笔 S$1,200 的赔付：它要 Aisha 签字，而她可能要吃好几个小时的午饭。</span></div>
-<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2><div class="card"><p class="en" style="margin:0 0 12px"><code>sqlite3.OperationalError: no such table: notes</code><br>Cause: the database file is new and the table was never created. Fix: run the <code>CREATE TABLE IF NOT EXISTS</code> line first.</p><p class="zh" style="margin:0 0 12px"><code>sqlite3.OperationalError: no such table: notes</code><br>原因：数据库文件是新的，表从来没建过。解决：先运行 <code>CREATE TABLE IF NOT EXISTS</code> 那一行。</p><p class="en" style="margin:0 0 12px"><code>sqlite3.OperationalError: database is locked</code><br>Cause: two programs write to the file at once. Fix: close the other one, and keep each write short with <code>commit()</code> right after.</p><p class="zh" style="margin:0 0 12px"><code>sqlite3.OperationalError: database is locked</code><br>原因：两个程序同时写这个文件。解决：关掉另一个，并让每次写入都短，写完立刻 <code>commit()</code>。</p><p class="en" style="margin:0 0 12px"><code>sqlite3.OperationalError: attempt to write a readonly database</code><br>Cause: this one is on purpose; the agent's connection to the reference data is read-only. Fix: nothing; write through the notes function only.</p><p class="zh" style="margin:0 0 12px"><code>sqlite3.OperationalError: attempt to write a readonly database</code><br>原因：这是故意的，智能体对参考数据的连接是只读的。解决：不用改；只通过笔记函数写入。</p></div>
-<h2><span class="en">Recap</span><span class="zh">小结</span></h2><div class="card"><p class="en" style="margin:0">• Keep two stores: reference data the agent only reads, and notes it may write.<br>• Open the reference data read-only, so a mistake cannot change it.<br>• Show which notes were read for each claim.</p><p class="zh" style="margin:0">• 分成两个存储：智能体只读的参考数据，和它可以写的笔记。<br>• 参考数据用只读方式打开，出错也改不了它。<br>• 每份理赔都显示读了哪些笔记。</p></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Add a “forget this customer” action</b> that clears their notes but not their claim records.</span><span class="zh"><b>加一个“忘掉这位客户”的操作</b>，清掉他的笔记，但不动他的理赔记录。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Store the notes the agent read</b> next to each decision, so a handler can see why.</span><span class="zh"><b>把智能体读过的笔记</b>和每个决定存在一起，让理赔员看到原因。</span></span></label></div>
+<h2><span class="en">Common errors</span><span class="zh">常见错误</span></h2><div class="card"><p class="en" style="margin:0 0 12px"><code>sqlite3.OperationalError: no such table: notes</code><br>Fix: run the <code>CREATE TABLE IF NOT EXISTS</code> line first.</p><p class="zh" style="margin:0 0 12px"><code>sqlite3.OperationalError: no such table: notes</code><br>解决：先运行 <code>CREATE TABLE IF NOT EXISTS</code> 那一行。</p><p class="en" style="margin:0 0 12px"><code>sqlite3.OperationalError: unable to open database file</code><br>Fix: run <code>make_reference.py</code> first; a read-only connection needs the file to exist.</p><p class="zh" style="margin:0 0 12px"><code>sqlite3.OperationalError: unable to open database file</code><br>解决：先运行 <code>make_reference.py</code>；只读连接要求文件已经存在。</p></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• Keep three sources apart: records, memory, reference data.<br>• The database stays the system of record. Memory is the agent’s own notes and can be deleted.<br>• Write short, factual notes after a claim and read them before the next one.<br>• Key notes by customer, so one customer never sees another’s notes.<br>• Show the handler which notes the agent used.<br>• Three sources have three owners and three rules.<br>• Enforce read-only with permissions, not with instructions.</p><p class="zh" style="margin:0">• 把三个数据源分开：记录、记忆、参考数据。<br>• 数据库仍然是权威记录。记忆是智能体自己的笔记，可以删掉。<br>• 理赔之后写简短的事实笔记，下一次理赔前先读。<br>• 笔记按客户存放，这样一位客户不会看到另一位的笔记。<br>• 让理赔员看到智能体用了哪些笔记。<br>• 三个数据源，三个主人，三条规则。<br>• 用权限来保证只读，而不是靠指令。</p></div>
+<div class="card"><p class="en" style="margin:0">• Keep records, memory and reference data apart; each has its own owner.<br>• Records are the truth; memory is the agent's deletable notes.<br>• Write short factual notes after a claim, key them by customer, read them before the next.<br>• Enforce read-only with permissions, not instructions.</p><p class="zh" style="margin:0">• 把记录、记忆、参考数据分开，各有各的主人。<br>• 记录是事实；记忆是智能体可删除的笔记。<br>• 理赔后写简短的事实笔记，按客户存放，下次理赔前先读。<br>• 用权限而不是指令来保证只读。</p></div>
 
 <button class="btn mark-done" style="margin-top:20px"></button>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI FDE</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"prev":["13-agentic-rag-over-a-manual.html","14-a-memory-over-mcp.html"],"tools":{"en":"Python 3, the openai package, an OpenAI API key, SQLite (comes with Python)","zh":"Python 3、openai 包、OpenAI API 密钥、SQLite（Python 自带）"},"know":{"en":"Agentic RAG and a memory server, as in the last two lessons.","zh":"上两课的智能体式检索和记忆服务。"},"mins":50,"offline":false,"goals":{"en":["Keep records, memory and reference data as three separate sources","Write short factual notes after a claim and read them before the next","Key notes by customer so no one sees another's","Enforce read-only with permissions, not instructions"],"zh":["把记录、记忆和参考数据分成三个来源","每单之后写简短的事实笔记，下一单前先读","按客户存笔记，避免互相看到","用权限而不是指令来强制只读"]}},"j":{"goal":{"en":"Build a returning-customer flow with three data sources, each with its own owner and its own rule.","zh":"做一个回头客流程：三个数据来源，各有各的负责人和规则。"},"deliver":{"en":"desk.py with records, memory and read-only reference data, notes written after each claim and shown to the handler.","zh":"desk.py：包含记录、记忆和只读的参考数据，每份理赔后写笔记，并展示给理赔员。"},"level":2,"mins":40,"accept":{"en":["After a run, three SQLite files exist: claims.db, memory.db and reference.db.","The second claim (C042) reads the note the first (C041) wrote, and its reason says a note was used (1 note read).","show_claim prints the decision, the reason and every note the agent read.","Writing to reference.db fails with 'attempt to write a readonly database'.","python reset.py clears the notes so the next demo starts clean."],"zh":["运行之后存在三个 SQLite 文件：claims.db、memory.db 和 reference.db。","第二个理赔（C042）读到了第一个（C041）写下的备注，理由里说明用了备注（读了 1 条）。","show_claim 打印决定、理由和智能体读过的每条备注。","写入 reference.db 失败，提示 “attempt to write a readonly database”。","python reset.py 清除备注，下一次演示从头开始。"]},"fail":[{"en":"“reference.db is missing”: run make_reference.py once first, because the read-only connection needs the file to exist.","zh":"“reference.db is missing”：先运行一次 make_reference.py，因为只读连接要求文件已存在。"},{"en":"The second claim read no notes. Notes are keyed by customer id, so check both claims use the same one.","zh":"第二份理赔没读到笔记。笔记按客户编号存放，检查两份理赔用的是不是同一个。"},{"en":"Old notes confuse a new demo. Run reset.py to start with an empty queue.","zh":"旧笔记会干扰新的演示。运行 reset.py，从空队列开始。"}],"stretch":[{"en":"Make notes expire after 90 days and skip expired ones.","zh":"让笔记 90 天后过期，并跳过过期的笔记。"},{"en":"Print a note’s source claim next to it on the handler’s page.","zh":"在理赔员页面上，把每条笔记的来源理赔显示在旁边。"}],"pkg":{"dir":"packages/ai-fde/15-agent-that-remembers-customers","files":["README.txt","requirements.txt","env.example","final/desk.py","final/make_reference.py","final/reset.py","starter/desk.py","starter/make_reference.py","starter/reset.py"],"note":{"en":"Run python make_reference.py, then DRY_RUN=1 python desk.py inside final/. There is no data folder: the demo claims are in desk.py.","zh":"在 final/ 里先运行 python make_reference.py，再运行 DRY_RUN=1 python desk.py。没有数据文件夹：示例理赔写在 desk.py 里。"}},"solution":{"en":"The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it, starting with desk.py, make_reference.py and reset.py. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.","zh":"完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照，从desk.py、make_reference.py、reset.py看起。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"}},"f":["README.txt","env.example","final/desk.py","final/make_reference.py","final/reset.py","requirements.txt","starter/desk.py","starter/make_reference.py","starter/reset.py"]}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=37968fc4"></script><script src="../assets/site.js?v=85ce92dd"></script><script src="../assets/teach.js?v=ede6f40f"></script>
-<script src="js/15-agent-that-remembers-customers.js?v=7f2c6407"></script></body></html>
+<script src="js/15-agent-that-remembers-customers.js?v=cf235482"></script></body></html>

@@ -7,16 +7,6 @@ document.addEventListener('DOMContentLoaded',function(){
   {k:'tool',en:'Plant Doctor runs its own little agent run: "Likely overwatering. Let the top 5 cm of soil dry before watering again."',zh:'Plant Doctor 自己跑了一次小的智能体运行：“很可能浇水过多。等表层 5 厘米土干了再浇。”',why:{en:'The specialist answers Fern, not the customer.',zh:'专家是回答 Fern，不是回答顾客。'}},
   {k:'llm',en:'Fern: "Oh no, poor monstera! It is probably getting a bit too much water. Let the top of the soil dry out first, and it should perk up."',zh:'Fern：“哎呀，可怜的龟背竹！它多半是水喝多了。先等表层土干了再浇，它应该会精神起来。”',why:{en:'Fern stays in charge and writes the final reply in its own voice.',zh:'Fern 始终掌控，并用自己的语气写出最终回复。'}}]);
 
- predict($('p1'),{q:{en:'After this run, what is <code>result.last_agent.name</code>?',zh:'这次运行结束后，<code>result.last_agent.name</code> 是什么？'},opts:[{k:'a',en:'"Fern"',zh:'"Fern"'},{k:'b',en:'"Plant Doctor"',zh:'"Plant Doctor"'}],a:'a',ex:{en:'Plant Doctor only answered Fern, like a function returning a value. Fern wrote the final answer.',zh:'Plant Doctor 只是回答了 Fern，就像函数返回了一个值。最终回答是 Fern 写的。'},hint:{en:'Who wrote the last message the customer saw?',zh:'顾客看到的最后一条消息是谁写的？'}});
-
- trace($('t2'),[
-  {k:'you',en:'My pot arrived cracked. I want my money back.',zh:'我的花盆到货就裂了，我要退款。'},
-  {k:'llm',en:'Fern: this is a refund. Hand off to Returns Desk.',zh:'Fern：这是退款问题，交接给 Returns Desk。',why:{en:'The model picks the handoff using its handoff_description, like picking a tool.',zh:'模型根据 handoff_description 选择交接，就像选工具一样。'}},
-  {k:'code',en:'The SDK switches the active agent to Returns Desk and passes along the whole conversation.',zh:'SDK 把当前智能体切换为 Returns Desk，并把整段对话一起交过去。',why:{en:'Fern is now done. It will not see the reply.',zh:'Fern 到此结束，它不会看到后面的回复。'}},
-  {k:'llm',en:'Returns Desk: "Sorry about that! What is your order number? I will send a return label."',zh:'Returns Desk：“非常抱歉！请问订单号是多少？我会给你发退货标签。”',why:{en:'The specialist talks to the customer directly.',zh:'专员直接和顾客对话。'}}]);
-
- predict($('p2'),{q:{en:'The customer replies with their order number. Which agent reads it?',zh:'顾客回复了订单号。哪个智能体会读到它？'},opts:[{k:'a',en:'Fern, who passes it on again',zh:'Fern，再转交一次'},{k:'b',en:'Returns Desk, which now owns the conversation',zh:'Returns Desk，现在由它负责这段对话'},{k:'c',en:'Both, at the same time',zh:'两个同时读'}],a:'b',out:{en:'print(result.last_agent.name)\n→ Returns Desk',zh:'print(result.last_agent.name)\n→ Returns Desk'},ex:{en:'After a handoff the first agent is done. To continue the chat, run the next turn with result.last_agent.',zh:'交接之后第一个智能体就结束了。要继续聊，下一轮就用 result.last_agent 来运行。'},hint:{en:'A handoff transfers the call. Does the first agent stay on the line?',zh:'交接就是转接电话。第一个智能体还会留在线上吗？'}});
-
  game($('g3'),[
   {en:'Fern asks a Care Calendar agent for a watering schedule, then tells the customer in a friendly way.',zh:'Fern 向浇水日历智能体要一份浇水计划，再用友好的语气告诉顾客。',a:'t',ex:{en:'Fern gets an answer back and keeps talking.',zh:'Fern 拿回答案，并继续说话。'},hint:{en:'Who tells the customer the schedule?',zh:'是谁把计划告诉顾客的？'}},
   {en:'A wholesale buyer wants 300 pots. Fern passes the chat to a Bulk Orders agent, who negotiates from there.',zh:'一位批发客户要 300 个花盆。Fern 把对话转给批量订单智能体，由它接着谈。',a:'h',ex:{en:'Bulk Orders takes over the conversation. That is a handoff.',zh:'批量订单智能体接管了对话，这就是交接。'},hint:{en:'Does Fern stay in the conversation?',zh:'Fern 还留在对话里吗？'}},
