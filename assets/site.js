@@ -257,7 +257,7 @@
     var TZ={'index.html':'TX Learns – 中英双语互动 AI 课','ecosystem.html':'TX Learns 如何运作','glossary.html':'AI 词汇表 | TX Learns'},TE=document.title;
     function setTitle(){var zh=root.getAttribute('data-lang')==='zh',tl=C&&C.lessons?C.lessons.filter(function(l){return l.file===here})[0]:null,z=!C&&TZ[here]?TZ[here]:(tl&&tl.title&&tl.title.zh?tl.title.zh+' | TX Learns':'');document.title=zh&&z?z:TE}
     setTitle();new MutationObserver(setTitle).observe(root,{attributes:true,attributeFilter:['data-lang']});
-    function toast(msg){var el=document.getElementById('toast');if(!el){el=document.createElement('div');el.id='toast';el.className='toast';el.setAttribute('role','status');el.setAttribute('aria-live','polite');document.body.appendChild(el)}
+    function toast(msg){var el=document.getElementById('toast');if(!el){el=document.createElement('div');el.id='toast';el.className='toast';el.setAttribute('role','status');el.setAttribute('aria-live','polite');el.onclick=function(){el.classList.remove('on')};document.body.appendChild(el)}
       el.innerHTML=msg;el.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(function(){el.classList.remove('on')},2600)}
     /* detail cards start folded so the lesson itself comes first */
     function fold(el,en,zh){if(!el||!el.parentNode||el.parentNode.classList.contains('fold'))return;var dt=document.createElement('details'),sm=document.createElement('summary');dt.className='fold';sm.innerHTML=t({en:en,zh:zh});el.before(dt);dt.appendChild(sm);dt.appendChild(el)}
