@@ -84,7 +84,15 @@ async function prepare() {
   const trackIds = trackIdList();
   const branch = p.head.ref;
   const labels = (p.labels || []).map(l => l.name);
-  const rows = files.map(f => ({ path: f.filename, area: classify(f.filename, trackIds), add: f.additions, del: f.deletions, status: f.status, patch: f.patch || '' }));
+  // `?v=<hash>` is a generated cache version (check-pages --fix). Mask it so a change that only moves hashes is not read as a content change.
+  const maskV = patch => {
+    const m = patch.replace(/\?v=[0-9a-f]{6,}/g, '?v=HASH');
+    const lines = m.split('\n').filter(l => /^[+-][^+-]/.test(l) || /^[+-]$/.test(l));
+    const minus = lines.filter(l => l[0] === '-').map(l => l.slice(1)).sort().join('\n');
+    const plus = lines.filter(l => l[0] === '+').map(l => l.slice(1)).sort().join('\n');
+    return minus === plus && lines.length ? '[only ?v= cache hashes changed (generated)]' : m;
+  };
+  const rows = files.map(f => ({ path: f.filename, area: classify(f.filename, trackIds), add: f.additions, del: f.deletions, status: f.status, patch: maskV(f.patch || '') }));
   const areas = [...new Set(rows.map(r => r.area))];
   const exempt = AREAS.exempt.some(x => branch.startsWith(x)) ? 'a rollback' : labels.includes('scope-ok') ? 'TX marked it scope-ok' : '';
   const violations = rules(branch, areas, trackIds);
