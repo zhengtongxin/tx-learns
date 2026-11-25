@@ -7,7 +7,7 @@ window.TRACK={id:'agentic-ai',title:{en:'AI Agentic',zh:'AI 智能体'},topics:[
   {k:'f',file:'04-many-models.html',title:{en:'Many models, one API',zh:'多模型同一 API'}}]},
  {n:2,level:1,title:{en:'Tools and memory',zh:'工具与记忆'},items:[
   {k:'c',file:'05-autonomy-and-tools.html',title:{en:'Autonomy and tools',zh:'自主性与工具'}},
-  {k:'p',file:'06-career-agent.html',title:{en:'Career answer agent',zh:'问答型智能体'}}]},
+  {k:'p',file:'06-career-agent.html',title:{en:'Personal career agent',zh:'个人职业智能体'}}]},
  {n:3,level:2,title:{en:'Agent SDKs',zh:'智能体 SDK'},items:[
   {k:'c',file:'07-agents-sdk-basics.html',title:{en:'Agents SDK basics',zh:'Agents SDK 基础'}},
   {k:'c',file:'08-agents-tools-handoffs.html',title:{en:'Tools, handoffs, guardrails',zh:'工具、交接与护栏'}},
