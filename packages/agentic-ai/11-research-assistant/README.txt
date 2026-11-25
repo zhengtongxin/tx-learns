@@ -6,7 +6,7 @@ All names and data in this package are invented.
 WHAT YOU BUILD
 --------------
 Four small agents and plain Python that turn one big question into a report.
-Question used in the lesson: "What is the cheapest way for a small kopitiam in Penang to
+Question used in the lesson: "What is the cheapest way for a small kopitiam in Singapore to
 take cashless payments in 2026?"
   Planner   -> splits the question into 3 web searches (a typed list)
   Searcher  -> runs each search with the hosted web search tool, all three at once

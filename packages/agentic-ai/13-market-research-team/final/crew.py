@@ -22,7 +22,7 @@ class MarketList(BaseModel):
 class MarketStudy(BaseModel):
     name: str
     crowd: str = Field(description="Typical crowd size and peak hours")
-    rent: str = Field(description="Rough stall rent per night, in RM")
+    rent: str = Field(description="Rough stall rent per night, in S$")
     competition: str = Field(description="How many kuih sellers are already there")
     verdict: str = Field(description="Is it worth a stall?")
 

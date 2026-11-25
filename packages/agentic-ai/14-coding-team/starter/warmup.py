@@ -9,7 +9,7 @@ load_dotenv(override=True)
 
 # TODO: make `coder` (an Agent with role, goal, backstory, llm and tools=box_tools)
 # and `job` (a Task with a description, an expected_output and agent=coder).
-# The job: print how many 30-sen coins pay for 1,000 cups of kopi at RM1.80 each, and run it.
+# The job: print how many 20-cent coins pay for 1,000 cups of kopi at S$1.80 each, and run it.
 coder = None
 job = None
 

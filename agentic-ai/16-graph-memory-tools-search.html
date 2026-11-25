@@ -1,14 +1,14 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Memory, tools and web search in a graph | TX Learns</title>
 <meta name="description" content="One line gives you a tool-using agent with memory. For a big research job, a deep agent plans, searches and delegates."><meta property="og:title" content="Memory, tools and web search in a graph | TX Learns"><meta property="og:description" content="One line gives you a tool-using agent with memory. For a big research job, a deep agent plans, searches and delegates."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/agentic-ai/16-graph-memory-tools-search.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
-<meta name="updated" content="2026-11-24">
-<link rel="canonical" href="https://tx-learns.vercel.app/agentic-ai/16-graph-memory-tools-search.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=0103ae17"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/agentic-ai/16-graph-memory-tools-search.html","url":"https://tx-learns.vercel.app/agentic-ai/16-graph-memory-tools-search.html","name":"Memory, tools and web search in a graph","alternateName":"图中的记忆、工具与联网搜索","description":"One line gives you a tool-using agent with memory. For a big research job, a deep agent plans, searches and delegates.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"Graphs and state","dateModified":"2026-11-24","isPartOf":{"@type":"CollectionPage","name":"AI Agentic","url":"https://tx-learns.vercel.app/agentic-ai/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Agentic","item":"https://tx-learns.vercel.app/agentic-ai/index.html"},{"@type":"ListItem","position":3,"name":"Memory, tools and web search in a graph","item":"https://tx-learns.vercel.app/agentic-ai/16-graph-memory-tools-search.html"}]}]}</script></head><body>
+<meta name="updated" content="2026-11-25">
+<link rel="canonical" href="https://tx-learns.vercel.app/agentic-ai/16-graph-memory-tools-search.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=06bb1ae2"><link rel="stylesheet" href="../assets/teach.css?v=e1e1324f"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/agentic-ai/16-graph-memory-tools-search.html","url":"https://tx-learns.vercel.app/agentic-ai/16-graph-memory-tools-search.html","name":"Memory, tools and web search in a graph","alternateName":"图中的记忆、工具与联网搜索","description":"One line gives you a tool-using agent with memory. For a big research job, a deep agent plans, searches and delegates.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"Graphs and state","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Agentic","url":"https://tx-learns.vercel.app/agentic-ai/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Agentic","item":"https://tx-learns.vercel.app/agentic-ai/index.html"},{"@type":"ListItem","position":3,"name":"Memory, tools and web search in a graph","item":"https://tx-learns.vercel.app/agentic-ai/16-graph-memory-tools-search.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Graphs and state · Lesson 2</span><span class="zh">图与状态 · 第 2 课</span></span><h1><span class="en">Memory, tools and web search in a graph</span><span class="zh">图中的记忆、工具与联网搜索</span></h1><p class="meta"><span class="en">The graph you wired by hand now comes in one line, and a bigger job gets a planner · ~25 min · hands-on</span><span class="zh">你手工接线的那张图，现在一行就能得到；更大的任务则交给会做计划的智能体 · 约 25 分钟 · 动手实践</span></p></div>
 <div class="callout thread"><b class="lbl"><span class="en">Where we left off</span><span class="zh">上回讲到</span></b><p class="en" style="margin:0">Last time the Kopi Corner assistant ran its flow as a graph with one shared order pad. Today it fails the next morning: the pad is wiped, and it cannot look anything up for Auntie Suria. We fix it by giving the graph memory, tools and web search.</p>
 <p class="zh" style="margin:0">上次 Kopi Corner 助手把流程跑成了共享一块订单板的图。今天它第二天一早就出问题：订单板被清空，也没法替 Suria 阿姨查任何东西。我们给这张图加上记忆、工具和联网搜索。</p></div>
-<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en" style="margin:0">Your cousin <b>Hui</b> runs a small tuition centre above a row of shops in Kajang. She wants to sell breakfast to parents in the mornings, but before she spends any money she wants a short briefing: what sells near schools, what the competition charges, and a recommendation. One small question needs one agent with a couple of tools. The whole briefing is a much bigger job. You will meet both sizes. Hui's tuition centre is a side case: the same tools and memory will serve Kopi Corner.</p>
-<p class="zh" style="margin:0">你的表姐 <b>惠</b> 在加影一排店屋楼上开了一间小补习中心。她想在早上卖早餐给家长，但花钱之前想先要一份简短的报告：学校附近什么好卖、竞争对手卖多少钱、最后给个建议。一个小问题只要一个带几件工具的智能体；整份报告则是大得多的任务。这节课你会遇到这两种规模。惠的补习中心是个支线案例：同样的工具和记忆也会用在 Kopi Corner 上。</p></div>
+<div class="story"><b class="lbl"><span class="en">Side case</span><span class="zh">支线案例</span></b><p class="en" style="margin:0">Your cousin <b>Hui</b> runs a small tuition centre above a row of shops in Jurong East. She wants to sell breakfast to parents in the mornings, but before she spends any money she wants a short briefing: what sells near schools, what the competition charges, and a recommendation. One small question needs one agent with a couple of tools. The whole briefing is a much bigger job. You will meet both sizes. Hui's tuition centre is a side case: the same tools and memory will serve Kopi Corner.</p>
+<p class="zh" style="margin:0">你的表姐 <b>惠</b> 在裕廊东一排店屋楼上开了一间小补习中心。她想在早上卖早餐给家长，但花钱之前想先要一份简短的报告：学校附近什么好卖、竞争对手卖多少钱、最后给个建议。一个小问题只要一个带几件工具的智能体；整份报告则是大得多的任务。这节课你会遇到这两种规模。惠的补习中心是个支线案例：同样的工具和记忆也会用在 Kopi Corner 上。</p></div>
 
 <h2><span class="en">Step 1 · create_agent: the tool loop in one line</span><span class="zh">第 1 步 · create_agent：一行搞定工具循环</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Last lesson you wired a model node, a tools node and a conditional edge yourself. <code>create_agent</code> hands you the same graph ready-made. You give it a model as a <code>"provider:model"</code> string, some tools and a system prompt. It is a real LangGraph graph underneath: a model node and a tools node going round in a loop.</p>
@@ -22,8 +22,8 @@ from langchain_core.tools import tool
 
 @tool
 def stall_price(item: str) -> str:
-    """Typical price in RM for a breakfast item near schools in Kajang."""
-    return {"nasi lemak": "RM3.50", "kuih": "RM0.80 each", "milo ais": "RM2.80"}.get(item.lower(), "not sure")
+    """Typical price in S$ for a breakfast item near schools in Jurong East."""
+    return {"nasi lemak": "S$3.50", "kuih": "S$0.80 each", "milo ais": "S$2.80"}.get(item.lower(), "not sure")
 
 @tool
 def footfall(hour: int) -> str:
@@ -39,7 +39,7 @@ out = helper.invoke({"messages": [{"role": "user", "content": "Is 7:30am busy, a
 print(out["messages"][-1].content)</span></div>
 <p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
 <div class="codebox" data-file="output" data-lang="text">Yes, 7:30am is busy: about 120 parents pass the shop then.
-Nasi lemak goes for around RM3.50 nearby.</div>
+Nasi lemak goes for around S$3.50 nearby.</div>
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 2 · Memory and structured output</span><span class="zh">第 2 步 · 记忆与结构化输出</span></h2>
@@ -50,11 +50,11 @@ from pydantic import BaseModel, Field
 
 </span><span class="chg">chatty = create_agent(model="openai:gpt-5.4-mini", tools=[stall_price], checkpointer=MemorySaver())
 cfg = {"configurable": {"thread_id": "cousin-hui"}}</span><span class="dim">
-chatty.invoke({"messages": [{"role": "user", "content": "My budget is RM800 for equipment."}]}, cfg)
+chatty.invoke({"messages": [{"role": "user", "content": "My budget is S$800 for equipment."}]}, cfg)
 
 class Plan(BaseModel):
     items: list[str] = Field(description="Breakfast items to sell")
-    est_daily_sales: str = Field(description="Rough daily sales estimate in RM")
+    est_daily_sales: str = Field(description="Rough daily sales estimate in S$")
 
 </span><span class="chg">planner = create_agent(model="openai:gpt-5.4-mini", tools=[stall_price, footfall], response_format=Plan)</span><span class="dim">
 plan = planner.invoke({"messages": [{"role": "user", "content": "Plan the menu."}]})["structured_response"]</span></div>
@@ -88,7 +88,7 @@ client = MultiServerMCPClient({
 surfer = create_agent(model="openai:gpt-5.4-mini", tools=browser_tools,
                       system_prompt="Browse to answer. Report briefly.")
 </span><span class="chg">res = await surfer.ainvoke(</span><span class="dim">{"messages": [{"role": "user",
-      "content": "Open a food delivery site and list three breakfast places in Kajang."}]})</span></div>
+      "content": "Open a food delivery site and list three breakfast places in Jurong East."}]})</span></div>
 <div class="try" id="p4"></div>
 
 <h2><span class="en">Step 5 · The big job: a deep agent</span><span class="zh">第 5 步 · 大任务：深度智能体</span></h2>
@@ -119,7 +119,7 @@ lead = create_deep_agent(
     </span><span class="chg">backend=FilesystemBackend(root_dir=box, virtual_mode=True),</span><span class="dim">
 )
 lead.invoke({"messages": [{"role": "user", "content":
-    "Should a tuition centre in Kajang sell breakfast to parents? Write breakfast.md."}]})</span></div>
+    "Should a tuition centre in Jurong East sell breakfast to parents? Write breakfast.md."}]})</span></div>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Sub-agents can have their own tools and <b>skills</b>. A skill is a folder with a <code>SKILL.md</code>: a name and description at the top, instructions below. Only the name and description sit in the prompt. The full file is read when it is needed, so skills cost almost nothing until used.</p>
 <p class="zh" style="margin:0 0 8px">子智能体可以有自己的工具和<b>技能（skill）</b>。技能是一个带 <code>SKILL.md</code> 的文件夹：开头是名称和描述，下面是详细说明。提示词里只放名称和描述，需要时才读完整文件，所以技能在被用到之前几乎不占成本。</p></div>
 <div class="sc" id="g5"></div>

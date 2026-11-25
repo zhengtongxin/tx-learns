@@ -38,7 +38,7 @@ function card(p: Portfolio, h: Point[]): HTMLElement {
   const title = document.createElement("h2");
   title.textContent = p.name;
   const money = document.createElement("div");
-  money.textContent = `RM${p.value.toFixed(2)} `;
+  money.textContent = `S$${p.value.toFixed(2)} `;
   const pl = document.createElement("span");
   pl.className = p.profit >= 0 ? "up" : "down";
   pl.textContent = `(${p.profit >= 0 ? "+" : ""}${p.profit.toFixed(2)})`;

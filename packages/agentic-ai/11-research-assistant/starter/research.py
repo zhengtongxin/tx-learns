@@ -61,7 +61,7 @@ async def write(question: str, findings: list[str]) -> Report:
 mailroom = None
 
 # Step 6: code is the boss
-QUESTION = "What is the cheapest way for a small kopitiam in Penang to take cashless payments in 2026?"
+QUESTION = "What is the cheapest way for a small kopitiam in Singapore to take cashless payments in 2026?"
 
 
 async def plan(question: str) -> SearchPlan:

@@ -11,7 +11,7 @@ mcp = FastMCP("accounts")
 
 @mcp.tool()
 async def get_balance(name: str) -> str:
-    """Cash, total value and profit so far for one uncle, in RM."""
+    """Cash, total value and profit so far for one uncle, in S$."""
     s = Account.get(name).summary()
     return json.dumps({k: s[k] for k in ("cash", "value", "profit")})
 

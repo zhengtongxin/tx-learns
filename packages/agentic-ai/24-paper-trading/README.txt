@@ -6,7 +6,7 @@ here connects to a real broker or real prices.
 
 WHAT YOU BUILD
 --------------
-A paper trading floor. Four agent "uncles" (Wong, Muthu, AhKow, Hamid) each get RM10,000 of
+A paper trading floor. Four agent "uncles" (Wong, Muthu, AhKow, Hamid) each get S$10,000 of
 pretend money, a written strategy and the same tools, and trade four made-up tickers
 (KOPI, ROTI, TEHT, NASI) on a timer. Everything is an MCP server:
   accounts server  your own FastMCP: cash, shares, buy, sell, change_strategy

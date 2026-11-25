@@ -54,7 +54,7 @@ INSTALL
 RUN
 ---
   cd final
-  python warmup.py       # optional: one coder, expect the answer 6000
+  python warmup.py       # optional: one coder, expect the answer 9000
   python main.py         # the whole crew
 Then try the screen the crew built:
   cd sandbox
@@ -63,10 +63,10 @@ Then try the screen the crew built:
 
 TEST / WHAT SUCCESS LOOKS LIKE
 ------------------------------
-- warmup.py ends with the number 6000 (1,000 cups x RM1.80 / RM0.30 per coin).
+- warmup.py ends with the number 9000 (1,000 cups x S$1.80 / S$0.20 per coin).
 - After main.py, final/sandbox holds design.md, tabs.py, app.py, a test file and
   test_report.md. The report says which checks passed. Open the tab screen and try: top up
-  RM5, order a teh_tarik (RM2.00), then try to order more than the balance allows. The
+  S$5, order a teh_tarik (S$2.00), then try to order more than the balance allows. The
   last one should be refused.
 - Open the sandbox files and read them. Passing tests only mean the code matches what the
   tester thought to check.
@@ -108,17 +108,17 @@ and the USE_DOCS_MCP switch.
 ACCEPTANCE CRITERIA
 -------------------
 You are done when:
-- python warmup.py ends with the number 6000 (1,000 cups x RM1.80 / RM0.30 per coin).
+- python warmup.py ends with the number 9000 (1,000 cups x S$1.80 / S$0.20 per coin).
 - After python main.py, final/sandbox holds design.md, tabs.py, app.py, a test file and test_report.md.
 - test_report.md says which checks passed and which failed.
-- In the tab screen, topping up RM5 and ordering a teh_tarik (RM2.00) leaves RM3.00.
+- In the tab screen, topping up S$5 and ordering a teh_tarik (S$2.00) leaves S$3.00.
 - An order larger than the balance is refused.
 
 Compare your work with final/ afterwards, starting with crew.py, the tools folder and warmup.py.
 
 验收标准（中文）
-- python warmup.py 以数字 6000 结束（1,000 杯 x RM1.80 / 每枚代币 RM0.30）。
+- python warmup.py 以数字 9000 结束（1,000 杯 x S$1.80 / 每枚硬币 S$0.20）。
 - 运行 python main.py 后，final/sandbox 里有 design.md、tabs.py、app.py、一个测试文件和 test_report.md。
 - test_report.md 写明哪些检查通过、哪些失败。
-- 在账单界面充值 RM5 再点一杯 teh_tarik（RM2.00），余额为 RM3.00。
+- 在账单界面充值 S$5 再点一杯 teh_tarik（S$2.00），余额为 S$3.00。
 - 超过余额的订单会被拒绝。
