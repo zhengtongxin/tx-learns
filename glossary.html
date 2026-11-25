@@ -26,7 +26,7 @@
 .chips-l a{display:inline-block;padding:3px 10px;border-radius:99px;border:1px solid color-mix(in srgb,var(--h) 55%,var(--line));background:color-mix(in srgb,var(--h) 9%,transparent);color:var(--fg);font-size:13px;line-height:1.5;text-decoration:none}
 .chips-l a:hover,.chips-l a:focus-visible{border-color:var(--h);background:color-mix(in srgb,var(--h) 22%,transparent);outline:2px solid transparent}
 .chips-l a:focus-visible{box-shadow:0 0 0 2px var(--fg)}
-/* search + list */
+/* A to Z list */
 .gl-letter{margin:26px 0 8px;font-size:15px;letter-spacing:.14em;color:var(--mut);border-bottom:1px solid var(--line);padding-bottom:4px}
 .gl-it{position:relative;padding:12px 14px 12px 16px;margin:8px 0;border:1px solid var(--line);border-left:4px solid var(--h);border-radius:10px;background:var(--glass);scroll-margin-top:70px}
 .gl-it:target{border-color:var(--h);box-shadow:0 0 0 2px color-mix(in srgb,var(--h) 55%,transparent)}
@@ -124,8 +124,7 @@ html[data-theme=light] .gl-m .tg{color:color-mix(in srgb,var(--h) 30%,var(--fg))
     listEl.innerHTML=Object.keys(groups).sort().map(function(L){
       return '<div class="gl-grp" data-l="'+esc(L)+'"><h3 class="gl-letter">'+esc(L)+'</h3>'+groups[L].map(function(g){
         var t=TH[thIdx[g.theme]];
-        var hay=(g.en+' '+g.zh+' '+g.def.en+' '+g.def.zh).toLowerCase();
-        return '<article class="gl-it '+thc(g.theme)+'" id="t-'+esc(g.id)+'" data-h="'+esc(hay)+'"><div class="gl-t"><b><span class="en">'+esc(g.en)+'</span><span class="zh">'+esc(g.zh)+'</span></b><span class="alt"><span class="en">'+esc(g.zh)+'</span><span class="zh">'+esc(g.en)+'</span></span></div>'+
+        return '<article class="gl-it '+thc(g.theme)+'" id="t-'+esc(g.id)+'"><div class="gl-t"><b><span class="en">'+esc(g.en)+'</span><span class="zh">'+esc(g.zh)+'</span></b><span class="alt"><span class="en">'+esc(g.zh)+'</span><span class="zh">'+esc(g.en)+'</span></span></div>'+
           '<p class="gl-d">'+bi(g.def)+'</p><div class="gl-m"><span class="tg">'+(t?bi(t.title):'')+'</span>'+lessonLink(g)+'</div></article>'}).join('')+'</div>'}).join('');
 
   }catch(err){try{console.warn('glossary',err)}catch(e2){}}
