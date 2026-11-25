@@ -568,10 +568,11 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     ['The live site is checked','线上网站会被检查','1','check per merge','次检查／每次合并','Every live page and link, once Vercel has deployed.','Vercel 部署后检查每一页和每个链接。'],
     ['Agents never push to the site','agent 从不直接推送到网站','0','pushes to main','次直接推送到 main','Everything goes through a pull request.','一切都走 pull request。'],
     ['No silent failures, no noise','不会悄悄失败，也不吵','1','digest a day','条每日汇总','A failure, stuck PR or rollback messages me at once.','失败、PR 卡住或回滚会马上通知我。']];
+  var GL={0: "ai-production/22-dev-test-prod-from-one-push.html", 1: "ai-production/21-push-to-deploy-github-actions.html", 3: "ai-production/21-push-to-deploy-github-actions.html", 4: "ai-fde/22-gateway-keys-and-policy.html", 5: "agentic-ai/08-agents-tools-handoffs.html", 6: "ai-fde/18-swarm-with-a-cap.html", 9: "ai-production/07-safe-cloud-account.html", 10: "ai-production/22-dev-test-prod-from-one-push.html", 11: "ai-fde/16-pause-for-approval-and-resume.html"};
   var GI=['🔎','✅','🎯','↩️','👀','🧰','⏱️','📄','🩹','🔑','🌐','🚧','🔔'];
   (function(){
     document.getElementById('guards').innerHTML=G.map(function(g,i){return '<li class="guard" tabindex="0" role="button" aria-label="'+esc(g[0])+'" data-i="'+i+'"><span class="gi" aria-hidden="true">'+GI[i]+'</span><span class="gt"><b>'+t(g[0],g[1])+'</b></span></li>'}).join('');
-    document.querySelectorAll('#guards .guard').forEach(function(el){var g=G[el.dataset.i];wireNote(el,t(g[0],g[1]),'<p>'+t(g[5],g[6])+'</p>',0)})})();
+    document.querySelectorAll('#guards .guard').forEach(function(el){var g=G[el.dataset.i];wireNote(el,t(g[0],g[1]),'<p>'+t(g[5],g[6])+'</p>'+(GL[el.dataset.i]?'<p><a href="'+GL[el.dataset.i]+'">'+t('Open the lesson →','打开这一课 →')+'</a></p>':''),0)})})();
 
 
   function kg(h,items){return '<div class="kg"><b>'+h+'</b>'+items.join('')+'</div>'}
