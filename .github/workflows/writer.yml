@@ -187,7 +187,9 @@ jobs:
         id: pr
         if: steps.notes.outputs.dirs != ''
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # MERGE_TOKEN (TX's token) opens the pull request, so the checks start without waiting for someone to approve a bot's workflow run.
+          GH_TOKEN: ${{ secrets.MERGE_TOKEN || secrets.GITHUB_TOKEN }}
+          HAS_MERGE_TOKEN: ${{ secrets.MERGE_TOKEN != '' }}
           SLUG: ${{ steps.notes.outputs.slug }}
           DIRS: ${{ steps.notes.outputs.dirs }}
         run: |
@@ -198,7 +200,8 @@ jobs:
           git checkout -b "$branch"
           git add -A -- . ':!inbox' ':!.writer-summary.md'
           git commit -m "Draft lesson from ${DIRS//$'\n'/, }" -m "Written by the content creator agent (Claude) from TX's notes."
-          git push -u origin "$branch"
+          auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          git -c "http.https://github.com/.extraheader=" -c "http.https://github.com/.extraheader=$auth" push -u origin "$branch"
           { echo "Draft lesson from \`${DIRS//$'\n'/\`, \`}\`, written by the content creator agent to STYLE.md."; echo;
             cat .writer-summary.md 2>/dev/null; echo; echo "Copy check: $(tail -1 /tmp/copy-check.txt)"; echo;
             echo "Next, by themselves: the intern agent reads the preview as a newcomer and adds clearer wording here if the lesson scores under 8/10,";
@@ -208,7 +211,8 @@ jobs:
           gh pr edit "$url" --add-assignee "${{ github.repository_owner }}" || true
           echo "url=$url" >> "$GITHUB_OUTPUT"
           # A push with the workflow token starts no workflows, so start the required copy check on this branch.
-          gh workflow run copy-check.yml --ref "$branch" -R "$GITHUB_REPOSITORY" || echo "::warning::Could not start the copy check."
+          # With MERGE_TOKEN the pull request starts its own checks; without it, start the required copy check by hand.
+          [ "$HAS_MERGE_TOKEN" = true ] || gh workflow run copy-check.yml --ref "$branch" -R "$GITHUB_REPOSITORY" || echo "::warning::Could not start the copy check."
       - name: Record what the agent used (tokens and estimated cost)
         if: ${{ !cancelled() && steps.notes.outputs.dirs != '' }}
         continue-on-error: true
