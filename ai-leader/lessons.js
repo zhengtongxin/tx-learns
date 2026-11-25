@@ -7,7 +7,7 @@ window.TRACK={id:'ai-leader',title:{en:'AI Leader',zh:'AI 领导者'},topics:[
   {k:'c',title:{en:"Who sells what: types of AI company and offering",zh:"谁在卖什么：AI 公司与产品的类型"}},
   {k:'c',title:{en:"Where to put the AI money",zh:"AI 的钱该投在哪"}}]},
  {n:2,level:2,title:{en:"Making the call with the tech team",zh:"和技术团队一起做决定"},items:[
-  {k:'f',title:{en:"Sponsoring an AI project by making the key decisions",zh:"当 AI 项目的发起人：做好关键决定"}},
+  {k:'f',file:'06-sponsor-by-deciding.html',title:{en:"Sponsoring an AI project by making the key decisions",zh:"当 AI 项目的发起人：做好关键决定"}},
   {k:'c',title:{en:"Working with the tech team on AI choices",zh:"和技术团队一起做 AI 选择"}},
   {k:'c',title:{en:"What an agent really costs, and what can go wrong",zh:"一个智能体真正的成本，以及会出什么错"}},
   {k:'c',title:{en:"RAG or fine-tuning for your use case",zh:"你的场景用 RAG 还是微调"}},
