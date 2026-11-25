@@ -105,7 +105,9 @@ jobs:
       - name: Guard and verify the change
         id: finish
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # MERGE_TOKEN (TX's token) opens the pull request, so the checks start without waiting for someone to approve a bot's workflow run.
+          GH_TOKEN: ${{ secrets.MERGE_TOKEN || secrets.GITHUB_TOKEN }}
+          HAS_MERGE_TOKEN: ${{ secrets.MERGE_TOKEN != '' }}
           DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
         run: |
           set -euo pipefail
@@ -163,8 +165,11 @@ jobs:
           url=$(gh pr create --base main --head "$branch" --title "$title" --body-file /tmp/pr-body.md)
           pr=${url##*/}
           gh pr edit "$url" --add-assignee "${{ github.repository_owner }}" || true
-          gh workflow run copy-check.yml --ref "$branch" -R "$GITHUB_REPOSITORY" || echo "::warning::Could not start the copy check."
-          gh workflow run review.yml -R "$GITHUB_REPOSITORY" -f pr="$pr" || echo "::warning::Could not start the backend engineer review."
+          # With MERGE_TOKEN the pull request starts its own checks and review; without it, start them by hand.
+          if [ "$HAS_MERGE_TOKEN" != true ]; then
+            gh workflow run copy-check.yml --ref "$branch" -R "$GITHUB_REPOSITORY" || echo "::warning::Could not start the copy check."
+            gh workflow run review.yml -R "$GITHUB_REPOSITORY" -f pr="$pr" || echo "::warning::Could not start the backend engineer review."
+          fi
           echo "pr=$url" >> "$GITHUB_OUTPUT"
           echo "state=ok" >> "$GITHUB_OUTPUT"
           echo "summary=Opened one measured efficiency improvement in pull request #$pr." >> "$GITHUB_OUTPUT"
