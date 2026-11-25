@@ -133,10 +133,12 @@ html[data-theme=light] .spot::after{background:radial-gradient(380px circle at v
 table{border-collapse:separate;border-spacing:0;width:100%;margin:1.3em 0;font-size:15px;border:1px solid var(--line);border-radius:18px;overflow:hidden}
 th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line)}th{background:var(--glass)}tr:last-child td{border-bottom:0}
 details{background:var(--glass);border:1px solid var(--line);border-radius:16px;padding:12px 18px;margin:.8em 0}summary{cursor:pointer;font-weight:700}
-.pager{display:flex;gap:12px;margin-top:64px}
-.pager a{flex:1;border:1px solid var(--line);border-radius:20px;padding:16px 18px;text-decoration:none;color:var(--fg);background:var(--glass);transition:.25s}
-.pager a:hover{border-color:var(--acc);transform:translateY(-3px)}
-.pager a small{display:block;color:var(--mut)}.pager a.next{text-align:right}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:64px}
+.pager a{display:block;border:1px solid var(--line);border-radius:18px;padding:14px 18px;text-decoration:none;color:var(--fg);background:var(--glass);font-weight:600;letter-spacing:-.01em;line-height:1.35;transition:border-color .25s,transform .25s}
+.pager a:hover{border-color:var(--acc);transform:translateY(-2px)}
+.pager a:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.pager a small{display:block;margin-bottom:2px;font-size:12px;font-weight:600;letter-spacing:.04em;color:var(--acc2)}
+.pager a.next{grid-column:2;text-align:right}
 /* hub + journey */
 .track-list{display:grid;gap:18px;margin-top:20px}
 .cc{display:grid;grid-template-columns:auto 1fr auto;gap:22px;align-items:center;padding:28px 30px;text-decoration:none;color:var(--fg);transition:transform .25s,border-color .25s;transform-style:preserve-3d}
@@ -327,8 +329,9 @@ main:not(.wide) p.meta{max-width:none;text-wrap:pretty}
 .fold>summary:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:12px}
 .fold>.card{margin:0;border:0;border-top:1px solid var(--line);border-radius:0 0 16px 16px;background:none;box-shadow:none}
 .fold>.card>.lbl{display:none}
-.pager .back{flex:0 0 auto;align-self:center;text-align:center;padding:12px 16px}
-@media(max-width:560px){.pager{flex-wrap:wrap}.pager .back{order:3;flex:1 1 100%}}
+.pager a.back{grid-column:1/-1;grid-row:2;justify-self:center;border:0;background:none;padding:8px 12px;font-size:14px;font-weight:500;color:var(--mut)}
+.pager a.back:hover{color:var(--acc);transform:none}
+@media(max-width:560px){.pager{grid-template-columns:1fr}.pager a.next{grid-column:1}.pager a.back{grid-row:auto;order:3}}
 .toc{display:none}
 @media(min-width:1340px){.toc{display:block;position:fixed;top:96px;left:calc(50% + 428px);width:220px;max-height:calc(100vh - 140px);overflow:auto;font-size:13px;line-height:1.45}
 .toc .lbl{display:block;margin-bottom:8px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc2)}
