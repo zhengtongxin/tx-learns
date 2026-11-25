@@ -16,6 +16,6 @@ window.TRACK={id:'ai-leader',title:{en:'AI Leader',zh:'AI 领导者'},topics:[
   {k:'f',title:{en:"Finding new AI ideas and dodging the traps",zh:"找到新的 AI 点子，避开陷阱"}},
   {k:'c',title:{en:"Who does what: organisation, rules and hiring for AI",zh:"谁来做什么：组织、规则与 AI 招聘"}},
   {k:'c',title:{en:"An AI roadmap with room for research",zh:"给研发留空间的 AI 路线图"}},
-  {k:'c',title:{en:"Getting people to adopt AI and agents",zh:"让大家真正用起 AI 和智能体"}},
+  {k:'c',file:'14-getting-people-to-adopt.html',title:{en:"Getting people to adopt AI and agents",zh:"让大家真正用起 AI 和智能体"}},
   {k:'c',title:{en:"Proving the return: measurable ROI from AI",zh:"证明回报：看得见的 AI 投资回报"}}]}
 ]};
