@@ -1,9 +1,9 @@
-# News agent: once a day it reads official AI blogs and release notes (RSS/Atom, public sources in scripts/news-sources.json)
+# Industry consultant agent: once a day it reads official AI blogs and release notes (RSS/Atom, public sources in scripts/news-sources.json)
 # and leaves at most 3 "refresh this lesson" ideas in the ideas backlog (signals/ideas.json on the agent-status branch).
 # The improvement agent acts on them like any other idea: one small PR, the normal checks, the scope guard, auto-merge.
 # No AI runs unless something new matches a lesson (scripts/news.mjs plan). Then Haiku, with no tools, judges at most 10 items.
 # It never edits the site, never proposes new lessons or tracks (those come from TX's notes) and never pushes except to agent-status.
-name: News agent
+name: Industry consultant agent
 on:
   schedule:
     - cron: '17 1 * * *'   # daily, 09:17 Malaysia time, before the improvement agent's morning run

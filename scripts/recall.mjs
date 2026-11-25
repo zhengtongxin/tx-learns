@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Recall agent: the weekly "what to review" message, so lessons do not fade.
+// Learning coach agent: the weekly "what to review" message, so lessons do not fade.
 //   Spaced recall: each lesson comes back 1, 3, 7, 14, 30, 60, 120, 240 and 365 days after it went live.
 //                  A lesson is due this week when one of those days fell in the last 7 days.
 //   Gap finder:    topics with planned lessons not written yet, and the next one to learn in each.
