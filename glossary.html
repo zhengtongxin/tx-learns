@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AI terms glossary | TX Learns</title>
 <meta name="description" content="The core AI terms used in the lessons, in plain words, with a concept map that groups them by theme and a link to the lesson that teaches each one."><meta property="og:title" content="AI terms glossary | TX Learns"><meta property="og:description" content="The core AI terms used in the lessons, in plain words, with a concept map that groups them by theme and a link to the lesson that teaches each one."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/glossary.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
-<link rel="canonical" href="https://tx-learns.vercel.app/glossary.html"><link rel="icon" href="assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><link rel="stylesheet" href="assets/site.css?v=ffc2cab0">
+<link rel="canonical" href="https://tx-learns.vercel.app/glossary.html"><link rel="icon" href="assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><link rel="stylesheet" href="assets/site.css?v=0103ae17">
 <style>
 .gl-hero .mega{font-size:clamp(2.2rem,6.4vw,4.2rem)}
 .th-0{--h:hsl(212 75% 58%)}.th-1{--h:hsl(38 90% 52%)}.th-2{--h:hsl(160 60% 42%)}.th-3{--h:hsl(280 55% 62%)}.th-4{--h:hsl(330 65% 58%)}.th-5{--h:hsl(2 70% 56%)}.th-6{--h:hsl(100 50% 44%)}
@@ -39,7 +39,9 @@
 .gl-find input:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
 .gl-stat{font-size:13px;color:var(--mut);margin:0 0 6px;min-height:1.6em}
 .gl-letter{margin:26px 0 8px;font-size:15px;letter-spacing:.14em;color:var(--mut);border-bottom:1px solid var(--line);padding-bottom:4px}
-.gl-grp[hidden],.gl-it[hidden],.gl-none[hidden]{display:none}
+.gl-grp[hidden],.gl-it[hidden],.gl-none[hidden],#list[hidden]{display:none}
+.gl-t .why{margin-left:auto;font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--mut);border:1px solid var(--line);border-radius:999px;padding:2px 10px;white-space:nowrap}
+.gl-hit mark{background:color-mix(in srgb,var(--acc) 38%,transparent);color:inherit;border-radius:3px;padding:0 1px}
 .gl-it{position:relative;padding:12px 14px 12px 16px;margin:8px 0;border:1px solid var(--line);border-left:4px solid var(--h);border-radius:10px;background:var(--glass);scroll-margin-top:70px}
 .gl-it:target{border-color:var(--h);box-shadow:0 0 0 2px color-mix(in srgb,var(--h) 55%,transparent)}
 .gl-t{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px}
@@ -93,17 +95,18 @@ html[data-theme=light] .gl-m .tg{color:color-mix(in srgb,var(--h) 30%,var(--fg))
 <h2 id="terms-h"><span class="en">All terms, A to Z</span><span class="zh">全部词汇，按字母排序</span></h2>
 <div class="gl-find"><label for="q"><span class="en">Find a term</span><span class="zh">查找词汇</span></label><input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="token, RAG, 护栏 ..."></div>
 <p class="gl-stat" id="stat" role="status" aria-live="polite"></p>
+<div id="res" aria-live="polite"></div>
 <div id="list"></div>
 <div class="gl-none" id="none" hidden><span class="en">No term matches. Try a shorter word, or clear the box.</span><span class="zh">没有匹配的词。换个短一点的词，或者清空输入框。</span></div>
 </section>
 </main>
-<script src="tracks.js?v=2bfa1a40"></script><script src="glossary.js"></script><script src="assets/site.js?v=551a69cf"></script>
+<script src="tracks.js?v=2bfa1a40"></script><script src="glossary.js"></script><script src="assets/site.js?v=9eb01700"></script>
 <script>
 (function(){
   try{
     var G=(window.GLOSSARY||[]).slice(),TH=window.GLOSSARY_THEMES||[],TK={};
     (window.TRACKS||[]).forEach(function(t){TK[t.id]=t});
-    var themesEl=document.getElementById('themes'),listEl=document.getElementById('list'),q=document.getElementById('q'),stat=document.getElementById('stat'),none=document.getElementById('none');
+    var themesEl=document.getElementById('themes'),resEl=document.getElementById('res'),listEl=document.getElementById('list'),q=document.getElementById('q'),stat=document.getElementById('stat'),none=document.getElementById('none');
     if(!themesEl||!listEl||!q)return;
     function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
     function bi(o){o=o||{};return '<span class="en">'+esc(o.en)+'</span><span class="zh">'+esc(o.zh)+'</span>'}
@@ -135,9 +138,22 @@ html[data-theme=light] .gl-m .tg{color:color-mix(in srgb,var(--h) 30%,var(--fg))
     var items=[].slice.call(listEl.querySelectorAll('.gl-it')),grps=[].slice.call(listEl.querySelectorAll('.gl-grp'));
         function apply(){
       var v=q.value.trim().toLowerCase(),shown=0;
-      var latin=/^[a-z0-9 .+\-]+$/.test(v),re=latin&&v?new RegExp('(^|[^a-z0-9])'+v.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')):null;
-      items.forEach(function(el){var h=el.getAttribute('data-h'),ok=!v||(re?re.test(h):h.indexOf(v)>-1);el.hidden=!ok;if(ok)shown++});
-      grps.forEach(function(gp){gp.hidden=!gp.querySelector('.gl-it:not([hidden])')});
+      var latin=/^[a-z0-9 .+\-]+$/.test(v),esc2=v.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),re=latin&&v?new RegExp('(^|[^a-z0-9])'+esc2):null,hits=[];
+      function hasWord(x){return re?re.test(x):x.indexOf(v)>-1}
+      items.forEach(function(el){var h=el.getAttribute('data-h'),ok=!v||hasWord(h);el.hidden=!!v||!ok;if(ok)shown++;
+        if(v&&ok){var en=el.querySelector('.gl-t b .en').textContent.toLowerCase(),zh=el.querySelector('.gl-t b .zh').textContent.toLowerCase(),sc,why;
+          if(en===v||zh===v){sc=0;why='exact'}else if(en.indexOf(v)===0||zh.indexOf(v)===0){sc=1;why='prefix'}else if(hasWord(en)||hasWord(zh)){sc=2;why='term'}else{sc=3;why='def'}
+          hits.push({el:el,sc:sc,why:why,k:en})}});
+      /* a search shows one list, best matches first: exact, then starts with, then inside the term, then only in the definition */
+      hits.sort(function(a,b){return a.sc-b.sc||a.k.localeCompare(b.k)});
+      var WHY={exact:['Exact term','完全匹配'],prefix:['Starts with it','词首匹配'],term:['In the term','词中匹配'],def:['In the definition','出现在解释里']};
+      function mark(root){if(!v)return;var rx=new RegExp(re?'(^|[^a-z0-9])('+esc2+')':'('+esc2+')','gi'),w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),ns=[],n;while((n=w.nextNode()))ns.push(n);
+        ns.forEach(function(t){var tx=t.nodeValue;if(!rx.test(tx))return;rx.lastIndex=0;var f=document.createDocumentFragment(),last=0,m;while((m=rx.exec(tx))){var st=m.index+(re?m[1].length:0);f.appendChild(document.createTextNode(tx.slice(last,st)));var mk=document.createElement('mark');mk.textContent=tx.slice(st,st+(re?m[2]:m[1]).length);f.appendChild(mk);last=st+mk.textContent.length;if(m[0].length===0)rx.lastIndex++}f.appendChild(document.createTextNode(tx.slice(last)));t.parentNode.replaceChild(f,t)})}
+      resEl.innerHTML='';
+      hits.forEach(function(h){var c=h.el.cloneNode(true);c.hidden=false;c.removeAttribute('id');c.classList.add('gl-hit');
+        var chip=document.createElement('span');chip.className='why';chip.innerHTML='<span class="en">'+WHY[h.why][0]+'</span><span class="zh">'+WHY[h.why][1]+'</span>';
+        var ttl=c.querySelector('.gl-t');ttl.appendChild(chip);mark(c.querySelector('.gl-t b'));mark(c.querySelector('.gl-d'));resEl.appendChild(c)});
+      listEl.hidden=!!v;
       none.hidden=shown>0;
       stat.innerHTML=(v?shown+' <span class="en">of</span><span class="zh">/</span> ':'')+items.length+' <span class="en">terms</span><span class="zh">个词</span>';
     }
