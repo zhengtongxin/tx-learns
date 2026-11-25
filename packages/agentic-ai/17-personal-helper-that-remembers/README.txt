@@ -13,7 +13,7 @@ Kaki, a small errand-running helper made of two parts:
   checker  a second model that returns a structured Verdict (feedback, done, need_human)
            by reading the worker's reply AND the list of tools it really called
 You give Kaki an errand and a "done means" line. The default errand is "find three
-kopitiams near SS2 that open before 7am and sell half-boiled eggs, write them to kopi.md
+kopitiams near Tiong Bahru that open before 7am and sell half-boiled eggs, write them to kopi.md
 and ping my phone with the best one".
 
 FOLDER STRUCTURE
