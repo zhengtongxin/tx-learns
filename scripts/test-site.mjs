@@ -3,7 +3,8 @@
 // It opens a local copy of the site in a headless browser and uses it the way a reader does. No AI, about ten seconds.
 //   language    EN/中文 switch changes the page language and the tab title, and is remembered
 //   theme       the theme button switches and is remembered
-//   progress    "Mark lesson as completed" is stored, shown, undone, and the home page then offers to continue
+//   progress    a lesson counts as done once the reader reaches its end (one "Lesson done" event, once), and the home page then
+//               offers to continue with the next lesson
 //   feedback    "Was this lesson clear?" sends one anonymous event (lesson and answer only), thanks the reader, asks once
 //   pager       a lesson links to the next lesson of its track
 //   quiet       no request leaves the site, and no analytics script loads while it is switched off
@@ -63,17 +64,16 @@ try {
   });
 
   await test('progress', async page => {
+    const end = async () => { await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight)); await page.waitForFunction(k => { try { return !!JSON.parse(localStorage.getItem('learn-done') || '{}')[k]; } catch { return false; } }, key, { timeout: 5000 }); };
     await page.goto(base + lesson);
-    await page.click('.mark-done');
-    eq((await store(page, 'learn-done'))[key], 1, 'the lesson in the stored progress');
-    ok((await page.textContent('.mark-done')).includes('✓'), 'the button should show the lesson as completed');
+    ok(!(await store(page, 'learn-done') || {})[key], 'a lesson that was only opened must not count as done');
+    await end();
     eq((await events(page)).filter(e => e.name === 'Lesson done').map(e => e.data), [{ lesson: key }], 'the "Lesson done" event');
+    await page.reload(); await end();
+    eq((await events(page)).filter(e => e.name === 'Lesson done').length, 0, '"Lesson done" events on a second read');
     await page.goto(base + 'index.html');
     const href = await page.getAttribute('a[data-start]', 'href');
     ok(L.length < 2 || href.endsWith(L[1].path), `the home button should continue at ${L[1] && L[1].path}, it points at ${href}`);
-    await page.goto(base + lesson);
-    await page.click('.mark-done');
-    ok(!(await store(page, 'learn-done'))[key], 'a second click should undo it');
   });
 
   await test('feedback', async page => {

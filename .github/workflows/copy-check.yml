@@ -74,19 +74,16 @@ jobs:
             && { node -e "require(process.argv[1]+'/node_modules/playwright').chromium.launch().then(b=>b.close())" "$RUNNER_TEMP/pw" 2>/dev/null || "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium >/dev/null; }; } \
             || { echo "::notice::The browser could not be installed, so the phone fit was skipped on this run."; exit 0; }
           PLAYWRIGHT_DIR="$RUNNER_TEMP/pw" node scripts/ui-check.mjs --fit --out "$RUNNER_TEMP/fit" --pages "$pages" | tee fit.txt; exit ${PIPESTATUS[0]}
-      - name: Shared script tests (only when assets/site.js or assets/search.js changed)
+      - name: Shared script tests (only when assets/site.js changed)
         if: (success() || failure()) && github.event_name == 'pull_request'
         run: |
           [ -f scripts/test-site.mjs ] || exit 0
-          git diff --name-only origin/main HEAD 2>/dev/null | grep -qE '^assets/(site|search)\.js$|^scripts/test-site\.mjs$' || { echo "The shared site script did not change."; exit 0; }
+          git diff --name-only origin/main HEAD 2>/dev/null | grep -qE '^assets/site\.js$|^scripts/test-site\.mjs$' || { echo "The shared site script did not change."; exit 0; }
           [ -x "$RUNNER_TEMP/pw/node_modules/.bin/playwright" ] || { echo "::notice::No browser on this run, so the shared script tests were skipped."; exit 0; }
           PLAYWRIGHT_DIR="$RUNNER_TEMP/pw" node scripts/test-site.mjs | tee site-tests.txt; code=${PIPESTATUS[0]}
           # 2 means the tests could not start (no browser): a notice, not a failed check.
           if [ "$code" = 2 ]; then echo "::notice::The shared script tests could not start on this run."; exit 0; fi
           exit "$code"
-      - name: Search index (a note, never a gate)
-        if: success() || failure()
-        run: "[ -f scripts/search-index.mjs ] && { node scripts/search-index.mjs --check || echo '::notice::The related-lessons file is behind. The writer agent rebuilds it; or run node scripts/search-index.mjs.'; }; exit 0"
       - name: Tell TX on Telegram
         if: failure()
         env:

@@ -123,7 +123,7 @@ vm.runInNewContext(readFileSync(new URL('tracks.js', root), 'utf8'), tracksCtx, 
 const trackMeta = Object.fromEntries(tracksCtx.window.TRACKS.map(t => [t.id, t]));
 const LEVELS = { 1: 'Beginner', 2: 'Intermediate', 3: 'Advanced' };
 const sha = (...fs) => createHash('sha1').update(fs.map(f => readFileSync(new URL(f, root))).reduce((a, b) => Buffer.concat([a, b]), Buffer.alloc(0))).digest('hex').slice(0, 8);
-const hashOf = f => f === 'assets/site.js' ? sha('assets/site.js', 'assets/search.js') : sha(f); // site.js hands its version on to search.js
+const hashOf = f => sha(f);
 const VERSIONED = /^assets\/(site|teach|build-concepts)\.(js|css)$|^tracks\.js$|^[\w-]+\/lessons\.js$|^[\w-]+\/js\/[\w-]+\.js$/;
 const REF = /(\b(?:src|href)=")([^"?#]*)(\?v=[0-9a-f]*)?(")/g;
 const resolve = (page, ref) => { const parts = page.split('/').slice(0, -1); for (const seg of ref.split('/')) { if (seg === '..') parts.pop(); else if (seg !== '.' && seg) parts.push(seg); } return parts.join('/'); };
@@ -186,8 +186,6 @@ for (const p of pages) {
   for (const m of (FIX ? next : cur).matchAll(REF)) { const t = resolve(p, m[2]); if (/^assets\/(site|teach|build-concepts)\.(js|css)$|^[\w-]+\/js\/[\w-]+\.js$/.test(t) && !m[3]) unversioned.push(`${p}: ${m[2]}`); }
 }
 for (const u of unversioned) bad(u.split(':')[0], 'asset cached as immutable has no ?v= version: ' + u.split(': ')[1]);
-// assets/site.js loads assets/search.js itself and must pass its own ?v= on, because search.js is cached as immutable too.
-if (!readFileSync(new URL('assets/site.js', root), 'utf8').includes("'search.js'+(m.src.match(/\\?.*$/)||[''])[0]")) bad('assets/site.js', "must load search.js with site.js's own ?v= (q.src=m.src.replace(/site\\.js.*$/,'search.js'+...)); search.js is cached as immutable");
 
 // Moved or renamed pages: scripts/redirects.json [{from,to}] becomes vercel.json redirects. A published URL is never deleted.
 let moves = [];

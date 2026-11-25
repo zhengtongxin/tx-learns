@@ -170,7 +170,6 @@ jobs:
           6. Every .en block needs a matching, natural .zh block.
           7. Run `node scripts/check-copy.mjs`, `node scripts/check-counts.mjs` and `node scripts/check-pages.mjs` and fix everything they report until all pass.
              Then run `node scripts/check-pages.mjs --fix`: it updates sitemap.xml, the lesson list and the lesson's updated date.
-             Then run `node scripts/search-index.mjs`: it updates the related-lessons file (assets/related.json).
              Start from agentic-ai/_template.html (copy it into <track>/): fill in its <title> and its description and og: tags with the lesson's own title and hero line.
           8. Before you finish, read your lesson once as that newcomer: every term is explained before it is used, every
              quiz answer was taught, no step's code uses something a later step creates, and each code box is complete
@@ -190,7 +189,7 @@ jobs:
           TURNS=80; [ -f scripts/max-turns.mjs ] && TURNS=$(node scripts/max-turns.mjs writer 80 --floor 30 || echo 80)
           curl -fsS -o /tmp/claude-run.mjs "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/scripts/claude-run.mjs" && CC="node /tmp/claude-run.mjs writer" || CC=claude
           $CC --model sonnet --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/writer-prompt.md)" --max-turns "$TURNS" \
-            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(node scripts/check-counts.mjs:*),Bash(node scripts/check-pages.mjs:*),Bash(node scripts/search-index.mjs:*),Bash(ls:*)" \
+            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(node scripts/check-counts.mjs:*),Bash(node scripts/check-pages.mjs:*),Bash(ls:*)" \
             --output-format text | tail -40
           # Drop scratch files the writer made outside the site (e.g. a .gen/ page generator), so they never deploy.
           keep=$(node -e "global.window={};require('./tracks.js');console.log(window.TRACKS.map(t=>t.id).join('|'))")
@@ -246,7 +245,6 @@ jobs:
           if [ -z "$packs" ]; then echo "No lesson was written."; echo "packed=0" >> "$GITHUB_OUTPUT"; exit 0; fi
           node scripts/writer-batch.mjs apply $packs
           node scripts/check-pages.mjs --fix
-          [ -f scripts/search-index.mjs ] && node scripts/search-index.mjs
           echo "packed=$(echo $packs | wc -w)" >> "$GITHUB_OUTPUT"
           first=$(echo $FOLDERS | awk '{print $1}' | cut -d/ -f2 | tr -cd 'a-z0-9-' | cut -c1-40)
           n=$(echo $FOLDERS | wc -w)

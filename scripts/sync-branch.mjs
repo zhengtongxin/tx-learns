@@ -54,7 +54,7 @@ for (const f of conflicted) {
 /* The generated files are rebuilt with main's trusted scripts. --fix also updates the ?v= hashes in the track's other pages
    when lessons.js changes; the page check needs that, so it is kept. */
 git('checkout', 'origin/main', '--', 'scripts');
-for (const cmd of [['scripts/check-pages.mjs', '--fix'], ['scripts/search-index.mjs']]) {
+for (const cmd of [['scripts/check-pages.mjs', '--fix']]) {
   try { execFileSync('node', cmd, { stdio: 'inherit' }); } catch { skip(cmd[0] + ' failed after the merge'); }
 }
 git('add', '-A');
