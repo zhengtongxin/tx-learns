@@ -4,7 +4,7 @@ window.TRACK={id:'ai-leader',title:{en:'AI Leader',zh:'AI 领导者'},topics:[
   {k:'f',title:{en:"What AI agents can do for a business",zh:"AI 智能体能为企业做什么"}},
   {k:'c',title:{en:"The GenAI map: models, tools and where they fit",zh:"生成式 AI 全景图：模型、工具和各自的位置"}},
   {k:'c',title:{en:"LLMs for the business: strengths, limits and risks",zh:"大模型对企业：优势、局限与风险"}},
-  {k:'c',title:{en:"Who sells what: types of AI company and offering",zh:"谁在卖什么：AI 公司与产品的类型"}},
+  {k:'c',file:'04-who-sells-what-in-ai.html',title:{en:"Who sells what: types of AI company and offering",zh:"谁在卖什么：AI 公司与产品的类型"}},
   {k:'c',title:{en:"Where to put the AI money",zh:"AI 的钱该投在哪"}}]},
  {n:2,level:2,title:{en:"Making the call with the tech team",zh:"和技术团队一起做决定"},items:[
   {k:'f',title:{en:"Sponsoring an AI project by making the key decisions",zh:"当 AI 项目的发起人：做好关键决定"}},
