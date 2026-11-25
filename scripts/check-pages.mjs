@@ -213,7 +213,6 @@ for (const m of moves) {
     h('/assets/(site\\.js|site\\.css|teach\\.js|teach\\.css|build-concepts\\.js|search\\.js)', 'public, max-age=31536000, immutable'),
     // each lesson's own script (<track>/js/NN-slug.js) is versioned the same way
     h('/(' + TR.map(t => t.dir).join('|') + ')/js/(.+\\.js)', 'public, max-age=31536000, immutable'),
-    h('/assets/fonts/(.+\\.woff2)', 'public, max-age=31536000, immutable'),
     h('/assets/(.+\\.(?:svg|png|jpg|ico|webp))', 'public, max-age=3600, stale-while-revalidate=86400'),
   ], redirects: moves.filter(m => m && m.from && m.to).map(m => ({ source: m.from, destination: m.to, permanent: true })) };
   if (!want.redirects.length) delete want.redirects;
