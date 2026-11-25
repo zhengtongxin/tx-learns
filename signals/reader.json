@@ -2,97 +2,105 @@
  "lessons": {
   "agentic-ai/01-agentic-workflow.html": {
    "score": 8,
-   "at": "2026-11-25T06:46:25.950Z",
+   "at": "2026-11-25T06:58:22.596Z",
    "confusing": [
     {
-     "where": "Step 2 · Watch the agent run",
-     "why": "I cannot picture how the model 'asks' for a tool. This is the core handoff of the lesson, and it is only explained later, in Lesson 5."
+     "where": "Step 2, after the log",
+     "why": "The two model steps in the log add up to that total (520 + 780 tokens), but the lesson never says so, so the total looks like it came from nowhere."
     },
     {
-     "where": "Step 1 · What is n8n, and what is an agent made of?",
-     "why": "The word 'loop' is used here, before Step 2 explains it."
+     "where": "Step 2, the think, act, observe loop",
+     "why": "It is not clear who decides the agent is finished: the model saying so, or n8n stopping it."
     }
    ]
   },
   "agentic-ai/02-agents-and-patterns.html": {
-   "score": 7,
-   "at": "2026-11-25T06:46:25.950Z",
+   "score": 6,
+   "at": "2026-11-25T06:58:22.596Z",
    "confusing": [
     {
-     "where": "Step 2 · What you just did",
-     "why": "Three definitions in a row read like three different answers. The zoom-level picture helps, but I did not know which one to keep."
+     "where": "Step 3, the workflow vs agent table",
+     "why": "Step 3 says a workflow is where your code picks the next step. Step 4's routing pattern uses a model to pick a branch, yet it is still called a workflow. The explanation (the model only picks from rou"
     },
     {
-     "where": "Step 2 · What you just did (code sketches)",
-     "why": "The workflow box calls ask_llm and the agent box calls ask_model, for the same kind of call. I wondered if they were different things."
+     "where": "Step 2, the two code sketches",
+     "why": "The workflow sketch defines ask_llm(text), but the agent sketch calls ask_llm(history, tools) with a different shape. A newcomer cannot tell whether these are one function."
     },
     {
-     "where": "Step 2 · What you just did",
-     "why": "I do not know who these are or what they said, so I could not judge the claim."
+     "where": "Step 2, the three views of an agent",
+     "why": "It names two companies for a claim the reader cannot check, with no link and no date beyond late 2024."
     }
    ]
   },
   "agentic-ai/03-first-api-calls.html": {
-   "score": 8,
-   "at": "2026-11-25T06:46:25.950Z",
+   "score": 7,
+   "at": "2026-11-25T06:58:22.596Z",
    "confusing": [
     {
-     "where": "Step 1 · Keep your key safe (checklist)",
-     "why": "The Step 2 cell that holds this line ends with a different print, so I could not tell where True would show up."
+     "where": "Step 2, the explanation above the code",
+     "why": "The code is client = OpenAI() with no key passed in. The lesson never says the client reads OPENAI_API_KEY on its own. Only the quiz feedback explains it, after the reader has already guessed."
     },
     {
-     "where": "What you need",
-     "why": "f-string first appears in the Step 3 code (f\"\"\") and is only explained in the callout after that code."
+     "where": "Step 2, the explanation of the response",
+     "why": "The lesson tells you to read response.choices[0].message.content but never shows what response looks like."
+    },
+    {
+     "where": "Now make it yours, item 2",
+     "why": "Chinese text has a stray space between AI and 智能体 in this sentence and in the last checklist item. It reads as a patch, not as one sentence."
     }
    ]
   },
   "agentic-ai/04-many-models.html": {
-   "score": 7,
-   "at": "2026-11-25T06:46:25.950Z",
+   "score": 6,
+   "at": "2026-11-25T06:58:22.596Z",
    "confusing": [
     {
-     "where": "Step 2 · One code shape, three swaps",
-     "why": "Then the same thing is called 'the address base_url'. Two names for one thing made me wonder if they differ."
+     "where": "Step 5, the story of the question",
+     "why": "The question was meant for a kopitiam customer, but the judge example asks about truth or trust. The reader asks how a coffee shop question became a philosophy question, and the lesson says real custo"
     },
     {
-     "where": "Step 5 · Be the judge",
-     "why": "'Rubric' is never defined. I guessed it meant the judging rule."
+     "where": "Step 5, the judge prompt",
+     "why": "The doubled braces {{ }} inside the f-string print single braces. Lesson 3 only taught {name} inside f-strings, so this is a new rule that is never explained."
     },
     {
-     "where": "One after another (callout)",
-     "why": "async is a new idea dropped in a side note, with no example. I could not tell if I needed it."
+     "where": "Step 5, reading the verdict",
+     "why": "The judge prompt is built but never sent to a model. The reply is typed in by hand, so the reader cannot see where the real reply comes from."
     }
    ]
   },
   "agentic-ai/05-autonomy-and-tools.html": {
    "score": 7,
-   "at": "2026-11-25T06:46:25.950Z",
+   "at": "2026-11-25T06:58:22.596Z",
    "confusing": [
     {
-     "where": "Step 4 · Loop (quiz 'Mei shares two emails in one message')",
-     "why": "This says one round can handle two tool requests, but the quiz answers 'while' for two emails. The lesson contradicts itself."
+     "where": "Step 2, the PDF code",
+     "why": "The prerequisites list only the openai and gradio packages. The code needs pypdf, which appears only in a comment."
     },
     {
-     "where": "Step 4 · Loop (handle_tool_calls code)",
-     "why": "**arguments is used here with no explanation. It is only explained in Lesson 6, after I need it."
+     "where": "Step 3, the tools list",
+     "why": "The extra wrapper with type and function is never explained, so the reader does not know why the description is nested inside another dictionary."
     },
     {
-     "where": "Step 3 · Tool (JSON description)",
-     "why": "The literal ??? looks like a bug until the quiz asks me to fill it in."
+     "where": "Step 2, the input file",
+     "why": "Lesson 6's package ships twin/linkedin.txt, not a PDF. The reader does not know which file to use."
     }
    ]
   },
   "agentic-ai/06-career-agent.html": {
-   "score": 8,
-   "at": "2026-11-25T06:46:25.950Z",
+   "score": 7,
+   "at": "2026-11-25T06:58:22.596Z",
    "confusing": [
     {
-     "where": "Step 4 · From a tool name to a real call",
-     "why": "The quiz asks which approach needs fewer changes and the answer is globals(). The warning then says not to use it. I was unsure which to pick."
+     "where": "Step 4, the explicit dictionary quiz",
+     "why": "The quiz asks you to choose an explicit dictionary before the warning box explains it, and no example dictionary is shown anywhere. The reader can only guess what it looks like."
     },
     {
-     "where": "Where we left off",
-     "why": "Two stories run at once (Alex's twin, then Kopi Corner in 'What changed'). I had to track which one was the main example."
+     "where": "Step 2, the tool description",
+     "why": "It promises more than the lesson can guarantee. The reader may think Always use this tool means the tool always fires."
+    },
+    {
+     "where": "Step 5, privacy and abuse",
+     "why": "It says to cap the calls but not how. The reader cannot tell how to limit the buzz."
     }
    ]
   },
