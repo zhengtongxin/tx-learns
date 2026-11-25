@@ -250,6 +250,20 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 .tip .nstat{margin:0;font:12px var(--mono);color:var(--mut)}.tip .nstat b{color:var(--ok);font-size:14px}
 .bcn.nhot,.bcn:has(.nhot){border-color:var(--acc)}.bcn a{transition:background-color .2s}
 @media(prefers-reduced-motion:reduce){#guards .guard,.bcn a{transition:none}}
+/* round 3: guardrail icons, nicer concept chips (no number pills; concept clicks only open the note) */
+#guards .guard{gap:12px;justify-content:flex-start}
+#guards .guard .gi{flex:none;width:34px;height:34px;display:grid;place-items:center;border-radius:10px;font-size:17px;background:color-mix(in srgb,var(--ok) 14%,transparent);border:1px solid color-mix(in srgb,var(--ok) 30%,transparent);transition:transform .2s}
+#guards .guard:hover .gi,#guards .guard:focus-visible .gi,#guards .guard.nhot .gi{transform:scale(1.08)}
+#guards .guard .gt{flex:1}
+.cgrid{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-top:22px}
+#cgrid2{margin-top:10px}
+.bcn{border-radius:12px;border:1px solid var(--line);background:var(--glass);transition:border-color .2s,transform .2s,background-color .2s}
+.bcn.rec{border-color:color-mix(in srgb,var(--acc) 45%,var(--line));background:color-mix(in srgb,var(--acc) 7%,var(--glass))}
+.bcn:hover,.bcn:has(a:focus-visible),.bcn:has(.nhot){border-color:var(--acc);transform:translateY(-1px)}
+.bcn a{padding:11px 13px;cursor:pointer}
+.bcn .ic{width:34px;height:34px;border-radius:10px;font-size:18px}
+.bcn b{font-size:14px}
+@media(prefers-reduced-motion:reduce){.bcn,#guards .guard .gi{transition:none}.bcn:hover{transform:none}}
 </style><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://tx-learns.vercel.app/ecosystem.html","url":"https://tx-learns.vercel.app/ecosystem.html","name":"How TX Learns works","description":"My learning notes, turned into lessons by AI. They go live after automatic checks and review, get watched afterwards, and a merge that breaks the site is rolled back automatically.","inLanguage":["en","zh"],"isPartOf":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"How TX Learns works","item":"https://tx-learns.vercel.app/ecosystem.html"}]}]}</script></head><body>
 <main class="wide eco">
 <header class="stage compact eco-hero"><div class="orb"></div>
@@ -285,7 +299,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 
 <section id="concepts">
 <h2><span class="en">Ideas to learn</span><span class="zh">可以学的概念</span></h2>
-<p><span class="en">What the site is built from. Tap one for the lesson that explains it.</span><span class="zh">网站用到的想法。点一下进入讲解它的课。</span></p>
+<p><span class="en">What the site is built from. Hover or tap one to see what it is.</span><span class="zh">网站用到的想法。移上去或点一下，看它是什么。</span></p>
 <ul class="cgrid" id="cgrid"></ul>
 <ul class="cgrid" id="cgrid2"></ul>
 </section>
@@ -389,7 +403,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     recall:{c:5,y:RP,agent:'recall'},
     quality:{c:3,y:RP,agent:'quality'},
     scope:{c:4,y:RM,agent:'scope-guard'},
-    opt:{c:2,y:RM,agent:'optimizer'},
+    opt:{c:0,y:RP,agent:'optimizer'},
     imp:{c:2,y:RP,agent:'improver'},
     news:{c:1,y:RP,agent:'news'}};
   function geo(n){var a=(n.agent&&!n.short)||n.tg,w=n.w||(a?AW:NW),h=n.h||(a?AH:NH),x=X(n.c)+(n.dx||0);return {x:x,y:n.y,w:w,h:h,l:x-w/2,r:x+w/2,t:n.y-h/2,b:n.y+h/2}}
@@ -469,7 +483,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     if(PIN){var pe=svg.querySelector('[data-agent="'+PIN+'"]');if(pe)showTip(pe,S,true);else hideTip()}}
     // phone version: the same layers as an ordered list
     var L=[['Write','写成课',['src','notes','writer']],['Check','检查',['test','cc','reader','reviewer','prev','scope','ui']],['Publish','发布',['main','live','readers']],['Keep watching','持续巡检',['livecheck','quality','recall','tg','opt','imp','news']]];
-    var PLAT={};[[0,['src']],[1,['notes','news']],[2,['writer','reader','reviewer','opt','imp']],[3,['test','cc','main','quality']],[4,['prev','scope','live','livecheck']],[5,['ui','tg','readers','recall']]].forEach(function(c){c[1].forEach(function(k){PLAT[k]=c[0]})});
+    var PLAT={};[[0,['src','opt']],[1,['notes','news']],[2,['writer','reader','reviewer','imp']],[3,['test','cc','main','quality']],[4,['prev','scope','live','livecheck']],[5,['ui','tg','readers','recall']]].forEach(function(c){c[1].forEach(function(k){PLAT[k]=c[0]})});
     function li(id){var pl=PLAT[id]===3||PLAT[id]===4?'<span class="lk">'+COLS[PLAT[id]][0]+'</span>':'',n=N[id],a=n.agent&&NAME[n.agent],s=a&&S[a.id],st=stOf(s);
       if(n.tg){var nm=function(L){return L.map(function(a){return a.en.replace(/ agent$/,'')}).join(', ')},nz=function(L){return L.map(function(a){return a.zh.replace(/ agent$/,'')}).join('、')},al=TG().filter(function(a){return a.tga}),pr=TG().filter(function(a){return !a.tga});
         return '<li class="it">'+t('Telegram → me','Telegram → 我')+'<small>'+t('every run: '+nm(al),'每次运行：'+nz(al))+'</small><small>'+t('only on a problem: '+nm(pr),'只在出问题时：'+nz(pr))+'</small></li>'}
@@ -506,10 +520,9 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     if(y+th>innerHeight-8&&r.top-th-8>60)y=r.top-th-8;
     TIP.style.left=(x+scrollX)+'px';TIP.style.top=(y+scrollY)+'px';el.classList.add('hot')}
   // Short labels with the explanation in the shared popup: hover or focus shows it, click or tap pins it, Escape closes it.
-  // link=1: a link (concepts). On a touch screen the first tap shows the note and the link inside it opens the lesson.
+  // link=1: the chip is a link (concepts) but clicking only shows the note; the link to the lesson is inside the note.
   function wireNote(el,title,html,link){
-    var touch=window.matchMedia('(hover:none)');
-    function show(pin){TIP.classList.toggle('pin',!!pin);TIP.style.setProperty('--h','var(--acc)');
+        function show(pin){TIP.classList.toggle('pin',!!pin);TIP.style.setProperty('--h','var(--acc)');
       TIP.innerHTML='<button class="x" aria-label="Close">×</button><h5>'+title+'</h5>'+html;TIP.querySelector('.x').onclick=hideTip;
       document.querySelectorAll('#ov .hot,.nhot').forEach(function(x){x.classList.remove('hot','nhot')});
       TIP.classList.add('on');var r=el.getBoundingClientRect(),tw=TIP.offsetWidth,th=TIP.offsetHeight,W=document.documentElement.clientWidth;
@@ -519,7 +532,6 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     el.addEventListener('mouseenter',function(){if(!PIN)show(0)});el.addEventListener('mouseleave',function(){if(!PIN)hideTip()});
     el.addEventListener('focus',function(){if(!PIN)show(0)});el.addEventListener('blur',function(){if(!PIN)hideTip()});
     el.addEventListener('click',function(ev){ev.stopPropagation();
-      if(link&&!touch.matches)return;
       if(link)ev.preventDefault();
       if(PIN==='_note'&&el.classList.contains('nhot'))hideTip();else show(1)});
     if(!link)el.addEventListener('keydown',function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();el.click()}})}
@@ -556,9 +568,10 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     ['The live site is checked','线上网站会被检查','1','check per merge','次检查／每次合并','Every live page and link, once Vercel has deployed.','Vercel 部署后检查每一页和每个链接。'],
     ['Agents never push to the site','agent 从不直接推送到网站','0','pushes to main','次直接推送到 main','Everything goes through a pull request.','一切都走 pull request。'],
     ['No silent failures, no noise','不会悄悄失败，也不吵','1','digest a day','条每日汇总','A failure, stuck PR or rollback messages me at once.','失败、PR 卡住或回滚会马上通知我。']];
+  var GI=['🔎','✅','🎯','↩️','👀','🧰','⏱️','📄','🩹','🔑','🌐','🚧','🔔'];
   (function(){
-    document.getElementById('guards').innerHTML=G.map(function(g,i){return '<li class="guard" tabindex="0" role="button" aria-label="'+esc(g[0])+'" data-i="'+i+'"><span class="gt"><b>'+t(g[0],g[1])+'</b></span><span class="stat"><b>'+g[2]+'</b> <span>'+t(g[3],g[4])+'</span></span></li>'}).join('');
-    document.querySelectorAll('#guards .guard').forEach(function(el){var g=G[el.dataset.i];wireNote(el,t(g[0],g[1]),'<p>'+t(g[5],g[6])+'</p><p class="nstat"><b>'+g[2]+'</b> '+t(g[3],g[4])+'</p>',0)})})();
+    document.getElementById('guards').innerHTML=G.map(function(g,i){return '<li class="guard" tabindex="0" role="button" aria-label="'+esc(g[0])+'" data-i="'+i+'"><span class="gi" aria-hidden="true">'+GI[i]+'</span><span class="gt"><b>'+t(g[0],g[1])+'</b></span></li>'}).join('');
+    document.querySelectorAll('#guards .guard').forEach(function(el){var g=G[el.dataset.i];wireNote(el,t(g[0],g[1]),'<p>'+t(g[5],g[6])+'</p>',0)})})();
 
 
   function kg(h,items){return '<div class="kg"><b>'+h+'</b>'+items.join('')+'</div>'}
