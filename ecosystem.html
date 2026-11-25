@@ -192,6 +192,17 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 .olist .it.ag{padding-top:0;padding-bottom:6px}.olist .it.ag::before{top:16px}
 .olist .more{margin:2px 0 8px}
 @media(max-width:760px){.dsk{display:none}.cgrid{grid-template-columns:1fr}.bcn a{min-height:44px}}
+/* step hover: light up the boxes and arrows of one step, dim the rest (nothing is hidden or collapsed) */
+#system [data-s]{transition:opacity .28s ease}
+#system[data-f="1"] [data-s]:not([data-s~="1"]),#system[data-f="2"] [data-s]:not([data-s~="2"]){opacity:.2}
+#system[data-f="3"] [data-s]:not([data-s~="3"]){opacity:.2}
+#system[data-f="4"] [data-s]:not([data-s~="4"]){opacity:.2}
+#system[data-f="5"] [data-s]:not([data-s~="5"]){opacity:.2}
+.flow li[tabindex]{cursor:pointer;outline:none;transition:opacity .28s ease}
+.flow li[tabindex]::after{content:"";position:absolute;inset:0 -10px -6px;border-radius:8px;border:1px solid transparent;transition:border-color .28s,background-color .28s;pointer-events:none}
+.flow li.on::after,.flow li:focus-visible::after{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 7%,transparent)}
+#system[data-f] .flow li[tabindex]:not(.on){opacity:.55}
+@media(prefers-reduced-motion:reduce){#system [data-s],.flow li[tabindex],.flow li[tabindex]::after{transition:none}}
 /* round 2b: simple flow, case study, folded details, nav, health */
 .cta{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 0}
 .btn{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border-radius:999px;background:var(--acc);color:#1a1200;font-weight:700;font-size:14.5px;text-decoration:none}
@@ -424,10 +435,12 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     if(n.seq)o+='<g class="seq"><rect x="'+f(g.l-6)+'" y="'+(g.t-9)+'" width="20" height="17" rx="2"/><text x="'+f(g.l+4)+'" y="'+(g.t+3)+'" text-anchor="middle">'+n.seq+'</text></g>';
     if(n.lock)o+='<g class="lock" transform="translate('+f(g.r-13)+','+(g.t+12)+')">'+LOCK+'</g>';
     return o+'</g>'}
-  function e(cls,d,ag){var a=ag&&NAME[ag];return '<path class="e '+cls+'" d="'+d+'"'+(a?' style="stroke:'+a.hue+'"':'')+' marker-end="url(#ah'+(a?'-'+ag:'')+')"/>'}
-  function lab(x,y,en,zh,anc,ag){var a=ag&&NAME[ag];return '<text class="lb" x="'+f(x)+'" y="'+f(y)+'" text-anchor="'+(anc||'middle')+'"'+(a?' style="fill:color-mix(in srgb,'+a.hue+' 75%,var(--fg))"':'')+'>'+ts(en,zh)+'</text>'}
-  function H(a,b,ag){var A=geo(N[a]),B=geo(N[b]);return e('','M'+f(A.r)+','+A.y+' H'+f(B.l-2),ag)}
+  function e(cls,d,ag,st){var a=ag&&NAME[ag];return '<path class="e '+cls+'" d="'+d+'"'+(st?' data-s="'+st+'"':'')+(a?' style="stroke:'+a.hue+'"':'')+' marker-end="url(#ah'+(a?'-'+ag:'')+')"/>'}
+  function lab(x,y,en,zh,anc,ag,st){var a=ag&&NAME[ag];return '<text class="lb"'+(st?' data-s="'+st+'"':'')+' x="'+f(x)+'" y="'+f(y)+'" text-anchor="'+(anc||'middle')+'"'+(a?' style="fill:color-mix(in srgb,'+a.hue+' 75%,var(--fg))"':'')+'>'+ts(en,zh)+'</text>'}
+  function H(a,b,ag,st){var A=geo(N[a]),B=geo(N[b]);return e('','M'+f(A.r)+','+A.y+' H'+f(B.l-2),ag,st)}
   var LIVE=false;
+  // which of the five steps each box belongs to (space separated), for the step hover highlight
+  var FS={src:'1',notes:'1 2',writer:'2',test:'2 3',prev:'3',reader:'3',reviewer:'3 4',cc:'3 4',scope:'3',ui:'3',main:'4',live:'4 5',readers:'4 5',livecheck:'5',quality:'5',recall:'5'};
   function drawOverview(S){
     var o=DEFS;
     COLS.forEach(function(c,i){var x0=i*CW;
@@ -436,32 +449,32 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
         '<line class="rule" x1="'+f(x0+16)+'" y1="44" x2="'+f(x0+CW-16)+'" y2="44"/>'});
     var T=geo(N.test),C=geo(N.cc),M=geo(N.main),P=geo(N.prev),R=geo(N.reader),RV=geo(N.reviewer);
     // lesson path; the edges an agent produces take its colour
-    o+=H('src','notes')+H('notes','writer')+H('writer','test','writer')+H('test','prev');
-    o+=e('','M'+T.x+','+T.b+' V'+(C.t-2),'copy-check')+e('','M'+T.x+','+C.b+' V'+(M.t-2),'copy-check');
-    o+=H('main','live')+H('live','readers');
-    o+=lab(T.x+8,(C.b+M.t)/2+3,'checks pass','检查通过','start','copy-check')+lab(T.x+8,(T.b+C.t)/2+3,'every PR','每个 PR','start','copy-check');
-    o+=lab((geo(N.writer).r+T.l)/2,T.y-8,'PR','PR','middle','writer');
+    o+=H('src','notes','','1')+H('notes','writer','','2')+H('writer','test','writer','2')+H('test','prev','','3');
+    o+=e('','M'+T.x+','+T.b+' V'+(C.t-2),'copy-check','3')+e('','M'+T.x+','+C.b+' V'+(M.t-2),'copy-check','4');
+    o+=H('main','live','','4')+H('live','readers','','4');
+    o+=lab(T.x+8,(C.b+M.t)/2+3,'checks pass','检查通过','start','copy-check','4')+lab(T.x+8,(T.b+C.t)/2+3,'every PR','每个 PR','start','copy-check','3');
+    o+=lab((geo(N.writer).r+T.l)/2,T.y-8,'PR','PR','middle','writer','2');
     // feedback loop: the reader reads each preview, its fix comes back onto the same PR (it skips its own fixes)
     var fx=T.l+30;
-    o+=e('lp','M'+P.x+','+P.t+' V'+(R.y-8)+' H'+f(R.r+2),'reader');
-    o+=e('lp','M'+f(R.r)+','+(R.y+8)+' H'+f(fx-10)+' Q'+f(fx)+','+(R.y+8)+' '+f(fx)+','+(R.y+18)+' V'+(T.t-11),'reader');
-    o+=lab((R.r+P.x)/2+50,R.y-15,'reads each preview','读每个预览','middle','reader')+lab(fx+8,(R.y+T.t)/2+14,'fixes onto the same PR','修改加到同一个 PR','start','reader');
-    o+=e('ck','M'+f(RV.r)+','+RV.y+' H'+f(M.l-2),'reviewer');
+    o+=e('lp','M'+P.x+','+P.t+' V'+(R.y-8)+' H'+f(R.r+2),'reader','3');
+    o+=e('lp','M'+f(R.r)+','+(R.y+8)+' H'+f(fx-10)+' Q'+f(fx)+','+(R.y+8)+' '+f(fx)+','+(R.y+18)+' V'+(T.t-11),'reader','3');
+    o+=lab((R.r+P.x)/2+50,R.y-15,'reads each preview','读每个预览','middle','reader','3')+lab(fx+8,(R.y+T.t)/2+14,'fixes onto the same PR','修改加到同一个 PR','start','reader','3');
+    o+=e('ck','M'+f(RV.r)+','+RV.y+' H'+f(M.l-2),'reviewer','3 4');
     // the reviewer agent also reviews each lesson PR and adds its fixes there
-    var vx=f((RV.r+C.l)/2);o+=e('lp','M'+f(RV.r)+','+(RV.y-14)+' H'+vx+' V'+(T.y+14)+' H'+f(T.l-2),'reviewer');
-    o+=lab(vx-6,RB-52,'reviews + fixes the lesson PR','审阅并修改课的 PR','end','reviewer');
+    var vx=f((RV.r+C.l)/2);o+=e('lp','M'+f(RV.r)+','+(RV.y-14)+' H'+vx+' V'+(T.y+14)+' H'+f(T.l-2),'reviewer','3');
+    o+=lab(vx-6,RB-52,'reviews + fixes the lesson PR','审阅并修改课的 PR','end','reviewer','3');
     // after each merge: the live check agent opens the real site and rolls the merge back if it broke the site;
     // the recall agent quizzes me every Sunday
     var Q=geo(N.quality),LV=geo(N.live),LC=geo(N.livecheck),RC=geo(N.recall),RD=geo(N.readers);
-    o+=e('ck','M'+LC.x+','+LC.t+' V'+(LV.b+2),'live-check')+lab(LC.x-8,LC.t-8,'checks every page','检查每一页','end','live-check');
-    var ry=f(M.b+17),rx=f(M.x+40);o+=e('lp','M'+f(LC.l+24)+','+LC.t+' V'+ry+' H'+rx+' V'+(M.b+2),'live-check')+lab(Q.x-8,LC.t-8,'rolls back a bad merge','回滚坏合并','end','live-check');
-    o+=e('ck','M'+RC.x+','+RC.t+' V'+(RD.b+2),'recall')+lab(RC.x-8,(RD.b+RC.t)/2+4,'weekly: what to review','每周：该复习什么','end','recall');
+    o+=e('ck','M'+LC.x+','+LC.t+' V'+(LV.b+2),'live-check','5')+lab(LC.x-8,LC.t-8,'checks every page','检查每一页','end','live-check','5');
+    var ry=f(M.b+17),rx=f(M.x+40);o+=e('lp','M'+f(LC.l+24)+','+LC.t+' V'+ry+' H'+rx+' V'+(M.b+2),'live-check','5')+lab(Q.x-8,LC.t-8,'rolls back a bad merge','回滚坏合并','end','live-check','5');
+    o+=e('ck','M'+RC.x+','+RC.t+' V'+(RD.b+2),'recall','5')+lab(RC.x-8,(RD.b+RC.t)/2+4,'weekly: what to review','每周：该复习什么','end','recall','5');
     // the UI check agent clicks through each preview and reports back on the PR
-    var SG=geo(N.scope);o+=e('ck','M'+f(SG.l)+','+SG.y+' H'+f(C.r+2),'scope-guard')+lab(SG.x,SG.b+16,'only what was asked','只改被要求的','middle','scope-guard');
-    var U=geo(N.ui);o+=e('ck','M'+f(P.r)+','+P.y+' H'+f(U.l-2),'ui-check')+lab(U.x,U.b+16,'status + comment on the PR','状态 + PR 上的评论','middle','ui-check');
+    var SG=geo(N.scope);o+=e('ck','M'+f(SG.l)+','+SG.y+' H'+f(C.r+2),'scope-guard','3')+lab(SG.x,SG.b+16,'only what was asked','只改被要求的','middle','scope-guard','3');
+    var U=geo(N.ui);o+=e('ck','M'+f(P.r)+','+P.y+' H'+f(U.l-2),'ui-check','3')+lab(U.x,U.b+16,'status + comment on the PR','状态 + PR 上的评论','middle','ui-check','3');
     // Telegram: the UI check agent sits right under my phone; every other agent's plane says when it pings me
-    var TGN=geo(N.tg);o+=e('ck','M'+U.x+','+U.t+' V'+(TGN.b+2),'ui-check');
-    Object.keys(N).forEach(function(k){o+=box(k,S)});
+    var TGN=geo(N.tg);o+=e('ck','M'+U.x+','+U.t+' V'+(TGN.b+2),'ui-check','3');
+    Object.keys(N).forEach(function(k){var b=box(k,S);if(FS[k])b=b.replace('<g class="nd','<g data-s="'+FS[k]+'" class="nd');o+=b});
     o+='<text class="foot" x="1084" y="592" text-anchor="end">'+ts('every run → this page','每次运行 → 这一页')+'</text>';
     var svg=document.getElementById('ov');
     if(o!==LASTO){LASTO=o;svg.innerHTML=o;
@@ -478,8 +491,8 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     function li(id){var pl=PLAT[id]===3||PLAT[id]===4?'<span class="lk">'+COLS[PLAT[id]][0]+'</span>':'',n=N[id],a=n.agent&&NAME[n.agent],s=a&&S[a.id],st=stOf(s);
       if(n.tg){var nm=function(L){return L.map(function(a){return a.en.replace(/ agent$/,'')}).join(', ')},nz=function(L){return L.map(function(a){return a.zh.replace(/ agent$/,'')}).join('、')},al=TG().filter(function(a){return a.tga}),pr=TG().filter(function(a){return !a.tga});
         return '<li class="it">'+t('Telegram → me','Telegram → 我')+'<small>'+t('every run: '+nm(al),'每次运行：'+nz(al))+'</small><small>'+t('only on a problem: '+nm(pr),'只在出问题时：'+nz(pr))+'</small></li>'}
-      if(a)return '<li class="it ag'+(OPEN===a.id?' open':'')+'" style="--h:'+a.hue+'" data-agent="'+a.id+'"'+(n.seq?' data-n="'+n.seq+'"':'')+'><button class="ob" aria-expanded="'+(OPEN===a.id)+'"><span class="st '+st+'"></span>'+t(a.en,a.zh)+pl+'</button><small class="hx">'+t(a.on[0],a.on[1])+'</small><small>'+(s?(PILL[st]||'')+' · '+ago(atOf(s))+runsOf(s):LIVE?t('no runs yet','还没运行'):t('status offline','状态离线'))+'</small>'+(a.tg?'<small class="tgl">✈ '+t('Telegram: '+a.tg[0],'Telegram：'+a.tg[1])+'</small>':'')+'<div class="more"><p>'+t(a.den,a.dzh)+'</p>'+specOf(a)+lastOf(s)+'</div></li>';
-      return '<li class="it"'+(n.seq?' data-n="'+n.seq+'"':'')+'>'+t(esc(n.en),esc(n.zh))+pl+(n.lock?'<span class="lk">'+t('REQUIRED','必过')+'</span>':'')+'<small>'+t(esc(n.m[0]),esc(n.m[1]))+'</small></li>'}
+      if(a)return '<li'+(FS[id]?' data-s="'+FS[id]+'"':'')+' class="it ag'+(OPEN===a.id?' open':'')+'" style="--h:'+a.hue+'" data-agent="'+a.id+'"'+(n.seq?' data-n="'+n.seq+'"':'')+'><button class="ob" aria-expanded="'+(OPEN===a.id)+'"><span class="st '+st+'"></span>'+t(a.en,a.zh)+pl+'</button><small class="hx">'+t(a.on[0],a.on[1])+'</small><small>'+(s?(PILL[st]||'')+' · '+ago(atOf(s))+runsOf(s):LIVE?t('no runs yet','还没运行'):t('status offline','状态离线'))+'</small>'+(a.tg?'<small class="tgl">✈ '+t('Telegram: '+a.tg[0],'Telegram：'+a.tg[1])+'</small>':'')+'<div class="more"><p>'+t(a.den,a.dzh)+'</p>'+specOf(a)+lastOf(s)+'</div></li>';
+      return '<li'+(FS[id]?' data-s="'+FS[id]+'"':'')+' class="it"'+(n.seq?' data-n="'+n.seq+'"':'')+'>'+t(esc(n.en),esc(n.zh))+pl+(n.lock?'<span class="lk">'+t('REQUIRED','必过')+'</span>':'')+'<small>'+t(esc(n.m[0]),esc(n.m[1]))+'</small></li>'}
     var lh=L.map(function(l,i){return '<li class="h">0'+(i+1)+' · '+t(l[0],l[1])+'</li>'+l[2].map(li).join('')}).join('');
     if(lh===LASTL)return;LASTL=lh;document.getElementById('ov-list').innerHTML=lh;
     // Phone: tapping an agent opens its details in place and closes any other.
@@ -487,6 +500,18 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
       document.querySelectorAll('#ov-list .it.open').forEach(function(x){x.classList.remove('open');x.querySelector('.ob').setAttribute('aria-expanded','false')});
       OPEN=was?'':it.dataset.agent;if(!was){it.classList.add('open');b.setAttribute('aria-expanded','true')}}})}
 
+  // Step hover / focus / tap: light up one step in the diagram (or the phone list), dim the rest. Click or Enter pins it, Escape clears.
+  (function(){var sys=document.getElementById('system'),steps=sys.querySelectorAll('.flow li'),pinned='';
+    function set(n){if(n)sys.setAttribute('data-f',n);else sys.removeAttribute('data-f');
+      steps.forEach(function(l,i){var on=String(i+1)===n;l.classList.toggle('on',on);l.setAttribute('aria-pressed',on&&pinned===n?'true':'false')})}
+    steps.forEach(function(l,i){var n=String(i+1);l.tabIndex=0;l.setAttribute('role','button');l.setAttribute('aria-pressed','false');
+      l.onmouseenter=function(){if(!pinned)set(n)};l.onmouseleave=function(){if(!pinned)set('')};
+      l.onfocus=function(){if(!pinned)set(n)};l.onblur=function(){if(!pinned)set('')};
+      var tog=function(){pinned=pinned===n?'':n;set(pinned||n);if(!pinned&&!l.matches(':hover')&&document.activeElement!==l)set('')};
+      l.onclick=tog;l.onkeydown=function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();tog()}}});
+    document.addEventListener('keydown',function(ev){if(ev.key==='Escape'&&pinned){pinned='';set('')}});
+    document.addEventListener('click',function(ev){if(pinned&&!ev.target.closest('.flow li')&&!ev.target.closest('#ov-panel,#ov-list')){pinned='';set('')}});
+  })();
   var LASTO='',LASTL='',LASTF='',LASTB='',PIN='',OPEN='',TIP=document.getElementById('tip');
   function runsOf(s){return s&&s.runs?' · '+t(s.runs+' runs',s.runs+' 次'):''}
   function showTip(el,S,pin){var a=NAME[el.dataset.agent],s=S[a.id];
