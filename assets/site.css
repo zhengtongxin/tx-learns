@@ -356,47 +356,45 @@ details{background:none;border:0;border-top:1px solid var(--line);border-radius:
 table{border:0;border-radius:0}
 code{background:color-mix(in srgb,var(--fg) 7%,transparent);border:0}
 /* tracks: a hairline list, two columns on wide screens */
-.track-list{gap:0 56px;margin-top:28px}
+.track-list{grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:0 clamp(24px,4vw,64px);margin-top:28px}
 .cc,.cc:hover{background:none;border:0;border-top:1px solid var(--line);border-radius:0;box-shadow:none;padding:30px 4px;transform:none}
 .cc:hover{border-top-color:var(--acc)}
 .cc .orbi{width:52px;height:52px;border-radius:16px;font-size:26px;box-shadow:none}
 .cc .go{opacity:.5}.cc:hover .go{opacity:1}
-@media(min-width:1000px){.track-list{grid-template-columns:1fr 1fr}.cc{align-items:start}}
 .statrow{border-top:0}
-/* wide screens: use the width */
-@media(min-width:1100px){
-main{max-width:880px}
-main.wide{max-width:min(1360px,90vw)}
-.toc{left:calc(50% + 468px)}
-.stage.home{text-align:left;padding:72px 0 24px;display:grid;grid-template-columns:1.25fr 1fr;gap:0 64px;align-items:end}
-.stage.home .eyebrow,.stage.home .mega,.stage.home .sub{grid-column:1}
-.stage.home .entries{grid-column:2;grid-row:1/4;justify-items:start;align-self:end}
-.stage.home .entry-main,.stage.home .cta{justify-items:start}
-.stage.home .sub{margin-left:0}
-.stage.home .mega{font-size:clamp(3rem,5.2vw,5rem)}
-.stage.home .mega br{display:inline}
-.stats{justify-content:flex-start}
-.track-ba{max-width:none}
-.whatnext{max-width:none}
-}
-@media(min-width:1500px){main.wide{max-width:min(1440px,88vw)}}
 /* tracks: topic tabs as plain underlined text, lessons as a hairline grid */
 .wtabs{background:none;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:0;gap:4px 26px;width:100%;justify-content:flex-start;backdrop-filter:none}
 .wtab,.wtab.on{background:none;border-radius:0;padding:12px 0;border-bottom:2px solid transparent;margin-bottom:-1px}
 .wtab.on{color:var(--fg);border-bottom-color:var(--acc)}
-.lgrid{gap:0 40px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.lgrid{gap:0 clamp(24px,4vw,56px);grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
 .lcard,.lcard.ready,.lcard.soon{border:0;border-top:1px solid var(--line);border-radius:0;box-shadow:none;min-height:150px;padding:20px 0}
 .lcard.ready:hover{transform:none;border-top-color:var(--acc)}
 .lcard.soon{opacity:.45}
 .lcard .n{font-size:1.8rem}
-@media(min-width:1100px){
-.stage{text-align:left}
-.stage .sub,.stage.compact .sub{margin-left:0;margin-right:0}
-.stage .cta,.stage .entries .cta{justify-content:flex-start}
-.ringbox{justify-content:flex-start}
-.orb{left:70%}
-.story{max-width:none}
-}
 .story{background:none;border:0;border-left:2px solid var(--acc2);border-radius:0;padding:2px 0 2px 18px;margin:26px 0}
 .panel{min-height:0}
 @media(max-width:720px){.wtabs{flex-wrap:nowrap;overflow-x:auto;gap:0 22px;scrollbar-width:none}.wtab{flex:none}}
+
+/* ---- fluid, centred layout: width follows the browser, no fixed columns ---- */
+main{max-width:min(880px,100% - 2*clamp(16px,4vw,48px));padding-left:0;padding-right:0}
+main.wide{max-width:min(1440px,100% - 2*clamp(16px,4vw,56px))}
+.toc{left:calc(50% + min(440px,50% - 40px) + 28px)}
+.stage,.stage.home,.stage.compact{text-align:center}
+.stage .sub,.sub{margin-left:auto;margin-right:auto;max-width:min(62ch,100%)}
+.stage .cta,.entries,.entry-main{justify-content:center;justify-items:center}
+h1,h2,h3,.mega{text-wrap:balance}
+p,li,.sub,.lead,.teach p{text-wrap:pretty}
+.stage.home .mega br,.mega br{display:none}
+main.wide h2,main.wide>section>.sub,main.wide>section>p{text-align:center;margin-left:auto;margin-right:auto}
+.stats{justify-content:center;gap:clamp(18px,5vw,56px)}
+.statrow{text-align:center}
+.track-ba{grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));max-width:min(900px,100%)}
+.wtabs{justify-content:center}
+.ringbox{justify-content:center}
+.wph{justify-content:center;text-align:center}
+.cc{text-align:left}
+.sub,.stage .sub,main.wide .sub{text-align:center}
+#guards,.guards{margin-left:auto;margin-right:auto}
+.wph{flex-direction:column;align-items:center}
+.whatnext{text-align:center;margin-left:auto;margin-right:auto}
+.pre-after,.track-ba{text-align:left}
