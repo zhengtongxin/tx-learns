@@ -1,106 +1,110 @@
 {
  "lessons": {
   "agentic-ai/01-agentic-workflow.html": {
-   "score": 8,
-   "at": "2026-11-25T06:58:22.596Z",
+   "score": 7,
+   "at": "2026-11-25T07:08:22.541Z",
    "confusing": [
     {
-     "where": "Step 2, after the log",
-     "why": "The two model steps in the log add up to that total (520 + 780 tokens), but the lesson never says so, so the total looks like it came from nowhere."
+     "where": "Step 3 · Build it yourself, step 5",
+     "why": "The steps name the nodes but not what to fill in: no credential fields, no sheet to append to, no system message for the agent. I could not build it from this page alone."
     },
     {
-     "where": "Step 2, the think, act, observe loop",
-     "why": "It is not clear who decides the agent is finished: the model saying so, or n8n stopping it."
+     "where": "Title and Step 1",
+     "why": "Lesson 2 uses 'workflow' for a route that your code fixes and 'agent' for one where the model picks the steps. This lesson's n8n build is the second kind, so the title's wording confused me."
+    },
+    {
+     "where": "Check questions after Step 3",
+     "why": "This question repeats the one before it (which step brought in the closing price). It adds no new idea, so it reads as padding."
     }
    ]
   },
   "agentic-ai/02-agents-and-patterns.html": {
-   "score": 6,
-   "at": "2026-11-25T06:58:22.596Z",
+   "score": 7,
+   "at": "2026-11-25T07:08:22.541Z",
    "confusing": [
     {
-     "where": "Step 3, the workflow vs agent table",
-     "why": "Step 3 says a workflow is where your code picks the next step. Step 4's routing pattern uses a model to pick a branch, yet it is still called a workflow. The explanation (the model only picks from rou"
+     "where": "Step 2 · the three views",
+     "why": "View 2 says the LLM controls the flow, and the same box calls a workflow its 'cousin'. I could not tell from these three what counts as an agent, and the views overlap."
     },
     {
-     "where": "Step 2, the two code sketches",
-     "why": "The workflow sketch defines ask_llm(text), but the agent sketch calls ask_llm(history, tools) with a different shape. A newcomer cannot tell whether these are one function."
+     "where": "Step 4 · routing card",
+     "why": "The router is a model that picks one branch, which sounds like the model choosing the next step. The reason it is still a workflow (the options are fixed) is only in this small note."
     },
     {
-     "where": "Step 2, the three views of an agent",
-     "why": "It names two companies for a claim the reader cannot check, with no link and no date beyond late 2024."
+     "where": "Step 2 · view 1",
+     "why": "I do not know where this quote comes from or when it was said, so I cannot tell if it is a definition the field agrees on or one person's phrase."
     }
    ]
   },
   "agentic-ai/03-first-api-calls.html": {
-   "score": 7,
-   "at": "2026-11-25T06:58:22.596Z",
+   "score": 8,
+   "at": "2026-11-25T07:08:22.541Z",
    "confusing": [
     {
-     "where": "Step 2, the explanation above the code",
-     "why": "The code is client = OpenAI() with no key passed in. The lesson never says the client reads OPENAI_API_KEY on its own. Only the quiz feedback explains it, after the reader has already guessed."
+     "where": "Step 2 · Learn",
+     "why": "The code box has more than four lines, and the lesson does not say which four are meant, so I had to guess."
     },
     {
-     "where": "Step 2, the explanation of the response",
-     "why": "The lesson tells you to read response.choices[0].message.content but never shows what response looks like."
+     "where": "Step 3 · the chain figure",
+     "why": "Call 2 passes the question straight in with no f-string, so the figure contradicts the code just below it."
     },
     {
-     "where": "Now make it yours, item 2",
-     "why": "Chinese text has a stray space between AI and 智能体 in this sentence and in the last checklist item. It reads as a patch, not as one sentence."
+     "where": "What changed",
+     "why": "Ah Seng is not introduced in this lesson, and a cup passed along a line does not explain why each reply must be pasted in by hand."
     }
    ]
   },
   "agentic-ai/04-many-models.html": {
    "score": 6,
-   "at": "2026-11-25T06:58:22.596Z",
+   "at": "2026-11-25T07:08:22.541Z",
    "confusing": [
     {
-     "where": "Step 5, the story of the question",
-     "why": "The question was meant for a kopitiam customer, but the judge example asks about truth or trust. The reader asks how a coffee shop question became a philosophy question, and the lesson says real custo"
+     "where": "Step 4 · the competition",
+     "why": "The lesson describes seven steps but shows no code for the calls to the models or the loop over them. I only saw the steps in a trace and the judge prompt."
     },
     {
-     "where": "Step 5, the judge prompt",
-     "why": "The doubled braces {{ }} inside the f-string print single braces. Lesson 3 only taught {name} inside f-strings, so this is a new rule that is never explained."
+     "where": "Step 4 and the callout in Step 5",
+     "why": "Step 4 calls sending to many models 'parallelization', but the loop in the callout later says the models are called one at a time. I could not tell whether the demo is parallel."
     },
     {
-     "where": "Step 5, reading the verdict",
-     "why": "The judge prompt is built but never sent to a model. The reply is typed in by hand, so the reader cannot see where the real reply comes from."
+     "where": "Step 5 · reading the verdict",
+     "why": "The judge prompt is built, but no line sends it to a model. The reply is a hard-coded string, so I never saw how the real reply arrives."
     }
    ]
   },
   "agentic-ai/05-autonomy-and-tools.html": {
    "score": 7,
-   "at": "2026-11-25T06:58:22.596Z",
+   "at": "2026-11-25T07:08:22.541Z",
    "confusing": [
     {
-     "where": "Step 2, the PDF code",
-     "why": "The prerequisites list only the openai and gradio packages. The code needs pypdf, which appears only in a comment."
+     "where": "Before you start (the prerequisites)",
+     "why": "The first code box installs pypdf (its comment says so), and the list does not mention it, so the first run would fail with a missing package."
     },
     {
-     "where": "Step 3, the tools list",
-     "why": "The extra wrapper with type and function is never explained, so the reader does not know why the description is nested inside another dictionary."
+     "where": "Step ② · memory",
+     "why": "The lesson says Gradio passes the history to the function, but no code connects chat() to a window, so I do not know how to run it or see it in a browser."
     },
     {
-     "where": "Step 2, the input file",
-     "why": "Lesson 6's package ships twin/linkedin.txt, not a PDF. The reader does not know which file to use."
+     "where": "Common errors",
+     "why": "The lesson tells me to cap the rounds with a counter, but the loop code has no counter, so I cannot see where it goes."
     }
    ]
   },
   "agentic-ai/06-career-agent.html": {
    "score": 7,
-   "at": "2026-11-25T06:58:22.596Z",
+   "at": "2026-11-25T07:08:22.541Z",
    "confusing": [
     {
-     "where": "Step 4, the explicit dictionary quiz",
-     "why": "The quiz asks you to choose an explicit dictionary before the warning box explains it, and no example dictionary is shown anywhere. The reader can only guess what it looks like."
+     "where": "Step 1 · the sorting game",
+     "why": "The game's visitors do not match the story. The story has Sam ask for a poem and Lee ask whether it is a real person, but the game has Lee thank the twin and Sam ask about pizza. I had to stop and che"
     },
     {
-     "where": "Step 2, the tool description",
-     "why": "It promises more than the lesson can guarantee. The reader may think Always use this tool means the tool always fires."
+     "where": "Before you start and Step 5",
+     "why": "Step 5 A presents Pushover as a required setup, but the package note calls it optional, and the prerequisites say 'free Pushover account' right after 'small one-time fee'. I do not know whether I must"
     },
     {
-     "where": "Step 5, privacy and abuse",
-     "why": "It says to cap the calls but not how. The reader cannot tell how to limit the buzz."
+     "where": "Step 5 · file split",
+     "why": "app.py is named as the home for the chat code, but no part of this page shows it, so I was left to find it in starter/ or final/ without knowing what to look for."
     }
    ]
   },
