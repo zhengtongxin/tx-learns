@@ -19,8 +19,6 @@
   window.TX={t:t,burst:burst};
   var TYPE={f:{en:'Foundations',zh:'基础'},c:{en:'Concept',zh:'概念'},p:{en:'Project',zh:'项目'}};
 
-  /* the "Related lessons" card lives in its own file (scripts/search-index.mjs builds assets/related.json) */
-  (function(m){if(m&&m.src){var q=document.createElement('script');q.src=m.src.replace(/site\.js.*$/,'search.js'+(m.src.match(/\?.*$/)||[''])[0]);q.defer=true;document.head.appendChild(q)}})(document.currentScript);
   document.addEventListener('DOMContentLoaded',function(){
     var C=window.TRACK,here=location.pathname.split('/').pop()||'index.html',d=done();
     if(C){C.all=[];C.topics.forEach(function(w){w.items.forEach(function(it,i){it.w=w.n;it.i=i+1;it.g=C.all.length+1;C.all.push(it)})});C.lessons=C.all.filter(function(x){return x.file});C.total=C.all.length}
@@ -103,7 +101,7 @@
     /* lesson: "Updated" date from <meta name="updated"> (set by node scripts/check-pages.mjs --fix, never typed) */
     var um=document.querySelector('meta[name="updated"]'),hm=document.querySelector('main .meta');
     if(um&&hm&&/^\d{4}-\d\d-\d\d$/.test(um.content)){var ud=um.content.split('-'),MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      var us=document.createElement('span');us.className='updated';us.innerHTML=' · '+t({en:'Updated '+(+ud[2])+' '+MO[ud[1]-1]+' '+ud[0],zh:'更新于 '+ud[0]+' 年 '+(+ud[1])+' 月 '+(+ud[2])+' 日'});hm.appendChild(us)}
+      var us=document.createElement('span');us.className='updated';us.innerHTML=t({en:'Updated '+(+ud[2])+' '+MO[ud[1]-1]+' '+ud[0],zh:'更新于 '+ud[0]+' 年 '+(+ud[1])+' 月 '+(+ud[2])+' 日'});hm.appendChild(us)}
 
     var LV={1:{en:'Beginner',zh:'入门'},2:{en:'Intermediate',zh:'进阶'},3:{en:'Advanced',zh:'高级'}};
     /* journey: topic tabs + lesson cards */
@@ -129,23 +127,14 @@
     function li(a){return (a||[]).map(function(x){return '<li>'+t(x)+'</li>'}).join('')}
     function renderMeta(){
       var LD={};try{LD=JSON.parse((document.getElementById('lesson-data')||{}).textContent||'{}')}catch(e){}
-      var P=LD.p,J=LD.j,hm2=document.querySelector('main .meta'),anchor=hm2&&(hm2.closest('.hero')||hm2),box;
+      var P=LD.p,J=LD.j,hm2=document.querySelector('main .meta'),anchor=hm2&&(hm2.closest('.hero')||hm2);
       /* optional P.changed={en,zh}: what changed last, shown after "Updated" */
-      if(P&&P.changed&&P.changed.en&&hm2&&!hm2.querySelector('.changed')){var cs=document.createElement('span');cs.className='changed';cs.innerHTML=' · '+t({en:'Last changed: '+P.changed.en,zh:'最近改动：'+(P.changed.zh||P.changed.en)});hm2.appendChild(cs)}
+      if(P&&P.changed&&P.changed.en&&hm2&&!hm2.querySelector('.changed')){var cs=document.createElement('span');cs.className='changed';cs.innerHTML=t({en:'Last changed: '+P.changed.en,zh:'最近改动：'+(P.changed.zh||P.changed.en)});hm2.appendChild(cs)}
       /* learning goals: optional P.goals={en:[],zh:[]}; skipped when the lesson body already has its own objectives block */
       if(P&&P.goals&&P.goals.en&&P.goals.en.length&&hm2&&!document.querySelector('main .objectives,main .goals')&&!Array.prototype.some.call(document.querySelectorAll('main h2,main h3,main .lbl'),function(h){return /learning objectives|学习目标/i.test(h.textContent)})){
         var gb=document.createElement('aside');gb.className='card goals';gb.setAttribute('aria-label','You will be able to · 学完你能');
         gb.innerHTML='<b class="lbl">'+t({en:'You will be able to',zh:'学完你能'})+'</b><ul>'+P.goals.en.map(function(e,i){return '<li>'+t({en:e,zh:P.goals.zh[i]||e})+'</li>'}).join('')+'</ul>';
         anchor.after(gb);anchor=gb}
-      if(P&&hm2){box=document.createElement('aside');box.className='card prereq';box.setAttribute('aria-label','Before you start · 开始之前');
-        var rows=[];
-        if(P.prev&&P.prev.length)rows.push(['Recommended first','建议先学','<ul>'+P.prev.map(function(f){var a=lessonLink(f);return a?'<li>'+a+(d[C.id+'/'+f]?' ✓':'')+'</li>':''}).join('')+'</ul>']);
-        if(P.tools)rows.push(['Tools and accounts','工具与账号',t(P.tools)]);
-        if(P.know)rows.push(['What you should already know','需要的基础',t(P.know)]);
-        if(P.mins)rows.push(['Total time, setup and exercises','总用时（含准备和练习）',t({en:'about '+P.mins+' minutes',zh:'约 '+P.mins+' 分钟'})]);
-        if(P.offline!==undefined)rows.push(['Works offline','能否离线',t(P.offline?(/python|node|npm|pip|package|install|key|docker|cli|sdk/i.test((P.tools&&P.tools.en)||'')?{en:'Yes, once the packages are installed',zh:'可以（装好依赖之后）'}:{en:'Yes, nothing to install',zh:'可以，无需安装'}):{en:'No, it needs an internet connection',zh:'不行，需要联网'})]);
-        box.innerHTML='<b class="lbl">'+t({en:'Before you start',zh:'开始之前'})+'</b><dl>'+rows.map(function(r){return '<dt>'+t({en:r[0],zh:r[1]})+'</dt><dd>'+r[2]+'</dd>'}).join('')+'</dl>';
-        anchor.after(box);anchor=box}
       if(J&&hm2){var pc=document.createElement('aside');pc.className='card prereq proj';pc.setAttribute('aria-label','Project card · 项目卡');
         var pk=J.pkg,fl=LD.f||[],files='';
         /* every file of the package (listed by --fix from the packages folder), grouped by folder */
@@ -168,7 +157,7 @@
         pc.addEventListener('change',function(ev){var c=ev.target;if(!c||c.type!=='checkbox'||!c.closest('.accept'))return;
           var AK='learn-accept',m=jget(AK,{}),ck=[];pc.querySelectorAll('.accept input').forEach(function(x){if(x.checked)ck.push(+x.dataset.i)});m[here]=ck;set(AK,JSON.stringify(m))});
         anchor.after(pc)}
-      if(box)fold(box,'Before you start: tools, time, what to know','开始之前：工具、时间、基础');if(typeof pc!=='undefined'&&pc)fold(pc,'Project card: goal, done when, files','项目卡：目标、完成标准、文件');
+      if(typeof pc!=='undefined'&&pc)fold(pc,'Project card: goal, done when, files','项目卡：目标、完成标准、文件');
       var ba=document.querySelector('.stage .track-ba');
       if(!ba&&window.TRACKS&&document.querySelector('.stage .ringbox')){var tr=window.TRACKS.filter(function(x){return x.id===C.id})[0];
         if(tr&&(tr.before||tr.after)){ba=document.createElement('div');ba.className='track-ba';
@@ -267,7 +256,7 @@
       side.querySelectorAll('.cg').forEach(function(g){var n=0,tot=0;g.querySelectorAll('.cg-b a[href]').forEach(function(a){var h=a.getAttribute('href')||'';if(!/\.html$/.test(h)||/(^|\/)index\.html$/.test(h))return;tot++;var on=!!d[key(a)];a.classList.toggle('done',on);if(on)n++});
         var pg=g.querySelector('.pg');if(pg&&tot)pg.textContent=n+'/'+tot})}
     /* lesson: prev/next + done + dock */
-    var db=document.querySelector('.mark-done'),idx=C?C.lessons.findIndex(function(l){return l.file===here}):-1;
+    var idx=C?C.lessons.findIndex(function(l){return l.file===here}):-1;
     if(C&&idx>-1){
       set(LAST,JSON.stringify({t:C.id,f:here}));
       var cl=C.lessons[idx],tp=C.topics.filter(function(w){return w.n===cl.w})[0],tag0=document.querySelector('main .tag');
@@ -278,9 +267,8 @@
       /* last published lesson of its topic: the What next card */
       var lastIn=C.lessons.filter(function(x){return x.w===cl.w}).pop()===cl;
       if(lastIn)whatNext(true,function(a){if(pg)pg.before(a);else{var m3=document.querySelector('main');if(m3)m3.appendChild(a)}},n,!n);
-      if(db){var key=C.id+'/'+here;
-        var lbl=function(){db.className='btn big mark-done'+(done()[key]?'':' pri');db.innerHTML=done()[key]?t({en:'✓ Completed — click to undo',zh:'✓ 已完成（点击撤销）'}):t({en:'Mark lesson as completed',zh:'标记本课已完成'})};
-        db.onclick=function(e){var x=done();if(x[key])delete x[key];else{x[key]=1;burst(e.clientX,e.clientY)}set(DONE,JSON.stringify(x));d=x;syncSide();var nn=count(C.id,CF);toast(x[key]?t({en:'Marked complete · progress '+nn+'/'+CF.length,zh:'已标记完成，进度 '+nn+'/'+CF.length}):t({en:'Marked not complete · progress '+nn+'/'+CF.length,zh:'已取消完成，进度 '+nn+'/'+CF.length}));lbl()};lbl()}
+      /* no button: a lesson counts as done once the reader scrolls to its end */
+      if(pg&&'IntersectionObserver' in window){var key=C.id+'/'+here,io=new IntersectionObserver(function(es){if(es.some(function(e){return e.isIntersecting})){io.disconnect();var x=done();if(!x[key]){x[key]=1;set(DONE,JSON.stringify(x));d=x;syncSide()}}});io.observe(pg)}
       buildToc();
       var dock=document.createElement('div');dock.className='dock';var RR=18,LL=2*Math.PI*RR;
       dock.innerHTML='<button class="dk" data-a="m" title="Menu" aria-label="Open topics menu · 打开主题菜单">☰</button>'+(p?'<a class="dk" href="'+p.file+'" title="Previous" aria-label="Previous lesson · 上一课">‹</a>':'<span class="dk off" aria-hidden="true">‹</span>')+

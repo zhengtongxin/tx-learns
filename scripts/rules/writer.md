@@ -15,4 +15,4 @@ Rules:
 - Counts are never typed: every number comes from `lessons.js`. Order is easiest first: topic `level` 1-3 never goes down the list.
 - Start from `agentic-ai/_template.html`; fill `<title>`, description and `og:` tags.
 
-Done when: `check-copy`, `check-counts`, `check-pages --fix`, `search-index` have run clean, and `.writer-summary.md` lists the title, file, topic, a 3-line story and open questions for TX.
+Done when: `check-copy`, `check-counts`, `check-pages --fix` have run clean, and `.writer-summary.md` lists the title, file, topic, a 3-line story and open questions for TX.
