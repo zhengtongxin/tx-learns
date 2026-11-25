@@ -201,7 +201,7 @@ jobs:
           git add -A -- . ':!inbox' ':!.writer-summary.md'
           git commit -m "Draft lesson from ${DIRS//$'\n'/, }" -m "Written by the content creator agent (Claude) from TX's notes."
           auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
-          git -c "http.https://github.com/.extraheader=$auth" push -u origin "$branch"
+          git -c "http.https://github.com/.extraheader=" -c "http.https://github.com/.extraheader=$auth" push -u origin "$branch"
           { echo "Draft lesson from \`${DIRS//$'\n'/\`, \`}\`, written by the content creator agent to STYLE.md."; echo;
             cat .writer-summary.md 2>/dev/null; echo; echo "Copy check: $(tail -1 /tmp/copy-check.txt)"; echo;
             echo "Next, by themselves: the intern agent reads the preview as a newcomer and adds clearer wording here if the lesson scores under 8/10,";
