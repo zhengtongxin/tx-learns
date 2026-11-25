@@ -60,15 +60,18 @@
         else body='<a href="../'+c.href+'">⌂ '+t({en:'Overview',zh:'总览'})+'</a><div class="oth" data-o="'+c.id+'"></div>';
         return '<div class="cg'+(open?' open':'')+(cur?' cur':'')+'" data-c="'+c.id+'"><button class="cg-h" aria-expanded="'+open+'" aria-controls="cgb-'+c.id+'"><span class="ic">'+(c.icon||'')+'</span><span class="tt">'+t(c.title)+'</span>'+(cur?'<span class="pg">'+count(c.id,CF)+'/'+CF.length+'</span>':'')+'<i class="chev"></i></button><div class="cg-b" id="cgb-'+c.id+'"'+(open?'':' inert')+'><div>'+body+'</div></div></div>'}).join('');
       /* Other tracks: read their lessons.js (in a throwaway window object) to list their lessons and show done/total. Without it (e.g. opened from disk) only the Overview link shows. */
-      list.forEach(function(c){if(c.id===C.id)return;
+      var loaded={};
+      function loadOther(c){if(c.id===C.id||loaded[c.id])return;loaded[c.id]=1;
         fetch('../'+c.id+'/lessons.js').then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(src){
           var w={};new Function('window',src)(w);var T=w.TRACK;if(!T||!T.topics)return;
           var files=[],h='';T.topics.forEach(function(tp){var part='';tp.items.forEach(function(l){if(l.file){files.push(l.file);part+='<a href="../'+c.id+'/'+l.file+'"'+(d[c.id+'/'+l.file]?' class="done"':'')+'>'+t(l.title)+'</a>'}else part+='<span class="soon">'+t(l.title)+'</span>'});h+='<h5>'+t(tp.title)+'</h5>'+part});
           var box=side.querySelector('.oth[data-o="'+c.id+'"]'),hd=side.querySelector('.cg[data-c="'+c.id+'"] .cg-h');
           if(box)box.innerHTML=h;
           if(hd&&files.length&&!hd.querySelector('.pg')){var sp=document.createElement('span');sp.className='pg';sp.textContent=count(c.id,files)+'/'+files.length;hd.insertBefore(sp,hd.querySelector('.chev'))}
-        }).catch(function(){})});
-      side.querySelectorAll('.cg-h').forEach(function(h){h.onclick=function(){var g=h.parentNode,o=!g.classList.contains('open');g.classList.toggle('open',o);h.setAttribute('aria-expanded',o);g.querySelector('.cg-b').inert=!o;ns[g.dataset.c]=o;try{localStorage.setItem(NK,JSON.stringify(ns))}catch(e){}}});
+        }).catch(function(){loaded[c.id]=0})}
+      /* Lazy: a track's lesson list is fetched only when its section is open (or when it is opened), not for every track on every page. */
+      list.forEach(function(c){if(ns[c.id]===true)loadOther(c)});
+      side.querySelectorAll('.cg-h').forEach(function(h){h.onclick=function(){var g=h.parentNode,o=!g.classList.contains('open');if(o)list.forEach(function(c){if(c.id===g.dataset.c)loadOther(c)});g.classList.toggle('open',o);h.setAttribute('aria-expanded',o);g.querySelector('.cg-b').inert=!o;ns[g.dataset.c]=o;try{localStorage.setItem(NK,JSON.stringify(ns))}catch(e){}}});
       scrim=document.createElement('div');scrim.className='scrim';scrim.setAttribute('aria-hidden','true');document.body.appendChild(scrim);
       document.body.appendChild(side);
       var opener=null;
@@ -202,15 +205,16 @@
         (rec.length?'<div class="rs-rec"><h3>'+t({en:'Recent lessons',zh:'最近学过'})+'</h3><ul>'+rec.map(function(k){var x=lookup[k];return '<li><a href="'+x.c.href.replace(/[^\/]*$/,'')+x.f+'">'+t(x.t)+'</a> <span class="meta">'+t(x.c.title)+(d[k]?' ✓':'')+'</span></li>'}).join('')+'</ul></div>':'')+
         (canStore()?'':'<p class="meta warn">'+t({en:'This browser is blocking saved progress.',zh:'这个浏览器禁止保存数据。'})+'</p>');
     }
-    if(window.TRACKS&&(hub||sums.length||rsm)){var q=window.TRACKS.slice();
-      (function next(){var c=q.shift();
-        if(!c){var tot={topics:0,lessons:0,published:0};window.TRACKS.forEach(function(x){tot.topics+=x.topics||0;tot.lessons+=x.total||0;tot.published+=x.published||0});
-          sums.forEach(function(el){el.dataset.count=tot[el.dataset.sum];countUp(el)});drawHub();drawResume();return}
-        var sc=document.createElement('script');sc.src=c.href.replace(/[^\/]*$/,'')+'lessons.js';
-        sc.onload=sc.onerror=function(){var T=window.TRACK;try{delete window.TRACK}catch(e){window.TRACK=undefined}
-          if(T&&T.topics){c.topics=T.topics.length;c.total=0;c.published=0;c.files=[];c.titles={};T.topics.forEach(function(w){c.total+=w.items.length;w.items.forEach(function(x){if(x.file){c.published++;c.files.push(x.file);c.titles[x.file]=x.title}})})}
-          next()};
-        document.body.appendChild(sc)})()}
+    if(window.TRACKS&&(hub||sums.length||rsm)){
+      /* Every track's lessons.js is read in parallel (fetch); a page opened from disk, where fetch is blocked, falls back to one script tag at a time. */
+      function absorb(c,T){if(T&&T.topics){c.topics=T.topics.length;c.total=0;c.published=0;c.files=[];c.titles={};T.topics.forEach(function(w){c.total+=w.items.length;w.items.forEach(function(x){if(x.file){c.published++;c.files.push(x.file);c.titles[x.file]=x.title}})})}}
+      function finish(){var tot={topics:0,lessons:0,published:0};window.TRACKS.forEach(function(x){tot.topics+=x.topics||0;tot.lessons+=x.total||0;tot.published+=x.published||0});
+        sums.forEach(function(el){el.dataset.count=tot[el.dataset.sum];countUp(el)});drawHub();drawResume()}
+      function viaScript(c,done){var sc=document.createElement('script');sc.src=c.href.replace(/[^\/]*$/,'')+'lessons.js';
+        sc.onload=sc.onerror=function(){var T=window.TRACK;try{delete window.TRACK}catch(e){window.TRACK=undefined}absorb(c,T);done()};document.body.appendChild(sc)}
+      Promise.all(window.TRACKS.map(function(c){
+        return fetch(c.href.replace(/[^\/]*$/,'')+'lessons.js').then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(src){var w={};new Function('window',src)(w);absorb(c,w.TRACK);return 0}).catch(function(){return c})
+      })).then(function(miss){var q=miss.filter(Boolean);(function next(){var c=q.shift();if(!c)return finish();viaScript(c,next)})()})}
 
     /* What next: a card pointing to the next lesson in this track or, when the track is finished, to the next track in tracks.js order. Links come from lessons.js and tracks.js. */
     function nextTrack(cb){var TS=window.TRACKS||[],i=-1;TS.forEach(function(c,k){if(C&&c.id===C.id)i=k});

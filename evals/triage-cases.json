@@ -1,0 +1,60 @@
+{
+ "about": "Golden diffs for scripts/review-triage.mjs (run by scripts/run-evals.mjs). exit 0 = generated files only, no AI review; exit 1 = the full review must run.",
+ "cases": [
+  {
+   "name": "triage: sitemap edit is generated",
+   "exit": 0,
+   "diff": "diff --git a/sitemap.xml b/sitemap.xml\n--- a/sitemap.xml\n+++ b/sitemap.xml\n@@ -1 +1 @@\n-<loc>a</loc>\n+<loc>b</loc>\n"
+  },
+  {
+   "name": "triage: a new ?v= hash on a page line is generated",
+   "exit": 0,
+   "diff": "diff --git a/index.html b/index.html\n--- a/index.html\n+++ b/index.html\n@@ -1 +1 @@\n-<script src=\"assets/site.js?v=aaaaaa1\"></script>\n+<script src=\"assets/site.js?v=bbbbbb2\"></script>\n"
+  },
+  {
+   "name": "triage: a changed page line with a hash is not generated",
+   "exit": 1,
+   "diff": "diff --git a/index.html b/index.html\n--- a/index.html\n+++ b/index.html\n@@ -1 +1 @@\n-<script src=\"assets/site.js?v=aaaaaa1\"></script>\n+<script src=\"assets/evil.js?v=bbbbbb2\"></script>\n"
+  },
+  {
+   "name": "triage: a binary change needs a review",
+   "exit": 1,
+   "diff": "diff --git a/assets/og.png b/assets/og.png\nBinary files a/assets/og.png and b/assets/og.png differ\n"
+  },
+  {
+   "name": "triage: a mode change needs a review",
+   "exit": 1,
+   "diff": "diff --git a/scripts/x.sh b/scripts/x.sh\nold mode 100644\nnew mode 100755\n"
+  },
+  {
+   "name": "triage: a rename needs a review",
+   "exit": 1,
+   "diff": "diff --git a/scripts/a.mjs b/scripts/b.mjs\nsimilarity index 100%\nrename from scripts/a.mjs\nrename to scripts/b.mjs\n"
+  },
+  {
+   "name": "triage: a code line that only mentions dateModified needs a review",
+   "exit": 1,
+   "diff": "diff --git a/agentic-ai/01-x.html b/agentic-ai/01-x.html\n--- a/agentic-ai/01-x.html\n+++ b/agentic-ai/01-x.html\n@@ -1 +1 @@\n-<p>x</p>\n+<p>dateModified x</p>\n"
+  },
+  {
+   "name": "triage: text hidden behind a meta tag on one line needs a review",
+   "exit": 1,
+   "diff": "diff --git a/agentic-ai/01-x.html b/agentic-ai/01-x.html\n--- a/agentic-ai/01-x.html\n+++ b/agentic-ai/01-x.html\n@@ -1 +1 @@\n-<p>x</p>\n+<p>x</p><meta name=\"updated\" content=\"2026-01-01\">\n"
+  },
+  {
+   "name": "triage: a code line with \"dateModified\": needs a review",
+   "exit": 1,
+   "diff": "diff --git a/agentic-ai/01-x.html b/agentic-ai/01-x.html\n--- a/agentic-ai/01-x.html\n+++ b/agentic-ai/01-x.html\n@@ -1 +1 @@\n-<p>x</p>\n+<p>\"dateModified\": x</p>\n"
+  },
+  {
+   "name": "triage: the updated meta line alone is generated",
+   "exit": 0,
+   "diff": "diff --git a/agentic-ai/01-x.html b/agentic-ai/01-x.html\n--- a/agentic-ai/01-x.html\n+++ b/agentic-ai/01-x.html\n@@ -1 +1 @@\n-<meta name=\"updated\" content=\"2026-01-01\">\n+<meta name=\"updated\" content=\"2026-01-02\">\n"
+  },
+  {
+   "name": "triage: canonical plus icon link line is generated",
+   "exit": 0,
+   "diff": "diff --git a/agentic-ai/01-x.html b/agentic-ai/01-x.html\n--- a/agentic-ai/01-x.html\n+++ b/agentic-ai/01-x.html\n@@ -1 +1 @@\n-<link rel=\"canonical\" href=\"https://a/\"><link rel=\"icon\" href=\"i.svg\">\n+<link rel=\"canonical\" href=\"https://b/\"><link rel=\"icon\" href=\"i.svg\">\n"
+  }
+ ]
+}

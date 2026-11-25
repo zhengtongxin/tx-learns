@@ -103,9 +103,34 @@ jobs:
           # Syntax check of every code box in the lessons this PR changes (nothing is run).
           lessons=$(grep -oE '^\+\+\+ b/[^ ]+/[0-9][0-9]-[^ ]+\.html' /tmp/pr.diff | sed 's|^+++ b/||' | tr '\n' ' ')
           if [ -n "$lessons" ] && [ -f scripts/check-code.mjs ]; then node scripts/check-code.mjs $lessons > /tmp/code-check.txt 2>&1 || true; else echo "No lesson code to check." > /tmp/code-check.txt; fi
+      - name: Triage without AI (generated files only)
+        id: triage
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # A pull request, or the commits since the last review, that changes only generated files (sitemap, hashes, related.json)
+          # needs no Sonnet read. The script comes from main, so the branch under review cannot change it; without it the review runs.
+          curl -fsS -o /tmp/review-triage.mjs "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/scripts/review-triage.mjs" || exit 0
+          [ "${{ steps.info.outputs.fix }}" = 1 ] && exit 0
+          skip=
+          if node /tmp/review-triage.mjs /tmp/pr.diff; then skip=1
+          else
+            # Commits since the last reviewed commit: reuse that verdict when they changed only generated files.
+            prev=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate --jq '.[].body' | grep -o 'tx-review sha=[0-9a-f]*' | tail -1 | cut -d= -f2)
+            if [ -n "$prev" ] && git cat-file -e "$prev^{commit}" 2>/dev/null \
+               && [ "$(gh api "repos/$GITHUB_REPOSITORY/commits/$prev/status" --jq '[.statuses[]|select(.context=="Reviewer")][0].state' 2>/dev/null)" = success ] \
+               && git diff "$prev" HEAD > /tmp/inc.diff && node /tmp/review-triage.mjs /tmp/inc.diff; then skip=1; fi
+          fi
+          if [ -n "$skip" ]; then
+            printf '✅ Ready to merge\n\nNo AI review needed: this change touches only generated files (sitemap, ?v= hashes, related.json, page dates), which the page check rebuilds and verifies. The copy, count and page checks still ran.\n' > /tmp/review-comment.md
+            echo "✅ Ready to merge: generated files only, no AI review needed." > /tmp/review-summary.txt
+            echo "skip=1" >> "$GITHUB_OUTPUT"
+          fi
       - name: Install Claude Code
+        if: ${{ steps.triage.outputs.skip != '1' }}
         run: npm install -g @anthropic-ai/claude-code
       - name: Review with Claude
+        if: ${{ steps.triage.outputs.skip != '1' }}
         env:
           # Prefer TX's Claude subscription (CLAUDE_CODE_OAUTH_TOKEN from `claude setup-token`); the API key is only a fallback.
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}

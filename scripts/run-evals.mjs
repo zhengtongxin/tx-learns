@@ -57,6 +57,13 @@ for (const c of ds.cases) {
   }
 }
 
+// ── 1c. The review triage (scripts/review-triage.mjs): which diffs may skip the AI review ──
+for (const c of JSON.parse(readFileSync(join(ROOT, 'evals/triage-cases.json'), 'utf8')).cases) {
+  const f = join(tmp, '.triage-case.diff'); writeFileSync(f, c.diff);
+  const r = spawnSync('node', [join(ROOT, 'scripts/review-triage.mjs'), f], { encoding: 'utf8' });
+  report(c.name, r.status === c.exit, r.status === c.exit ? '' : `exit ${r.status}, wanted ${c.exit}`);
+}
+
 // ── 2. The reviewer's judgement (optional, uses Claude) ──
 if (LLM) {
   const rv = JSON.parse(readFileSync(join(ROOT, 'evals/review-cases.json'), 'utf8'));
