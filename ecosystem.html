@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>How TX Learns works</title>
 <meta name="description" content="My learning notes, turned into lessons by AI. They go live after automatic checks and review, get watched afterwards, and a merge that breaks the site is rolled back automatically."><meta property="og:title" content="How TX Learns works"><meta property="og:description" content="My learning notes, turned into lessons by AI. They go live after automatic checks and review, get watched afterwards, and a merge that breaks the site is rolled back automatically."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ecosystem.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
-<link rel="canonical" href="https://tx-learns.vercel.app/ecosystem.html"><link rel="icon" href="assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><link rel="stylesheet" href="assets/site.css?v=38f07b40">
+<link rel="canonical" href="https://tx-learns.vercel.app/ecosystem.html"><link rel="icon" href="assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><link rel="stylesheet" href="assets/site.css?v=6947c6f4">
 <style>
 :root{--mono:ui-monospace,"SF Mono",SFMono-Regular,"JetBrains Mono",Menlo,Consolas,monospace}
 .eco{--edge:color-mix(in srgb,var(--fg) 46%,transparent);--edge2:color-mix(in srgb,var(--fg) 26%,transparent);--box:color-mix(in srgb,var(--fg) 22%,transparent)}
@@ -323,7 +323,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 </section>
 </main>
 <div class="tip" id="tip" role="tooltip"></div>
-<script src="changelog.js"></script><script src="tracks.js?v=bffcced0"></script><script src="assets/build-concepts.js?v=cf202fe2"></script><script src="assets/site.js?v=8ccb78fa"></script>
+<script src="changelog.js"></script><script src="tracks.js?v=2bfa1a40"></script><script src="assets/build-concepts.js?v=cf202fe2"></script><script src="assets/site.js?v=b3e1ee7d"></script>
 <script>
 (function(){
   function t(en,zh){return '<span class="en">'+en+'</span><span class="zh">'+zh+'</span>'}
@@ -579,12 +579,12 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
   function drawBar(S,live){var act=AGENTS.filter(function(a){return !a.later}),ran=act.filter(function(a){return S[a.id]}),last=0;
     ran.forEach(function(a){var x=+new Date(S[a.id].at);if(x>last)last=x});
     var runs=ran.reduce(function(n,a){return n+(S[a.id].runs||0)},0);
-    var bh='<span>status: <b class="'+(live?'on':'off')+'">'+(live?'● live':'○ offline')+'</b></span><span><b>'+act.length+'</b> '+t('automated roles','个自动化角色')+(AGENTS.length>act.length?' · <b>'+(AGENTS.length-act.length)+'</b> '+t('planned','计划中'):'')+'</span>'+
-      '<span>runs: <b>'+runs+'</b></span>'+(last?'<span>'+t('last run','上次运行')+': <b>'+ago(new Date(last).toISOString())+'</b></span>':'')+'<span>'+t('merge gate: <b>2 required checks</b>','合并条件：<b>2 项必需检查</b>')+'</span>';if(bh!==LASTB){LASTB=bh;document.getElementById('sbar').innerHTML=bh}}
+    var bh='<span>'+t('status','状态')+': <b class="'+(live?'on':'off')+'">'+(live?t('● live','● 在线'):t('○ offline','○ 离线'))+'</b></span><span><b>'+act.length+'</b> '+t('automated roles','个自动化角色')+(AGENTS.length>act.length?' · <b>'+(AGENTS.length-act.length)+'</b> '+t('planned','计划中'):'')+'</span>'+
+      '<span>'+t('runs','运行次数')+': <b>'+runs+'</b></span>'+(last?'<span>'+t('last run','上次运行')+': <b>'+ago(new Date(last).toISOString())+'</b></span>':'')+'<span>'+t('merge gate: <b>2 required checks</b>','合并条件：<b>2 项必需检查</b>')+'</span>';if(bh!==LASTB){LASTB=bh;document.getElementById('sbar').innerHTML=bh}}
 
   (function(){var g=document.getElementById('cgrid'),g2=document.getElementById('cgrid2'),C=window.BUILD_CONCEPTS||[],REC=['workflows','roles','guardrails','evals','cicd','approval'];
     function card(c,rec){var soon=c.status==='soon',l=c.lessons[0];
-      return '<li class="bcn'+(soon?' soon':'')+(rec?' rec':'')+'" title="'+esc(c.use.en)+'"><a href="'+esc(l.d+'/'+l.f)+'"><span class="ic" aria-hidden="true">'+c.icon+'</span><span class="bt"><b>'+t(esc(c.title.en),esc(c.title.zh))+'</b><span class="bu">'+t(esc(c.use.en),esc(c.use.zh))+'</span></span></a></li>'}
+      return '<li class="bcn'+(soon?' soon':'')+(rec?' rec':'')+'""><a href="'+esc(l.d+'/'+l.f)+'"><span class="ic" aria-hidden="true">'+c.icon+'</span><span class="bt"><b>'+t(esc(c.title.en),esc(c.title.zh))+'</b><span class="bu">'+t(esc(c.use.en),esc(c.use.zh))+'</span></span></a></li>'}
     var R=REC.map(function(id){return C.filter(function(c){return c.id===id})[0]}).filter(Boolean),O=C.filter(function(c){return REC.indexOf(c.id)<0});
     g.innerHTML=R.map(function(c){return card(c,1)}).join('');g2.innerHTML=O.map(function(c){return card(c,0)}).join('');
     document.querySelector('#cmore summary').innerHTML=t('Show the other '+O.length+' ideas','展开其余 '+O.length+' 个概念')})();

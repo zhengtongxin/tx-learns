@@ -144,15 +144,15 @@
         if(P.prev&&P.prev.length)rows.push(['Recommended first','建议先学','<ul>'+P.prev.map(function(f){var a=lessonLink(f);return a?'<li>'+a+(d[C.id+'/'+f]?' ✓':'')+'</li>':''}).join('')+'</ul>']);
         if(P.tools)rows.push(['Tools and accounts','工具与账号',t(P.tools)]);
         if(P.know)rows.push(['What you should already know','需要的基础',t(P.know)]);
-        if(P.mins)rows.push(['Hands-on time','动手时间',t({en:'about '+P.mins+' minutes',zh:'约 '+P.mins+' 分钟'})]);
-        if(P.offline!==undefined)rows.push(['Works offline','能否离线',t(P.offline?{en:'Yes, once the packages are installed',zh:'可以（装好依赖之后）'}:{en:'No, it needs an internet connection',zh:'不行，需要联网'})]);
+        if(P.mins)rows.push(['Total time, setup and exercises','总用时（含准备和练习）',t({en:'about '+P.mins+' minutes',zh:'约 '+P.mins+' 分钟'})]);
+        if(P.offline!==undefined)rows.push(['Works offline','能否离线',t(P.offline?(/python|node|npm|pip|package|install|key|docker|cli|sdk/i.test((P.tools&&P.tools.en)||'')?{en:'Yes, once the packages are installed',zh:'可以（装好依赖之后）'}:{en:'Yes, nothing to install',zh:'可以，无需安装'}):{en:'No, it needs an internet connection',zh:'不行，需要联网'})]);
         box.innerHTML='<b class="lbl">'+t({en:'Before you start',zh:'开始之前'})+'</b><dl>'+rows.map(function(r){return '<dt>'+t({en:r[0],zh:r[1]})+'</dt><dd>'+r[2]+'</dd>'}).join('')+'</dl>';
         anchor.after(box);anchor=box}
       if(J&&hm2){var pc=document.createElement('aside');pc.className='card prereq proj';pc.setAttribute('aria-label','Project card · 项目卡');
         var pk=J.pkg,fl=LD.f||[],files='';
         /* every file of the package (listed by --fix from the packages folder), grouped by folder */
         if(fl.length){var gr={};fl.forEach(function(f){var i=f.lastIndexOf('/'),k=i<0?'':f.slice(0,i);(gr[k]=gr[k]||[]).push(f)});
-          files=Object.keys(gr).map(function(k){return '<li>'+(k?'<b>'+k+'/</b> ':'')+gr[k].map(function(f){return '<a href="../'+pk.dir+'/'+f+'">'+f.slice(k?k.length+1:0)+'</a>'}).join(' · ')+'</li>'}).join('')}
+          files=Object.keys(gr).map(function(k){return '<li>'+(k?'<b>'+k+'/</b> ':'')+gr[k].map(function(f){return '<a href="../'+pk.dir+'/'+f+'" download="'+f.split('/').pop()+'">'+f.slice(k?k.length+1:0)+'</a>'}).join(' · ')+'</li>'}).join('')}
         /* reference solution: only the files under final/ */
         var refs=fl.filter(function(f){return f.indexOf('final/')===0}).map(function(f){return '<li><a href="../'+pk.dir+'/'+f+'">'+f+'</a></li>'}).join('');
         /* "Done when" checklist: ticks are kept per lesson in the browser (learn-accept), never required */
@@ -161,12 +161,12 @@
           return '<ul class="accept">'+(a.en||[]).map(function(e,i){return '<li><label><input type="checkbox" data-i="'+i+'"'+(ck.indexOf(i)>-1?' checked':'')+'> '+t({en:esc(e),zh:esc((a.zh||[])[i]||e)})+'</label></li>'}).join('')+'</ul>'}
         pc.innerHTML='<b class="lbl">'+t({en:'Project card',zh:'项目卡'})+'</b><dl>'+
           (J.goal?'<dt>'+t({en:'Goal',zh:'目标'})+'</dt><dd>'+t(J.goal)+'</dd>':'')+(J.deliver?'<dt>'+t({en:'Deliverable',zh:'交付物'})+'</dt><dd>'+t(J.deliver)+'</dd>':'')+
-          (J.level?'<dt>'+t({en:'Difficulty',zh:'难度'})+'</dt><dd>'+t(LV[J.level])+'</dd>':'')+(J.mins?'<dt>'+t({en:'Time',zh:'时间'})+'</dt><dd>'+t({en:'about '+J.mins+' minutes',zh:'约 '+J.mins+' 分钟'})+'</dd>':'')+
+          (J.level?'<dt>'+t({en:'Difficulty',zh:'难度'})+'</dt><dd>'+t(LV[J.level])+'</dd>':'')+((P&&P.mins)||J.mins?'<dt>'+t({en:'Time',zh:'时间'})+'</dt><dd>'+t({en:'about '+((P&&P.mins)||J.mins)+' minutes',zh:'约 '+((P&&P.mins)||J.mins)+' 分钟'})+'</dd>':'')+
           (J.accept?'<dt>'+t({en:'Done when…',zh:'完成标准'})+'</dt><dd>'+(Array.isArray(J.accept)?'<ul>'+li(J.accept)+'</ul>':acceptList(J.accept))+'</dd>':'')+
           (J.fail?'<dt>'+t({en:'Common problems',zh:'常见问题'})+'</dt><dd><ul>'+li(J.fail)+'</ul></dd>':'')+
           (J.stretch?'<dt>'+t({en:'Stretch goals',zh:'进阶挑战'})+'</dt><dd><ul>'+li(J.stretch)+'</ul></dd>':'')+
           (J.solution&&refs?'<dt>'+t({en:'Reference solution',zh:'参考答案'})+'</dt><dd><p>'+t({en:esc(J.solution.en),zh:esc(J.solution.zh)})+'</p><ul class="pkg">'+refs+'</ul></dd>':'')+
-          (files?'<dt>'+t({en:'Starter and final code',zh:'起步与完成代码'})+'</dt><dd><ul class="pkg">'+files+'</ul>'+(pk.note?'<p class="meta">'+t(pk.note)+'</p>':'')+'<p class="meta">'+t({en:'Download every file and keep the folder layout.',zh:'下载全部文件，并保持文件夹结构。'})+'</p></dd>':'')+'</dl>';
+          (files?'<dt>'+t({en:'Starter and final code',zh:'起步与完成代码'})+'</dt><dd><ul class="pkg">'+files+'</ul>'+(pk.note?'<p class="meta">'+t(pk.note)+'</p>':'')+'<p><button type="button" class="btn dl-all" data-dir="'+pk.dir+'" data-files="'+esc(fl.join('|'))+'">'+t({en:'Download all files (.zip)',zh:'下载全部文件（.zip）'})+'</button></p><p class="meta">'+t({en:'The zip keeps the folder layout.',zh:'压缩包保留文件夹结构。'})+'</p></dd>':'')+'</dl>';
         pc.addEventListener('change',function(ev){var c=ev.target;if(!c||c.type!=='checkbox'||!c.closest('.accept'))return;
           var AK='learn-accept',m=jget(AK,{}),ck=[];pc.querySelectorAll('.accept input').forEach(function(x){if(x.checked)ck.push(+x.dataset.i)});m[here]=ck;set(AK,JSON.stringify(m))});
         anchor.after(pc)}
@@ -234,6 +234,31 @@
         var base='../'+r.c.id+'/',after=cur&&cur.after?'<p>'+t(cur.after)+'</p>':'<p>'+t({en:'You have finished this track.',zh:'这条路线学完了。'})+'</p>',
           pre=r.c.before?'<p class="meta">'+t({en:'Before you start it: ',zh:'开始之前：'})+t(r.c.before)+'</p>':'';
         show('<a class="btn pri wn-go" href="'+base+r.l.file+'"><small>'+t({en:'Next track',zh:'下一条路线'})+' · '+t(r.c.title)+'</small> '+t(r.l.title)+' →</a> <a class="btn" href="../'+r.c.href+'">'+t({en:'Track overview',zh:'路线总览'})+'</a>'+pre,after)})}
+    /* "Download all files": a store-only .zip built in the browser (no library), so the folder layout survives */
+    function crc32(u){var t=crc32.t;if(!t){t=crc32.t=[];for(var n=0;n<256;n++){var c=n;for(var k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}}var r=-1;for(var i=0;i<u.length;i++)r=t[(r^u[i])&255]^(r>>>8);return(r^-1)>>>0}
+    function makeZip(list){var enc=new TextEncoder(),parts=[],cen=[],off=0;
+      list.forEach(function(f){var nm=enc.encode(f.name),c=crc32(f.data),h=new DataView(new ArrayBuffer(30));
+        h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint32(14,c,true);h.setUint32(18,f.data.length,true);h.setUint32(22,f.data.length,true);h.setUint16(26,nm.length,true);
+        parts.push(h.buffer,nm,f.data);
+        var e=new DataView(new ArrayBuffer(46));e.setUint32(0,0x02014b50,true);e.setUint16(4,20,true);e.setUint16(6,20,true);e.setUint16(8,0x0800,true);e.setUint32(16,c,true);e.setUint32(20,f.data.length,true);e.setUint32(24,f.data.length,true);e.setUint16(28,nm.length,true);e.setUint32(42,off,true);
+        cen.push(e.buffer,nm);off+=30+nm.length+f.data.length});
+      var cs=0;cen.forEach(function(b){cs+=b.byteLength||b.length});
+      var z=new DataView(new ArrayBuffer(22));z.setUint32(0,0x06054b50,true);z.setUint16(8,list.length,true);z.setUint16(10,list.length,true);z.setUint32(12,cs,true);z.setUint32(16,off,true);
+      return new Blob(parts.concat(cen,[z.buffer]),{type:'application/zip'})}
+    document.addEventListener('click',function(ev){var b=ev.target.closest&&ev.target.closest('.dl-all');if(!b||b.disabled)return;
+      var dir=b.dataset.dir,names=(b.dataset.files||'').split('|').filter(Boolean),label=b.innerHTML;b.disabled=true;
+      Promise.all(names.map(function(n){return fetch('../'+dir+'/'+n).then(function(r){if(!r.ok)throw 0;return r.arrayBuffer()}).then(function(buf){return{name:n,data:new Uint8Array(buf)}})}))
+        .then(function(list){var a=document.createElement('a');a.href=URL.createObjectURL(makeZip(list));a.download=dir.split('/').pop()+'.zip';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000)})
+        .then(function(){b.innerHTML=label},function(){b.innerHTML=t({en:'Could not download. Save each file above instead.',zh:'下载失败，请逐个保存上方文件。'})})
+        .then(function(){b.disabled=false})});
+    /* browser tab title follows the language: fixed pages by name, lessons from their own zh title */
+    var TZ={'index.html':'TX Learns – 中英双语互动 AI 课','ecosystem.html':'TX Learns 如何运作','glossary.html':'AI 词汇表 | TX Learns'},TE=document.title;
+    function setTitle(){var zh=root.getAttribute('data-lang')==='zh',tl=C&&C.lessons?C.lessons.filter(function(l){return l.file===here})[0]:null,z=!C&&TZ[here]?TZ[here]:(tl&&tl.title&&tl.title.zh?tl.title.zh+' | TX Learns':'');document.title=zh&&z?z:TE}
+    setTitle();new MutationObserver(setTitle).observe(root,{attributes:true,attributeFilter:['data-lang']});
+    /* keep the topics drawer in step after a lesson is marked done or undone: ticks and the n/total counters */
+    function syncSide(){if(!side)return;var key=function(a){var h=(a.getAttribute('href')||'').replace(/^(\.\.\/)+/,'');return h.indexOf('/')>-1?h:(C?C.id+'/'+h:h)};
+      side.querySelectorAll('.cg').forEach(function(g){var n=0,tot=0;g.querySelectorAll('.cg-b a[href]').forEach(function(a){var h=a.getAttribute('href')||'';if(!/\.html$/.test(h)||/(^|\/)index\.html$/.test(h))return;tot++;var on=!!d[key(a)];a.classList.toggle('done',on);if(on)n++});
+        var pg=g.querySelector('.pg');if(pg&&tot)pg.textContent=n+'/'+tot})}
     /* lesson: prev/next + done + dock */
     var db=document.querySelector('.mark-done'),idx=C?C.lessons.findIndex(function(l){return l.file===here}):-1;
     if(C&&idx>-1){
@@ -248,7 +273,7 @@
       if(lastIn)whatNext(true,function(a){if(pg)pg.before(a);else{var m3=document.querySelector('main');if(m3)m3.appendChild(a)}},n,!n);
       if(db){var key=C.id+'/'+here;
         var lbl=function(){db.className='btn big mark-done'+(done()[key]?'':' pri');db.innerHTML=done()[key]?t({en:'✓ Completed — click to undo',zh:'✓ 已完成（点击撤销）'}):t({en:'Mark lesson as completed',zh:'标记本课已完成'})};
-        db.onclick=function(e){var x=done();if(x[key])delete x[key];else{x[key]=1;burst(e.clientX,e.clientY)}set(DONE,JSON.stringify(x));lbl()};lbl()}
+        db.onclick=function(e){var x=done();if(x[key])delete x[key];else{x[key]=1;burst(e.clientX,e.clientY)}set(DONE,JSON.stringify(x));d=x;syncSide();lbl()};lbl()}
       var dock=document.createElement('div');dock.className='dock';var RR=18,LL=2*Math.PI*RR;
       dock.innerHTML='<button class="dk" data-a="m" title="Menu" aria-label="Open topics menu · 打开主题菜单">☰</button>'+(p?'<a class="dk" href="'+p.file+'" title="Previous" aria-label="Previous lesson · 上一课">‹</a>':'<span class="dk off" aria-hidden="true">‹</span>')+
         '<div class="dk ring" role="progressbar" aria-label="Reading progress · 阅读进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><svg width="44" height="44" viewBox="0 0 44 44"><circle class="bg" cx="22" cy="22" r="'+RR+'"/><circle class="fg" cx="22" cy="22" r="'+RR+'" stroke-dasharray="'+LL+'" stroke-dashoffset="'+LL+'"/></svg><b>0</b></div>'+
@@ -329,6 +354,7 @@
     document.addEventListener('mousemove',function(e){var s=e.target.closest&&e.target.closest('.spot');if(s){var r=s.getBoundingClientRect();s.style.setProperty('--mx',(e.clientX-r.left)+'px');s.style.setProperty('--my',(e.clientY-r.top)+'px')}
       var c=e.target.closest&&e.target.closest('.cc');if(c){var r2=c.getBoundingClientRect(),x=(e.clientX-r2.left)/r2.width-.5,y=(e.clientY-r2.top)/r2.height-.5;c.style.transform='perspective(900px) rotateX('+(-y*5)+'deg) rotateY('+(x*7)+'deg) translateY(-4px)'}});
     document.addEventListener('mouseout',function(e){var c=e.target.closest&&e.target.closest('.cc');if(c&&!c.contains(e.relatedTarget))c.style.transform=''});
+    document.querySelectorAll('.zh:not([lang])').forEach(function(e){e.lang='zh-Hans'});document.querySelectorAll('.en:not([lang])').forEach(function(e){e.lang='en'});
     document.querySelectorAll('[data-count]').forEach(countUp);
     var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:0,rootMargin:'0px 0px -8% 0px'});
     document.querySelectorAll('main > h2,main > .card,main > .callout,main > .quiz,main > .stepper,main > .grid,main > .flow,main > .wfwrap,main > p,main > section,main > .track-list').forEach(function(e){e.classList.add('rv');io.observe(e)});
