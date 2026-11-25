@@ -26,6 +26,8 @@ concurrency:
 jobs:
   # Marks the reviewer as working (yellow) on the How it works page while this run goes. Trusted scripts from main only.
   working:
+    # A lesson's own pull request (writer/ branch) is reviewed only after the reader, which starts this workflow by hand; opening it must not start a second, earlier review.
+    if: ${{ !(github.event_name == 'pull_request' && startsWith(github.head_ref, 'writer/')) }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -60,6 +62,8 @@ jobs:
           gh api -X POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state=pending -f context=Reviewer -f description="Backend engineer agent is reading…" -f target_url="$RUN" > /dev/null || true
 
   review:
+    # A lesson's own pull request (writer/ branch) is reviewed only after the reader, which starts this workflow by hand; opening it must not start a second, earlier review.
+    if: ${{ !(github.event_name == 'pull_request' && startsWith(github.head_ref, 'writer/')) }}
     runs-on: ubuntu-latest
     outputs:
       base: ${{ steps.info.outputs.base }}
@@ -203,7 +207,7 @@ jobs:
   # A review cancelled by a newer run of the same PR stays quiet: the newer run reports.
   share:
     needs: [review, working]
-    if: ${{ !cancelled() && needs.review.result != 'cancelled' }}
+    if: ${{ !cancelled() && needs.review.result != 'cancelled' && !(github.event_name == 'pull_request' && startsWith(github.head_ref, 'writer/')) }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
