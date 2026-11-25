@@ -72,7 +72,7 @@ html[data-theme=light] .orb{opacity:.25}
 @keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
 .mega{font-size:clamp(2.8rem,9vw,6.4rem);line-height:1.12;letter-spacing:-.04em;font-weight:800;margin:.3em 0 .2em;padding:.04em .06em .16em;background:linear-gradient(180deg,var(--hg1) 25%,var(--hg2));-webkit-background-clip:text;background-clip:text;color:transparent}
 .sub{max-width:620px;margin:0 auto 1.6em;font-size:clamp(1.05rem,2.4vw,1.35rem);color:var(--mut);line-height:1.5}
-#topics>.sub{margin:0 0 1.2em}
+#topics>.sub{margin-bottom:1.2em}
 .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 .stats{display:flex;justify-content:center;gap:clamp(24px,7vw,72px);margin-top:56px;flex-wrap:wrap}
 .stat b{display:block;font-size:clamp(2rem,5vw,3rem);font-weight:800;letter-spacing:-.04em;line-height:1.1;font-variant-numeric:tabular-nums}
@@ -398,3 +398,18 @@ main.wide h2,main.wide>section>.sub,main.wide>section>p{text-align:center;margin
 .wph{flex-direction:column;align-items:center}
 .whatnext{text-align:center;margin-left:auto;margin-right:auto}
 .pre-after,.track-ba{text-align:left}
+
+/* ---- type: a serif display voice for headings, a clean sans for reading ---- */
+@font-face{font-family:"Fraunces";src:url(fonts/fraunces-5.3.0-normal.woff2) format("woff2");font-weight:100 900;font-style:normal;font-display:swap}
+@font-face{font-family:"Fraunces";src:url(fonts/fraunces-5.3.0-italic.woff2) format("woff2");font-weight:100 900;font-style:italic;font-display:swap}
+:root{--serif:"Fraunces","Iowan Old Style","Palatino Linotype",Georgia,"Songti SC","Noto Serif CJK SC","Source Han Serif SC",serif}
+.mega,.hero h1,h1,h2,.cc h3,.lcard h3,.score,.bigring b{font-family:var(--serif)}
+.mega,.hero h1{font-weight:650;letter-spacing:-.03em;font-variation-settings:"opsz" 144,"SOFT" 50}
+h2{font-weight:600;letter-spacing:-.025em;font-variation-settings:"opsz" 72}
+.cc h3{font-weight:600;letter-spacing:-.02em}
+h1 em,h2 em{font-style:italic;font-weight:400;color:var(--acc2);-webkit-text-fill-color:var(--acc2);letter-spacing:-.02em}
+html[data-lang=zh] h1 em,html[data-lang=zh] h2 em{font-style:normal;font-weight:inherit}
+.sub{font-weight:400;font-size:clamp(1.05rem,2.2vw,1.25rem)}
+.eyebrow,.tag{font-weight:600;letter-spacing:.2em}
+h3{font-weight:650}
+.meta,.chip{font-size:13.5px}
