@@ -9,33 +9,25 @@
 .gl-sec>h2{margin:0 0 6px}
 .gl-note{margin:0 0 16px;color:var(--mut);font-size:15px}
 /* concept map: one node per theme, its terms inside */
-.themes{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:clamp(48px,7vw,84px);row-gap:56px;margin-top:18px}
+.themes{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:clamp(48px,7vw,84px);row-gap:76px;margin-top:18px}
 .theme{position:relative;padding:14px 16px 16px;border:1px solid color-mix(in srgb,var(--h) 55%,var(--line));border-top:3px solid var(--h);border-radius:14px;background:color-mix(in srgb,var(--h) 7%,var(--glass));scroll-margin-top:70px}
 .theme[data-p=models]{grid-area:1/1}.theme[data-p=agents]{grid-area:1/2}.theme[data-p=tools]{grid-area:1/3}
 .theme[data-p=evals]{grid-area:2/1}.theme[data-p=safety]{grid-area:2/2}.theme[data-p=memory]{grid-area:2/3}.theme[data-p=delivery]{grid-area:3/2}
-.flow{position:absolute;inset:0;pointer-events:none}
-.flow svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.flow .e{fill:none;stroke:var(--mut);stroke-width:1.5}.flow .e.d{stroke-dasharray:5 4;opacity:.75}
-.flow marker path{fill:var(--mut)}
-.flow .el{position:absolute;font-size:12px;color:var(--mut);white-space:nowrap;line-height:1.2;transform:translate(-50%,-50%);background:var(--bg);padding:1px 6px;border-radius:6px}
+.cflow{position:absolute;inset:0;pointer-events:none}
+.cflow svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.cflow .e{fill:none;stroke:var(--mut);stroke-width:1.75;stroke-linecap:round}.cflow .e.d{stroke-dasharray:5 4;opacity:.75}
+.cflow marker path{fill:var(--mut)}
+.cflow .el{position:absolute;font-size:12.5px;font-weight:500;color:var(--fg);white-space:nowrap;line-height:1.2;transform:translate(-50%,-50%);background:var(--bg);border:1px solid var(--line);padding:2px 9px;border-radius:999px}
 .theme h3{margin:0 0 2px;font-size:17px}
 .theme h3 .no{font:700 12px ui-monospace,Menlo,Consolas,monospace;color:var(--h);margin-right:8px}
 .theme p{margin:0 0 10px;color:var(--mut);font-size:14px;line-height:1.5}
-@media(max-width:700px){.themes{grid-template-columns:1fr;row-gap:12px}.theme[data-p]{grid-area:auto}.flow{display:none}}
+@media(max-width:700px){.themes{grid-template-columns:1fr;row-gap:12px}.theme[data-p]{grid-area:auto}.cflow{display:none}}
 .chips-l{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
 .chips-l a{display:inline-block;padding:3px 10px;border-radius:99px;border:1px solid color-mix(in srgb,var(--h) 55%,var(--line));background:color-mix(in srgb,var(--h) 9%,transparent);color:var(--fg);font-size:13px;line-height:1.5;text-decoration:none}
 .chips-l a:hover,.chips-l a:focus-visible{border-color:var(--h);background:color-mix(in srgb,var(--h) 22%,transparent);outline:2px solid transparent}
 .chips-l a:focus-visible{box-shadow:0 0 0 2px var(--fg)}
 /* search + list */
-.gl-find{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:10px 0 6px}
-.gl-find label{font-weight:600;font-size:14px}
-.gl-find input{flex:1 1 240px;min-width:0;font:inherit;font-size:16px;color:var(--fg);background:var(--glass);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
-.gl-find input:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
-.gl-stat{font-size:13px;color:var(--mut);margin:0 0 6px;min-height:1.6em}
 .gl-letter{margin:26px 0 8px;font-size:15px;letter-spacing:.14em;color:var(--mut);border-bottom:1px solid var(--line);padding-bottom:4px}
-.gl-grp[hidden],.gl-it[hidden],.gl-none[hidden],#list[hidden]{display:none}
-.gl-t .why{margin-left:auto;font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--mut);border:1px solid var(--line);border-radius:999px;padding:2px 10px;white-space:nowrap}
-.gl-hit mark{background:color-mix(in srgb,var(--acc) 38%,transparent);color:inherit;border-radius:3px;padding:0 1px}
 .gl-it{position:relative;padding:12px 14px 12px 16px;margin:8px 0;border:1px solid var(--line);border-left:4px solid var(--h);border-radius:10px;background:var(--glass);scroll-margin-top:70px}
 .gl-it:target{border-color:var(--h);box-shadow:0 0 0 2px color-mix(in srgb,var(--h) 55%,transparent)}
 .gl-t{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px}
@@ -46,7 +38,6 @@
 .gl-m .tg{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:color-mix(in srgb,var(--h) 55%,var(--fg))}
 html[data-theme=light] .gl-m .tg{color:color-mix(in srgb,var(--h) 30%,var(--fg))}
 .gl-m a{font-weight:600}
-.gl-none{padding:18px;border:1px dashed var(--line);border-radius:10px;color:var(--mut);text-align:center}
 </style><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://tx-learns.vercel.app/glossary.html","url":"https://tx-learns.vercel.app/glossary.html","name":"AI terms glossary","description":"The core AI terms used in the lessons, in plain words, with a concept map that groups them by theme and a link to the lesson that teaches each one.","inLanguage":["en","zh"],"isPartOf":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI terms glossary","item":"https://tx-learns.vercel.app/glossary.html"}]}]}</script></head><body>
 <main class="wide">
 <header class="stage compact gl-hero"><div class="orb"></div>
@@ -64,11 +55,7 @@ html[data-theme=light] .gl-m .tg{color:color-mix(in srgb,var(--h) 30%,var(--fg))
 
 <section class="gl-sec" id="terms" aria-labelledby="terms-h">
 <h2 id="terms-h"><span class="en">All terms, A to Z</span><span class="zh">全部词汇，按字母排序</span></h2>
-<div class="gl-find"><label for="q"><span class="en">Find a term</span><span class="zh">查找词汇</span></label><input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="token, RAG, 护栏 ..."></div>
-<p class="gl-stat" id="stat" role="status" aria-live="polite"></p>
-<div id="res" aria-live="polite"></div>
 <div id="list"></div>
-<div class="gl-none" id="none" hidden><span class="en">No term matches. Try a shorter word, or clear the box.</span><span class="zh">没有匹配的词。换个短一点的词，或者清空输入框。</span></div>
 </section>
 </main>
 <script src="tracks.js?v=2bfa1a40"></script><script src="glossary.js"></script><script src="assets/site.js?v=85ce92dd"></script>
@@ -77,8 +64,8 @@ html[data-theme=light] .gl-m .tg{color:color-mix(in srgb,var(--h) 30%,var(--fg))
   try{
     var G=(window.GLOSSARY||[]).slice(),TH=window.GLOSSARY_THEMES||[],TK={};
     (window.TRACKS||[]).forEach(function(t){TK[t.id]=t});
-    var themesEl=document.getElementById('themes'),resEl=document.getElementById('res'),listEl=document.getElementById('list'),q=document.getElementById('q'),stat=document.getElementById('stat'),none=document.getElementById('none');
-    if(!themesEl||!listEl||!q)return;
+    var themesEl=document.getElementById('themes'),listEl=document.getElementById('list');
+    if(!themesEl||!listEl)return;
     function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
     function bi(o){o=o||{};return '<span class="en">'+esc(o.en)+'</span><span class="zh">'+esc(o.zh)+'</span>'}
     var thIdx={};TH.forEach(function(t,i){thIdx[t.id]=i});
@@ -94,22 +81,23 @@ html[data-theme=light] .gl-m .tg{color:color-mix(in srgb,var(--h) 30%,var(--fg))
         terms.map(function(g){return '<li><a href="#t-'+esc(g.id)+'" data-t="'+esc(g.id)+'" title="'+esc(g.def.en)+'">'+bi({en:g.en,zh:g.zh})+'</a></li>'}).join('')+'</ul></section>'}).join('');
 
     /* arrows: the original flows, drawn from where the nodes actually sit */
-    var flow=document.createElement('div');flow.className='flow';flow.setAttribute('aria-hidden','true');themesEl.appendChild(flow);
+    var flow=document.createElement('div');flow.className='cflow';flow.setAttribute('aria-hidden','true');themesEl.appendChild(flow);
     var EDGES=[['models','agents','h',{en:'calls',zh:'调用'}],['agents','tools','h',{en:'uses',zh:'使用'}],['agents','safety','v',{en:'kept in line by',zh:'受其约束'}],['tools','memory','v',{en:'reads from',zh:'读取'}],['safety','delivery','v',{en:'shipped by',zh:'由其上线'}],['agents','evals','d',{en:'scored by',zh:'由其评分'}]];
     function draw(){
       if(window.innerWidth<=700){flow.innerHTML='';return}
       var R=themesEl.getBoundingClientRect(),P={};
       order.forEach(function(id){var e=document.getElementById('theme-'+id);if(e){var b=e.getBoundingClientRect();P[id]={l:b.left-R.left,r:b.right-R.left,t:b.top-R.top,b:b.bottom-R.top,w:b.width,cx:(b.left+b.right)/2-R.left,cy:(b.top+b.bottom)/2-R.top}}});
-      var p='',lb='';
-      EDGES.forEach(function(e){var a=P[e[0]],z=P[e[1]];if(!a||!z)return;var x1,y1,x2,y2,lx,ly,cls='e';
-        if(e[2]==='h'){x1=a.r;y1=Math.min(a.cy,z.cy);x2=z.l;y2=y1;lx=(x1+x2)/2;ly=y1-14}
-        else if(e[2]==='v'){x1=a.cx;y1=a.b;x2=z.cx;y2=z.t;lx=x1;ly=(y1+y2)/2}
-        else{x1=a.l+a.w*0.25;y1=a.b;x2=z.cx;y2=z.t;lx=(x1+x2)/2-24;ly=(y1+y2)/2;cls='e d'}
-        p+='<path class="'+cls+'" d="M'+x1.toFixed(1)+' '+y1.toFixed(1)+'L'+x2.toFixed(1)+' '+(y2-1).toFixed(1)+'" marker-end="url(#ar)"/>';
+      var p='',lb='',G=4;
+      EDGES.forEach(function(e){var a=P[e[0]],z=P[e[1]];if(!a||!z)return;var d,lx,ly,cls='e';
+        if(e[2]==='h'){var y=Math.round((Math.max(a.t,z.t)+Math.min(a.b,z.b))/2);d='M'+(a.r+G)+' '+y+'H'+(z.l-G);lx=(a.r+z.l)/2;ly=y}
+        else if(e[2]==='v'){var x=Math.round(a.cx);d='M'+x+' '+(a.b+G)+'V'+(z.t-G);lx=x;ly=(a.b+z.t)/2}
+        else{var x1=Math.round(a.l+a.w*0.16),y1=a.b+G,x2=Math.round(z.cx),y2=z.t-G,m=(y2-y1)*0.55;d='M'+x1+' '+y1+'C'+x1+' '+(y1+m)+' '+x2+' '+(y2-m)+' '+x2+' '+y2;lx=(x1+x2)/2;ly=(y1+y2)/2;cls='e d'}
+        p+='<path class="'+cls+'" d="'+d+'" marker-end="url(#ar)"/>';
         lb+='<div class="el" style="left:'+lx.toFixed(1)+'px;top:'+ly.toFixed(1)+'px">'+bi(e[3])+'</div>'});
-      flow.innerHTML='<svg><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z"/></marker></defs>'+p+'</svg>'+lb}
+      flow.innerHTML='<svg><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z"/></marker></defs>'+p+'</svg>'+lb}
     draw();window.addEventListener('resize',draw);
-    if(window.ResizeObserver)new ResizeObserver(draw).observe(themesEl);
+    if(window.ResizeObserver){var ro=new ResizeObserver(function(){requestAnimationFrame(draw)});ro.observe(themesEl);[].forEach.call(themesEl.querySelectorAll('.theme'),function(n){ro.observe(n)})}
+    window.addEventListener('load',draw);
     if(document.fonts&&document.fonts.ready)document.fonts.ready.then(draw);
 
     /* the A to Z list */
@@ -125,34 +113,6 @@ html[data-theme=light] .gl-m .tg{color:color-mix(in srgb,var(--h) 30%,var(--fg))
         return '<article class="gl-it '+thc(g.theme)+'" id="t-'+esc(g.id)+'" data-h="'+esc(hay)+'"><div class="gl-t"><b><span class="en">'+esc(g.en)+'</span><span class="zh">'+esc(g.zh)+'</span></b><span class="alt"><span class="en">'+esc(g.zh)+'</span><span class="zh">'+esc(g.en)+'</span></span></div>'+
           '<p class="gl-d">'+bi(g.def)+'</p><div class="gl-m"><span class="tg">'+(t?bi(t.title):'')+'</span>'+lessonLink(g)+'</div></article>'}).join('')+'</div>'}).join('');
 
-    var items=[].slice.call(listEl.querySelectorAll('.gl-it')),grps=[].slice.call(listEl.querySelectorAll('.gl-grp'));
-        function apply(){
-      var v=q.value.trim().toLowerCase(),shown=0;
-      var latin=/^[a-z0-9 .+\-]+$/.test(v),esc2=v.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),re=latin&&v?new RegExp('(^|[^a-z0-9])'+esc2):null,hits=[];
-      function hasWord(x){return re?re.test(x):x.indexOf(v)>-1}
-      items.forEach(function(el){var h=el.getAttribute('data-h'),ok=!v||hasWord(h);el.hidden=!!v||!ok;if(ok)shown++;
-        if(v&&ok){var en=el.querySelector('.gl-t b .en').textContent.toLowerCase(),zh=el.querySelector('.gl-t b .zh').textContent.toLowerCase(),sc,why;
-          if(en===v||zh===v){sc=0;why='exact'}else if(en.indexOf(v)===0||zh.indexOf(v)===0){sc=1;why='prefix'}else if(hasWord(en)||hasWord(zh)){sc=2;why='term'}else{sc=3;why='def'}
-          hits.push({el:el,sc:sc,why:why,k:en})}});
-      /* a search shows one list, best matches first: exact, then starts with, then inside the term, then only in the definition */
-      hits.sort(function(a,b){return a.sc-b.sc||a.k.localeCompare(b.k)});
-      var WHY={exact:['Exact term','完全匹配'],prefix:['Starts with it','词首匹配'],term:['In the term','词中匹配'],def:['In the definition','出现在解释里']};
-      function mark(root){if(!v)return;var rx=new RegExp(re?'(^|[^a-z0-9])('+esc2+')':'('+esc2+')','gi'),w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),ns=[],n;while((n=w.nextNode()))ns.push(n);
-        ns.forEach(function(t){var tx=t.nodeValue;if(!rx.test(tx))return;rx.lastIndex=0;var f=document.createDocumentFragment(),last=0,m;while((m=rx.exec(tx))){var st=m.index+(re?m[1].length:0);f.appendChild(document.createTextNode(tx.slice(last,st)));var mk=document.createElement('mark');mk.textContent=tx.slice(st,st+(re?m[2]:m[1]).length);f.appendChild(mk);last=st+mk.textContent.length;if(m[0].length===0)rx.lastIndex++}f.appendChild(document.createTextNode(tx.slice(last)));t.parentNode.replaceChild(f,t)})}
-      resEl.innerHTML='';
-      hits.forEach(function(h){var c=h.el.cloneNode(true);c.hidden=false;c.removeAttribute('id');c.classList.add('gl-hit');
-        var chip=document.createElement('span');chip.className='why';chip.innerHTML='<span class="en">'+WHY[h.why][0]+'</span><span class="zh">'+WHY[h.why][1]+'</span>';
-        var ttl=c.querySelector('.gl-t');ttl.appendChild(chip);mark(c.querySelector('.gl-t b'));mark(c.querySelector('.gl-d'));resEl.appendChild(c)});
-      listEl.hidden=!!v;
-      none.hidden=shown>0;
-      stat.innerHTML=(v?shown+' <span class="en">of</span><span class="zh">/</span> ':'')+items.length+' <span class="en">terms</span><span class="zh">个词</span>';
-    }
-    q.addEventListener('input',apply);
-    q.addEventListener('keydown',function(e){if(e.key==='Escape'&&q.value){q.value='';apply()}});
-    apply();
-    /* going to a term that the filter hid: clear the filter first */
-    function reveal(){var h=location.hash;if(h.indexOf('#t-')!==0)return;var el=document.getElementById(h.slice(1));if(el&&el.hidden){q.value='';apply();el.scrollIntoView()}}
-    window.addEventListener('hashchange',reveal);reveal();
   }catch(err){try{console.warn('glossary',err)}catch(e2){}}
 })();
 </script></body></html>
