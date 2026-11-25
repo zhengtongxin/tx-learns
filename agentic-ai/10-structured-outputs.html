@@ -22,7 +22,7 @@ writer_a = Agent(name="Writer A", instructions=shop_voice,
 manager  = Agent(name="Manager", model="gpt-5.4-mini",      # plain string: an OpenAI model
                  tools=[writer_a.as_tool(tool_name="writer_a", tool_description="Writes one draft"),
                         writer_b.as_tool(...), writer_c.as_tool(...),   # made the same way as writer_a
-                        send_email])   # send_email: your own helper that sends the chosen draft (see the outreach helper lesson), wrapped with @function_tool for the manager</span></div>
+                        send_email])   # send_email: a @function_tool that sends the chosen draft (built in the outreach helper lesson; it wraps a plain helper, send_message)</span></div>
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 2 · Structured output: a form, not a paragraph</span><span class="zh">第 2 步 · 结构化输出：要一张表，不要一段话</span></h2>
@@ -57,7 +57,7 @@ check = (await Runner.run(checker, draft)).final_output
 </span><span class="chg">if check.has_placeholders or not check.is_friendly or check.price_mentioned != "S$8.50":</span><span class="dim">
     print("Not sending, fix the draft first")
 else:
-    send_email("This month's breakfast set", draft)   # the same send_email helper from Step 1, called directly</span></div>
+    send_message("This month's breakfast set", draft)   # the plain helper that send_email wraps; the agent tool from Step 1 cannot be called like a function</span></div>
 <p class="meta"><span class="en">Expected output (your wording will differ)</span><span class="zh">预期输出（你的措辞会有所不同）</span></p>
 <div class="codebox" data-file="output" data-lang="text">Not sending, fix the draft first</div>
 <div class="try" id="p3"></div>
