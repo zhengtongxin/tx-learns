@@ -170,6 +170,7 @@
         pc.addEventListener('change',function(ev){var c=ev.target;if(!c||c.type!=='checkbox'||!c.closest('.accept'))return;
           var AK='learn-accept',m=jget(AK,{}),ck=[];pc.querySelectorAll('.accept input').forEach(function(x){if(x.checked)ck.push(+x.dataset.i)});m[here]=ck;set(AK,JSON.stringify(m))});
         anchor.after(pc)}
+      if(box)fold(box,'Before you start: tools, time, what to know','开始之前：工具、时间、基础');if(typeof pc!=='undefined'&&pc)fold(pc,'Project card: goal, done when, files','项目卡：目标、完成标准、文件');
       var ba=document.querySelector('.stage .track-ba');
       if(!ba&&window.TRACKS&&document.querySelector('.stage .ringbox')){var tr=window.TRACKS.filter(function(x){return x.id===C.id})[0];
         if(tr&&(tr.before||tr.after)){ba=document.createElement('div');ba.className='track-ba';
@@ -195,6 +196,7 @@
       if(!go)T.some(function(c){var nf=c.files&&nextOf(c.id,c.files);if(nf){go={c:c,f:nf};return true}});
       var started=hasP||!!last,hs=document.querySelector('[data-start]');
       if(hs&&go&&started){hs.href=go.c.href.replace(/[^\/]*$/,'')+go.f;hs.innerHTML=t({en:'Continue where you left off →',zh:'继续上次的进度 →'})}
+      var sh=document.getElementById('stopped');if(sh){if(go&&started){sh.hidden=false;sh.innerHTML=t({en:'Next up: ',zh:'下一课：'})+t(go.c.titles[go.f])}else sh.hidden=true}
       if(!rsm)return;
       if(!started){rsm.hidden=false;rsm.innerHTML='<p class="meta">'+t({en:'No saved progress yet. Your progress is kept only in this browser; open any lesson to begin.',zh:'还没有学习记录。进度只保存在这个浏览器里，打开任意一课就开始了。'})+'</p>'+(canStore()?'':'<p class="meta warn">'+t({en:'This browser is blocking saved progress, so your place cannot be remembered.',zh:'这个浏览器禁止保存数据，所以无法记住你的进度。'})+'</p>');return}
       var rec=jget(REC,[]).filter(function(k){return lookup[k]}).slice(0,5);
@@ -255,6 +257,16 @@
     var TZ={'index.html':'TX Learns – 中英双语互动 AI 课','ecosystem.html':'TX Learns 如何运作','glossary.html':'AI 词汇表 | TX Learns'},TE=document.title;
     function setTitle(){var zh=root.getAttribute('data-lang')==='zh',tl=C&&C.lessons?C.lessons.filter(function(l){return l.file===here})[0]:null,z=!C&&TZ[here]?TZ[here]:(tl&&tl.title&&tl.title.zh?tl.title.zh+' | TX Learns':'');document.title=zh&&z?z:TE}
     setTitle();new MutationObserver(setTitle).observe(root,{attributes:true,attributeFilter:['data-lang']});
+    function toast(msg){var el=document.getElementById('toast');if(!el){el=document.createElement('div');el.id='toast';el.className='toast';el.setAttribute('role','status');el.setAttribute('aria-live','polite');document.body.appendChild(el)}
+      el.innerHTML=msg;el.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(function(){el.classList.remove('on')},2600)}
+    /* detail cards start folded so the lesson itself comes first */
+    function fold(el,en,zh){if(!el||!el.parentNode||el.parentNode.classList.contains('fold'))return;var dt=document.createElement('details'),sm=document.createElement('summary');dt.className='fold';sm.innerHTML=t({en:en,zh:zh});el.before(dt);dt.appendChild(sm);dt.appendChild(el)}
+    /* "On this page": a contents list beside wide screens, with the section in view highlighted */
+    function buildToc(){var hs=[].slice.call(document.querySelectorAll('main h2')).filter(function(h){return h.textContent.trim()});if(hs.length<3||document.querySelector('.toc'))return;
+      var nav=document.createElement('nav'),h='<b class="lbl">'+t({en:'On this page',zh:'本页目录'})+'</b><ol>';nav.className='toc';nav.setAttribute('aria-label','On this page · 本页目录');
+      hs.forEach(function(x,i){if(!x.id)x.id='sec-'+(i+1);h+='<li><a href="#'+x.id+'">'+x.innerHTML.replace(/<span class="no">.*?<\/span>/g,'')+'</a></li>'});
+      nav.innerHTML=h+'</ol>';document.body.appendChild(nav);var links=nav.querySelectorAll('a');
+      if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)links.forEach(function(l){l.classList.toggle('on',l.getAttribute('href')==='#'+e.target.id)})})},{rootMargin:'-15% 0px -75% 0px'});hs.forEach(function(x){io.observe(x)})}}
     /* keep the topics drawer in step after a lesson is marked done or undone: ticks and the n/total counters */
     function syncSide(){if(!side)return;var key=function(a){var h=(a.getAttribute('href')||'').replace(/^(\.\.\/)+/,'');return h.indexOf('/')>-1?h:(C?C.id+'/'+h:h)};
       side.querySelectorAll('.cg').forEach(function(g){var n=0,tot=0;g.querySelectorAll('.cg-b a[href]').forEach(function(a){var h=a.getAttribute('href')||'';if(!/\.html$/.test(h)||/(^|\/)index\.html$/.test(h))return;tot++;var on=!!d[key(a)];a.classList.toggle('done',on);if(on)n++});
@@ -267,13 +279,14 @@
       if(tag0&&tp){var bc=document.createElement('nav');bc.className='crumbs';bc.setAttribute('aria-label','Breadcrumb · 面包屑');
         bc.innerHTML='<a href="../index.html">'+t({en:'Home',zh:'首页'})+'</a> › <a href="index.html">'+t(C.title)+'</a> › <span>'+t(tp.title)+'</span>';tag0.before(bc)}
       var pg=document.querySelector('.pager'),p=C.lessons[idx-1],n=C.lessons[idx+1];
-      if(pg)pg.innerHTML=(p?'<a href="'+p.file+'"><small>← '+t({en:'Previous',zh:'上一课'})+'</small>'+t(p.title)+'</a>':'')+(n?'<a class="next" href="'+n.file+'"><small>'+t({en:'Next',zh:'下一课'})+' →</small>'+t(n.title)+'</a>':'');
+      if(pg)pg.innerHTML=(p?'<a href="'+p.file+'"><small>← '+t({en:'Previous',zh:'上一课'})+'</small>'+t(p.title)+'</a>':'')+'<a class="back" href="index.html">'+t({en:'Back to track',zh:'回到路线'})+'</a>'+(n?'<a class="next" href="'+n.file+'"><small>'+t({en:'Next',zh:'下一课'})+' →</small>'+t(n.title)+'</a>':'');
       /* last published lesson of its topic: the What next card */
       var lastIn=C.lessons.filter(function(x){return x.w===cl.w}).pop()===cl;
       if(lastIn)whatNext(true,function(a){if(pg)pg.before(a);else{var m3=document.querySelector('main');if(m3)m3.appendChild(a)}},n,!n);
       if(db){var key=C.id+'/'+here;
         var lbl=function(){db.className='btn big mark-done'+(done()[key]?'':' pri');db.innerHTML=done()[key]?t({en:'✓ Completed — click to undo',zh:'✓ 已完成（点击撤销）'}):t({en:'Mark lesson as completed',zh:'标记本课已完成'})};
-        db.onclick=function(e){var x=done();if(x[key])delete x[key];else{x[key]=1;burst(e.clientX,e.clientY)}set(DONE,JSON.stringify(x));d=x;syncSide();lbl()};lbl()}
+        db.onclick=function(e){var x=done();if(x[key])delete x[key];else{x[key]=1;burst(e.clientX,e.clientY)}set(DONE,JSON.stringify(x));d=x;syncSide();var nn=count(C.id,CF);toast(x[key]?t({en:'Marked complete · progress '+nn+'/'+CF.length,zh:'已标记完成，进度 '+nn+'/'+CF.length}):t({en:'Marked not complete · progress '+nn+'/'+CF.length,zh:'已取消完成，进度 '+nn+'/'+CF.length}));lbl()};lbl()}
+      buildToc();
       var dock=document.createElement('div');dock.className='dock';var RR=18,LL=2*Math.PI*RR;
       dock.innerHTML='<button class="dk" data-a="m" title="Menu" aria-label="Open topics menu · 打开主题菜单">☰</button>'+(p?'<a class="dk" href="'+p.file+'" title="Previous" aria-label="Previous lesson · 上一课">‹</a>':'<span class="dk off" aria-hidden="true">‹</span>')+
         '<div class="dk ring" role="progressbar" aria-label="Reading progress · 阅读进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><svg width="44" height="44" viewBox="0 0 44 44"><circle class="bg" cx="22" cy="22" r="'+RR+'"/><circle class="fg" cx="22" cy="22" r="'+RR+'" stroke-dasharray="'+LL+'" stroke-dashoffset="'+LL+'"/></svg><b>0</b></div>'+
