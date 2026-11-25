@@ -93,11 +93,9 @@
     /* stage progress ring */
     var rb=document.querySelector('.ringbox');
     if(C&&rb){var n=count(C.id,CF),pub=CF.length,R=36,L=2*Math.PI*R,p=pub?n/pub:0;
-      rb.innerHTML='<div class="bigring"><svg width="84" height="84" viewBox="0 0 84 84"><defs><linearGradient id="rg"><stop offset="0" stop-color="#ffb703"/><stop offset="1" stop-color="#ffe066"/></linearGradient></defs><circle class="bg" cx="42" cy="42" r="'+R+'"/><circle class="fg" cx="42" cy="42" r="'+R+'" stroke-dasharray="'+L+'" stroke-dashoffset="'+L+'"/></svg><b>'+Math.round(p*100)+'%</b></div><div style="text-align:left"><div style="font-weight:700">'+t({en:n+' of '+pub+' published lessons completed',zh:'已完成 '+n+' / '+pub+' 课（已发布）'})+'</div><div class="meta">'+t({en:pub+' of '+C.total+' planned lessons are published',zh:'规划 '+C.total+' 课，已发布 '+pub+' 课'})+'</div></div>';
+      rb.innerHTML='<div class="bigring"><svg width="84" height="84" viewBox="0 0 84 84"><defs><linearGradient id="rg"><stop offset="0" stop-color="#ffb703"/><stop offset="1" stop-color="#ffe066"/></linearGradient></defs><circle class="bg" cx="42" cy="42" r="'+R+'"/><circle class="fg" cx="42" cy="42" r="'+R+'" stroke-dasharray="'+L+'" stroke-dashoffset="'+L+'"/></svg><b>'+Math.round(p*100)+'%</b></div><div style="text-align:left"><div style="font-weight:700">'+t({en:n+' of '+pub+' published lessons completed',zh:'已完成 '+n+' / '+pub+' 课（已发布）'})+'</div></div>';
       var br=rb.querySelector('.bigring');br.setAttribute('role','progressbar');br.setAttribute('aria-valuemin','0');br.setAttribute('aria-valuemax',pub);br.setAttribute('aria-valuenow',n);br.setAttribute('aria-valuetext',n+' of '+pub+' published lessons completed · 已完成 '+n+' / '+pub+' 课');br.setAttribute('aria-label','Track progress · 路线进度');
       setTimeout(function(){rb.querySelector('.fg').style.strokeDashoffset=L*(1-p)},200)}
-    var tm=document.querySelector('.track-meta');
-    if(C&&tm)tm.innerHTML=t({en:C.topics.length+' topics · '+C.total+' lessons',zh:C.topics.length+' 个主题 · '+C.total+' 课'});
     var sb=document.querySelector('.startbtn');
     var NX=C&&CF.length?nextOf(C.id,CF):null,started=C&&(count(C.id,CF)>0||(jget(LAST,{}).t===C.id));
     if(C&&sb&&CF.length){sb.href=NX||CF[0];sb.innerHTML=!NX?t({en:'All done: review from the start →',zh:'全部完成：从头复习 →'}):started?t({en:'Continue where you left off →',zh:'继续上次的进度 →'}):t({en:'Start learning →',zh:'开始学习 →'})}
@@ -181,10 +179,10 @@
 
     /* hub: topic and lesson counts are never typed by hand. They come from each track's lessons.js
        (scripts/check-counts.mjs fails a PR that types one). Progress is completed / PUBLISHED lessons; planned lessons are shown separately. */
-    var hub=document.querySelector('.track-list'),sums=document.querySelectorAll('[data-sum]'),rsm=document.getElementById('resume');
+    var hub=document.querySelector('.track-list'),rsm=document.getElementById('resume');
     function pbar(n,tot,label){return '<div class="mini" role="progressbar" aria-label="'+label+'" aria-valuemin="0" aria-valuemax="'+tot+'" aria-valuenow="'+n+'" aria-valuetext="'+n+' / '+tot+'"><i style="width:'+(tot?n/tot*100:0)+'%"></i></div>'}
     function drawHub(){if(hub)hub.innerHTML=window.TRACKS.map(function(c,ci){var n=count(c.id,c.files),ok=c.total>0;
-      return '<a class="cc spot" href="'+c.href+'"><div class="orbi">'+c.icon+'</div><div><h3>'+t(c.title)+'</h3><div class="meta" style="margin-top:4px">'+t(c.desc)+'</div><div class="chips"><span class="chip">'+t({en:'Step '+(ci+1),zh:'第 '+(ci+1)+' 步'})+(c.level?' · '+t(LV[c.level]):'')+'</span>'+(ok?'<span class="chip">'+t({en:c.topics+' topics',zh:c.topics+' 个主题'})+'</span><span class="chip">'+t({en:c.published+' lessons',zh:c.published+' 课'})+'</span>'+(c.published<c.total?'<span class="chip">'+t({en:(c.total-c.published)+' coming soon',zh:'另有 '+(c.total-c.published)+' 课即将发布'})+'</span>':'')+(n?'<span class="chip">'+t({en:n+' done',zh:'已完成 '+n})+'</span>':''):'')+'<span class="chip">'+t({en:'Bilingual',zh:'双语'})+'</span></div>'+pbar(n,c.published||0,'Progress in '+c.title.en+' · '+c.title.zh)+'</div><div class="go">→</div></a>'}).join('')}
+      return '<a class="cc spot" href="'+c.href+'"><div class="orbi">'+c.icon+'</div><div><h3>'+t(c.title)+'</h3><div class="meta" style="margin-top:4px">'+t(c.desc)+'</div><div class="chips"><span class="chip">'+t({en:'Step '+(ci+1),zh:'第 '+(ci+1)+' 步'})+(c.level?' · '+t(LV[c.level]):'')+'</span>'+(ok&&n?'<span class="chip">'+t({en:n+' of '+c.published+' done',zh:'已完成 '+n+' / '+c.published})+'</span>':'')+'</div>'+pbar(n,c.published||0,'Progress in '+c.title.en+' · '+c.title.zh)+'</div><div class="go">→</div></a>'}).join('')}
     function canStore(){try{localStorage.setItem('learn-t','1');localStorage.removeItem('learn-t');return true}catch(e){return false}}
     function drawResume(){
       var T=window.TRACKS,tot=0,fin=0,hasP=false,lookup={};
@@ -205,11 +203,10 @@
         '<div class="cc rs-all"><div><div class="ey">'+t({en:'All tracks',zh:'全部路线'})+'</div><div style="font-weight:700">'+t({en:fin+' of '+tot+' published lessons completed',zh:'已完成 '+fin+' / '+tot+' 课（已发布）'})+'</div>'+pbar(fin,tot,'Overall progress · 总进度')+'</div></div></div>'+
         (canStore()?'':'<p class="meta warn">'+t({en:'This browser is blocking saved progress.',zh:'这个浏览器禁止保存数据。'})+'</p>');
     }
-    if(window.TRACKS&&(hub||sums.length||rsm)){
+    if(window.TRACKS&&(hub||rsm)){
       /* Every track's lessons.js is read in parallel (fetch); a page opened from disk, where fetch is blocked, falls back to one script tag at a time. */
       function absorb(c,T){if(T&&T.topics){c.topics=T.topics.length;c.total=0;c.published=0;c.files=[];c.titles={};T.topics.forEach(function(w){c.total+=w.items.length;w.items.forEach(function(x){if(x.file){c.published++;c.files.push(x.file);c.titles[x.file]=x.title}})})}}
-      function finish(){var tot={topics:0,lessons:0,published:0};window.TRACKS.forEach(function(x){tot.topics+=x.topics||0;tot.lessons+=x.total||0;tot.published+=x.published||0});
-        sums.forEach(function(el){el.dataset.count=tot[el.dataset.sum];countUp(el)});drawHub();drawResume()}
+      function finish(){drawHub();drawResume()}
       function viaScript(c,done){var sc=document.createElement('script');sc.src=c.href.replace(/[^\/]*$/,'')+'lessons.js';
         sc.onload=sc.onerror=function(){var T=window.TRACK;try{delete window.TRACK}catch(e){window.TRACK=undefined}absorb(c,T);done()};document.body.appendChild(sc)}
       Promise.all(window.TRACKS.map(function(c){

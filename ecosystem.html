@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>How TX Learns works</title>
 <meta name="description" content="My learning notes, turned into lessons by AI. They go live after automatic checks and review, get watched afterwards, and a merge that breaks the site is rolled back automatically."><meta property="og:title" content="How TX Learns works"><meta property="og:description" content="My learning notes, turned into lessons by AI. They go live after automatic checks and review, get watched afterwards, and a merge that breaks the site is rolled back automatically."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ecosystem.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
-<link rel="canonical" href="https://tx-learns.vercel.app/ecosystem.html"><link rel="icon" href="assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><link rel="stylesheet" href="assets/site.css?v=626b0377">
+<link rel="canonical" href="https://tx-learns.vercel.app/ecosystem.html"><link rel="icon" href="assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><link rel="preload" href="/assets/fonts/fraunces-5.3.0-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="assets/site.css?v=95bf6c47">
 <style>
 :root{--mono:ui-monospace,"SF Mono",SFMono-Regular,"JetBrains Mono",Menlo,Consolas,monospace}
 .eco{--edge:color-mix(in srgb,var(--fg) 46%,transparent);--edge2:color-mix(in srgb,var(--fg) 26%,transparent);--box:color-mix(in srgb,var(--fg) 22%,transparent)}
@@ -9,8 +9,6 @@
 .eco h2 .no{font-family:var(--mono);font-size:.5em;font-weight:600;color:var(--mut);letter-spacing:.04em;vertical-align:.35em;margin-right:12px}
 .conn{display:none;margin:0 auto 10px;max-width:760px;font-size:14px;color:var(--mut);text-align:center;padding:10px 16px;border:1px dashed var(--line);border-radius:8px}
 .conn.on{display:block}
-.statusbar{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 18px;margin:26px auto 0;max-width:820px;font:12.5px/1.5 var(--mono);color:var(--mut);padding:10px 16px;border:1px solid var(--line);border-radius:8px;background:var(--glass)}
-.statusbar b{color:var(--fg);font-weight:600}.statusbar .on{color:var(--acc2)}.statusbar .off{color:var(--warn)}
 .code{font-family:var(--mono);font-size:.86em;padding:1px 6px;border-radius:4px;background:var(--glass);border:1px solid var(--line)}
 
 /* the system: one diagram, two views */
@@ -248,10 +246,8 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 <main class="wide eco">
 <header class="stage compact eco-hero"><div class="orb"></div>
 <span class="eyebrow"><span class="en">Behind the scenes · system view</span><span class="zh">幕后 · 系统视图</span></span>
-<h1 class="mega"><span class="en">From something I learn <br>to a page you can read.</span><span class="zh">从我学到的东西，<br>到你能读的一页。</span></h1>
+<h1 class="mega"><span class="en">From something I learn <em>to a page you can read.</em></span><span class="zh">从我学到的东西，<em>到你能读的一页。</em></span></h1>
 <p class="sub"><span class="en">My learning notes, turned into lessons by AI. They go live after automatic checks and review, get watched afterwards, and a merge that breaks the site is rolled back automatically.</span><span class="zh">我的学习笔记，由 AI 整理成课。经过自动检查和审阅后发布，上线后继续巡检；弄坏网站的合并会被自动回滚。</span></p>
-<div class="statusbar" id="sbar"></div>
-<p class="cta"><a class="btn" href="#story"><span class="en">See one lesson being made</span><span class="zh">看一课是怎么做出来的</span></a><a class="btn ghost" href="index.html#topics"><span class="en">Browse the lessons</span><span class="zh">去看看这些课</span></a></p>
 <nav class="pnav" aria-label="On this page"><a href="#system"><span class="en">Flow</span><span class="zh">流程</span></a><a href="#story"><span class="en">A real lesson</span><span class="zh">真实案例</span></a><a href="#guardrails"><span class="en">Safeguards</span><span class="zh">保障机制</span></a><a href="#concepts"><span class="en">Ideas</span><span class="zh">学习概念</span></a><a href="#changes"><span class="en">Recent activity</span><span class="zh">最近动态</span></a></nav>
 </header>
 
@@ -323,7 +319,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 </section>
 </main>
 <div class="tip" id="tip" role="tooltip"></div>
-<script src="changelog.js"></script><script src="tracks.js?v=2bfa1a40"></script><script src="assets/build-concepts.js?v=cf202fe2"></script><script src="assets/site.js?v=9eb01700"></script>
+<script src="changelog.js"></script><script src="tracks.js?v=2bfa1a40"></script><script src="assets/build-concepts.js?v=cf202fe2"></script><script src="assets/site.js?v=85ce92dd"></script>
 <script>
 (function(){
   function t(en,zh){return '<span class="en">'+en+'</span><span class="zh">'+zh+'</span>'}
@@ -576,11 +572,6 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     var rows=[[['Preview checks','预览版本检查'],['ui-check','copy-check','reviewer']],[['Live site','线上网站'],['live-check']],[['Background jobs','后台任务'],['quality','recall','improver','news','optimizer']]];
     var h=rows.map(function(r){var k=live?worst(r[1]):'';return '<li><span class="dot '+k+'"></span><b>'+t(r[0][0],r[0][1])+'</b><span class="hv">'+(k?PILL[k]:live?t('no runs yet','还没运行'):t('shows on the live site','线上网站才显示'))+'</span></li>'}).join('');
     if(h!==el.dataset.h){el.dataset.h=h;el.innerHTML=h}}
-  function drawBar(S,live){var act=AGENTS.filter(function(a){return !a.later}),ran=act.filter(function(a){return S[a.id]}),last=0;
-    ran.forEach(function(a){var x=+new Date(S[a.id].at);if(x>last)last=x});
-    var runs=ran.reduce(function(n,a){return n+(S[a.id].runs||0)},0);
-    var bh='<span>'+t('status','状态')+': <b class="'+(live?'on':'off')+'">'+(live?t('● live','● 在线'):t('○ offline','○ 离线'))+'</b></span><span><b>'+act.length+'</b> '+t('automated roles','个自动化角色')+(AGENTS.length>act.length?' · <b>'+(AGENTS.length-act.length)+'</b> '+t('planned','计划中'):'')+'</span>'+
-      '<span>'+t('runs','运行次数')+': <b>'+runs+'</b></span>'+(last?'<span>'+t('last run','上次运行')+': <b>'+ago(new Date(last).toISOString())+'</b></span>':'')+'<span>'+t('merge gate: <b>2 required checks</b>','合并条件：<b>2 项必需检查</b>')+'</span>';if(bh!==LASTB){LASTB=bh;document.getElementById('sbar').innerHTML=bh}}
 
   (function(){var g=document.getElementById('cgrid'),g2=document.getElementById('cgrid2'),C=window.BUILD_CONCEPTS||[],REC=['workflows','roles','guardrails','evals','cicd','approval'];
     function card(c,rec){var soon=c.status==='soon',l=c.lessons[0];
@@ -605,7 +596,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
       :t('Live status is not available right now.','暂时看不到实时状态。')}
     else if(why==='not-found'&&!Object.keys(S).length){c.classList.add('on');c.innerHTML=t('No agent status found yet. If agents have run, the token may not have access to the repo.','还没有找到 agent 状态。如果 agent 已经运行过，可能是令牌没有这个仓库的权限。')}
     else c.classList.remove('on');
-    LIVE=live;drawOverview(S);drawBar(S,live);drawHealth(S,live);drawFeed(S,live)}
+    LIVE=live;drawOverview(S);drawHealth(S,live);drawFeed(S,live)}
   draw(null);
   function load(){fetch('api/status',{cache:'no-store'}).then(function(r){return r.json()}).then(draw).catch(function(){draw({connected:false})})}
   load();setInterval(function(){if(!document.hidden)load()},60e3);
