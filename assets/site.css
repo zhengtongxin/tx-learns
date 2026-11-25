@@ -1,4 +1,4 @@
-:root{--sans:"Inter var",Inter,system-ui,-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,"Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;--bg:#050507;--glass:rgba(255,255,255,.055);--glass2:rgba(22,22,30,.72);--line:rgba(255,255,255,.11);--fg:#f5f5f7;--mut:#9a9aa8;--acc:#ffc83d;--acc2:#ffe066;--on:#1d1d1f;--ok:#30d158;--warn:#ff9f0a;--run:#ffd60a;--bad:#ff453a;--node:#0f1017;--hg1:#ffffff;--hg2:rgba(255,255,255,.5);--glow:rgba(255,196,61,.4);--grad:linear-gradient(135deg,#ffb703 0%,#ffe066 100%);--aur:1}
+:root{--bg:#050507;--glass:rgba(255,255,255,.055);--glass2:rgba(22,22,30,.72);--line:rgba(255,255,255,.11);--fg:#f5f5f7;--mut:#9a9aa8;--acc:#ffc83d;--acc2:#ffe066;--on:#1d1d1f;--ok:#30d158;--warn:#ff9f0a;--run:#ffd60a;--bad:#ff453a;--node:#0f1017;--hg1:#ffffff;--hg2:rgba(255,255,255,.5);--glow:rgba(255,196,61,.4);--grad:linear-gradient(135deg,#ffb703 0%,#ffe066 100%);--aur:1}
 html[data-theme=light]{--bg:#f5f5f7;--glass:rgba(255,255,255,.72);--glass2:rgba(255,255,255,.85);--line:rgba(0,0,0,.09);--fg:#1d1d1f;--mut:#6e6e73;--acc:#8a5a00;--acc2:#825400;--ok:#12802f;--warn:#c76a00;--run:#a68500;--bad:#d70015;--node:#fff;--hg1:#1d1d1f;--hg2:rgba(29,29,31,.55);--glow:rgba(255,184,0,.4);--grad:linear-gradient(135deg,#ffbe0b 0%,#ffe066 100%);--aur:.45}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -399,16 +399,15 @@ main.wide h2,main.wide>section>.sub,main.wide>section>p{text-align:center;margin
 .whatnext{text-align:center;margin-left:auto;margin-right:auto}
 .pre-after,.track-ba{text-align:left}
 
-/* ---- type: a serif display voice for headings, a clean sans for reading ---- */
-@font-face{font-family:"Fraunces";src:url(fonts/fraunces-5.3.0-normal.woff2) format("woff2");font-weight:100 900;font-style:normal;font-display:swap}
-@font-face{font-family:"Fraunces";src:url(fonts/fraunces-5.3.0-italic.woff2) format("woff2");font-weight:100 900;font-style:italic;font-display:swap}
-:root{--serif:"Fraunces","Iowan Old Style","Palatino Linotype",Georgia,"Songti SC","Noto Serif CJK SC","Source Han Serif SC",serif}
-.mega,.hero h1,h1,h2,.cc h3,.lcard h3,.score,.bigring b{font-family:var(--serif)}
-.mega,.hero h1{font-weight:650;letter-spacing:-.03em;font-variation-settings:"opsz" 144,"SOFT" 50}
-h2{font-weight:600;letter-spacing:-.025em;font-variation-settings:"opsz" 72}
-.cc h3{font-weight:600;letter-spacing:-.02em}
-h1 em,h2 em{font-style:italic;font-weight:400;color:var(--acc2);-webkit-text-fill-color:var(--acc2);letter-spacing:-.02em}
-html[data-lang=zh] h1 em,html[data-lang=zh] h2 em{font-style:normal;font-weight:inherit}
+/* ---- type: Apple-style system sans (SF Pro on Apple devices, Inter elsewhere, PingFang SC for 中文); contrast from weight, size and tight tracking ---- */
+@font-face{font-family:"Inter";src:url(fonts/inter-5.3.0-latin.woff2) format("woff2");font-weight:100 900;font-style:normal;font-display:swap}
+:root{--sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Inter","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Segoe UI",Roboto,"Helvetica Neue",system-ui,sans-serif}
+.mega,.hero h1{font-weight:700;letter-spacing:-.045em;line-height:1.04}
+h1{font-weight:700;letter-spacing:-.04em}
+h2{font-weight:650;letter-spacing:-.035em}
+.cc h3,.lcard h3{font-weight:650;letter-spacing:-.02em}
+h1 em,h2 em{font-style:normal;font-weight:inherit;color:var(--acc2);-webkit-text-fill-color:var(--acc2)}
+html[data-lang=zh] h1,html[data-lang=zh] h2,html[data-lang=zh] .mega{letter-spacing:-.01em}
 .sub{font-weight:400;font-size:clamp(1.05rem,2.2vw,1.25rem)}
 .eyebrow,.tag{font-weight:600;letter-spacing:.2em}
 h3{font-weight:650}
