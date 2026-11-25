@@ -9,11 +9,19 @@
 .gl-sec>h2{margin:0 0 6px}
 .gl-note{margin:0 0 16px;color:var(--mut);font-size:15px}
 /* concept map: one node per theme, its terms inside */
-.themes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:14px;margin-top:14px}
+.themes{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:clamp(48px,7vw,84px);row-gap:56px;margin-top:18px}
 .theme{position:relative;padding:14px 16px 16px;border:1px solid color-mix(in srgb,var(--h) 55%,var(--line));border-top:3px solid var(--h);border-radius:14px;background:color-mix(in srgb,var(--h) 7%,var(--glass));scroll-margin-top:70px}
+.theme[data-p=models]{grid-area:1/1}.theme[data-p=agents]{grid-area:1/2}.theme[data-p=tools]{grid-area:1/3}
+.theme[data-p=evals]{grid-area:2/1}.theme[data-p=safety]{grid-area:2/2}.theme[data-p=memory]{grid-area:2/3}.theme[data-p=delivery]{grid-area:3/2}
+.flow{position:absolute;inset:0;pointer-events:none}
+.flow svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.flow .e{fill:none;stroke:var(--mut);stroke-width:1.5}.flow .e.d{stroke-dasharray:5 4;opacity:.75}
+.flow marker path{fill:var(--mut)}
+.flow .el{position:absolute;font-size:12px;color:var(--mut);white-space:nowrap;line-height:1.2;transform:translate(-50%,-50%);background:var(--bg);padding:1px 6px;border-radius:6px}
 .theme h3{margin:0 0 2px;font-size:17px}
 .theme h3 .no{font:700 12px ui-monospace,Menlo,Consolas,monospace;color:var(--h);margin-right:8px}
 .theme p{margin:0 0 10px;color:var(--mut);font-size:14px;line-height:1.5}
+@media(max-width:700px){.themes{grid-template-columns:1fr;row-gap:12px}.theme[data-p]{grid-area:auto}.flow{display:none}}
 .chips-l{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
 .chips-l a{display:inline-block;padding:3px 10px;border-radius:99px;border:1px solid color-mix(in srgb,var(--h) 55%,var(--line));background:color-mix(in srgb,var(--h) 9%,transparent);color:var(--fg);font-size:13px;line-height:1.5;text-decoration:none}
 .chips-l a:hover,.chips-l a:focus-visible{border-color:var(--h);background:color-mix(in srgb,var(--h) 22%,transparent);outline:2px solid transparent}
@@ -82,8 +90,27 @@ html[data-theme=light] .gl-m .tg{color:color-mix(in srgb,var(--h) 30%,var(--fg))
     themesEl.innerHTML=order.map(function(id,n){
       var t=TH[thIdx[id]];if(!t)return '';
       var terms=G.filter(function(g){return g.theme===id});
-      return '<section class="theme '+thc(id)+'" id="theme-'+esc(id)+'"><h3><span class="no">'+(n+1)+'</span>'+bi(t.title)+'</h3><p>'+bi(t.blurb)+'</p><ul class="chips-l">'+
+      return '<section class="theme '+thc(id)+'" data-p="'+id+'" id="theme-'+esc(id)+'"><h3><span class="no">'+(n+1)+'</span>'+bi(t.title)+'</h3><p>'+bi(t.blurb)+'</p><ul class="chips-l">'+
         terms.map(function(g){return '<li><a href="#t-'+esc(g.id)+'" data-t="'+esc(g.id)+'" title="'+esc(g.def.en)+'">'+bi({en:g.en,zh:g.zh})+'</a></li>'}).join('')+'</ul></section>'}).join('');
+
+    /* arrows: the original flows, drawn from where the nodes actually sit */
+    var flow=document.createElement('div');flow.className='flow';flow.setAttribute('aria-hidden','true');themesEl.appendChild(flow);
+    var EDGES=[['models','agents','h',{en:'calls',zh:'调用'}],['agents','tools','h',{en:'uses',zh:'使用'}],['agents','safety','v',{en:'kept in line by',zh:'受其约束'}],['tools','memory','v',{en:'reads from',zh:'读取'}],['safety','delivery','v',{en:'shipped by',zh:'由其上线'}],['agents','evals','d',{en:'scored by',zh:'由其评分'}]];
+    function draw(){
+      if(window.innerWidth<=700){flow.innerHTML='';return}
+      var R=themesEl.getBoundingClientRect(),P={};
+      order.forEach(function(id){var e=document.getElementById('theme-'+id);if(e){var b=e.getBoundingClientRect();P[id]={l:b.left-R.left,r:b.right-R.left,t:b.top-R.top,b:b.bottom-R.top,w:b.width,cx:(b.left+b.right)/2-R.left,cy:(b.top+b.bottom)/2-R.top}}});
+      var p='',lb='';
+      EDGES.forEach(function(e){var a=P[e[0]],z=P[e[1]];if(!a||!z)return;var x1,y1,x2,y2,lx,ly,cls='e';
+        if(e[2]==='h'){x1=a.r;y1=Math.min(a.cy,z.cy);x2=z.l;y2=y1;lx=(x1+x2)/2;ly=y1-14}
+        else if(e[2]==='v'){x1=a.cx;y1=a.b;x2=z.cx;y2=z.t;lx=x1;ly=(y1+y2)/2}
+        else{x1=a.l+a.w*0.25;y1=a.b;x2=z.cx;y2=z.t;lx=(x1+x2)/2-24;ly=(y1+y2)/2;cls='e d'}
+        p+='<path class="'+cls+'" d="M'+x1.toFixed(1)+' '+y1.toFixed(1)+'L'+x2.toFixed(1)+' '+(y2-1).toFixed(1)+'" marker-end="url(#ar)"/>';
+        lb+='<div class="el" style="left:'+lx.toFixed(1)+'px;top:'+ly.toFixed(1)+'px">'+bi(e[3])+'</div>'});
+      flow.innerHTML='<svg><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z"/></marker></defs>'+p+'</svg>'+lb}
+    draw();window.addEventListener('resize',draw);
+    if(window.ResizeObserver)new ResizeObserver(draw).observe(themesEl);
+    if(document.fonts&&document.fonts.ready)document.fonts.ready.then(draw);
 
     /* the A to Z list */
     var groups={};
