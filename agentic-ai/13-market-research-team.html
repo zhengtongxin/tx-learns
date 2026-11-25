@@ -21,6 +21,7 @@ class Market(BaseModel):
 class MarketList(BaseModel):
     markets: list[Market]
 
+# the methods below sit inside a @CrewBase class, PasarPicker, that reads config/agents.yaml and config/tasks.yaml
 @agent
 def scout(self) -> Agent:
     return Agent(config=self.agents_config["scout"], </span><span class="chg">tools=[SerperDevTool()]</span><span class="dim">, verbose=True)
@@ -73,6 +74,7 @@ def picker(self) -> Agent:
 
 @crew
 def crew(self) -> Crew:
+    </span><span class="dim"># config/agents.yaml has a "boss" entry (role, goal, backstory) like the other three
     </span><span class="chg">boss = Agent(config=self.agents_config["boss"], allow_delegation=True)</span><span class="dim">
     return Crew(
         agents=self.agents,          # scout, researcher, picker (not the boss)

@@ -35,8 +35,8 @@
   <div class="step"><b><span class="en">1. Trigger</span><span class="zh">1. 触发器</span></b><p class="en">New blank workflow, then add “When chat message received”.</p><p class="zh">新建空白工作流，添加“When chat message received”。</p></div>
   <div class="step"><b><span class="en">2. Agent</span><span class="zh">2. 智能体</span></b><p class="en">Connect the trigger to an AI Agent node.</p><p class="zh">把触发器连接到 AI Agent 节点。</p></div>
   <div class="step"><b><span class="en">3. Model + memory</span><span class="zh">3. 模型和记忆</span></b><p class="en">Chat Model: OpenAI. Memory: Simple Memory.</p><p class="zh">Chat Model 选 OpenAI；Memory 选 Simple Memory。</p></div>
-  <div class="step"><b><span class="en">4. Tools</span><span class="zh">4. 工具</span></b><p class="en">Marketstack (market data) and Google Sheets (append rows).</p><p class="zh">添加 Marketstack（行情数据）和 Google Sheets（追加行）。</p></div>
-  <div class="step"><b><span class="en">5. Chat, then open Logs</span><span class="zh">5. 聊天并看日志</span></b><p class="en">Ask for yesterday's closing price and see which tools ran.</p><p class="zh">问昨天的收盘价，看哪些工具运行了。</p></div>
+  <div class="step"><b><span class="en">4. Tools</span><span class="zh">4. 工具</span></b><p class="en">Add Marketstack, operation “Get many EoD data”: paste your Marketstack key when n8n asks for a credential. Add Google Sheets, operation “Append row”: sign in with Google, then pick a sheet with two columns, Date and Close.</p><p class="zh">添加 Marketstack，操作选“Get many EoD data”：n8n 要凭证时贴上你的 Marketstack 密钥。再添加 Google Sheets，操作选“Append row”：用 Google 登录，然后选一张有“Date”和“Close”两列的表。</p></div>
+  <div class="step"><b><span class="en">5. Chat, then open Logs</span><span class="zh">5. 聊天并看日志</span></b><p class="en">Ask: “Check yesterday's closing price of AAPL and write it down.” Any ticker symbol works. Then see which tools ran.</p><p class="zh">问它：“查一下 AAPL 昨天的收盘价并记下来。”换成任何股票代码都行。然后看哪些工具运行了。</p></div>
 </div>
 <div class="try" id="p4"></div>
 
@@ -44,7 +44,7 @@
 <div class="cl"><label><input type="checkbox"><span><span class="en">Build the six parts in your own n8n and send one question.</span><span class="zh">在你自己的 n8n 里搭出这六个部分并发一个问题。</span></span></label><label><input type="checkbox"><span><span class="en">In the Logs, find which step used the model and which used a tool.</span><span class="zh">在 Logs 里找出哪一步用了模型、哪一步用了工具。</span></span></label></div>
 
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• Agent = LLM + tools + a loop; the AI Agent node is the loop.<br>• Model is the brain, tools the hands, memory the notebook.<br>• The agent repeats think, act, observe until it can answer.<br>• The log shows each step, its time and its tokens; tokens are cost.<br>• Simple Memory is for learning; use database-backed memory for real use.</p><p class="zh" style="margin:0">• 智能体 = 大模型 + 工具 + 循环；AI Agent 节点就是循环。<br>• 模型是大脑，工具是双手，记忆是笔记本。<br>• 智能体重复“思考、行动、观察”，直到能回答。<br>• 日志显示每一步、耗时和 token；token 就是成本。<br>• Simple Memory 适合学习，正式使用请换成基于数据库的记忆。</p></div>
+<div class="card"><p class="en" style="margin:0">• Agent = LLM + tools + a loop; the AI Agent node is the loop.<br>• Model is the brain, tools the hands, memory the notebook.<br>• The agent repeats think, act, observe until it can answer.<br>• The log shows each step, its time and its tokens; tokens are cost.<br>• Simple Memory forgets everything when the workflow restarts. For real use, pick a memory node that saves to a database.</p><p class="zh" style="margin:0">• 智能体 = 大模型 + 工具 + 循环；AI Agent 节点就是循环。<br>• 模型是大脑，工具是双手，记忆是笔记本。<br>• 智能体重复“思考、行动、观察”，直到能回答。<br>• 日志显示每一步、耗时和 token；token 就是成本。<br>• Simple Memory 在工作流重启后就全忘了。正式使用时，请换成把内容存进数据库的记忆节点。</p></div>
 
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Agentic</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>

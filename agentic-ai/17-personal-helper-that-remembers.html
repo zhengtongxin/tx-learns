@@ -10,8 +10,8 @@
 # also Node + npx. env: OPENAI_API_KEY, SERPER_API_KEY, PUSHOVER_USER, PUSHOVER_TOKEN</span></div>
 
 <h2><span class="en">Step 1 · Tools first</span><span class="zh">第 1 步 · 先备工具</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li>A worker is only as good as its toolbox: a search tool, two functions you write (<code>ping_phone</code>, <code>ask_human</code>) and a browser from an MCP server.</li><li>A browser must keep tabs and cookies between calls, so keep its MCP session <b>open</b> with <code>client.session(name)</code> and <code>load_mcp_tools(session)</code>.</li></ul>
-<ul class="zh" style="margin:0;padding-left:18px"><li>执行者的能力取决于工具箱：一个搜索工具、两个你自己写的函数（<code>ping_phone</code>、<code>ask_human</code>），以及来自 MCP 服务的浏览器。</li><li>浏览器要在多次调用之间保留标签页和 cookie，所以用 <code>client.session(name)</code> 和 <code>load_mcp_tools(session)</code> 让 MCP 会话保持<b>开启</b>。</li></ul></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li>A worker is only as good as its toolbox: a search tool, two functions you write (<code>ping_phone</code>, <code>ask_human</code>) and two MCP servers: a browser, and a file tool that can only touch one folder.</li><li>A browser must keep tabs and cookies between calls, so keep its MCP session <b>open</b> with <code>client.session(name)</code> and <code>load_mcp_tools(session)</code>.</li></ul>
+<ul class="zh" style="margin:0;padding-left:18px"><li>执行者的能力取决于工具箱：一个搜索工具、两个你自己写的函数（<code>ping_phone</code>、<code>ask_human</code>），以及两个 MCP 服务：浏览器，和一个只能动一个文件夹的文件工具。</li><li>浏览器要在多次调用之间保留标签页和 cookie，所以用 <code>client.session(name)</code> 和 <code>load_mcp_tools(session)</code> 让 MCP 会话保持<b>开启</b>。</li></ul></div>
 <div class="codebox" data-file="tools.py" data-lang="python"><span class="dim">import os, requests
 from contextlib import AsyncExitStack
 from langchain_core.tools import tool
@@ -34,12 +34,18 @@ def ask_human(instructions: str) -> str:
     return "The human says it's done. Continue."</span><span class="dim">
 
 # run inside an async function or a notebook cell
+os.makedirs("workspace", exist_ok=True)
 client = MultiServerMCPClient({
     "browser": {"transport": "stdio", "command": "npx", "args": ["@playwright/mcp@latest", "--isolated"]},
+    "files": {"transport": "stdio", "command": "npx",        # reads and writes inside workspace/ only
+              "args": ["-y", "@modelcontextprotocol/server-filesystem", os.path.abspath("workspace")]},
 })
 stack = AsyncExitStack()
-session = await stack.enter_async_context(client.session("browser"))   # stays open
-</span><span class="chg">all_tools = [search, ping_phone, ask_human] + await load_mcp_tools(session)</span></div>
+</span><span class="chg">all_tools = [search, ping_phone, ask_human]
+for name in ("browser", "files"):
+    session = await stack.enter_async_context(client.session(name))   # stays open
+    all_tools += await load_mcp_tools(session)</span><span class="dim">
+# when the errand is finished, in this same function: await stack.aclose()</span></div>
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 2 · The worker, and asking first</span><span class="zh">第 2 步 · 执行者与先问一声</span></h2>
@@ -112,7 +118,7 @@ async def run_errand(errand: str, done_means: str, cfg: dict, tries: int = 3):
     return reply, "gave up after max tries"</span></div>
 <div class="try" id="p4"></div>
 
-<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en">I opened a stdio MCP session in one asyncio task and closed it in another, which gave confusing cancel-scope errors. Open and close it in the same task. And without <code>tries</code> and a call limit, a strict checker plus an eager worker can loop and cost real money.</span><span class="zh">我在一个 asyncio 任务里打开 stdio MCP 会话，却在另一个任务里关闭，得到一堆莫名其妙的取消范围错误。要在同一个任务里打开和关闭。另外，没有 <code>tries</code> 和调用上限，严格的检查员加上积极的执行者可能一直循环，花掉真金白银。</span></div>
+<div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我犯过的错</span></b><span class="en">I opened the MCP sessions in one function and closed them in another, which gave confusing errors on exit. Open and close them in the same function: that is the <code>await stack.aclose()</code> line in Step 1. And without <code>tries</code> and a call limit, a strict checker plus an eager worker can loop and cost real money.</span><span class="zh">我在一个函数里打开 MCP 会话，却在另一个函数里关闭，退出时得到一堆莫名其妙的错误。要在同一个函数里打开和关闭：就是第 1 步里的 <code>await stack.aclose()</code> 那一行。另外，没有 <code>tries</code> 和调用上限，严格的检查员加上积极的执行者可能一直循环，花掉真金白银。</span></div>
 
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Write your own errand.</b> Write its “done means” line first, then run it through <code>run_errand</code>.</span><span class="zh"><b>写你自己的任务。</b>先写“完成标准”，再用 <code>run_errand</code> 运行。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Reject once</b> with “not before 8am” and watch Kaki change its plan.</span><span class="zh"><b>拒绝一次</b>，理由写“早上 8 点前别发”，看 Kaki 怎么改计划。</span></span></label></div>

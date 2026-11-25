@@ -23,7 +23,11 @@ with open("twin/summary.txt") as f: summary = f.read()
 def chat(message, history):
     messages = [{"role": "system", "content": system_prompt}] + history + [{"role": "user", "content": message}]
     response = client.chat.completions.create(model="gpt-5.4-mini", messages=messages)
-    return response.choices[0].message.content</span></div>
+    return response.choices[0].message.content
+
+</span><span class="chg">history = []
+reply = chat("Hi, who is Alex?", history)
+history += [{"role": "user", "content": "Hi, who is Alex?"}, {"role": "assistant", "content": reply}]  # this list is the memory</span></div>
 <div class="try" id="p1b"></div>
 <div class="try" id="p2"></div>
 
@@ -60,23 +64,21 @@ def handle_tool_calls(tool_calls):
             output = record_email_tool(**arguments)
         else:
             output = "Unknown tool"
-        results.append({"role": "tool", "tool_call_id": call.id, "content": output})
+        results.append({"role": "tool", "tool_call_id": call.id, "content": output})  # the id says which request this result answers
     return results
 
 def chat(message, history):
     messages = [{"role": "system", "content": system_prompt}] + history + [{"role": "user", "content": message}]
-    </span><span class="chg">done = False
-    while not done:</span><span class="dim">
+    </span><span class="chg">for _ in range(5):                               # at most 5 rounds, so it can never loop forever</span><span class="dim">
         response = client.chat.completions.create(model="gpt-5.4-mini", messages=messages, tools=tools)
-        if response.choices[0].finish_reason == "tool_calls":
-            messages.append(response.choices[0].message)
-            messages.extend(handle_tool_calls(response.choices[0].message.tool_calls))
-        else:
-            </span><span class="chg">done = True</span><span class="dim">
+        </span><span class="chg">if response.choices[0].finish_reason != "tool_calls":
+            break                                    # the model is done</span><span class="dim">
+        messages.append(response.choices[0].message)
+        messages.extend(handle_tool_calls(response.choices[0].message.tool_calls))
     return response.choices[0].message.content</span></div>
-<div class="callout tip"><b class="lbl"><span class="en">You just wrote an agent loop</span><span class="zh">你刚写出了一个智能体循环</span></b><span class="en">An LLM, tools and a <code>while</code> loop until the model stops asking. A framework only hides these lines behind a neat name.</span><span class="zh">一个大模型、几个工具，加一个 <code>while</code> 循环，直到模型不再请求。框架只是把这些代码藏在了漂亮的名字后面。</span></div>
+<div class="callout tip"><b class="lbl"><span class="en">You just wrote an agent loop</span><span class="zh">你刚写出了一个智能体循环</span></b><span class="en">An LLM, tools and a loop that runs until the model stops asking (or the round limit hits). A framework only hides these lines behind a neat name.</span><span class="zh">一个大模型、几个工具，加一个循环，直到模型不再请求（或达到轮数上限）。框架只是把这些代码藏在了漂亮的名字后面。</span></div>
 <div class="try" id="p4"></div>
-<div class="callout warn"><b class="lbl"><span class="en">Common error</span><span class="zh">常见错误</span></b><span class="en"><code>BadRequestError ... role 'tool' must be a response to a preceeding message with 'tool_calls'</code>: append the model's own tool request to <code>messages</code> before the results, as above. If the loop never ends, always return a short result string and cap the rounds.</span><span class="zh"><code>BadRequestError ... role 'tool' must be a response to a preceeding message with 'tool_calls'</code>：像上面那样，先把模型自己的工具请求加进 <code>messages</code>，再加结果。如果循环停不下来，总要返回一个简短的结果字符串，并限制轮数。</span></div>
+<div class="callout warn"><b class="lbl"><span class="en">Common error</span><span class="zh">常见错误</span></b><span class="en"><code>BadRequestError ... role 'tool' must be a response to a preceeding message with 'tool_calls'</code>: append the model's own tool request to <code>messages</code> before the results, as above. If the model keeps asking for tools, always return a short result string; the round limit above stops it either way.</span><span class="zh"><code>BadRequestError ... role 'tool' must be a response to a preceeding message with 'tool_calls'</code>：像上面那样，先把模型自己的工具请求加进 <code>messages</code>，再加结果。如果模型一直请求工具，总要返回一个简短的结果字符串；上面的轮数上限无论如何都会让它停下。</span></div>
 
 <h2><span class="en">Now make it yours</span><span class="zh">现在轮到你</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en">Write a second tool, such as one that saves a note, and add its JSON to <code>tools</code>.</span><span class="zh">再写一个工具，比如保存备注，并把它的 JSON 加进 <code>tools</code>。</span></span></label><label><input type="checkbox"><span><span class="en">Test a message with no email and check that no tool runs.</span><span class="zh">测试一条没有邮箱的消息，确认没有工具运行。</span></span></label></div>

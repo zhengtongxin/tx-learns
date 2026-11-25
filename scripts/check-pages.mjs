@@ -109,7 +109,7 @@ for (const f of ['index.html', ...TR.map(t => t.dir + '/index.html')]) {
   if (f === 'index.html') { // the home page's no-JavaScript track list: every track, in tracks.js order
     const re = /<!-- tracks:start -->[\s\S]*?<!-- tracks:end -->/;
     if (!re.test(cur)) bad(f, 'missing <!-- tracks:start --><!-- tracks:end --> markers');
-    else next = next.replace(re, () => '<!-- tracks:start --><noscript>' + TRACKS.map(t => `<a class="cc" href="${t.href}"><div><h3>${esc(t.title.en)} · ${esc(t.title.zh)}</h3></div></a>`).join('') + '</noscript><!-- tracks:end -->');
+    else next = next.replace(re, () => '<!-- tracks:start --><noscript>' + TRACKS.map(t => `<a class="cc" href="${t.href}"><div><h3>${esc(t.title.en)} · ${esc(t.title.zh)}</h3>${t.desc ? `<p>${esc(t.desc.en)} · ${esc(t.desc.zh)}</p>` : ''}</div></a>`).join('') + '</noscript><!-- tracks:end -->');
   }
   if (lists[f]) { const [re, block] = lists[f]; if (!re.test(cur)) bad(f, 'missing <!-- lessons:start --><!-- lessons:end --> markers'); else next = next.replace(re, block); }
   const own = f === 'index.html' ? TR[0] : TR.find(t => t.dir + '/index.html' === f), first = own && firstOf(own);
