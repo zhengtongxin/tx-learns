@@ -97,7 +97,7 @@ html[data-theme=light] .gl-m .tg{color:color-mix(in srgb,var(--h) 30%,var(--fg))
 <div class="gl-none" id="none" hidden><span class="en">No term matches. Try a shorter word, or clear the box.</span><span class="zh">没有匹配的词。换个短一点的词，或者清空输入框。</span></div>
 </section>
 </main>
-<script src="tracks.js?v=bffcced0"></script><script src="glossary.js"></script><script src="assets/site.js?v=20c91d6e"></script>
+<script src="tracks.js?v=2bfa1a40"></script><script src="glossary.js"></script><script src="assets/site.js?v=b3e1ee7d"></script>
 <script>
 (function(){
   try{
@@ -135,7 +135,8 @@ html[data-theme=light] .gl-m .tg{color:color-mix(in srgb,var(--h) 30%,var(--fg))
     var items=[].slice.call(listEl.querySelectorAll('.gl-it')),grps=[].slice.call(listEl.querySelectorAll('.gl-grp'));
         function apply(){
       var v=q.value.trim().toLowerCase(),shown=0;
-      items.forEach(function(el){var ok=!v||el.getAttribute('data-h').indexOf(v)>-1;el.hidden=!ok;if(ok)shown++});
+      var latin=/^[a-z0-9 .+\-]+$/.test(v),re=latin&&v?new RegExp('(^|[^a-z0-9])'+v.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')):null;
+      items.forEach(function(el){var h=el.getAttribute('data-h'),ok=!v||(re?re.test(h):h.indexOf(v)>-1);el.hidden=!ok;if(ok)shown++});
       grps.forEach(function(gp){gp.hidden=!gp.querySelector('.gl-it:not([hidden])')});
       none.hidden=shown>0;
       stat.innerHTML=(v?shown+' <span class="en">of</span><span class="zh">/</span> ':'')+items.length+' <span class="en">terms</span><span class="zh">个词</span>';
