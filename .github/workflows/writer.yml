@@ -21,7 +21,7 @@ permissions:
   pull-requests: write
   actions: write
 concurrency:
-  group: writer-${{ github.event_name }}-${{ inputs.folder || github.run_id }}
+  group: writer-${{ github.run_id }}
   cancel-in-progress: false
 jobs:
   # A push to the notes branch: find the note folders that changed and start the writer on main with them.
@@ -45,8 +45,8 @@ jobs:
           dirs=$(git diff --name-only --diff-filter=AM "$BEFORE" "$GITHUB_SHA" -- inbox/ | grep -v '^inbox/README.md$' | awk -F/ 'NF>2{print $1"/"$2}' | sort -u | tr '\n' ' ')
           [ -z "${dirs// }" ] && { echo "No note folders changed."; exit 0; }
           echo "Folders: $dirs"
-          # One run per folder: a single run with many folders made the concurrency group name too long (over 400 characters), so the run never started.
-          for d in $dirs; do gh workflow run writer.yml --ref main -R "$GITHUB_REPOSITORY" -f folder="$d"; done
+          # One run for the whole push: its folders are written in parallel and land in ONE pull request (no clashes between lessons).
+          gh workflow run writer.yml --ref main -R "$GITHUB_REPOSITORY" -f folder="${dirs% }"
 
   # Marks the writer as working (yellow) on the How it works page while this run goes. Trusted scripts from main only.
   working:
@@ -66,10 +66,29 @@ jobs:
           STATE: run
         run: "[ -f scripts/record-status.mjs ] && node scripts/record-status.mjs writer || true"
 
-  write:
-    needs: working
-    if: ${{ !cancelled() && github.event_name == 'workflow_dispatch' }}
+  # Splits the folders into one parallel write job each.
+  plan:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.m.outputs.matrix }}
+    steps:
+      - id: m
+        env:
+          FOLDER: ${{ inputs.folder }}
+        run: |
+          json=$(node -e "const f=(process.env.FOLDER||'').split(/\\s+/).filter(Boolean).map(d=>d.replace(/\\/+\$/,''));console.log(JSON.stringify({folder:f}))")
+          echo "matrix=$json" >> "$GITHUB_OUTPUT"; echo "$json"
+
+  # One job per folder, in parallel. Each writes its lesson and packs only its own change (scripts/writer-batch.mjs);
+  # the publish job below applies all packs to main and opens ONE pull request.
+  write:
+    needs: [working, plan]
+    if: ${{ !cancelled() && github.event_name == 'workflow_dispatch' && needs.plan.outputs.matrix != '' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -81,7 +100,7 @@ jobs:
       - name: Bring in the notes
         id: notes
         env:
-          FOLDER: ${{ inputs.folder }}
+          FOLDER: ${{ matrix.folder }}
         run: |
           git fetch -q origin notes 2>/dev/null || echo "No notes branch; using inbox/ on main."
           dirs=
@@ -183,62 +202,113 @@ jobs:
       - name: Count check
         if: steps.notes.outputs.dirs != ''
         run: node scripts/check-counts.mjs && { [ ! -f scripts/check-pages.mjs ] || node scripts/check-pages.mjs; }
-      - name: Open a pull request into main
-        id: pr
+      - name: Pack this lesson's change
         if: steps.notes.outputs.dirs != ''
-        env:
-          # MERGE_TOKEN (TX's token) opens the pull request, so the checks start without waiting for someone to approve a bot's workflow run.
-          GH_TOKEN: ${{ secrets.MERGE_TOKEN || secrets.GITHUB_TOKEN }}
-          HAS_MERGE_TOKEN: ${{ secrets.MERGE_TOKEN != '' }}
-          SLUG: ${{ steps.notes.outputs.slug }}
-          DIRS: ${{ steps.notes.outputs.dirs }}
-        run: |
-          if [ -z "$(git status --porcelain -- . ':!inbox' ':!.writer-summary.md')" ]; then echo "The writer changed nothing."; exit 1; fi
-          branch="writer/${SLUG:-notes}-${GITHUB_RUN_NUMBER}"
-          git config user.name "TX Learns content creator"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -b "$branch"
-          git add -A -- . ':!inbox' ':!.writer-summary.md'
-          git commit -m "Draft lesson from ${DIRS//$'\n'/, }" -m "Written by the content creator agent (Claude) from TX's notes."
-          auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
-          git -c "http.https://github.com/.extraheader=" -c "http.https://github.com/.extraheader=$auth" push -u origin "$branch"
-          { echo "Draft lesson from \`${DIRS//$'\n'/\`, \`}\`, written by the content creator agent to STYLE.md."; echo;
-            cat .writer-summary.md 2>/dev/null; echo; echo "Copy check: $(tail -1 /tmp/copy-check.txt)"; echo;
-            echo "Next, by themselves: the intern agent reads the preview as a newcomer and adds clearer wording here if the lesson scores under 8/10,";
-            echo "the frontend engineer agent clicks through it, then the backend engineer agent reviews the facts and code and adds its fixes here too.";
-            echo "When all of them are green it merges by itself and the product engineer agent checks the live site. You only hear about it if it gets stuck."; } > /tmp/pr-body.md
-          url=$(gh pr create --base main --head "$branch" --title "Draft lesson: ${SLUG:-new notes}" --body-file /tmp/pr-body.md)
-          gh pr edit "$url" --add-assignee "${{ github.repository_owner }}" || true
-          echo "url=$url" >> "$GITHUB_OUTPUT"
-          # A push with the workflow token starts no workflows, so start the required copy check on this branch.
-          # With MERGE_TOKEN the pull request starts its own checks; without it, start the required copy check by hand.
-          [ "$HAS_MERGE_TOKEN" = true ] || gh workflow run copy-check.yml --ref "$branch" -R "$GITHUB_REPOSITORY" || echo "::warning::Could not start the copy check."
+        run: node scripts/writer-batch.mjs pack /tmp/pack
+      - name: Keep the pack for the publish job
+        if: steps.notes.outputs.dirs != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: pack-${{ strategy.job-index }}
+          path: /tmp/pack
+          if-no-files-found: error
+          retention-days: 3
       - name: Record what the agent used (tokens and estimated cost)
         if: ${{ !cancelled() && steps.notes.outputs.dirs != '' }}
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: "[ -f scripts/trace.mjs ] && node scripts/trace.mjs push writer /tmp/out || true"
-      # Quiet on success: the reviewer agent messages TX once the lesson is read, reviewed and ready to approve.
+
+  # Applies every pack to main, rebuilds the generated files once and opens ONE pull request for the whole batch.
+  publish:
+    needs: [plan, write]
+    if: ${{ !cancelled() && github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: pack-*
+          path: /tmp/packs
+      - name: Apply the packs and rebuild the generated files
+        id: apply
+        env:
+          FOLDERS: ${{ inputs.folder }}
+        run: |
+          packs=$(ls -d /tmp/packs/pack-* 2>/dev/null | sort -V | tr '\n' ' ')
+          if [ -z "$packs" ]; then echo "No lesson was written."; echo "packed=0" >> "$GITHUB_OUTPUT"; exit 0; fi
+          node scripts/writer-batch.mjs apply $packs
+          node scripts/check-pages.mjs --fix
+          [ -f scripts/search-index.mjs ] && node scripts/search-index.mjs
+          echo "packed=$(echo $packs | wc -w)" >> "$GITHUB_OUTPUT"
+          first=$(echo $FOLDERS | awk '{print $1}' | cut -d/ -f2 | tr -cd 'a-z0-9-' | cut -c1-40)
+          n=$(echo $FOLDERS | wc -w)
+          [ "$n" -gt 1 ] && first="$first-and-$((n-1))-more"
+          echo "slug=$first" >> "$GITHUB_OUTPUT"
+      - name: Copy check
+        if: steps.apply.outputs.packed != '0'
+        run: node scripts/check-copy.mjs | tee /tmp/copy-check.txt; exit ${PIPESTATUS[0]}
+      - name: Count and page check
+        if: steps.apply.outputs.packed != '0'
+        run: node scripts/check-counts.mjs && { [ ! -f scripts/check-pages.mjs ] || node scripts/check-pages.mjs; }
+      - name: Open ONE pull request into main
+        id: pr
+        if: steps.apply.outputs.packed != '0'
+        env:
+          # MERGE_TOKEN (TX's token) opens the pull request, so the checks start without waiting for someone to approve a bot's workflow run.
+          GH_TOKEN: ${{ secrets.MERGE_TOKEN || secrets.GITHUB_TOKEN }}
+          HAS_MERGE_TOKEN: ${{ secrets.MERGE_TOKEN != '' }}
+          SLUG: ${{ steps.apply.outputs.slug }}
+          FOLDERS: ${{ inputs.folder }}
+          PACKED: ${{ steps.apply.outputs.packed }}
+        run: |
+          branch="writer/${SLUG:-notes}-${GITHUB_RUN_NUMBER}"
+          git config user.name "TX Learns content creator"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add -A
+          git commit -m "Draft lessons from ${FOLDERS// /, }" -m "Written by the content creator agent (Claude) from TX's notes, in one pull request."
+          auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          git -c "http.https://github.com/.extraheader=" -c "http.https://github.com/.extraheader=$auth" push -u origin "$branch"
+          { echo "Draft lessons from \`${FOLDERS// /\`, \`}\`, written by the content creator agent to STYLE.md, all in this one pull request ($PACKED written)."; echo;
+            for f in /tmp/packs/pack-*/summary.md; do [ -f "$f" ] && { cat "$f"; echo; }; done
+            echo "Copy check: $(tail -1 /tmp/copy-check.txt)"; echo;
+            echo "Next, by themselves: the intern agent reads the preview as a newcomer and adds clearer wording here if a lesson scores under 8/10,";
+            echo "the frontend engineer agent clicks through it, then the backend engineer agent reviews the facts and code and adds its fixes here too.";
+            echo "When all of them are green it merges by itself and the product engineer agent checks the live site. You only hear about it if it gets stuck."; } > /tmp/pr-body.md
+          title="Draft lesson: ${SLUG:-new notes}"; [ "$PACKED" -gt 1 ] && title="Draft lessons: $PACKED lessons from ${SLUG}"
+          url=$(gh pr create --base main --head "$branch" --title "$title" --body-file /tmp/pr-body.md)
+          gh pr edit "$url" --add-assignee "${{ github.repository_owner }}" || true
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          # With MERGE_TOKEN the pull request starts its own checks; without it, start the required copy check by hand.
+          [ "$HAS_MERGE_TOKEN" = true ] || gh workflow run copy-check.yml --ref "$branch" -R "$GITHUB_REPOSITORY" || echo "::warning::Could not start the copy check."
+      # Quiet on success: the reviewer agent messages TX once the lessons are read, reviewed and ready to approve.
       - name: Tell TX on Telegram
-        if: failure() && steps.notes.outputs.dirs != ''
+        if: ${{ failure() || needs.write.result == 'failure' }}
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           URL: ${{ steps.pr.outputs.url }}
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          node scripts/notify-telegram.mjs "⚠️ The content creator agent could not finish a draft from your notes.${URL:+ Draft: $URL} Logs: $RUN"
+          node scripts/notify-telegram.mjs "⚠️ The content creator agent could not finish every draft from your notes.${URL:+ Pull request with the ones that worked: $URL} Logs: $RUN"
       - name: Record status for the Ecosystem page
         if: ${{ !cancelled() }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DIRS: ${{ steps.notes.outputs.dirs }}
           URL: ${{ steps.pr.outputs.url }}
-          SLUG: ${{ steps.notes.outputs.slug }}
+          SLUG: ${{ steps.apply.outputs.slug }}
+          PACKED: ${{ steps.apply.outputs.packed }}
         run: |
-          # No notes to draft: just clear this run's working mark.
-          [ -z "$DIRS" ] && { STATE=idle node scripts/record-status.mjs writer; exit 0; }
-          if [ -n "$URL" ]; then STATE=ok; SUMMARY="Drafted a lesson from the $SLUG notes. The intern, frontend and backend engineer agents look at it next."
-          else STATE=fail; SUMMARY="Could not finish a draft from the $SLUG notes."; fi
+          [ -f scripts/record-status.mjs ] || exit 0
+          if [ -n "$URL" ]; then STATE=ok; SUMMARY="Drafted $PACKED lesson(s) from the $SLUG notes in one pull request. The intern, frontend and backend engineer agents look at it next."
+          elif [ -z "$PACKED" ] || [ "$PACKED" = 0 ]; then STATE=fail; SUMMARY="Could not finish a draft from the $SLUG notes."
+          else STATE=fail; SUMMARY="Could not open the pull request for the $SLUG notes."; fi
           STATE=$STATE SUMMARY="$SUMMARY" LINK="$URL" node scripts/record-status.mjs writer
