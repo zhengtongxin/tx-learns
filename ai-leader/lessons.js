@@ -9,7 +9,7 @@ window.TRACK={id:'ai-leader',title:{en:'AI Leader',zh:'AI 领导者'},topics:[
  {n:2,level:2,title:{en:"Making the call with the tech team",zh:"和技术团队一起做决定"},items:[
   {k:'f',title:{en:"Sponsoring an AI project by making the key decisions",zh:"当 AI 项目的发起人：做好关键决定"}},
   {k:'c',title:{en:"Working with the tech team on AI choices",zh:"和技术团队一起做 AI 选择"}},
-  {k:'c',title:{en:"What an agent really costs, and what can go wrong",zh:"一个智能体真正的成本，以及会出什么错"}},
+  {k:'c',file:'08-what-an-agent-really-costs.html',title:{en:"What an agent really costs, and what can go wrong",zh:"一个智能体真正的成本，以及会出什么错"}},
   {k:'c',title:{en:"RAG or fine-tuning for your use case",zh:"你的场景用 RAG 还是微调"}},
   {k:'c',title:{en:"Scaling laws in plain business terms",zh:"用商业语言讲规模定律"}}]},
  {n:3,level:3,title:{en:"Leading the change",zh:"带领变革"},items:[
