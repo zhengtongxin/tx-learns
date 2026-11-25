@@ -1,5 +1,7 @@
 # Story for the AI FDE track
 
+> **Names and setting to reuse, nothing more.** `STYLE.md` decides the shape of a lesson: a story is optional (1 to 3 sentences) and lessons have no "Where we left off", "What changed", "Back at ..." or "At the ..." boxes and no required thread from lesson to lesson. Any rule below that asks for those is retired and kept only as history.
+
 Setting: a three-storey shophouse on Tanjong Pagar's five-foot way in Singapore, home of Kaya Travel Cover, a small family-run travel insurer that has never used AI. The builder is posted there as a forward-deployed engineer: she works at their desks, not from a far-off office. (AI Agentic uses the Singapore kopitiam and AI Engineer uses the Block 12 void deck; do not mix them.)
 
 Cast:

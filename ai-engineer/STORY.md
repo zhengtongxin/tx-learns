@@ -1,5 +1,7 @@
 # Story for the AI Engineer track
 
+> **Names and setting to reuse, nothing more.** `STYLE.md` decides the shape of a lesson: a story is optional (1 to 3 sentences) and lessons have no "Where we left off", "What changed", "Back at ..." or "At the ..." boxes and no required thread from lesson to lesson. Any rule below that asks for those is retired and kept only as history.
+
 Setting: Block 12, a heartland HDB estate in Singapore, with its void deck, heartland mall and bus interchange. (The AI Agentic track uses the Singapore kopitiam; do not mix them.)
 
 Cast:

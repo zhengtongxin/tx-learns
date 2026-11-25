@@ -1,5 +1,7 @@
 # Story for the AI Agentic track
 
+> **Names and setting to reuse, nothing more.** `STYLE.md` decides the shape of a lesson: a story is optional (1 to 3 sentences) and lessons have no "Where we left off", "What changed", "Back at ..." or "At the ..." boxes and no required thread from lesson to lesson. Any rule below that asks for those is retired and kept only as history.
+
 One thread, one artifact: **the Kopi Corner assistant**. Aina (Uncle Lim's niece) builds it for Uncle Lim's kopitiam in Singapore. Every lesson adds one capability to the same assistant. The lesson's own scenario (Alex's twin, a plant shop, a tuition centre, a night market...) stays as a **side case**: the same pattern, tried somewhere else. The kopitiam assistant is the main line.
 
 - **Cast:** Uncle Lim (towkay), Auntie Suria (counter, remembers regulars), Aina (builder), Ah Seng (drinks), Kak Ros (noodles), Uncle Rahim (mamak credit notebook). Add nobody new unless the lesson cannot be taught without a new role.

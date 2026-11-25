@@ -1,5 +1,7 @@
 # Story for the AI Production track
 
+> **Names and setting to reuse, nothing more.** `STYLE.md` decides the shape of a lesson: a story is optional (1 to 3 sentences) and lessons have no "Where we left off", "What changed", "Back at ..." or "At the ..." boxes and no required thread from lesson to lesson. Any rule below that asks for those is retired and kept only as history.
+
 Setting: Pasir Panjang Wharf 7, a busy container terminal on Singapore's southern coast, seen from a small IT office above the gantry cranes. (AI Agentic uses the Singapore kopitiam and AI Engineer the heartland HDB estate; do not mix them.)
 
 Cast:
