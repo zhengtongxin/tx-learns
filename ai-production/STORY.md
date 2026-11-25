@@ -1,6 +1,6 @@
 # Story for the AI Production track
 
-Setting: Pasir Panjang Wharf 7, a busy container terminal on Singapore's southern coast, seen from a small IT office above the gantry cranes. (AI Agentic uses the Penang kopitiam and AI Engineer the heartland HDB estate; do not mix them.)
+Setting: Pasir Panjang Wharf 7, a busy container terminal on Singapore's southern coast, seen from a small IT office above the gantry cranes. (AI Agentic uses the Singapore kopitiam and AI Engineer the heartland HDB estate; do not mix them.)
 
 Cast:
 - Mei Ling: the builder. A junior IT officer at the wharf who teaches herself to put AI tools in front of real people.

@@ -1,6 +1,6 @@
 # Story for the AI FDE track
 
-Setting: a three-storey shophouse on Tanjong Pagar's five-foot way in Singapore, home of Kaya Travel Cover, a small family-run travel insurer that has never used AI. The builder is posted there as a forward-deployed engineer: she works at their desks, not from a far-off office. (AI Agentic uses the Penang kopitiam and AI Engineer uses the Block 12 void deck; do not mix them.)
+Setting: a three-storey shophouse on Tanjong Pagar's five-foot way in Singapore, home of Kaya Travel Cover, a small family-run travel insurer that has never used AI. The builder is posted there as a forward-deployed engineer: she works at their desks, not from a far-off office. (AI Agentic uses the Singapore kopitiam and AI Engineer uses the Block 12 void deck; do not mix them.)
 
 Cast:
 - Mei Ling: the forward-deployed engineer. Asks "what does your day look like?" before writing any code.
