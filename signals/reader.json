@@ -352,109 +352,109 @@
   },
   "agentic-ai/14-coding-team.html": {
    "score": 6,
-   "at": "2026-11-25T06:59:10.830Z",
+   "at": "2026-11-25T12:53:06.977Z",
    "confusing": [
     {
-     "where": "Step 3 (agents.yaml) and Step 4 (run)",
-     "why": "The backend dev is told to save a file, but no snippet shows which agents get tools=box_tools. The save_file tool only appears on the warm-up coder, so I cannot tell how backend_dev or tester actually"
+     "where": "Step 2, after the Learn text",
+     "why": "The raw placeholder text shows on the page where a figure should be."
     },
     {
-     "where": "The side case box, before Step 1",
-     "why": "The story box is labelled Side case and names Uncle Raju at a mamak, while the Where we left off box is about Uncle Lim and Aina. The steps then use teh_tarik and kopi_o with no character at all. I di"
+     "where": "Step 1, Python code",
+     "why": "Step 1 uses a coder agent, but the agents.yaml shown in Step 2 defines lead, backend_dev, frontend_dev and tester. No coder entry exists."
     },
     {
-     "where": "Step 5 callout, What I got wrong",
-     "why": "I do not know what the patch is or where it lives, and it is not in the steps. The phrase I must check it again is vague, so I cannot tell whether I need to do anything now."
+     "where": "Step 3, Learn text",
+     "why": "It is unclear whether this runs on the laptop in the sandbox folder or inside the Docker box, and the Docker image shown has no gradio."
     }
    ]
   },
   "agentic-ai/10-structured-outputs.html": {
-   "score": 6,
-   "at": "2026-11-25T07:00:55.324Z",
+   "score": 7,
+   "at": "2026-11-25T12:53:06.977Z",
    "confusing": [
     {
-     "where": "Step 3 · The checker is just an if (code box before the guar",
-     "why": "'writer' is not built yet. Step 1 made writer_a, writer_b and writer_c, and the writer agent only appears in the guardrail box below. send_message is also never built on this page."
+     "where": "Step 3, guardrail code",
+     "why": "ctx is never explained, and a guardrail's arguments are not described, so the guardrail looks like a black box."
     },
     {
-     "where": "Step 1 · One team, many model providers (Learn)",
-     "why": "The text calls send_email a plain function marked @function_tool. The code comment says send_email wraps send_message, and that the agent tool from Step 1 cannot be called like a function. I could not"
+     "where": "Goals list",
+     "why": "The goal promises base_url, but the lesson never shows or explains it."
     },
     {
-     "where": "The story",
-     "why": "Step 1 shows one other provider (writer_a). writer_b and writer_c are just '...'. The page's prerequisites say a second provider key is optional, so the three-provider story is not what the code shows"
+     "where": "Step 3, text above the guardrail code",
+     "why": "Agents used as tools is never explained, so the reader cannot tell what this exclusion means."
     }
    ]
   },
   "agentic-ai/13-market-research-team.html": {
-   "score": 7,
-   "at": "2026-11-25T06:48:03.382Z",
+   "score": 6,
+   "at": "2026-11-25T12:53:06.977Z",
    "confusing": [
     {
-     "where": "Where we left off, Side case, What changed",
-     "why": "The story has two people. Uncle Lim is the main thread, and Mei's aunt is the side case. The code and diagram ping Mei's aunt, but the What changed box says Lim gets the ping. A newcomer cannot tell w"
+     "where": "Step 3, after the Learn text",
+     "why": "The raw placeholder text shows on the page where a figure should be."
     },
     {
-     "where": "Expected output and the Done-when list",
-     "why": "The expected output lists markets.json, studies.json and report.md. The code writes only output/studies.json, and the Done-when list asks for pick.md. Three names for one result."
+     "where": "Step 1, Python code",
+     "why": "find_markets is referenced, but the tasks.yaml shown defines only study_markets, so the reader cannot see where the task is written."
     },
     {
-     "where": "Step 1 and Step 4 code",
-     "why": "self.agents and self.agents_config are used, but the class they belong to (a CrewBase class) is never introduced. agents.yaml, which defines the boss, is never shown."
+     "where": "Step 3, Learn text",
+     "why": "The date goes into kickoff(), but no shown prompt uses {today}, so the reader cannot see how it changes the search."
     }
    ]
   },
   "agentic-ai/17-personal-helper-that-remembers.html": {
    "score": 5,
-   "at": "2026-11-25T06:48:03.382Z",
+   "at": "2026-11-25T12:53:06.977Z",
    "confusing": [
     {
-     "where": "Step 3 expected output, and the quiz after Step 4",
-     "why": "The expected output pauses on write_file, but interrupt_on lists only ping_phone and ask_human. The quiz says writing kopi.md just goes ahead. The code and the lesson disagree about which step pauses."
+     "where": "Step 2, figure caption",
+     "why": "The title is about memory, but the code keeps state only in InMemorySaver (lost when the program stops), and nothing reads kopi.md back at the start of a run. I could not see where the helper remember"
     },
     {
-     "where": "What I got wrong (Step 1 sessions)",
-     "why": "The lesson names the fix but shows no code for it. Task, asyncio and cancel scope are never explained, and the code shown still opens the sessions at top level."
+     "where": "Step 2, Python code",
+     "why": "The shape of the interrupt result (a list, .value, action_requests, description) is never shown, so the reader copies keys without knowing where they come from."
     },
     {
-     "where": "Step 1 code",
-     "why": "await at top level works only in a notebook. Run as a script, it is a SyntaxError, and the lesson never says which to use."
+     "where": "Step 3, Python code",
+     "why": "run_errand returns a dict when paused and a (reply, feedback) tuple otherwise, so a caller cannot unpack the result the same way each time."
     }
    ]
   },
   "agentic-ai/23-many-mcp-servers.html": {
-   "score": 6,
-   "at": "2026-11-25T06:49:31.806Z",
+   "score": 7,
+   "at": "2026-11-25T12:53:06.977Z",
    "confusing": [
     {
-     "where": "Step 3, the filters.py box",
-     "why": "The box uses os, MCPServerStdio, Agent and Runner without importing them, and nothing says to join it with the Step 2 file. Copied alone, it fails with a NameError."
+     "where": "Step 1, Learn list",
+     "why": "A vector server is used in Step 1, but what a vector or an embedding is only comes up in Step 3."
     },
     {
-     "where": "Step 4, after the Run 2 code",
-     "why": "A model with no tools can still guess, and the lesson gives no way to check. The quiz offers 'It guessed' only as a wrong option, so the claim feels proven when it is not."
+     "where": "Step 2, Learn list",
+     "why": "Entity, observation and relation are never defined, so the reader cannot tell whether they are data types or plain words."
     },
     {
-     "where": "Step 5, the Learn paragraph",
-     "why": "The code does not loop. It enters each server by hand, one line at a time, so the text and the code disagree."
+     "where": "Step 3, Learn list",
+     "why": "RAG is never spelled out (retrieval-augmented generation), and this is the first place the term appears."
     }
    ]
   },
   "ai-engineer/07-shop-assistant-that-acts.html": {
    "score": 7,
-   "at": "2026-11-25T06:49:45.698Z",
+   "at": "2026-11-25T12:53:06.977Z",
    "confusing": [
     {
-     "where": "Step 1 code, database connection",
-     "why": "Gradio runs the callbacks from Step 4 on worker threads, and I think a default SQLite connection made on the main thread refuses use from another thread. I could not run it, so I am not sure, but the "
+     "where": "Step 2, Learn text",
+     "why": "The code still passes set_price in the tools list used for customer chats, and no step removes it, so the reader cannot tell whether it is live."
     },
     {
-     "where": "Step 4, What I got wrong",
-     "why": "The lesson says the two callbacks fought but never shows how. The only reason given in Step 4 is that the user message shows up straight away, which is a different reason."
+     "where": "Step 1, Learn text",
+     "why": "A system message is never defined for a beginner; the reader does not know it is the standing instruction sent with every question."
     },
     {
-     "where": "Step 2, the set_price tool",
-     "why": "This assistant hands set_price to every customer, and no code checks who is asking. As a newcomer I cannot tell whether Staff only is a rule or just a comment."
+     "where": "Step 1, Learn text",
+     "why": "Neither worker threads nor why SQLite cares about them is explained, so the flag is copied without knowing what it protects."
     }
    ]
   }
