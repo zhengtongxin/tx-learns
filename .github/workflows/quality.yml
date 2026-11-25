@@ -1,10 +1,10 @@
-# Quality check agent: once a week it opens every page of the site in a headless browser (desktop and phone, EN and 中文) and runs
+# QA engineer agent: once a week it opens every page of the site in a headless browser (desktop and phone, EN and 中文) and runs
 # axe-core on it (serious accessibility problems, colour contrast, Tab reaching every control, page weight, image sizes), crawls
 # every internal link, anchor and project file, tries the external links (a dead one is a warning, never a failure) and
 # syntax-checks the lesson code boxes. No AI. It never opens a PR and never commits: when something fails it opens or updates
 # ONE issue titled "Quality check" (and closes it again once a run is clean) and tells TX on Telegram.
 # Not a pull request check and not required for any merge. axe-core is installed here only, never added to the repo.
-name: Quality check
+name: QA engineer (quality check)
 on:
   schedule:
     - cron: '0 2 * * 1'   # Mondays 02:00 UTC
@@ -142,7 +142,7 @@ jobs:
           SUMMARY: ${{ needs.check.outputs.summary }}
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          { echo "🔎 Quality check agent: the weekly check found problems"; echo; echo "$SUMMARY"; echo; echo "Details are in the open Quality check issue. Run: $RUN"; } | node scripts/notify-telegram.mjs
+          { echo "🔎 QA engineer agent: the weekly check found problems"; echo; echo "$SUMMARY"; echo; echo "Details are in the open Quality check issue. Run: $RUN"; } | node scripts/notify-telegram.mjs
 
   # Separate job: the write token for the status log never shares a job with the checked-out commit.
   record:

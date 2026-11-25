@@ -1,4 +1,4 @@
-# Improvement agent: the loop that acts on what the other agents already found. Four times a day it looks, without any AI,
+# Improvement engineer agent: the loop that acts on what the other agents already found. Four times a day it looks, without any AI,
 # for the one thing most worth fixing for readers: a broken page or link from the weekly quality check, or the lowest-scored
 # lesson the intern agent flagged, then the best idea in the backlog (scripts/signals.mjs). When none of those exist, one
 # agent role (content creator, backend engineer, frontend engineer, ...) scouts ONE file with Haiku, read-only, and leaves
@@ -6,7 +6,7 @@
 # something does it start Claude (Sonnet, at most 30 turns) on that one item and open ONE small pull request. At most one improver pull request is open at a time, an item is
 # not retried for 7 days, and it never touches workflows, scripts, the rules or project code. The normal copy check, the
 # scope guard, the backend review, auto-merge and the live rollback all apply, so it never pushes to main.
-name: Improvement agent
+name: Improvement engineer agent
 on:
   schedule:
     - cron: '41 3,9,15,21 * * *'   # 4 times a day, offset from the efficiency engineer
@@ -199,7 +199,7 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          node scripts/notify-telegram.mjs "⚠️ The improvement agent could not finish safely. Logs: $RUN"
+          node scripts/notify-telegram.mjs "⚠️ The improvement engineer agent could not finish safely. Logs: $RUN"
       - name: Record status for the Ecosystem page
         if: ${{ !cancelled() }}
         env:

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// News agent: once a day it reads official AI release notes and blogs (RSS/Atom, public, no key) and leaves a few
+// Industry consultant agent: once a day it reads official AI release notes and blogs (RSS/Atom, public, no key) and leaves a few
 // "refresh this lesson" ideas in the ideas backlog; the improvement agent then acts on them (one small PR, scope guard, auto-merge).
 //   node scripts/news.mjs plan --out DIR    no AI: fetch feeds, keep new items, match each to the lessons that mention the topic;
 //                                           writes DIR/prompt.md + DIR/plan.json, exports news=true|false
@@ -132,7 +132,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       return d;
     });
     await update('signals/news.json', d => markSeen(d, p.read));
-    out('summary', `Read ${p.read.length} new item(s), kept ${kept} idea(s) for the improvement agent.`);
+    out('summary', `Read ${p.read.length} new item(s), kept ${kept} idea(s) for the improvement engineer agent.`);
   } else { console.error('Usage: node scripts/news.mjs plan --out DIR | add ANSWER_FILE [PLAN_FILE]'); process.exit(2); }
 }
 

@@ -14,9 +14,9 @@ import { readRuns, summarize, weekly } from './trace.mjs';
 const SITE = (process.env.SITE || 'https://tx-learns.vercel.app/').replace(/\/?$/, '/');
 const out = (k, v) => process.env.GITHUB_OUTPUT && appendFileSync(process.env.GITHUB_OUTPUT, `${k}<<EOF\n${v}\nEOF\n`);
 const today = () => new Date().toLocaleDateString('en-GB', { timeZone: 'Asia/Kuala_Lumpur', weekday: 'short', day: 'numeric', month: 'short' });
-const AG = { writer: '✍️ Content creator', reader: '📖 Intern', reviewer: '🔧 Backend engineer', 'scope-guard': '🧭 Scope guard', 'ui-check': '🖱️ Frontend engineer',
-  'copy-check': '🛡️ Cybersecurity engineer', 'live-check': '🌐 Product engineer', optimizer: '⚡ Efficiency engineer', improver: '🔁 Improvement agent', news: '📰 News agent',
-  quality: '🔎 Quality check', recall: '🧠 Recall' };
+const AG = { writer: '✍️ Content creator', reader: '📖 Intern', reviewer: '🔧 Backend engineer', 'scope-guard': '🧭 Change control', 'ui-check': '🖱️ Frontend engineer',
+  'copy-check': '🛡️ Cybersecurity engineer', 'live-check': '🌐 Product engineer', optimizer: '⚡ Efficiency engineer', improver: '🔁 Improvement engineer', news: '📰 Industry consultant',
+  quality: '🔎 QA engineer', recall: '🧠 Learning coach' };
 
 // The reviewer agent's latest verdict on a pull request, from its marked comment.
 async function verdict(n) {
