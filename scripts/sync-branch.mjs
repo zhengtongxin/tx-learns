@@ -31,7 +31,7 @@ const generated = f => ['sitemap.xml', 'vercel.json', 'assets/related.json'].inc
 /* A lesson page the branch did not add (it exists on main's side of the merge base) only clashes because both sides
    rewrote its ?v= hashes; --fix below rebuilds them, so main's copy is taken. */
 const base = git('merge-base', 'origin/main', 'origin/' + branch);
-const notMine = f => /\.html$/.test(f) && tryGit('cat-file', '-e', base + ':' + f).ok;
+const notMine = f => branch.startsWith('writer/') && /\.html$/.test(f) && tryGit('cat-file', '-e', base + ':' + f).ok;
 const other = conflicted.filter(f => !generated(f) && !notMine(f));
 if (other.length) skip('other files clash: ' + other.join(', '));
 
