@@ -10,7 +10,7 @@ Assume they are smart, busy and have never seen this topic. If a sentence needs 
 
 ## The shape of a lesson
 
-1. **Hero.** Tag `<Topic> · Lesson N` (or `<Topic> · Project`), a plain title, and a meta line:
+1. **Hero.** Tag `<Topic> · Lesson N` (or `<Topic> · Project`), a plain title, and a meta line. **Titles are short noun phrases**: 2 to 5 words in English, about 4 to 10 characters in 中文, the key concept only, never a sentence, no colons, no trailing clause ("and ...", "for your ..."), and no "Project:" prefix (the Project chip already says so). Example: "Proving AI ROI", not "Proving the return: measurable ROI from AI":
    one sentence on what changes for the reader, then time and type (`~20 min · hands-on`).
 2. **The story** (`.story`). One running example with a named character and a concrete goal.
    Every step moves that same example forward. Pick our own names and situations, never the source's.
