@@ -1855,6 +1855,114 @@
      "why": "A real openai RateLimitError is not RateLimited, so it counts as a real failure, and two 429s send a claim to a handler. The Common errors box says to try later, but the code never shows how."
     }
    ]
+  },
+  "ai-fde/18-swarm-with-a-cap.html": {
+   "score": 6,
+   "at": "2026-11-25T13:56:50.960Z",
+   "confusing": [
+    {
+     "where": "Step 1, Learn",
+     "why": "Rate limit is used before anyone explains it, so I could not tell why runs would share one."
+    },
+    {
+     "where": "Step 1, code",
+     "why": "await and race are never explained, so I cannot tell why this line is safe."
+    },
+    {
+     "where": "Step 2, code",
+     "why": "Step 2 rewrites run_dispatch and agent from Step 1, but nothing says to replace them, so I could paste both."
+    }
+   ]
+  },
+  "ai-fde/19-a-judge-with-a-reference-answer.html": {
+   "score": 7,
+   "at": "2026-11-25T13:56:50.960Z",
+   "confusing": [
+    {
+     "where": "Step 1, Learn",
+     "why": "The judge prompt asks only for a grade and two checks; the score is computed from the grade in the code."
+    },
+    {
+     "where": "Step 1, Learn",
+     "why": "Rubric is never defined, and since the judge gives no number, the disagreement cannot happen."
+    },
+    {
+     "where": "Step 3, Learn",
+     "why": "I do not know whether three runs is enough, or how the noise number is worked out (the code uses the gap between the highest and lowest average)."
+    }
+   ]
+  },
+  "ai-fde/20-improver-a-human-approves.html": {
+   "score": 6,
+   "at": "2026-11-25T13:56:50.960Z",
+   "confusing": [
+    {
+     "where": "Step 1, Learn",
+     "why": "Practice and held-out are not defined in this lesson; held-out first appears as code."
+    },
+    {
+     "where": "Step 2, Learn",
+     "why": "Nothing in the code shown calls finish_round, so I do not know what starts the test."
+    },
+    {
+     "where": "Step 1, code",
+     "why": "A named person appears in the code and never in the prose, so I cannot tell if she is a handler or an example."
+    }
+   ]
+  },
+  "ai-fde/21-hidden-instructions-and-guardrails.html": {
+   "score": 8,
+   "at": "2026-11-25T13:56:50.960Z",
+   "confusing": [
+    {
+     "where": "Step 2, Learn",
+     "why": "The Step 3 code also puts the why text into the refer reason, so only is not true."
+    },
+    {
+     "where": "Now make it yours",
+     "why": "Spot check is never taught, yet the S$300 quiz answer depends on it."
+    },
+    {
+     "where": "Step 2, expected output",
+     "why": "The grammar is wrong for one, and it looks like a bug."
+    }
+   ]
+  },
+  "ai-fde/22-gateway-keys-and-policy.html": {
+   "score": 7,
+   "at": "2026-11-25T13:56:50.960Z",
+   "confusing": [
+    {
+     "where": "Step 2, code comment",
+     "why": "The start-up check still needs AGENT_KEY, and its new version is never shown, so I could not finish the swap."
+    },
+    {
+     "where": "Takeaways",
+     "why": "The check allows any tool with no rule, and only the payment tool has a rule, so it does not fail closed for other tools."
+    },
+    {
+     "where": "Before you start",
+     "why": "This lesson uses no OpenAI package or key, but the list sends me to get one."
+    }
+   ]
+  },
+  "ai-fde/23-the-context-layer-as-its-own-service.html": {
+   "score": 7,
+   "at": "2026-11-25T13:56:50.960Z",
+   "confusing": [
+    {
+     "where": "Step 1, code box",
+     "why": "Two programs (a one-off export and the service) share one box, and the changed lines start mid-box, so I cannot tell which lines go in which file."
+    },
+    {
+     "where": "Step 1, try-it comments",
+     "why": "key is never defined."
+    },
+    {
+     "where": "Step 3, Learn",
+     "why": "The record keeps file names, sources, dates and a version number, not the text that was read, so a changed text with no version bump cannot be shown."
+    }
+   ]
   }
  }
 }
