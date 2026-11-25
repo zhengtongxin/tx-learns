@@ -919,6 +919,114 @@
      "why": "The fix is named but not shown, so the reader cannot try it."
     }
    ]
+  },
+  "ai-engineer/16-measuring-retrieval.html": {
+   "score": 7,
+   "at": "2026-11-25T13:18:03.732Z",
+   "confusing": [
+    {
+     "where": "Step 1 · Test set and retrieval score",
+     "why": "A question has several keywords, and the page never says how their scores combine. Only the code shows it averages them."
+    },
+    {
+     "where": "Step 2 quiz feedback",
+     "why": "nDCG is never introduced anywhere on the page."
+    },
+    {
+     "where": "Step 2 · code",
+     "why": "with_structured_output and temperature=0 are not explained, and the page does not say why the judge is a different model."
+    }
+   ]
+  },
+  "ai-engineer/17-company-knowledge-helper.html": {
+   "score": 6,
+   "at": "2026-11-25T13:18:03.732Z",
+   "confusing": [
+    {
+     "where": "Step 3 · Rewrite the question before searching",
+     "why": "Search uses both the original and the rewritten question, but the rerank uses only the rewrite, and the page does not say why."
+    },
+    {
+     "where": "Step 3 · code",
+     "why": "The shape of history (role and content keys) is never shown."
+    },
+    {
+     "where": "Step 4 · Cite sources",
+     "why": "The lesson 16 code calls the store directly, so a reader would not know to change it."
+    }
+   ]
+  },
+  "ai-engineer/18-curating-and-cleaning-a-dataset.html": {
+   "score": 5,
+   "at": "2026-11-25T13:18:03.732Z",
+   "confusing": [
+    {
+     "where": "Step 1 · code",
+     "why": "No such dataset exists in the lesson and none is named, so the reader is stuck on the first line."
+    },
+    {
+     "where": "Step 4 · Learn",
+     "why": "The hub, the login and huggingface-cli are never explained."
+    },
+    {
+     "where": "Step 2 quiz",
+     "why": "float() cannot read commas, so this example would crash rather than be rejected."
+    }
+   ]
+  },
+  "ai-engineer/19-baselines-average-linear-forest.html": {
+   "score": 6,
+   "at": "2026-11-25T13:18:03.732Z",
+   "confusing": [
+    {
+     "where": "Step 3 · Put each baseline on the ladder",
+     "why": "No linear or forest score is printed anywhere, so 'best' has to be taken on trust."
+    },
+    {
+     "where": "Step 2 · code",
+     "why": "Lesson 18 saves rows with a text field, not items with summary, so the data type changes between lessons."
+    },
+    {
+     "where": "Step 3 · Learn",
+     "why": "CountVectorizer and what a word-count column is are never pictured."
+    }
+   ]
+  },
+  "ai-engineer/20-neural-nets-and-frontier-as-predictors.html": {
+   "score": 4,
+   "at": "2026-11-25T13:18:03.732Z",
+   "confusing": [
+    {
+     "where": "Step 1 · Learn",
+     "why": "The human is scored on test[:100], but lesson 19 scored 250 items, so the comparison is off."
+    },
+    {
+     "where": "Step 1 · code",
+     "why": "Items have no id field, and nothing creates one."
+    },
+    {
+     "where": "Step 2 · code",
+     "why": "batches is never built, and torch, tensor, backward and Adam are unexplained. I lost the thread here."
+    }
+   ]
+  },
+  "ai-engineer/21-price-guesser.html": {
+   "score": 5,
+   "at": "2026-11-25T13:18:03.732Z",
+   "confusing": [
+    {
+     "where": "Step 2 · Learn",
+     "why": "The project card's accept list also expects linear, and the tuned model in Step 3 is never built."
+    },
+    {
+     "where": "Project card · fail list",
+     "why": "The lesson body loads from the hub; data/train.jsonl and make_data.py appear nowhere in it."
+    },
+    {
+     "where": "Project card · accept list",
+     "why": "No file named price_guesser.py appears in the lesson; the code is in four snippets."
+    }
+   ]
   }
  }
 }
