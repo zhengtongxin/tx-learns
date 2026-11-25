@@ -109,9 +109,6 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 .guard .stat{display:flex;align-items:baseline;gap:8px;padding:0;border:0;text-align:right}.guard .stat b{font:700 20px var(--mono);color:var(--ok)}.guard .stat span{font:11.5px var(--mono);color:var(--mut);max-width:150px;text-align:left}
 .sub3{margin:44px 0 6px;font:600 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
 .feed li{padding:14px 6px}.rule-line{margin-top:72px}
-.cl-day{margin:30px 0 8px;font-size:13px;letter-spacing:.06em;color:var(--mut);border-bottom:1px solid var(--line);padding-bottom:6px}
-.cl-list{list-style:none;margin:0;padding:0}.cl-list li{padding:9px 0 9px 16px;border-left:3px solid var(--acc);margin:8px 0;font-size:14.5px;line-height:1.65}.cl-list a{font-weight:600;white-space:nowrap}
-.more-btn{margin-top:22px;padding:9px 16px;border-radius:8px;border:1px solid var(--acc);background:transparent;color:var(--fg);font:inherit;font-size:14px;cursor:pointer}.more-btn:hover,.more-btn:focus-visible{background:color-mix(in srgb,var(--acc) 15%,transparent)}
 @media(max-width:760px){.eco section{margin-top:72px}.guard{grid-template-columns:28px 1fr;padding:15px 0}.guard .stat{grid-column:2;justify-content:flex-start;text-align:left}.statusbar{padding:12px 14px}.olist .it{padding:13px 0 13px 34px}.olist .it::before{top:19px}.olist .it[data-n]::before,.olist .it.g::before{top:14px}.key{margin-top:26px}}
 /* phone: the diagrams become ordered lists */
 .olist{display:none;list-style:none;margin:16px 0 0;padding:0}
@@ -306,12 +303,10 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 <ul class="health" id="health"></ul>
 <h3 class="sub3"><span class="en">Latest agent runs</span><span class="zh">agent 最近运行</span></h3>
 <ul class="feed" id="feed"></ul>
-<h3 class="sub3"><span class="en">Site updates</span><span class="zh">网站更新</span></h3>
-<div id="clog"></div>
 </section>
 </main>
 <div class="tip" id="tip" role="tooltip"></div>
-<script src="changelog.js"></script><script src="tracks.js?v=2bfa1a40"></script><script src="assets/build-concepts.js?v=cf202fe2"></script><script src="assets/site.js?v=85ce92dd"></script>
+<script src="tracks.js?v=2bfa1a40"></script><script src="assets/build-concepts.js?v=cf202fe2"></script><script src="assets/site.js?v=85ce92dd"></script>
 <script>
 (function(){
   function t(en,zh){return '<span class="en">'+en+'</span><span class="zh">'+zh+'</span>'}
@@ -567,14 +562,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     var R=REC.map(function(id){return C.filter(function(c){return c.id===id})[0]}).filter(Boolean),O=C.filter(function(c){return REC.indexOf(c.id)<0});
     g.innerHTML=R.map(function(c){return card(c,1)}).join('');g2.innerHTML=O.map(function(c){return card(c,0)}).join('');
     })();
-  (function(){var el=document.getElementById('clog'),L=(window.CHANGELOG||[]).slice(),MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],N=9999;
-    L.sort(function(a,b){return a.date<b.date?1:a.date>b.date?-1:0});
-    function day(d){var p=d.split('-');return t((+p[2])+' '+MO[p[1]-1]+' '+p[0],p[0]+' 年 '+(+p[1])+' 月 '+(+p[2])+' 日')}
-    function draw(all){var cur='',o='';L.slice(0,all?L.length:N).forEach(function(x){if(x.date!==cur){if(cur)o+='</ul>';cur=x.date;o+='<h4 class="cl-day">'+day(x.date)+'</h4><ul class="cl-list">'}
-        o+='<li>'+t(esc(x.en),esc(x.zh))+(x.files||[]).map(function(f){return ' <a href="'+esc(f)+'">'+t('See it →','去看看 →')+'</a>'}).join('')+'</li>'});
-      if(cur)o+='</ul>';if(!all&&L.length>N)o+='<button class="more-btn" id="clmore">'+t('Show all '+L.length+' updates','显示全部 '+L.length+' 条更新')+'</button>';
-      el.innerHTML=o;var b=document.getElementById('clmore');if(b)b.onclick=function(){draw(true)}}
-    draw(false)})();
+  
   function draw(data){
     var live=!!(data&&data.connected),S=(data&&data.agents)||{};
     var c=document.getElementById('conn'),why=data&&data.reason;
