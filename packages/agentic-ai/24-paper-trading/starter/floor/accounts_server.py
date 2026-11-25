@@ -11,8 +11,8 @@ mcp = FastMCP("accounts")
 
 @mcp.tool()
 async def get_balance(name: str) -> str:
-    """Cash, total value and profit so far for one uncle, in RM."""
-    # TODO: Cash, total value and profit so far for one uncle, in RM.
+    """Cash, total value and profit so far for one uncle, in S$."""
+    # TODO: Cash, total value and profit so far for one uncle, in S$.
     # Hint: Account.get(name).summary() and return the cash, value and profit as JSON text
     raise NotImplementedError("TODO")
 

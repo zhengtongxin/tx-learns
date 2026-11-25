@@ -8,7 +8,7 @@ mcp = FastMCP("market")
 
 @mcp.tool()
 async def lookup_price(symbol: str) -> float:
-    """Latest price of a ticker, in RM. Tickers: KOPI, ROTI, TEHT, NASI."""
+    """Latest price of a ticker, in S$. Tickers: KOPI, ROTI, TEHT, NASI."""
     if symbol not in BASE:  # added: a clear error instead of a crash
         raise ValueError(f"Unknown ticker {symbol}. Use one of: {', '.join(BASE)}")
     return get_price(symbol)

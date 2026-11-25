@@ -337,3 +337,66 @@ main:not(.wide) :is(p,li){max-width:70ch}
 @media(prefers-reduced-motion:reduce){.toast{transition:none}}
 #resume>p.meta{text-align:center;margin:18px auto 0}
 body:has(.scrim.on) .toast{display:none}
+
+/* ---- desktop width + fewer boxes (design pass) ---- */
+/* pills and badges become plain small type */
+.tag,.eyebrow,.chip{background:none;border:0;box-shadow:none;backdrop-filter:none;padding:0;border-radius:0;letter-spacing:.14em}
+.chip.f,.chip.c,.chip.p{border:0}
+.cc .chips{gap:6px 18px;margin-top:8px}
+.chip+.chip::before{content:"";}
+.seg{border:0;background:none;padding:0}
+.top .btn,.eco-btn{border-color:transparent;background:none;box-shadow:none}
+/* cards lose frames: one hairline, whitespace does the grouping */
+.card,.quiz,.stepper,.lcard,.panel,.wfwrap{background:none;border:0;border-top:1px solid var(--line);border-radius:0;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
+.card{padding:22px 0 4px}
+.callout{background:none;border-radius:0;border:0;border-left:2px solid var(--c);padding:4px 0 4px 18px;backdrop-filter:none}
+.fold{border:0;border-top:1px solid var(--line);border-radius:0;background:none}
+.fold>.card{border-top:0}
+details{background:none;border:0;border-top:1px solid var(--line);border-radius:0;padding:12px 0}
+table{border:0;border-radius:0}
+code{background:color-mix(in srgb,var(--fg) 7%,transparent);border:0}
+/* tracks: a hairline list, two columns on wide screens */
+.track-list{gap:0 56px;margin-top:28px}
+.cc,.cc:hover{background:none;border:0;border-top:1px solid var(--line);border-radius:0;box-shadow:none;padding:30px 4px;transform:none}
+.cc:hover{border-top-color:var(--acc)}
+.cc .orbi{width:52px;height:52px;border-radius:16px;font-size:26px;box-shadow:none}
+.cc .go{opacity:.5}.cc:hover .go{opacity:1}
+@media(min-width:1000px){.track-list{grid-template-columns:1fr 1fr}.cc{align-items:start}}
+.statrow{border-top:0}
+/* wide screens: use the width */
+@media(min-width:1100px){
+main{max-width:880px}
+main.wide{max-width:min(1360px,90vw)}
+.toc{left:calc(50% + 468px)}
+.stage.home{text-align:left;padding:72px 0 24px;display:grid;grid-template-columns:1.25fr 1fr;gap:0 64px;align-items:end}
+.stage.home .eyebrow,.stage.home .mega,.stage.home .sub{grid-column:1}
+.stage.home .entries{grid-column:2;grid-row:1/4;justify-items:start;align-self:end}
+.stage.home .entry-main,.stage.home .cta{justify-items:start}
+.stage.home .sub{margin-left:0}
+.stage.home .mega{font-size:clamp(3rem,5.2vw,5rem)}
+.stage.home .mega br{display:inline}
+.stats{justify-content:flex-start}
+.track-ba{max-width:none}
+.whatnext{max-width:none}
+}
+@media(min-width:1500px){main.wide{max-width:min(1440px,88vw)}}
+/* tracks: topic tabs as plain underlined text, lessons as a hairline grid */
+.wtabs{background:none;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:0;gap:4px 26px;width:100%;justify-content:flex-start;backdrop-filter:none}
+.wtab,.wtab.on{background:none;border-radius:0;padding:12px 0;border-bottom:2px solid transparent;margin-bottom:-1px}
+.wtab.on{color:var(--fg);border-bottom-color:var(--acc)}
+.lgrid{gap:0 40px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.lcard,.lcard.ready,.lcard.soon{border:0;border-top:1px solid var(--line);border-radius:0;box-shadow:none;min-height:150px;padding:20px 0}
+.lcard.ready:hover{transform:none;border-top-color:var(--acc)}
+.lcard.soon{opacity:.45}
+.lcard .n{font-size:1.8rem}
+@media(min-width:1100px){
+.stage{text-align:left}
+.stage .sub,.stage.compact .sub{margin-left:0;margin-right:0}
+.stage .cta,.stage .entries .cta{justify-content:flex-start}
+.ringbox{justify-content:flex-start}
+.orb{left:70%}
+.story{max-width:none}
+}
+.story{background:none;border:0;border-left:2px solid var(--acc2);border-radius:0;padding:2px 0 2px 18px;margin:26px 0}
+.panel{min-height:0}
+@media(max-width:720px){.wtabs{flex-wrap:nowrap;overflow-x:auto;gap:0 22px;scrollbar-width:none}.wtab{flex:none}}

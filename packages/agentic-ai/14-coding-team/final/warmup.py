@@ -17,9 +17,9 @@ coder = Agent(
 )
 
 job = Task(
-    description=("Print how many 30-sen coins you need to pay for 1,000 cups of kopi "
-                 "at RM1.80 each, and run it."),
-    expected_output="The number the script printed (the right answer is 6000).",
+    description=("Print how many 20-cent coins you need to pay for 1,000 cups of kopi "
+                 "at S$1.80 each, and run it."),
+    expected_output="The number the script printed (the right answer is 9000).",
     agent=coder,
 )
 

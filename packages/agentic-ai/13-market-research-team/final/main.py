@@ -10,7 +10,7 @@ load_dotenv(override=True)
 
 def run():
     # every {blank} in the two YAML files needs a key here: state and today
-    inputs = {"state": "Selangor", "today": str(date.today())}
+    inputs = {"state": "Singapore", "today": str(date.today())}
     result = PasarPicker().crew().kickoff(inputs=inputs)
     print(result.raw)
 

@@ -1,6 +1,6 @@
 # Story for the AI Engineer track
 
-Setting: Block 12, a heartland HDB estate in Singapore, with its void deck, heartland mall and bus interchange. (The AI Agentic track uses the Penang kopitiam; do not mix them.)
+Setting: Block 12, a heartland HDB estate in Singapore, with its void deck, heartland mall and bus interchange. (The AI Agentic track uses the Singapore kopitiam; do not mix them.)
 
 Cast:
 - Wei Jie: the builder. Runs a small phone-repair and IT counter at the heartland mall and teaches himself AI engineering so the estate can use it.

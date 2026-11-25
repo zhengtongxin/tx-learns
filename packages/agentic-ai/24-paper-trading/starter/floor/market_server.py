@@ -8,8 +8,8 @@ mcp = FastMCP("market")
 
 @mcp.tool()
 async def lookup_price(symbol: str) -> float:
-    """Latest price of a ticker, in RM. Tickers: KOPI, ROTI, TEHT, NASI."""
-    # TODO: Latest price of a ticker, in RM. Tickers: KOPI, ROTI, TEHT, NASI.
+    """Latest price of a ticker, in S$. Tickers: KOPI, ROTI, TEHT, NASI."""
+    # TODO: Latest price of a ticker, in S$. Tickers: KOPI, ROTI, TEHT, NASI.
     # Hint: return get_price(symbol) (and reject unknown tickers clearly)
     raise NotImplementedError("TODO")
 

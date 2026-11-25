@@ -11,7 +11,7 @@ load_dotenv(override=True)
 REQS = """
 A tab system for regular customers at a drinks stall.
 Open a tab, top up cash, record orders (item, qty) using get_price(item),
-with fixed test prices: teh_tarik 2.00, kopi_o 1.60, roti_canai 1.50 (RM).
+with fixed test prices: teh_tarik 2.00, kopi_o 1.60, roti_canai 1.50 (S$).
 Block orders that would make the balance negative.
 Report balance, items ordered, and a full history.
 """

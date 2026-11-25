@@ -19,7 +19,7 @@ If you are not sure, say you do not know."""
 
 db = sqlite3.connect("trips.db", check_same_thread=False)
 db.execute("CREATE TABLE IF NOT EXISTS prices (place TEXT PRIMARY KEY, price REAL)")
-db.execute("INSERT OR IGNORE INTO prices VALUES ('malacca', 48), ('ipoh', 62), ('genting', 55)")
+db.execute("INSERT OR IGNORE INTO prices VALUES ('sentosa', 48), ('mandai', 62), ('changi', 55)")
 db.commit()
 
 looked_up = []  # places the tools touched during this question

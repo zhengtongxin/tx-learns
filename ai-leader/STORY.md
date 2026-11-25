@@ -1,6 +1,6 @@
 # Story for the AI Leader track
 
-Setting: Heng Huat Mart, a family-run chain of 30 neighbourhood supermarkets in HDB estates across Singapore, from Woodlands to Bedok. It has never had an AI plan. Everyone, from the staff canteen to the Monday meeting, keeps hearing about AI; nobody owns it. Mdm Rohani, the managing director, has decided to lead it herself, without learning to code. (AI Agentic uses the Penang kopitiam, AI Engineer the Block 12 void deck, AI Production the Pasir Panjang wharf and AI FDE the Tanjong Pagar shophouse; do not mix them.)
+Setting: Heng Huat Mart, a family-run chain of 30 neighbourhood supermarkets in HDB estates across Singapore, from Woodlands to Bedok. It has never had an AI plan. Everyone, from the staff canteen to the Monday meeting, keeps hearing about AI; nobody owns it. Mdm Rohani, the managing director, has decided to lead it herself, without learning to code. (AI Agentic uses the Singapore kopitiam, AI Engineer the Block 12 void deck, AI Production the Pasir Panjang wharf and AI FDE the Tanjong Pagar shophouse; do not mix them.)
 
 Cast:
 - Mdm Rohani: managing director. Smart, practical, not technical. Asks "what do I decide, and what happens if we are wrong?"

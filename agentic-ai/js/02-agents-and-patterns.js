@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
  /* 2 · the loop, stepped */
  trace($('t2'),[
-  {k:'you',en:'Goal: find the KL → Tokyo price, total for 2 tickets in SGD, email Uncle Lim, give the answer.',zh:'目标：查出吉隆坡→东京的价格，算出 2 张票的新元总价，发邮件给 Lim 叔叔，给出答案。',why:{en:'You are given a goal.',zh:'你拿到一个目标。'}},
+  {k:'you',en:'Goal: find the Singapore → Tokyo price, total for 2 tickets in SGD, email Uncle Lim, give the answer.',zh:'目标：查出新加坡→东京的价格，算出 2 张票的新元总价，发邮件给 Lim 叔叔，给出答案。',why:{en:'You are given a goal.',zh:'你拿到一个目标。'}},
   {k:'llm',en:'Think: what do I know, what is missing, what next?',zh:'思考：我知道什么、缺什么、下一步做什么？',why:{en:'The LLM reads the log and decides. Nothing has run yet.',zh:'大模型读日志并做决定，此时还什么都没运行。'}},
   {k:'tool',en:'Act: call a tool (search, calculator, email…).',zh:'行动：调用一个工具（搜索、计算器、邮件……）。',why:{en:'The chosen tool does its work and returns a result.',zh:'被选中的工具干活并返回结果。'}},
   {k:'llm',en:'Observe: read the result, then think again. Repeat.',zh:'观察：读取结果，再次思考，如此重复。',why:{en:'The result joins the log, so the next choice is better informed.',zh:'结果进入日志，下一次选择就有了更多依据。'}},

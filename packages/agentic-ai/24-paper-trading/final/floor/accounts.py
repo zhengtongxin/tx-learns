@@ -55,13 +55,13 @@ class Account:
         with conn() as db:
             cash = db.execute("SELECT cash FROM accounts WHERE name=?", (self.name,)).fetchone()["cash"]
             if cost > cash:
-                return f"Not enough cash: this costs RM{cost:.2f} but you have RM{cash:.2f}."
+                return f"Not enough cash: this costs S${cost:.2f} but you have S${cash:.2f}."
             db.execute("UPDATE accounts SET cash=cash-? WHERE name=?", (cost, self.name))
             db.execute("INSERT INTO holdings (name, symbol, qty) VALUES (?, ?, ?) "
                        "ON CONFLICT(name, symbol) DO UPDATE SET qty=qty+excluded.qty", (self.name, symbol, qty))
             db.execute("INSERT INTO transactions (ts, name, side, symbol, qty, price) VALUES (?, ?, 'buy', ?, ?, ?)",
                        (time.time(), self.name, symbol, qty, price))
-        return f"Bought {qty} {symbol} at RM{price:.2f}. Cash left: RM{cash - cost:.2f}."
+        return f"Bought {qty} {symbol} at S${price:.2f}. Cash left: S${cash - cost:.2f}."
 
     def sell(self, symbol: str, qty: int, price: float) -> str:
         if qty <= 0:
@@ -75,7 +75,7 @@ class Account:
             db.execute("UPDATE holdings SET qty=qty-? WHERE name=? AND symbol=?", (qty, self.name, symbol))
             db.execute("INSERT INTO transactions (ts, name, side, symbol, qty, price) VALUES (?, ?, 'sell', ?, ?, ?)",
                        (time.time(), self.name, symbol, qty, price))
-        return f"Sold {qty} {symbol} at RM{price:.2f}."
+        return f"Sold {qty} {symbol} at S${price:.2f}."
 
     def set_strategy(self, new_strategy: str) -> str:
         with conn() as db:
