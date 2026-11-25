@@ -90,8 +90,9 @@ const live = TR.flatMap(t => t.T.topics.flatMap(w => w.items).filter(x => x.file
 const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 const want = {
   'sitemap.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<!-- Made by node scripts/check-pages.mjs --fix from lessons.js. Do not edit by hand. -->\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-    ['', 'ecosystem.html', 'glossary.html', ...TR.map(t => t.dir + '/index.html'), ...live.map(x => x.path)].map(u => `<url><loc>${SITE}${u}</loc></url>`).join('\n') + '\n</urlset>\n',
+    ['', 'ecosystem.html', 'glossary.html', 'about.html', ...TR.map(t => t.dir + '/index.html'), ...live.map(x => x.path)].map(u => `<url><loc>${SITE}${u}</loc></url>`).join('\n') + '\n</urlset>\n',
 };
+const TRACKS = (() => { const c = { window: {} }; vm.runInNewContext(readFileSync(new URL('tracks.js', root), 'utf8'), c, { filename: 'tracks.js' }); return c.window.TRACKS; })();
 const lists = Object.fromEntries(TR.map(t => [t.dir + '/index.html', [/<!-- lessons:start -->[\s\S]*?<!-- lessons:end -->/, '<!-- lessons:start --><noscript><ol>' +
     t.T.topics.flatMap(w => w.items).filter(x => x.file).map(x => `<li><a href="${x.file}">${esc(x.title.en)} · ${esc(x.title.zh)}</a></li>`).join('') + '</ol></noscript><!-- lessons:end -->']]));
 const firstOf = t => { const x = t.T.topics.flatMap(w => w.items).find(i => i.file); return x && x.file; };
@@ -105,10 +106,15 @@ for (const [f, text] of Object.entries(want)) {
 for (const f of ['index.html', ...TR.map(t => t.dir + '/index.html')]) {
   const cur = readFileSync(new URL(f, root), 'utf8');
   let next = cur;
+  if (f === 'index.html') { // the home page's no-JavaScript track list: every track, in tracks.js order
+    const re = /<!-- tracks:start -->[\s\S]*?<!-- tracks:end -->/;
+    if (!re.test(cur)) bad(f, 'missing <!-- tracks:start --><!-- tracks:end --> markers');
+    else next = next.replace(re, () => '<!-- tracks:start --><noscript>' + TRACKS.map(t => `<a class="cc" href="${t.href}"><div><h3>${esc(t.title.en)} · ${esc(t.title.zh)}</h3></div></a>`).join('') + '</noscript><!-- tracks:end -->');
+  }
   if (lists[f]) { const [re, block] = lists[f]; if (!re.test(cur)) bad(f, 'missing <!-- lessons:start --><!-- lessons:end --> markers'); else next = next.replace(re, block); }
   const own = f === 'index.html' ? TR[0] : TR.find(t => t.dir + '/index.html' === f), first = own && firstOf(own);
   if (first) next = next.replace(/(<a [^>]*data-start[^>]*href=")[^"]*(")/g, (m, a, b) => a + (f === 'index.html' ? own.dir + '/' : '') + first + b);
-  if (next !== cur) { if (FIX) writeFileSync(new URL(f, root), next); else bad(f, 'lesson list or start link out of date with lessons.js (run node scripts/check-pages.mjs --fix)'); }
+  if (next !== cur) { if (FIX) writeFileSync(new URL(f, root), next); else bad(f, 'track list, lesson list or start link out of date with tracks.js or lessons.js (run node scripts/check-pages.mjs --fix)'); }
 }
 
 // ---- Canonical links, JSON-LD, cache-busting versions, vercel.json (all generated; --fix rewrites, otherwise stale = fail) ----
@@ -206,7 +212,16 @@ for (const m of moves) {
   const vp = new URL('vercel.json', root);
   let cfg = {}; try { cfg = JSON.parse(readFileSync(vp, 'utf8')); } catch {}
   const h = (source, value) => ({ source, headers: [{ key: 'Cache-Control', value }] });
+  // Security headers on every response. The content policy starts as Report-Only and only on the live host: a violation
+  // shows up as a console error, which the live check and UI check already read, so nothing can break for a reader.
+  // Once it has stayed quiet, rename the key to Content-Security-Policy to enforce it (keep SECURITY and CSP in step with the site).
+  const SECURITY = [['X-Content-Type-Options', 'nosniff'], ['Referrer-Policy', 'strict-origin-when-cross-origin'], ['X-Frame-Options', 'SAMEORIGIN'],
+    ['Permissions-Policy', 'camera=(), microphone=(), geolocation=(), browsing-topics=()']];
+  const CSP = ["default-src 'self'", "script-src 'self' 'unsafe-inline'", "style-src 'self' 'unsafe-inline'", "img-src 'self' data: blob:", "font-src 'self'",
+    "connect-src 'self'", "frame-src 'self'", "object-src 'none'", "base-uri 'self'", "form-action 'self'", "frame-ancestors 'self'"].join('; ');
   const want = { ...cfg, headers: [
+    { source: '/(.*)', headers: SECURITY.map(([key, value]) => ({ key, value })) },
+    { source: '/(.*)', has: [{ type: 'host', value: new URL(SITE).host }], headers: [{ key: 'Content-Security-Policy-Report-Only', value: CSP }] },
     h('/', 'public, max-age=0, must-revalidate'),
     h('/(.*)\\.html', 'public, max-age=0, must-revalidate'),
     // only the files every page references with ?v=<hash> (checked above) are immutable
@@ -219,7 +234,7 @@ for (const m of moves) {
   if (!want.redirects.length) delete want.redirects;
   const text = JSON.stringify(want, null, 2) + '\n';
   let curText = ''; try { curText = readFileSync(vp, 'utf8'); } catch {}
-  if (curText !== text) { if (FIX) writeFileSync(vp, text); else bad('vercel.json', 'cache headers or redirects out of date (run node scripts/check-pages.mjs --fix)'); }
+  if (curText !== text) { if (FIX) writeFileSync(vp, text); else bad('vercel.json', 'security headers, cache headers or redirects out of date (run node scripts/check-pages.mjs --fix)'); }
 }
 
 // The concept cards on ecosystem.html (assets/build-concepts.js): every lesson link is a published lesson with the titles in lessons.js.

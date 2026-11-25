@@ -19,6 +19,13 @@
   window.TX={t:t,burst:burst};
   var TYPE={f:{en:'Foundations',zh:'基础'},c:{en:'Concept',zh:'概念'},p:{en:'Project',zh:'项目'}};
 
+  /* Vercel Web Analytics: page views plus two anonymous events (lesson feedback, lesson done). No cookies, no text typed by the reader.
+     It stays off until VA holds the script path the Vercel dashboard shows when Web Analytics is switched on for the project
+     (Project > Analytics > Enable; plain HTML sites get a path like '/abc123/script.js'). Events queue harmlessly until then. */
+  var VA='';
+  window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};
+  function track(n,d){try{window.va('event',{name:n,data:d})}catch(e){}}
+  if(VA&&/^https?:$/.test(location.protocol)&&!/^(localhost|127\.)/.test(location.hostname)){var vs=document.createElement('script');vs.defer=true;vs.src=VA;document.head.appendChild(vs)}
   /* the "Related lessons" card lives in its own file (scripts/search-index.mjs builds assets/related.json) */
   (function(m){if(m&&m.src){var q=document.createElement('script');q.src=m.src.replace(/site\.js.*$/,'search.js'+(m.src.match(/\?.*$/)||[''])[0]);q.defer=true;document.head.appendChild(q)}})(document.currentScript);
   document.addEventListener('DOMContentLoaded',function(){
@@ -249,7 +256,7 @@
         .then(function(){b.innerHTML=label},function(){b.innerHTML=t({en:'Could not download. Save each file above instead.',zh:'下载失败，请逐个保存上方文件。'})})
         .then(function(){b.disabled=false})});
     /* browser tab title follows the language: fixed pages by name, lessons from their own zh title */
-    var TZ={'index.html':'TX Learns – 中英双语互动 AI 课','ecosystem.html':'TX Learns 如何运作','glossary.html':'AI 词汇表 | TX Learns'},TE=document.title;
+    var TZ={'index.html':'TX Learns – 中英双语互动 AI 课','ecosystem.html':'TX Learns 如何运作','glossary.html':'AI 词汇表 | TX Learns','about.html':'关于本站 | TX Learns'},TE=document.title;
     function setTitle(){var zh=root.getAttribute('data-lang')==='zh',tl=C&&C.lessons?C.lessons.filter(function(l){return l.file===here})[0]:null,z=!C&&TZ[here]?TZ[here]:(tl&&tl.title&&tl.title.zh?tl.title.zh+' | TX Learns':'');document.title=zh&&z?z:TE}
     setTitle();new MutationObserver(setTitle).observe(root,{attributes:true,attributeFilter:['data-lang']});
     function toast(msg){var el=document.getElementById('toast');if(!el){el=document.createElement('div');el.id='toast';el.className='toast';el.setAttribute('role','status');el.setAttribute('aria-live','polite');el.onclick=function(){el.classList.remove('on')};document.body.appendChild(el)}
@@ -275,12 +282,17 @@
         bc.innerHTML='<a href="../index.html">'+t({en:'Home',zh:'首页'})+'</a> › <a href="index.html">'+t(C.title)+'</a> › <span>'+t(tp.title)+'</span>';tag0.before(bc)}
       var pg=document.querySelector('.pager'),p=C.lessons[idx-1],n=C.lessons[idx+1];
       if(pg)pg.innerHTML=(p?'<a href="'+p.file+'"><small>← '+t({en:'Previous',zh:'上一课'})+'</small>'+t(p.title)+'</a>':'')+'<a class="back" href="index.html">'+t({en:'Back to track',zh:'回到路线'})+'</a>'+(n?'<a class="next" href="'+n.file+'"><small>'+t({en:'Next',zh:'下一课'})+' →</small>'+t(n.title)+'</a>':'');
+      /* "Was this lesson clear?": one tap, sent as an anonymous analytics event (lesson and yes/no only); the answer is kept on this device so it is asked once */
+      (function(){var FK='learn-fb',fbs=jget(FK,{}),fk=C.id+'/'+here,a=document.createElement('aside');a.className='card fbk';a.setAttribute('aria-label','Was this lesson clear? · 这一课讲清楚了吗？');
+        function draw(){a.innerHTML=fbs[fk]?'<p role="status">'+t({en:'Thanks. That shows me which lessons to fix first.',zh:'谢谢，这能让我知道先改哪一课。'})+'</p>':'<b class="lbl">'+t({en:'Was this lesson clear?',zh:'这一课讲清楚了吗？'})+'</b><button type="button" class="btn" data-v="yes">'+t({en:'Yes',zh:'清楚'})+'</button><button type="button" class="btn" data-v="no">'+t({en:'Not quite',zh:'不太清楚'})+'</button>'}
+        a.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-v]');if(!b)return;fbs[fk]=b.dataset.v;set(FK,JSON.stringify(fbs));track('Lesson feedback',{lesson:fk,answer:b.dataset.v});draw()});
+        draw();if(pg)pg.before(a)})();
       /* last published lesson of its topic: the What next card */
       var lastIn=C.lessons.filter(function(x){return x.w===cl.w}).pop()===cl;
       if(lastIn)whatNext(true,function(a){if(pg)pg.before(a);else{var m3=document.querySelector('main');if(m3)m3.appendChild(a)}},n,!n);
       if(db){var key=C.id+'/'+here;
         var lbl=function(){db.className='btn big mark-done'+(done()[key]?'':' pri');db.innerHTML=done()[key]?t({en:'✓ Completed — click to undo',zh:'✓ 已完成（点击撤销）'}):t({en:'Mark lesson as completed',zh:'标记本课已完成'})};
-        db.onclick=function(e){var x=done();if(x[key])delete x[key];else{x[key]=1;burst(e.clientX,e.clientY)}set(DONE,JSON.stringify(x));d=x;syncSide();var nn=count(C.id,CF);toast(x[key]?t({en:'Marked complete · progress '+nn+'/'+CF.length,zh:'已标记完成，进度 '+nn+'/'+CF.length}):t({en:'Marked not complete · progress '+nn+'/'+CF.length,zh:'已取消完成，进度 '+nn+'/'+CF.length}));lbl()};lbl()}
+        db.onclick=function(e){var x=done();if(x[key])delete x[key];else{x[key]=1;burst(e.clientX,e.clientY);track('Lesson done',{lesson:key})}set(DONE,JSON.stringify(x));d=x;syncSide();var nn=count(C.id,CF);toast(x[key]?t({en:'Marked complete · progress '+nn+'/'+CF.length,zh:'已标记完成，进度 '+nn+'/'+CF.length}):t({en:'Marked not complete · progress '+nn+'/'+CF.length,zh:'已取消完成，进度 '+nn+'/'+CF.length}));lbl()};lbl()}
       buildToc();
       var dock=document.createElement('div');dock.className='dock';var RR=18,LL=2*Math.PI*RR;
       dock.innerHTML='<button class="dk" data-a="m" title="Menu" aria-label="Open topics menu · 打开主题菜单">☰</button>'+(p?'<a class="dk" href="'+p.file+'" title="Previous" aria-label="Previous lesson · 上一课">‹</a>':'<span class="dk off" aria-hidden="true">‹</span>')+

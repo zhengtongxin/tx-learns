@@ -19,7 +19,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ github.event.repository.default_branch }}
           sparse-checkout: scripts
@@ -35,8 +35,8 @@ jobs:
     outputs:
       line: ${{ steps.result.outputs.line }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
       - name: Scan served files
@@ -52,7 +52,7 @@ jobs:
         run: "[ -f scripts/check-pages.mjs ] || { echo 'No page check on this branch yet.' > pages.txt; exit 0; }; node scripts/check-pages.mjs | tee pages.txt; exit ${PIPESTATUS[0]}"
       - name: Cache the headless browser
         if: (success() || failure()) && github.event_name == 'pull_request'
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: |
             ~/.cache/ms-playwright
@@ -66,7 +66,7 @@ jobs:
           pages=$(echo "$changed" | grep -E '\.html$' | grep -vE '^(inbox/|scripts/|\.github/)|_template\.html$|^404\.html$' | while read -r f; do if [ -f "$f" ]; then echo "$f"; fi; done)
           # Shared layout files change every page: test a small sample (home, How it works, glossary, each track's page and first lesson) instead of all of them.
           if echo "$changed" | grep -qE '^assets/(site|teach)\.(css|js)$|^tracks\.js$'; then
-            pages="index.html ecosystem.html glossary.html $(for d in $(ls -d */ | tr -d /); do if [ -f "$d/lessons.js" ]; then echo "$d/index.html"; ls "$d" | grep -E '^[0-9]+.*\.html$' | sort | head -1 | sed "s#^#$d/#"; fi; done)"
+            pages="index.html ecosystem.html glossary.html about.html $(for d in $(ls -d */ | tr -d /); do if [ -f "$d/lessons.js" ]; then echo "$d/index.html"; ls "$d" | grep -E '^[0-9]+.*\.html$' | sort | head -1 | sed "s#^#$d/#"; fi; done)"
           fi
           pages=$(echo $pages | tr ' ' '\n' | sort -u | head -12 | xargs)
           if [ -z "$pages" ]; then echo "No served page changed: nothing to fit-check." | tee fit.txt; exit 0; fi
@@ -74,6 +74,16 @@ jobs:
             && { node -e "require(process.argv[1]+'/node_modules/playwright').chromium.launch().then(b=>b.close())" "$RUNNER_TEMP/pw" 2>/dev/null || "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium >/dev/null; }; } \
             || { echo "::notice::The browser could not be installed, so the phone fit was skipped on this run."; exit 0; }
           PLAYWRIGHT_DIR="$RUNNER_TEMP/pw" node scripts/ui-check.mjs --fit --out "$RUNNER_TEMP/fit" --pages "$pages" | tee fit.txt; exit ${PIPESTATUS[0]}
+      - name: Shared script tests (only when assets/site.js or assets/search.js changed)
+        if: (success() || failure()) && github.event_name == 'pull_request'
+        run: |
+          [ -f scripts/test-site.mjs ] || exit 0
+          git diff --name-only origin/main HEAD 2>/dev/null | grep -qE '^assets/(site|search)\.js$|^scripts/test-site\.mjs$' || { echo "The shared site script did not change."; exit 0; }
+          [ -x "$RUNNER_TEMP/pw/node_modules/.bin/playwright" ] || { echo "::notice::No browser on this run, so the shared script tests were skipped."; exit 0; }
+          PLAYWRIGHT_DIR="$RUNNER_TEMP/pw" node scripts/test-site.mjs | tee site-tests.txt; code=${PIPESTATUS[0]}
+          # 2 means the tests could not start (no browser): a notice, not a failed check.
+          if [ "$code" = 2 ]; then echo "::notice::The shared script tests could not start on this run."; exit 0; fi
+          exit "$code"
       - name: Search index (a note, never a gate)
         if: success() || failure()
         run: "[ -f scripts/search-index.mjs ] && { node scripts/search-index.mjs --check || echo '::notice::The related-lessons file is behind. The writer agent rebuilds it; or run node scripts/search-index.mjs.'; }; exit 0"
@@ -84,7 +94,7 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           WHERE: ${{ github.event.pull_request.html_url || format('{0}/{1}/commit/{2}', github.server_url, github.repository, github.sha) }}
         run: |
-          { echo "🛡️ Cybersecurity engineer agent: the copy and security check failed on ${GITHUB_REF_NAME}"; echo "$WHERE"; echo; cat copy-check.txt security.txt counts.txt pages.txt fit.txt 2>/dev/null | head -c 3000; } \
+          { echo "🛡️ Cybersecurity engineer agent: the copy and security check failed on ${GITHUB_REF_NAME}"; echo "$WHERE"; echo; cat copy-check.txt security.txt counts.txt pages.txt fit.txt site-tests.txt 2>/dev/null | head -c 3000; } \
             | node scripts/notify-telegram.mjs
       - name: Pass the result to the status job
         id: result
@@ -100,7 +110,7 @@ jobs:
       contents: write
       actions: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ github.event.repository.default_branch }}
           sparse-checkout: scripts

@@ -21,13 +21,16 @@ Everything runs with plain Node 22. Nothing needs installing except the browser 
 | `node scripts/run-evals.mjs` | Golden cases for the checks above. Add a case whenever you add a check rule |
 | `node scripts/ui-check.mjs --pages <page.html>` | Hover, click and Tab through a page in a headless browser (needs Playwright) |
 | `node scripts/ui-check.mjs --fit --pages <page.html>` | The quick phone check (390px): content wider than the screen, popups off the side |
+| `node scripts/test-site.mjs` | Behaviour tests for `assets/site.js`: language, theme, progress, feedback, no outside requests (needs Playwright) |
+| `node scripts/daily-scan.mjs drift` | The docs check: `CLAUDE.md` and this file still match the workflows, scripts, tracks and agents |
+| `node scripts/daily-scan.mjs smoke --pkg packages/<track>/<name>` | Smoke-run one project package: it parses, its requirements install, its imports exist |
 
 Before every commit run the copy, count and page checks; all three must pass. Every change is a pull request into `main`; never push to `main`.
 
 ## How it is built
 
 ```
-index.html, ecosystem.html, glossary.html   site pages
+index.html, ecosystem.html, glossary.html, about.html   site pages
 tracks.js                    the learning tracks (window.TRACKS)
 <track>/lessons.js           topics and lessons of one track (the only source of counts)
 <track>/NN-slug.html         one lesson per file, widgets in <track>/js/NN-slug.js
@@ -49,7 +52,8 @@ Agents run as GitHub Actions workflows in `.github/workflows/`. The "How it work
 2. Every pull request gets the same checks: copy check (scrubber, security, counts, pages and the phone fit), a backend review that sets the required `Reviewer` status, and a scope guard that compares what the diff does with what the description says.
 3. Auto-merge merges a pull request once `copy-check` and `Reviewer` are green on its newest commit. The UI check and live check run after the merge.
 4. If a merge breaks the live site, the live check agent opens a `Rollback:` pull request that puts `main` back.
-5. Telegram gets one digest a day and an instant message only for a failure, a rollback or a stuck pull request.
+5. Every day the QA engineer agent's scan (`daily-scan.yml`) reads what readers did, smoke-runs one project package, checks the docs, a speed budget and reworked files. Lessons readers marked unclear go to the improvement engineer agent.
+6. Telegram gets one digest a day and an instant message only for a failure, a rollback or a stuck pull request.
 
 Pull requests that change auto-merge itself (`auto-merge.yml`, `scripts/auto-merge.mjs`, the ruleset in `.github/rulesets/`) wait for the owner to merge them. Everything else merges by itself.
 

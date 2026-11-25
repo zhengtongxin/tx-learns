@@ -14,7 +14,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { loadTracks, arg, escHtml as e } from './lib.mjs';
+import { loadTracks, modelsInLessons, arg, escHtml as e } from './lib.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = (process.env.SITE || 'https://tx-learns.vercel.app/').replace(/\/?$/, '/');
@@ -52,16 +52,7 @@ function plan() {
 
 function ago(d) { return d < 1 ? 'today' : d < 2 ? 'yesterday' : d < 14 ? `${d} days ago` : d < 60 ? `${Math.round(d / 7)} weeks ago` : `${Math.round(d / 30)} months ago`; }
 
-// Model ids as lessons write them in code, e.g. gpt-5.4-mini, claude-sonnet-4-6, gemini-3.1-flash-lite, llama3.2.
-const MODEL = /\b(?:gpt-[0-9][\w.-]*|gpt-oss-[\w.-]+|o[1-9]-(?:mini|pro)|claude-[a-z]+-[\w.-]+|gemini-[0-9][\w.-]*|llama[0-9][\w.:-]*|deepseek-[\w.-]+|qwen[0-9][\w.:-]*|mistral-[\w.-]+|grok-[0-9][\w.-]*)\b/gi;
-function models() {
-  const found = {};
-  for (const t of loadTracks(ROOT)) for (const l of t.T.topics.flatMap(w => w.items).filter(x => x.file)) {
-    const text = readFileSync(join(ROOT, t.dir, l.file), 'utf8');
-    for (const m of text.match(MODEL) || []) { const id = m.replace(/[.:-]+$/, '').toLowerCase(); (found[id] ||= new Set()).add(t.dir + '/' + l.file); }
-  }
-  return Object.fromEntries(Object.entries(found).sort().map(([k, v]) => [k, [...v]]));
-}
+const models = () => modelsInLessons(ROOT);
 
 function message(P, Q, S) {
   const qs = {};
