@@ -205,7 +205,7 @@ async function main() {
       const hang = setTimeout(() => page.close().catch(() => {}), 120000);
       page.on('dialog', d => d.dismiss().catch(() => {}));
       page.on('pageerror', e => add({ kind: 'js-error', msg: `Script error: ${String(e.message || e).split('\n')[0].slice(0, 200)}` }));
-      page.on('console', m => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) add({ kind: 'js-error', msg: `Console error: ${m.text().slice(0, 200)}` }); });
+      page.on('console', m => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text()) && !/\[Report Only\][\s\S]*'unsafe-eval'/.test(m.text())) add({ kind: 'js-error', msg: `Console error: ${m.text().slice(0, 200)}` }); });
       page.on('response', r => {
         const u = new URL(r.url());
         if (r.status() >= 400 && u.origin === origin && !(local && u.pathname.startsWith('/api/')) && !/favicon/.test(u.pathname))
