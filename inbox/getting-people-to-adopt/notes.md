@@ -2,7 +2,7 @@
 
 File name (fixed, do not change; other lessons are being written in parallel): ai-leader/14-getting-people-to-adopt.html. Do not touch any other lesson file. If lessons.js already lists a planned item for this concept, add file:'14-getting-people-to-adopt.html' to that item only (it is the item whose title matches: "Getting people to adopt AI and agents").
 
-Topic: Leading the change. Track story: STORY.md (Sri Murni Mart; end with the "Back at the mart" callout). This track has no code: use no code box; teach with a small diagram plus a decision widget (TX2.predict or TX2.game). Keep the lesson short, about 6 to 8 minutes.
+Topic: Leading the change. Track story: STORY.md (Heng Huat Mart; end with the "Back at the mart" callout). This track has no code: use no code box; teach with a small diagram plus a decision widget (TX2.predict or TX2.game). Keep the lesson short, about 6 to 8 minutes.
 
 ## Goal
 Help people use the new tools, so the project does not die after launch.
@@ -15,7 +15,7 @@ Help people use the new tools, so the project does not die after launch.
 5. Collect feedback and fix quickly. Celebrate saved hours. Track use: how many people, how often, and whether results are accepted.
 6. Leaders go first: use the tool in front of the team.
 
-## What I got wrong (common slip-ups; tell them through Puan Rohani or Mr Tan)
+## What I got wrong (common slip-ups; tell them through Mdm Rohani or Mr Tan)
 - Announcing a tool by email and hoping.
 - Skipping the people who do the work when choosing the tool.
 - Measuring only licences bought, not real use.

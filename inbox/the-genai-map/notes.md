@@ -2,7 +2,7 @@
 
 File name (fixed, do not change; other lessons are being written in parallel): ai-leader/02-the-genai-map.html. Do not touch any other lesson file. If lessons.js already lists a planned item for this concept, add file:'02-the-genai-map.html' to that item only (it is the item whose title matches: "The GenAI map: models, tools and where they fit").
 
-Topic: Seeing the AI landscape. Track story: STORY.md (Sri Murni Mart; end with the "Back at the mart" callout). This track has no code: use no code box; teach with a small diagram plus a decision widget (TX2.predict or TX2.game). Keep the lesson short, about 6 to 8 minutes.
+Topic: Seeing the AI landscape. Track story: STORY.md (Heng Huat Mart; end with the "Back at the mart" callout). This track has no code: use no code box; teach with a small diagram plus a decision widget (TX2.predict or TX2.game). Keep the lesson short, about 6 to 8 minutes.
 
 ## Goal
 Hold one simple picture of the generative AI world so new product names stop sounding like new planets.
@@ -13,7 +13,7 @@ Hold one simple picture of the generative AI world so new product names stop sou
 3. A buying question maps to a layer: 'which model?' is layer 2, 'how do I connect it to our files?' is layer 3, 'can we just buy something?' is layer 4.
 4. Things change monthly at layer 2 and 3; the layers themselves change slowly. Learn the layers.
 
-## What I got wrong (common slip-ups; tell them through Puan Rohani or Mr Tan)
+## What I got wrong (common slip-ups; tell them through Mdm Rohani or Mr Tan)
 - Treating each new tool as a new category when it is one more thing at the same layer.
 - Choosing a model before knowing what data it must reach.
 - Believing 'open' means free of cost; running it still costs people and machines.

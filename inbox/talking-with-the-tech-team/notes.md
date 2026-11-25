@@ -2,7 +2,7 @@
 
 File name (fixed, do not change; other lessons are being written in parallel): ai-leader/07-talking-with-the-tech-team.html. Do not touch any other lesson file. If lessons.js already lists a planned item for this concept, add file:'07-talking-with-the-tech-team.html' to that item only (it is the item whose title matches: "Working with the tech team on AI choices").
 
-Topic: Making the call with the tech team. Track story: STORY.md (Sri Murni Mart; end with the "Back at the mart" callout). This track has no code: use no code box; teach with a small diagram plus a decision widget (TX2.predict or TX2.game). Keep the lesson short, about 6 to 8 minutes.
+Topic: Making the call with the tech team. Track story: STORY.md (Heng Huat Mart; end with the "Back at the mart" callout). This track has no code: use no code box; teach with a small diagram plus a decision widget (TX2.predict or TX2.game). Keep the lesson short, about 6 to 8 minutes.
 
 ## Goal
 Have better conversations with the technical people so decisions are made on real trade-offs.
@@ -14,7 +14,7 @@ Have better conversations with the technical people so decisions are made on rea
 4. Ask for a small test on real examples before any big decision, and look at some results yourself.
 5. Trust but verify: respect the team's judgement, and make them show numbers, not adjectives.
 
-## What I got wrong (common slip-ups; tell them through Puan Rohani or Mr Tan)
+## What I got wrong (common slip-ups; tell them through Mdm Rohani or Mr Tan)
 - Nodding along when you do not understand; ask them to say it again with an example.
 - Asking 'can AI do this?' instead of 'how good is it on our data?'.
 - Letting the team choose both the question and the test.

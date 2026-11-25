@@ -2,7 +2,7 @@
 
 File name (fixed, do not change; other lessons are being written in parallel): ai-leader/13-a-roadmap-with-room-for-research.html. Do not touch any other lesson file. If lessons.js already lists a planned item for this concept, add file:'13-a-roadmap-with-room-for-research.html' to that item only (it is the item whose title matches: "An AI roadmap with room for research").
 
-Topic: Leading the change. Track story: STORY.md (Sri Murni Mart; end with the "Back at the mart" callout). This track has no code: use no code box; teach with a small diagram plus a decision widget (TX2.predict or TX2.game). Keep the lesson short, about 6 to 8 minutes.
+Topic: Leading the change. Track story: STORY.md (Heng Huat Mart; end with the "Back at the mart" callout). This track has no code: use no code box; teach with a small diagram plus a decision widget (TX2.predict or TX2.game). Keep the lesson short, about 6 to 8 minutes.
 
 ## Goal
 Write and defend a roadmap that mixes sure wins with experiments.
@@ -14,7 +14,7 @@ Write and defend a roadmap that mixes sure wins with experiments.
 4. Defending it: lead with the business result, show the cost and the stop rule, show what is already working, and be honest about what is uncertain.
 5. Review every quarter. A roadmap that never changes is a wish list.
 
-## What I got wrong (common slip-ups; tell them through Puan Rohani or Mr Tan)
+## What I got wrong (common slip-ups; tell them through Mdm Rohani or Mr Tan)
 - A roadmap that is only a list of tools.
 - Research judged by the same return rules as production, so nobody dares experiment.
 - No dependencies shown, so the plan slips when data is not ready.

@@ -2,7 +2,7 @@
 
 File name (fixed, do not change; other lessons are being written in parallel): ai-leader/06-sponsor-by-deciding.html. Do not touch any other lesson file. If lessons.js already lists a planned item for this concept, add file:'06-sponsor-by-deciding.html' to that item only (it is the item whose title matches: "Sponsoring an AI project by making the key decisions").
 
-Topic: Making the call with the tech team. Track story: STORY.md (Sri Murni Mart; end with the "Back at the mart" callout). This track has no code: use no code box; teach with a small diagram plus a decision widget (TX2.predict or TX2.game). Keep the lesson short, about 6 to 8 minutes.
+Topic: Making the call with the tech team. Track story: STORY.md (Heng Huat Mart; end with the "Back at the mart" callout). This track has no code: use no code box; teach with a small diagram plus a decision widget (TX2.predict or TX2.game). Keep the lesson short, about 6 to 8 minutes.
 
 ## Goal
 Understand what a sponsor must actually decide, and what to leave to the team.
@@ -14,7 +14,7 @@ Understand what a sponsor must actually decide, and what to leave to the team.
 4. Say yes with conditions: 'yes for four weeks on one store, we review against this number'.
 5. Show up: a sponsor who disappears leaves the team guessing; a short weekly look at the real numbers is enough.
 
-## What I got wrong (common slip-ups; tell them through Puan Rohani or Mr Tan)
+## What I got wrong (common slip-ups; tell them through Mdm Rohani or Mr Tan)
 - Approving a vague goal like 'use AI to improve service'.
 - Deciding technical details you do not understand, or deciding nothing at all.
 - Never defining what counts as success, so the project cannot end.

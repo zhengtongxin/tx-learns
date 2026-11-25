@@ -2,7 +2,7 @@
 
 File name (fixed, do not change; other lessons are being written in parallel): ai-leader/04-who-sells-what-in-ai.html. Do not touch any other lesson file. If lessons.js already lists a planned item for this concept, add file:'04-who-sells-what-in-ai.html' to that item only (it is the item whose title matches: "Who sells what: types of AI company and offering").
 
-Topic: Seeing the AI landscape. Track story: STORY.md (Sri Murni Mart; end with the "Back at the mart" callout). This track has no code: use no code box; teach with a small diagram plus a decision widget (TX2.predict or TX2.game). Keep the lesson short, about 6 to 8 minutes.
+Topic: Seeing the AI landscape. Track story: STORY.md (Heng Huat Mart; end with the "Back at the mart" callout). This track has no code: use no code box; teach with a small diagram plus a decision widget (TX2.predict or TX2.game). Keep the lesson short, about 6 to 8 minutes.
 
 ## Goal
 Tell the kinds of AI supplier apart so you buy from the right one and know what you depend on.
@@ -14,7 +14,7 @@ Tell the kinds of AI supplier apart so you buy from the right one and know what 
 4. Questions for any vendor: who owns the data we send, where is it stored, can we leave and take our work, what happens when the underlying model changes, what is the price at ten times our volume?
 5. Most companies end up with a mix: bought tools for common jobs, a platform for custom ones.
 
-## What I got wrong (common slip-ups; tell them through Puan Rohani or Mr Tan)
+## What I got wrong (common slip-ups; tell them through Mdm Rohani or Mr Tan)
 - Comparing a model maker with an application company as if they sold the same thing.
 - Signing for a year before testing on your own data.
 - Ignoring lock-in until the first price rise.

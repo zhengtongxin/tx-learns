@@ -2,7 +2,7 @@
 
 File name (fixed, do not change; other lessons are being written in parallel): ai-leader/03-llms-pros-cons-risks.html. Do not touch any other lesson file. If lessons.js already lists a planned item for this concept, add file:'03-llms-pros-cons-risks.html' to that item only (it is the item whose title matches: "LLMs for the business: strengths, limits and risks").
 
-Topic: Seeing the AI landscape. Track story: STORY.md (Sri Murni Mart; end with the "Back at the mart" callout). This track has no code: use no code box; teach with a small diagram plus a decision widget (TX2.predict or TX2.game). Keep the lesson short, about 6 to 8 minutes.
+Topic: Seeing the AI landscape. Track story: STORY.md (Heng Huat Mart; end with the "Back at the mart" callout). This track has no code: use no code box; teach with a small diagram plus a decision widget (TX2.predict or TX2.game). Keep the lesson short, about 6 to 8 minutes.
 
 ## Goal
 Say in business words what a large language model is good at, where it fails, and which risks the company must own.
@@ -14,7 +14,7 @@ Say in business words what a large language model is good at, where it fails, an
 4. Controls that work: a human checks anything that matters, give the model your documents and ask it to quote them, keep a written rule about what data may go in, log what it did, and keep a plan B if the supplier changes.
 5. Rule of thumb: the cost of a wrong answer decides how much checking you need.
 
-## What I got wrong (common slip-ups; tell them through Puan Rohani or Mr Tan)
+## What I got wrong (common slip-ups; tell them through Mdm Rohani or Mr Tan)
 - Trusting a fluent answer because it sounds sure.
 - Banning AI outright; staff then use it secretly on personal accounts.
 - Counting only the cheap per-task price and forgetting the cost of checking.

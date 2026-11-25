@@ -2,7 +2,7 @@
 
 File name (fixed, do not change; other lessons are being written in parallel): ai-leader/15-proving-roi.html. Do not touch any other lesson file. If lessons.js already lists a planned item for this concept, add file:'15-proving-roi.html' to that item only (it is the item whose title matches: "Proving the return: measurable ROI from AI").
 
-Topic: Leading the change. Track story: STORY.md (Sri Murni Mart; end with the "Back at the mart" callout). This track has no code: use no code box; teach with a small diagram plus a decision widget (TX2.predict or TX2.game). Keep the lesson short, about 6 to 8 minutes.
+Topic: Leading the change. Track story: STORY.md (Heng Huat Mart; end with the "Back at the mart" callout). This track has no code: use no code box; teach with a small diagram plus a decision widget (TX2.predict or TX2.game). Keep the lesson short, about 6 to 8 minutes.
 
 ## Goal
 Show with numbers that AI paid off, in a way the finance head accepts.
@@ -14,7 +14,7 @@ Show with numbers that AI paid off, in a way the finance head accepts.
 4. Be honest: separate hard savings from soft ones, show a range, and use a comparison group or a before and after period where you can.
 5. Report in a one-page scorecard on a fixed rhythm, and say what you will do next with the result. Stop what does not pay.
 
-## What I got wrong (common slip-ups; tell them through Puan Rohani or Mr Tan)
+## What I got wrong (common slip-ups; tell them through Mdm Rohani or Mr Tan)
 - Claiming saved hours that never became anything.
 - Forgetting the checking time and training in the cost.
 - No baseline, so the number is a guess.
