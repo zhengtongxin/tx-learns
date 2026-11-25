@@ -8,7 +8,9 @@ import { readFileSync } from 'node:fs';
 const file = process.argv[2];
 if (!file) { console.error('usage: review-triage.mjs <diff-file>'); process.exit(2); }
 const GEN_FILES = new Set(['sitemap.xml', 'vercel.json', 'assets/related.json']);
-const PAGE_GEN = /<meta name="updated"|<link rel="canonical"|<script type="application\/ld\+json"|<script type="application\/json" id="lesson-data"|"dateModified":/;
+// Whole-line patterns only: a line of <meta>/<link> tags that holds the updated date or the canonical link, or a whole JSON script block.
+const TAGS = /^\s*(<(meta|link)\b[^>]*>\s*)+$/;
+const PAGE_GEN = { test: l => (TAGS.test(l) && /<meta name="updated"|<link rel="canonical"/.test(l)) || /^\s*<script type="application\/(ld\+json|json)"( id="lesson-data")?>.*<\/script>\s*$/.test(l) };
 const HASH = /\?v=[0-9a-f]{6,}/g;
 let path = null, seen = 0, minus = [], plus = [];
 // A line with a ?v= hash counts as generated when its hash-free text is also on the other side of the diff (same line, new hash).
@@ -26,8 +28,8 @@ for (const line of readFileSync(file, 'utf8').split('\n')) {
   if (/^(index |--- a\/|--- \/dev\/null|\+\+\+ b\/|\+\+\+ \/dev\/null|@@ )/.test(line) || !/^[+-]/.test(line)) continue;
   if (GEN_FILES.has(path)) continue;
   const html = path && path.endsWith('.html');
-  if (html && /\?v=[0-9a-f]{6,}/.test(line) && !PAGE_GEN.test(line)) { (line[0] === '-' ? minus : plus).push(line.slice(1)); continue; }
-  if (html && PAGE_GEN.test(line)) continue;
+  if (html && /\?v=[0-9a-f]{6,}/.test(line) && !PAGE_GEN.test(line.slice(1))) { (line[0] === '-' ? minus : plus).push(line.slice(1)); continue; }
+  if (html && PAGE_GEN.test(line.slice(1))) continue;
   no('a changed line is not generated');
 }
 if (!flush()) no('a changed line is not just a new hash');
