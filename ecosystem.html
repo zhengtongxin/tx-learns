@@ -71,6 +71,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 .kb b{color:var(--fg);font-weight:600}
 /* the one popup: it lives on <body>, outside the glass panels, so no later card or panel can paint over it, and its background is solid */
 .tip{position:absolute;z-index:45;display:none;width:min(380px,calc(100vw - 20px));padding:12px 14px;border-radius:8px;border:1px solid var(--box);background:var(--node);box-shadow:0 18px 50px rgba(0,0,0,.45);font-size:13.5px;line-height:1.55;pointer-events:none;isolation:isolate}
+@media (hover:hover){.tip.on{pointer-events:auto}}
 .tip.pin{pointer-events:auto}.tip .x{float:right;margin:-4px -6px 0 8px;border:0;background:none;color:var(--mut);font-size:18px;line-height:1;cursor:pointer;display:none}.tip.pin .x{display:block}
 .tip.on{display:block}
 .tip h5{margin:0 0 4px;font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
@@ -476,7 +477,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     if(o!==LASTO){LASTO=o;svg.innerHTML=o;
     // One popup for the whole page. Hover or focus shows it, click pins it, Escape or a click elsewhere closes it.
     svg.querySelectorAll('[data-agent]').forEach(function(el){
-      el.onmouseenter=function(){if(!PIN)showTip(el,S,false)};el.onmouseleave=function(){if(!PIN)hideTip()};
+      el.onmouseenter=function(){holdTip();if(!PIN)showTip(el,S,false)};el.onmouseleave=function(){if(!PIN)softHide()};
       el.onfocus=function(){if(!PIN)showTip(el,S,false)};el.onblur=function(){if(!PIN)hideTip()};
       var go=function(){if(PIN===el.dataset.agent){hideTip()}else showTip(el,S,true)};
       el.onclick=function(ev){ev.stopPropagation();go()};el.onkeydown=function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();go()}}});
@@ -529,13 +530,15 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
       var x=Math.max(10,Math.min(r.left+r.width/2-tw/2,W-tw-10)),y=r.bottom+8;
       if(y+th>innerHeight-8&&r.top-th-8>60)y=r.top-th-8;
       TIP.style.left=(x+scrollX)+'px';TIP.style.top=(y+scrollY)+'px';el.classList.add('nhot');PIN=pin?'_note':''}
-    el.addEventListener('mouseenter',function(){if(!PIN)show(0)});el.addEventListener('mouseleave',function(){if(!PIN)hideTip()});
+    el.addEventListener('mouseenter',function(){holdTip();if(!PIN)show(0)});el.addEventListener('mouseleave',function(){if(!PIN)softHide()});
     el.addEventListener('focus',function(){if(!PIN)show(0)});el.addEventListener('blur',function(){if(!PIN)hideTip()});
     el.addEventListener('click',function(ev){ev.stopPropagation();
       if(link)ev.preventDefault();
       if(PIN==='_note'&&el.classList.contains('nhot'))hideTip();else show(1)});
     if(!link)el.addEventListener('keydown',function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();el.click()}})}
-  function hideTip(){PIN='';TIP.classList.remove('on','pin');document.querySelectorAll('#ov .hot,.nhot').forEach(function(x){x.classList.remove('hot','nhot')})}
+  var HT=0;function holdTip(){clearTimeout(HT)}function softHide(){clearTimeout(HT);HT=setTimeout(function(){if(!PIN)hideTip()},220)}
+  TIP.addEventListener('mouseenter',holdTip);TIP.addEventListener('mouseleave',function(){if(!PIN)softHide()});
+  function hideTip(){clearTimeout(HT);PIN='';TIP.classList.remove('on','pin');document.querySelectorAll('#ov .hot,.nhot').forEach(function(x){x.classList.remove('hot','nhot')})}
   document.addEventListener('click',function(ev){if(PIN&&!TIP.contains(ev.target))hideTip()});
   document.addEventListener('keydown',function(ev){if(ev.key==='Escape')hideTip()});
 
