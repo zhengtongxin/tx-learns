@@ -2,109 +2,109 @@
  "lessons": {
   "agentic-ai/01-agentic-workflow.html": {
    "score": 7,
-   "at": "2026-11-26T06:51:12.968Z",
+   "at": "2026-11-26T06:52:43.603Z",
    "confusing": [
     {
-     "where": "Step 5 · Chat, then open Logs",
-     "why": "The step asks for AAPL, but the replay right below it checks the closing price of a bond ETF. A reader sees two different questions and cannot tell which one the log belongs to."
+     "where": "Step 3 · Build it, step 4 (Tools)",
+     "why": "A newcomer does not know which sheet to pick, or that it must already exist with exactly those column names."
     },
     {
-     "where": "Step 3 · 4. Tools",
-     "why": "EoD (end-of-day price) is only explained inside the replay, after the build steps. The reader has to build the node before learning what it fetches."
+     "where": "Step 3 · Build it, step 5",
+     "why": "The lesson never says where Logs is in n8n, so the final check becomes a hunt."
     },
     {
-     "where": "Step 3 · 5. Chat, then open Logs",
-     "why": "It never says where Logs is in n8n, or what the entries look like, yet the Step 2 replay and the test depend on reading them."
+     "where": "Takeaways",
+     "why": "'Database' is never explained, and the reader does not know what makes a memory node save."
     }
    ]
   },
   "agentic-ai/02-agents-and-patterns.html": {
-   "score": 6,
-   "at": "2026-11-26T06:51:12.968Z",
+   "score": 7,
+   "at": "2026-11-26T06:52:43.603Z",
    "confusing": [
     {
-     "where": "Step 3 · Five workflow patterns",
-     "why": "Step 2 says a workflow is where your code fixes the route and an agent is where the model picks each step. Here the model splits the task at run time, which sounds like an agent. The lesson only says "
-    },
-    {
-     "where": "Step 3 · quiz (Test)",
-     "why": "Its answer says a boss LLM plans the sub-tasks at run time. That contradicts the other quiz, where steps that depend on what turns up mean agent. The reader is given two rules that disagree."
+     "where": "Step 2 · Learn",
+     "why": "Lesson 1 just called the n8n canvas a workflow with an AI Agent node. Now 'workflow' means something else, so the reader must hold two meanings in a row."
     },
     {
      "where": "Step 2 · agent.py code box",
-     "why": "It points to a lesson the reader has not read yet, and the idea of a tool description is not explained here."
+     "why": "It points forward to a later lesson, and the reader does not yet know what a tool description is for."
+    },
+    {
+     "where": "Step 3 · Five workflow patterns card",
+     "why": "This is one 60-word bullet inside a card of five patterns. 'Shape' and 'split, work, combine' are abstract and come with no example until the quiz."
     }
    ]
   },
   "agentic-ai/03-first-api-calls.html": {
    "score": 7,
-   "at": "2026-11-26T06:51:12.968Z",
+   "at": "2026-11-26T06:52:43.603Z",
    "confusing": [
     {
-     "where": "Step 2 · first call code box",
-     "why": "Nothing says that OpenAI() finds OPENAI_API_KEY by itself after load_dotenv. A reader who has just been told to pass keys safely may wonder where the key goes."
+     "where": "Intro (before Step 1)",
+     "why": "The page says to have a virtual environment and a notebook, but never says how to make, switch on or open them, or how to pick the notebook's kernel. A newcomer may never have done this."
     },
     {
-     "where": "Step 2 · first call code box",
-     "why": "Every other name in the box is explained, but override=True is not. The reader cannot tell what it changes."
+     "where": "Step 3 · Learn",
+     "why": "'Full' is a new size name. Lesson 4 calls the same tier 'Large · smartest' and uses small, mid and large."
     },
     {
-     "where": "Setup paragraph",
-     "why": "Before the first call the reader must create a virtual environment, pick it as the notebook kernel, and create a .env file. Those steps are spread over the intro and a troubleshooting section."
+     "where": "Step 3 · code box",
+     "why": "A triple-quoted f-string over several lines is new here; the lesson only explained a one-line f-string."
     }
    ]
   },
   "agentic-ai/04-many-models.html": {
-   "score": 7,
-   "at": "2026-11-26T06:51:12.968Z",
+   "score": 6,
+   "at": "2026-11-26T06:52:43.603Z",
    "confusing": [
     {
-     "where": "Step 2 · compare.py code box",
-     "why": "The box uses messages but never defines it. The Ollama box below uses it too. A reader copying the box will get a NameError."
+     "where": "Step 3 · Learn",
+     "why": "The code that follows asks the models one after another in a list, so 'parallelization' suggests they run at the same time, and the code does not show that."
     },
     {
-     "where": "Step 2 · Local models",
-     "why": "The reason is not given. A reader does not know that a model's size is its download and its memory need."
+     "where": "Step 3 · judge.py",
+     "why": "Doubled braces inside an f-string are never explained. A reader who knows some Python may still stop here."
     },
     {
-     "where": "Step 3 · judge.py code box",
-     "why": "json.loads raises an error if the judge adds any words around the JSON. The lesson warns about judges in general but never says what the reader will see if this happens."
+     "where": "Step 3 · judge.py",
+     "why": "The judge numbers answers from 1, but Python lists start at 0. The '- 1' is never explained."
     }
    ]
   },
   "agentic-ai/05-autonomy-and-tools.html": {
-   "score": 7,
-   "at": "2026-11-26T06:51:12.968Z",
+   "score": 6,
+   "at": "2026-11-26T06:52:43.603Z",
    "confusing": [
     {
-     "where": "Step 3 · tools.py code box",
-     "why": "The Learn text never says the reader fills this in. It looks like a broken placeholder until the quiz below asks for it."
+     "where": "Step 3 · tools.py JSON",
+     "why": "The nested keys (parameters, properties, required, and the 'function' wrapper) are never explained. A reader can copy them but cannot change them safely."
     },
     {
-     "where": "Step 4 · chat() code box",
-     "why": "If the model still asks for tools on the fifth round, the function returns the last reply's text, which can be empty, with no error. The reader is not warned. This is a code issue for the writer to ch"
+     "where": "Step 4 · tools.py loop",
+     "why": "**arguments is used before the reader knows what it does. The next project lesson is the first to explain it."
     },
     {
-     "where": "Step 2 · twin.py code box",
-     "why": "client is used here but never created in this lesson, and no comment says it comes from lesson 3."
+     "where": "Step 2 · twin.py",
+     "why": "The role 'assistant' is never named or explained. Lesson 3 said the other roles would come in this lesson."
     }
    ]
   },
   "agentic-ai/06-career-agent.html": {
-   "score": 7,
-   "at": "2026-11-26T06:51:12.968Z",
+   "score": 6,
+   "at": "2026-11-26T06:52:43.603Z",
    "confusing": [
     {
-     "where": "Step 4 · Deploy checklist",
-     "why": "The lesson never says where the project files are or how to get them. The only pointer is in the failure notes (put .env next to README.txt), so the reader does not know which folder to open first."
+     "where": "Step 4 · Learn and checklist",
+     "why": "The page never says where Alex's facts go. The package has twin/summary.txt and linkedin.txt, but the lesson does not mention them, so the twin would not know Alex."
     },
     {
-     "where": "Step 2 · tool_json.py code box",
-     "why": "The Learn text says strong wording such as Always use this tool makes the tool reliable, but the box uses a weaker description. The reader is told one thing and shown another."
+     "where": "Step 4 · checklist",
+     "why": "pypdf is installed, but nothing on the page says what it is for."
     },
     {
-     "where": "Project check list (the first acceptance test)",
-     "why": "The check expects the terminal to print this line. The tools.py box in Step 1 prints Push: followed by the message when no Pushover key is set, so the expected output does not match the code shown. I "
+     "where": "Step 2 · code comment",
+     "why": "The second tool's JSON is left as an exercise in a comment, and the reader is not shown the lines that change."
     }
    ]
   },
