@@ -15,8 +15,8 @@
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 2 · Make your first call</span><span class="zh">第 2 步 · 完成第一次调用</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">An <b>LLM API</b> is a function you call over the internet: <b>messages</b> in, text out. Four lines do the work: load the key, create a <b>client</b> (your connection to the model), send the messages, read the reply. Each message is a <b>dictionary</b> (labelled values in curly braces) with a <b>role</b> (who is speaking; <code>user</code> is you, and the lesson “Autonomy and tools” adds the others) and <b>content</b>. Each call starts fresh: the model remembers nothing between calls.</p>
-<p class="zh" style="margin:0"><b>LLM API</b> 是一个通过网络调用的函数：输入<b>消息</b>，输出文本。四行就够：加载密钥、创建<b>客户端</b>（你与模型的连接）、发送消息、读取回复。每条消息是一个<b>字典</b>（花括号里带标签的值），含<b>角色</b>（谁在说话；<code>user</code> 就是你，其他角色在“自主性与工具”一课出现）和<b>内容</b>。每次调用都从零开始：模型在两次调用之间什么都不记得。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Recap: an LLM call is <b>messages</b> in, text out (<a href="../ai-engineer/01-what-an-llm-call-is.html">Anatomy of an LLM call</a> shows what happens underneath). Four lines do the work: load the key, create a <b>client</b> (your connection to the model), send a list of messages, read the reply. Each call starts fresh: the model remembers nothing between calls, so an agent has to carry its own memory.</p>
+<p class="zh" style="margin:0">回顾：一次 LLM 调用就是输入<b>消息</b>、输出文本（底层发生了什么，见<a href="../ai-engineer/01-what-an-llm-call-is.html">大模型调用解剖</a>）。四行就够：加载密钥、创建<b>客户端</b>（你与模型的连接）、发送消息列表、读取回复。每次调用都从零开始：模型在两次调用之间什么都不记得，所以智能体要自己带着记忆。</p></div>
 <div class="codebox" data-file="first_call.ipynb" data-lang="python"><span class="dim"># once, in a terminal: pip install openai python-dotenv
 import os                                  # built into Python: lets code read settings such as keys
 from dotenv import load_dotenv
