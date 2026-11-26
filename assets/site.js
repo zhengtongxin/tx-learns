@@ -19,13 +19,14 @@
   window.TX={t:t,burst:burst};
   var TYPE={f:{en:'Foundations',zh:'基础'},c:{en:'Concept',zh:'概念'},p:{en:'Project',zh:'项目'}};
 
-  /* Vercel Web Analytics: page views plus two anonymous events (lesson feedback, lesson done). No cookies, no text typed by the reader.
-     It stays off until VA holds the script path the Vercel dashboard shows when Web Analytics is switched on for the project
-     (Project > Analytics > Enable; plain HTML sites get a path like '/abc123/script.js'). Events queue harmlessly until then. */
-  var VA='';
-  window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};
-  function track(n,d){try{window.va('event',{name:n,data:d})}catch(e){}}
-  if(VA&&/^https?:$/.test(location.protocol)&&!/^(localhost|127\.)/.test(location.hostname)){var vs=document.createElement('script');vs.defer=true;vs.src=VA;document.head.appendChild(vs)}
+  /* Reader signals: the site keeps exactly two, both anonymous (a lesson's path and yes/no/done, nothing about the reader):
+     the answer to "Was this lesson clear?" and that a lesson was read to its end. They go to this site's own /api/feedback
+     (api/feedback.js). Nothing is sent from a local copy or from an automated browser, so the agents' checks never count.
+     window.txq keeps what this page raised, for scripts/test-site.mjs. */
+  function track(n,d){try{(window.txq=window.txq||[]).push({name:n,data:d});
+    if(!/^https?:$/.test(location.protocol)||/^(localhost|127\.)/.test(location.hostname)||navigator.webdriver)return;
+    var b=JSON.stringify({event:n==='Lesson done'?'done':'feedback',lesson:d.lesson,answer:d.answer});
+    if(!(navigator.sendBeacon&&navigator.sendBeacon('/api/feedback',b)))fetch('/api/feedback',{method:'POST',body:b,keepalive:true})}catch(e){}}
   document.addEventListener('DOMContentLoaded',function(){
     var C=window.TRACK,here=location.pathname.split('/').pop()||'index.html',d=done();
     if(C){C.all=[];C.topics.forEach(function(w){w.items.forEach(function(it,i){it.w=w.n;it.i=i+1;it.g=C.all.length+1;C.all.push(it)})});C.lessons=C.all.filter(function(x){return x.file});C.total=C.all.length}

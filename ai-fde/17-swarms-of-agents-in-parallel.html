@@ -1,14 +1,14 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Parallel agent swarms | TX Learns</title>
 <meta name="description" content="Work many claims at once with a plain-code dispatcher, a cap on how many agents run together, and retries that never let one bad claim stop the rest."><meta property="og:title" content="Parallel agent swarms | TX Learns"><meta property="og:description" content="Work many claims at once with a plain-code dispatcher, a cap on how many agents run together, and retries that never let one bad claim stop the rest."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-fde/17-swarms-of-agents-in-parallel.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
-<meta name="updated" content="2026-11-25">
-<link rel="canonical" href="https://tx-learns.vercel.app/ai-fde/17-swarms-of-agents-in-parallel.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=5f3cd6d1"><link rel="stylesheet" href="../assets/teach.css?v=284a1f31"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-fde/17-swarms-of-agents-in-parallel.html","url":"https://tx-learns.vercel.app/ai-fde/17-swarms-of-agents-in-parallel.html","name":"Parallel agent swarms","alternateName":"并行智能体群","description":"Work many claims at once with a plain-code dispatcher, a cap on how many agents run together, and retries that never let one bad claim stop the rest.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"Pausing and working in parallel","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI FDE","url":"https://tx-learns.vercel.app/ai-fde/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI FDE","item":"https://tx-learns.vercel.app/ai-fde/index.html"},{"@type":"ListItem","position":3,"name":"Parallel agent swarms","item":"https://tx-learns.vercel.app/ai-fde/17-swarms-of-agents-in-parallel.html"}]}]}</script></head><body>
+<meta name="updated" content="2026-11-26">
+<link rel="canonical" href="https://tx-learns.vercel.app/ai-fde/17-swarms-of-agents-in-parallel.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=5f3cd6d1"><link rel="stylesheet" href="../assets/teach.css?v=284a1f31"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-fde/17-swarms-of-agents-in-parallel.html","url":"https://tx-learns.vercel.app/ai-fde/17-swarms-of-agents-in-parallel.html","name":"Parallel agent swarms","alternateName":"并行智能体群","description":"Work many claims at once with a plain-code dispatcher, a cap on how many agents run together, and retries that never let one bad claim stop the rest.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"Pausing and working in parallel","dateModified":"2026-11-26","isPartOf":{"@type":"CollectionPage","name":"AI FDE","url":"https://tx-learns.vercel.app/ai-fde/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI FDE","item":"https://tx-learns.vercel.app/ai-fde/index.html"},{"@type":"ListItem","position":3,"name":"Parallel agent swarms","item":"https://tx-learns.vercel.app/ai-fde/17-swarms-of-agents-in-parallel.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Pausing and working in parallel · Lesson 2</span><span class="zh">暂停与并行 · 第 2 课</span></span><h1><span class="en">Parallel agent swarms</span><span class="zh">并行智能体群</span></h1><p class="meta"><span class="en">Work many claims at once with a dispatcher, a cap on how many agents run together, and retries · ~25 min · concept with one runnable idea</span><span class="zh">用调度器、并行上限和重试，同时处理很多份理赔 · 约 25 分钟 · 概念课，附一个可动手的做法</span></p></div>
 <h2><span class="en">Step 1 · A plain-code dispatcher</span><span class="zh">第 1 步 · 用普通代码做调度器</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b>
-<ul class="en" style="margin:0"><li>A <b>dispatcher</b> hands each claim to an agent. Its job is fixed, so use plain code, no model: free, instant, the same every time.</li><li><code>asyncio.gather</code> starts one job per claim and waits for all of them, so the slow waits (for the model) overlap instead of queueing.</li><li>Test with a <b>stand-in</b> that just sleeps, not the real agent: it is slow, costs money and can hide your own bugs.</li></ul>
-<ul class="zh" style="margin:0"><li><b>调度器</b>把每份理赔交给一个智能体。它的活是固定的，所以用普通代码，不用模型：免费、即时、每次都一样。</li><li><code>asyncio.gather</code> 给每份理赔开一个任务并等它们全部做完，这样（等模型的）慢等待是重叠的，不是排队。</li><li>用只会睡一会儿的<b>替身</b>来测，而不是真智能体：它又慢又花钱，还可能盖住你自己的 bug。</li></ul></div>
+<ul class="en" style="margin:0"><li>A <b>dispatcher</b> hands each claim to an agent. Its job is fixed, so use plain code, no model: free, instant, the same every time.</li><li><code>async def</code> marks a function that can pause, and <code>await</code> is the spot where it pauses (waiting for the model) and lets the others run. <code>asyncio.run</code> starts the whole thing from normal code.</li><li><code>asyncio.gather</code> starts one job per claim and waits for all of them, so the slow waits (for the model) overlap instead of queueing.</li><li>Test with a <b>stand-in</b> that just sleeps, not the real agent: it is slow, costs money and can hide your own bugs.</li></ul>
+<ul class="zh" style="margin:0"><li><b>调度器</b>把每份理赔交给一个智能体。它的活是固定的，所以用普通代码，不用模型：免费、即时、每次都一样。</li><li><code>async def</code> 标出一个可以暂停的函数，<code>await</code> 就是它暂停（等模型）并让别的任务先跑的地方。<code>asyncio.run</code> 从普通代码里把整件事启动起来。</li><li><code>asyncio.gather</code> 给每份理赔开一个任务并等它们全部做完，这样（等模型的）慢等待是重叠的，不是排队。</li><li>用只会睡一会儿的<b>替身</b>来测，而不是真智能体：它又慢又花钱，还可能盖住你自己的 bug。</li></ul></div>
 <div class="codebox" data-file="dispatcher.py" data-lang="python"><span class="chg">import asyncio, random
 
 async def dispatch(claims, agent):
@@ -45,7 +45,7 @@ async def run_one(claim, agent, on_change, gate):
         return result
 
 async def dispatch(claims, agent, on_change, cap=3):
-    gate = asyncio.Semaphore(max(1, min(25, cap)))
+    gate = asyncio.Semaphore(max(1, cap))    # cap tickets; at least 1, or nothing would ever run
     for c in claims:
         on_change(c["id"], "waiting")
     results = await asyncio.gather(*(run_one(c, agent, on_change, gate) for c in claims))
@@ -56,15 +56,16 @@ async def dispatch(claims, agent, on_change, cap=3):
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b>
 <ul class="en" style="margin:0"><li>A <b>rate limit</b> or <b>timeout</b> means “not now”: wait and ask again. It is the same attempt, not a strike against the claim.</li><li>Any other failure goes back once. A second failure is left for a handler.</li><li>Going parallel cuts the time a lot; the cost per claim stays the same.</li></ul>
 <ul class="zh" style="margin:0"><li><b>速率限制</b>或<b>超时</b>只是“现在不行”：等一会儿再问。这是同一次尝试，不算这份理赔的一次失败。</li><li>其他任何失败退回一次。第二次失败就留给理赔员。</li><li>并行能大幅缩短时间；每份理赔的成本不变。</li></ul></div>
-<div class="codebox" data-file="dispatcher.py" data-lang="python"><span class="dim">class RateLimited(Exception): pass     # map your provider's rate-limit error to this
-class TimedOut(Exception): pass        # and its timeout error to this
+<div class="codebox" data-file="dispatcher.py" data-lang="python"><span class="dim">import openai
+# the "not now" errors of your provider. Add your own to the tuple for tests with a stand-in.
+NOT_NOW = (openai.RateLimitError, openai.APITimeoutError)
 </span><span class="chg">WAIT_SECONDS = 2
 async def attempt(claim, agent):
     failures = 0
     while True:
         try:
             return await agent(claim)
-        except (RateLimited, TimedOut):
+        except NOT_NOW:
             await asyncio.sleep(WAIT_SECONDS)      # same attempt, just later
         except Exception:
             failures += 1
@@ -83,5 +84,5 @@ async def attempt(claim, agent):
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI FDE</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"prev":["09-agent-that-works-the-queue.html"],"tools":{"en":"Python 3","zh":"Python 3"},"know":{"en":"A basic agent loop from Lesson 9.","zh":"前面几课的基本智能体循环。"},"mins":30,"offline":true,"goals":{"en":["Dispatch claims to agents in parallel with plain code","Test the dispatcher with stand-in agents first","Cap concurrency to stay under the provider's rate limit","Retry once, then send a failed claim to a handler without stopping the rest"],"zh":["用普通代码把理赔单并行分发给智能体","先用替身智能体测试分发器","限制并发数，避免触到服务商的速率上限","失败时重试一次再转人工，且不影响其余的单"]}}}</script>
-<script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=37968fc4"></script><script src="../assets/site.js?v=4ca28843"></script><script src="../assets/teach.js?v=ede6f40f"></script>
+<script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=37968fc4"></script><script src="../assets/site.js?v=a53ae783"></script><script src="../assets/teach.js?v=ede6f40f"></script>
 <script src="js/17-swarms-of-agents-in-parallel.js?v=9c61b93e"></script></body></html>

@@ -83,10 +83,12 @@ for (const c of JSON.parse(readFileSync(join(ROOT, 'evals/triage-cases.json'), '
   const rw = reworkFrom('@one\n\n10\t2\ta.html\n1\t1\tb.html\n@two\n\n9\t0\ta.html\n1\t1\tb.html\n@three\n\n5\t5\ta.html\n1\t1\tb.html\n30\t3\tsitemap.xml\n');
   report('daily: a file changed by three merges is rework; hash-only and generated changes are not', rw.prs === 3 && rw.hot.length === 1 && rw.hot[0].file === 'a.html');
   const known = ['t/01-a.html', 't/02-b.html'];
-  const rs = readerSignal({ views: [{ key: '/t/01-a.html', n: 40 }, { key: '/gone.html', n: 3 }, { key: '/', n: 9 }], yes: [{ key: 't/01-a.html', n: 1 }, { key: 't/02-b.html', n: 5 }], no: [{ key: 't/01-a.html', n: 2 }, { key: 't/02-b.html', n: 1 }], done: [] }, known, ['index.html', ...known]);
-  report('daily: a lesson half of at least 3 readers marked unclear is picked, a clear one is not', rs.unclear.length === 1 && rs.unclear[0].file === 't/01-a.html' && rs.missing.length === 1 && rs.missing[0].path === 'gone.html');
-  const few = readerSignal({ views: [], yes: [], no: [{ key: 't/01-a.html', n: 2 }], done: [] }, known, known);
+  const rs = readerSignal({ 't/01-a.html': { yes: 1, no: 2, done: 9 }, 't/02-b.html': { yes: 5, no: 1, done: 3 }, 'x/99-not-a-lesson.html': { yes: 0, no: 50, done: 0 } }, known);
+  report('daily: a lesson half of at least 3 readers marked unclear is picked; a clear one and an unknown path are not', rs.unclear.length === 1 && rs.unclear[0].file === 't/01-a.html' && rs.votes === 9 && rs.done === 12);
+  const few = readerSignal({ 't/01-a.html': { yes: 0, no: 2, done: 0 } }, known);
   report('daily: two answers are too few to call a lesson unclear', few.unclear.length === 0);
+  const junk = readerSignal({ 't/01-a.html': { yes: 'many', no: -4, done: 1.5 } }, known);
+  report('daily: counts that are not plain positive whole numbers are ignored', junk.votes === 0 && junk.done === 0);
   report('daily: rework alone never flags the run, a broken package does, no results is a failure',
     combine({ rework: { ok: false, summary: '' }, drift: { ok: true, summary: '' } }).state === 'ok' && combine({ smoke: { ok: false, summary: '' } }).state === 'flag' && combine({}).state === 'fail');
 }

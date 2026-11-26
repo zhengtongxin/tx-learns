@@ -7,7 +7,7 @@
 //               offers to continue with the next lesson
 //   feedback    "Was this lesson clear?" sends one anonymous event (lesson and answer only), thanks the reader, asks once
 //   pager       a lesson links to the next lesson of its track
-//   quiet       no request leaves the site, and no analytics script loads while it is switched off
+//   quiet       no request leaves the site, and a local or automated visit sends no reader signal
 //   no script   with JavaScript off, the home page lists the tracks in tracks.js order and a track page lists its lessons
 //   no storage  with storage blocked (private windows), pages still open without a script error
 // Usage: node scripts/test-site.mjs      Env: PLAYWRIGHT_DIR = folder where `playwright` is installed (node_modules inside)
@@ -37,7 +37,7 @@ async function test(name, fn, opts = {}) {
   await ctx.close();
 }
 const store = (page, k) => page.evaluate(k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return localStorage.getItem(k); } }, k);
-const events = page => page.evaluate(() => (window.vaq || []).map(a => a[1]));
+const events = page => page.evaluate(() => window.txq || []);
 
 try {
   await test('language', async page => {

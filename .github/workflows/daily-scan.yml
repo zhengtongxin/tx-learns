@@ -1,5 +1,5 @@
 # QA engineer agent, daily scan: the light pass between the weekly quality checks. No AI, a few minutes.
-#   readers  what real readers did (Vercel Web Analytics): lessons marked "not quite clear", addresses that do not exist
+#   readers  what real readers did (the site's own /api/feedback counts): lessons marked "not quite clear", lessons finished
 #   smoke    one project package a day: its code parses, its requirements install, the names it imports still exist
 #   drift    CLAUDE.md and README.md still match the workflows, scripts, tracks and agent ids in the repo
 #   speed    a speed budget on a phone for the home page and two rotating pages
@@ -7,8 +7,7 @@
 # It never opens a PR or an issue and never commits to main. The result goes to signals/daily.json on the data-only
 # `agent-status` branch, where the daily digest picks it up; lessons readers marked unclear become ideas for the
 # improvement engineer agent. Telegram only when the scan itself breaks. It records under the `quality` status id.
-# Reader data needs the VERCEL_TOKEN secret and the VERCEL_PROJECT_ID (and VERCEL_TEAM_ID) repository variables; without
-# them that one check is skipped.
+# Reader data is public counts from the live site, so no step in this workflow needs a secret.
 name: QA engineer (daily scan)
 on:
   schedule:
@@ -74,12 +73,7 @@ jobs:
           node scripts/daily-scan.mjs drift --out daily-out || true
           node scripts/daily-scan.mjs rework --out daily-out || true
           node scripts/daily-scan.mjs speed --out daily-out || true
-      # Before the smoke run on purpose: that step installs third-party packages, and no step after it may hold a secret.
       - name: What readers did
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
-          VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
         run: node scripts/daily-scan.mjs readers --out daily-out || true
       - name: Smoke-run one project package
         env:

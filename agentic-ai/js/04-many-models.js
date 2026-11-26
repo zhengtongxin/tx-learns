@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded',function(){
   {en:'<code>    model="gpt-5.4-nano",</code>',zh:'<code>    model="gpt-5.4-nano",</code>',a:'e',ex:{en:'Edit. This is the third value: use a Groq model name such as "openai/gpt-oss-120b".',zh:'修改。这是第三个值：换成 Groq 的模型名，例如 "openai/gpt-oss-120b"。'},hint:{en:'Which brain answers? A Groq-hosted model has its own name.',zh:'由哪个模型回答？Groq 上的模型有自己的名字。'}},
   {en:'<code>    messages=messages)</code>',zh:'<code>    messages=messages)</code>',a:'k',ex:{en:'Keep. Your messages are unchanged.',zh:'保持。你的 messages 不变。'},hint:{en:'Do your messages depend on the provider?',zh:'你的 messages 和厂商有关吗？'}},
   {en:'<code>answer = response.choices[0].message.content</code>',zh:'<code>answer = response.choices[0].message.content</code>',a:'k',ex:{en:'Keep. The reply comes back in the same shape.',zh:'保持。回复的格式也一样。'},hint:{en:'Does the reply come back in a different shape?',zh:'回复的格式会不一样吗？'}}],
-  [{k:'k',en:'Keep',zh:'保持'},{k:'e',en:'Edit',zh:'修改'}],{en:'Line',zh:'第'});
+  [{k:'k',en:'Keep',zh:'保持'},{k:'e',en:'Edit',zh:'修改'}],{en:'Line',zh:'代码行'});
 
  trace($('t4'),[
   {k:'code',en:'Asks one model to write a hard question',zh:'让一个模型写出一道难题',why:{en:'Everything after this needs a question to send. Its output feeds the next step: prompt chaining.',zh:'后面所有步骤都需要一个问题可发。它的输出喂给下一步：提示链。'}},
