@@ -1,0 +1,46 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Self-hosting and local models | TX Learns</title>
+<meta name="description" content="Run n8n and a model on your own machine, and know what that costs you"><meta property="og:title" content="Self-hosting and local models | TX Learns"><meta property="og:description" content="Run n8n and a model on your own machine, and know what that costs you"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-builder/11-self-hosting-and-local-models.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-26">
+<link rel="canonical" href="https://tx-learns.vercel.app/ai-builder/11-self-hosting-and-local-models.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=6d38d6e9"><link rel="stylesheet" href="../assets/teach.css?v=284a1f31"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-builder/11-self-hosting-and-local-models.html","url":"https://tx-learns.vercel.app/ai-builder/11-self-hosting-and-local-models.html","name":"Self-hosting and local models","alternateName":"自托管与本地模型","description":"Run n8n and a model on your own machine, and know what that costs you","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Many agents and MCP","dateModified":"2026-11-26","isPartOf":{"@type":"CollectionPage","name":"AI Builder","url":"https://tx-learns.vercel.app/ai-builder/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Builder","item":"https://tx-learns.vercel.app/ai-builder/index.html"},{"@type":"ListItem","position":3,"name":"Self-hosting and local models","item":"https://tx-learns.vercel.app/ai-builder/11-self-hosting-and-local-models.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Many agents and MCP · Lesson 1</span><span class="zh">多智能体与 MCP · 第 1 课</span></span><h1><span class="en">Self-hosting and local models</span><span class="zh">自托管与本地模型</span></h1><p class="meta"><span class="en">Run n8n and a model on your own machine, and know what that costs you · ~13 min · hands-on</span><span class="zh">在自己的电脑上跑 n8n 和模型，并知道这要付出什么 · 约 13 分钟 · 动手做</span></p></div>
+
+<h2><span class="en">Step 1 · Why host it yourself</span><span class="zh">第 1 步 · 为什么要自己托管</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">• <b>Privacy:</b> documents never leave your machine.<br>• <b>Cost:</b> no per-run fee for the workflow engine, and a local model has no per-token charge.<br>• <b>Control:</b> you choose versions and limits.</p>
+<p class="zh" style="margin:0 0 8px">• <b>隐私：</b>文档不离开你的电脑。<br>• <b>成本：</b>工作流引擎没有按次费用，本地模型也不按 token 收费。<br>• <b>可控：</b>版本和限制由你决定。</p>
+<p class="en" style="margin:0 0 8px">The price: you do the updates, backups and security, and a model that fits on your laptop is weaker than a frontier one. Choose it for a reason, not for fashion.</p>
+<p class="zh" style="margin:0 0 8px">代价是：更新、备份、安全都由你负责，而且能放进笔记本的模型，比前沿模型弱。要有理由才选它，别图时髦。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Step 2 · Start n8n and a local model</span><span class="zh">第 2 步 · 启动 n8n 和本地模型</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Install <b>Docker</b>, then start n8n with one command. A <b>volume</b> keeps your workflows when the container restarts. Install <b>Ollama</b> to download and run open models, then pull one.</p>
+<p class="zh" style="margin:0 0 8px">安装 <b>Docker</b>，用一条命令启动 n8n。<b>数据卷</b>能让容器重启后工作流还在。安装 <b>Ollama</b> 来下载和运行开源模型，再拉一个模型下来。</p>
+<p class="en" style="margin:0 0 8px">Open <code>http://localhost:5678</code> for n8n. Ollama listens on port 11434.</p>
+<p class="zh" style="margin:0 0 8px">n8n 在 <code>http://localhost:5678</code>，Ollama 监听 11434 端口。</p></div>
+<div class="codebox" data-file="terminal" data-lang="bash"># start n8n, keeping its data in a volume called n8n_data
+docker volume create n8n_data
+docker run -it --rm --name n8n -p 5678:5678 -v n8n_data:/home/node/.n8n docker.n8n.io/n8nio/n8n
+
+# in another terminal: download a small model and try it
+ollama pull llama3.2
+ollama run llama3.2 "Say hello in five words."</div>
+
+<h2><span class="en">Step 3 · Connect them</span><span class="zh">第 3 步 · 把两者连起来</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">In n8n add an <b>Ollama Chat Model</b> to your agent and create the credential with a <b>base URL</b>. Here is the trap: n8n runs inside a container, so <code>localhost</code> means the container itself, not your computer.</p>
+<p class="zh" style="margin:0 0 8px">在 n8n 里给智能体接一个 <b>Ollama Chat Model</b>，创建凭证并填写<b>基础地址</b>。这里有个陷阱：n8n 跑在容器里，<code>localhost</code> 指的是容器自己，不是你的电脑。</p>
+<p class="en" style="margin:0 0 8px">• n8n in Docker, Ollama on your machine: use <code>http://host.docker.internal:11434</code>.<br>• Both on the same machine without Docker: use <code>http://localhost:11434</code>.<br>• Do not expose port 5678 to the internet without HTTPS and a login.</p>
+<p class="zh" style="margin:0 0 8px">• n8n 在 Docker 里、Ollama 在你的电脑上：用 <code>http://host.docker.internal:11434</code>。<br>• 两者都在同一台机器上且不用 Docker：用 <code>http://localhost:11434</code>。<br>• 没有 HTTPS 和登录之前，不要把 5678 端口暴露到互联网。</p></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Start</b> n8n in Docker and run one workflow from the earlier lessons on it.</span><span class="zh"><b>用</b> Docker 启动 n8n，把前面课里的一个工作流在上面跑一遍。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Swap</b> the cloud model for a local one and compare the answers for one task.</span><span class="zh"><b>把</b>云端模型换成本地模型，用同一个任务比较答案。</span></span></label></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Self-host for privacy, cost control or control, not for fashion.<br>• You own updates, backups and security.<br>• Docker plus a volume runs n8n and keeps your data.<br>• Ollama runs open models locally; pull one with a single command.<br>• Inside a container, localhost is the container: use host.docker.internal.</p><p class="zh" style="margin:0">• 为了隐私、成本或可控才自托管，别图时髦。<br>• 更新、备份和安全由你负责。<br>• Docker 加数据卷就能跑 n8n 并保住数据。<br>• Ollama 在本地运行开源模型，一条命令就能拉下来。<br>• 在容器里 localhost 指容器自己，要用 host.docker.internal。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Builder</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"prev":[],"tools":{"en":"A computer that can run Docker and Ollama, with some free disk space","zh":"能运行 Docker 和 Ollama、还有一些空闲磁盘的电脑"},"know":{"en":"Building an n8n agent.","zh":"会做 n8n 智能体。"},"goals":{"en":["Say when self-hosting is worth it","Run n8n in Docker and a model in Ollama","Connect the two without the localhost trap"],"zh":["说出什么时候自托管值得","用 Docker 跑 n8n、用 Ollama 跑模型","把两者连起来，避开 localhost 陷阱"]}}}</script>
+<script src="../tracks.js?v=e02eabf7"></script><script src="lessons.js?v=bc7f7459"></script><script src="../assets/site.js?v=91cb2e5f"></script><script src="../assets/teach.js?v=ede6f40f"></script>
+<script src="js/11-self-hosting-and-local-models.js?v=c8b76183"></script></body></html>

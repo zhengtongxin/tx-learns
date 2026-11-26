@@ -1,0 +1,66 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vector store and ingest | TX Learns</title>
+<meta name="description" content="Store your documents in Supabase and fill it automatically from n8n"><meta property="og:title" content="Vector store and ingest | TX Learns"><meta property="og:description" content="Store your documents in Supabase and fill it automatically from n8n"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-builder/09-vector-store-and-ingest.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-26">
+<link rel="canonical" href="https://tx-learns.vercel.app/ai-builder/09-vector-store-and-ingest.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=6d38d6e9"><link rel="stylesheet" href="../assets/teach.css?v=284a1f31"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-builder/09-vector-store-and-ingest.html","url":"https://tx-learns.vercel.app/ai-builder/09-vector-store-and-ingest.html","name":"Vector store and ingest","alternateName":"向量库与数据入库","description":"Store your documents in Supabase and fill it automatically from n8n","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Voice agents and retrieval","dateModified":"2026-11-26","isPartOf":{"@type":"CollectionPage","name":"AI Builder","url":"https://tx-learns.vercel.app/ai-builder/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Builder","item":"https://tx-learns.vercel.app/ai-builder/index.html"},{"@type":"ListItem","position":3,"name":"Vector store and ingest","item":"https://tx-learns.vercel.app/ai-builder/09-vector-store-and-ingest.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Voice agents and retrieval · Lesson 4</span><span class="zh">语音智能体与检索 · 第 4 课</span></span><h1><span class="en">Vector store and ingest</span><span class="zh">向量库与数据入库</span></h1><p class="meta"><span class="en">Store your documents in Supabase and fill it automatically from n8n · ~14 min · hands-on</span><span class="zh">把文档存进 Supabase，并用 n8n 自动填库 · 约 14 分钟 · 动手做</span></p></div>
+
+<h2><span class="en">Step 1 · Make a store in Supabase</span><span class="zh">第 1 步 · 在 Supabase 建一个库</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><b>Supabase</b> is a hosted Postgres database. Its <b>pgvector</b> extension stores embeddings and finds the closest ones. Create a free project, open the <b>SQL Editor</b> and run the script below once.</p>
+<p class="zh" style="margin:0 0 8px"><b>Supabase</b> 是托管的 Postgres 数据库。它的 <b>pgvector</b> 扩展能存嵌入并找出最近的几条。新建一个免费项目，打开 <b>SQL Editor</b>，把下面的脚本运行一次。</p>
+<p class="en" style="margin:0 0 8px">The number in <code>vector(1536)</code> is the length of each embedding. It must equal what your embedding model produces. Change the model later and you must re-embed everything.</p>
+<p class="zh" style="margin:0 0 8px"><code>vector(1536)</code> 里的数字是每条嵌入的长度，必须和你的嵌入模型产出的长度一致。以后换了模型，所有内容都要重新嵌入。</p></div>
+<div class="codebox" data-file="supabase.sql" data-lang="text">create extension if not exists vector;
+
+create table documents (
+  id bigserial primary key,
+  content text,                 -- the chunk of text
+  metadata jsonb,               -- where it came from, e.g. {"file":"products.txt"}
+  embedding vector(1536)        -- must match your embedding model
+);
+
+create function match_documents (
+  query_embedding vector(1536),
+  match_count int default 3,
+  filter jsonb default '{}'
+) returns table (id bigint, content text, metadata jsonb, similarity float)
+language plpgsql as $$
+#variable_conflict use_column
+begin
+  return query
+  select id, content, metadata,
+         1 - (documents.embedding &lt;=&gt; query_embedding) as similarity
+  from documents
+  where metadata @&gt; filter
+  order by documents.embedding &lt;=&gt; query_embedding
+  limit match_count;
+end;
+$$;</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Ingest with an n8n workflow</span><span class="zh">第 2 步 · 用 n8n 工作流入库</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">• <b>Trigger:</b> a new or changed file, or a button you press.<br>• <b>Extract:</b> get the plain text out of the file.<br>• <b>Split:</b> cut it into chunks, about 500 characters with a small overlap, so a sentence is not cut off from its context.<br>• <b>Embed and store:</b> the <b>Supabase Vector Store</b> node in <b>Insert</b> mode, with an <b>Embeddings</b> model attached.</p>
+<p class="zh" style="margin:0 0 8px">• <b>触发：</b>新文件、文件有改动，或你按一个按钮。<br>• <b>提取：</b>从文件里取出纯文字。<br>• <b>切分：</b>切成约 500 字符的块，留一点重叠，免得一句话和它的上下文被切断。<br>• <b>嵌入并存储：</b>用 <b>Supabase Vector Store</b> 节点的 <b>Insert</b> 模式，并接上一个 <b>Embeddings</b> 模型。</p>
+<p class="en" style="margin:0 0 8px">Add each chunk's source file name as metadata. Later you can show where an answer came from.</p>
+<p class="zh" style="margin:0 0 8px">把每块来自哪个文件写进元数据，以后就能说明答案出自哪里。</p></div>
+<figure class="fig"><svg class="fig-h" viewBox="0 0 720 110" role="img" aria-label="Ingest: trigger, extract, split, embed, insert into Supabase"><defs><marker id="f8" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9a9aa8"/></marker></defs><rect class="box soft" x="2" y="20" width="128" height="70" rx="12"/><text class="en" x="66" y="51">Trigger</text><text class="en sm" x="66" y="72">new file</text><text class="zh" x="66" y="51">触发</text><text class="zh sm" x="66" y="72">新文件</text><path class="lnk" d="M133,55 L145,55" marker-end="url(#f8)"/><rect class="box soft" x="148" y="20" width="128" height="70" rx="12"/><text class="en" x="212" y="51">Extract</text><text class="en sm" x="212" y="72">plain text</text><text class="zh" x="212" y="51">提取</text><text class="zh sm" x="212" y="72">纯文字</text><path class="lnk" d="M279,55 L291,55" marker-end="url(#f8)"/><rect class="box new" x="294" y="20" width="128" height="70" rx="12"/><text class="en" x="358" y="51">Split</text><text class="en sm" x="358" y="72">~500 chars</text><text class="zh" x="358" y="51">切分</text><text class="zh sm" x="358" y="72">约 500 字符</text><path class="lnk" d="M425,55 L437,55" marker-end="url(#f8)"/><rect class="box soft" x="440" y="20" width="128" height="70" rx="12"/><text class="en" x="504" y="51">Embed</text><text class="en sm" x="504" y="72">numbers</text><text class="zh" x="504" y="51">嵌入</text><text class="zh sm" x="504" y="72">变成数字</text><path class="lnk" d="M571,55 L583,55" marker-end="url(#f8)"/><rect class="box soft" x="586" y="20" width="128" height="70" rx="12"/><text class="en" x="650" y="51">Supabase</text><text class="en sm" x="650" y="72">insert rows</text><text class="zh" x="650" y="51">Supabase</text><text class="zh sm" x="650" y="72">写入数据行</text></svg><svg class="fig-v" viewBox="0 0 360 500" aria-hidden="true"><defs><marker id="f8v" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9a9aa8"/></marker></defs><rect class="box soft" x="50" y="10" width="260" height="70" rx="12"/><text class="en" x="180" y="41">Trigger</text><text class="en sm" x="180" y="62">new file</text><text class="zh" x="180" y="41">触发</text><text class="zh sm" x="180" y="62">新文件</text><path class="lnk" d="M180,83 L180,107" marker-end="url(#f8v)"/><rect class="box soft" x="50" y="110" width="260" height="70" rx="12"/><text class="en" x="180" y="141">Extract</text><text class="en sm" x="180" y="162">plain text</text><text class="zh" x="180" y="141">提取</text><text class="zh sm" x="180" y="162">纯文字</text><path class="lnk" d="M180,183 L180,207" marker-end="url(#f8v)"/><rect class="box new" x="50" y="210" width="260" height="70" rx="12"/><text class="en" x="180" y="241">Split</text><text class="en sm" x="180" y="262">~500 chars</text><text class="zh" x="180" y="241">切分</text><text class="zh sm" x="180" y="262">约 500 字符</text><path class="lnk" d="M180,283 L180,307" marker-end="url(#f8v)"/><rect class="box soft" x="50" y="310" width="260" height="70" rx="12"/><text class="en" x="180" y="341">Embed</text><text class="en sm" x="180" y="362">numbers</text><text class="zh" x="180" y="341">嵌入</text><text class="zh sm" x="180" y="362">变成数字</text><path class="lnk" d="M180,383 L180,407" marker-end="url(#f8v)"/><rect class="box soft" x="50" y="410" width="260" height="70" rx="12"/><text class="en" x="180" y="441">Supabase</text><text class="en sm" x="180" y="462">insert rows</text><text class="zh" x="180" y="441">Supabase</text><text class="zh sm" x="180" y="462">写入数据行</text></svg><figcaption><span class="en">Run it once per document. Run it again when the document changes.</span><span class="zh">每份文档跑一次。文档变了再跑一次。</span></figcaption></figure>
+
+<h2><span class="en">Step 3 · Search it back</span><span class="zh">第 3 步 · 再把它搜出来</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A second workflow does the reverse: embed the question, call <code>match_documents</code>, and take the top few chunks. The n8n Supabase node does this in <b>Get many</b> mode, or an agent can use the store as a tool.</p>
+<p class="zh" style="margin:0 0 8px">第二个工作流做相反的事：嵌入问题，调用 <code>match_documents</code>，取最靠前的几块。n8n 的 Supabase 节点用 <b>Get many</b> 模式就能做到，也可以让智能体把这个库当成工具。</p>
+<p class="en" style="margin:0 0 8px">• Use the <b>service role key</b> only inside n8n credentials. Never put it in a web page or share it.<br>• Turn on <b>row level security</b> for tables a browser may reach.</p>
+<p class="zh" style="margin:0 0 8px">• <b>service role 密钥</b>只放在 n8n 的凭证里，不要放进网页，也不要分享。<br>• 浏览器可能碰到的表，要打开<b>行级安全</b>。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Create</b> the Supabase project, run the SQL, and ingest one short text file.</span><span class="zh"><b>建好</b> Supabase 项目，运行 SQL，并入库一份短文本。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Search</b> it with a question in your own words and check the top chunk.</span><span class="zh"><b>用自己的话</b>提一个问题去搜，检查排第一的块。</span></span></label></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Supabase with pgvector stores embeddings and finds the nearest.<br>• The column length must match the embedding model.<br>• Ingest is trigger, extract, split, embed, insert.<br>• Chunk about 500 characters with a little overlap and keep the source name.<br>• Keep the service role key inside n8n only.</p><p class="zh" style="margin:0">• 带 pgvector 的 Supabase 存嵌入，并找出最近的。<br>• 列的长度必须和嵌入模型一致。<br>• 入库就是触发、提取、切分、嵌入、写入。<br>• 切成约 500 字符、略有重叠，并保留来源名。<br>• service role 密钥只放在 n8n 里。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Builder</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"prev":["08-rag-plain-and-agentic.html"],"tools":{"en":"n8n Cloud, a free Supabase project and a model API key for embeddings","zh":"n8n Cloud、一个免费 Supabase 项目，以及做嵌入用的模型 API 密钥"},"know":{"en":"What RAG, chunks and embeddings are.","zh":"知道 RAG、块和嵌入是什么。"},"goals":{"en":["Create a vector table and match function in Supabase","Ingest a document with an n8n workflow","Search the store and read the top chunks"],"zh":["在 Supabase 建向量表和 match 函数","用 n8n 工作流入库一份文档","搜索向量库并读懂排第一的块"]}}}</script>
+<script src="../tracks.js?v=e02eabf7"></script><script src="lessons.js?v=bc7f7459"></script><script src="../assets/site.js?v=91cb2e5f"></script><script src="../assets/teach.js?v=ede6f40f"></script>
+<script src="js/09-vector-store-and-ingest.js?v=3a2af403"></script></body></html>

@@ -1,0 +1,113 @@
+{
+  "name": "Portfolio drift alert",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * 1-5"
+            }
+          ]
+        }
+      },
+      "name": "Every weekday 8am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "t1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Sample holdings. Replace with a Google Sheets or HTTP Request node for real prices.\nreturn [\n  { json: { symbol: \"WORLD-ETF\", qty: 50, price: 120 } },\n  { json: { symbol: \"BOND-FUND\", qty: 200, price: 25 } },\n  { json: { symbol: \"SGX-IDX\", qty: 1000, price: 3.4 } },\n];"
+      },
+      "name": "Holdings",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "id": "holdings"
+    },
+    {
+      "parameters": {
+        "jsCode": "// How far each holding has drifted from its target share.\n// holdings: [{ symbol, qty, price }]   targets: { symbol: share between 0 and 1 }\nfunction drift(holdings, targets) {\n  const total = holdings.reduce((sum, h) => sum + h.qty * h.price, 0);\n  return holdings.map(h => {\n    const weight = total === 0 ? 0 : (h.qty * h.price) / total;\n    const target = targets[h.symbol] ?? 0;\n    return {\n      symbol: h.symbol,\n      weight: round(weight),\n      target,\n      gap: round(weight - target),\n      trade: Math.round((target - weight) * total), // + buy, - sell, in dollars\n    };\n  });\n}\n\nfunction round(x) { return Math.round(x * 1000) / 1000; }\n\n// Only the rows whose gap is bigger than the limit (for example 0.05 = 5 points).\nfunction breaches(rows, limit) {\n  return rows.filter(r => Math.abs(r.gap) > limit);\n}\n\n\nconst targets = { \"WORLD-ETF\": 0.5, \"BOND-FUND\": 0.3, \"SGX-IDX\": 0.2 };\nconst holdings = $input.all().map(i => i.json);\nconst hit = breaches(drift(holdings, targets), 0.05);\n// No breach means no items, so the workflow stops here quietly.\nreturn hit.map(r => ({ json: r }));"
+      },
+      "name": "Drift check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ],
+      "id": "drift-check"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "m1",
+              "name": "message",
+              "value": "={{ $json.symbol }} is at {{ Math.round($json.weight * 1000) / 10 }}% against a target of {{ $json.target * 100 }}%. A trade of about {{ $json.trade }} dollars would bring it back.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        720,
+        0
+      ],
+      "id": "m1"
+    }
+  ],
+  "connections": {
+    "Every weekday 8am": {
+      "main": [
+        [
+          {
+            "node": "Holdings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Holdings": {
+      "main": [
+        [
+          {
+            "node": "Drift check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drift check": {
+      "main": [
+        [
+          {
+            "node": "Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "timezone": "Asia/Singapore",
+    "executionOrder": "v1"
+  }
+}
