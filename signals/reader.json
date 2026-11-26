@@ -1022,109 +1022,109 @@
   },
   "ai-engineer/22-lora-and-quantisation-plain-words.html": {
    "score": 7,
-   "at": "2026-11-25T13:21:57.242Z",
+   "at": "2026-11-26T04:34:38.513Z",
    "confusing": [
     {
-     "where": "Hero and Step 1",
-     "why": "Fine-tuning is never defined; the lesson uses it as if every reader already knows it."
+     "where": "Step 3, Learn",
+     "why": "Loss is used here for the first time and is never explained in this lesson."
     },
     {
-     "where": "Step 3",
-     "why": "Loss is used here, but the lesson only explains training loss in the next lesson."
+     "where": "Now make it yours, task 2",
+     "why": "The task names get_peft_model and print_trainable_parameters, but no code box in the lesson shows either one."
     },
     {
-     "where": "Step 3",
-     "why": "Attention, and the layer names it refers to, are never explained."
+     "where": "Step 2, code box",
+     "why": "bitsandbytes, nf4 and bfloat16 appear with no meaning; only double quant gets a comment."
     }
    ]
   },
   "ai-engineer/23-training-run-what-to-watch.html": {
-   "score": 6,
-   "at": "2026-11-25T13:21:57.242Z",
+   "score": 7,
+   "at": "2026-11-26T04:34:38.513Z",
    "confusing": [
     {
-     "where": "Step 1",
-     "why": "Batch and gradient accumulation are never defined; the code comment about a batch of 32 is the only hint."
+     "where": "Step 1, code box",
+     "why": "wandb is set here, but Weights & Biases is only introduced in Step 3."
     },
     {
-     "where": "Step 1",
-     "why": "The hub is never explained, and why a disconnect matters is left implicit."
+     "where": "Step 1, code box",
+     "why": "Along with the cosine schedule and warmup, these knobs are not in the Learn list, so they are unexplained."
     },
     {
-     "where": "Step 3",
-     "why": "The numbers 64.2, 59.1 and 61.7 have no unit, and evaluate is never explained here."
+     "where": "Step 1, Learn",
+     "why": "The Hugging Face Hub is never named, so the reader has to guess what the hub is."
     }
    ]
   },
   "ai-engineer/24-fine-tuned-price-guesser.html": {
-   "score": 6,
-   "at": "2026-11-25T13:21:57.242Z",
+   "score": 7,
+   "at": "2026-11-26T04:34:38.513Z",
    "confusing": [
     {
-     "where": "Step 3",
-     "why": "The code only reads a price when each whole number is one token. Many tokenizers split 145 into several tokens, so this may read only part of the price. I cannot tell which tokenizer the lesson assume"
+     "where": "Step 3, code box",
+     "why": "It only reads single top tokens. The lesson never says how a price like 145 is split into tokens, so the average may miss most of the number. This is the question I would ask my mentor."
     },
     {
-     "where": "Step 3",
-     "why": "logits, softmax, topk and no_grad are never explained."
+     "where": "Step 3, code box",
+     "why": "AutoTokenizer appears only in a comment; the box has no import for it."
     },
     {
-     "where": "Step 4",
-     "why": "forest and frontier are never defined here, and lesson 21, where they were built, is missing from the prerequisites."
+     "where": "Step 4, code box",
+     "why": "forest (a random forest) is never explained, and the metric is only described as scored in dollars: which error?"
     }
    ]
   },
   "ai-engineer/25-putting-a-model-behind-an-api.html": {
    "score": 6,
-   "at": "2026-11-25T13:21:57.242Z",
+   "at": "2026-11-26T04:34:38.513Z",
    "confusing": [
     {
-     "where": "Step 2",
-     "why": "The @ line is the first decorator I have seen, and it is never explained."
+     "where": "Before you start, and Step 3",
+     "why": "Step 3 needs an OpenAI key and client, but the setup list names only Modal, a Hugging Face token and a T4 GPU."
     },
     {
-     "where": "Step 2",
-     "why": "The figure says the model loads once, but the code loads it inside the function, and the model it uses is never defined here. I cannot tell where loading happens."
+     "where": "Step 2, code box",
+     "why": "The function body is only a comment. The text says load inside the function, but the figure says loads once; the reader cannot tell where model is loaded."
     },
     {
-     "where": "Step 1 quiz",
-     "why": "The timeout is first introduced in Step 2, after the quiz asks about it."
+     "where": "Step 2, deploy line",
+     "why": "Step 1's file is modal_app.py, so the reader does not know which file to deploy."
     }
    ]
   },
   "ai-engineer/26-agents-that-scan-estimate-decide.html": {
    "score": 7,
-   "at": "2026-11-26T02:34:53.396Z",
+   "at": "2026-11-26T04:34:38.513Z",
    "confusing": [
     {
-     "where": "Step 1 · Small agents and an ensemble",
-     "why": "The text lists two agents, but the Step 3 diagram says three opinions and lesson 27 says three guessers. The third is never named."
+     "where": "Step 1, code box",
+     "why": "FrontierAgent needs a filled store, but no step shows how to create it or add the past items."
     },
     {
-     "where": "Step 1 · Small agents and an ensemble",
-     "why": "FrontierAgent takes store and embedder as inputs, but no step says where they come from or that each price is kept as metadata."
+     "where": "Step 1, code box",
+     "why": "positive is never explained (the weights cannot go below zero), and scikit-learn is not named."
     },
     {
-     "where": "Step 1 · Small agents and an ensemble",
-     "why": "There is no fallback or count, so \"About $120 maybe\" crashes here, although lesson 21 warned about exactly that."
+     "where": "Step 2, code box",
+     "why": "The pydantic model and the parse call are used without explaining how the reply is checked against them."
     }
    ]
   },
   "ai-engineer/27-deal-hunting-system.html": {
    "score": 7,
-   "at": "2026-11-26T02:34:53.396Z",
+   "at": "2026-11-26T04:34:38.513Z",
    "confusing": [
     {
-     "where": "Step 2 · A table, then a timer",
-     "why": "screen.py calls system.run() but never imports system, and the box has no launch line. screen.queue().launch() appears only in the Step 3 text."
+     "where": "Step 1, Learn and code box",
+     "why": "The text says run() returns the new opportunities, but the code returns self.opportunities, every opportunity so far."
     },
     {
-     "where": "Step 3 · A live log, handed over safely",
-     "why": "log() is defined, but no agent calls it, so the reader cannot tell where the lines come from."
+     "where": "Step 1, code box",
+     "why": "The reader must write fetch_feed(), but the lesson does not say what the feed is or that a sample file is in the package."
     },
     {
-     "where": "Step 2 · A table, then a timer",
-     "why": "Discount is estimate minus price in dollars, not a percentage, and the text never says so."
+     "where": "Step 3, code box",
+     "why": "No agent in the lesson calls log(), so the reader cannot see where the log lines come from."
     }
    ]
   },
