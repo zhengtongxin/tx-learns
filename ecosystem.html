@@ -268,13 +268,13 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 /* Attention: decisions first, technical reports only when opened. */
 #attention{scroll-margin-top:68px}
 .attention-status{min-height:1.6em}.eco section>p.attention-status{font-size:12.5px;text-wrap:wrap;margin:12px 0;color:var(--mut)}
-.attention-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:14px;list-style:none;padding:0;margin:18px 0 0}
-.attention-card{--case:var(--mut);min-width:0;padding:16px 18px;border:1px solid var(--line);border-left:3px solid var(--case);border-radius:10px;background:var(--glass);scroll-margin-top:90px;overflow-wrap:anywhere}
+.attention-list{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;list-style:none;padding:0;margin:14px auto 0;max-width:760px;text-align:left}
+.attention-card{--case:var(--mut);min-width:0;padding:0;border:1px solid var(--line);border-left:3px solid var(--case);border-radius:10px;background:var(--glass);scroll-margin-top:90px;overflow-wrap:anywhere}
 .attention-card[data-kind=action]{--case:var(--bad)}.attention-card[data-kind=auto]{--case:var(--warn)}.attention-card[data-kind=resolved]{--case:var(--ok)}
 .attention-card:target,.attention-card:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
-.attention-kind{display:inline-block;margin:0 0 9px;padding:3px 8px;border:1px solid color-mix(in srgb,var(--case) 65%,var(--line));border-radius:5px;font-size:11.5px;font-weight:700;color:var(--fg);background:color-mix(in srgb,var(--case) 10%,transparent)}
-.attention-card h3{margin:0;font-size:16px;line-height:1.4;letter-spacing:-.01em}.attention-card .attention-agent{margin:6px 0 12px;font-size:12px;line-height:1.5;color:var(--mut)}
-.attention-card .attention-agent b{font-weight:600;color:var(--fg)}.attention-card .attention-age{display:block;margin-top:3px}
+.attention-kind{flex:none;padding:2px 8px;border:1px solid color-mix(in srgb,var(--case) 65%,var(--line));border-radius:5px;font-size:11.5px;font-weight:700;color:var(--fg);background:color-mix(in srgb,var(--case) 10%,transparent)}.eco .attention-card>details{margin:0;padding:0;border:0;background:none}.attention-card>details>summary{display:flex;align-items:center;gap:10px;min-height:44px;box-sizing:border-box;padding:8px 14px;cursor:pointer;list-style:none}.attention-card>details>summary::-webkit-details-marker{display:none}.attention-card>details>summary::after{content:'+';margin-left:auto;flex:none;color:var(--mut);font-weight:600}.attention-card>details[open]>summary::after{content:'\2212'}.attention-sum{min-width:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:0 8px}.attention-card h3{font-size:14px!important}.attention-agent{margin:0!important;font-size:12px}.attention-body{padding:0 14px 6px}
+.attention-card h3{margin:0;font-size:14px;line-height:1.4;letter-spacing:-.01em}.attention-card .attention-agent{margin:0;font-size:12px;line-height:1.5;color:var(--mut)}
+.attention-card .attention-agent b{font-weight:600;color:var(--fg)}.attention-age{margin-left:4px}
 .attention-facts{display:grid;grid-template-columns:auto minmax(0,1fr);gap:7px 12px;margin:0;font-size:13px;line-height:1.55}.attention-facts dt{color:var(--mut)}.attention-facts dd{min-width:0;margin:0}.attention-facts dd:last-child{font-weight:600}
 .attention-links{display:flex;flex-wrap:wrap;gap:0 16px;margin-top:8px}.attention-links a{display:inline-flex;align-items:center;min-height:44px;font-size:12.5px;font-weight:600;color:var(--acc2);text-underline-offset:3px}
 .eco .attention-history{margin:18px 0 0;padding:0;border:0;border-top:1px solid var(--line);border-radius:0;background:none}.attention-history>summary{min-height:44px;box-sizing:border-box;padding:13px 0;font-size:13px;font-weight:600;cursor:pointer;color:var(--mut)}.attention-history .attention-list{margin-top:4px}
@@ -282,7 +282,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 .eco .attention-report{margin:4px 0 0;padding:0;border:0;border-top:1px solid var(--line);border-radius:0;background:none}.attention-report summary{min-height:44px;padding:11px 0;box-sizing:border-box;font-size:12px;line-height:1.5;font-weight:500;color:var(--mut);cursor:pointer}.attention-report p{margin:0 0 4px;font-size:12.5px;line-height:1.6;white-space:pre-wrap}
 .attention-jump{font-size:12px;line-height:1.5}.tip p.attention-jump{margin:8px 0 0;font-size:12px}.attention-jump a{color:var(--acc2);font-weight:600;text-underline-offset:3px}.olist p.attention-jump{margin:3px 0 4px}.olist .attention-jump a{display:inline-flex;align-items:center;min-height:32px}
 .panel .attention-hint{font:700 9px var(--sans);fill:var(--fg)}
-@media(max-width:560px){.attention-card{padding:14px}.attention-facts{gap:6px 10px}.attention-list{gap:10px}}
+@media(max-width:560px){.attention-card>details>summary{padding:8px 12px}.attention-body{padding:0 12px 6px}.attention-facts{gap:6px 10px}}
 </style><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://tx-learns.vercel.app/ecosystem.html","url":"https://tx-learns.vercel.app/ecosystem.html","name":"How TX Learns works","description":"My learning notes, turned into lessons by AI. They go live after automatic checks and review, get watched afterwards, and a merge that breaks the site is rolled back automatically.","inLanguage":["en","zh"],"isPartOf":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"How TX Learns works","item":"https://tx-learns.vercel.app/ecosystem.html"}]}]}</script></head><body>
 <main class="wide eco">
 <header class="stage compact eco-hero"><div class="orb"></div>
@@ -294,7 +294,6 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 
 <section id="attention" aria-labelledby="attention-heading">
 <h2 id="attention-heading" tabindex="-1"><span class="en">Attention</span><span class="zh">需要关注</span></h2>
-<p><span class="en">What went wrong, who is handling it, and your next step. Automatic fixes and recovery need evidence.</span><span class="zh">出了什么问题、谁在处理、你下一步做什么。自动处理和恢复，都以实际记录为准。</span></p>
 <p class="attention-status" id="attention-status" role="status"><span class="en">Checking issue records…</span><span class="zh">正在核对问题记录…</span></p>
 <ul class="attention-list" id="attention-list"></ul>
 <details class="attention-history" id="attention-history" hidden><summary><span class="en">Earlier reports</span><span class="zh">较早的报告</span></summary><ul class="attention-list" id="attention-history-list"></ul></details>
@@ -433,11 +432,11 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
   function attentionLink(a){var item=ATTENTION_BY_AGENT[a.id],label=item&&ATTENTION_SHORT[item.kind];return label?'<p class="attention-jump"><a href="#'+item.anchor+'" data-attention-jump>'+pairHTML(label)+' · '+t('view issue →','查看问题 →')+'</a></p>':''}
   function attentionCard(item){var a=NAME[item.agent],state=item.state==='run'&&(!item.at||Date.now()-Date.parse(item.at)>=30*60e3)?'unknown':item.state;
     var row=function(en,zh,value){return '<dt>'+t(en,zh)+'</dt><dd>'+pairHTML(value)+'</dd>'},text=item.detail.replace(/\s+/g,' '),excerpt=text.slice(0,150),long=text.length>150;
-    return '<span class="attention-kind">'+pairHTML(ATTENTION_KINDS[item.kind])+'</span><h3>'+pairHTML(item.title)+'</h3><p class="attention-agent"><b>'+t(a.en,a.zh)+'</b> · '+t('Run status: ','运行状态：')+(PILL[state]||PILL.unknown)+'<span class="attention-age">'+(item.at?t('Evidence: ','记录时间：')+'<time datetime="'+item.at+'">'+ago(item.at)+'</time>':t('Evidence time unavailable','记录时间未知'))+'</span></p>'+
-      (text?'<p class="attention-excerpt"><span class="attention-excerpt-label">'+t('Report excerpt (English)','报告摘录（英文）')+'</span><span lang="en">'+esc(excerpt)+(long?'…':'')+'</span>'+(item.detailTruncated?'<span class="attention-truncated">'+t('Excerpt only; open the source for the full report.','仅为摘录；完整报告请打开来源记录。')+'</span>':'')+'</p>':'')+
-      '<dl class="attention-facts">'+row('Impact','影响',item.impact)+row('Owner','处理人',item.owner)+row('Next step','下一步',item.next)+'</dl>'+
-      (item.links.length?'<div class="attention-links">'+item.links.map(function(link){return '<a href="'+esc(link.url)+'" target="_blank" rel="noopener noreferrer">'+pairHTML(link.label)+' <span aria-hidden="true">↗</span></a>'}).join('')+'</div>':'')+
-      (long?'<details class="attention-report"><summary>'+t('More report text (English)','更多报告内容（英文）')+'</summary><p lang="en">'+esc(item.detail)+'</p></details>':'')}
+    var meta='<span class="attention-agent"><b>'+t(a.en,a.zh)+'</b>'+(item.at?'<span class="attention-age"><time datetime="'+item.at+'">'+ago(item.at)+'</time></span>':'')+'</span>';
+    return '<details><summary><span class="attention-kind">'+pairHTML(ATTENTION_SHORT[item.kind]||ATTENTION_KINDS[item.kind])+'</span><span class="attention-sum"><h3>'+pairHTML(item.title)+'</h3>'+meta+'</span></summary><div class="attention-body">'+
+      (text?'<p class="attention-excerpt"><span lang="en">'+esc(excerpt)+(long?'…':'')+'</span></p>':'')+
+      '<dl class="attention-facts">'+row('Impact','影响',item.impact)+'<dt>'+t('Run status','运行状态')+'</dt><dd>'+(PILL[state]||PILL.unknown)+'</dd>'+row('Owner','处理人',item.owner)+row('Next step','下一步',item.next)+'</dl>'+
+      (item.links.length?'<div class="attention-links">'+item.links.map(function(link){return '<a href="'+esc(link.url)+'" target="_blank" rel="noopener noreferrer">'+pairHTML(link.label)+' <span aria-hidden="true">↗</span></a>'}).join('')+'</div>':'')+'</div></details>'}
   function drawAttention(data){var raw=data&&data.attention,available=!!(raw&&Array.isArray(raw.items));if(available)ATTENTION_CACHE=raw;else raw=ATTENTION_CACHE;
     var checked=iso(raw&&raw.checkedAt),stale=!checked||Date.now()-Date.parse(checked)>30*60e3,offline=!!data&&data.connected!==true,complete=available&&raw.complete===true&&!stale&&!offline;
     var seen=Object.create(null),items=[],bad=false;
@@ -461,7 +460,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     var section=document.getElementById('attention'),list=document.getElementById('attention-list'),historyBox=document.getElementById('attention-history'),historyList=document.getElementById('attention-history-list'),active=document.activeElement,focused=section.contains(active),host=focused&&active.closest('.attention-card'),focus=host?{id:host.id,href:active.getAttribute('href'),summary:active.tagName==='SUMMARY'}:null,keep=Object.create(null),anchor=null;
     section.querySelectorAll('.attention-card').forEach(function(el){if(anchor)return;var r=el.getBoundingClientRect();if(r.width&&r.top<innerHeight&&r.bottom>80)anchor={id:el.id,top:r.top}});
     function render(list,entries){entries.forEach(function(item,index){var el=document.getElementById(item.anchor);if(!el||!section.contains(el)){el=document.createElement('li');el.id=item.anchor;el.className='attention-card';el.tabIndex=-1}
-      var html=attentionCard(item),report=el.querySelector('details'),open=!!(report&&report.open);el.dataset.kind=item.kind;
+      var html=attentionCard(item),report=el.querySelector('details'),open=report?report.open:item.kind==='action'&&!item.historical;el.dataset.kind=item.kind;
       if(el._attentionHTML!==html){el._attentionHTML=html;el.innerHTML=html;if(open&&el.querySelector('details'))el.querySelector('details').open=true}
       keep[item.anchor]=true;if(list.children[index]!==el)list.insertBefore(el,list.children[index]||null)})}
     render(list,current);render(historyList,earlier);
@@ -641,7 +640,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
   function hideTip(){clearTimeout(HT);PIN='';TIP.classList.remove('on','pin');document.querySelectorAll('#ov .hot,.nhot').forEach(function(x){x.classList.remove('hot','nhot')})}
   document.addEventListener('click',function(ev){if(PIN&&!TIP.contains(ev.target))hideTip()});
   document.addEventListener('keydown',function(ev){if(ev.key==='Escape')hideTip()});
-  document.addEventListener('click',function(ev){var a=ev.target.closest('a[data-attention-jump]');if(!a)return;var id=a.getAttribute('href').slice(1),card=document.getElementById(id);if(!card)return;ev.preventDefault();hideTip();var historyBox=card.closest('.attention-history');if(historyBox)historyBox.open=true;history.replaceState(null,'','#'+id);card.scrollIntoView({block:'start'});card.focus({preventScroll:true})});
+  document.addEventListener('click',function(ev){var a=ev.target.closest('a[data-attention-jump]');if(!a)return;var id=a.getAttribute('href').slice(1),card=document.getElementById(id);if(!card)return;ev.preventDefault();hideTip();var historyBox=card.closest('.attention-history');if(historyBox)historyBox.open=true;history.replaceState(null,'','#'+id);card.scrollIntoView({block:'start'});var dd=card.querySelector('details');if(dd)dd.open=true;card.focus({preventScroll:true})});
 
   // Knowledge base line comes from the track's lessons.js, loaded after site.js has set up the page (so it stays a home-level page).
   (function loadTopics(){
