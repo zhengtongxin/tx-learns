@@ -676,7 +676,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
   var GI=['🔎','✅','🎯','↩️','👀','🧰','⏱️','📄','🩹','🔑','🌐','🚧','🔔'];
   var GG=[[['Before a merge','合并之前'],[1,2,7,8]],[['What agents may touch','权限边界'],[4,5,6,11]],[['After it goes live','上线之后'],[0,10,3]],[['Secrets and alerts','密钥与通知'],[9,12]]];
   (function(){
-    document.getElementById('guards').innerHTML=GG.map(function(gr){return '<h3 class="sub3 gh">'+t(gr[0][0],gr[0][1])+'</h3><ul class="gl2">'+gr[1].map(function(i){var g=G[i];return '<li class="guard" tabindex="0" role="button" aria-label="'+esc(g[0])+'" data-i="'+i+'"><span class="gi" aria-hidden="true">'+GI[i]+'</span><span class="gt"><b title="'+esc(t(g[0],g[1]))+'">'+t(g[0],g[1])+'</b></span></li>'}).join('')+'</ul>'}).join('');
+    document.getElementById('guards').innerHTML=GG.map(function(gr){return '<h3 class="sub3 gh">'+t(gr[0][0],gr[0][1])+'</h3><ul class="gl2">'+gr[1].map(function(i){var g=G[i];return '<li class="guard" tabindex="0" role="button" aria-label="'+esc(g[0])+'" data-i="'+i+'"><span class="gi" aria-hidden="true">'+GI[i]+'</span><span class="gt"><b>'+t(g[0],g[1])+'</b></span></li>'}).join('')+'</ul>'}).join('');
     document.querySelectorAll('#guards .guard').forEach(function(el){var g=G[el.dataset.i];wireNote(el,t(g[0],g[1]),'<p>'+t(g[5],g[6])+'</p>'+(GL[el.dataset.i]?'<p><a href="'+GL[el.dataset.i]+'">'+t('Open the lesson →','打开这一课 →')+'</a></p>':''),0)})})();
 
   function kg(h,items){return '<div class="kg"><b>'+h+'</b>'+items.join('')+'</div>'}
