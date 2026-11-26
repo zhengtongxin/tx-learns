@@ -7,13 +7,13 @@
 //   node scripts/daily-scan.mjs speed   [--pages a.html,b.html] [--out DIR]   speed budget on a phone with a slowed-down processor
 //                                        (home page plus two rotating pages): bytes, requests, largest paint, layout shift
 //   node scripts/daily-scan.mjs rework  [--hours 48] [--out DIR]   files that several pull requests changed in the last two days
-//   node scripts/daily-scan.mjs readers [--out DIR]   what real readers did (Vercel Web Analytics): lessons marked "not quite clear",
-//                                        lessons opened but rarely finished, addresses that do not exist. Skipped without VERCEL_TOKEN
+//   node scripts/daily-scan.mjs readers [--out DIR]   what real readers did (the site's own /api/feedback counts, no token):
+//                                        lessons readers marked "not quite clear", and how many lessons were read to the end
 //   node scripts/daily-scan.mjs report  [--out DIR]   one summary of the files above; with GITHUB_TOKEN it stores it in
 //                                        signals/daily.json on `agent-status` (the digest reads it) and adds reader ideas to the backlog
 // Each check writes DIR/<name>.json: { ok, summary, problems: [...] }. A check that cannot run says so and is never a failure.
 // Exit code: 0 always for a check that ran (findings are data, not a broken run), 2 when the script itself broke.
-// Env: PLAYWRIGHT_DIR (speed), VERCEL_TOKEN + VERCEL_PROJECT_ID + VERCEL_TEAM_ID (readers), GITHUB_TOKEN + GITHUB_REPOSITORY (report).
+// Env: PLAYWRIGHT_DIR (speed), SITE_URL (readers; default the live site), GITHUB_TOKEN + GITHUB_REPOSITORY (report).
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, appendFileSync, rmSync } from 'node:fs';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
@@ -183,38 +183,27 @@ function rework() {
 }
 
 // ---------------------------------------------------------------- readers: what real readers did
-const VOTES_MIN = 3, UNCLEAR_SHARE = 0.5, VIEWS_MIN = 10;
-// rows from the analytics API: one object per group, the group's value under the dimension's name, plus a count.
-const rowsOf = (json, keys) => (json && Array.isArray(json.data) ? json.data : []).map(r => ({ key: String(keys.map(k => r[k]).find(v => v != null && v !== '') ?? ''), n: +(r.count ?? r.total ?? r.pageviews ?? r.visitors ?? 0) })).filter(r => r.key);
-export function readerSignal({ views = [], yes = [], no = [], done = [] }, known = lessons().map(l => l.path), pages = allPages()) {
-  const lesson = k => k.replace(/^\/+/, ''), tally = rows => Object.fromEntries(rows.map(r => [lesson(r.key), r.n]));
-  const Y = tally(yes), N = tally(no), D = tally(done), V = tally(views.map(r => ({ ...r, key: r.key === '/' ? 'index.html' : r.key })));
-  const unclear = known.map(f => ({ file: f, no: N[f] || 0, votes: (N[f] || 0) + (Y[f] || 0) })).filter(x => x.votes >= VOTES_MIN && x.no / x.votes >= UNCLEAR_SHARE).sort((a, b) => b.no - a.no).slice(0, 5);
-  const unfinished = known.map(f => ({ file: f, views: V[f] || 0, done: D[f] || 0 })).filter(x => x.views >= VIEWS_MIN && x.done / x.views < 0.1).sort((a, b) => b.views - a.views).slice(0, 3);
-  const missing = Object.entries(V).filter(([p]) => /\.html$/.test(p) && !pages.includes(p)).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([path, views]) => ({ path, views }));
-  const total = Object.values(V).reduce((a, b) => a + b, 0), votes = Object.values(Y).reduce((a, b) => a + b, 0) + Object.values(N).reduce((a, b) => a + b, 0);
-  const top = known.map(f => ({ file: f, views: V[f] || 0 })).filter(x => x.views).sort((a, b) => b.views - a.views).slice(0, 3);
-  return { total, votes, top, unclear, unfinished, missing };
+// The site's own counts (api/feedback.js, public): per lesson, the yes/no answers to "Was this lesson clear?" and how often it was finished.
+const VOTES_MIN = 3, UNCLEAR_SHARE = 0.5;
+const SITE = (process.env.SITE_URL || 'https://tx-learns.vercel.app').replace(/\/$/, '');
+export function readerSignal(counts = {}, known = lessons().map(l => l.path)) {
+  const n = (f, k) => { const v = counts[f] && counts[f][k]; return Number.isInteger(v) && v > 0 ? v : 0; };
+  const rows = known.map(f => ({ file: f, yes: n(f, 'yes'), no: n(f, 'no'), done: n(f, 'done') }));
+  const unclear = rows.map(r => ({ file: r.file, no: r.no, votes: r.yes + r.no })).filter(x => x.votes >= VOTES_MIN && x.no / x.votes >= UNCLEAR_SHARE).sort((a, b) => b.no - a.no).slice(0, 5);
+  const finished = rows.filter(r => r.done).sort((a, b) => b.done - a.done).slice(0, 3).map(r => ({ file: r.file, done: r.done }));
+  return { votes: rows.reduce((a, r) => a + r.yes + r.no, 0), done: rows.reduce((a, r) => a + r.done, 0), unclear, finished };
 }
 async function readers() {
-  const { VERCEL_TOKEN: token, VERCEL_PROJECT_ID: projectId, VERCEL_TEAM_ID: teamId } = process.env;
-  if (!token || !projectId) return save('readers', { ok: true, skipped: true, summary: 'Skipped: reader data is not connected (VERCEL_TOKEN and VERCEL_PROJECT_ID).', problems: [] });
-  const q = async (kind, by, days, filter) => {
-    const u = new URL(`https://api.vercel.com/v1/query/web-analytics/${kind}/aggregate`);
-    const p = { projectId, by, limit: 100, since: new Date(Date.now() - days * 864e5).toISOString(), until: new Date().toISOString(), ...(teamId ? { teamId } : {}), ...(filter ? { filter } : {}) };
-    for (const [k, v] of Object.entries(p)) u.searchParams.set(k, v);
-    const r = await fetch(u, { headers: { authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(20000) });
-    if (!r.ok) throw new Error(`${kind} ${r.status} ${(await r.text()).slice(0, 120).replace(/\s+/g, ' ')}`);
-    return r.json();
-  };
   try {
-    const views = rowsOf(await q('visits', 'requestPath', 7), ['requestPath']);
-    const ev = async (name, extra) => rowsOf(await q('events', 'eventData/lesson', 14, `eventName eq '${name}'${extra || ''}`), ['eventData', 'eventData/lesson', 'lesson']).filter(r => /^[\w-]+\/\d\d-[\w-]+\.html$/.test(r.key));
-    const s = readerSignal({ views, yes: await ev('Lesson feedback', " and eventData/answer eq 'yes'"), no: await ev('Lesson feedback', " and eventData/answer eq 'no'"), done: await ev('Lesson done') });
-    const problems = [...s.unclear.map(x => `${x.file}: ${x.no} of ${x.votes} readers said "not quite clear"`), ...s.missing.map(x => `/${x.path}: ${x.views} view(s) of an address that does not exist`)];
-    return save('readers', { ok: !problems.length, ...s, summary: `${s.total} page view(s) in 7 days, ${s.votes} answer(s) to "Was this lesson clear?" in 14 days${s.unclear.length ? `; ${s.unclear.length} lesson(s) marked unclear` : ''}${s.missing.length ? `; ${s.missing.length} missing address(es)` : ''}${s.unfinished.length ? `; opened often but rarely finished: ${s.unfinished.map(x => x.file).join(', ')}` : ''}.`, problems });
+    const r = await fetch(SITE + '/api/feedback', { signal: AbortSignal.timeout(30000) });
+    if (!r.ok) throw new Error('status ' + r.status);
+    const j = await r.json();
+    if (j.ok === false) return save('readers', { ok: true, skipped: true, summary: 'Skipped: the feedback store did not answer.', problems: [] });
+    const s = readerSignal(j.lessons || {});
+    const problems = s.unclear.map(x => `${x.file}: ${x.no} of ${x.votes} readers said "not quite clear"`);
+    return save('readers', { ok: !problems.length, ...s, summary: `In ${j.days || 14} days: ${s.votes} answer(s) to "Was this lesson clear?", ${s.done} lesson(s) read to the end${s.unclear.length ? `; ${s.unclear.length} lesson(s) marked unclear` : ''}.`, problems });
   } catch (e) {
-    return save('readers', { ok: true, skipped: true, summary: `Skipped: the analytics API did not answer (${String(e.message).slice(0, 160)}).`, problems: [] });
+    return save('readers', { ok: true, skipped: true, summary: `Skipped: the site's feedback counts could not be read (${String(e.message).slice(0, 120)}).`, problems: [] });
   }
 }
 
