@@ -59,7 +59,7 @@ export const pendingIdeas = (state = {}) => (state.ideas || []).filter(i => exis
 // Pick the one thing to fix. Returns {kind, key, files, text} or null.
 export async function pick({ ideas = true } = {}) {
   const attempts = (await rawFile('signals/improver.json')).attempts || {};
-  const fresh = k => !attempts[k] || Date.now() - Date.parse(attempts[k]) > COOLDOWN_DAYS * 864e5;
+  const fresh = k => process.env.IMPROVER_NOW === '1' || !attempts[k] || Date.now() - Date.parse(attempts[k]) > COOLDOWN_DAYS * 864e5;
   const issues = await gh('GET', '/issues?state=open&per_page=50').catch(() => []);
   const q = issues.find(i => !i.pull_request && i.title === 'Quality check');
   if (q) {
