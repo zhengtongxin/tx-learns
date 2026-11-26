@@ -1434,105 +1434,105 @@
   },
   "ai-production/19-deploy-scripts-and-clean-teardown.html": {
    "score": 7,
-   "at": "2026-11-25T13:35:25.388Z",
+   "at": "2026-11-26T04:45:57.835Z",
    "confusing": [
     {
-     "where": "Step 1 · Learn",
-     "why": "I do not know what the function resource is. The lesson points back to the last lesson, so a reader who starts here has no way to know."
+     "where": "Step 2, Learn",
+     "why": "The same paragraph says force_destroy = true on the bucket lets Terraform empty it itself. A newcomer cannot tell which way to go, or why dev and test get both."
     },
     {
-     "where": "Step 1 · Learn",
-     "why": "CDN and cache invalidation are never explained, yet the script's last steps depend on them."
+     "where": "Step 2, destroy.sh",
+     "why": "memory_bucket is never introduced. The reader does not know it exists or what it holds."
     },
     {
-     "where": "Step 1 · Learn",
-     "why": "outputs.tf is named without a reason. I cannot tell what it does for the script."
+     "where": "Step 1, Learn",
+     "why": "CDN is not explained until lesson 22, and the create-invalidation line is not explained here either."
     }
    ]
   },
   "ai-production/20-shared-state-and-stale-locks.html": {
-   "score": 6,
-   "at": "2026-11-25T13:35:25.388Z",
+   "score": 8,
+   "at": "2026-11-26T04:45:57.835Z",
    "confusing": [
     {
-     "where": "Step 1 · code",
-     "why": "The Learn text asks for encryption, but the command is only a comment in the code box, so I cannot run it."
+     "where": "Step 1, create-state.sh",
+     "why": "The text says the bucket must be encrypted, but the command exists only as a comment, so the reader cannot do it."
     },
     {
-     "where": "Step 2 · Learn",
-     "why": "The lesson has just built a lock table, so I do not know whether I need it or not."
-    },
-    {
-     "where": "Step 3 · quiz",
-     "why": "The card 'The Lock Info is from last week and the laptop in it was returned' is marked safe to unlock, but its explanation says to check the pipeline runs first. The answer and the explanation disagre"
+     "where": "Step 2, Learn",
+     "why": "The reader does not know which setting applies to their version, or whether they still need the lock table."
     }
    ]
   },
   "ai-production/21-push-to-deploy-github-actions.html": {
    "score": 6,
-   "at": "2026-11-26T03:47:56.147Z",
+   "at": "2026-11-26T04:45:57.835Z",
    "confusing": [
     {
-     "where": "Step 3, trust policy",
-     "why": "The workflow tells the cloud to let the pipeline assume a role named wharf-pipeline, and the trust policy is written for it, but the lesson never says where that role comes from or which permissions i"
+     "where": "Step 3, Learn",
+     "why": "No command or console step creates the OIDC provider or the wharf-pipeline role. The reader can read the policy but cannot make the role the workflow assumes."
     },
     {
-     "where": "Step 3, trust policy",
-     "why": "This account id is a placeholder, and nothing says to replace it. The policy also uses Federated, Principal and sts without saying what they are, and the lesson never says to register GitHub as an ide"
+     "where": "Before you start",
+     "why": "The workflow uses the state bucket and lock table from lesson 20 and the role from Step 3, but neither is listed as set up."
     },
     {
-     "where": "Step 4, manual workflow",
-     "why": "The plan and apply jobs leave out the setup steps and say 'same as deploy.yml'. A reader who copies this file gets a workflow that cannot run, and the approval step is the part they most need to get r"
+     "where": "Step 4, manual.yml",
+     "why": "The plan job is only a comment, so a copy gets no AWS sign-in. workflow_dispatch, choice and needs are not explained."
     }
    ]
   },
   "ai-production/22-dev-test-prod-from-one-push.html": {
-   "score": 5,
-   "at": "2026-11-26T02:14:47.063Z",
+   "score": 7,
+   "at": "2026-11-26T04:45:57.835Z",
    "confusing": [
     {
-     "where": "Step 4, quiz (Why destroy through the pipeline)",
-     "why": "The answer (a hand delete leaves the state thinking the thing still exists) is never taught in the body."
+     "where": "Step 1, checklist",
+     "why": "Four one-time steps with no commands or file names. The bootstrap scripts in the project package are never named in the text."
+    },
+    {
+     "where": "Accept list (Step 3 test)",
+     "why": "The deploy script from lesson 19 prints only site:. No api: address appears anywhere in the lesson."
     },
     {
      "where": "Step 3, Learn",
-     "why": "CloudFront and the AWS command are never named, so a newcomer cannot tell what create-invalidation is."
-    },
-    {
-     "where": "Step 1, checklist box",
-     "why": "CDN appears before Step 3 explains it."
+     "why": "The reader does not know how the twin keeps memory, so this test cannot be run as written."
     }
    ]
   },
   "ai-production/23-agent-runtime-in-minutes.html": {
    "score": 6,
-   "at": "2026-11-25T13:35:25.388Z",
+   "at": "2026-11-26T04:45:57.835Z",
    "confusing": [
     {
-     "where": "Step 2 · Learn",
-     "why": "'Decorator' and the @ line are never explained. Lesson 24 uses them again."
+     "where": "Common errors",
+     "why": "The three services are never named, so the reader does not know which permissions to grant."
     },
     {
-     "where": "Step 2 · Learn",
-     "why": "The code reads payload.get(...), and I do not know that payload is the JSON the invoke command sends."
+     "where": "Step 1, install",
+     "why": "Four packages, and none is explained. Strands appears only as an import, and nothing says which package provides the agentcore command."
     },
     {
-     "where": "Step 3 · figure",
-     "why": "The picture says configure sets up the role, but the text says launch creates the roles."
+     "where": "Step 1, Learn",
+     "why": "The reader is told to do a step with no command or console path."
     }
    ]
   },
   "ai-production/24-tools-and-a-planning-loop.html": {
-   "score": 6,
-   "at": "2026-11-25T13:35:25.388Z",
+   "score": 8,
+   "at": "2026-11-26T04:45:57.835Z",
    "confusing": [
     {
-     "where": "Step 2 · Learn",
-     "why": "pydantic is installed in lesson 23 without any explanation, and here it checks the shape of the plan item. I do not know what it does."
+     "where": "Step 1, output box",
+     "why": "The output answers a question the lesson never asks. The reader only sees 'square yard' in a list."
     },
     {
-     "where": "Step 3 · output",
-     "why": "The sample output has no question above it, so I cannot tell whether the answer is right."
+     "where": "Step 3, figure caption",
+     "why": "Mr Ong is never introduced in this lesson or any earlier one the reader would have read."
+    },
+    {
+     "where": "Step 3, Common errors",
+     "why": "The code keeps one global list, so the reader cannot see how to make it per request."
     }
    ]
   },
