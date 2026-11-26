@@ -1,94 +1,110 @@
 {
  "lessons": {
   "agentic-ai/01-agentic-workflow.html": {
-   "score": 7,
-   "at": "2026-11-26T09:04:49.375Z",
+   "score": 6,
+   "at": "2026-11-26T09:24:00.693Z",
    "confusing": [
     {
-     "where": "Step 3 · Build it, step 4 (Tools)",
-     "why": "Nothing says to create the sheet first, so a newcomer may look for a sheet that does not exist yet."
+     "where": "Step 3, step 3 (Model + memory)",
+     "why": "The OpenAI key is never asked for by name here. The reader only learns it is needed from the intro and from the Marketstack credential in step 4, so the first credential prompt looks unexplained."
     },
     {
-     "where": "Step 3 · Build it, step 4 (Tools)",
-     "why": "EoD (end-of-day, one closing price per day) is explained only in the widget, not in the text."
+     "where": "Step 3, step 4 (Google Sheets)",
+     "why": "It does not say how to make that sheet or that row 1 must hold the headers, so Append row has nothing to pick."
+    },
+    {
+     "where": "Step 3, step 5",
+     "why": "The Logs panel is named but never located, so the reader cannot find the proof the lesson asks for."
     }
    ]
   },
   "agentic-ai/02-agents-and-patterns.html": {
    "score": 7,
-   "at": "2026-11-26T09:04:49.375Z",
+   "at": "2026-11-26T09:24:00.693Z",
    "confusing": [
     {
-     "where": "Step 2 · Workflow vs agent, Learn",
-     "why": "The lesson title of lesson 1 is Agentic workflow, and its n8n workflow contains an AI Agent node. The word means two different things across the two lessons."
+     "where": "Step 2, agent.py box",
+     "why": "Guardrail is used here, in Step 4 and in the takeaways, but never defined. Only the phrase step limit hints at it."
     },
     {
-     "where": "Step 3 · Five workflow patterns, orchestrator-worker bullet",
-     "why": "Orchestrator, worker and the workflow rule all sit in one long bullet among five patterns, which is hard to hold on first read."
+     "where": "Step 3, orchestrator-worker card",
+     "why": "Three dense sentences in one bullet. A newcomer has to hold orchestrator, worker and shape in mind at once."
+    },
+    {
+     "where": "Step 2, Learn",
+     "why": "Workflow gets two meanings in one paragraph, right after the reader has met n8n. Easy to lose the thread."
     }
    ]
   },
   "agentic-ai/03-first-api-calls.html": {
-   "score": 8,
-   "at": "2026-11-26T09:04:49.375Z",
+   "score": 7,
+   "at": "2026-11-26T09:24:00.693Z",
    "confusing": [
     {
-     "where": "Step 2 · Make your first call, Learn",
-     "why": "The client is created as OpenAI() with no key in it, and the text never says it reads OPENAI_API_KEY on its own. The widget says it, but after the reader has already wondered."
+     "where": "Intro (You need...)",
+     "why": "The lesson requires one but never shows how to create or activate it, or how to select it as the notebook kernel. That only appears under If something breaks."
     },
     {
-     "where": "Step 3 · Chain three calls, prompt in the first call",
-     "why": "Kopitiam is never explained, so the prompt looks like a typo to a newcomer outside Singapore."
+     "where": "Step 2, code",
+     "why": "No key is passed in, and the code does not say the key is read from OPENAI_API_KEY on its own. Only the quiz feedback explains it."
+    },
+    {
+     "where": "Step 2, code",
+     "why": "override=True is not explained in the text or the comment."
     }
    ]
   },
   "agentic-ai/04-many-models.html": {
-   "score": 8,
-   "at": "2026-11-26T09:04:49.375Z",
+   "score": 7,
+   "at": "2026-11-26T09:24:00.693Z",
    "confusing": [
     {
-     "where": "Step 2 · One code shape, three swaps, compare.py box",
-     "why": "messages is not defined in this box, and the text does not say it comes from lesson 3."
+     "where": "Step 2, compare.py box",
+     "why": "messages is never created in this box or earlier in this lesson, so the box cannot run as written."
     },
     {
-     "where": "Step 2 · Local models",
-     "why": "A newcomer does not know what the size means for their laptop, or what ollama pull does."
+     "where": "Step 2, Local models",
+     "why": "Hosted is not explained. A reader may think a :cloud model is as private and offline as the others."
+    },
+    {
+     "where": "Step 3, judge box",
+     "why": "It calls itself the whole script but is a fragment with no OpenAI import, so the reader cannot tell what to run."
     }
    ]
   },
   "agentic-ai/05-autonomy-and-tools.html": {
    "score": 7,
-   "at": "2026-11-26T09:04:49.375Z",
+   "at": "2026-11-26T09:24:00.693Z",
    "confusing": [
     {
-     "where": "Step 2 · Context and memory, twin.py box",
-     "why": "client is made in lesson 3. This box does not say so, so the name looks undefined."
+     "where": "Step 3, tool JSON",
+     "why": "required is never explained in this lesson (only in the career project), so the reader does not know what it controls."
     },
     {
-     "where": "Step 3 · A tool, tools.py box",
-     "why": "The wrapper around each tool is not explained, and the JSON types (object, string) are not explained either."
+     "where": "Step 4, loop box",
+     "why": "The ** is used before any explanation of it. The reader has no idea what the stars do."
     },
     {
-     "where": "Step 4 · The loop, handle_tool_calls",
-     "why": "The ** unpacking is explained only in lesson 6, which the reader has not reached yet."
+     "where": "Step 3, tool JSON",
+     "why": "The blank is only marked in the quiz. Read alone, the box looks broken."
     }
    ]
   },
   "agentic-ai/06-career-agent.html": {
-   "score": 7,
-   "at": "2026-11-26T09:04:49.375Z",
+   "score": 6,
+   "at": "2026-11-26T09:24:00.693Z",
    "confusing": [
     {
-     "where": "Step 4 · From a tool name to a real call, then ship, Deploy",
-     "why": "It does not say which folder the project files are in, so the reader cannot find app.py."
+     "where": "Step 1 game vs Step 2 figure and Step 3",
+     "why": "The same visitor name means different messages. The figure and Step 3 have Sam asking for a poem (no tool), but this game has Sam asking the pizza question, which needs the unknown-question tool."
     },
     {
-     "where": "Step 4 · Deploy checklist",
-     "why": "pypdf is never explained, and uv run is not explained either."
+     "where": "Step 4, deploy checklist",
+     "why": "pypdf is never explained, and the lesson never mentions a PDF."
     },
     {
-     "where": "Step 2 · The description is the trigger, JSON box",
-     "why": "The reader is asked to write a second JSON tool they have not seen."
+     "where": "Step 4, deploy checklist",
+     "why": "The body never says where the project files are or which folder (starter or final) to use, so the reader cannot find app.py from here."
     }
    ]
   },
