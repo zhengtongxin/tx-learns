@@ -373,20 +373,20 @@
    ]
   },
   "agentic-ai/17-personal-helper-that-remembers.html": {
-   "score": 5,
-   "at": "2026-11-26T02:13:55.288Z",
+   "score": 6,
+   "at": "2026-11-26T02:30:51.249Z",
    "confusing": [
     {
-     "where": "Step 1 Learn",
-     "why": "MCP is the first time this track uses it and it is never explained. I had to guess it is a standard way to plug in ready-made tools."
+     "where": "Project card, fail list",
+     "why": "open_toolbox never appears in the lesson. The MCP sessions are opened at top level in Step 1."
     },
     {
-     "where": "Step 2 quiz",
-     "why": "The question resumes with [{\"type\": \"approve\"}], but the code resumes with Command(resume={\"decisions\": [...]}). The quiz and the code disagree on the shape."
+     "where": "Step 3, checker",
+     "why": "run_errand is defined but never called. The card expects printed plan, tool-call and 'Kaki says' lines that no box prints."
     },
     {
-     "where": "Step 2 Learn",
-     "why": "One bullet packs the checkpointer, thread_id, InMemorySaver, the saved files and the notes folder into a single run-on. I lost the thread halfway."
+     "where": "Step 1, tools",
+     "why": "AsyncExitStack is never explained. The fix in 'What I got wrong' only makes sense once you know it closes everything in the stack."
     }
    ]
   },
@@ -463,20 +463,20 @@
    ]
   },
   "agentic-ai/09-outreach-email-helper.html": {
-   "score": 8,
-   "at": "2026-11-26T02:00:47.884Z",
+   "score": 6,
+   "at": "2026-11-26T02:30:51.249Z",
    "confusing": [
     {
-     "where": "Step 1",
-     "why": "The code needs MAIL_FROM, MAIL_TO and SMTP_HOST, but the text names only the app password."
+     "where": "Step 1, sending",
+     "why": "The code reads os.environ and never loads .env. The names MAIL_FROM, MAIL_TO, SMTP_HOST and SMTP_APP_PASSWORD appear only in the code."
     },
     {
-     "where": "Step 2",
-     "why": "trace is imported and used but never explained here."
+     "where": "Project card, accept",
+     "why": "A main.py with code, manager and handoff modes is never built. push() prints the body, not the '[nothing sent: no mail or push settings]' line the card expects."
     },
     {
-     "where": "Step 3",
-     "why": "Three names for sending appear in one lesson: send_by_email, send_message and send_email. The Step 3 code also says it replaces main() without saying to drop the asyncio.run line."
+     "where": "Step 2, drafts",
+     "why": "trace is never explained, yet the last 'make it yours' item and the card depend on the traces page."
     }
    ]
   },
@@ -571,38 +571,38 @@
    ]
   },
   "agentic-ai/19-python-vs-ts-frameworks.html": {
-   "score": 6,
-   "at": "2026-11-26T02:13:55.288Z",
+   "score": 7,
+   "at": "2026-11-26T02:30:51.249Z",
    "confusing": [
     {
-     "where": "Step 2, Pydantic AI code box",
-     "why": "This box uses TODOS and CAFE, which are only defined in the Strands box above. Run alone it fails, and the box does not say it continues the one above."
+     "where": "Step 1 quiz and the five steps",
+     "why": "No box has a loop or a maxSteps setting. Step 5 of the five steps is never shown in code."
     },
     {
-     "where": "Step 2, Strands code box",
-     "why": "The Pydantic box says to open the connection with async with. This box never opens its MCPClient, and the lesson does not say whether it must. I could not tell."
+     "where": "Step 2, Strands box",
+     "why": "The lesson says MCP connections must be opened, but the Strands box never opens its client, so I could not tell whether that is needed."
     },
     {
-     "where": "Step 1 quiz",
-     "why": "The quiz asks which step stops a loop running forever, but no step cap is taught in this lesson."
+     "where": "Step 2, Pydantic box",
+     "why": "TODOS and CAFE are defined in the box above. Nothing says so, so the box looks broken on its own."
     }
    ]
   },
   "agentic-ai/20-own-agent-loop.html": {
-   "score": 6,
-   "at": "2026-11-26T02:13:55.288Z",
+   "score": 7,
+   "at": "2026-11-26T02:30:51.249Z",
    "confusing": [
     {
-     "where": "Key point",
-     "why": "start_builder takes a framework name, so each builder might be a different framework. The package note says all five run the same ADK worker by default. I could not tell which the lesson means."
+     "where": "Step 2, coordinator sketch",
+     "why": "Board and Team are empty stubs with '...', and the text never says you write them. The card's live board has no code behind it."
     },
     {
-     "where": "Step 2 coordinator box",
-     "why": "judge and LlmAgent come from the box above, and the lesson does not say so. Run alone, the box fails."
+     "where": "Step 2, inspector",
+     "why": "The inspector loads localhost:8000, but the lesson never says to start a local web server on port 8000."
     },
     {
-     "where": "Step 2 Learn",
-     "why": "Playwright, npx and the MCP timeout are named but not explained. I did not know what starts when the browser opens."
+     "where": "Step 2, inspector",
+     "why": "ADK terms (InMemoryRunner, session, run_async, RunConfig) are used but never explained. Only run_once's docstring says what it does."
     }
    ]
   },
@@ -644,19 +644,19 @@
   },
   "agentic-ai/24-paper-trading.html": {
    "score": 6,
-   "at": "2026-11-26T02:13:55.288Z",
+   "at": "2026-11-26T02:30:51.249Z",
    "confusing": [
     {
-     "where": "Step 2 code (STRATEGY_NOTE)",
-     "why": "The Step 2 prompt tells uncles to update their strategy, but change_strategy is only built in Step 3. Build-before-use is broken."
+     "where": "Project card, Run it",
+     "why": "trading_floor.py ends with asyncio.run(floor()), which takes no name and loops forever. The accounts are saved in accounts.json, not floor.db, so the card and the code disagree."
     },
     {
-     "where": "Step 3 code",
-     "why": "add_trace_processor runs when floor/tracing.py is imported, but no line imports it. Without that, the log stays empty and the lesson never says why."
+     "where": "Step 3, tracing",
+     "why": "add_trace_processor(FloorLog()) runs only when this module is imported, and no step imports it, so no log appears."
     },
     {
-     "where": "Project card (hero)",
-     "why": "The project card promises a read-only API and a dashboard that no step builds. A reader cannot tell if they are required."
+     "where": "Project card, Deliver and accept",
+     "why": "No step builds the API (fastapi, uvicorn) or the dashboard, but the card's checks need both."
     }
    ]
   },
@@ -981,20 +981,20 @@
    ]
   },
   "ai-engineer/20-neural-nets-and-frontier-as-predictors.html": {
-   "score": 6,
-   "at": "2026-11-26T02:13:55.288Z",
+   "score": 7,
+   "at": "2026-11-26T02:30:51.249Z",
    "confusing": [
     {
-     "where": "Step 2 Learn",
-     "why": "One paragraph holds about ten new terms (hashing, tensor, linear layer, activation, ReLU, forward, loss, backward, Adam). I lost track around Adam."
+     "where": "Step 3, frontier model",
+     "why": "This is a placeholder. A newcomer would send it to the API and get a model-not-found error, with no hint of what to type instead."
     },
     {
-     "where": "Step 3 quiz",
-     "why": "The quiz offers 120.0 as the answer, but the regex returns the text 120. The float conversion happens later, in frontier_pricer."
+     "where": "Step 4, fine-tuning",
+     "why": "The lesson writes the JSON Lines file but never starts the fine-tuning job or says where the tuned model's name comes from."
     },
     {
-     "where": "Step 3 code",
-     "why": "The placeholder model name is never explained, and frontier_pricer is never run through evaluate, so I do not know how to score it."
+     "where": "Step 3, quiz on fair comparison",
+     "why": "Cost is never measured or printed in the lesson, so the 'pick by error and cost' answer rests on the feedback alone."
     }
    ]
   },
