@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>How TX Learns works</title>
 <meta name="description" content="My learning notes, turned into lessons by AI. They go live after automatic checks and review, get watched afterwards, and a merge that breaks the site is rolled back automatically."><meta property="og:title" content="How TX Learns works"><meta property="og:description" content="My learning notes, turned into lessons by AI. They go live after automatic checks and review, get watched afterwards, and a merge that breaks the site is rolled back automatically."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ecosystem.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
-<link rel="canonical" href="https://tx-learns.vercel.app/ecosystem.html"><link rel="icon" href="assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><link rel="stylesheet" href="assets/site.css?v=5f3cd6d1">
+<link rel="canonical" href="https://tx-learns.vercel.app/ecosystem.html"><link rel="icon" href="assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><link rel="stylesheet" href="assets/site.css?v=0a21ae25">
 <style>
 :root{--mono:ui-monospace,"SF Mono",SFMono-Regular,"JetBrains Mono",Menlo,Consolas,monospace}
 .eco{--edge:color-mix(in srgb,var(--fg) 46%,transparent);--edge2:color-mix(in srgb,var(--fg) 26%,transparent);--box:color-mix(in srgb,var(--fg) 22%,transparent)}
@@ -267,7 +267,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 #guards .guard b,.bcn b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bcn .bt{min-width:0;flex:1}
 /* Attention: decisions first, technical reports only when opened. */
-#attention{scroll-margin-top:68px}.eco section#attention{margin-top:28px;padding-top:0;border-top:0}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}.eco .attention-box{max-width:760px;margin:0 auto;padding:0;border:0;background:none}.attention-box>summary{display:flex;align-items:center;justify-content:center;gap:10px;min-height:44px;box-sizing:border-box;padding:8px 16px;border:1px solid var(--line);border-radius:999px;background:var(--glass);font-size:14px;font-weight:600;cursor:pointer;list-style:none;width:fit-content;max-width:100%;margin:0 auto}.attention-box>summary::-webkit-details-marker{display:none}.attention-dot{flex:none;width:9px;height:9px;border-radius:50%;background:var(--mut)}.attention-box[data-tone=ok] .attention-dot{background:var(--ok)}.attention-box[data-tone=warn] .attention-dot{background:var(--warn)}.attention-box[data-tone=bad] .attention-dot{background:var(--bad)}.attention-box>summary::after{content:'+';color:var(--mut)}.attention-box[open]>summary::after{content:'\2212'}
+.attention-box{margin-bottom:22px}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}.eco .attention-box{max-width:760px;margin:0 auto;padding:0;border:0;background:none}.attention-box>summary{display:flex;align-items:center;justify-content:center;gap:10px;min-height:44px;box-sizing:border-box;padding:8px 16px;border:1px solid var(--line);border-radius:999px;background:var(--glass);font-size:14px;font-weight:600;cursor:pointer;list-style:none;width:fit-content;max-width:100%;margin:0 auto}.attention-box>summary::-webkit-details-marker{display:none}.attention-dot{flex:none;width:9px;height:9px;border-radius:50%;background:var(--mut)}.attention-box[data-tone=ok] .attention-dot{background:var(--ok)}.attention-box[data-tone=warn] .attention-dot{background:var(--warn)}.attention-box[data-tone=bad] .attention-dot{background:var(--bad)}.attention-box>summary::after{content:'+';color:var(--mut)}.attention-box[open]>summary::after{content:'\2212'}
 .attention-status{min-height:1.6em}.eco section>p.attention-status{font-size:12.5px;text-wrap:wrap;margin:12px 0;color:var(--mut)}
 .attention-list{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;list-style:none;padding:0;margin:14px auto 0;max-width:760px;text-align:left}
 .attention-card{--case:var(--mut);min-width:0;padding:0;border:1px solid var(--line);border-left:3px solid var(--case);border-radius:10px;background:var(--glass);scroll-margin-top:90px;overflow-wrap:anywhere}
@@ -290,17 +290,9 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 <span class="eyebrow"><span class="en">Behind the scenes · system view</span><span class="zh">幕后 · 系统视图</span></span>
 <h1 class="mega"><span class="en">From something I learn to a page you can read.</span><span class="zh">从我学到的东西，到你能读的一页。</span></h1>
 <p class="sub"><span class="en">My notes, turned into lessons by AI, checked before and after going live.</span><span class="zh">我的学习笔记，由 AI 整理成课，上线前后都有检查。</span></p>
-<nav class="pnav" aria-label="On this page"><a href="#attention"><span class="en">Attention</span><span class="zh">需要关注</span></a><a href="#system"><span class="en">System</span><span class="zh">系统</span></a><a href="#guardrails"><span class="en">Guardrails</span><span class="zh">护栏</span></a><a href="#concepts"><span class="en">Ideas</span><span class="zh">概念</span></a><a href="#changes"><span class="en">Changes</span><span class="zh">更新</span></a></nav>
+<nav class="pnav" aria-label="On this page"><a href="#system"><span class="en">System</span><span class="zh">系统</span></a><a href="#guardrails"><span class="en">Guardrails</span><span class="zh">护栏</span></a><a href="#concepts"><span class="en">Ideas</span><span class="zh">概念</span></a><a href="#changes"><span class="en">Changes</span><span class="zh">更新</span></a></nav>
 </header>
 
-<section id="attention" aria-labelledby="attention-heading">
-<h2 id="attention-heading" tabindex="-1" class="sr-only"><span class="en">Attention</span><span class="zh">需要关注</span></h2>
-<details class="attention-box" id="attention-box" data-tone="wait"><summary><span class="attention-dot" aria-hidden="true"></span><span id="attention-headline"><span class="en">Checking issue records…</span><span class="zh">正在核对问题记录…</span></span></summary>
-<p class="attention-status" id="attention-status" role="status"><span class="en">Checking issue records…</span><span class="zh">正在核对问题记录…</span></p>
-<ul class="attention-list" id="attention-list"></ul>
-<details class="attention-history" id="attention-history" hidden><summary><span class="en">Earlier reports</span><span class="zh">较早的报告</span></summary><ul class="attention-list" id="attention-history-list"></ul></details></details>
-<noscript><p><span class="en">Enable JavaScript to load current issue records. No status has been checked yet.</span><span class="zh">启用 JavaScript 后才能加载当前问题记录；目前尚未核对状态。</span></p></noscript>
-</section>
 
 <section id="system">
 <h2><span class="en">How a lesson gets made</span><span class="zh">一课是怎么做出来的</span></h2>
@@ -334,6 +326,11 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 
 <section id="changes">
 <h2><span class="en">What changed</span><span class="zh">最近更新</span></h2>
+<details class="attention-box" id="attention-box" data-tone="wait"><summary><span class="attention-dot" aria-hidden="true"></span><span id="attention-headline"><span class="en">Checking issue records…</span><span class="zh">正在核对问题记录…</span></span></summary>
+<p class="attention-status" id="attention-status" role="status"><span class="en">Checking issue records…</span><span class="zh">正在核对问题记录…</span></p>
+<ul class="attention-list" id="attention-list"></ul>
+<details class="attention-history" id="attention-history" hidden><summary><span class="en">Earlier reports</span><span class="zh">较早的报告</span></summary><ul class="attention-list" id="attention-history-list"></ul></details></details>
+<noscript><p><span class="en">Enable JavaScript to load current issue records. No status has been checked yet.</span><span class="zh">启用 JavaScript 后才能加载当前问题记录；目前尚未核对状态。</span></p></noscript>
 <h3 class="sub3"><span class="en">Health, in three parts</span><span class="zh">健康状况，分三部分</span></h3>
 <ul class="health" id="health"></ul>
 <h3 class="sub3"><span class="en">Latest agent runs</span><span class="zh">agent 最近运行</span></h3>
@@ -341,7 +338,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 </section>
 </main>
 <div class="tip" id="tip" role="tooltip"></div>
-<script src="tracks.js?v=2bfa1a40"></script><script src="assets/build-concepts.js?v=c5ce02a0"></script><script src="assets/site.js?v=7be5d075"></script>
+<script src="tracks.js?v=2bfa1a40"></script><script src="assets/build-concepts.js?v=c5ce02a0"></script><script src="assets/site.js?v=91cb2e5f"></script>
 <script>
 (function(){
   function t(en,zh){return '<span class="en">'+en+'</span><span class="zh">'+zh+'</span>'}
@@ -399,11 +396,11 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
      dzh:'测量多余的数据量、请求和重复工作，再做一项安全的改进。',
      runs:['Every six hours, or manually.','每六小时，或手动运行。'],
      output:['At most one focused PR, with before-and-after measurements.','最多一个小范围改进 PR，附前后测量结果。']},
-    {id:'quality',hue:'#2dd4bf',on:['daily scan · Mondays full check','每天巡检 · 每周一全面检查'],tg:['only when it finds a problem','只在发现问题时'],en:'QA engineer agent',zh:'质量保证工程师 agent',
+    {id:'quality',hue:'#2dd4bf',on:['daily scan · daily full check','每天巡检 · 每天全面检查'],tg:['only when it finds a problem','只在发现问题时'],en:'QA engineer agent',zh:'质量保证工程师 agent',
      den:'Checks accessibility, links, project files and site health without editing the site.',
      dzh:'检查无障碍体验、链接、项目文件和网站状况，不修改网站。',
-     runs:['Daily scans; full checks Mondays; also manually.','每天巡检，周一全面检查，也可手动运行。'],
-     output:['Daily findings in the digest; weekly problems in one issue. Never blocks merges.','日常发现写入摘要，每周检查的问题记入一个 issue；不阻止合并。']},
+     runs:['Daily scans and a daily full check; also manually.','每天巡检并全面检查一遍，也可手动运行。'],
+     output:['Daily findings in the digest; problems in one issue. Never blocks merges.','日常发现写入摘要，全面检查的问题记入一个 issue；不阻止合并。']},
     {id:'recall',hue:'#facc15',on:['Sundays · 9 AM','每周日 · 早 9 点'],tg:['every week: what to review, with questions; monthly: outdated model names','每周：该复习什么，附带问题；每月：过时的模型名'],tga:1,en:'Learning coach agent',zh:'学习教练 agent',
      den:'Brings back lessons for spaced review and checks for outdated model names monthly.',
      dzh:'按间隔安排旧课复习，每月再查一次过时的模型名。',
@@ -460,7 +457,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     var note=document.getElementById('attention-status');if(note.innerHTML!==status)note.innerHTML=status;
     var need=current.filter(function(i){return i.kind!=='resolved'}),box=document.getElementById('attention-box'),tone=data===null?'wait':!available||offline||stale||bad?'unk':need.some(function(i){return i.kind==='action'})?'bad':need.length?'warn':complete?'ok':'unk',head=data===null?t('Checking issue records…','正在核对问题记录…'):!available||offline||stale?t('Issue records unavailable','暂时无法核对问题记录'):need.length?t(need.length+(need.length===1?' item needs attention':' items need attention'),need.length+' 项需要关注'):complete?t('All clear','一切正常'):t('No issues found so far (some records unchecked)','暂无问题（部分记录未核对）'),hl=document.getElementById('attention-headline');if(hl.innerHTML!==head)hl.innerHTML=head;box.dataset.tone=tone==='unk'?'wait':tone;
     // Both lists reuse keyed cards; the history wrapper itself is never replaced during polling.
-    var section=document.getElementById('attention'),list=document.getElementById('attention-list'),historyBox=document.getElementById('attention-history'),historyList=document.getElementById('attention-history-list'),active=document.activeElement,focused=section.contains(active),host=focused&&active.closest('.attention-card'),focus=host?{id:host.id,href:active.getAttribute('href'),summary:active.tagName==='SUMMARY'}:null,keep=Object.create(null),anchor=null;
+    var section=document.getElementById('attention-box'),list=document.getElementById('attention-list'),historyBox=document.getElementById('attention-history'),historyList=document.getElementById('attention-history-list'),active=document.activeElement,focused=section.contains(active),host=focused&&active.closest('.attention-card'),focus=host?{id:host.id,href:active.getAttribute('href'),summary:active.tagName==='SUMMARY'}:null,keep=Object.create(null),anchor=null;
     section.querySelectorAll('.attention-card').forEach(function(el){if(anchor)return;var r=el.getBoundingClientRect();if(r.width&&r.top<innerHeight&&r.bottom>80)anchor={id:el.id,top:r.top}});
     function render(list,entries){entries.forEach(function(item,index){var el=document.getElementById(item.anchor);if(!el||!section.contains(el)){el=document.createElement('li');el.id=item.anchor;el.className='attention-card';el.tabIndex=-1}
       var html=attentionCard(item),report=el.querySelector('details'),open=report?report.open:item.kind==='action'&&!item.historical;el.dataset.kind=item.kind;
@@ -470,8 +467,8 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     section.querySelectorAll('.attention-card').forEach(function(el){if(!keep[el.id])el.remove()});historyBox.hidden=!earlier.length;
     if(focus){var moved=document.getElementById(focus.id);if(moved&&historyList.contains(moved))historyBox.open=true}
     if(anchor){var anchored=document.getElementById(anchor.id),rect=anchored&&anchored.getBoundingClientRect();if(rect&&rect.width){var dy=rect.top-anchor.top;if(Math.abs(dy)>1)window.scrollBy(0,dy)}}
-    if(focus&&document.activeElement!==active){var card=document.getElementById(focus.id),target=card&&(focus.summary?card.querySelector('summary'):focus.href?Array.from(card.querySelectorAll('a')).find(function(a){return a.getAttribute('href')===focus.href}):card);if(!target)target=card||document.getElementById('attention-heading');target.focus({preventScroll:true})}
-    else if(active===historyBox.querySelector('summary')&&historyBox.hidden)document.getElementById('attention-heading').focus({preventScroll:true})}
+    if(focus&&document.activeElement!==active){var card=document.getElementById(focus.id),target=card&&(focus.summary?card.querySelector('summary'):focus.href?Array.from(card.querySelectorAll('a')).find(function(a){return a.getAttribute('href')===focus.href}):card);if(!target)target=card||section.querySelector('summary');if(target)target.focus({preventScroll:true})}
+    else if(active===historyBox.querySelector('summary')&&historyBox.hidden)section.querySelector('summary').focus({preventScroll:true})}
   function V(x){return typeof x==='string'?esc(x):t(esc(x[0]),esc(x[1]))}
   function specOf(a){return '<dl class="spec">'+[[['Runs','触发'],a.runs],[['Output','产出'],a.output]].map(function(r){return '<dt>'+V(r[0])+'</dt><dd>'+V(r[1])+'</dd>'}).join('')+'</dl>'}
   // Desktop popups and phone inline details share the same short explanation. Run summaries stay in the feed.
@@ -517,9 +514,9 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
         '<text class="t" x="'+f(g.l+30)+'" y="'+(g.y-22)+'">'+ts('Telegram → me','Telegram → 我')+'</text>'+
         '<text class="m" x="'+f(g.l+12)+'" y="'+(g.y-5)+'">'+ts('every run','每次运行')+'</text>'+dots(al,g.y-5,0,1)+
         '<text class="m" x="'+f(g.l+12)+'" y="'+(g.y+14)+'">'+ts('on a problem','出问题时')+'</text>'+dots(pr,g.y+27,1)+'</g>'}
-    if(a&&n.short)return '<g class="nd planned" data-agent="'+a.id+'" tabindex="0" role="button" aria-label="'+esc(a.en)+'"><rect x="'+f(g.l)+'" y="'+f(g.t)+'" width="'+g.w+'" height="'+g.h+'" rx="4"/><text class="m" x="'+f(g.x)+'" y="'+(g.y+4)+'" text-anchor="middle">'+ts(n.short[0],n.short[1])+'</text></g>';
+    if(a&&n.short)return '<g class="nd planned" data-agent="'+a.id+'" tabindex="0" role="button"><rect x="'+f(g.l)+'" y="'+f(g.t)+'" width="'+g.w+'" height="'+g.h+'" rx="4"/><text class="m" x="'+f(g.x)+'" y="'+(g.y+4)+'" text-anchor="middle">'+ts(n.short[0],n.short[1])+'</text></g>';
     if(a){var run=st==='run',dx=g.l+16,stl=s?[(PP[st]||['?','?'])[0]+' · '+agoP(atOf(s))[0],(PP[st]||['?','?'])[1]+' · '+agoP(atOf(s))[1]]:LIVE?['no runs yet','还没运行']:['status offline','状态离线'];
-      o='<g class="nd ag'+(run?' run':'')+'" style="--h:'+a.hue+'" data-agent="'+a.id+'" tabindex="0" role="button" aria-label="'+esc(a.en)+'">';
+      o='<g class="nd ag'+(run?' run':'')+'" style="--h:'+a.hue+'" data-agent="'+a.id+'" tabindex="0" role="button">';
       o+='<rect x="'+f(g.l)+'" y="'+f(g.t)+'" width="'+g.w+'" height="'+g.h+'" rx="6"/>';
       var ty=g.y-23,dy=g.y-8;
       o+='<text class="t" x="'+f(g.l+12)+'" y="'+ty+'"'+(a.en.length>20?' style="font-size:11px"':'')+'>'+ts(a.en.replace(/ agent$/,''),a.zh.replace(/ agent$/,''))+'</text>';
@@ -678,7 +675,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
   var GI=['🔎','✅','🎯','↩️','👀','🧰','⏱️','📄','🩹','🔑','🌐','🚧','🔔'];
   var GG=[[['Before a merge','合并之前'],[1,2,7,8]],[['What agents may touch','权限边界'],[4,5,6,11]],[['After it goes live','上线之后'],[0,10,3]],[['Secrets and alerts','密钥与通知'],[9,12]]];
   (function(){
-    document.getElementById('guards').innerHTML=GG.map(function(gr){return '<h3 class="sub3 gh">'+t(gr[0][0],gr[0][1])+'</h3><ul class="gl2">'+gr[1].map(function(i){var g=G[i];return '<li class="guard" tabindex="0" role="button" aria-label="'+esc(g[0])+'" data-i="'+i+'"><span class="gi" aria-hidden="true">'+GI[i]+'</span><span class="gt"><b>'+t(g[0],g[1])+'</b></span></li>'}).join('')+'</ul>'}).join('');
+    document.getElementById('guards').innerHTML=GG.map(function(gr){return '<h3 class="sub3 gh">'+t(gr[0][0],gr[0][1])+'</h3><ul class="gl2" role="group">'+gr[1].map(function(i){var g=G[i];return '<li class="guard" tabindex="0" role="button" data-i="'+i+'"><span class="gi" aria-hidden="true">'+GI[i]+'</span><span class="gt"><b>'+t(g[0],g[1])+'</b></span></li>'}).join('')+'</ul>'}).join('');
     document.querySelectorAll('#guards .guard').forEach(function(el){var g=G[el.dataset.i];wireNote(el,t(g[0],g[1]),'<p>'+t(g[5],g[6])+'</p>'+(GL[el.dataset.i]?'<p><a href="'+GL[el.dataset.i]+'">'+t('Open the lesson →','打开这一课 →')+'</a></p>':''),0)})})();
 
   function kg(h,items){return '<div class="kg"><b>'+h+'</b>'+items.join('')+'</div>'}

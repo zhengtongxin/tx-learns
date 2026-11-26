@@ -7,7 +7,7 @@
 name: QA engineer (quality check)
 on:
   schedule:
-    - cron: '0 2 * * 1'   # Mondays 02:00 UTC
+    - cron: '0 2 * * *'   # every day 02:00 UTC, so a fixed problem closes its issue the next night
   workflow_dispatch:
 permissions:
   contents: read
@@ -116,7 +116,7 @@ jobs:
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           {
-            echo "The weekly quality check found problems. Run: $RUN"; echo
+            echo "The quality check found problems. Run: $RUN"; echo
             for f in a11y links; do [ -f "quality-out/$f.md" ] && { sed 's/^# /### /; s/^## /#### /' "quality-out/$f.md"; echo; }; done
             if [ -f quality-out/code.txt ] && grep -q '^✗' quality-out/code.txt; then
               echo "### Code boxes (a note, not a gate)"; grep '^✗' quality-out/code.txt | head -30 | sed 's/^✗ /- /'; tail -1 quality-out/code.txt; echo

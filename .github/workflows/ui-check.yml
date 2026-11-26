@@ -249,7 +249,9 @@ jobs:
           }
           md += `\nScreenshots and logs: [this run](${process.env.RUN}). _Checked by the TX Learns frontend engineer agent._\n`;
           fs.writeFileSync('/tmp/comment.md', md);
-          const state = r.issues ? 'flag' : vis.length ? 'flag' : 'ok';
+          // Visual notes are suggestions: they stay in the PR comment and the summary line but never turn the agent orange,
+          // so only a real UI problem shows as "flagged" on the Ecosystem page.
+          const state = r.issues ? 'flag' : 'ok';
           const line = r.summary + (vis.length ? ` Claude also noted ${vis.length} visual thing${vis.length > 1 ? 's' : ''} to look at.` : '');
           fs.writeFileSync('/tmp/line.txt', line);
           fs.writeFileSync(process.env.GITHUB_OUTPUT, `state=${state}\nfailed=${r.issues ? 1 : 0}\nvisual=${vis.length}\n`, { flag: 'a' });
