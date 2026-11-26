@@ -1,0 +1,5 @@
+Orchestrator: reads tasks.json, runs the planner, starts one worker per task in a wave.
+Worker:       one task, its own worktree, only its listed files, must pass its test.
+Reviewer:     a sub-agent that reads the combined diff after each wave. Cannot edit.
+You:          approve the plan, merge each wave, decide when to stop.
+Limits:       at most 3 workers at once, a money budget, 2 retries per task.

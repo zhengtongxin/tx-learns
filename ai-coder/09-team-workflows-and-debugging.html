@@ -1,0 +1,46 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Team workflows and debugging | TX Learns</title>
+<meta name="description" content="Use agents inside a team workflow, and give them what they need to debug"><meta property="og:title" content="Team workflows and debugging | TX Learns"><meta property="og:description" content="Use agents inside a team workflow, and give them what they need to debug"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-coder/09-team-workflows-and-debugging.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-26">
+<link rel="canonical" href="https://tx-learns.vercel.app/ai-coder/09-team-workflows-and-debugging.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=6d38d6e9"><link rel="stylesheet" href="../assets/teach.css?v=284a1f31"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-coder/09-team-workflows-and-debugging.html","url":"https://tx-learns.vercel.app/ai-coder/09-team-workflows-and-debugging.html","name":"Team workflows and debugging","alternateName":"团队流程与调试","description":"Use agents inside a team workflow, and give them what they need to debug","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Vibe engineering","dateModified":"2026-11-26","isPartOf":{"@type":"CollectionPage","name":"AI Coder","url":"https://tx-learns.vercel.app/ai-coder/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Coder","item":"https://tx-learns.vercel.app/ai-coder/index.html"},{"@type":"ListItem","position":3,"name":"Team workflows and debugging","item":"https://tx-learns.vercel.app/ai-coder/09-team-workflows-and-debugging.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Vibe engineering · Lesson 4</span><span class="zh">专业级氛围工程 · 第 4 课</span></span><h1><span class="en">Team workflows and debugging</span><span class="zh">团队流程与调试</span></h1><p class="meta"><span class="en">Use agents inside a team workflow, and give them what they need to debug · ~11 min · concepts</span><span class="zh">把智能体放进团队流程，并给它调试所需要的东西 · 约 11 分钟 · 讲概念</span></p></div>
+
+<h2><span class="en">Step 1 · One loop for the team</span><span class="zh">第 1 步 · 团队共用一个循环</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A steady loop works for people and agents alike: <b>explore</b> the code, <b>plan</b>, <b>build</b> in small steps, <b>test</b>, <b>commit</b>, open a pull request. Ask for the plan before the code.</p>
+<p class="zh" style="margin:0 0 8px">有一个稳定的循环，人和智能体都适用：<b>探索</b>代码、<b>计划</b>、分小步<b>构建</b>、<b>测试</b>、<b>提交</b>、发起拉取请求。先要计划，再要代码。</p>
+<p class="en" style="margin:0 0 8px">For a team, share what the agent reads: commit AGENTS.md, custom commands and skills. Everyone gets the same test command, the same rules, the same checks in continuous integration (CI).</p>
+<p class="zh" style="margin:0 0 8px">对团队来说，要共享智能体读的东西：提交 AGENTS.md、自定义命令和技能。每个人都有同一条测试命令、同一套规矩、持续集成（CI）里同样的检查。</p>
+</div>
+
+<h2><span class="en">Step 2 · You still own the review</span><span class="zh">第 2 步 · 审阅仍归你</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Agent-written code is code you are responsible for. Read the diff like a colleague's: does it match the plan, are there tests, any new dependency, any secret, any change you did not ask for?</p>
+<p class="zh" style="margin:0 0 8px">智能体写的代码，你要负责。像读同事的代码那样读它的改动：和计划一致吗？有测试吗？有没有新依赖、有没有密钥、有没有你没要求的改动？</p>
+<p class="en" style="margin:0 0 8px">Keep pull requests <b>small and single-purpose</b>. A 2,000-line agent diff is a review nobody can do, and the checks are only as good as the review behind them.</p>
+<p class="zh" style="margin:0 0 8px">拉取请求要<b>小而专一</b>。2,000 行的智能体改动没人审得了，而检查的可靠程度，取决于背后那次审阅。</p>
+</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Debugging with an agent</span><span class="zh">第 3 步 · 和智能体一起调试</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Give it the <b>evidence</b>: the exact error, how to reproduce it, what you expected. Ask for <b>causes first</b>, then a fix. Best of all, ask it to write a <b>failing test</b> that captures the bug, then make it pass.</p>
+<p class="zh" style="margin:0 0 8px">把<b>证据</b>给它：准确的报错、复现的办法、你期望的结果。先让它<b>找原因</b>，再给修复。最好的做法是让它先写一个能复现这个 bug 的<b>失败测试</b>，再让测试通过。</p>
+<p class="en" style="margin:0 0 8px">Change one thing at a time. If it loops on the same wrong idea after two tries, stop, start a fresh session and give it what you learned.</p>
+<p class="zh" style="margin:0 0 8px">一次只改一件事。如果它在同一个错误想法上试了两次还在打转，就停下来，开一个新会话，把你学到的告诉它。</p>
+</div>
+<div class="codebox" data-file="debug prompt" data-lang="text">Bug: checkout total is 1 cent too high when 3 people share a dish.
+Reproduce: node scripts/try-split.js  (prints 1679, expected 1678)
+Do not change code yet. First list three likely causes, with the file for each.
+Then write a failing test that shows the bug. Only then fix it.</div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Take</b> a real bug of yours and write a debug prompt with error, steps, expectation and "causes first".</span><span class="zh"><b>拿</b>你的一个真实 bug，写一份包含报错、步骤、期望和“先找原因”的调试提示。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check</b> your last agent-written change against the review questions: plan, tests, dependency, secret, extras.</span><span class="zh"><b>检查</b>你最近一次智能体写的改动，对照审阅问题：计划、测试、依赖、密钥、多余改动。</span></span></label></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Explore, plan, build small, test, commit, pull request.<br>• Share AGENTS.md, commands and skills so the team agrees.<br>• You own the review; keep diffs small.<br>• Debug with evidence: error, steps, expectation. Causes first, then a failing test.</p><p class="zh" style="margin:0">• 探索、计划、小步构建、测试、提交、拉取请求。<br>• 共享 AGENTS.md、命令和技能，让团队保持一致。<br>• 审阅归你；改动要小。<br>• 用证据调试：报错、步骤、期望。先找原因，再写失败测试。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Coder</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"prev":["08-mcp-skills-and-plugins.html"],"tools":{"en":"A terminal agent and a git repository","zh":"一个终端智能体和一个 git 仓库"},"know":{"en":"Commands and checkpoints.","zh":"命令和检查点。"},"goals":{"en":["Run one workflow for people and agents","Review an agent diff properly","Debug with evidence and a failing test"],"zh":["让人和智能体共用一套流程","认真审阅智能体的改动","用证据和失败测试来调试"]}}}</script>
+<script src="../tracks.js?v=1d94b57d"></script><script src="lessons.js?v=389b4305"></script><script src="../assets/site.js?v=91cb2e5f"></script><script src="../assets/teach.js?v=ede6f40f"></script>
+<script src="js/09-team-workflows-and-debugging.js?v=204b7f43"></script></body></html>

@@ -1,0 +1,52 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Commands, checkpoints and loops | TX Learns</title>
+<meta name="description" content="Reuse prompts as commands, undo safely with checkpoints, and run the same brief in a loop"><meta property="og:title" content="Commands, checkpoints and loops | TX Learns"><meta property="og:description" content="Reuse prompts as commands, undo safely with checkpoints, and run the same brief in a loop"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-coder/07-commands-checkpoints-loops.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-26">
+<link rel="canonical" href="https://tx-learns.vercel.app/ai-coder/07-commands-checkpoints-loops.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=6d38d6e9"><link rel="stylesheet" href="../assets/teach.css?v=284a1f31"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-coder/07-commands-checkpoints-loops.html","url":"https://tx-learns.vercel.app/ai-coder/07-commands-checkpoints-loops.html","name":"Commands, checkpoints and loops","alternateName":"命令、检查点与循环","description":"Reuse prompts as commands, undo safely with checkpoints, and run the same brief in a loop","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Vibe engineering","dateModified":"2026-11-26","isPartOf":{"@type":"CollectionPage","name":"AI Coder","url":"https://tx-learns.vercel.app/ai-coder/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Coder","item":"https://tx-learns.vercel.app/ai-coder/index.html"},{"@type":"ListItem","position":3,"name":"Commands, checkpoints and loops","item":"https://tx-learns.vercel.app/ai-coder/07-commands-checkpoints-loops.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Vibe engineering · Lesson 2</span><span class="zh">专业级氛围工程 · 第 2 课</span></span><h1><span class="en">Commands, checkpoints and loops</span><span class="zh">命令、检查点与循环</span></h1><p class="meta"><span class="en">Reuse prompts as commands, undo safely with checkpoints, and run the same brief in a loop · ~12 min · hands-on</span><span class="zh">把常用提示词做成命令，用检查点放心撤销，让同一份简报循环运行 · 约 12 分钟 · 动手做</span></p></div>
+
+<h2><span class="en">Step 1 · Commands you reuse</span><span class="zh">第 1 步 · 可复用的命令</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Built-in <b>slash commands</b> manage the session: clear it, compact it to free space, check cost, list what is loaded. Learn the few you use daily.</p>
+<p class="zh" style="margin:0 0 8px">内置的<b>斜杠命令</b>用来管理会话：清空、压缩以腾出空间、查看花费、列出已加载的内容。先学会每天用的那几个。</p>
+<p class="en" style="margin:0 0 8px">You can also save a prompt you repeat as your own command: in Claude Code, a Markdown file in <b>.claude/commands/</b> becomes <b>/name</b>. Commit it, and the whole team gets it.</p>
+<p class="zh" style="margin:0 0 8px">你也可以把重复用的提示词存成自己的命令：在 Claude Code 里，<b>.claude/commands/</b> 下的一个 Markdown 文件就变成 <b>/名字</b>。提交进仓库，整个团队都能用。</p>
+</div>
+<div class="codebox" data-file=".claude/commands/review.md" data-lang="md">Review the changes on this branch against main.
+Check: tests exist for new logic, no secrets, no new dependency without a reason.
+Reply with a short list: must fix, should fix, fine.</div>
+
+<h2><span class="en">Step 2 · Checkpoints: safe to try</span><span class="zh">第 2 步 · 检查点：放心去试</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>checkpoint</b> is a save point you can return to. Some agents save one automatically before each edit, so you can rewind a bad turn. These cover the agent's file edits, not everything a command did to the outside world.</p>
+<p class="zh" style="margin:0 0 8px"><b>检查点</b>是可以回到的存档。有些智能体在每次编辑之前自动存一个，所以坏的一轮可以倒回去。它们只覆盖智能体对文件的编辑，不包括命令对外部世界做的事。</p>
+<p class="en" style="margin:0 0 8px">The reliable checkpoint is <b>git</b>. Commit before a risky task, and again after each step that works. If it goes wrong, you step back one commit and lose nothing.</p>
+<p class="zh" style="margin:0 0 8px">最可靠的检查点是 <b>git</b>。风险大的任务之前先提交一次，每一步成功之后再提交。出了岔子，退一个提交，什么也不损失。</p>
+</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · The loop: same brief, fresh agent</span><span class="zh">第 3 步 · 循环：同一份简报，全新的智能体</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>Ralph loop</b> runs an agent again and again on the same brief file. Each round starts <b>fresh</b>, so context never gets muddy, and the progress lives in files and git, not in memory.</p>
+<p class="zh" style="margin:0 0 8px"><b>Ralph 循环</b>是让智能体对同一份简报文件一遍遍地运行。每一轮都<b>全新开始</b>，上下文不会变乱；进度存在文件和 git 里，不在记忆里。</p>
+<p class="en" style="margin:0 0 8px">It works when the brief has a checklist the agent ticks off and a test that tells it when it is done. Always set a <b>round limit</b> and watch the cost.</p>
+<p class="zh" style="margin:0 0 8px">它适用的前提是：简报里有智能体逐项勾掉的清单，和一个告诉它“做完了”的测试。一定要设<b>轮数上限</b>，并盯着花费。</p>
+</div>
+<div class="codebox" data-file="ralph.sh" data-lang="bash">#!/usr/bin/env bash
+# Same brief, fresh agent each round. Stop when TODO.md has no unchecked boxes.
+for round in 1 2 3 4 5 6 7 8; do
+  claude -p "$(cat PROMPT.md)" --allowedTools "Edit" "Bash(npm test:*)"
+  git add -A &amp;&amp; git commit -m "round $round" --allow-empty -q
+  grep -q '\[ \]' TODO.md || break
+done</div>
+<p class="en">Is this a good job for a loop?</p>
+<p class="zh">这件事适合用循环吗？</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Save</b> one prompt you type often as a custom command and use it twice.</span><span class="zh"><b>保存</b>一个你常打的提示词，做成自定义命令，用两次。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Try</b> a three-round loop on a tiny TODO.md in a scratch repository, and read the git log afterwards.</span><span class="zh"><b>试</b>在一个练习仓库里，用很小的 TODO.md 试一个三轮的循环，结束后读一读 git 日志。</span></span></label></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Slash commands manage the session; your own commands reuse prompts.<br>• Checkpoints cover agent edits; git is the one you trust.<br>• A Ralph loop = same brief, fresh agent, progress in files.<br>• Loops need a checklist, a test, a round limit and a cost watch.</p><p class="zh" style="margin:0">• 斜杠命令管理会话；自己的命令复用提示词。<br>• 检查点覆盖智能体的编辑；你最信得过的是 git。<br>• Ralph 循环 = 同一份简报、全新的智能体、进度放在文件里。<br>• 循环需要清单、测试、轮数上限和花费监控。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Coder</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"prev":["06-terminal-agents.html"],"tools":{"en":"A terminal agent and git","zh":"一个终端智能体和 git"},"know":{"en":"Permission modes and plan first.","zh":"权限模式，以及先计划。"},"goals":{"en":["Save a prompt as a command","Recover with git when a turn goes wrong","Run a capped loop on a checklist"],"zh":["把提示词存成命令","某一轮出错时用 git 恢复","在清单上运行有上限的循环"]}}}</script>
+<script src="../tracks.js?v=1d94b57d"></script><script src="lessons.js?v=389b4305"></script><script src="../assets/site.js?v=91cb2e5f"></script><script src="../assets/teach.js?v=ede6f40f"></script>
+<script src="js/07-commands-checkpoints-loops.js?v=4c098148"></script></body></html>

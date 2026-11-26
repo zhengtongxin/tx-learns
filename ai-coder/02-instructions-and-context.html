@@ -1,0 +1,58 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Instructions and context | TX Learns</title>
+<meta name="description" content="Give an agent a short instruction file and keep its context clean"><meta property="og:title" content="Instructions and context | TX Learns"><meta property="og:description" content="Give an agent a short instruction file and keep its context clean"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-coder/02-instructions-and-context.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-26">
+<link rel="canonical" href="https://tx-learns.vercel.app/ai-coder/02-instructions-and-context.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=6d38d6e9"><link rel="stylesheet" href="../assets/teach.css?v=284a1f31"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-coder/02-instructions-and-context.html","url":"https://tx-learns.vercel.app/ai-coder/02-instructions-and-context.html","name":"Instructions and context","alternateName":"指令与上下文","description":"Give an agent a short instruction file and keep its context clean","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Vibe coding","dateModified":"2026-11-26","isPartOf":{"@type":"CollectionPage","name":"AI Coder","url":"https://tx-learns.vercel.app/ai-coder/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Coder","item":"https://tx-learns.vercel.app/ai-coder/index.html"},{"@type":"ListItem","position":3,"name":"Instructions and context","item":"https://tx-learns.vercel.app/ai-coder/02-instructions-and-context.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Vibe coding · Lesson 2</span><span class="zh">凭感觉编程 · 第 2 课</span></span><h1><span class="en">Instructions and context</span><span class="zh">指令与上下文</span></h1><p class="meta"><span class="en">Give an agent a short instruction file and keep its context clean · ~11 min · concepts</span><span class="zh">给智能体一份简短的说明文件，并保持它的上下文干净 · 约 11 分钟 · 讲概念</span></p></div>
+
+<h2><span class="en">Step 1 · Context is the whole job</span><span class="zh">第 1 步 · 上下文就是全部</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A model only knows what is in its <b>context</b>: your instructions, the files it has read, the conversation so far. The window is limited, and a crowded one makes answers worse, not better.</p>
+<p class="zh" style="margin:0 0 8px">模型只知道它<b>上下文</b>里的东西：你的指令、它读过的文件、到目前为止的对话。窗口是有限的，塞得太满，回答反而更差。</p>
+<p class="en" style="margin:0 0 8px">So most of coding with agents is deciding <b>what the agent sees</b>. A clear request plus the right three files beats a vague request plus the whole repository.</p>
+<p class="zh" style="margin:0 0 8px">所以用智能体写代码，大半功夫在于决定<b>它能看到什么</b>。清楚的请求加上恰当的三个文件，胜过含糊的请求加整个代码库。</p>
+</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · AGENTS.md: the project briefing</span><span class="zh">第 2 步 · AGENTS.md：项目简报</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><b>AGENTS.md</b> is a plain Markdown file in your repository root that coding agents read at the start. Many tools read it, including Codex, Cursor, Copilot and OpenCode. Claude Code reads <b>CLAUDE.md</b>; a one-line file that says to read AGENTS.md keeps both in step.</p>
+<p class="zh" style="margin:0 0 8px"><b>AGENTS.md</b> 是放在仓库根目录的普通 Markdown 文件，编程智能体一开始就会读它。很多工具都读它，包括 Codex、Cursor、Copilot 和 OpenCode。Claude Code 读的是 <b>CLAUDE.md</b>；让它写一行“请读 AGENTS.md”，两边就能保持一致。</p>
+<p class="en" style="margin:0 0 8px">Put in what an agent cannot guess: how to run, test and format; the rules of the codebase; what never to touch. Keep it short. Every line is read on every task.</p>
+<p class="zh" style="margin:0 0 8px">只写智能体猜不到的东西：怎么运行、测试、格式化；这个代码库的规矩；什么绝对不能碰。要短，因为每个任务都会把每一行读一遍。</p>
+</div>
+<div class="codebox" data-file="AGENTS.md" data-lang="md"># Shop booking app
+
+## Commands
+- Install: npm install
+- Test: npm test   (run before you say you are done)
+- Dev server: npm run dev
+
+## Rules
+- Plain JavaScript, no new dependencies without asking.
+- Money is stored as integer cents, never as decimals.
+- Never edit files in generated/ or .env.
+
+## Layout
+- src/ app code, test/ tests, docs/api.md the API we promise</div>
+
+<h2><span class="en">Step 3 · Keeping context clean</span><span class="zh">第 3 步 · 保持上下文干净</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Start a <b>fresh session</b> for each new task, so old talk does not leak in. When a long session gets muddy, summarise what matters and restart rather than push on.</p>
+<p class="zh" style="margin:0 0 8px">每个新任务都开一个<b>新会话</b>，免得旧的闲聊混进来。长会话变得混乱时，先总结要点再重新开始，不要硬撑。</p>
+<p class="en" style="margin:0 0 8px">Point to files by name instead of pasting them. Give the agent a way to check itself, such as the test command. An agent that can run the tests needs far less hand-holding.</p>
+<p class="zh" style="margin:0 0 8px">用文件名指给它看，不要整段粘贴。给它一个自检的办法，比如测试命令。能自己跑测试的智能体，需要的指点少得多。</p>
+<p class="en" style="margin:0 0 8px">Never put secrets in AGENTS.md or in a prompt. Keys live in environment variables the agent is not told.</p>
+<p class="zh" style="margin:0 0 8px">不要把密钥写进 AGENTS.md 或提示词。密钥放在环境变量里，别告诉智能体。</p>
+</div>
+<p class="en">Should it go in AGENTS.md?</p>
+<p class="zh">该不该写进 AGENTS.md？</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Write</b> an AGENTS.md of under 25 lines for a project of yours: commands, three rules and one boundary.</span><span class="zh"><b>写</b>为你的一个项目写一份不超过 25 行的 AGENTS.md：命令、三条规矩、一条边界。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Test</b> it: start a fresh agent session and ask it to describe how to run the tests. Fix what it gets wrong.</span><span class="zh"><b>检验</b>：开一个新的智能体会话，让它说明怎么跑测试。哪里错了就改哪里。</span></span></label></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• The agent knows only what is in its context.<br>• AGENTS.md holds commands, rules and boundaries, in few lines.<br>• Fresh session per task; point to files instead of pasting.<br>• Give the agent a way to check itself.<br>• No secrets in prompts or instruction files.</p><p class="zh" style="margin:0">• 智能体只知道它上下文里有的东西。<br>• AGENTS.md 只放命令、规矩和边界，越短越好。<br>• 每个任务一个新会话；指向文件，不要整段粘贴。<br>• 给智能体一个自检的办法。<br>• 提示词和说明文件里不放密钥。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Coder</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"prev":["01-the-agentic-coding-map.html"],"tools":{"en":"Only a browser to read; any coding agent to try it","zh":"只读的话只需要浏览器；想试的话要任一编程智能体"},"know":{"en":"What an agent is.","zh":"知道什么是智能体。"},"goals":{"en":["Explain why context is limited and why it matters","Write a short AGENTS.md","Keep a session clean"],"zh":["讲清上下文为什么有限、为什么重要","写一份简短的 AGENTS.md","保持会话干净"]}}}</script>
+<script src="../tracks.js?v=1d94b57d"></script><script src="lessons.js?v=389b4305"></script><script src="../assets/site.js?v=91cb2e5f"></script><script src="../assets/teach.js?v=ede6f40f"></script>
+<script src="js/02-instructions-and-context.js?v=a08f99b9"></script></body></html>

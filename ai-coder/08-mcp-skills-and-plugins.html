@@ -1,0 +1,58 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MCP, skills and plugins | TX Learns</title>
+<meta name="description" content="Extend an agent three ways: MCP for access, skills for know-how, plugins to share both"><meta property="og:title" content="MCP, skills and plugins | TX Learns"><meta property="og:description" content="Extend an agent three ways: MCP for access, skills for know-how, plugins to share both"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-coder/08-mcp-skills-and-plugins.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-26">
+<link rel="canonical" href="https://tx-learns.vercel.app/ai-coder/08-mcp-skills-and-plugins.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=6d38d6e9"><link rel="stylesheet" href="../assets/teach.css?v=284a1f31"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-coder/08-mcp-skills-and-plugins.html","url":"https://tx-learns.vercel.app/ai-coder/08-mcp-skills-and-plugins.html","name":"MCP, skills and plugins","alternateName":"MCP、技能与插件","description":"Extend an agent three ways: MCP for access, skills for know-how, plugins to share both","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Vibe engineering","dateModified":"2026-11-26","isPartOf":{"@type":"CollectionPage","name":"AI Coder","url":"https://tx-learns.vercel.app/ai-coder/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Coder","item":"https://tx-learns.vercel.app/ai-coder/index.html"},{"@type":"ListItem","position":3,"name":"MCP, skills and plugins","item":"https://tx-learns.vercel.app/ai-coder/08-mcp-skills-and-plugins.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Vibe engineering · Lesson 3</span><span class="zh">专业级氛围工程 · 第 3 课</span></span><h1><span class="en">MCP, skills and plugins</span><span class="zh">MCP、技能与插件</span></h1><p class="meta"><span class="en">Extend an agent three ways: MCP for access, skills for know-how, plugins to share both · ~11 min · concepts</span><span class="zh">用三种方式扩展智能体：MCP 给“通路”，技能给“门道”，插件把它们打包分享 · 约 11 分钟 · 讲概念</span></p></div>
+
+<h2><span class="en">Step 1 · MCP: access to things</span><span class="zh">第 1 步 · MCP：接通外部世界</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">You met <b>MCP</b> as a standard plug between AI apps and tools. For coding it is how an agent reaches your issue tracker, database, docs or browser. A server is added by a few lines of config.</p>
+<p class="zh" style="margin:0 0 8px">你已经认识了 <b>MCP</b>：AI 应用和工具之间的标准插头。放到编程里，它让智能体够得着你的任务系统、数据库、文档或浏览器。接入一个服务器只需要几行配置。</p>
+<p class="en" style="margin:0 0 8px">Every connected server adds tool descriptions to the context. Add only what the task needs, and give each the least access it requires.</p>
+<p class="zh" style="margin:0 0 8px">每接一个服务器，工具描述就会占用一些上下文。只接任务需要的，并且只给最小权限。</p>
+</div>
+<div class="codebox" data-file=".mcp.json" data-lang="json">{
+  "mcpServers": {
+    "docs": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "./docs"]
+    }
+  }
+}</div>
+
+<h2><span class="en">Step 2 · Skills: know-how on demand</span><span class="zh">第 2 步 · 技能：按需取用的门道</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>skill</b> is a folder with a <b>SKILL.md</b> file: a name, a one-line description of when to use it, and the steps. The agent reads only the descriptions at first and loads the full skill when the task matches, so skills cost little context until needed.</p>
+<p class="zh" style="margin:0 0 8px"><b>技能</b>是一个带 <b>SKILL.md</b> 文件的文件夹：名字、一句“何时使用”的描述，以及步骤。智能体起初只读描述，任务匹配时才加载整个技能，所以在用到之前几乎不占上下文。</p>
+<p class="en" style="margin:0 0 8px">Use a skill for a procedure your team repeats: how you write a release note, how you review a migration.</p>
+<p class="zh" style="margin:0 0 8px">把团队反复要做的流程做成技能：比如怎么写发布说明、怎么审一次数据库迁移。</p>
+</div>
+<div class="codebox" data-file=".claude/skills/release-note/SKILL.md" data-lang="md">---
+name: release-note
+description: Write a release note from merged changes. Use when asked for a changelog or release note.
+---
+1. List the merged changes since the last tag.
+2. Group them: new, fixed, changed.
+3. One plain sentence each, no internal jargon.
+4. End with anything users must do (migrations, new settings).</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Plugins, and which to reach for</span><span class="zh">第 3 步 · 插件，以及该选哪个</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>plugin</b> bundles commands, skills, sub-agents, hooks and MCP servers into one installable package, so a team shares a setup in one step.</p>
+<p class="zh" style="margin:0 0 8px"><b>插件</b>把命令、技能、子智能体、钩子和 MCP 服务器打包成一个可安装的整体，团队一步就能共享同一套配置。</p>
+<p class="en" style="margin:0 0 8px">A rule of thumb: need to <b>reach</b> something? MCP. Need the agent to <b>know how</b>? A skill. Need to <b>share</b> a whole setup? A plugin. Install third-party ones as carefully as any code: read what they do first.</p>
+<p class="zh" style="margin:0 0 8px">经验法则：要<b>够到</b>某个东西？用 MCP。要智能体<b>懂得怎么做</b>？用技能。要<b>分享</b>整套配置？用插件。第三方的插件要像任何代码一样谨慎安装：先看它做什么。</p>
+</div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Write</b> a SKILL.md for one procedure you repeat, then ask the agent to do that job and see if it loads.</span><span class="zh"><b>写</b>为你重复做的一件事写一个 SKILL.md，然后让智能体做这件事，看它会不会加载。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add</b> one read-only MCP server and write the smallest access it needs.</span><span class="zh"><b>接入</b>一个只读的 MCP 服务器，并写下它所需的最小权限。</span></span></label></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• MCP reaches systems; skills carry know-how; plugins bundle and share.<br>• Every MCP server costs context: add only what the task needs.<br>• Skills load on demand, so they are cheap until used.<br>• Treat third-party plugins like any code you would run.</p><p class="zh" style="margin:0">• MCP 够到系统；技能承载门道；插件打包分享。<br>• 每个 MCP 服务器都占上下文：只接任务需要的。<br>• 技能按需加载，没用到时很省。<br>• 第三方插件和任何你要运行的代码一样要谨慎。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Coder</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"prev":["07-commands-checkpoints-loops.html"],"tools":{"en":"A terminal agent; Node.js for the MCP example","zh":"一个终端智能体；MCP 示例需要 Node.js"},"know":{"en":"What MCP is (see the AI Builder track).","zh":"知道 MCP 是什么（见 AI 构建者路线）。"},"goals":{"en":["Choose between MCP, a skill and a plugin","Write a SKILL.md","Keep MCP access small"],"zh":["在 MCP、技能和插件之间做选择","写一个 SKILL.md","让 MCP 的权限保持很小"]}}}</script>
+<script src="../tracks.js?v=1d94b57d"></script><script src="lessons.js?v=389b4305"></script><script src="../assets/site.js?v=91cb2e5f"></script><script src="../assets/teach.js?v=ede6f40f"></script>
+<script src="js/08-mcp-skills-and-plugins.js?v=d683d250"></script></body></html>
