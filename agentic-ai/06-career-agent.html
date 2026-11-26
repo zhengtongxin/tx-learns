@@ -11,9 +11,9 @@
 <p class="zh" style="margin:0">Alex 的职业分身要做两件实事，何时做只靠文字来决定：</p>
 <p class="zh" style="margin:0">• <b>record_user_details</b>：有人想联系，保存他们的邮箱。<br>• <b>record_unknown_question</b>：分身答不上来，记录问题，了解还缺什么资料。</p></div>
 <div class="codebox" data-file="tools.py" data-lang="python"><span class="dim"># push(): Pushover is a service that sends a notification to your phone (set up under Step 4)
-import os, requests
+import os, requests                 # requests: a library for sending web requests (pip install requests)
 from dotenv import load_dotenv
-load_dotenv(override=True)
+load_dotenv(override=True)          # read .env; override=True lets a changed .env win over an old value still in memory
 
 def push(message):
     if not os.getenv("PUSHOVER_USER"):           # no Pushover account yet: print the message instead
@@ -47,7 +47,7 @@ def record_unknown_question(question):
             "name": {"type": "string", "description": "The user's name, if they gave it"}
         },
         </span><span class="chg">"required": ["email"]</span><span class="dim">,
-        "additionalProperties": False
+        "additionalProperties": False     # the model may send only the fields listed above
     }
 }
 # record_unknown_question_json is written the same way: "Always use this tool to record any question that couldn't be answered", required: ["question"]</span></div>
@@ -64,7 +64,8 @@ def record_unknown_question(question):
 <div class="codebox" data-file="chat.py" data-lang="python"><span class="dim">import json
 
 # inside the loop over the model's tool calls (the loop from “Autonomy and tools”):
-</span><span class="chg">ALLOWED = {"record_user_details": record_user_details, "record_unknown_question": record_unknown_question}
+</span><span class="chg"># call is one entry of response.choices[0].message.tool_calls: it has the tool name and its arguments as text
+ALLOWED = {"record_user_details": record_user_details, "record_unknown_question": record_unknown_question}
 
 tool = ALLOWED.get(call.function.name)                      # text name -> function, or None
 arguments = json.loads(call.function.arguments)             # e.g. {"email": "mei@example.com"}
