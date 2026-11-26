@@ -1537,98 +1537,98 @@
    ]
   },
   "ai-production/25-planning-agent-that-checks-itself.html": {
-   "score": 6,
-   "at": "2026-11-26T02:14:47.063Z",
+   "score": 7,
+   "at": "2026-11-26T04:48:58.179Z",
    "confusing": [
     {
-     "where": "Step 1, Learn",
-     "why": "The code hardcodes ap-southeast-1 and never says where the agent's region is set, so the reader cannot check the rule."
+     "where": "Step 3 · Learn",
+     "why": "The lesson says to invoke the deployed agent but gives no command, no payload and no file name. The example file examples/derangements.py is never mentioned in the body."
     },
     {
-     "where": "Step 2, Learn",
-     "why": "System prompt is never explained."
+     "where": "Step 1 · code box",
+     "why": "The sandbox call takes a language and a clearContext flag, and the lesson never says what clearContext does or what the stream events hold (event[\"result\"])."
     },
     {
-     "where": "Step 2, figure (中文 label)",
-     "why": "The label reads as isolated from the dock. The English means sealed off, which is 封闭 or 与外界隔绝."
+     "where": "Step 3 · Learn",
+     "why": "Cleanup is the step that stops charges, but the body gives no commands. The package has scripts/cleanup-check.sh, which the body never mentions."
     }
    ]
   },
   "ai-fde/01-what-a-forward-deployed-engineer-does.html": {
    "score": 8,
-   "at": "2026-11-25T13:38:29.999Z",
+   "at": "2026-11-26T04:48:58.179Z",
    "confusing": [
     {
-     "where": "Step 1",
-     "why": "I did not know a claim means an insurance claim, or what a policy and a payout are."
+     "where": "Step 1 · Learn",
+     "why": "The word claims is never said to mean insurance claims. A newcomer can read it as a claim about AI, and payout and policy later are also unexplained."
     }
    ]
   },
   "ai-fde/02-plan-then-build-with-a-coding-agent.html": {
    "score": 7,
-   "at": "2026-11-25T13:38:29.999Z",
+   "at": "2026-11-26T04:48:58.179Z",
    "confusing": [
     {
-     "where": "Step 1",
-     "why": "The figure says standing instruction, but the text never says how the agent gets that file each session. Do I paste it in, or is it saved somewhere?"
+     "where": "Step 1 · Learn",
+     "why": "Session is not explained, and the lesson never says where the prompt is typed or how the agent is pointed at the docs folder. A newcomer can follow the idea but not the first real action."
     },
     {
-     "where": "Step 1",
-     "why": "Session is never defined."
+     "where": "Step 2 · Learn",
+     "why": "Phase is used in the plan example (Phase 1, Phase 2) without a line saying what one phase is."
     }
    ]
   },
   "ai-fde/03-claims-desk-pilot.html": {
-   "score": 7,
-   "at": "2026-11-25T13:38:29.999Z",
+   "score": 6,
+   "at": "2026-11-26T04:48:58.179Z",
    "confusing": [
     {
-     "where": "Step 3 code",
-     "why": "Lesson 04 gives this same file payouts and difficulty tags and scores payouts too. This lesson counts actions only, so I cannot tell which shape is real."
+     "where": "Step 3 · Learn",
+     "why": "The reader is a newcomer who has never called a model. The lesson does not say where to get a key, how to set an environment variable on their computer, or which folder to run python run_pilot.py from"
     },
     {
-     "where": "Step 3",
-     "why": "The lesson calls this an agent, but it is a single call. I could not tell what makes it an agent."
+     "where": "Step 1 · Learn",
+     "why": "It says to invent 25 claims, but the package already ships them. The shape of policies.json and of answer_key is never shown, so a reader writing their own does not know the format."
     },
     {
-     "where": "Step 2 code",
-     "why": "Step 2 reads the action and payout fields, but the reply's shape (action, payout, reason) is only introduced in Step 3."
+     "where": "Step 3 · Learn",
+     "why": "Tools are used without explanation, and the code (client = OpenAI(), response_format, reply.choices[0].message.content) is not explained line by line."
     }
    ]
   },
   "ai-fde/04-frontier-models-on-real-claims.html": {
    "score": 6,
-   "at": "2026-11-25T13:38:29.999Z",
+   "at": "2026-11-26T04:48:58.179Z",
    "confusing": [
     {
-     "where": "Step 2 code",
-     "why": "Difficulty tags appear here, but lesson 03 had none, and this lesson never says where they came from."
+     "where": "Step 2 · code box",
+     "why": "Lesson 03 uses the key as a plain action string. Here want[\"action\"], want[\"payout\"] and want[\"difficulty\"] read from the key, which is a dict. A reader who reuses the pilot's key gets a TypeError, an"
     },
     {
-     "where": "Step 3 output",
-     "why": "Step 2 asks for accuracy by difficulty, but the printed result shows only totals. I never see the by-difficulty table."
+     "where": "Step 3 · code box",
+     "why": "This calls the gateway two times per model, so 150 paid calls for three models. The lesson never says it will cost money or take a while."
     },
     {
-     "where": "Step 2",
-     "why": "This rule also checks the payout within S$1. It is stricter than lesson 03's action-only count, and the change is not noted."
+     "where": "Step 2 · Learn",
+     "why": "The scoring code reads difficulty from the answer key, but no step tells the reader where the difficulty labels come from."
     }
    ]
   },
   "ai-fde/05-open-models-local-and-token-cost.html": {
-   "score": 6,
-   "at": "2026-11-25T13:38:29.999Z",
+   "score": 5,
+   "at": "2026-11-26T04:48:58.179Z",
    "confusing": [
     {
-     "where": "Before you start",
-     "why": "This says qwen2.5:3b, but the code runs llama3.2 after ollama pull llama3.2. Following the setup, I would pull the wrong model and the run would fail."
+     "where": "Step 2 · code box",
+     "why": "The Before-you-start line says to have Ollama with qwen2.5:3b pulled, but the code pulls and calls llama3.2. Someone who followed the setup gets a model-not-found error on this step."
     },
     {
-     "where": "Step 1 code",
-     "why": "The claims file from lesson 03 had no type field, and this lesson never says to add one or where the types come from."
+     "where": "Step 1 · code box",
+     "why": "This needs a new data file with a section for each claim type and a type field on each claim. Neither is created in lessons 03 or 04, and the example shows only three sections, not limits."
     },
     {
-     "where": "Step 2 code",
-     "why": "The hosted models are listed but never called. Only the local run happens, so I cannot compare hosted with local."
+     "where": "Step 2 · code box",
+     "why": "The hosted open models are defined but no code calls them. The summary only prints the local run, so the comparison the lesson promises is never actually run."
     }
    ]
   },
