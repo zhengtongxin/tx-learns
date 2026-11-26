@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve, join } from 'node:path';
 import { gh, scrub, REPO, arg } from './lib.mjs';
 
-const BRANCH = 'agent-status', COOLDOWN_DAYS = 7, LOW = 8;
+const BRANCH = 'agent-status', COOLDOWN_DAYS = 7, LOW = 8, MAX_TRIES = 3; // a lesson the intern re-read after a fix and still scores under 8 gets another fix at once (up to 3 tries within the 7-day window)
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const short = (s, n) => scrub(String(s || '')).replace(/\s+/g, ' ').trim().slice(0, n);
 const out = (k, v) => process.env.GITHUB_OUTPUT && appendFileSync(process.env.GITHUB_OUTPUT, `${k}=${v}\n`);
@@ -58,7 +58,7 @@ export const pendingIdeas = (state = {}) => (state.ideas || []).filter(i => exis
 
 // Pick the one thing to fix. Returns {kind, key, files, text} or null.
 export async function pick({ ideas = true } = {}) {
-  const attempts = (await rawFile('signals/improver.json')).attempts || {};
+  const tried = await rawFile('signals/improver.json'), attempts = tried.attempts || {}, tries = tried.tries || {};
   const fresh = k => process.env.IMPROVER_NOW === '1' || !attempts[k] || Date.now() - Date.parse(attempts[k]) > COOLDOWN_DAYS * 864e5;
   const issues = await gh('GET', '/issues?state=open&per_page=50').catch(() => []);
   const q = issues.find(i => !i.pull_request && i.title === 'Quality check');
@@ -71,7 +71,7 @@ export async function pick({ ideas = true } = {}) {
     if (pages.length && fresh(key)) return { kind: 'quality', key, files: pages.slice(0, 3), text: `The weekly quality check found these problems (open issue "Quality check"):\n\n${short((q.body || '').replace(/\n{3,}/g, '\n\n'), 3000)}\n\nFix only the problems on the listed pages. Do not touch anything else.` };
   }
   const reader = (await rawFile('signals/reader.json')).lessons || {};
-  const low = Object.entries(reader).filter(([f, v]) => v.score < LOW && existsSync(join(ROOT, f)) && fresh(`reader:${f}`)).sort((a, b) => a[1].score - b[1].score)[0];
+  const low = Object.entries(reader).filter(([f, v]) => v.score < LOW && existsSync(join(ROOT, f)) && (fresh(`reader:${f}`) || (v.at && Date.parse(v.at) > Date.parse(attempts[`reader:${f}`]) && (tries[`reader:${f}`] || 0) < MAX_TRIES))).sort((a, b) => a[1].score - b[1].score)[0];
   if (low) {
     const [file, v] = low;
     const js = file.replace(/^([^/]+)\/(\d\d-[^.]+)\.html$/, '$1/js/$2.js');
@@ -93,7 +93,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     await update('signals/reader.json', d => mergeReader(d, reader));
   } else if (mode === 'attempt') {
     const key = process.argv[3];
-    await update('signals/improver.json', d => { d.attempts ||= {}; d.attempts[key] = new Date().toISOString(); for (const k of Object.keys(d.attempts)) if (Date.now() - Date.parse(d.attempts[k]) > 30 * 864e5) delete d.attempts[k]; return d; });
+    await update('signals/improver.json', d => { d.attempts ||= {}; d.tries ||= {}; d.tries[key] = (d.attempts[key] && Date.now() - Date.parse(d.attempts[key]) <= COOLDOWN_DAYS * 864e5 ? d.tries[key] || 1 : 0) + 1; d.attempts[key] = new Date().toISOString(); for (const k of Object.keys(d.attempts)) if (Date.now() - Date.parse(d.attempts[k]) > 30 * 864e5) { delete d.attempts[k]; delete d.tries[k]; } return d; });
     if (key.startsWith('idea:')) await update('signals/ideas.json', d => { const i = (d.ideas || []).find(x => 'idea:' + x.id === key); if (i) (d.done ||= []).push({ file: i.file, title: i.title, at: new Date().toISOString() }); d.ideas = (d.ideas || []).filter(x => 'idea:' + x.id !== key); d.done = (d.done || []).slice(-60); return d; });
   } else if (mode === 'brief') {
     const dir = arg('out', '/tmp/improver'); mkdirSync(dir, { recursive: true });
