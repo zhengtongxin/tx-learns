@@ -409,20 +409,20 @@
    ]
   },
   "ai-engineer/07-shop-assistant-that-acts.html": {
-   "score": 6,
-   "at": "2026-11-26T04:25:21.132Z",
+   "score": 5,
+   "at": "2026-11-26T05:51:38.227Z",
    "confusing": [
     {
-     "where": "Step 1",
-     "why": "'Worker threads' and check_same_thread are not explained, so a newcomer cannot tell why the flag is there."
+     "where": "Step 2, Learn and tools box",
+     "why": "The text says the real guard is keeping set_price out of the customer's tools, but the box puts it in the only tools list and never shows the customer version."
     },
     {
-     "where": "Step 3",
-     "why": "screen.py uses client, which is defined only in the tool_chat.py box. The lesson never says the three boxes form one file or in what order."
+     "where": "Step 3, screen box comment",
+     "why": "There is no chat() function. The loop is run_chat, which answer_everything calls. A reader searching for chat() is stuck."
     },
     {
-     "where": "Step 2",
-     "why": "The customer's tool list includes set_price. The text says only 'it stays here only for testing', so a reader can ship a bot that changes prices."
+     "where": "Step 3, Learn",
+     "why": "Gradio callbacks, .submit and .then are all new, and two writers is not explained. This whole wiring step is copy-only for a newcomer."
     }
    ]
   },
@@ -697,38 +697,38 @@
    ]
   },
   "ai-engineer/03-stall-brochure-maker.html": {
-   "score": 6,
-   "at": "2026-11-26T04:21:26.078Z",
+   "score": 7,
+   "at": "2026-11-26T05:51:38.227Z",
    "confusing": [
     {
-     "where": "Step 4, Learn",
-     "why": "The code yields the whole text so far on every chunk (yield text), not one new piece. The explanation contradicts the code."
+     "where": "Step 2, pick_links box",
+     "why": "The box uses client, requests and BeautifulSoup from the Step 1 box but does not say the boxes are one file, so a newcomer cannot tell where they come from."
     },
     {
-     "where": "Step 2, code box",
-     "why": "This line is highlighted as a change but its parameter is never explained. It is the line that forces JSON output."
+     "where": "Step 1, code box",
+     "why": "Nothing says where the API key goes. OpenAI() reads OPENAI_API_KEY from the environment, and the lesson does not say so."
     },
     {
-     "where": "Step 2, quiz",
-     "why": "The question asks what you need before chosen[0][\"url\"], but pick_links already calls json.loads in the code above. The answer looks already done."
+     "where": "Step 4, stream box",
+     "why": "The demo prints so_far[-40:], so the screen shows only the last 40 characters each time. The idea of redrawing the whole text so far does not show."
     }
    ]
   },
   "ai-engineer/04-comparing-frontier-local-models.html": {
    "score": 6,
-   "at": "2026-11-26T04:25:21.132Z",
+   "at": "2026-11-26T05:51:38.227Z",
    "confusing": [
     {
-     "where": "Step 2",
-     "why": "\"The other\" is ambiguous, and the lesson never says why HH does not count. The 2/3 answer only follows if you read it as 'at least one tails'."
+     "where": "Step 2, the coin puzzle",
+     "why": "The wording is ambiguous. The 2/3 answer only works for exactly one coin being tails, and the lesson never says that, or why HH stays in the list."
     },
     {
-     "where": "Step 1",
-     "why": "<provider> is a placeholder. The lesson never says to fill it in or that cloud-b is optional, so Step 1 cannot run as written."
+     "where": "Title",
+     "why": "Frontier is in the title and the quiz, but the lesson never says what a frontier model is."
     },
     {
-     "where": "Step 1",
-     "why": "os.getenv, .env and where keys live are never explained. OpenAI() also reads its key from an environment variable without saying so."
+     "where": "Step 1, Learn",
+     "why": "Ollama is used before anything says what it is. Step 4 says to run it but still does not explain it, and localhost is never defined."
     }
    ]
   },
@@ -752,19 +752,19 @@
   },
   "ai-engineer/06-tools-images-voice.html": {
    "score": 6,
-   "at": "2026-11-26T04:25:21.132Z",
+   "at": "2026-11-26T05:51:38.227Z",
    "confusing": [
     {
-     "where": "Step 3",
-     "why": "SQL, the ? placeholder, fetchone and commit() appear with no explanation. A newcomer can copy this line but not change it."
+     "where": "Step 3, Learn",
+     "why": "SQL is never introduced. CREATE TABLE, INSERT OR IGNORE and the ? placeholder appear with no plain explanation, so a newcomer can copy the lines but not read them."
     },
     {
-     "where": "Step 3",
-     "why": "The loop is changed only by this comment. The four code boxes are also never joined into one program: tool_loop.py uses get_price and price_tool with no import."
+     "where": "Step 3, shop_db box",
+     "why": "The comment says the loop stays the same, but the next line says to call functions[...] in the loop, and that loop change is never shown."
     },
     {
-     "where": "Step 2",
-     "why": "'Assistant message' is used as if known. A newcomer does not know the model's own reply that asked for the tools is stored in the list."
+     "where": "Step 4, Learn",
+     "why": "base64 and Pillow (PIL) are new names. A newcomer does not know base64 is a way to write image bytes as text."
     }
    ]
   },
@@ -841,20 +841,20 @@
    ]
   },
   "ai-engineer/12-code-translator.html": {
-   "score": 6,
-   "at": "2026-11-26T04:28:12.193Z",
+   "score": 7,
+   "at": "2026-11-26T05:51:38.227Z",
    "confusing": [
     {
-     "where": "Step 2 code (run_both.py)",
-     "why": "It uses SYSTEM, make_user_prompt, strip_fences, COMPILE and RUN from the Step 1 box, but never imports them. subprocess is never explained."
+     "where": "Step 3, Learn",
+     "why": "The code prints tokens only. No price is given for any model, so the cost part of the ranking cannot be computed from the lesson."
     },
     {
-     "where": "Step 2 Learn",
-     "why": "The two numbers are never named. From the code I guess they are output-matches-Python and speedup, but I am not sure."
+     "where": "Project card, what it does",
+     "why": "The boxes are named run_both.py and compare.py. The reader cannot tell which box is translate.py."
     },
     {
-     "where": "Step 3 Learn",
-     "why": "translate_and_run returns only output and time. Nothing counts tokens or cost, so I cannot do the ranking the lesson asks for."
+     "where": "Takeaways",
+     "why": "Every model on the shortlist is an OpenAI model, and open models are never introduced or tested, so this claim is not shown."
     }
    ]
   },
@@ -932,19 +932,19 @@
   },
   "ai-engineer/17-company-knowledge-helper.html": {
    "score": 6,
-   "at": "2026-11-26T04:31:32.841Z",
+   "at": "2026-11-26T05:51:38.227Z",
    "confusing": [
     {
-     "where": "Step 4, Learn",
-     "why": "The last lesson's score_retrieval calls the store directly, not fetch. No code shows how to switch it or print the per-category table, so this is where a reader gets stuck."
+     "where": "Step 4, eval box",
+     "why": "That line is commented out, and json is never imported in the box, so the box fails with tests undefined as written."
     },
     {
-     "where": "Step 1",
-     "why": "with_structured_output and Pydantic are used without explanation, the same gap as the earlier lesson."
+     "where": "Project card, what it does",
+     "why": "The code prints hits per category. MRR is never defined or computed here, so the output will not match the card."
     },
     {
-     "where": "Now make it yours",
-     "why": "The code has no switch for reranking, so the reader has to invent one with no hint."
+     "where": "Step 1, Learn",
+     "why": "ChatOpenAI, Chroma, Document and with_structured_output are new names. Their roles are only in code comments, and the Learn text does not name them."
     }
    ]
   },
