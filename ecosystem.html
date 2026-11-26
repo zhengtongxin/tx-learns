@@ -260,9 +260,10 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 .bcn b{font-size:14px}
 @media(prefers-reduced-motion:reduce){.bcn,#guards .guard .gi{transition:none}.bcn:hover{transform:none}}
 /* grouped guardrails and ideas: one card style, one-line titles */
-#guards.groups,#cgrid.groups{margin:26px 0 0;border:0;display:block;max-width:none}
-.groups .gh{margin:30px 0 10px;text-align:left}.groups .gh:first-child{margin-top:0}
-.gl2{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:8px 12px}
+#guards.groups,#cgrid.groups{margin:16px 0 0;border:0;display:block;max-width:none}
+.groups .gh{margin:18px 0 8px;text-align:left}.groups .gh:first-child{margin-top:0}#guardrails,#concepts{margin-top:44px}#guardrails>p,#concepts>p{margin-bottom:0}#guards.groups,#cgrid.groups{margin-top:16px}
+.gl2{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:8px}
+.gl2>li{height:56px;box-sizing:border-box}.gl2>.bcn a{height:100%;box-sizing:border-box;padding-top:0;padding-bottom:0}#guards .guard{padding-top:0;padding-bottom:0}
 #guards .guard b,.bcn b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bcn .bt{min-width:0;flex:1}
 /* Attention: decisions first, technical reports only when opened. */
@@ -337,7 +338,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 </section>
 </main>
 <div class="tip" id="tip" role="tooltip"></div>
-<script src="tracks.js?v=2bfa1a40"></script><script src="assets/build-concepts.js?v=cf587e8d"></script><script src="assets/site.js?v=91cb2e5f"></script>
+<script src="tracks.js?v=2bfa1a40"></script><script src="assets/build-concepts.js?v=c5ce02a0"></script><script src="assets/site.js?v=91cb2e5f"></script>
 <script>
 (function(){
   function t(en,zh){return '<span class="en">'+en+'</span><span class="zh">'+zh+'</span>'}
@@ -703,7 +704,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     function card(c){var soon=c.status==='soon',l=c.lessons[0];
       return '<li class="bcn'+(soon?' soon':'')+'" data-c="'+esc(c.id)+'"><a href="'+esc(l.d+'/'+l.f)+'"><span class="ic" aria-hidden="true">'+c.icon+'</span><span class="bt"><b>'+t(esc(c.title.en),esc(c.title.zh))+'</b></span></a></li>'}
     var used={};
-    g.innerHTML=CG.map(function(gr){var cs=gr[1].map(function(id){used[id]=1;return C.filter(function(c){return c.id===id})[0]}).filter(Boolean);return cs.length?'<h3 class="sub3 gh">'+t(gr[0][0],gr[0][1])+'</h3><ul class="gl2 cg">'+cs.map(card).join('')+'</ul>':''}).join('')+(function(){var r=C.filter(function(c){return !used[c.id]});return r.length?'<h3 class="sub3 gh">'+t('More','更多')+'</h3><ul class="gl2 cg">'+r.map(card).join('')+'</ul>':''})();
+    g.innerHTML=CG.map(function(gr){var cs=gr[1].map(function(id){used[id]=1;return C.filter(function(c){return c.id===id})[0]}).filter(Boolean);return cs.length?'<h3 class="sub3 gh">'+t(gr[0][0],gr[0][1])+'</h3><ul class="gl2">'+cs.map(card).join('')+'</ul>':''}).join('')+(function(){var r=C.filter(function(c){return !used[c.id]});return r.length?'<h3 class="sub3 gh">'+t('More','更多')+'</h3><ul class="gl2">'+r.map(card).join('')+'</ul>':''})();
     document.querySelectorAll('.bcn').forEach(function(li){var c=C.filter(function(x){return x.id===li.dataset.c})[0],a=li.querySelector('a'),l=c.lessons[0];
       wireNote(a,t(esc(c.title.en),esc(c.title.zh)),'<p>'+t(esc(c.use.en),esc(c.use.zh))+'</p><p><a href="'+esc(l.d+'/'+l.f)+'">'+t('Open the lesson →','打开这一课 →')+'</a></p>',1)});
     })();
