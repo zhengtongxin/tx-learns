@@ -63,7 +63,7 @@ evaluate(net_pricer, test[:100])</span></div>
 <div class="codebox" data-file="frontier.py" data-lang="python"><span class="dim">import re
 from openai import OpenAI
 client = OpenAI()
-</span><span class="chg">def frontier_pricer(item, model="your-big-model"):
+</span><span class="chg">def frontier_pricer(item, model="your-big-model"):   # replace with a current model name from your provider's model list
     reply = client.chat.completions.create(model=model, messages=[
         {"role": "user", "content":
          "Estimate the price of this product. Reply with the price only.\n\n" + item.summary}])
@@ -82,7 +82,8 @@ client = OpenAI()
         {"role": "assistant", "content": f"{round(item.price)}"}]})
 
 with open("tune_train.jsonl", "w") as f:
-    for item in train[:100]:
+    for item in train[:100]:           # then upload this file on your provider's fine-tuning page and start a job;
+                                       # when it finishes you get the tuned model's name: pass it as model= above
         f.write(to_line(item) + "\n")</span></div>
 
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I expected a fine-tuned model to clearly beat a strong plain one. With 100 examples the change is small; the gain comes with more data and a cheaper base model.</span><span class="zh">我原以为微调后的模型会明显赢过强的原模型。只有 100 条样例时变化很小；好处要在更多数据、更便宜的底座模型上才有。</span></div>
@@ -94,5 +95,5 @@ with open("tune_train.jsonl", "w") as f:
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"goals":{"en":["Run many predictors through the same harness","Use hashed word counts as a vector with no vocabulary","Train a small neural net through forward, loss, backward and step","Prompt a frontier model for a number only and parse it with a regex"],"zh":["让多种预测器跑同一套评测","用哈希词频得到不需要词表的向量","用前向、损失、反向、更新训练一个小神经网络","让前沿模型只回答数字，并用正则解析"]},"prev":["18-curating-and-cleaning-a-dataset.html","19-baselines-average-linear-forest.html"],"tools":{"en":"Python 3.10+, torch, scikit-learn, openai package, an OpenAI API key","zh":"Python 3.10+、torch、scikit-learn、openai 包、OpenAI API 密钥"},"know":{"en":"How baseline scoring works.","zh":"懂基线评分是怎么回事。"},"mins":40,"offline":false}}</script>
-<script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=dcd48bec"></script><script src="../assets/site.js?v=a53ae783"></script><script src="../assets/teach.js?v=ede6f40f"></script>
+<script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=dcd48bec"></script><script src="../assets/site.js?v=7991ba8c"></script><script src="../assets/teach.js?v=ede6f40f"></script>
 <script src="js/20-neural-nets-and-frontier-as-predictors.js?v=45527d5c"></script></body></html>

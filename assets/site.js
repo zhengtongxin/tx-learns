@@ -154,7 +154,7 @@
         function esc(x){return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
         function acceptList(a){var AK='learn-accept',m=jget(AK,{}),ck=m[here]||[];
           return '<ul class="accept">'+(a.en||[]).map(function(e,i){return '<li><label><input type="checkbox" data-i="'+i+'"'+(ck.indexOf(i)>-1?' checked':'')+'> '+t({en:esc(e),zh:esc((a.zh||[])[i]||e)})+'</label></li>'}).join('')+'</ul>'}
-        pc.innerHTML='<b class="lbl">'+t({en:'Project card',zh:'项目卡'})+'</b><dl>'+
+        pc.innerHTML='<b class="lbl">'+t({en:'Project card',zh:'项目卡'})+'</b>'+(pk?'<p class="meta">'+t({en:'The lesson shows the key parts. The complete project, with the file names used below, is in the starter and final code at the end of this card.',zh:'课文只展示关键部分。完整的项目（用的就是下面这些文件名）在这张卡片末尾的起步与完成代码里。'})+'</p>':'')+'<dl>'+
           (J.goal?'<dt>'+t({en:'Goal',zh:'目标'})+'</dt><dd>'+t(J.goal)+'</dd>':'')+(J.deliver?'<dt>'+t({en:'Deliverable',zh:'交付物'})+'</dt><dd>'+t(J.deliver)+'</dd>':'')+
           (J.level?'<dt>'+t({en:'Difficulty',zh:'难度'})+'</dt><dd>'+t(LV[J.level])+'</dd>':'')+((P&&P.mins)||J.mins?'<dt>'+t({en:'Time',zh:'时间'})+'</dt><dd>'+t({en:'about '+((P&&P.mins)||J.mins)+' minutes',zh:'约 '+((P&&P.mins)||J.mins)+' 分钟'})+'</dd>':'')+
           (J.accept?'<dt>'+t({en:'Done when…',zh:'完成标准'})+'</dt><dd>'+(Array.isArray(J.accept)?'<ul>'+li(J.accept)+'</ul>':acceptList(J.accept))+'</dd>':'')+

@@ -54,7 +54,9 @@ items = [Item(r) for r in kept]</span></div>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Prices are skewed: many cheap items, a long tail of dear ones. Train on that as is and the model learns "about thirty dollars", rarely far off and never useful. Sample on purpose: keep every expensive item and only part of the cheap crowd.</p><p class="zh" style="margin:0">价格是偏斜的：便宜的很多，贵的拖着长尾。原样训练，模型会学到“大概三十块”，很少错得远，却毫无用处。有意抽样：贵的全留，便宜的只留一部分。</p></div>
 <div class="codebox" data-file="balance.py" data-lang="python"><span class="dim">import random
 random.seed(42)
-</span><span class="chg">cheap = [i for i in items if i.price < 50]
+</span><span class="chg"># Simple version: balance everything. Stricter: split off the test set first and balance only the rest,
+# so the test set still looks like real listings.
+cheap = [i for i in items if i.price < 50]
 dear  = [i for i in items if i.price >= 50]
 balanced = dear + random.sample(cheap, k=min(len(cheap), len(dear)))
 random.shuffle(balanced)</span></div>
@@ -87,5 +89,5 @@ lite.push_to_hub("your-name/gadget-prices-lite")</span></div>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"goals":{"en":["Inspect one record and the most extreme record first","Filter out missing, tiny and absurd values","Clean text of boilerplate and part numbers and fix its length","Split train, validation and test and push the dataset to the hub"],"zh":["先看一条普通记录和一条最极端的记录","过滤缺失、过小和荒谬的值","清理文本里的套话和零件编号，并统一长度","划分训练、验证和测试集并推送到 hub"]},"prev":[],"tools":{"en":"Python 3.10+, the datasets package, internet to download the dataset","zh":"Python 3.10+、datasets 包、能联网下载数据集"},"know":{"en":"Basic Python lists, dictionaries and loops.","zh":"基础 Python 的列表、字典和循环。"},"mins":30,"offline":false}}</script>
-<script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=dcd48bec"></script><script src="../assets/site.js?v=a53ae783"></script><script src="../assets/teach.js?v=ede6f40f"></script>
+<script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=dcd48bec"></script><script src="../assets/site.js?v=7991ba8c"></script><script src="../assets/teach.js?v=ede6f40f"></script>
 <script src="js/18-curating-and-cleaning-a-dataset.js?v=a0dc4ce3"></script></body></html>
