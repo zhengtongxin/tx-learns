@@ -296,6 +296,8 @@
         '<div class="dk ring" role="progressbar" aria-label="Reading progress · 阅读进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><svg width="44" height="44" viewBox="0 0 44 44"><circle class="bg" cx="22" cy="22" r="'+RR+'"/><circle class="fg" cx="22" cy="22" r="'+RR+'" stroke-dasharray="'+LL+'" stroke-dashoffset="'+LL+'"/></svg><b>0</b></div>'+
         (n?'<a class="dk" href="'+n.file+'" title="Next" aria-label="Next lesson · 下一课">›</a>':'<span class="dk off" aria-hidden="true">›</span>')+'<button class="dk" data-a="t" title="Top" aria-label="Back to top · 回到顶部">↑</button>';
       document.body.appendChild(dock);
+      /* phone: hide the dock while scrolling down, show it when scrolling up or near the page end */
+      var ly=window.scrollY,tk=0;window.addEventListener('scroll',function(){if(tk)return;tk=requestAnimationFrame(function(){tk=0;var y=window.scrollY,end=y+innerHeight>=document.documentElement.scrollHeight-80;dock.classList.toggle('away',y>ly+6&&y>200&&!end&&innerWidth<=720);if(Math.abs(y-ly)>6)ly=y})},{passive:true});
       dock.querySelector('[data-a=m]').onclick=function(){window.TX.menu()};
       dock.querySelector('[data-a=t]').onclick=function(){window.scrollTo({top:0,behavior:calm?'auto':'smooth'})};
     }
