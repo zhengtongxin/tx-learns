@@ -56,6 +56,8 @@ try {
     // Avoid a response-listener race: attach before invoking the site's actual interval callback.
     const refresh = async next => { data = next; await Promise.all([page.waitForResponse(r => r.url().endsWith('/api/status')), page.evaluate(() => window.__statusPoll())]); await page.evaluate(() => new Promise(ok => requestAnimationFrame(() => requestAnimationFrame(ok)))); };
     await page.goto(base + '/ecosystem.html', { waitUntil: 'networkidle' });
+    assert.equal(await page.locator('#attention-box').evaluate(e => e.open), false, 'the status pill starts closed');
+    await page.locator('#attention-box > summary').click();
     assert.equal(await page.locator('#attention-list > li').count(), 2);
     assert.equal(await page.locator('#attention-history-list > li').count(), 2);
     assert.equal(await page.locator('#attention-history').evaluate(e => e.open), false);
@@ -65,7 +67,7 @@ try {
     assert(await page.locator('#attention-list li[data-kind=auto]').isVisible());
     // Disclosure state and keyboard focus must survive real polling, including a card moving into history.
     const first = page.locator('#attention-list > li').first();
-    await first.locator('summary').click();
+    assert(await first.locator('details').evaluate(e => e.open), 'Needs-you rows start open');
     const action = first.locator('a').first(); await action.focus();
     await refresh(structuredClone(data));
     assert(await first.locator('details').evaluate(e => e.open));
@@ -93,25 +95,25 @@ try {
       const target = page.locator(mobile ? `#ov-list [data-agent="${id}"] .ob` : `#ov [data-agent="${id}"]`);
       await target.evaluate(e => e.scrollIntoView({ block: 'center' }));
       if (mobile) { if (await target.getAttribute('aria-expanded') !== 'true') await target.click(); assert.equal(await page.locator('#ov-list .it.open').count(), 1); }
-      else { await target.focus(); assert(await page.locator('#tip').isVisible()); await page.keyboard.press('Enter'); await page.keyboard.press('Escape'); assert(!await page.locator('#tip').isVisible()); await target.evaluate(e => e.blur()); }
+      else { await target.focus(); assert(await page.locator('#tip').isVisible()); await page.keyboard.press('Enter'); await page.keyboard.press('Escape'); await page.mouse.move(0, 0); assert(!await page.locator('#tip').isVisible(), 'escape '+id); await target.evaluate(e => e.blur()); }
     }
     // Unsafe text and URLs never become executable markup or clickable cross-repository links.
     const injection = fixture();
     injection.attention.items[0].title = pair('<img src=x onerror=alert(1)>', '<img src=x onerror=alert(1)>');
     injection.attention.items[0].detail = '<script>alert(1)</script>';
     injection.attention.items[0].links.push(...['javascript:alert(1)', 'https://github.com/evil/other/pull/1', host + '/pull/1?x=1', 'https://github.com:443/zhengtongxin/tx-learns/pull/1', host + '/issues/../pull/1'].map(url => ({ url, label: pair('Bad', '不安全') })));
-    await refresh(injection); assert.equal(await page.locator('#attention img,#attention script').count(), 0);
+    await refresh(injection); assert.equal(await page.locator('#attention-box img,#attention-box script').count(), 0);
     assert.equal(await page.locator('#attention-list li').first().locator('a').count(), 1);
     await refresh({ connected: false });
-    assert.equal(await page.locator('#attention [data-kind=auto],#attention [data-kind=resolved]').count(), 0);
+    assert.equal(await page.locator('#attention-box [data-kind=auto],#attention-box [data-kind=resolved]').count(), 0);
     assert((await page.locator('#attention-status').innerText()).includes(lang === 'zh' ? '不代表' : 'does not mean'));
     const stale = fixture(); stale.attention.checkedAt = new Date(Date.now() - 3600000).toISOString();
-    await refresh(stale); assert.equal(await page.locator('#attention [data-kind=auto],#attention [data-kind=resolved]').count(), 0);
+    await refresh(stale); assert.equal(await page.locator('#attention-box [data-kind=auto],#attention-box [data-kind=resolved]').count(), 0);
     const empty = fixture(); empty.attention.items = []; await refresh(empty);
-    assert.equal(await page.locator('#attention .attention-card').count(), 0);
+    assert.equal(await page.locator('#attention-box .attention-card').count(), 0);
     assert((await page.locator('#attention-status').innerText()).includes(lang === 'zh' ? '暂无当前问题' : 'No current issues'));
     const ordinary = fixture(); ordinary.attention.items = []; ordinary.agents.writer.now = { at: stamp };
-    await refresh(ordinary); assert.equal(await page.locator('#attention [data-kind=auto]').count(), 0, 'Running alone must not mean automatic repair');
+    await refresh(ordinary); assert.equal(await page.locator('#attention-box [data-kind=auto]').count(), 0, 'Running alone must not mean automatic repair');
     const partial = fixture(); partial.attention.complete = false; await refresh(partial);
     assert((await page.locator('#attention-status').innerText()).includes(lang === 'zh' ? '可能不完整' : 'may be incomplete'));
     const malformed = fixture(); malformed.attention.items[0].kind = 'invented'; malformed.attention.items.push({ ...item('unknown-agent', 'retired', 'auto') });
