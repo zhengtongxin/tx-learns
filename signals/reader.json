@@ -1738,105 +1738,109 @@
   },
   "ai-fde/12-scoreboard-for-the-agent.html": {
    "score": 6,
-   "at": "2026-11-25T13:52:57.548Z",
+   "at": "2026-11-26T04:56:09.049Z",
    "confusing": [
     {
-     "where": "Step 2 Learn",
-     "why": "score_run() is in this file, and the numbers come from scoring.py functions (matrix, kappa, straight_through) that this lesson never shows."
+     "where": "Step 3 · Keep every run, then compare",
+     "why": "Kappa is never explained in the lesson, and straight-through rate is only explained later, in a quiz's feedback."
     },
     {
-     "where": "Step 3 Learn",
-     "why": "kappa and straight-through rate are never defined in this lesson, so I got stuck at kappa."
+     "where": "Step 1 · Hold out claims the agent has never seen",
+     "why": "The text never says what gateway is, what ask() returns (four values), or why the model name has a provider prefix, openai/."
     },
     {
-     "where": "Step 2 Learn",
-     "why": "run_claim() never creates a human_wait event, so I could not see where the tag is set."
+     "where": "Step 2 · Score a run: agreement, cost and time",
+     "why": "No code in the lesson creates a human_wait event, so the reader cannot see where the tag goes."
     }
    ]
   },
   "ai-fde/13-agentic-rag-over-a-manual.html": {
    "score": 6,
-   "at": "2026-11-25T13:52:57.548Z",
+   "at": "2026-11-26T04:56:09.049Z",
    "confusing": [
     {
-     "where": "Step 2 code",
-     "why": "The message flow is never explained: the model asks for a search, and the answer goes back tagged with the same id. TOOLS, the JSON description of the search, is also unexplained."
+     "where": "Step 2 · The agent chooses its own searches (quiz)",
+     "why": "By my hand trace, search('strike') also returns M4.2, the strike rule, since both sections contain the word strike. So the quiz premise is wrong, and the answer 'search again for the strike rule' make"
     },
     {
-     "where": "Step 1 Learn",
-     "why": "Matching is whole words only, so \"bag\" does not find E1 (\"baggage\"). I thought the search was broken."
+     "where": "Step 3 · Compare with one-shot retrieval",
+     "why": "By my hand trace, the one-shot search on this story also returns M4.2, because common words like a, the and was count as matches. The example output 'approve' is then unlikely, so the code does not sh"
     },
     {
-     "where": "Step 2 quiz",
-     "why": "The code also returns M4.2 for \"strike\", since both sections contain it, and the expected output lists both."
+     "where": "Step 2 · The agent chooses its own searches",
+     "why": "The messages list, its roles (system, user, tool) and tool_call_id are never explained, so the loop that feeds results back is hard to follow."
     }
    ]
   },
   "ai-fde/14-a-memory-over-mcp.html": {
-   "score": 8,
-   "at": "2026-11-25T13:52:57.548Z",
+   "score": 7,
+   "at": "2026-11-26T04:56:09.049Z",
    "confusing": [
     {
-     "where": "Step 2 Learn",
-     "why": "stdio is not explained."
+     "where": "Step 1 · A memory server",
+     "why": "The text never says that @mcp.tool() turns a function into a tool, or that the docstring is the description the agent reads to decide when to call it."
     },
     {
-     "where": "Step 1 code",
-     "why": "It looks like a comment. The agent reads it to decide when to call the tool, and the lesson never says so."
+     "where": "Step 2 · Connect the agent",
+     "why": "stdio, async with, asyncio.run and final_output are used with no gloss. A newcomer does not know that async means the code waits on the model."
+    },
+    {
+     "where": "Step 3 · Notes are leads, not facts",
+     "why": "Handlers, the people who make the final decision on a claim, are not introduced in this lesson."
     }
    ]
   },
   "ai-fde/15-agent-that-remembers-customers.html": {
    "score": 6,
-   "at": "2026-11-25T13:52:57.548Z",
+   "at": "2026-11-26T04:56:09.049Z",
    "confusing": [
     {
-     "where": "Step 2 Learn",
-     "why": "remember() saves every note the model returns. The two-note cap and the no-card-numbers rule exist only in the prompt, not in the code."
+     "where": "Step 2 · Read notes, decide, write notes",
+     "why": "remember() saves every note the model returns. The 'at most two' and 'no card or passport numbers' rules live only in the prompt, so the sentence is not true of the code."
     },
     {
-     "where": "Step 1 code",
-     "why": "One code box holds two files, make_reference.py and desk.py, so I could not tell which lines go in which file."
+     "where": "Step 1 · Three stores, three owners",
+     "why": "The file: prefix and uri=True are never explained, though Step 3 depends on mode=ro."
     },
     {
-     "where": "Step 2 code",
-     "why": "The doubled braces are f-string escaping, and nothing explains them, so the prompt looks broken."
+     "where": "Step 1 · Three stores, three owners",
+     "why": "SQL, the ? placeholders and commit() are used with no gloss. SQLite is named only in the setup line."
     }
    ]
   },
   "ai-fde/16-pause-for-approval-and-resume.html": {
-   "score": 8,
-   "at": "2026-11-26T02:34:53.396Z",
+   "score": 7,
+   "at": "2026-11-26T04:56:09.049Z",
    "confusing": [
     {
-     "where": "Step 2 · Stop for a person, then resume",
-     "why": "The box patches Step 1: it re-declares ClaimState and builder, and the reader must know which Step 1 lines to replace."
+     "where": "Step 1 · Steps, edges and a checkpointer",
+     "why": "The fallback is not shown in code. The box uses a with block and a Postgres URL, so the reader does not know what to change to run without a database."
     },
     {
      "where": "Step 3 · Survive a crash without paying twice",
-     "why": "None (no new input, carry on from the saved state) and snapshot.next are never explained."
+     "why": "This box silently replaces send_payment and pay from Step 1, so the reader cannot tell which version runs."
     },
     {
-     "where": "Step 1 · Steps, edges and a checkpointer",
-     "why": "The box uses a with block and setup(). Swapping in InMemorySaver is not a one-line change, and no code shows it."
+     "where": "Step 3 · Survive a crash without paying twice",
+     "why": "The box keeps paid_keys in the same process, so the demo is a dictionary standing in for the backend. The text and the box disagree about what the backend is."
     }
    ]
   },
   "ai-fde/17-swarms-of-agents-in-parallel.html": {
-   "score": 8,
-   "at": "2026-11-26T02:41:20.675Z",
+   "score": 7,
+   "at": "2026-11-26T04:56:09.049Z",
    "confusing": [
     {
-     "where": "Step 2 code box",
-     "why": "This redefines the Step 1 dispatch (it adds on_change and cap), but the text never says to replace it, so a reader may keep both or mix them up."
+     "where": "Step 2 · Track state, isolate failures, cap the swarm",
+     "why": "The signature changes, but the Step 1 run line asyncio.run(dispatch(claims, stand_in)) is not updated, so the file fails as written."
     },
     {
-     "where": "Step 2 learn",
-     "why": "The state dict is filled in but never printed, so the promised view of the batch is never shown."
+     "where": "Step 3 · Retries: wait or go back",
+     "why": "The box imports openai, but the setup lists only Python 3, and the lesson never says to install it."
     },
     {
-     "where": "Step 3 code box",
-     "why": "The text says wait and ask again, but nothing says how long this goes on. A rate limit that never clears would loop forever."
+     "where": "Step 3 · Retries: wait or go back",
+     "why": "Nothing caps the waiting: a rate limit that never clears loops forever, and the lesson does not say so."
     }
    ]
   },
