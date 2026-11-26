@@ -946,19 +946,19 @@
   },
   "ai-engineer/18-curating-and-cleaning-a-dataset.html": {
    "score": 7,
-   "at": "2026-11-26T02:09:03.129Z",
+   "at": "2026-11-26T02:34:53.396Z",
    "confusing": [
     {
-     "where": "Step 1 · Learn",
-     "why": "The code builds the priced list but never prints how many have a price."
+     "where": "Step 3 · Balance the prices",
+     "why": "Balancing runs on all rows before the split, so the test set is rebalanced too and no longer looks like real listings. A reader who knows ML will ask whether the test set should be balanced."
     },
     {
-     "where": "Step 2 · Learn",
-     "why": "The code drops any word with five or more digits, and re is never explained."
+     "where": "Step 2 · Clean the text into an Item",
+     "why": "re (Python's pattern-matching module), the digit pattern, the five-digit cut-off and ASIN in NOISE_LINES are never explained."
     },
     {
-     "where": "Step 3 · quiz",
-     "why": "Its card says 'Makes it useless', but peeking only makes the score too hopeful."
+     "where": "Step 4 · Split, then save",
+     "why": "DatasetDict, Dataset.from_list and .select appear in the box with no line of explanation."
     }
    ]
   },
@@ -999,20 +999,20 @@
    ]
   },
   "ai-engineer/21-price-guesser.html": {
-   "score": 6,
-   "at": "2026-11-26T02:09:03.129Z",
+   "score": 7,
+   "at": "2026-11-26T02:34:53.396Z",
    "confusing": [
     {
-     "where": "Step 1 · Learn",
-     "why": "The box loads from the hub, the package reads JSONL files, and make_data.py is never introduced as a step."
+     "where": "Step 2 · Classic and frontier guessers",
+     "why": "No step names a model, and the failure notes mention a FRONTIER_MODEL variable that the box never reads."
     },
     {
-     "where": "Step 2 · Learn",
-     "why": "Word counts (CountVectorizer) are never explained."
+     "where": "Step 4 · A small screen where they disagree",
+     "why": "The diagram shows a baseline and a tuned model, but the code builds four guessers and no tuned one."
     },
     {
-     "where": "Step 4 · Learn",
-     "why": "Gradio is never described, and gr.Interface, gr.Number and gr.JSON appear unexplained."
+     "where": "Step 4 · A small screen where they disagree",
+     "why": "Gradio is never explained, so a reader new to it does not know what the screen library does."
     }
    ]
   },
@@ -1089,38 +1089,38 @@
    ]
   },
   "ai-engineer/26-agents-that-scan-estimate-decide.html": {
-   "score": 5,
-   "at": "2026-11-26T02:09:03.129Z",
+   "score": 7,
+   "at": "2026-11-26T02:34:53.396Z",
    "confusing": [
     {
-     "where": "Step 3 figure",
-     "why": "The lesson names two price agents; the ensemble takes whatever list it gets, and a third is never introduced."
+     "where": "Step 1 · Small agents and an ensemble",
+     "why": "The text lists two agents, but the Step 3 diagram says three opinions and lesson 27 says three guessers. The third is never named."
     },
     {
-     "where": "Step 1 · Learn",
-     "why": "Nothing fills the store, and the validation table the ensemble needs (val_guesses) is never built."
+     "where": "Step 1 · Small agents and an ensemble",
+     "why": "FrontierAgent takes store and embedder as inputs, but no step says where they come from or that each price is kept as metadata."
     },
     {
-     "where": "Step 1 · code",
-     "why": "A reply like 'About $120 maybe', which lesson 21 teaches to handle, raises an error here."
+     "where": "Step 1 · Small agents and an ensemble",
+     "why": "There is no fallback or count, so \"About $120 maybe\" crashes here, although lesson 21 warned about exactly that."
     }
    ]
   },
   "ai-engineer/27-deal-hunting-system.html": {
-   "score": 5,
-   "at": "2026-11-26T02:09:03.129Z",
+   "score": 7,
+   "at": "2026-11-26T02:34:53.396Z",
    "confusing": [
     {
-     "where": "Step 1 · code",
-     "why": "The two helpers the whole system depends on are never shown or described."
+     "where": "Step 2 · A table, then a timer",
+     "why": "screen.py calls system.run() but never imports system, and the box has no launch line. screen.queue().launch() appears only in the Step 3 text."
     },
     {
-     "where": "Step 3 · Learn",
-     "why": "log() is defined but never called, so the live log stays empty."
+     "where": "Step 3 · A live log, handed over safely",
+     "why": "log() is defined, but no agent calls it, so the reader cannot tell where the lines come from."
     },
     {
-     "where": "Step 3 · Learn",
-     "why": "'Thread' is never defined."
+     "where": "Step 2 · A table, then a timer",
+     "why": "Discount is estimate minus price in dollars, not a percentage, and the text never says so."
     }
    ]
   },
@@ -1680,19 +1680,19 @@
   },
   "ai-fde/09-agent-that-works-the-queue.html": {
    "score": 7,
-   "at": "2026-11-26T02:09:03.129Z",
+   "at": "2026-11-26T02:34:53.396Z",
    "confusing": [
     {
-     "where": "Step 2 · code",
-     "why": "The Learn never says the model must see its own request before the tool answer, so the append looks optional."
+     "where": "Expected output",
+     "why": "The body never calls run(ids) or says how to start a run. The flags --limit and --break appear only in the project note."
     },
     {
-     "where": "Step 3 · quiz",
-     "why": "work_one also skips any claim that already has a decision on record."
+     "where": "Step 2 · A to-do board and a fresh helper per claim",
+     "why": "Step 1 taught response_format for valid JSON, but this helper does not use it, and the lesson never says why."
     },
     {
-     "where": "Now make it yours",
-     "why": "No command is given for stopping mid-run, and the --break flag is not in the lesson text itself."
+     "where": "Step 2 · A to-do board and a fresh helper per claim",
+     "why": "The six-round cap appears only in code and in a quiz, not in the Learn text."
     }
    ]
   },
@@ -1801,20 +1801,20 @@
    ]
   },
   "ai-fde/16-pause-for-approval-and-resume.html": {
-   "score": 6,
-   "at": "2026-11-26T02:09:03.129Z",
+   "score": 8,
+   "at": "2026-11-26T02:34:53.396Z",
    "confusing": [
     {
-     "where": "Step 2 · code",
-     "why": "The box overlays step 1's code with no words saying which lines to delete or where the with block goes."
+     "where": "Step 2 · Stop for a person, then resume",
+     "why": "The box patches Step 1: it re-declares ClaimState and builder, and the reader must know which Step 1 lines to replace."
     },
     {
-     "where": "Step 3 · code",
-     "why": "A plain dict is wiped on restart, the very failure this step fixes; the code reads as protection."
+     "where": "Step 3 · Survive a crash without paying twice",
+     "why": "None (no new input, carry on from the saved state) and snapshot.next are never explained."
     },
     {
-     "where": "Step 1 · note",
-     "why": "The swap to InMemorySaver is named but not shown; the code still imports PostgresSaver."
+     "where": "Step 1 · Steps, edges and a checkpointer",
+     "why": "The box uses a with block and setup(). Swapping in InMemorySaver is not a one-line change, and no code shows it."
     }
    ]
   },
