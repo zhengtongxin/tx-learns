@@ -2,105 +2,109 @@
  "lessons": {
   "agentic-ai/01-agentic-workflow.html": {
    "score": 7,
-   "at": "2026-11-26T07:19:56.887Z",
+   "at": "2026-11-26T07:55:25.753Z",
    "confusing": [
     {
-     "where": "Step 3, item 4 (Tools)",
-     "why": "“EoD” and “ticker” (step 5) are never explained in the text. Only the widget says EoD means end-of-day."
+     "where": "Step 3 · Build it, step 4 (Google Sheets)",
+     "why": "It says to pick a sheet, but never says to make one first or what the two columns should hold. A newcomer does not know whether a sheet already exists."
     },
     {
-     "where": "Step 3, item 4 (Tools)",
-     "why": "The reader is never told to create that sheet first, or how."
+     "where": "Intro (what you need)",
+     "why": "The lesson says to paste a Marketstack key in step 4 but gives no sign-up route. The reader has no idea where the key comes from."
     },
     {
-     "where": "Step 2 widget and Step 3, item 5",
-     "why": "The simulated run checks a bond ETF, while the build step asks about AAPL, so the example is unclear."
+     "where": "Step 3 · Build it, step 4",
+     "why": "EoD (end-of-day price) is explained only in the widget, not in the lesson text the reader has to follow."
     }
    ]
   },
   "agentic-ai/02-agents-and-patterns.html": {
    "score": 7,
-   "at": "2026-11-26T07:19:56.887Z",
+   "at": "2026-11-26T07:55:25.753Z",
    "confusing": [
     {
-     "where": "Step 2, Learn",
-     "why": "“Workflow” now has two meanings, right after lesson 1 used it for the n8n canvas. The aside makes it harder, not easier."
+     "where": "Step 2 · Workflow vs agent (Learn)",
+     "why": "The previous lesson is called Agentic workflow and builds an agent in n8n. This lesson then says a workflow is not an agent. A newcomer finishing lesson 1 is confused about what they just built."
     },
     {
-     "where": "Step 3, Learn (orchestrator-worker)",
-     "why": "The model chooses how many pieces to make, which seems to break the rule from Step 2 that the model picks the next step. A newcomer will not see why it is still a workflow."
+     "where": "Step 1 · Be the agent (Learn)",
+     "why": "log is in bold but never defined. It is the running record of what has happened, the next lesson's history list."
     },
     {
-     "where": "Code box in Step 3 (agent.py)",
-     "why": "It points ahead to a later lesson for an idea used here."
+     "where": "Step 4 · Choose the simplest design",
+     "why": "Guardrails are named as something to add, but never explained here. The step limit in the code comes later and is not linked to the word."
     }
    ]
   },
   "agentic-ai/03-first-api-calls.html": {
-   "score": 8,
-   "at": "2026-11-26T07:19:56.887Z",
+   "score": 7,
+   "at": "2026-11-26T07:55:25.753Z",
    "confusing": [
     {
-     "where": "Step 1, Learn",
-     "why": "No one says which folder that is, so a newcomer may not know where to save .env."
+     "where": "Step 2 · Make your first call (Learn)",
+     "why": "The text says to create a client, but never says that OpenAI() finds OPENAI_API_KEY on its own. Only the widget explains it, so a reader may think the key must be passed in."
     },
     {
-     "where": "Step 3, Learn",
-     "why": "“full” is not a model name. The code uses gpt-5.4, and nothing links the two."
+     "where": "Step 3 · Chain three calls (Learn)",
+     "why": "Model names such as gpt-5.4-nano appear from Step 2 onward, but what the sizes mean is taught only in lesson 4."
     },
     {
-     "where": "Step 3, code box",
-     "why": "A local word inside the prompt, with no gloss."
+     "where": "Step 2 · code box",
+     "why": "override=True is written with no explanation of what it changes. A reader copying the line cannot tell why it is there."
     }
    ]
   },
   "agentic-ai/04-many-models.html": {
    "score": 7,
-   "at": "2026-11-26T07:42:13.267Z",
+   "at": "2026-11-26T07:55:25.753Z",
    "confusing": [
     {
-     "where": "Step 3, Learn",
-     "why": "A newcomer meets prompt chaining, parallelization and JSON in one long paragraph, before the code that shows them. It is too much to take in at once."
+     "where": "Step 3 · judge.py code box",
+     "why": "The comment is wrong. json.loads gives a dictionary; [\"results\"] then picks out the list. A careful newcomer will notice the mismatch and lose trust in the example."
     },
     {
-     "where": "Step 3, judge code",
-     "why": "The comment is wrong. json.loads returns a dictionary, and [\"results\"] picks the list out of it. A careful reader will be confused about what the line returns."
+     "where": "Step 1 · model table",
+     "why": "The table then lists Haiku, Sonnet, Opus, Flash-Lite, Flash and Pro, with no line saying these are each company's own names for small, middle and large."
     },
     {
-     "where": "Step 2, code box",
-     "why": "messages is used here and again in the Ollama box, but nothing builds it. A newcomer does not know what shape it has (a list of role and content entries)."
+     "where": "Local models",
+     "why": "3 GB of what is not said. Download size and memory on your laptop are different things."
     }
    ]
   },
   "agentic-ai/05-autonomy-and-tools.html": {
-   "score": 7,
-   "at": "2026-11-26T07:19:56.887Z",
+   "score": 6,
+   "at": "2026-11-26T07:55:25.753Z",
    "confusing": [
     {
-     "where": "Step 3, code box",
-     "why": "The blank sits in the code, but nothing before it says what goes there. Only the quiz explains that the description says when to use the tool."
+     "where": "Step 4 · The loop (code box)",
+     "why": "The ** unpacking (a dictionary becomes named inputs) is not explained here. Lesson 6 explains it, too late for this box."
     },
     {
-     "where": "Step 4, code box",
-     "why": "The ** unpacking is not explained in this lesson (only in lesson 6)."
+     "where": "Step 4 · The loop (code box)",
+     "why": "The model's own tool request is added to the list, and no line says why. The reason only appears in the Common error box, after the error."
     },
     {
-     "where": "Step 2, code box",
-     "why": "The folder is never mentioned, and client, which comes from lesson 3, is assumed without a note."
+     "where": "Step 2 · twin.py code box",
+     "why": "This box uses client but never creates it, and the lesson does not say it comes from lesson 3. A reader starting here sees an undefined name."
     }
    ]
   },
   "agentic-ai/06-career-agent.html": {
-   "score": 7,
-   "at": "2026-11-26T07:19:56.887Z",
+   "score": 6,
+   "at": "2026-11-26T07:55:25.753Z",
    "confusing": [
     {
-     "where": "Step 4, deploy checklist",
-     "why": "The reader is not told where the project files are, so the deploy steps cannot start."
+     "where": "Deploy checklist (Now make it yours)",
+     "why": "pypdf is never explained or used in the lesson text. requirements.txt sits in the package but is never mentioned, and it is unclear whether to use uv or pip."
     },
     {
-     "where": "Header and Before you start",
-     "why": "The header says about 20 minutes, while the lesson data says 45 minutes."
+     "where": "Deploy checklist (Now make it yours)",
+     "why": "The secrets page is never shown. A newcomer does not know what a secret is or where to click."
+    },
+    {
+     "where": "Step 1 · project checks (accept list)",
+     "why": "The code shown prints lines like Push: Someone wants to get in touch, not this text. The reader cannot tell whether the project works."
     }
    ]
   },
