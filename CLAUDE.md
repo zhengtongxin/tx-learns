@@ -82,7 +82,7 @@ Claude auth: the writer, reviewer, reader, UI check and recall agents use TX's C
 
 ## Typography
 
-Type is Apple-style: the system sans (-apple-system / SF Pro on Apple devices, self-hosted Inter in `assets/fonts/` elsewhere, PingFang SC for 中文), no serif and no italics. Headings get contrast from weight, size and tight tracking. An `<em>` inside `h1`/`h2` is upright amber. Rules are at the end of `assets/site.css`.
+Type is Apple-style: the system sans (-apple-system / SF Pro on Apple devices, self-hosted Inter in `assets/fonts/` elsewhere, PingFang SC for 中文), no serif and no italics. Headings get contrast from weight, size and tight tracking. An `<em>` inside `h1`/`h2` is upright amber. Rules are at the end of `assets/site.css`. **One size scale on every page**: page titles (`.mega`, `.hero h1`) `clamp(2.3rem,6.5vw,4rem)`, `h2` `clamp(1.6rem,3.4vw,2.2rem)`, `h3` 1.15rem, body 1.04rem, subtitle `.sub` `clamp(1.05rem,2.2vw,1.25rem)`, small text 13.5px. Pages (`about`, `ecosystem`, `glossary`, home) must not set their own `font-size` on titles, headings or body paragraphs; make a page compact with spacing instead. Small UI parts (chips, popups, badges, card titles) may keep a smaller size.
 
 ## Rules
 
