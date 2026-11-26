@@ -222,8 +222,6 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 .full>summary::before,.morebox>summary::before{content:"+ ";font-family:var(--mono)}.full[open]>summary::before,.morebox[open]>summary::before{content:"− "}
 .full>p{max-width:640px;margin:8px 0 0;font-size:14.5px;line-height:1.7;color:var(--mut)}
 .eco .start{margin-top:10px;font-size:14.5px;color:var(--mut)}
-.bcn.rec a{border-left:2px solid var(--acc);border-radius:0 8px 8px 0}
-#cgrid2{margin-top:0}
 .health{list-style:none;margin:6px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:0 26px}
 .health li{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
 .health .dot{width:8px;height:8px;border-radius:50%;background:var(--mut);flex:none}
@@ -255,15 +253,19 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 #guards .guard:hover .gi,#guards .guard:focus-visible .gi,#guards .guard.nhot .gi{transform:scale(1.08)}
 #guards .guard .gt{flex:1}
 .cgrid{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-top:22px}
-#cgrid2{margin-top:10px}
 .bcn{border-radius:12px;border:1px solid var(--line);background:var(--glass);transition:border-color .2s,transform .2s,background-color .2s}
-.bcn.rec{border-color:color-mix(in srgb,var(--acc) 45%,var(--line));background:color-mix(in srgb,var(--acc) 7%,var(--glass))}
 .bcn:hover,.bcn:has(a:focus-visible),.bcn:has(.nhot){border-color:var(--acc);transform:translateY(-1px)}
 .bcn a{padding:11px 13px;cursor:pointer}
 .bcn .ic{width:34px;height:34px;border-radius:10px;font-size:18px}
 .bcn b{font-size:14px}
 @media(prefers-reduced-motion:reduce){.bcn,#guards .guard .gi{transition:none}.bcn:hover{transform:none}}
-/* Attention: decisions first, technical reports only when opened. */
+/* grouped guardrails and ideas: one card style, one-line titles */
+#guards.groups,#cgrid.groups{margin:26px 0 0;border:0;display:block;max-width:none}
+.groups .gh{margin:30px 0 10px;text-align:left}.groups .gh:first-child{margin-top:0}
+.gl2{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:8px 12px}
+#guards .guard b,.bcn b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bcn .bt{min-width:0;flex:1}
+.bcn,/* Attention: decisions first, technical reports only when opened. */
 #attention{scroll-margin-top:68px}
 .attention-status{min-height:1.6em}.eco section>p.attention-status{font-size:12.5px;text-wrap:wrap;margin:12px 0;color:var(--mut)}
 .attention-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:14px;list-style:none;padding:0;margin:18px 0 0}
@@ -320,14 +322,13 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 <section id="guardrails">
 <h2><span class="en">Guardrails</span><span class="zh">护栏</span></h2>
 <p><span class="en">What stops a bad change. These rules the agents cannot break.</span><span class="zh">什么拦住坏改动。agent 打破不了这些规则。</span></p>
-<ol class="guards" id="guards" role="group" aria-label="Guardrails · 护栏"></ol>
+<div class="groups" id="guards" role="group" aria-label="Guardrails · 护栏"></div>
 </section>
 
 <section id="concepts">
 <h2><span class="en">Ideas to learn</span><span class="zh">可以学的概念</span></h2>
 <p><span class="en">What the site is built from. Hover or tap one to see what it is.</span><span class="zh">网站用到的想法。移上去或点一下，看它是什么。</span></p>
-<ul class="cgrid" id="cgrid"></ul>
-<ul class="cgrid" id="cgrid2"></ul>
+<div class="groups" id="cgrid"></div>
 </section>
 
 <section id="changes">
@@ -673,10 +674,10 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     ['No silent failures, no noise','不会悄悄失败，也不吵','1','digest a day','条每日汇总','A failure, stuck PR or rollback messages me at once.','失败、PR 卡住或回滚会马上通知我。']];
   var GL={0: "ai-production/22-dev-test-prod-from-one-push.html", 1: "ai-production/21-push-to-deploy-github-actions.html", 3: "ai-production/21-push-to-deploy-github-actions.html", 4: "ai-fde/22-gateway-keys-and-policy.html", 5: "agentic-ai/08-agents-tools-handoffs.html", 6: "ai-fde/18-swarm-with-a-cap.html", 9: "ai-production/07-safe-cloud-account.html", 10: "ai-production/22-dev-test-prod-from-one-push.html", 11: "ai-fde/16-pause-for-approval-and-resume.html"};
   var GI=['🔎','✅','🎯','↩️','👀','🧰','⏱️','📄','🩹','🔑','🌐','🚧','🔔'];
+  var GG=[[['Before a merge','合并之前'],[1,2,7,8]],[['What agents may touch','权限边界'],[4,5,6,11]],[['After it goes live','上线之后'],[0,10,3]],[['Secrets and alerts','密钥与通知'],[9,12]]];
   (function(){
-    document.getElementById('guards').innerHTML=G.map(function(g,i){return '<li class="guard" tabindex="0" role="button" aria-label="'+esc(g[0])+'" data-i="'+i+'"><span class="gi" aria-hidden="true">'+GI[i]+'</span><span class="gt"><b>'+t(g[0],g[1])+'</b></span></li>'}).join('');
+    document.getElementById('guards').innerHTML=GG.map(function(gr){return '<h3 class="sub3 gh">'+t(gr[0][0],gr[0][1])+'</h3><ul class="gl2">'+gr[1].map(function(i){var g=G[i];return '<li class="guard" tabindex="0" role="button" aria-label="'+esc(g[0])+'" data-i="'+i+'"><span class="gi" aria-hidden="true">'+GI[i]+'</span><span class="gt"><b title="'+esc(t(g[0],g[1]))+'">'+t(g[0],g[1])+'</b></span></li>'}).join('')+'</ul>'}).join('');
     document.querySelectorAll('#guards .guard').forEach(function(el){var g=G[el.dataset.i];wireNote(el,t(g[0],g[1]),'<p>'+t(g[5],g[6])+'</p>'+(GL[el.dataset.i]?'<p><a href="'+GL[el.dataset.i]+'">'+t('Open the lesson →','打开这一课 →')+'</a></p>':''),0)})})();
-
 
   function kg(h,items){return '<div class="kg"><b>'+h+'</b>'+items.join('')+'</div>'}
   function dt(c,en,zh){return '<span><i class="dt" style="background:'+c+'"></i>'+t(en,zh)+'</span>'}
@@ -699,11 +700,12 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     var h=rows.map(function(r){var k=live?worst(r[1]):'';return '<li><span class="dot '+k+'"></span><b>'+t(r[0][0],r[0][1])+'</b><span class="hv">'+(k?PILL[k]:live?t('no runs yet','还没运行'):t('shows on the live site','线上网站才显示'))+'</span></li>'}).join('');
     if(h!==el.dataset.h){el.dataset.h=h;el.innerHTML=h}}
 
-  (function(){var g=document.getElementById('cgrid'),g2=document.getElementById('cgrid2'),C=window.BUILD_CONCEPTS||[],REC=['workflows','roles','guardrails','evals','cicd','approval'];
-    function card(c,rec){var soon=c.status==='soon',l=c.lessons[0];
-      return '<li class="bcn'+(soon?' soon':'')+(rec?' rec':'')+'" data-c="'+esc(c.id)+'"><a href="'+esc(l.d+'/'+l.f)+'"><span class="ic" aria-hidden="true">'+c.icon+'</span><span class="bt"><b>'+t(esc(c.title.en),esc(c.title.zh))+'</b></span></a></li>'}
-    var R=REC.map(function(id){return C.filter(function(c){return c.id===id})[0]}).filter(Boolean),O=C.filter(function(c){return REC.indexOf(c.id)<0});
-    g.innerHTML=R.map(function(c){return card(c,1)}).join('');g2.innerHTML=O.map(function(c){return card(c,0)}).join('');
+  (function(){var g=document.getElementById('cgrid'),C=window.BUILD_CONCEPTS||[],
+      CG=[[['Agent basics','智能体基础'],['workflows','roles','tools','structured','memory','parallel']],[['Quality and safety','质量与安全'],['guardrails','evals','approval','security']],[['Shipping and running','上线与运维'],['cicd','observe','performance','serverless']],[['Models and data','模型与数据'],['rag','vision','models']]];
+    function card(c){var soon=c.status==='soon',l=c.lessons[0];
+      return '<li class="bcn'+(soon?' soon':'')+'" data-c="'+esc(c.id)+'"><a href="'+esc(l.d+'/'+l.f)+'"><span class="ic" aria-hidden="true">'+c.icon+'</span><span class="bt"><b>'+t(esc(c.title.en),esc(c.title.zh))+'</b></span></a></li>'}
+    var used={};
+    g.innerHTML=CG.map(function(gr){var cs=gr[1].map(function(id){used[id]=1;return C.filter(function(c){return c.id===id})[0]}).filter(Boolean);return cs.length?'<h3 class="sub3 gh">'+t(gr[0][0],gr[0][1])+'</h3><ul class="gl2 cg">'+cs.map(card).join('')+'</ul>':''}).join('')+(function(){var r=C.filter(function(c){return !used[c.id]});return r.length?'<h3 class="sub3 gh">'+t('More','更多')+'</h3><ul class="gl2 cg">'+r.map(card).join('')+'</ul>':''})();
     document.querySelectorAll('.bcn').forEach(function(li){var c=C.filter(function(x){return x.id===li.dataset.c})[0],a=li.querySelector('a'),l=c.lessons[0];
       wireNote(a,t(esc(c.title.en),esc(c.title.zh)),'<p>'+t(esc(c.use.en),esc(c.use.zh))+'</p><p><a href="'+esc(l.d+'/'+l.f)+'">'+t('Open the lesson →','打开这一课 →')+'</a></p>',1)});
     })();
