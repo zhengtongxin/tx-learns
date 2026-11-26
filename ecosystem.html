@@ -266,7 +266,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 #guards .guard b,.bcn b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bcn .bt{min-width:0;flex:1}
 /* Attention: decisions first, technical reports only when opened. */
-#attention{scroll-margin-top:68px}
+#attention{scroll-margin-top:68px}.eco section#attention{margin-top:28px;padding-top:0;border-top:0}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}.eco .attention-box{max-width:760px;margin:0 auto;padding:0;border:0;background:none}.attention-box>summary{display:flex;align-items:center;justify-content:center;gap:10px;min-height:44px;box-sizing:border-box;padding:8px 16px;border:1px solid var(--line);border-radius:999px;background:var(--glass);font-size:14px;font-weight:600;cursor:pointer;list-style:none;width:fit-content;max-width:100%;margin:0 auto}.attention-box>summary::-webkit-details-marker{display:none}.attention-dot{flex:none;width:9px;height:9px;border-radius:50%;background:var(--mut)}.attention-box[data-tone=ok] .attention-dot{background:var(--ok)}.attention-box[data-tone=warn] .attention-dot{background:var(--warn)}.attention-box[data-tone=bad] .attention-dot{background:var(--bad)}.attention-box>summary::after{content:'+';color:var(--mut)}.attention-box[open]>summary::after{content:'\2212'}
 .attention-status{min-height:1.6em}.eco section>p.attention-status{font-size:12.5px;text-wrap:wrap;margin:12px 0;color:var(--mut)}
 .attention-list{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;list-style:none;padding:0;margin:14px auto 0;max-width:760px;text-align:left}
 .attention-card{--case:var(--mut);min-width:0;padding:0;border:1px solid var(--line);border-left:3px solid var(--case);border-radius:10px;background:var(--glass);scroll-margin-top:90px;overflow-wrap:anywhere}
@@ -293,10 +293,11 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 </header>
 
 <section id="attention" aria-labelledby="attention-heading">
-<h2 id="attention-heading" tabindex="-1"><span class="en">Attention</span><span class="zh">需要关注</span></h2>
+<h2 id="attention-heading" tabindex="-1" class="sr-only"><span class="en">Attention</span><span class="zh">需要关注</span></h2>
+<details class="attention-box" id="attention-box" data-tone="wait"><summary><span class="attention-dot" aria-hidden="true"></span><span id="attention-headline"><span class="en">Checking issue records…</span><span class="zh">正在核对问题记录…</span></span></summary>
 <p class="attention-status" id="attention-status" role="status"><span class="en">Checking issue records…</span><span class="zh">正在核对问题记录…</span></p>
 <ul class="attention-list" id="attention-list"></ul>
-<details class="attention-history" id="attention-history" hidden><summary><span class="en">Earlier reports</span><span class="zh">较早的报告</span></summary><ul class="attention-list" id="attention-history-list"></ul></details>
+<details class="attention-history" id="attention-history" hidden><summary><span class="en">Earlier reports</span><span class="zh">较早的报告</span></summary><ul class="attention-list" id="attention-history-list"></ul></details></details>
 <noscript><p><span class="en">Enable JavaScript to load current issue records. No status has been checked yet.</span><span class="zh">启用 JavaScript 后才能加载当前问题记录；目前尚未核对状态。</span></p></noscript>
 </section>
 
@@ -456,6 +457,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     if(checked)status+=' · '+t('Checked ','核对于 ')+'<time datetime="'+checked+'">'+ago(checked)+'</time>';
     if(raw&&raw.repairSearchLimited)status+=' · '+t('Repair matching covers the latest recorded PRs only.','自动修复匹配仅覆盖最近记录的 PR。');
     var note=document.getElementById('attention-status');if(note.innerHTML!==status)note.innerHTML=status;
+    var need=current.filter(function(i){return i.kind!=='resolved'}),box=document.getElementById('attention-box'),tone=data===null?'wait':!available||offline||stale||bad?'unk':need.some(function(i){return i.kind==='action'})?'bad':need.length?'warn':complete?'ok':'unk',head=data===null?t('Checking issue records…','正在核对问题记录…'):!available||offline||stale?t('Issue records unavailable','暂时无法核对问题记录'):need.length?t(need.length+(need.length===1?' item needs attention':' items need attention'),need.length+' 项需要关注'):complete?t('All clear','一切正常'):t('No issues found so far (some records unchecked)','暂无问题（部分记录未核对）'),hl=document.getElementById('attention-headline');if(hl.innerHTML!==head)hl.innerHTML=head;box.dataset.tone=tone==='unk'?'wait':tone;
     // Both lists reuse keyed cards; the history wrapper itself is never replaced during polling.
     var section=document.getElementById('attention'),list=document.getElementById('attention-list'),historyBox=document.getElementById('attention-history'),historyList=document.getElementById('attention-history-list'),active=document.activeElement,focused=section.contains(active),host=focused&&active.closest('.attention-card'),focus=host?{id:host.id,href:active.getAttribute('href'),summary:active.tagName==='SUMMARY'}:null,keep=Object.create(null),anchor=null;
     section.querySelectorAll('.attention-card').forEach(function(el){if(anchor)return;var r=el.getBoundingClientRect();if(r.width&&r.top<innerHeight&&r.bottom>80)anchor={id:el.id,top:r.top}});
@@ -640,7 +642,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
   function hideTip(){clearTimeout(HT);PIN='';TIP.classList.remove('on','pin');document.querySelectorAll('#ov .hot,.nhot').forEach(function(x){x.classList.remove('hot','nhot')})}
   document.addEventListener('click',function(ev){if(PIN&&!TIP.contains(ev.target))hideTip()});
   document.addEventListener('keydown',function(ev){if(ev.key==='Escape')hideTip()});
-  document.addEventListener('click',function(ev){var a=ev.target.closest('a[data-attention-jump]');if(!a)return;var id=a.getAttribute('href').slice(1),card=document.getElementById(id);if(!card)return;ev.preventDefault();hideTip();var historyBox=card.closest('.attention-history');if(historyBox)historyBox.open=true;history.replaceState(null,'','#'+id);card.scrollIntoView({block:'start'});var dd=card.querySelector('details');if(dd)dd.open=true;card.focus({preventScroll:true})});
+  document.addEventListener('click',function(ev){var a=ev.target.closest('a[data-attention-jump]');if(!a)return;var id=a.getAttribute('href').slice(1),card=document.getElementById(id);if(!card)return;ev.preventDefault();hideTip();var historyBox=card.closest('.attention-history');if(historyBox)historyBox.open=true;history.replaceState(null,'','#'+id);card.scrollIntoView({block:'start'});var box=card.closest('.attention-box');if(box)box.open=true;var dd=card.querySelector('details');if(dd)dd.open=true;card.focus({preventScroll:true})});
 
   // Knowledge base line comes from the track's lessons.js, loaded after site.js has set up the page (so it stays a home-level page).
   (function loadTopics(){
