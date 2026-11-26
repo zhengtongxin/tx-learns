@@ -42,8 +42,8 @@ answer = response.choices[0].message.content</span></div>
 <span class="dim">ollama.chat.completions.create(model="llama3.2", messages=messages)</span></div>
 
 <h2><span class="en">Step 3 · A model judges the rest</span><span class="zh">第 3 步 · 让模型当裁判</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Send one question to several models, then ask a strong model to rank the answers. Writing the question with one call and feeding it to the next is <b>prompt chaining</b>; asking every model independently is <b>parallelization</b>. The judge must reply in strict <b>JSON</b> (plain text of labels and values, like <code>{"best": 2}</code>) so code can read it. Step through the script.</p>
-<p class="zh" style="margin:0">把一个问题发给多个模型，再让强模型给回答排名。用一次调用写出问题再喂给下一次是<b>提示链</b>；让每个模型独立作答是<b>并行化</b>。裁判必须返回严格的 <b>JSON</b>（由标签和值组成的纯文本，如 <code>{"best": 2}</code>），代码才能读取。一步步走一遍脚本。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0">Send one question to several models, then ask a strong model to rank the answers. Writing the question with one call and feeding it to the next is <b>prompt chaining</b>; asking every model independently is <b>parallelization</b>: each answer does not depend on the others, so they could run at the same time (the code below simply asks them one after another). The judge must reply in strict <b>JSON</b> (plain text of labels and values, like <code>{"results": ["2", "1"]}</code>, a list with the best first) so code can read it. Step through the script.</p>
+<p class="zh" style="margin:0">把一个问题发给多个模型，再让强模型给回答排名。用一次调用写出问题再喂给下一次是<b>提示链</b>；让每个模型独立作答是<b>并行化</b>：每个回答不依赖其他回答，所以可以同时进行（下面的代码只是一个接一个地问）。裁判必须返回严格的 <b>JSON</b>（由标签和值组成的纯文本，如 <code>{"results": ["2", "1"]}</code>，列表里最好的排第一），代码才能读取。一步步走一遍脚本。</p></div>
 <div id="t4"></div>
 <p class="en">Be the judge yourself, on <b>clarity and strength of argument</b>. Three answers to “Which matters more to a society, truth or trust?”:</p>
 <p class="zh">先自己当裁判，标准是<b>表达清晰度和论证力度</b>。对“对一个社会来说，真相和信任哪个更重要？”的三个回答：</p>
@@ -60,18 +60,18 @@ competitors = ["gpt-5.4-nano", "gpt-5.4-mini"]            # model names
 answers = [ask(question, name) for name in competitors]   # replies, in the same order
 
 together = ""
-for number, answer in enumerate(answers, start=1):
+for number, answer in enumerate(answers, start=1):   # gives (1, first answer), (2, second answer) ...
     together += f"# Response from competitor {number}\n\n{answer}\n\n"
 
 judge = f"""Rank these {len(answers)} competitors by clarity and strength of argument for this question:
 {question}
 
 {together}
-Reply only with JSON, best first, like {{"results": ["2", "1"]}}."""
+Reply only with JSON, best first, like {{"results": ["2", "1"]}}."""   # {{ }} print as one { } inside an f-string
 
 </span><span class="chg">reply = ask(judge, "gpt-5.4")                # the judge's JSON, e.g. {"results": ["2", "1"]}
 results = json.loads(reply)["results"]       # JSON text -> a Python list
-winner = competitors[int(results[0]) - 1]
+winner = competitors[int(results[0]) - 1]   # the judge counts from 1, Python lists from 0, so subtract 1
 print(winner)</span></div>
 <div class="callout warn"><b class="lbl"><span class="en">Know the limits</span><span class="zh">了解局限</span></b><span class="en">A judge is one more model, so its ranking is an opinion. Use a strong model, hide who wrote what, and spot-check.</span><span class="zh">裁判也是一个模型，排名只是一种意见。用强模型，隐藏回答者身份，并抽查结果。</span></div>
 
