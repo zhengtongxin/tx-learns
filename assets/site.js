@@ -46,7 +46,7 @@
     var mn=document.querySelector('main');
     if(mn){if(!mn.id)mn.id='main';mn.setAttribute('tabindex','-1');var sk=document.createElement('a');sk.className='skip';sk.href='#'+mn.id;sk.innerHTML=t({en:'Skip to content',zh:'跳到正文'});sk.onclick=function(){setTimeout(function(){mn.focus()},0)};document.body.prepend(sk)}
     var top=document.createElement('div');top.className='top';
-    top.innerHTML='<a class="brand" href="'+(C?'../index.html':'index.html')+'"><b></b>TX Learns</a>'+(C?'<button class="icon-btn menu-btn" aria-label="Topics · 主题" aria-expanded="false" aria-controls="topics-nav">☰ <span class="en">Topics</span><span class="zh">主题</span></button>':'')+'<span class="sp"></span>'+'<a class="icon-btn eco-btn" href="'+(C?'../':'')+'ecosystem.html" title="How it works · 运作方式" aria-label="How it works · 运作方式">🌐<span class="lbl"> <span class="en">How it works</span><span class="zh">运作方式</span></span></a>'+'<a class="icon-btn eco-btn" href="'+(C?'../':'')+'glossary.html" title="Glossary · 词汇表" aria-label="Glossary · 词汇表">📖<span class="lbl"> <span class="en">Glossary</span><span class="zh">词汇表</span></span></a>'+
+    top.innerHTML='<a class="brand" href="'+(C?'../index.html':'index.html')+'"><b></b>TX Learns</a>'+'<button class="icon-btn menu-btn" aria-label="Topics · 主题" aria-expanded="false" aria-controls="topics-nav">☰ <span class="en">Topics</span><span class="zh">主题</span></button>'+'<span class="sp"></span>'+'<a class="icon-btn eco-btn" href="'+(C?'../':'')+'ecosystem.html" title="How it works · 运作方式" aria-label="How it works · 运作方式">🌐<span class="lbl"> <span class="en">How it works</span><span class="zh">运作方式</span></span></a>'+'<a class="icon-btn eco-btn" href="'+(C?'../':'')+'about.html" title="About this site · 关于本站" aria-label="About this site · 关于本站">ℹ️<span class="lbl"> <span class="en">About this site</span><span class="zh">关于本站</span></span></a>'+'<a class="icon-btn eco-btn" href="'+(C?'../':'')+'glossary.html" title="Glossary · 词汇表" aria-label="Glossary · 词汇表">📖<span class="lbl"> <span class="en">Glossary</span><span class="zh">词汇表</span></span></a>'+
       '<div class="seg" role="group" aria-label="Language · 语言"><button data-l="en" lang="en">EN</button><button data-l="zh" lang="zh-Hans">中文</button></div><button class="icon-btn th" aria-label="theme"></button>';
     document.body.insertBefore(top,bar.nextSibling);
     function mark(){top.querySelectorAll('[data-l]').forEach(function(b){var on=b.dataset.l===root.getAttribute('data-lang');b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});var dk=root.getAttribute('data-theme')==='dark',th=top.querySelector('.th');th.textContent=dk?'☀︎':'☾';th.setAttribute('aria-label',dk?'Switch to light theme · 切换到浅色':'Switch to dark theme · 切换到深色')}
@@ -55,6 +55,16 @@
     mark();
 
     var side=document.querySelector('.side'),scrim;if(side){side.id='topics-nav';side.setAttribute('aria-label','Topics · 主题');side.inert=true}
+    if(!C&&!side){
+      /* Pages outside a track (home, How it works, Glossary, About): Topics opens a drawer with the track list. */
+      side=document.createElement('div');side.className='side';side.id='topics-nav';side.setAttribute('aria-label','Topics · 主题');side.inert=true;
+      var tl=(window.TRACKS||[]);
+      side.innerHTML='<div class="side-top"><a class="side-all" href="index.html">⌂ '+t({en:'Home',zh:'首页'})+'</a><button type="button" class="side-close" aria-label="Close topics menu · 关闭主题菜单">✕</button></div>'+tl.map(function(c){return '<a href="'+c.href+'">'+(c.icon?c.icon+' ':'')+t(c.title)+'</a>'}).join('');
+      scrim=document.createElement('div');scrim.className='scrim';scrim.setAttribute('aria-hidden','true');document.body.appendChild(scrim);document.body.appendChild(side);
+      var mb0=top.querySelector('.menu-btn'),tg0=function(o){side.inert=!o;side.classList.toggle('open',o);scrim.classList.toggle('on',o);mb0.setAttribute('aria-expanded',o);if(o)side.querySelector('.side-close').focus();else mb0.focus()};
+      mb0.onclick=function(){tg0(!side.classList.contains('open'))};scrim.onclick=function(){tg0(false)};side.querySelector('.side-close').onclick=function(){tg0(false)};
+      document.addEventListener('keydown',function(e){if(side.classList.contains('open')&&e.key==='Escape')tg0(false)});
+    }
     if(C&&side){
       var NK='learn-nav',ns={};try{ns=JSON.parse(localStorage.getItem(NK)||'{}')}catch(e){}
       var list=(window.TRACKS&&window.TRACKS.length)?window.TRACKS:[{id:C.id,icon:'',title:C.title,href:'agentic-ai/index.html'}];
