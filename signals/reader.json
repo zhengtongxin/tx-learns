@@ -409,20 +409,20 @@
    ]
   },
   "ai-engineer/07-shop-assistant-that-acts.html": {
-   "score": 5,
-   "at": "2026-11-26T05:51:38.227Z",
+   "score": 6,
+   "at": "2026-11-26T05:53:40.043Z",
    "confusing": [
     {
-     "where": "Step 2, Learn and tools box",
-     "why": "The text says the real guard is keeping set_price out of the customer's tools, but the box puts it in the only tools list and never shows the customer version."
+     "where": "Step 3, code box comment",
+     "why": "There is no chat() in any box; the function is run_chat. The comment also says same file while the boxes name three different files (prompt_tools.py, tool_chat.py, screen.py)."
     },
     {
-     "where": "Step 3, screen box comment",
-     "why": "There is no chat() function. The loop is run_chat, which answer_everything calls. A reader searching for chat() is stuck."
+     "where": "Step 2, Learn",
+     "why": "The text says to keep set_price away from customers, but the box puts it in the customer's tools list. Nothing says to remove it before the app is shown to customers."
     },
     {
-     "where": "Step 3, Learn",
-     "why": "Gradio callbacks, .submit and .then are all new, and two writers is not explained. This whole wiring step is copy-only for a newcomer."
+     "where": "Step 3, code box",
+     "why": "The lesson never says why the history is cleaned. A reader will copy it without knowing what it removes."
     }
    ]
   },
@@ -697,38 +697,38 @@
    ]
   },
   "ai-engineer/03-stall-brochure-maker.html": {
-   "score": 7,
-   "at": "2026-11-26T05:51:38.227Z",
+   "score": 6,
+   "at": "2026-11-26T05:53:40.043Z",
    "confusing": [
     {
-     "where": "Step 2, pick_links box",
-     "why": "The box uses client, requests and BeautifulSoup from the Step 1 box but does not say the boxes are one file, so a newcomer cannot tell where they come from."
+     "where": "Step 1, code box",
+     "why": "requests is imported and called, but the text only names BeautifulSoup. A newcomer does not know requests is what downloads the page."
     },
     {
      "where": "Step 1, code box",
-     "why": "Nothing says where the API key goes. OpenAI() reads OPENAI_API_KEY from the environment, and the lesson does not say so."
+     "why": "Where the API key comes from, and what OpenAI() does, is never said in this lesson. The line just appears."
     },
     {
-     "where": "Step 4, stream box",
-     "why": "The demo prints so_far[-40:], so the screen shows only the last 40 characters each time. The idea of redrawing the whole text so far does not show."
+     "where": "Step 4 box and the other three boxes",
+     "why": "Four boxes, four file names, and later boxes use names from earlier ones (brochure_system, build_material). The lesson never says whether they go in one file, or in what order."
     }
    ]
   },
   "ai-engineer/04-comparing-frontier-local-models.html": {
    "score": 6,
-   "at": "2026-11-26T05:51:38.227Z",
+   "at": "2026-11-26T05:53:40.043Z",
    "confusing": [
     {
-     "where": "Step 2, the coin puzzle",
-     "why": "The wording is ambiguous. The 2/3 answer only works for exactly one coin being tails, and the lesson never says that, or why HH stays in the list."
-    },
-    {
-     "where": "Title",
-     "why": "Frontier is in the title and the quiz, but the lesson never says what a frontier model is."
-    },
-    {
      "where": "Step 1, Learn",
-     "why": "Ollama is used before anything says what it is. Step 4 says to run it but still does not explain it, and localhost is never defined."
+     "why": "Base URL is never explained. Localhost and Ollama are used in Step 4 with no meaning given either."
+    },
+    {
+     "where": "Step 1, code box",
+     "why": "os.getenv, environment variables and the .env file are never explained. The comment api_key=\"ollama\" looks like a fake key, and the reader cannot tell if it matters."
+    },
+    {
+     "where": "Step 2, Learn",
+     "why": "The instruction says run only the cloud one, but the loop in the box right below still lists both providers. The reader must edit the box without being told how."
     }
    ]
   },
@@ -752,19 +752,19 @@
   },
   "ai-engineer/06-tools-images-voice.html": {
    "score": 6,
-   "at": "2026-11-26T05:51:38.227Z",
+   "at": "2026-11-26T05:53:40.043Z",
    "confusing": [
     {
+     "where": "Step 3, code box comment",
+     "why": "This contradicts the Learn text, which says the loop must run the right function by name. The loop is left as a comment (functions[...]) and tools is never passed to it, so the new tool would never ru"
+    },
+    {
      "where": "Step 3, Learn",
-     "why": "SQL is never introduced. CREATE TABLE, INSERT OR IGNORE and the ? placeholder appear with no plain explanation, so a newcomer can copy the lines but not read them."
+     "why": "SQLite, SQL, CREATE TABLE, commit and INSERT OR REPLACE are not explained. Only SELECT and the ? placeholder get comments."
     },
     {
-     "where": "Step 3, shop_db box",
-     "why": "The comment says the loop stays the same, but the next line says to call functions[...] in the loop, and that loop change is never shown."
-    },
-    {
-     "where": "Step 4, Learn",
-     "why": "base64 and Pillow (PIL) are new names. A newcomer does not know base64 is a way to write image bytes as text."
+     "where": "Step 2, Learn",
+     "why": "Six instructions are packed into one paragraph. This is the hardest step in the lesson and the one most likely to be skipped."
     }
    ]
   },
@@ -842,19 +842,19 @@
   },
   "ai-engineer/12-code-translator.html": {
    "score": 7,
-   "at": "2026-11-26T05:51:38.227Z",
+   "at": "2026-11-26T05:53:40.043Z",
    "confusing": [
     {
+     "where": "Step 2, code box comment",
+     "why": "Step 1 is named prompts.py and Step 2 is named run_both.py, but the comment says they are the same file. The reader cannot tell whether to merge them."
+    },
+    {
      "where": "Step 3, Learn",
-     "why": "The code prints tokens only. No price is given for any model, so the cost part of the ranking cannot be computed from the lesson."
+     "why": "Ranking needs a price per token, and the lesson never says where to find it. compare.py prints speedup and tokens but no cost."
     },
     {
-     "where": "Project card, what it does",
-     "why": "The boxes are named run_both.py and compare.py. The reader cannot tell which box is translate.py."
-    },
-    {
-     "where": "Takeaways",
-     "why": "Every model on the shortlist is an OpenAI model, and open models are never introduced or tested, so this claim is not shown."
+     "where": "Step 2 quiz and code box",
+     "why": "The quiz answer says translate_and_run returns None, None, but the code returns three values. The meaning of the subprocess return code is never explained."
     }
    ]
   },
@@ -931,20 +931,20 @@
    ]
   },
   "ai-engineer/17-company-knowledge-helper.html": {
-   "score": 6,
-   "at": "2026-11-26T05:51:38.227Z",
+   "score": 7,
+   "at": "2026-11-26T05:53:40.043Z",
    "confusing": [
     {
-     "where": "Step 4, eval box",
-     "why": "That line is commented out, and json is never imported in the box, so the box fails with tests undefined as written."
+     "where": "Step 4, code box",
+     "why": "The tests line is only a comment, so tests is undefined as the box stands. json is not imported in this box, and the format of tests.jsonl is described only in a comment."
     },
     {
-     "where": "Project card, what it does",
-     "why": "The code prints hits per category. MRR is never defined or computed here, so the output will not match the card."
+     "where": "Step 1, code box",
+     "why": "Chroma, langchain and the Document class are named in code but never introduced in the text, which only says the store. The reader knows libraries are new to them."
     },
     {
      "where": "Step 1, Learn",
-     "why": "ChatOpenAI, Chroma, Document and with_structured_output are new names. Their roles are only in code comments, and the Learn text does not name them."
+     "why": "In parallel is not explained: the thread pool runs four model calls at once. That is why RateLimitError appears later, and the link is never made."
     }
    ]
   },
