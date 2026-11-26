@@ -392,19 +392,19 @@
   },
   "agentic-ai/23-many-mcp-servers.html": {
    "score": 7,
-   "at": "2026-11-25T12:53:06.977Z",
+   "at": "2026-11-26T04:21:26.078Z",
    "confusing": [
     {
-     "where": "Step 1, Learn list",
-     "why": "A vector server is used in Step 1, but what a vector or an embedding is only comes up in Step 3."
+     "where": "Step 3, Learn",
+     "why": "Qdrant (a vector database) is never said. Neither is what qdrant-store and qdrant-find do, so the step is hard to follow."
     },
     {
-     "where": "Step 2, Learn list",
-     "why": "Entity, observation and relation are never defined, so the reader cannot tell whether they are data types or plain words."
+     "where": "Step 2, the keys line",
+     "why": "Tavily is never said to be a web search service, and there is no hint where to get its key."
     },
     {
-     "where": "Step 3, Learn list",
-     "why": "RAG is never spelled out (retrieval-augmented generation), and this is the first place the term appears."
+     "where": "Step 3, last code box",
+     "why": "The last box builds an agent and never runs it. The reader cannot tell what to run or what the servers list is for."
     }
    ]
   },
@@ -625,88 +625,92 @@
    ]
   },
   "agentic-ai/22-mcp-server-and-client.html": {
-   "score": 6,
-   "at": "2026-11-25T13:07:39.856Z",
+   "score": 7,
+   "at": "2026-11-26T04:21:26.078Z",
    "confusing": [
     {
-     "where": "Figure, Step 2",
-     "why": "The server has no read_tab tool. It offers a resource, and the client calls read_resource. I was unsure which name is real."
+     "where": "Step 2, agent and client code",
+     "why": "uv starts the server, but the install line is pip only and uv is not in the lesson's prerequisites. The first run would fail with uv not found."
     },
     {
-     "where": "Step 2, raw client code",
-     "why": "The step says to set cwd so the server finds tabs.py, but this copy leaves cwd out. Copying it gives the error the callout describes."
+     "where": "Step 2, figure",
+     "why": "The server has no read_tab tool. read_tab is the client's own helper, which calls read_resource. A reader would look for a tool that does not exist."
     },
     {
-     "where": "Install line and callout",
-     "why": "mcp<2 appears in the install line before any reason. The reason only comes at the end, and I did not know what 2.0 was."
+     "where": "Step 2, client code",
+     "why": "It is an async function and nothing calls it: no asyncio.run line and no output shown, so the reader cannot run the client."
     }
    ]
   },
   "agentic-ai/24-paper-trading.html": {
    "score": 6,
-   "at": "2026-11-26T02:30:51.249Z",
+   "at": "2026-11-26T04:21:26.078Z",
    "confusing": [
     {
-     "where": "Project card, Run it",
-     "why": "trading_floor.py ends with asyncio.run(floor()), which takes no name and loops forever. The accounts are saved in accounts.json, not floor.db, so the card and the code disagree."
+     "where": "Now make it yours",
+     "why": "The body never says how to start the floor, the API or the screen. The card's command does not match the code: asyncio.run(floor()) takes no name."
     },
     {
-     "where": "Step 3, tracing",
-     "why": "add_trace_processor(FloorLog()) runs only when this module is imported, and no step imports it, so no log appears."
+     "where": "Step 2, code box",
+     "why": "Step 2 imports floor.tracing, which Step 3 only writes, so the first run fails with a missing module."
     },
     {
-     "where": "Project card, Deliver and accept",
-     "why": "No step builds the API (fastapi, uvicorn) or the dashboard, but the card's checks need both."
+     "where": "Step 1, quiz",
+     "why": "This Step 1 quiz is answered with change_strategy, which first appears in Step 3."
     }
    ]
   },
   "ai-engineer/01-what-an-llm-call-is.html": {
-   "score": 8,
-   "at": "2026-11-25T13:07:39.856Z",
+   "score": 6,
+   "at": "2026-11-26T04:21:26.078Z",
    "confusing": [
     {
-     "where": "Step 1",
-     "why": "POST, JSON, endpoint and header are used before they are explained. I could not picture what POST means."
+     "where": "Step 1, code box",
+     "why": "The answer sits several levels deep in the JSON. The lesson only says the answer comes back as JSON, so the path looks like magic."
     },
     {
-     "where": "Step 1 code",
-     "why": "The path choices, then [0], then message, then content is never explained, so I could not find where the answer is."
+     "where": "Step 3, first paragraph",
+     "why": "Step 1 used raw requests. Step 3 switches to the openai package without saying it is a change of tool, so the two styles look like they do different things."
     },
     {
-     "where": "What I got wrong",
-     "why": "The code is a .py file, yet the lesson talks about cells and restarting a notebook. I did not know whether I was in a notebook."
+     "where": "What I got wrong callout and Common errors",
+     "why": "The code is a .py file, yet the text talks about notebooks and cells that were never set up. A newcomer does not know where to run the code."
     }
    ]
   },
   "ai-engineer/02-tokens-context-memory.html": {
    "score": 7,
-   "at": "2026-11-25T13:07:39.856Z",
+   "at": "2026-11-26T04:21:26.078Z",
    "confusing": [
     {
-     "where": "Step 4",
-     "why": "RAG is an acronym dropped in without meaning. I did not know what it stands for."
+     "where": "Step 1, code box",
+     "why": "tiktoken and o200k_base are never explained. I could not tell what the tokenizer is or why the name matters."
     },
     {
-     "where": "Now make it yours",
-     "why": "The lesson counts tokens in one string with tiktoken. It never shows how to count a whole message list."
+     "where": "Step 4, Learn",
+     "why": "RAG is promised for later but never expanded, so a newcomer cannot tell what is coming."
     },
     {
-     "where": "Step 1 code",
-     "why": "Encoding and o200k_base are not explained, and it is not said that different model makers count differently."
+     "where": "Common errors",
+     "why": "Same notebook-and-cells gap as lesson 01: the code is a .py file and the reader is never told where to run it."
     }
    ]
   },
   "ai-engineer/03-stall-brochure-maker.html": {
-   "score": 7,
-   "at": "2026-11-25T13:11:05.398Z",
+   "score": 6,
+   "at": "2026-11-26T04:21:26.078Z",
    "confusing": [
     {
-     "where": "Step 2",
-     "why": "It is highlighted in the code, but the text never says what it does or that the prompt must still mention JSON."
+     "where": "Step 4, Learn",
+     "why": "The code yields the whole text so far on every chunk (yield text), not one new piece. The explanation contradicts the code."
     },
     {
-     "where": "Step 4 quiz",
-     "why": "The quiz asks why `or \"\"` is needed after delta.content, but nothing in the lesson says that some chunks have no text."
+     "where": "Step 2, code box",
+     "why": "This line is highlighted as a change but its parameter is never explained. It is the line that forces JSON output."
+    },
+    {
+     "where": "Step 2, quiz",
+     "why": "The question asks what you need before chosen[0][\"url\"], but pick_links already calls json.loads in the code above. The answer looks already done."
     }
    ]
   },
