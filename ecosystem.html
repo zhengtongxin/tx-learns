@@ -466,7 +466,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     section.querySelectorAll('.attention-card').forEach(function(el){if(!keep[el.id])el.remove()});historyBox.hidden=!earlier.length;
     if(focus){var moved=document.getElementById(focus.id);if(moved&&historyList.contains(moved))historyBox.open=true}
     if(anchor){var anchored=document.getElementById(anchor.id),rect=anchored&&anchored.getBoundingClientRect();if(rect&&rect.width){var dy=rect.top-anchor.top;if(Math.abs(dy)>1)window.scrollBy(0,dy)}}
-    if(focus&&document.activeElement!==active){var card=document.getElementById(focus.id),target=card&&(focus.summary?card.querySelector('summary'):focus.href?Array.from(card.querySelectorAll('a')).find(function(a){return a.getAttribute('href')===focus.href}):card);if(!target)target=card||document.getElementById('attention-heading');target.focus({preventScroll:true})}
+    if(focus&&document.activeElement!==active){var card=document.getElementById(focus.id),target=card&&(focus.summary?card.querySelector('summary'):focus.href?Array.from(card.querySelectorAll('a')).find(function(a){return a.getAttribute('href')===focus.href}):card);if(!target)target=card||section.querySelector('summary');if(target)target.focus({preventScroll:true})}
     else if(active===historyBox.querySelector('summary')&&historyBox.hidden)section.querySelector('summary').focus({preventScroll:true})}
   function V(x){return typeof x==='string'?esc(x):t(esc(x[0]),esc(x[1]))}
   function specOf(a){return '<dl class="spec">'+[[['Runs','触发'],a.runs],[['Output','产出'],a.output]].map(function(r){return '<dt>'+V(r[0])+'</dt><dd>'+V(r[1])+'</dd>'}).join('')+'</dl>'}
