@@ -263,14 +263,41 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 .bcn .ic{width:34px;height:34px;border-radius:10px;font-size:18px}
 .bcn b{font-size:14px}
 @media(prefers-reduced-motion:reduce){.bcn,#guards .guard .gi{transition:none}.bcn:hover{transform:none}}
+/* Attention: decisions first, technical reports only when opened. */
+#attention{scroll-margin-top:68px}
+.attention-status{min-height:1.6em}.eco section>p.attention-status{font-size:12.5px;text-wrap:wrap;margin:12px 0;color:var(--mut)}
+.attention-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:14px;list-style:none;padding:0;margin:18px 0 0}
+.attention-card{--case:var(--mut);min-width:0;padding:16px 18px;border:1px solid var(--line);border-left:3px solid var(--case);border-radius:10px;background:var(--glass);scroll-margin-top:90px;overflow-wrap:anywhere}
+.attention-card[data-kind=action]{--case:var(--bad)}.attention-card[data-kind=auto]{--case:var(--warn)}.attention-card[data-kind=resolved]{--case:var(--ok)}
+.attention-card:target,.attention-card:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+.attention-kind{display:inline-block;margin:0 0 9px;padding:3px 8px;border:1px solid color-mix(in srgb,var(--case) 65%,var(--line));border-radius:5px;font-size:11.5px;font-weight:700;color:var(--fg);background:color-mix(in srgb,var(--case) 10%,transparent)}
+.attention-card h3{margin:0;font-size:16px;line-height:1.4;letter-spacing:-.01em}.attention-card .attention-agent{margin:6px 0 12px;font-size:12px;line-height:1.5;color:var(--mut)}
+.attention-card .attention-agent b{font-weight:600;color:var(--fg)}.attention-card .attention-age{display:block;margin-top:3px}
+.attention-facts{display:grid;grid-template-columns:auto minmax(0,1fr);gap:7px 12px;margin:0;font-size:13px;line-height:1.55}.attention-facts dt{color:var(--mut)}.attention-facts dd{min-width:0;margin:0}.attention-facts dd:last-child{font-weight:600}
+.attention-links{display:flex;flex-wrap:wrap;gap:0 16px;margin-top:8px}.attention-links a{display:inline-flex;align-items:center;min-height:44px;font-size:12.5px;font-weight:600;color:var(--acc2);text-underline-offset:3px}
+.eco .attention-history{margin:18px 0 0;padding:0;border:0;border-top:1px solid var(--line);border-radius:0;background:none}.attention-history>summary{min-height:44px;box-sizing:border-box;padding:13px 0;font-size:13px;font-weight:600;cursor:pointer;color:var(--mut)}.attention-history .attention-list{margin-top:4px}
+.attention-excerpt{margin:8px 0 12px;font-size:12.5px;line-height:1.55;color:var(--fg)}.attention-excerpt-label{display:block;margin-bottom:3px;font-size:10.5px;color:var(--mut)}.attention-excerpt .attention-truncated{display:block;margin-top:4px;color:var(--mut);font-size:11.5px}
+.eco .attention-report{margin:4px 0 0;padding:0;border:0;border-top:1px solid var(--line);border-radius:0;background:none}.attention-report summary{min-height:44px;padding:11px 0;box-sizing:border-box;font-size:12px;line-height:1.5;font-weight:500;color:var(--mut);cursor:pointer}.attention-report p{margin:0 0 4px;font-size:12.5px;line-height:1.6;white-space:pre-wrap}
+.attention-jump{font-size:12px;line-height:1.5}.tip p.attention-jump{margin:8px 0 0;font-size:12px}.attention-jump a{color:var(--acc2);font-weight:600;text-underline-offset:3px}.olist p.attention-jump{margin:3px 0 4px}.olist .attention-jump a{display:inline-flex;align-items:center;min-height:32px}
+.panel .attention-hint{font:700 9px var(--sans);fill:var(--fg)}
+@media(max-width:560px){.attention-card{padding:14px}.attention-facts{gap:6px 10px}.attention-list{gap:10px}}
 </style><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://tx-learns.vercel.app/ecosystem.html","url":"https://tx-learns.vercel.app/ecosystem.html","name":"How TX Learns works","description":"My learning notes, turned into lessons by AI. They go live after automatic checks and review, get watched afterwards, and a merge that breaks the site is rolled back automatically.","inLanguage":["en","zh"],"isPartOf":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"How TX Learns works","item":"https://tx-learns.vercel.app/ecosystem.html"}]}]}</script></head><body>
 <main class="wide eco">
 <header class="stage compact eco-hero"><div class="orb"></div>
 <span class="eyebrow"><span class="en">Behind the scenes · system view</span><span class="zh">幕后 · 系统视图</span></span>
 <h1 class="mega"><span class="en">From something I learn to a page you can read.</span><span class="zh">从我学到的东西，到你能读的一页。</span></h1>
 <p class="sub"><span class="en">My notes, turned into lessons by AI, checked before and after going live.</span><span class="zh">我的学习笔记，由 AI 整理成课，上线前后都有检查。</span></p>
-<nav class="pnav" aria-label="On this page"><a href="#system"><span class="en">System</span><span class="zh">系统</span></a><a href="#guardrails"><span class="en">Guardrails</span><span class="zh">护栏</span></a><a href="#concepts"><span class="en">Ideas</span><span class="zh">概念</span></a><a href="#changes"><span class="en">Changes</span><span class="zh">更新</span></a></nav>
+<nav class="pnav" aria-label="On this page"><a href="#attention"><span class="en">Attention</span><span class="zh">需要关注</span></a><a href="#system"><span class="en">System</span><span class="zh">系统</span></a><a href="#guardrails"><span class="en">Guardrails</span><span class="zh">护栏</span></a><a href="#concepts"><span class="en">Ideas</span><span class="zh">概念</span></a><a href="#changes"><span class="en">Changes</span><span class="zh">更新</span></a></nav>
 </header>
+
+<section id="attention" aria-labelledby="attention-heading">
+<h2 id="attention-heading" tabindex="-1"><span class="en">Attention</span><span class="zh">需要关注</span></h2>
+<p><span class="en">What went wrong, who is handling it, and your next step. Automatic fixes and recovery need evidence.</span><span class="zh">出了什么问题、谁在处理、你下一步做什么。自动处理和恢复，都以实际记录为准。</span></p>
+<p class="attention-status" id="attention-status" role="status"><span class="en">Checking issue records…</span><span class="zh">正在核对问题记录…</span></p>
+<ul class="attention-list" id="attention-list"></ul>
+<details class="attention-history" id="attention-history" hidden><summary><span class="en">Earlier reports</span><span class="zh">较早的报告</span></summary><ul class="attention-list" id="attention-history-list"></ul></details>
+<noscript><p><span class="en">Enable JavaScript to load current issue records. No status has been checked yet.</span><span class="zh">启用 JavaScript 后才能加载当前问题记录；目前尚未核对状态。</span></p></noscript>
+</section>
 
 <section id="system">
 <h2><span class="en">How a lesson gets made</span><span class="zh">一课是怎么做出来的</span></h2>
@@ -386,12 +413,62 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     if(s<60)return ['just now','刚刚'];var m=Math.round(s/60);if(m<60)return [m+' min ago',m+' 分钟前'];
     var h=Math.round(m/60);if(h<36)return [h+' h ago',h+' 小时前'];var d=Math.round(h/24);return [d+' days ago',d+' 天前']}
   function ago(iso){var p=agoP(iso);return p[0]?t(p[0],p[1]):''}
-  var PP={run:['working','运行中'],ok:['passed','通过'],flag:['flagged','有问题'],fail:['failed','失败'],skip:['skipped','跳过']};
+  var PP={run:['working','运行中'],ok:['passed','通过'],flag:['flagged','有问题'],fail:['failed','失败'],skip:['skipped','跳过'],unknown:['awaiting update','待确认']};
   var PILL={};Object.keys(PP).forEach(function(k){PILL[k]=t(PP[k][0].replace(/^./,function(c){return c.toUpperCase()}),PP[k][1])});
-  // An agent is working while its run has a fresh `now` mark (yellow); a mark older than 30 minutes is a run that never reported.
-  function working(s){return !!(s&&s.now&&(Date.now()-new Date(s.now.at))<30*60e3)}
-  function stOf(s){return working(s)?'run':s&&PP[s.state]?s.state:''}
-  function atOf(s){return working(s)?s.now.at:s&&s.at}
+  // A stale working mark is not evidence that work is still happening, or that an old success still holds.
+  function working(s){var age=s&&s.now?Date.now()-new Date(s.now.at):NaN;return age>=0&&age<30*60e3}
+  function stOf(s){if(!s)return '';if(s.uncertain===true)return 'unknown';if(s.now)return working(s)?'run':'unknown';if(s.state==='run'){var age=Date.now()-new Date(s.at);return age>=0&&age<30*60e3?'run':'unknown'}return Object.prototype.hasOwnProperty.call(PP,s.state)?s.state:''}
+  function atOf(s){return s&&s.now?s.now.at:s&&s.at}
+  var ATTENTION_BY_AGENT=Object.create(null),ATTENTION_CACHE=null;
+  var ATTENTION_KINDS={action:['Needs you','需要你处理'],auto:['Being handled automatically','正在自动处理'],resolved:['Recovered','已恢复'],unknown:['Needs confirmation','待确认']};
+  var ATTENTION_SHORT={action:['Needs you','需处理'],auto:['Being handled','处理中'],unknown:['Unconfirmed','待确认']};
+  function plain(v,max){return typeof v==='string'?v.trim().slice(0,max):''}
+  function iso(v){if(typeof v!=='string'||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(v))return '';var ms=Date.parse(v);return Number.isFinite(ms)&&ms<=Date.now()+5*60e3?new Date(ms).toISOString():''}
+  function pair(v,fallback,max){return v&&plain(v.en,max)&&plain(v.zh,max)?[plain(v.en,max),plain(v.zh,max)]:fallback}
+  function pairHTML(v){return t(esc(v[0]),esc(v[1]))}
+  // Only evidence links in this repository. No redirects, credentials, queries, or arbitrary destinations.
+  function evidenceURL(v){return typeof v==='string'&&v.length<=500&&v.trim()===v&&!/[\r\n]/.test(v)&&/^https:\/\/github\.com\/zhengtongxin\/tx-learns\/(?:(?:pull|issues)\/[1-9]\d*(?:#issuecomment-[1-9]\d*)?|actions\/runs\/[1-9]\d*|commit\/[a-f0-9]{40}(?:#commitcomment-[1-9]\d*)?)$/.test(v)?v:''}
+  function attentionId(id){return 'attention-'+Array.from(id).map(function(c){return c.codePointAt(0).toString(16)}).join('-')}
+  function attentionLink(a){var item=ATTENTION_BY_AGENT[a.id],label=item&&ATTENTION_SHORT[item.kind];return label?'<p class="attention-jump"><a href="#'+item.anchor+'" data-attention-jump>'+pairHTML(label)+' · '+t('view issue →','查看问题 →')+'</a></p>':''}
+  function attentionCard(item){var a=NAME[item.agent],state=item.state==='run'&&(!item.at||Date.now()-Date.parse(item.at)>=30*60e3)?'unknown':item.state;
+    var row=function(en,zh,value){return '<dt>'+t(en,zh)+'</dt><dd>'+pairHTML(value)+'</dd>'},text=item.detail.replace(/\s+/g,' '),excerpt=text.slice(0,150),long=text.length>150;
+    return '<span class="attention-kind">'+pairHTML(ATTENTION_KINDS[item.kind])+'</span><h3>'+pairHTML(item.title)+'</h3><p class="attention-agent"><b>'+t(a.en,a.zh)+'</b> · '+t('Run status: ','运行状态：')+(PILL[state]||PILL.unknown)+'<span class="attention-age">'+(item.at?t('Evidence: ','记录时间：')+'<time datetime="'+item.at+'">'+ago(item.at)+'</time>':t('Evidence time unavailable','记录时间未知'))+'</span></p>'+
+      (text?'<p class="attention-excerpt"><span class="attention-excerpt-label">'+t('Report excerpt (English)','报告摘录（英文）')+'</span><span lang="en">'+esc(excerpt)+(long?'…':'')+'</span>'+(item.detailTruncated?'<span class="attention-truncated">'+t('Excerpt only; open the source for the full report.','仅为摘录；完整报告请打开来源记录。')+'</span>':'')+'</p>':'')+
+      '<dl class="attention-facts">'+row('Impact','影响',item.impact)+row('Owner','处理人',item.owner)+row('Next step','下一步',item.next)+'</dl>'+
+      (item.links.length?'<div class="attention-links">'+item.links.map(function(link){return '<a href="'+esc(link.url)+'" target="_blank" rel="noopener noreferrer">'+pairHTML(link.label)+' <span aria-hidden="true">↗</span></a>'}).join('')+'</div>':'')+
+      (long?'<details class="attention-report"><summary>'+t('More report text (English)','更多报告内容（英文）')+'</summary><p lang="en">'+esc(item.detail)+'</p></details>':'')}
+  function drawAttention(data){var raw=data&&data.attention,available=!!(raw&&Array.isArray(raw.items));if(available)ATTENTION_CACHE=raw;else raw=ATTENTION_CACHE;
+    var checked=iso(raw&&raw.checkedAt),stale=!checked||Date.now()-Date.parse(checked)>30*60e3,offline=!!data&&data.connected!==true,complete=available&&raw.complete===true&&!stale&&!offline;
+    var seen=Object.create(null),items=[],bad=false;
+    ((raw&&Array.isArray(raw.items))?raw.items:[]).slice(0,100).forEach(function(x){
+      if(!x||typeof x.id!=='string'||!x.id||x.id.length>160||typeof x.agent!=='string'||!Object.prototype.hasOwnProperty.call(NAME,x.agent)||seen[x.id]){bad=true;return}seen[x.id]=true;
+      var validKind=typeof x.kind==='string'&&Object.prototype.hasOwnProperty.call(ATTENTION_KINDS,x.kind),kind=validKind?x.kind:'unknown',at=iso(x.at),title=pair(x.title,['Issue needs confirmation','问题有待确认'],160),impact=pair(x.impact,['Impact not confirmed.','影响尚未确认。'],260),owner=pair(x.owner,['Not confirmed','尚未确认'],160),next=pair(x.next,['Open the evidence to check what happened.','打开记录，确认发生了什么。'],300),links=[];
+      if(!validKind||!at||!pair(x.title,null,160)||!pair(x.impact,null,260)||!pair(x.owner,null,160)||!pair(x.next,null,300)){bad=true;kind='unknown';owner=['Not confirmed','尚未确认'];next=['Handling status is not confirmed. Check the linked record before taking action.','尚未确认处理状态，请先查看关联记录。']}
+      if(stale||!available||offline){kind='unknown';owner=['Current owner not confirmed','当前处理人待确认'];next=['This record may be out of date. Open the evidence to check the current state.','这条记录可能已过时，请打开记录核对当前状态。']}
+      if(!validKind){owner=['Not confirmed','尚未确认'];next=['Handling status is not confirmed. Check the linked record before taking action.','尚未确认处理状态，请先查看关联记录。']}
+      (Array.isArray(x.links)?x.links:[]).slice(0,6).forEach(function(link){var url=evidenceURL(link&&link.url);if(url&&!links.some(function(l){return l.url===url}))links.push({url:url,label:pair(link.label,['View evidence','查看记录'],80)})});
+      items.push({anchor:attentionId(x.id),agent:x.agent,kind:kind,state:typeof x.state==='string'&&Object.prototype.hasOwnProperty.call(PP,x.state)?x.state:'unknown',at:at,title:title,impact:impact,owner:owner,next:next,detail:plain(x.detail,400),detailTruncated:x.detailTruncated===true||typeof x.detail==='string'&&x.detail.trim().length>400,historical:x.historical===true,links:links})});
+    if(raw&&Array.isArray(raw.items)&&raw.items.length>100)bad=true;if(bad)complete=false;
+    var order={action:0,auto:1,unknown:2,resolved:3};items.sort(function(a,b){return Number(a.historical)-Number(b.historical)||order[a.kind]-order[b.kind]});ATTENTION_BY_AGENT=Object.create(null);
+    var current=items.filter(function(item){return !item.historical}),earlier=items.filter(function(item){return item.historical});
+    current.forEach(function(item){if(item.kind!=='resolved'&&!ATTENTION_BY_AGENT[item.agent])ATTENTION_BY_AGENT[item.agent]=item});
+    var status=data===null?t('Checking issue records…','正在核对问题记录…'):!available||offline?t('Issue records are unavailable. This does not mean everything is healthy.','暂时无法核对问题记录，不代表一切正常。'):stale?t('Issue records are out of date; current handling needs confirmation.','问题记录已过时，当前处理进展需要确认。'):!complete?t('Some records could not be checked. The list may be incomplete.','部分记录未能核对，下方列表可能不完整。'):current.length?t('Based on checked issue and repair records.','依据已核对的问题与修复记录。'):earlier.length?t('No new issues in the checked records. Earlier reports below may still need confirmation.','已核对的记录中暂无新问题；下方较早的报告可能仍需确认。'):t('No current issues in the checked records.','已核对的记录中，暂无当前问题。');
+    if(checked)status+=' · '+t('Checked ','核对于 ')+'<time datetime="'+checked+'">'+ago(checked)+'</time>';
+    if(raw&&raw.repairSearchLimited)status+=' · '+t('Repair matching covers the latest recorded PRs only.','自动修复匹配仅覆盖最近记录的 PR。');
+    var note=document.getElementById('attention-status');if(note.innerHTML!==status)note.innerHTML=status;
+    // Both lists reuse keyed cards; the history wrapper itself is never replaced during polling.
+    var section=document.getElementById('attention'),list=document.getElementById('attention-list'),historyBox=document.getElementById('attention-history'),historyList=document.getElementById('attention-history-list'),active=document.activeElement,focused=section.contains(active),host=focused&&active.closest('.attention-card'),focus=host?{id:host.id,href:active.getAttribute('href'),summary:active.tagName==='SUMMARY'}:null,keep=Object.create(null),anchor=null;
+    section.querySelectorAll('.attention-card').forEach(function(el){if(anchor)return;var r=el.getBoundingClientRect();if(r.width&&r.top<innerHeight&&r.bottom>80)anchor={id:el.id,top:r.top}});
+    function render(list,entries){entries.forEach(function(item,index){var el=document.getElementById(item.anchor);if(!el||!section.contains(el)){el=document.createElement('li');el.id=item.anchor;el.className='attention-card';el.tabIndex=-1}
+      var html=attentionCard(item),report=el.querySelector('details'),open=!!(report&&report.open);el.dataset.kind=item.kind;
+      if(el._attentionHTML!==html){el._attentionHTML=html;el.innerHTML=html;if(open&&el.querySelector('details'))el.querySelector('details').open=true}
+      keep[item.anchor]=true;if(list.children[index]!==el)list.insertBefore(el,list.children[index]||null)})}
+    render(list,current);render(historyList,earlier);
+    section.querySelectorAll('.attention-card').forEach(function(el){if(!keep[el.id])el.remove()});historyBox.hidden=!earlier.length;
+    if(focus){var moved=document.getElementById(focus.id);if(moved&&historyList.contains(moved))historyBox.open=true}
+    if(anchor){var anchored=document.getElementById(anchor.id),rect=anchored&&anchored.getBoundingClientRect();if(rect&&rect.width){var dy=rect.top-anchor.top;if(Math.abs(dy)>1)window.scrollBy(0,dy)}}
+    if(focus&&document.activeElement!==active){var card=document.getElementById(focus.id),target=card&&(focus.summary?card.querySelector('summary'):focus.href?Array.from(card.querySelectorAll('a')).find(function(a){return a.getAttribute('href')===focus.href}):card);if(!target)target=card||document.getElementById('attention-heading');target.focus({preventScroll:true})}
+    else if(active===historyBox.querySelector('summary')&&historyBox.hidden)document.getElementById('attention-heading').focus({preventScroll:true})}
   function V(x){return typeof x==='string'?esc(x):t(esc(x[0]),esc(x[1]))}
   function specOf(a){return '<dl class="spec">'+[[['Runs','触发'],a.runs],[['Output','产出'],a.output]].map(function(r){return '<dt>'+V(r[0])+'</dt><dd>'+V(r[1])+'</dd>'}).join('')+'</dl>'}
   // Desktop popups and phone inline details share the same short explanation. Run summaries stay in the feed.
@@ -445,6 +522,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
       o+='<text class="t" x="'+f(g.l+12)+'" y="'+ty+'"'+(a.en.length>20?' style="font-size:11px"':'')+'>'+ts(a.en.replace(/ agent$/,''),a.zh.replace(/ agent$/,''))+'</text>';
       o+=(run?'<circle class="ring" cx="'+f(g.l+17)+'" cy="'+(dy-3.5)+'" r="4.5"/>':'')+'<circle class="dot '+st+'" cx="'+f(g.l+17)+'" cy="'+(dy-3.5)+'" r="4.5"/>';
       o+='<text class="hx" x="'+f(g.l+28)+'" y="'+dy+'">agent</text>';
+      var issue=ATTENTION_BY_AGENT[a.id],hint=issue&&ATTENTION_SHORT[issue.kind];if(hint)o+='<text class="attention-hint" x="'+f(g.r-10)+'" y="'+dy+'" text-anchor="end">'+ts(hint[0],hint[1])+'</text>';
       o+='<text class="hx" x="'+f(g.l+12)+'" y="'+(g.y+9)+'">'+ts(a.on[0],a.on[1])+'</text>';
       o+='<text class="m" x="'+f(g.l+12)+'" y="'+(g.y+26)+'">'+ts(stl[0],stl[1])+'</text>';
       if(a.tg)o+=plane(g.r-14,g.b-13,!a.tga,'Telegram: '+a.tg[0])}
@@ -509,7 +587,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     function li(id){var pl=PLAT[id]===3||PLAT[id]===4?'<span class="lk">'+COLS[PLAT[id]][0]+'</span>':'',n=N[id],a=n.agent&&NAME[n.agent],s=a&&S[a.id],st=stOf(s);
       if(n.tg){var nm=function(L){return L.map(function(a){return a.en.replace(/ agent$/,'')}).join(', ')},nz=function(L){return L.map(function(a){return a.zh.replace(/ agent$/,'')}).join('、')},al=TG().filter(function(a){return a.tga}),pr=TG().filter(function(a){return !a.tga});
         return '<li class="it">'+t('Telegram → me','Telegram → 我')+'<small>'+t('every run: '+nm(al),'每次运行：'+nz(al))+'</small><small>'+t('only on a problem: '+nm(pr),'只在出问题时：'+nz(pr))+'</small></li>'}
-      if(a)return '<li'+(FS[id]?' data-s="'+FS[id]+'"':'')+' class="it ag'+(OPEN===a.id?' open':'')+'" style="--h:'+a.hue+'" data-agent="'+a.id+'"'+(n.seq?' data-n="'+n.seq+'"':'')+'><button class="ob" aria-expanded="'+(OPEN===a.id)+'"><span class="st '+st+'"></span>'+t(a.en,a.zh)+pl+'</button><small class="hx">'+t(a.on[0],a.on[1])+'</small><small>'+(s?(PILL[st]||'')+' · '+ago(atOf(s))+runsOf(s):LIVE?t('no runs yet','还没运行'):t('status offline','状态离线'))+'</small>'+(a.tg?'<small class="tgl">✈ '+t('Telegram: '+a.tg[0],'Telegram：'+a.tg[1])+'</small>':'')+'<div class="more">'+detailsOf(a)+'</div></li>';
+      if(a)return '<li'+(FS[id]?' data-s="'+FS[id]+'"':'')+' class="it ag'+(OPEN===a.id?' open':'')+'" style="--h:'+a.hue+'" data-agent="'+a.id+'"'+(n.seq?' data-n="'+n.seq+'"':'')+'><button class="ob" aria-expanded="'+(OPEN===a.id)+'"><span class="st '+st+'"></span>'+t(a.en,a.zh)+pl+'</button><small class="hx">'+t(a.on[0],a.on[1])+'</small><small>'+(s?(PILL[st]||'')+' · '+ago(atOf(s))+runsOf(s):LIVE?t('no runs yet','还没运行'):t('status offline','状态离线'))+'</small>'+(a.tg?'<small class="tgl">✈ '+t('Telegram: '+a.tg[0],'Telegram：'+a.tg[1])+'</small>':'')+'<div class="more">'+detailsOf(a)+attentionLink(a)+'</div></li>';
       return '<li'+(FS[id]?' data-s="'+FS[id]+'"':'')+' class="it"'+(n.seq?' data-n="'+n.seq+'"':'')+'>'+t(esc(n.en),esc(n.zh))+pl+(n.lock?'<span class="lk">'+t('REQUIRED','必过')+'</span>':'')+'<small>'+t(esc(n.m[0]),esc(n.m[1]))+'</small></li>'}
     var lh=L.map(function(l,i){return '<li class="h">0'+(i+1)+' · '+t(l[0],l[1])+'</li>'+l[2].map(li).join('')}).join('');
     if(lh===LASTL)return;LASTL=lh;document.getElementById('ov-list').innerHTML=lh;
@@ -535,7 +613,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
   function showTip(el,S,pin){var a=NAME[el.dataset.agent],s=S[a.id];
     document.querySelectorAll('#ov .hot').forEach(function(x){x.classList.remove('hot')});
     PIN=pin?a.id:'';TIP.classList.toggle('pin',pin);TIP.style.setProperty('--h',a.hue||'var(--mut)');
-    TIP.innerHTML='<button class="x" aria-label="Close">×</button><h5>'+t(a.en,a.zh)+(s&&PILL[stOf(s)]?' · '+PILL[stOf(s)]:a.later?' · '+t('planned','计划中'):'')+(s?' · '+ago(atOf(s))+runsOf(s):'')+'</h5>'+detailsOf(a);
+    TIP.innerHTML='<button class="x" aria-label="Close">×</button><h5>'+t(a.en,a.zh)+(s&&PILL[stOf(s)]?' · '+PILL[stOf(s)]:a.later?' · '+t('planned','计划中'):'')+(s?' · '+ago(atOf(s))+runsOf(s):'')+'</h5>'+detailsOf(a)+attentionLink(a);
     TIP.querySelector('.x').onclick=hideTip;
     TIP.classList.add('on');var r=el.getBoundingClientRect(),tw=TIP.offsetWidth,th=TIP.offsetHeight,W=document.documentElement.clientWidth;
     var x=Math.max(10,Math.min(r.left+r.width/2-tw/2,W-tw-10)),y=r.bottom+8;
@@ -562,6 +640,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
   function hideTip(){clearTimeout(HT);PIN='';TIP.classList.remove('on','pin');document.querySelectorAll('#ov .hot,.nhot').forEach(function(x){x.classList.remove('hot','nhot')})}
   document.addEventListener('click',function(ev){if(PIN&&!TIP.contains(ev.target))hideTip()});
   document.addEventListener('keydown',function(ev){if(ev.key==='Escape')hideTip()});
+  document.addEventListener('click',function(ev){var a=ev.target.closest('a[data-attention-jump]');if(!a)return;var id=a.getAttribute('href').slice(1),card=document.getElementById(id);if(!card)return;ev.preventDefault();hideTip();var historyBox=card.closest('.attention-history');if(historyBox)historyBox.open=true;history.replaceState(null,'','#'+id);card.scrollIntoView({block:'start'});card.focus({preventScroll:true})});
 
   // Knowledge base line comes from the track's lessons.js, loaded after site.js has set up the page (so it stays a home-level page).
   (function loadTopics(){
@@ -615,7 +694,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
       return '<li class="fi"><details open><summary><span class="dot '+st+'"></span><span class="tx"><b>'+t(a.en,a.zh)+'</b> · '+(PILL[st]||'')+'</span><span class="tm">'+ago(x.h.at)+'</span></summary><p class="fd"><span class="fl">'+t('Detail (written in English)','详情（英文原文）')+'</span> '+esc(x.h.summary)+'</p></details></li>'}).join('');if(fh!==LASTF){LASTF=fh;el.innerHTML=fh}}
 
   function drawHealth(S,live){var el=document.getElementById('health');
-    function worst(ids){var o={fail:4,flag:3,run:2,ok:1},best='',n=0;ids.forEach(function(id){var s=S[id];if(!s)return;var k=stOf(s);if(!k)return;n++;if((o[k]||0)>(o[best]||0))best=k});return n?best:''}
+    function worst(ids){var o={fail:5,flag:4,unknown:3,run:2,ok:1},best='',n=0;ids.forEach(function(id){var s=S[id];if(!s)return;var k=stOf(s);if(!k)return;n++;if((o[k]||0)>(o[best]||0))best=k});return n?best:''}
     var rows=[[['Preview checks','预览版本检查'],['ui-check','copy-check','reviewer']],[['Live site','线上网站'],['live-check']],[['Background jobs','后台任务'],['quality','recall','improver','news','optimizer']]];
     var h=rows.map(function(r){var k=live?worst(r[1]):'';return '<li><span class="dot '+k+'"></span><b>'+t(r[0][0],r[0][1])+'</b><span class="hv">'+(k?PILL[k]:live?t('no runs yet','还没运行'):t('shows on the live site','线上网站才显示'))+'</span></li>'}).join('');
     if(h!==el.dataset.h){el.dataset.h=h;el.innerHTML=h}}
@@ -631,6 +710,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
   
   function draw(data){
     var live=!!(data&&data.connected),S=(data&&data.agents)||{};
+    drawAttention(data);
     var c=document.getElementById('conn'),why=data&&data.reason;
     if(!live){c.classList.add('on');c.innerHTML=why==='no-token'
       ?t('Live status is not connected yet. The agents still run; this page just cannot see them.','实时状态还没接上。agent 照常运行，只是这一页还看不到。')
