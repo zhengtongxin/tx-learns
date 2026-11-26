@@ -1139,16 +1139,20 @@
    ]
   },
   "ai-production/02-product-in-two-halves.html": {
-   "score": 7,
-   "at": "2026-11-26T02:12:18.780Z",
+   "score": 6,
+   "at": "2026-11-26T02:41:20.675Z",
    "confusing": [
     {
-     "where": "Step 1 Learn",
-     "why": "API, host and model key appear before anything explains them. API is never spelled out."
+     "where": "Step 2 learn, rewrite bullet",
+     "why": "A long run-on bullet. Replaces is unclear: overwritten or merged?"
     },
     {
-     "where": "Step 2 Learn",
-     "why": "Unclear which file overwrites which, and why a newcomer should care."
+     "where": "Step 2 code box",
+     "why": "The reader has never called a model. The lesson never says OpenAI() reads the key from an environment variable, or what create() does."
+    },
+    {
+     "where": "Step 1 learn",
+     "why": "Host is used as a plain word throughout and never defined."
     }
    ]
   },
@@ -1208,19 +1212,19 @@
   },
   "ai-production/06-consultation-notes-assistant.html": {
    "score": 6,
-   "at": "2026-11-26T02:12:18.780Z",
+   "at": "2026-11-26T02:41:20.675Z",
    "confusing": [
     {
-     "where": "Step 2 Learn",
-     "why": "The page puts the reply into plain text (setOutput(text)) with no markdown step, so the ## headings would show as raw ## marks."
+     "where": "Step 3 code box",
+     "why": "The pla field and the pro_plan name are never explained, and the token that carries them is not defined."
     },
     {
-     "where": "Step 3 code",
-     "why": "'pla', 'pro_plan', Depends and the fastapi_clerk_auth library are never explained."
+     "where": "Step 3 learn",
+     "why": "EventSource is named as the thing not to use, but it is never explained."
     },
     {
-     "where": "Common errors",
-     "why": "The code already checks res.ok before reading the body, so the error as described cannot happen as written."
+     "where": "Step 2 code box",
+     "why": "The Step 3 box uses SYSTEM_PROMPT, but it is in prompt.py and never imported. A reader cannot tell which file it belongs in."
     }
    ]
   },
@@ -1271,16 +1275,20 @@
    ]
   },
   "ai-production/10-product-in-a-container-on-serverless.html": {
-   "score": 6,
-   "at": "2026-11-26T02:12:18.780Z",
+   "score": 7,
+   "at": "2026-11-26T02:41:20.675Z",
    "confusing": [
     {
-     "where": "Step 2 Learn",
-     "why": "No command or console path is given, and the function is never named before Step 3 reads its logs."
+     "where": "Step 2 learn",
+     "why": "No command and no console path. The reader is not told where these settings go or which .env variables to copy."
     },
     {
-     "where": "Step 1 Learn",
-     "why": "'mount', 'amd64' and 'chip type' are never explained, and server:app is not described."
+     "where": "Step 1 learn",
+     "why": "Mount is not explained, nor why the order matters."
+    },
+    {
+     "where": "Step 1 code box",
+     "why": "The .env file is never described: which keys, or that it is copied from env.example."
     }
    ]
   },
@@ -1335,20 +1343,20 @@
    ]
   },
   "ai-production/14-digital-twin-live.html": {
-   "score": 5,
-   "at": "2026-11-26T02:12:18.780Z",
+   "score": 7,
+   "at": "2026-11-26T02:41:20.675Z",
    "confusing": [
     {
-     "where": "Step 1 checklist",
-     "why": "Bucket is never explained, and S3 is never named. Steps 2 and 3 depend on it."
+     "where": "Step 2 learn",
+     "why": "Five builds with no settings listed. The bucket permission is only mentioned later, in Now make it yours, and is never set up in the text."
     },
     {
-     "where": "Step 2 quiz",
-     "why": "MEMORY_BUCKET never appears in the lesson text, so the answer names a setting nobody was taught."
+     "where": "Step 3 learn",
+     "why": "Restart and re-upload mean different things. The reader cannot tell whether to reload, redeploy or click something."
     },
     {
-     "where": "Step 3 Learn",
-     "why": "No command or console path shows how to restart or create anything. Steps 2 and 3 give only curl and one publish script."
+     "where": "Step 2 publish box",
+     "why": "A placeholder with no hint where to find it."
     }
    ]
   },
@@ -1819,16 +1827,20 @@
    ]
   },
   "ai-fde/17-swarms-of-agents-in-parallel.html": {
-   "score": 7,
-   "at": "2026-11-26T02:12:18.780Z",
+   "score": 8,
+   "at": "2026-11-26T02:41:20.675Z",
    "confusing": [
     {
-     "where": "Step 2 code",
-     "why": "Step 1 called dispatch(claims, stand_in) with two arguments. This version also needs on_change, so the Step 1 call now breaks. The lesson never says so."
+     "where": "Step 2 code box",
+     "why": "This redefines the Step 1 dispatch (it adds on_change and cap), but the text never says to replace it, so a reader may keep both or mix them up."
     },
     {
-     "where": "Step 3 Learn",
-     "why": "The while True loop has no cap, so a rate limit that never clears would retry forever. A newcomer would ask what happens then."
+     "where": "Step 2 learn",
+     "why": "The state dict is filled in but never printed, so the promised view of the batch is never shown."
+    },
+    {
+     "where": "Step 3 code box",
+     "why": "The text says wait and ask again, but nothing says how long this goes on. A rate limit that never clears would loop forever."
     }
    ]
   },
@@ -1959,20 +1971,20 @@
    ]
   },
   "ai-fde/25-the-handover-copilot.html": {
-   "score": 4,
-   "at": "2026-11-26T02:12:18.780Z",
+   "score": 7,
+   "at": "2026-11-26T02:41:20.675Z",
    "confusing": [
     {
-     "where": "Step 1 Learn",
-     "why": "Token, Bearer header, localStorage and sessionStorage are never explained. The copilot.js box is about 40 lines of browser code with no walk-through."
+     "where": "Step 2 code box, copilot_agent.py",
+     "why": "The tool learns whose token and limit to use through context=user and ctx.context. The lesson never says so, so the no-powers-of-its-own idea reads as a claim, not as code."
     },
     {
-     "where": "Step 2 code",
-     "why": "The agents library (Agent, Runner, function_tool, ctx.context) is used but never introduced. One box holds three files under a single copilot_agent.py label."
+     "where": "Step 1 copilot.js",
+     "why": "The page reads the token from sessionStorage, but the lesson never says where it gets put."
     },
     {
-     "where": "Step 1 figure",
-     "why": "The gateway is named here, but Step 2 is where it is defined."
+     "where": "Common errors",
+     "why": "No code in this lesson returns a 403. Refusals come back as a refused message from run_tool, so a reader looking for the 403 will not find it."
     }
    ]
   }
