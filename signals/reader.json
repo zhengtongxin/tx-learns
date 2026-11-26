@@ -1329,110 +1329,106 @@
    ]
   },
   "ai-production/13-where-memory-lives-in-the-cloud.html": {
-   "score": 6,
-   "at": "2026-11-25T13:31:50.514Z",
+   "score": 7,
+   "at": "2026-11-26T04:43:22.473Z",
    "confusing": [
     {
-     "where": "Step 3, Learn",
-     "why": "A newcomer cannot see why a missing file gives an access error. The reason sits in a bracket, and it is the detail that makes the code crash."
+     "where": "Step 3 · Least privilege, role-policy box",
+     "why": "This bucket is called twin-memory here, but lessons 14 and 16 use wharf-twin-memory. Copying this policy would deny the function on the real bucket."
     },
     {
-     "where": "Step 3, role-policy.json",
-     "why": "Lesson 14 and the common errors say the bucket is wharf-twin-memory and must match exactly, but this policy says twin-memory. Copied as written, the function gets AccessDenied."
+     "where": "Step 2 · Memory becomes bucket objects",
+     "why": "boto3 is never said to be AWS's Python library. S3 is never named, although the code says boto3.client('s3'). ClientError and NoSuchKey appear with no explanation."
     },
     {
-     "where": "Step 2, memory_bucket.py",
-     "why": "Bucket, object, key and body are never explained, so the three S3 calls read like a foreign language."
+     "where": "Step 3 · Least privilege, Learn",
+     "why": "The reader cannot tell why a missing file gives access denied rather than the NoSuchKey branch the code handles."
     }
    ]
   },
   "ai-production/14-digital-twin-live.html": {
-   "score": 7,
-   "at": "2026-11-26T02:41:20.675Z",
+   "score": 6,
+   "at": "2026-11-26T04:43:22.473Z",
    "confusing": [
     {
-     "where": "Step 2 learn",
-     "why": "Five builds with no settings listed. The bucket permission is only mentioned later, in Now make it yours, and is never set up in the text."
+     "where": "Step 1 · Learn",
+     "why": "It says to get the twin working on your laptop, but gives no command to start the backend or the page and no place to put the model key."
     },
     {
-     "where": "Step 3 learn",
-     "why": "Restart and re-upload mean different things. The reader cannot tell whether to reload, redeploy or click something."
+     "where": "Step 2 · Learn",
+     "why": "No step says how to create any piece, whether by console clicks or by the package scripts. The reader is left guessing."
     },
     {
-     "where": "Step 2 publish box",
-     "why": "A placeholder with no hint where to find it."
+     "where": "Step 1 · Learn",
+     "why": "Next.js is never explained, so 'static export' into out/ and the build step are unclear."
     }
    ]
   },
   "ai-production/15-managed-models-vs-vendor-api.html": {
-   "score": 6,
-   "at": "2026-11-25T13:31:50.514Z",
+   "score": 7,
+   "at": "2026-11-26T04:43:22.473Z",
    "confusing": [
     {
-     "where": "Step 3, Learn",
-     "why": "Inference profile is never explained, and both addresses is not matched to the two Resource lines. The ARN format is also new and unexplained."
+     "where": "Step 3 · Learn",
+     "why": "Inference profile and the apac. prefix are never explained, so 'both addresses' is a guess."
     },
     {
-     "where": "Step 2, Learn",
-     "why": "Content blocks is new, and the old message shape is never shown, so I cannot see what changed in history."
+     "where": "Step 3 · policy.json box",
+     "why": "The ARN format is never explained, so the wildcards are copied without knowing what they match."
     },
     {
-     "where": "What I got wrong",
-     "why": "Which id and which region? The mistake cannot be learned without the pair."
+     "where": "Step 2 · Learn",
+     "why": "The client name bedrock-runtime and the converse call are not explained."
     }
    ]
   },
   "ai-production/16-picking-a-model-by-cost-and-speed.html": {
-   "score": 7,
-   "at": "2026-11-25T13:31:50.514Z",
+   "score": 8,
+   "at": "2026-11-26T04:43:22.473Z",
    "confusing": [
     {
-     "where": "Step 1, update-model.sh",
-     "why": "The example drops USE_BUCKET=true, which lessons 13 and 14 say must stay on. Copied as written, memory goes back to the function's local disk. The Learn text says to list every variable, so this is a "
+     "where": "Step 4 · Learn",
+     "why": "Alarm is never explained. It is a rule that tells you when a number crosses a limit."
     },
     {
-     "where": "Step 1, Learn",
-     "why": "The family is never named (Amazon Nova, from the ids), so the sizes do not read as Amazon's models until the code."
+     "where": "Step 2 · game, last option",
+     "why": "No working is shown. The prices give pro 0.00128 and micro 0.000064 per chat, so twenty is pro against micro."
     },
     {
-     "where": "Step 4, Learn",
-     "why": "Alarm is never explained and the reader is not told where to set one."
+     "where": "Step 1 · code box",
+     "why": "The AWS service behind 'the function' is never named. The server.py line here has no default, unlike lesson 15's managed_model.py."
     }
    ]
   },
   "ai-production/17-why-console-clicking-does-not-scale.html": {
-   "score": 6,
-   "at": "2026-11-25T13:31:50.514Z",
+   "score": 8,
+   "at": "2026-11-26T04:43:22.473Z",
    "confusing": [
     {
-     "where": "Step 1, Learn",
-     "why": "Lesson 14 counted five cloud pieces. Which is the sixth?"
+     "where": "Step 1 · Learn",
+     "why": "Lesson 14 counts five pieces, and the six here are never listed, so the reader cannot check the count."
     },
     {
-     "where": "Step 1, figure",
-     "why": "Plan and apply appear in the figure before Step 2 says the tool is Terraform, so I met the words before the tool."
+     "where": "Step 2 · terms box",
+     "why": "The var. prefix appears in a table but is not explained until lesson 18."
     },
     {
-     "where": "Step 1, Learn",
-     "why": "This is said for deleting by hand, but the Terraform part never says that destroy fails on a bucket that still has files."
+     "where": "Step 3 · Learn",
+     "why": "The lesson stresses emptying buckets before a hand delete, but does not say that destroy fails on a bucket that still has files."
     }
    ]
   },
   "ai-production/18-state-workspaces-three-environments.html": {
-   "score": 7,
-   "at": "2026-11-25T13:31:50.514Z",
+   "score": 8,
+   "at": "2026-11-26T04:43:22.473Z",
    "confusing": [
     {
-     "where": "Step 2, terminal",
-     "why": "Two ways to make a workspace are shown, workspace new dev and select -or-create dev. I am not told which to use, and new fails if dev already exists."
+     "where": "Now make it yours, item 1",
+     "why": "Terraform outputs are never introduced in this lesson, so the reader does not know what to compare or where to see them."
     },
     {
-     "where": "Step 2, quiz explanation",
-     "why": "No script appears in this lesson. The command shown is terraform workspace show."
-    },
-    {
-     "where": "Step 3, codebox",
-     "why": "The map is clear, but where the value goes (the function's settings) is only a comment."
+     "where": "Step 2 · terminal box",
+     "why": "The box shows workspace new dev, then select -or-create dev. The reader cannot tell which to run each time, and -or-create first appears here."
     }
    ]
   },
