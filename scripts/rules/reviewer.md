@@ -6,6 +6,7 @@ Blockers (each needs file, exact text, a suggested rewrite):
 - Copyright: a platform, program, instructor or student name; the C-word "course" / 课程; week, day or "Project N" numbering; examples, prompts or code comments that look copied rather than written fresh.
 - Facts and code: a code box that would not run as shown once earlier steps are in place (package or install line, imports, function and argument names for the library version, `await` outside async code, return types, model names that exist, printed output that does not match the code); a false claim about a tool or model.
 - Build before use: a step's code uses something only a later step creates.
+- Unexplained code: a library, class, function, setting or environment variable in a code box that neither the Learn text nor a comment explains the first time it appears; a project lesson that needs a key, account or dataset it never names. A nit for one name, a blocker when a step cannot be followed without it.
 - EN and 中文 differ in meaning, or an `.en` has no `.zh`.
 - Lesson wiring: `lessons.js` lists the file; links and pager work; no broken HTML; `<meta name="updated">` is today's date when the text changed (`check-pages --fix` sets it); widget code is in `js/NN-slug.js`, not inline.
 - Any ✗ in the checks block you were given, or a code-box syntax error (an elided `...` argument is fine).

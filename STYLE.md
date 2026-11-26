@@ -33,7 +33,9 @@ There is no required running story or cast. A track may keep a short `STORY.md` 
 - Cut padding, repetition, hedging, recaps and scene-setting.
 - Use "you". Plain words, like explaining to a friend, not documentation.
 - Build before you use. Code in a step never calls a function, agent or variable that a later step creates. If the story needs it, build that piece in an earlier step.
-- No walls of code. Show the few lines that matter; the rest is dimmed or left out.
+- No walls of code. Show the few lines that matter; the rest is dimmed or left out. A box is about 25 lines at most; a longer one is split by what it does.
+- Every name in a code box is known. The first time a library, class, function, setting or environment variable appears, say what it is: a phrase in the Learn text, or a comment on that line. This is the most common reason a newcomer gets lost. A box that holds more than one file says so, and each file has its own imports.
+- A project lesson can be run from the page alone. It names every key and account it needs, says how to get the data, and where the project package differs from the boxes (file names, a demo mode), it says that too.
 - English and 中文 must say the same thing. Every `.en` block has a matching `.zh` block. Chinese should read naturally, not as a word-for-word translation.
 - Every interactive piece works without a server and gives feedback on both right and wrong answers.
 
@@ -56,6 +58,7 @@ The site records what TX learnt, in TX's own words. It never reproduces where it
 - [ ] A newcomer could follow it without the source
 - [ ] EN and 中文 match
 - [ ] Code runs as written (correct package names, imports, `await` placement)
+- [ ] Every new name in a code box is explained in the text or in a comment
 - [ ] Nothing in the code is used before the step that builds it
 - [ ] Added to the track's `lessons.js` with a `file`
 - [ ] Widget code is in `<track>/js/NN-slug.js` (loaded after `assets/teach.js`), not an inline `<script>`

@@ -7,7 +7,7 @@ Shape (succinct and sleek, key point first, roughly 600-1,000 words of prose per
 Story is optional and off by default: add one only if it makes the concept click faster; then 1-3 sentences, Singapore-set, on the point. No cast lists, no "Where we left off" / "What changed" / "Back at ..." boxes, no padding, recaps or hedging.
 
 Rules:
-- Key point first. Explain every term before using it. No wall of code.
+- Key point first. Explain every term before using it. No wall of code: a box is about 25 lines at most. Every library, class, function, setting or environment variable is explained the first time it appears, in the Learn text or in a comment on that line. A project lesson names every key and account it needs and how to get the data.
 - Build before use: no step's code calls anything a later step creates. Code boxes are complete enough to run (imports, right package names, `await` only where allowed).
 - Every `.en` has a matching natural `.zh` (also in `{en,zh}` script strings). Widget code goes in `<track>/js/NN-slug.js`, never inline.
 - Source-neutral: never name a platform, program, instructor or student; never write the C-word "course" / 课程; no week, day or "Project N" numbering; invent your own names, prompts and examples; rewrite code comments and variable names. Tool names (OpenAI, MCP...) are fine.

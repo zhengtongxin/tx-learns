@@ -64,9 +64,12 @@ async def buy_shares(name: str, symbol: str, qty: int) -&gt; str:
     return Account.get(name).buy(symbol, qty, get_price(symbol))
 
 @mcp.tool()
-async def past_trades(name: str) -&gt; list:
-    """The last 10 trades this uncle made, so he can judge how his strategy did."""
-    return Account.get(name).trades[-10:]
+async def past_trades(name: str) -&gt; dict:
+    """This uncle's last 10 trades, what he owns is worth now, and his profit against the S$10,000 start."""
+    a = Account.get(name)
+    worth = a.cash + sum(qty * get_price(sym) for sym, qty in a.holdings.items())
+    return {"trades": a.trades[-10:], "worth": round(worth, 2), "profit": round(worth - 10000, 2)}
+# sell_shares is buy_shares in reverse: add the cash, take away the shares
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")</span></div>
@@ -95,8 +98,8 @@ async def push(message: str) -&gt; str:
 <div class="try" id="p2"></div>
 
 <h2><span class="en">Step 2 · One uncle, one researcher, a timer</span><span class="zh">第 2 步 · 一位大叔、一位研究员、一个定时器</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li>Each uncle is an agent whose tools come from the three servers. His <b>researcher</b> is another agent with two ready-made servers: one fetches a web page, the other is <b>Tavily</b>, a web search service that needs its own key (<code>TAVILY_API_KEY</code>) and is filtered down to its one search tool. The researcher is handed over <b>as a tool</b> with <code>as_tool</code>, so the uncle stays in charge.</li><li><code>AsyncExitStack</code> opens servers in a loop and closes them all, even on failure. <code>max_turns=30</code> stops a runaway run.</li><li><code>asyncio.gather</code> runs all four at once, then the floor sleeps. Watch the cost: four traders, each with a researcher, every N minutes adds up while you sleep.</li></ul>
-<ul class="zh" style="margin:0;padding-left:18px"><li>每位大叔都是一个智能体，工具来自这三个服务端。他的<b>研究员</b>是另一个智能体，带两个现成的服务端：一个抓取网页，另一个是 <b>Tavily</b>，一项需要单独密钥（<code>TAVILY_API_KEY</code>）的网页搜索服务，并且过滤到只剩一个搜索工具。研究员用 <code>as_tool</code> <b>作为工具</b>交给他，所以大叔始终是主导。</li><li><code>AsyncExitStack</code> 循环打开服务端，最后统一关闭，失败时也一样。<code>max_turns=30</code> 防止失控。</li><li><code>asyncio.gather</code> 让四位同时运行，然后交易所休眠。留意成本：四位交易员各带研究员，每 N 分钟一次，你睡觉时费用也在涨。</li></ul></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li>Each uncle is an agent whose tools come from the three servers. His <b>researcher</b> is another agent with two ready-made servers: one fetches a web page, the other is <b>Tavily</b>, a web search service that needs its own key (<code>TAVILY_API_KEY</code>) and is filtered down to its one search tool. The researcher is handed over <b>as a tool</b> with <code>as_tool</code>, so the uncle stays in charge.</li><li>In the code, <code>create_static_tool_filter</code> is what keeps only the search tool. <code>AsyncExitStack</code> opens servers in a loop and closes them all, even on failure. <code>max_turns=30</code> stops a runaway run.</li><li><code>asyncio.gather</code> runs all four at once, then the floor sleeps. Watch the cost: four traders, each with a researcher, every N minutes adds up while you sleep.</li></ul>
+<ul class="zh" style="margin:0;padding-left:18px"><li>每位大叔都是一个智能体，工具来自这三个服务端。他的<b>研究员</b>是另一个智能体，带两个现成的服务端：一个抓取网页，另一个是 <b>Tavily</b>，一项需要单独密钥（<code>TAVILY_API_KEY</code>）的网页搜索服务，并且过滤到只剩一个搜索工具。研究员用 <code>as_tool</code> <b>作为工具</b>交给他，所以大叔始终是主导。</li><li>代码里的 <code>create_static_tool_filter</code> 负责只留下搜索工具。<code>AsyncExitStack</code> 循环打开服务端，最后统一关闭，失败时也一样。<code>max_turns=30</code> 防止失控。</li><li><code>asyncio.gather</code> 让四位同时运行，然后交易所休眠。留意成本：四位交易员各带研究员，每 N 分钟一次，你睡觉时费用也在涨。</li></ul></div>
 <div class="codebox" data-file="trading_floor.py" data-lang="python"><span class="dim">import asyncio, os
 from contextlib import AsyncExitStack
 from agents import Agent, Runner, trace
@@ -126,7 +129,7 @@ def researcher_servers():
                       instructions=f"{STRATEGIES[name]} Trade only KOPI, ROTI, TEHT, NASI. Never guess prices. {STRATEGY_NOTE}",
                       tools=[researcher.as_tool(tool_name="Researcher",
                                                 tool_description="Research news and prices for a ticker")])
-        with trace(f"{name}-trading"):
+        with trace(f"{name}-trading"):      # Step 3 adds a trace_id here
             await Runner.run(uncle, f"You are {name}. Check your account, trade if it is worthwhile, then push a short note.",
                              max_turns=30)
 
@@ -141,8 +144,8 @@ if __name__ == "__main__":
 <div class="try" id="p4"></div>
 
 <h2><span class="en">Step 3 · Trace each uncle, let him learn</span><span class="zh">第 3 步 · 追踪每位大叔，让他学习</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li>Four agents at once make a messy log. A custom <code>TracingProcessor</code> is called for every <b>span</b> (an agent step, tool call or model call). Put the uncle's name inside the <code>trace_id</code> so every span traces back to its owner.</li><li>The learning loop: <code>change_strategy</code> lets an uncle rewrite his own strategy after reviewing <code>past_trades</code>. Profit and loss is real feedback, so a fixed prompt becomes a loop that learns.</li></ul>
-<ul class="zh" style="margin:0;padding-left:18px"><li>四个智能体同时跑，日志会很乱。自定义的 <code>TracingProcessor</code> 会在每个 <b>span</b>（智能体的一步、工具调用或模型调用）时被调用。把大叔的名字放进 <code>trace_id</code>，每个 span 就能追溯到主人。</li><li>学习循环：<code>change_strategy</code> 让大叔在查看 <code>past_trades</code> 之后改写自己的策略。盈亏是真实的反馈，固定的提示词于是变成会学习的循环。</li></ul></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0;padding-left:18px"><li>Four agents at once make a messy log. A custom <code>TracingProcessor</code> is called for every <b>span</b> (an agent step, tool call or model call). Put the uncle's name inside the <code>trace_id</code> so every span traces back to its owner.</li><li>The learning loop: <code>change_strategy</code> lets an uncle rewrite his own strategy after reviewing <code>past_trades</code>. <code>past_trades</code> also returns what the account is worth now and the profit against the S$10,000 start. That number is real feedback, so a fixed prompt becomes a loop that learns.</li></ul>
+<ul class="zh" style="margin:0;padding-left:18px"><li>四个智能体同时跑，日志会很乱。自定义的 <code>TracingProcessor</code> 会在每个 <b>span</b>（智能体的一步、工具调用或模型调用）时被调用。把大叔的名字放进 <code>trace_id</code>，每个 span 就能追溯到主人。</li><li>学习循环：<code>change_strategy</code> 让大叔在查看 <code>past_trades</code> 之后改写自己的策略。<code>past_trades</code> 还会返回账户现在值多少钱，以及相对 1 万新元起始资金的盈亏。这个数字是真实的反馈，固定的提示词于是变成会学习的循环。</li></ul></div>
 <div class="codebox" data-file="learning_and_tracing.py" data-lang="python"><span class="dim"># add to floor/accounts_server.py, above the mcp.run line
 </span><span class="chg">@mcp.tool()
 async def change_strategy(name: str, new_strategy: str) -&gt; str:
@@ -156,7 +159,8 @@ from floor.db import write_log          # a small helper that inserts a row into
 
 def make_trace_id(tag):                 # "trace_" + 32 chars; the name rides in front
     return "trace_" + (tag + "0" + secrets.token_hex(16))[:32]
-# in run_uncle: with trace(f"{name}-trading", trace_id=make_trace_id(name.lower())):
+# make_trace_id("wong") gives "trace_wong0a3f9...": the name, a 0 as the divider, then random letters.
+# Change the line in run_uncle to: with trace(f"{name}-trading", trace_id=make_trace_id(name.lower())):
 </span><span class="chg">class FloorLog(TracingProcessor):
     def _who(self, x):                  # trace ids look like trace_&lt;name&gt;0&lt;random&gt;
         tag = x.trace_id.split("_")[1]

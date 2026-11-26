@@ -73,10 +73,10 @@ def make_tools(team):
         return team.status()
     async def inspect_page(slug: str) -> str:
         """Open one finished page in a real browser and report whether it works."""
-        return str(await judge(slug))
+        return str(await judge(f"http://localhost:8000/{slug}/"))   # the site folder, served locally
     def send_back(framework: str, problem: str) -> str:
         """Give one worker a single fix task that describes the problem."""
-        return team.fix_once(framework, problem)</span><span class="dim">
+        return team.fix_once(framework, problem)       # fix_once refuses a second fix for the same page</span><span class="dim">
     return [start_builder, wait_for_builders, inspect_page, send_back]
 
 </span><span class="chg">coordinator = LlmAgent(name="fair_coordinator", model="gemini-2.5-flash",
