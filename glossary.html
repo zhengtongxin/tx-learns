@@ -24,7 +24,7 @@
 @media(max-width:700px){.themes{--box-h:260px;grid-template-columns:1fr;row-gap:12px}.theme[data-p]{grid-area:auto}.cflow{display:none}}
 .chips-l{display:flex;flex-wrap:wrap;align-content:flex-start;gap:6px;margin:0;padding:2px;list-style:none;flex:1 1 auto;min-height:0;overflow:hidden}
 .chips-l li[hidden]{display:none}
-.theme.open{height:auto;min-height:var(--box-h)}.theme.open .chips-l{overflow:visible}
+.theme.open{height:auto;min-height:var(--box-h)}.themes.measure .theme{height:auto;min-height:0}.theme.open .chips-l{overflow:visible}
 .more-b{align-self:flex-start;margin-top:10px;padding:4px 12px;border-radius:99px;border:1px dashed color-mix(in srgb,var(--h) 70%,var(--line));background:transparent;color:var(--fg);font-size:13px;font-weight:600;line-height:1.4;font-family:inherit;cursor:pointer}
 .more-b:hover,.more-b:focus-visible{border-style:solid;background:color-mix(in srgb,var(--h) 16%,transparent);outline:2px solid transparent}.more-b:focus-visible{box-shadow:0 0 0 2px var(--fg)}
 .more-b[hidden]{display:none}
@@ -87,16 +87,23 @@ html[data-theme=light] .gl-m .tg{color:color-mix(in srgb,var(--h) 30%,var(--fg))
         '<button type="button" class="more-b" hidden aria-expanded="false" aria-controls="chips-'+esc(id)+'"></button></section>'}).join('');
     [].forEach.call(themesEl.querySelectorAll('.chips-l'),function(u){u.id='chips-'+u.parentNode.dataset.p});
 
-    /* every box is the same size; a box with more terms than fit shows the most important ones and a Show all button */
+    /* every box shows its 10 most important terms (the rest behind Show all); all boxes take the height of the tallest one */
+    var TOP=10;
     function fit(){
-      [].forEach.call(themesEl.querySelectorAll('.theme'),function(box){
-        var ul=box.querySelector('.chips-l'),btn=box.querySelector('.more-b'),li=ul.children,open=box.classList.contains('open'),i,n=0;
+      var boxes=themesEl.querySelectorAll('.theme'),max=0;
+      themesEl.classList.add('measure');
+      [].forEach.call(boxes,function(box){
+        var btn=box.querySelector('.more-b'),li=box.querySelector('.chips-l').children,more=li.length-TOP,i;
+        for(i=0;i<li.length;i++)li[i].hidden=i>=TOP;
+        btn.hidden=more<=0;
+        if(more>0){btn.innerHTML=bi({en:'Show all · '+more+' more',zh:'显示全部 · 还有 '+more+' 个'});btn.setAttribute('aria-expanded','false')}
+        max=Math.max(max,box.offsetHeight)});
+      themesEl.style.setProperty('--box-h',Math.ceil(max)+'px');
+      themesEl.classList.remove('measure');
+      [].forEach.call(boxes,function(box){if(!box.classList.contains('open'))return;
+        var btn=box.querySelector('.more-b'),li=box.querySelector('.chips-l').children,i;
         for(i=0;i<li.length;i++)li[i].hidden=false;
-        if(open){btn.hidden=false;btn.innerHTML=bi({en:'Show fewer',zh:'收起'});btn.setAttribute('aria-expanded','true');return}
-        btn.hidden=true;if(ul.scrollHeight<=ul.clientHeight+1)return;
-        btn.hidden=false;btn.innerHTML=bi({en:'Show all',zh:'显示全部'});
-        var lim=ul.offsetTop+ul.clientHeight;for(i=0;i<li.length;i++){if(n||li[i].offsetTop+li[i].offsetHeight>lim){li[i].hidden=true;n++}}
-        btn.innerHTML=bi({en:'Show all · '+n+' more',zh:'显示全部 · 还有 '+n+' 个'});btn.setAttribute('aria-expanded','false')})}
+        btn.innerHTML=bi({en:'Show fewer',zh:'收起'});btn.setAttribute('aria-expanded','true')})}
     themesEl.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.more-b');if(!b)return;
       var box=b.parentNode,o=!box.classList.contains('open');box.classList.toggle('open',o);fit();
       if(!o)box.scrollIntoView({block:'nearest'})});
