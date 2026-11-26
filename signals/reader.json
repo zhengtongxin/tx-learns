@@ -2,109 +2,109 @@
  "lessons": {
   "agentic-ai/01-agentic-workflow.html": {
    "score": 7,
-   "at": "2026-11-26T06:48:20.574Z",
+   "at": "2026-11-26T06:51:12.968Z",
    "confusing": [
     {
-     "where": "Step 3 · Build it, step 4 (Tools)",
-     "why": "It never says where to get the Marketstack key, or how to make the Google Sheet with Date and Close columns. I can follow the n8n clicks but not get the keys or the sheet."
+     "where": "Step 5 · Chat, then open Logs",
+     "why": "The step asks for AAPL, but the replay right below it checks the closing price of a bond ETF. A reader sees two different questions and cannot tell which one the log belongs to."
     },
     {
-     "where": "Step 3 · Build it, step 5 and the step 2 example",
-     "why": "Ticker, AAPL and ETF are never explained. The step 2 example is about a bond ETF while step 5 asks about AAPL, so I could not tell what I was meant to look up."
+     "where": "Step 3 · 4. Tools",
+     "why": "EoD (end-of-day price) is only explained inside the replay, after the build steps. The reader has to build the node before learning what it fetches."
     },
     {
-     "where": "Lesson title",
-     "why": "This lesson builds an agent (the AI Agent node decides each step), but lesson 2 says a workflow is the kind where your code fixes the route. I now have two meanings for one word."
+     "where": "Step 3 · 5. Chat, then open Logs",
+     "why": "It never says where Logs is in n8n, or what the entries look like, yet the Step 2 replay and the test depend on reading them."
     }
    ]
   },
   "agentic-ai/02-agents-and-patterns.html": {
-   "score": 7,
-   "at": "2026-11-26T06:48:20.574Z",
+   "score": 6,
+   "at": "2026-11-26T06:51:12.968Z",
    "confusing": [
     {
-     "where": "Step 2, agent.py code comment",
-     "why": "It points me to a lesson I have not read yet, inside a code comment I am trying to follow."
+     "where": "Step 3 · Five workflow patterns",
+     "why": "Step 2 says a workflow is where your code fixes the route and an agent is where the model picks each step. Here the model splits the task at run time, which sounds like an agent. The lesson only says "
     },
     {
-     "where": "Step 3, orchestrator-worker bullet",
-     "why": "Step 2 said that in a workflow your code picks the next step. Here the model picks the pieces at run time, so I could not see why it is still a workflow."
+     "where": "Step 3 · quiz (Test)",
+     "why": "Its answer says a boss LLM plans the sub-tasks at run time. That contradicts the other quiz, where steps that depend on what turns up mean agent. The reader is given two rules that disagree."
     },
     {
-     "where": "Step 4 and Takeaways",
-     "why": "Traces get a definition, but guardrails only get an example. I was not sure what the word means."
+     "where": "Step 2 · agent.py code box",
+     "why": "It points to a lesson the reader has not read yet, and the idea of a tool description is not explained here."
     }
    ]
   },
   "agentic-ai/03-first-api-calls.html": {
    "score": 7,
-   "at": "2026-11-26T06:48:20.574Z",
+   "at": "2026-11-26T06:51:12.968Z",
    "confusing": [
     {
-     "where": "Before you start (the intro line)",
-     "why": "The line says I need one but never shows how to make or switch it on. I have never done that, so I would stop before step 1."
+     "where": "Step 2 · first call code box",
+     "why": "Nothing says that OpenAI() finds OPENAI_API_KEY by itself after load_dotenv. A reader who has just been told to pass keys safely may wonder where the key goes."
     },
     {
-     "where": "Step 3 · Chain three calls",
-     "why": "nano, mini and full are tier names used before lesson 4 explains them, and full is never tied to gpt-5.4, the name in the code."
+     "where": "Step 2 · first call code box",
+     "why": "Every other name in the box is explained, but override=True is not. The reader cannot tell what it changes."
     },
     {
-     "where": "Step 2 · Make your first call, code comment",
-     "why": "override=True is not explained here, and raise SystemExit in the next lines is not explained either."
+     "where": "Setup paragraph",
+     "why": "Before the first call the reader must create a virtual environment, pick it as the notebook kernel, and create a .env file. Those steps are spread over the intro and a troubleshooting section."
     }
    ]
   },
   "agentic-ai/04-many-models.html": {
-   "score": 6,
-   "at": "2026-11-26T06:48:20.574Z",
+   "score": 7,
+   "at": "2026-11-26T06:51:12.968Z",
    "confusing": [
     {
-     "where": "Step 3 · A model judges the rest, judge.py",
-     "why": "Why minus one? The judge numbers answers from 1, but Python lists start at 0. Without that, it looks like a bug."
+     "where": "Step 2 · compare.py code box",
+     "why": "The box uses messages but never defines it. The Ollama box below uses it too. A reader copying the box will get a NameError."
     },
     {
-     "where": "Step 3, judge.py prompt",
-     "why": "The doubled braces are how an f-string prints a single brace. Nothing says so, so it reads like a typo."
+     "where": "Step 2 · Local models",
+     "why": "The reason is not given. A reader does not know that a model's size is its download and its memory need."
     },
     {
-     "where": "Step 3, judge.py first line",
-     "why": "It says whole script, but the box is only part of one: no OpenAI import, and client comes from step 2."
+     "where": "Step 3 · judge.py code box",
+     "why": "json.loads raises an error if the judge adds any words around the JSON. The lesson warns about judges in general but never says what the reader will see if this happens."
     }
    ]
   },
   "agentic-ai/05-autonomy-and-tools.html": {
    "score": 7,
-   "at": "2026-11-26T06:48:20.574Z",
+   "at": "2026-11-26T06:51:12.968Z",
    "confusing": [
     {
-     "where": "Step 4 · The loop",
-     "why": "The ** is used before anything explains it. Lesson 6 explains it later, so I met it cold."
+     "where": "Step 3 · tools.py code box",
+     "why": "The Learn text never says the reader fills this in. It looks like a broken placeholder until the quiz below asks for it."
     },
     {
-     "where": "Step 2 · Context and memory",
-     "why": "The twin/ folder and summary.txt are never set up, and the client it uses comes from lesson 3 with no reminder."
+     "where": "Step 4 · chat() code box",
+     "why": "If the model still asks for tools on the fifth round, the function returns the last reply's text, which can be empty, with no error. The reader is not warned. This is a code issue for the writer to ch"
     },
     {
-     "where": "Step 4 · The loop, callout",
-     "why": "After five rounds of tool requests, chat() returns the text of the last reply, which is still a tool request and probably empty. The loop stops, but I get no answer, and the text does not say so."
+     "where": "Step 2 · twin.py code box",
+     "why": "client is used here but never created in this lesson, and no comment says it comes from lesson 3."
     }
    ]
   },
   "agentic-ai/06-career-agent.html": {
-   "score": 6,
-   "at": "2026-11-26T06:48:20.574Z",
+   "score": 7,
+   "at": "2026-11-26T06:51:12.968Z",
    "confusing": [
     {
-     "where": "Done when (checklist)",
-     "why": "The code box above prints “Someone wants to get in touch: …”, not that text. Copying the code exactly would fail the check, and nothing says the package's tools.py prints different lines."
+     "where": "Step 4 · Deploy checklist",
+     "why": "The lesson never says where the project files are or how to get them. The only pointer is in the failure notes (put .env next to README.txt), so the reader does not know which folder to open first."
     },
     {
-     "where": "Step 4, uv install line",
-     "why": "pypdf is never explained, and nothing else in the lesson mentions reading a PDF."
+     "where": "Step 2 · tool_json.py code box",
+     "why": "The Learn text says strong wording such as Always use this tool makes the tool reliable, but the box uses a weaker description. The reader is told one thing and shown another."
     },
     {
-     "where": "Step 4, deploy checkbox",
-     "why": "The project folder is never named, and five tools (uv, Gradio, the hosting site, secrets, the test run) sit in one tick box."
+     "where": "Project check list (the first acceptance test)",
+     "why": "The check expects the terminal to print this line. The tools.py box in Step 1 prints Push: followed by the message when no Pushover key is set, so the expected output does not match the code shown. I "
     }
    ]
   },
