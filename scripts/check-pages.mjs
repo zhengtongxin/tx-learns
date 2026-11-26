@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Page check: every page a reader can open has what it needs to be found, shared and read in both languages.
-// Fails (exit 1) on: no <html lang>, no title, no description or link-preview tags, an image without alt text,
+// Fails (exit 1) on: no <html lang>, no title, no description or link-preview tags, an image without alt text, a leftover @@PLACEHOLDER@@ marker,
 // headings that skip a level, or English text without its 中文 twin (and the other way round).
 // It also keeps the files that list lessons in step with lessons.js: sitemap.xml, the no-JavaScript lesson list on
 // the track page, and the "start here" links (data-start) that point at the first published lesson.
@@ -47,6 +47,9 @@ for (const p of pages) {
 
   if (!/<link rel="icon" href="[^"]+"/.test(html)) bad(p, 'no favicon (<link rel="icon">)');
   for (const img of markup.match(/<img\b[^>]*>/gi) || []) if (!/\balt="/i.test(img)) bad(p, `image without alt text: ${img.slice(0, 80)}`);
+  // a leftover marker from an edit that never put its piece back (a figure was once lost this way and showed as raw text)
+  const marker = markup.match(/@@[A-Z0-9_]{2,}@@/);
+  if (marker) bad(p, `leftover placeholder ${marker[0]} shows on the page`);
 
   // Headings in order: a page may go down one level at a time (h1 → h2 → h3), never skip one (h2 → h4).
   let last = 0;
