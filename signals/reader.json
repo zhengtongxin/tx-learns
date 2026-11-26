@@ -374,19 +374,19 @@
   },
   "agentic-ai/17-personal-helper-that-remembers.html": {
    "score": 6,
-   "at": "2026-11-26T02:30:51.249Z",
+   "at": "2026-11-26T04:17:36.657Z",
    "confusing": [
     {
-     "where": "Project card, fail list",
-     "why": "open_toolbox never appears in the lesson. The MCP sessions are opened at top level in Step 1."
+     "where": "Step 1 · Tools first",
+     "why": "MCP is never defined here (what it is, that a server runs as a subprocess, what a session is), yet the whole step is built on it. AsyncExitStack and client.session are also unexplained."
     },
     {
-     "where": "Step 3, checker",
-     "why": "run_errand is defined but never called. The card expects printed plan, tool-call and 'Kaki says' lines that no box prints."
+     "where": "Step 1 · Tools first",
+     "why": "ask_human is on the pause list, so approving it seems to mean the human did the login. But the tool body returns 'The human says it's done' whatever happens, and the lesson never explains what approve"
     },
     {
-     "where": "Step 1, tools",
-     "why": "AsyncExitStack is never explained. The fix in 'What I got wrong' only makes sense once you know it closes everything in the stack."
+     "where": "Step 2 · The worker, and asking first",
+     "why": "One Learn bullet packs the checkpointer, thread_id, workspace memory files and the prompt into a single run-on. Command(resume=...) is also used without explanation."
     }
    ]
   },
@@ -535,92 +535,92 @@
    ]
   },
   "agentic-ai/16-graph-memory-tools-search.html": {
-   "score": 6,
-   "at": "2026-11-25T13:04:06.071Z",
+   "score": 7,
+   "at": "2026-11-26T04:17:36.657Z",
    "confusing": [
     {
-     "where": "Goals list (lesson data)",
-     "why": "MCP, ainvoke and a browser tool (the Node line) never appear in the lesson, so the promised goal is not kept."
+     "where": "Before you start",
+     "why": "The browser tool and MCP are never taught in this lesson, yet the requirements list Node for it and the goals say to load MCP tools with await ainvoke. The reader installs Node for something that neve"
     },
     {
-     "where": "Step 2, code",
-     "why": "request and handler are never explained. The reader cannot tell what handler(request) does."
+     "where": "Step 1 · create_agent, memory and structure",
+     "why": "Checkpointer is used before anything says what it is. MemorySaver then appears in the code with no word on what it stores."
     },
     {
-     "where": "Step 3, Learn",
-     "why": "context is used for the first time here and never defined."
+     "where": "Step 3 · The big job: a deep agent",
+     "why": "Serper is never said to be a Google search service, and the reader is not told where to get its key."
     }
    ]
   },
   "agentic-ai/18-agent-to-agent.html": {
-   "score": 6,
-   "at": "2026-11-25T13:04:06.071Z",
+   "score": 8,
+   "at": "2026-11-26T04:17:36.657Z",
    "confusing": [
     {
-     "where": "Goals list (lesson data)",
-     "why": "MCP does not appear in the lesson. The goals and the mcp extra in the tools line look copied from another version."
+     "where": "Step 3 · Mei walks over",
+     "why": "The box uses LlmAgent but imports only RemoteA2aAgent and AGENT_CARD_WELL_KNOWN_PATH. Copied as written, it fails with a NameError."
     },
     {
-     "where": "Step 1, code",
-     "why": "Top-level await in a .py file is a SyntaxError when run as a script. The lesson 11 warning describes this exact error."
+     "where": "Step 1 · One agent in Google ADK",
+     "why": "The await sits at top level in a .py file, which is a syntax error in plain Python. The box does not say to run it in a notebook or inside an async function."
     },
     {
-     "where": "Step 3, code",
-     "why": "mei_stall is given no tools, so save_order is not passed in and there is no drinks tool to handle drinks with."
+     "where": "Step 3 · Mei walks over",
+     "why": "Local sub-agent is the lesson's main contrast with a remote agent, but it is never defined. The reader has to guess it means an agent in the same program."
     }
    ]
   },
   "agentic-ai/19-python-vs-ts-frameworks.html": {
    "score": 7,
-   "at": "2026-11-26T02:30:51.249Z",
+   "at": "2026-11-26T04:17:36.657Z",
    "confusing": [
     {
-     "where": "Step 1 quiz and the five steps",
-     "why": "No box has a loop or a maxSteps setting. Step 5 of the five steps is never shown in code."
+     "where": "Step 1 · The same five steps everywhere",
+     "why": "No code in this lesson shows a loop: each box makes one call. The quiz also asks about maxSteps: 30, a setting that appears nowhere in the lesson, so the 'loop' step cannot be checked."
     },
     {
-     "where": "Step 2, Strands box",
-     "why": "The lesson says MCP connections must be opened, but the Strands box never opens its client, so I could not tell whether that is needed."
+     "where": "Step 2 · Two Python frameworks",
+     "why": "The boxes read the key from os.environ and never load .env (python-dotenv is installed but not called), so the key is missing unless the reader exports it."
     },
     {
-     "where": "Step 2, Pydantic box",
-     "why": "TODOS and CAFE are defined in the box above. Nothing says so, so the box looks broken on its own."
+     "where": "Step 2 · Two Python frameworks",
+     "why": "stderr, cwd and DEVNULL appear without explanation, and the takeaway 'stderr noise' depends on a term never defined."
     }
    ]
   },
   "agentic-ai/20-own-agent-loop.html": {
-   "score": 7,
-   "at": "2026-11-26T02:30:51.249Z",
+   "score": 6,
+   "at": "2026-11-26T04:17:36.657Z",
    "confusing": [
     {
-     "where": "Step 2, coordinator sketch",
-     "why": "Board and Team are empty stubs with '...', and the text never says you write them. The card's live board has no code behind it."
+     "where": "Step 2 · A fresh inspector, then the coordinator",
+     "why": "judge comes from inspector.py and LlmAgent is never imported in the coordinator box, so the two boxes cannot be put together from what is shown."
     },
     {
-     "where": "Step 2, inspector",
-     "why": "The inspector loads localhost:8000, but the lesson never says to start a local web server on port 8000."
+     "where": "What done looks like",
+     "why": "The lesson never names main.py, the --plan flag, or the final/site folder in its body. There is no 'how to run it' step, so the reader does not know how to start the coordinator."
     },
     {
-     "where": "Step 2, inspector",
-     "why": "ADK terms (InMemoryRunner, session, run_async, RunConfig) are used but never explained. Only run_once's docstring says what it does."
+     "where": "Step 3 · The board and the guardrails",
+     "why": "The live view is what the reader should see on screen, but nothing says what draws it. rich is in the requirements and never used, and the live view is never explained."
     }
    ]
   },
   "agentic-ai/21-why-mcp.html": {
-   "score": 6,
-   "at": "2026-11-25T13:07:39.856Z",
+   "score": 8,
+   "at": "2026-11-26T04:17:36.657Z",
    "confusing": [
     {
-     "where": "Step 3 quiz (remote server)",
-     "why": "There is no table in this lesson, so the hint points at nothing."
+     "where": "Step 3 · Remote servers, and when to use MCP (quiz hint)",
+     "why": "The hint points to a table that is not in this lesson, and there is no Setup row anywhere."
     },
     {
-     "where": "Step 2, code",
-     "why": "Schema and JSON are not explained, so I could not tell what the printed text means."
+     "where": "Step 3 · Remote servers",
+     "why": "The remote box uses Agent and Runner but imports only MCPServerStreamableHttp. Copied as written, it fails."
     },
     {
-     "where": "Step 2, code",
-     "why": "async, await and asyncio.run have not been explained, so I did not know how to run this snippet."
+     "where": "Step 2 · Local servers, listed then plugged in",
+     "why": "This box uses await at top level with no note on where to run it. The list-tools box has that note; this one does not."
     }
    ]
   },
