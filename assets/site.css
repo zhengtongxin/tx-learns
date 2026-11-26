@@ -83,11 +83,11 @@ html[data-theme=light] .orb{opacity:.25}
 .bigring .bg{stroke:var(--line)}.bigring .fg{stroke:url(#rg);stroke-linecap:round;transition:stroke-dashoffset 1s}
 .bigring b{position:absolute;inset:0;display:grid;place-items:center;font-size:18px;font-weight:800}
 /* buttons */
-.btn{border:1px solid var(--line);background:var(--glass);color:var(--fg);border-radius:999px;padding:10px 20px;cursor:pointer;font:inherit;font-size:14.5px;font-weight:600;transition:.25s;text-decoration:none;display:inline-block;backdrop-filter:blur(10px)}
-.btn:hover{border-color:var(--acc);transform:translateY(-2px)}
-.btn.pri{background:var(--grad);color:var(--on);border:0;box-shadow:0 10px 34px var(--glow)}
-.btn.pri:hover{box-shadow:0 14px 44px var(--glow)}
-.btn.big{padding:14px 30px;font-size:16px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;min-height:44px;border:1px solid var(--line);background:var(--glass);color:var(--fg);border-radius:999px;padding:0 22px;cursor:pointer;font:inherit;font-size:14.5px;font-weight:600;line-height:1.2;transition:.25s;text-decoration:none;backdrop-filter:blur(10px)}
+.btn:hover{border-color:var(--acc);transform:translateY(-1px)}
+.btn.pri{background:var(--grad);color:var(--on);border-color:transparent;box-shadow:0 6px 20px var(--glow)}
+.btn.pri:hover{box-shadow:0 8px 26px var(--glow)}
+.btn.big{min-height:52px;padding:0 30px;font-size:16px}
 .btn:disabled{opacity:.35;cursor:default;transform:none}
 /* glass surfaces */
 .card,.callout,.quiz,.stepper,.wfwrap,.lcard,.cc,.panel{position:relative;background:var(--glass);border:1px solid var(--line);border-radius:22px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
@@ -273,7 +273,7 @@ main:focus{outline:none}
 
 .changed{color:var(--mut)}
 .whatnext{margin:28px auto;max-width:720px}.whatnext .lbl{display:block;margin-bottom:8px}
-.whatnext p{margin:0 0 10px;line-height:1.6}.whatnext .btn{display:inline-block;margin:2px 8px 6px 0;max-width:100%;text-align:left;white-space:normal}
+.whatnext p{margin:0 0 10px;line-height:1.6}.whatnext .btn{display:inline-flex;margin:2px 8px 6px 0;max-width:100%;padding-top:9px;padding-bottom:9px;text-align:left;white-space:normal}
 .whatnext .wn-go small{display:block;font-size:.78em;opacity:.8}
 /* "Was this lesson clear?": one quiet line at the end of a lesson */
 .fbk{margin:26px auto 8px;max-width:720px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 12px;font-size:14px;color:var(--mut)}.fbk .lbl{font-weight:500}.fbk .btn{padding:6px 16px;font-size:14px;min-height:36px}.fbk p{margin:0}
@@ -296,7 +296,7 @@ h1,h2,h3{text-wrap:balance}
 .sub,p{text-wrap:pretty}
 .eyebrow{box-shadow:0 0 0 1px color-mix(in srgb,var(--acc) 22%,transparent),0 8px 30px -12px var(--glow)}
 .btn{box-shadow:0 1px 0 rgba(255,255,255,.06) inset}
-.btn.pri{box-shadow:0 10px 34px var(--glow),0 1px 0 rgba(255,255,255,.35) inset}
+.btn.pri{box-shadow:0 6px 20px var(--glow),0 1px 0 rgba(255,255,255,.35) inset}
 .btn:focus-visible,.cc:focus-visible,.seg button:focus-visible,.icon-btn:focus-visible,a:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
 .cc{border-radius:26px;background:linear-gradient(160deg,color-mix(in srgb,var(--fg) 7%,transparent),var(--glass));border:1px solid var(--line)}
 .cc:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--acc) 70%,var(--line))}
@@ -305,7 +305,7 @@ h1,h2,h3{text-wrap:balance}
 .stat{min-width:96px}
 .stat span{display:block;margin-top:8px}
 h2{margin-top:2.6em}
-@media(max-width:720px){.mega{font-size:clamp(2.5rem,13vw,3.6rem)}.btn.big{padding:13px 24px}.cc{padding:22px 20px;border-radius:22px}}
+@media(max-width:720px){.mega{font-size:clamp(2.5rem,13vw,3.6rem)}.btn.big{padding:0 24px}.cc{padding:22px 20px;border-radius:22px}}
 @media(prefers-reduced-motion:reduce){body::before,.orb{animation:none}.btn,.cc{transition:none}html{scroll-behavior:auto}}
 
 /* home: shorter hero, one clear next step, stats are secondary */
@@ -354,7 +354,7 @@ body:has(.scrim.on) .toast{display:none}
 .cc .chips{gap:6px 18px;margin-top:8px}
 .chip+.chip::before{content:"";}
 .seg{border:0;background:none;padding:0}
-.top .btn,.eco-btn{border-color:transparent;background:none;box-shadow:none}
+.top .btn{border-color:transparent;background:none;box-shadow:none}
 /* cards lose frames: one hairline, whitespace does the grouping */
 .card,.quiz,.stepper,.lcard,.panel,.wfwrap{background:none;border:0;border-top:1px solid var(--line);border-radius:0;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
 .card{padding:22px 0 4px}
