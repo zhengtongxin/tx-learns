@@ -1129,106 +1129,110 @@
    ]
   },
   "ai-production/01-what-production-means-ship-first.html": {
-   "score": 8,
-   "at": "2026-11-25T13:24:46.269Z",
+   "score": 6,
+   "at": "2026-11-26T04:37:28.136Z",
    "confusing": [
     {
-     "where": "Step 3",
-     "why": "The code pulls the text out of a nested reply object, and nothing says what choices or message are."
+     "where": "Step 3 · code box",
+     "why": "The lesson never says what a model call sends or what comes back, so messages and reply.choices[0] are unexplained. A newcomer who has never called a model cannot tell what the code does."
     },
     {
-     "where": "Step 2",
-     "why": "The builds and routes keys in vercel.json are never named, so the config reads like magic."
+     "where": "Step 3 · Learn",
+     "why": "It never says where the OpenAI key comes from, though the lesson asks you to set one."
+    },
+    {
+     "where": "Step 2 · Learn",
+     "why": "FastAPI and uvicorn are named as if known. uvicorn appears in requirements.txt with no word on what it does."
     }
    ]
   },
   "ai-production/02-product-in-two-halves.html": {
    "score": 6,
-   "at": "2026-11-26T02:41:20.675Z",
+   "at": "2026-11-26T04:37:28.136Z",
    "confusing": [
     {
-     "where": "Step 2 learn, rewrite bullet",
-     "why": "A long run-on bullet. Replaces is unclear: overwritten or merged?"
+     "where": "Step 2 · code line",
+     "why": "TypeScript, Tailwind and --no-app are never explained. The only hint is Next.js is a toolkit for React pages."
     },
     {
-     "where": "Step 2 code box",
-     "why": "The reader has never called a model. The lesson never says OpenAI() reads the key from an environment variable, or what create() does."
+     "where": "Step 2 · Learn, third bullet",
+     "why": "It is not clear which file is 'this file', so a reader cannot tell what to delete from an older deploy."
     },
     {
-     "where": "Step 1 learn",
-     "why": "Host is used as a plain word throughout and never defined."
+     "where": "Step 2 · Learn, third bullet",
+     "why": "CORS is never spelled out, and the browser rule behind it gets one clause."
     }
    ]
   },
   "ai-production/03-streaming-answers-to-the-browser.html": {
    "score": 6,
-   "at": "2026-11-25T13:24:46.269Z",
+   "at": "2026-11-26T04:37:28.136Z",
    "confusing": [
     {
-     "where": "Step 1",
-     "why": "yield and generators are never taught, so generate() with no return looks wrong."
+     "where": "Step 1 · code box",
+     "why": "yield is the core of the lesson and is never named. A newcomer who can read Python still will not know it hands out one piece, then pauses."
     },
     {
-     "where": "Step 1",
-     "why": "The code reads chunk.choices[0] before any check, so as shown it raises the IndexError the lesson warns about. The fix is not in the code."
+     "where": "Common errors",
+     "why": "The fix tells you to check chunk.choices, but the code only checks if piece: after chunk.choices[0]. The difference between an empty choices list and empty text is not taught."
     },
     {
-     "where": "Step 2",
-     "why": "Nobody says what calls ask or what setAnswer is."
+     "where": "Step 2 · ask.js",
+     "why": "The file is never said to go anywhere, and nothing calls ask() or supplies setAnswer. The reader does not know how to hook it into the page."
     }
    ]
   },
   "ai-production/04-sign-in-you-do-not-write.html": {
    "score": 6,
-   "at": "2026-11-25T13:24:46.269Z",
+   "at": "2026-11-26T04:37:28.136Z",
    "confusing": [
     {
-     "where": "Step 1",
-     "why": "git and .gitignore are never explained, so out of git means nothing yet."
-    },
-    {
-     "where": "Step 1",
-     "why": "No code in the lesson reads the secret key, so the reader cannot tell what it is for here."
-    },
-    {
      "where": "Common errors",
-     "why": "Step 3 says a bad token gets 401, but this line says 403 for a missing or expired token."
+     "why": "Step 3 says a bad token gets 401 (\"unauthorized\"), so the reader cannot tell which status to expect."
+    },
+    {
+     "where": "Step 3 · code box",
+     "why": "This required install is only a comment at the very end of the box, easy to miss, and the import name is not the same as the package name."
+    },
+    {
+     "where": "Step 1 · Learn",
+     "why": "The lesson says public key, but the code and error use NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY and Missing publishable key. Nothing links the two names."
     }
    ]
   },
   "ai-production/05-subscriptions-and-feature-gates.html": {
    "score": 7,
-   "at": "2026-11-25T13:24:46.269Z",
+   "at": "2026-11-26T04:37:28.136Z",
    "confusing": [
     {
-     "where": "Step 1",
-     "why": "Slug is the heading's key word but is never defined."
+     "where": "Step 1 · title and Learn",
+     "why": "Slug is used in the step title and never defined. A newcomer does not know it is a short id made of plain text."
     },
     {
-     "where": "Step 3",
-     "why": "A substring test: a plan named pro_plan_trial would pass. The text also calls pla a list, but the example is a single string, so the reader cannot tell which it is."
+     "where": "Step 1 · Learn",
+     "why": "It does not say which test card number to use, or where the service lists it."
     },
     {
-     "where": "Common errors",
-     "why": "Step 2 says tokens are fresh on every request, so the reader cannot see why signing out is needed."
+     "where": "Step 3 · code box",
+     "why": "Step 2 says to replace pro_plan with your slug, but the server code is a separate box and the text never says to change it there too."
     }
    ]
   },
   "ai-production/06-consultation-notes-assistant.html": {
    "score": 6,
-   "at": "2026-11-26T02:41:20.675Z",
+   "at": "2026-11-26T04:37:28.136Z",
    "confusing": [
     {
-     "where": "Step 3 code box",
-     "why": "The pla field and the pro_plan name are never explained, and the token that carries them is not defined."
+     "where": "Step 2 · Learn",
+     "why": "The page code puts the raw text on screen, and nothing turns the ## marks into headings. Markdown is never explained, so the reader sees ## symbols."
     },
     {
-     "where": "Step 3 learn",
-     "why": "EventSource is named as the thing not to use, but it is never explained."
+     "where": "Step 3 · Learn",
+     "why": "GET and POST are never explained. Earlier routes used GET, so the reader does not know what changes or why."
     },
     {
-     "where": "Step 2 code box",
-     "why": "The Step 3 box uses SYSTEM_PROMPT, but it is in prompt.py and never imported. A reader cannot tell which file it belongs in."
+     "where": "Step 1 · code box",
+     "why": "Field is not explained, so the reader cannot tell what min_length does."
     }
    ]
   },
