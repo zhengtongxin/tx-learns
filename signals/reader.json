@@ -914,109 +914,109 @@
   },
   "ai-engineer/16-measuring-retrieval.html": {
    "score": 7,
-   "at": "2026-11-25T13:18:03.732Z",
+   "at": "2026-11-26T04:31:32.841Z",
    "confusing": [
     {
-     "where": "Step 1 · Test set and retrieval score",
-     "why": "A question has several keywords, and the page never says how their scores combine. Only the code shows it averages them."
+     "where": "Step 2",
+     "why": "Pydantic and with_structured_output are used but never explained, so the reader does not know what the Verdict class does for them."
     },
     {
-     "where": "Step 2 quiz feedback",
-     "why": "nDCG is never introduced anywhere on the page."
+     "where": "Step 1, Learn",
+     "why": "k is never defined. The reader has to guess it is how many chunks to fetch."
     },
     {
-     "where": "Step 2 · code",
-     "why": "with_structured_output and temperature=0 are not explained, and the page does not say why the judge is a different model."
+     "where": "Quiz after Step 2",
+     "why": "nDCG is named in the explanation but never introduced anywhere in the lesson."
     }
    ]
   },
   "ai-engineer/17-company-knowledge-helper.html": {
    "score": 6,
-   "at": "2026-11-25T13:18:03.732Z",
+   "at": "2026-11-26T04:31:32.841Z",
    "confusing": [
     {
-     "where": "Step 3 · Rewrite the question before searching",
-     "why": "Search uses both the original and the rewritten question, but the rerank uses only the rewrite, and the page does not say why."
+     "where": "Step 4, Learn",
+     "why": "The last lesson's score_retrieval calls the store directly, not fetch. No code shows how to switch it or print the per-category table, so this is where a reader gets stuck."
     },
     {
-     "where": "Step 3 · code",
-     "why": "The shape of history (role and content keys) is never shown."
+     "where": "Step 1",
+     "why": "with_structured_output and Pydantic are used without explanation, the same gap as the earlier lesson."
     },
     {
-     "where": "Step 4 · Cite sources",
-     "why": "The lesson 16 code calls the store directly, so a reader would not know to change it."
+     "where": "Now make it yours",
+     "why": "The code has no switch for reranking, so the reader has to invent one with no hint."
     }
    ]
   },
   "ai-engineer/18-curating-and-cleaning-a-dataset.html": {
-   "score": 7,
-   "at": "2026-11-26T02:34:53.396Z",
+   "score": 6,
+   "at": "2026-11-26T04:31:32.841Z",
    "confusing": [
     {
-     "where": "Step 3 · Balance the prices",
-     "why": "Balancing runs on all rows before the split, so the test set is rebalanced too and no longer looks like real listings. A reader who knows ML will ask whether the test set should be balanced."
+     "where": "Step 1",
+     "why": "The lesson's own sample row, {'title': 'Pro camera kit', 'price': '1499.00'}, has no description key, so this line raises KeyError. The step stops there."
     },
     {
-     "where": "Step 2 · Clean the text into an Item",
-     "why": "re (Python's pattern-matching module), the digit pattern, the five-digit cut-off and ASIN in NOISE_LINES are never explained."
+     "where": "Step 4",
+     "why": "Balancing leaves about twice the count of items priced $50 or more. With fewer than about 3,000 of those, train is empty, and the sizes do not match 'training (large)'."
     },
     {
-     "where": "Step 4 · Split, then save",
-     "why": "DatasetDict, Dataset.from_list and .select appear in the box with no line of explanation."
+     "where": "Step 3, code comment",
+     "why": "The lesson uses the simple version, so the test set is balanced and does not look like real listings. The choice is left in a comment and never explained."
     }
    ]
   },
   "ai-engineer/19-baselines-average-linear-forest.html": {
-   "score": 6,
-   "at": "2026-11-25T13:18:03.732Z",
+   "score": 8,
+   "at": "2026-11-26T04:31:32.841Z",
    "confusing": [
     {
-     "where": "Step 3 · Put each baseline on the ladder",
-     "why": "No linear or forest score is printed anywhere, so 'best' has to be taken on trust."
+     "where": "Common errors",
+     "why": "This lesson's vectoriser has max_features=1500, so the error would say 1500. 5000 is the number from the next lesson and looks like a mistake."
     },
     {
-     "where": "Step 2 · code",
-     "why": "Lesson 18 saves rows with a text field, not items with summary, so the data type changes between lessons."
+     "where": "Step 1, code",
+     "why": "matplotlib is imported and used, but it is not in the 'Before you start' list (scikit-learn only)."
     },
     {
-     "where": "Step 3 · Learn",
-     "why": "CountVectorizer and what a word-count column is are never pictured."
+     "where": "Step 3, code",
+     "why": "fit and transform are never explained, and the rule that the word list comes from train only is not stated."
     }
    ]
   },
   "ai-engineer/20-neural-nets-and-frontier-as-predictors.html": {
    "score": 7,
-   "at": "2026-11-26T02:30:51.249Z",
+   "at": "2026-11-26T04:31:32.841Z",
    "confusing": [
     {
-     "where": "Step 3, frontier model",
-     "why": "This is a placeholder. A newcomer would send it to the API and get a model-not-found error, with no hint of what to type instead."
+     "where": "Step 2, Learn",
+     "why": "About twelve new words (tensor, linear layer, activation, ReLU, forward, loss, backward, Adam, batch) sit in one paragraph. Each is explained, but it is a lot at once."
     },
     {
-     "where": "Step 4, fine-tuning",
-     "why": "The lesson writes the JSON Lines file but never starts the fine-tuning job or says where the tuned model's name comes from."
+     "where": "Step 2, code",
+     "why": "The loop runs one pass and prints nothing, so the reader cannot tell whether the net learned anything."
     },
     {
-     "where": "Step 3, quiz on fair comparison",
-     "why": "Cost is never measured or printed in the lesson, so the 'pick by error and cost' answer rests on the feedback alone."
+     "where": "Step 3",
+     "why": "The frontier box defines the pricer but never calls evaluate, and the lesson does not say that 100 paid calls are made."
     }
    ]
   },
   "ai-engineer/21-price-guesser.html": {
    "score": 7,
-   "at": "2026-11-26T02:34:53.396Z",
+   "at": "2026-11-26T04:31:32.841Z",
    "confusing": [
     {
-     "where": "Step 2 · Classic and frontier guessers",
-     "why": "No step names a model, and the failure notes mention a FRONTIER_MODEL variable that the box never reads."
+     "where": "Step 1, code",
+     "why": "This differs from lessons 19 and 20: it takes rows with text, returns a dict, and prints nothing. The lesson says it is the same board and does not mention the change."
     },
     {
-     "where": "Step 4 · A small screen where they disagree",
-     "why": "The diagram shows a baseline and a tuned model, but the code builds four guessers and no tuned one."
+     "where": "Step 3, code",
+     "why": "table is built but never printed, though the acceptance check expects a printed table. The 1.5 cost is typed in, not measured, and the text does not say so."
     },
     {
-     "where": "Step 4 · A small screen where they disagree",
-     "why": "Gradio is never explained, so a reader new to it does not know what the screen library does."
+     "where": "Step 1, Learn",
+     "why": "The frontier row makes one paid model call per test row, so the lite test set means about 500 calls every run. The lesson never says this."
     }
    ]
   },
