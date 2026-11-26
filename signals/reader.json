@@ -409,20 +409,20 @@
    ]
   },
   "ai-engineer/07-shop-assistant-that-acts.html": {
-   "score": 7,
-   "at": "2026-11-25T12:53:06.977Z",
+   "score": 6,
+   "at": "2026-11-26T04:25:21.132Z",
    "confusing": [
     {
-     "where": "Step 2, Learn text",
-     "why": "The code still passes set_price in the tools list used for customer chats, and no step removes it, so the reader cannot tell whether it is live."
+     "where": "Step 1",
+     "why": "'Worker threads' and check_same_thread are not explained, so a newcomer cannot tell why the flag is there."
     },
     {
-     "where": "Step 1, Learn text",
-     "why": "A system message is never defined for a beginner; the reader does not know it is the standing instruction sent with every question."
+     "where": "Step 3",
+     "why": "screen.py uses client, which is defined only in the tool_chat.py box. The lesson never says the three boxes form one file or in what order."
     },
     {
-     "where": "Step 1, Learn text",
-     "why": "Neither worker threads nor why SQLite cares about them is explained, so the flag is copied without knowing what it protects."
+     "where": "Step 2",
+     "why": "The customer's tool list includes set_price. The text says only 'it stays here only for testing', so a reader can ship a bot that changes prices."
     }
    ]
   },
@@ -716,91 +716,91 @@
   },
   "ai-engineer/04-comparing-frontier-local-models.html": {
    "score": 6,
-   "at": "2026-11-25T13:11:05.398Z",
+   "at": "2026-11-26T04:25:21.132Z",
    "confusing": [
     {
      "where": "Step 2",
-     "why": "The compare.py loop still lists the local model, so the code fails before Step 4."
-    },
-    {
-     "where": "Step 2",
-     "why": "The lesson never says why 1/2 is tempting, or what 'the other' coin means, so 2/3 looks arbitrary."
+     "why": "\"The other\" is ambiguous, and the lesson never says why HH does not count. The 2/3 answer only follows if you read it as 'at least one tails'."
     },
     {
      "where": "Step 1",
-     "why": "'Frontier' is never defined, so a newcomer has to guess it means the biggest cloud models."
+     "why": "<provider> is a placeholder. The lesson never says to fill it in or that cloud-b is optional, so Step 1 cannot run as written."
+    },
+    {
+     "where": "Step 1",
+     "why": "os.getenv, .env and where keys live are never explained. OpenAI() also reads its key from an environment variable without saying so."
     }
    ]
   },
   "ai-engineer/05-chat-screen-in-minutes.html": {
-   "score": 8,
-   "at": "2026-11-25T13:11:05.398Z",
+   "score": 7,
+   "at": "2026-11-26T04:25:21.132Z",
    "confusing": [
     {
-     "where": "Step 2 (explained only under Common errors)",
-     "why": "The Step 2 code strips extra keys from history, but the reason appears only in Common errors."
+     "where": "Step 2",
+     "why": "'chunk' and 'delta' are never explained. This is the line a newcomer copies without knowing what it does."
     },
     {
      "where": "Step 2",
-     "why": "The parameter appears in the code and is never explained in the text."
+     "why": "type=\"messages\" appears here, but it is only explained under Common errors, after the reader has already run it."
     },
     {
-     "where": "Step 2",
-     "why": "'Stateless' is never defined."
+     "where": "Step 3",
+     "why": "This box redefines system_message from Step 2, and nothing says it replaces the first one. A reader may keep both."
     }
    ]
   },
   "ai-engineer/06-tools-images-voice.html": {
-   "score": 8,
-   "at": "2026-11-25T13:11:05.398Z",
+   "score": 6,
+   "at": "2026-11-26T04:25:21.132Z",
    "confusing": [
     {
      "where": "Step 3",
-     "why": "The Step 2 loop still calls get_price directly, and the new loop is only a comment."
+     "why": "SQL, the ? placeholder, fetchone and commit() appear with no explanation. A newcomer can copy this line but not change it."
     },
     {
      "where": "Step 3",
-     "why": "SQLite is never explained; the reader does not know it is a small database in one file."
+     "why": "The loop is changed only by this comment. The four code boxes are also never joined into one program: tool_loop.py uses get_price and price_tool with no import."
     },
     {
-     "where": "Step 4",
-     "why": "base64 and PIL are not explained, and the prerequisites list only Pillow."
+     "where": "Step 2",
+     "why": "'Assistant message' is used as if known. A newcomer does not know the model's own reply that asked for the tools is stored in the list."
     }
    ]
   },
   "ai-engineer/08-pipelines-models-few-lines.html": {
    "score": 8,
-   "at": "2026-11-25T13:11:05.398Z",
+   "at": "2026-11-26T04:25:21.132Z",
    "confusing": [
     {
-     "where": "Step 2",
-     "why": "The quiz needs the task name ner, which is never written in the lesson."
-    },
-    {
-     "where": "Common errors",
-     "why": "'Token' is used before it is explained, and this lesson's prerequisites do not cover it."
+     "where": "Step 3",
+     "why": "parent_letter.txt is never supplied or described as a file to create, so the first run fails with FileNotFoundError."
     },
     {
      "where": "Step 3",
-     "why": "The file is never created, so the code fails with FileNotFoundError."
+     "why": "max_length and summary_text are used without saying what they are, or that the result is a list of dictionaries."
+    },
+    {
+     "where": "Step 2",
+     "why": "The task names for translation, question answering and names (ner) are never given, so the reader cannot type them."
     }
    ]
   },
   "ai-engineer/09-tokenizers-how-models-load.html": {
-   "score": 6,
-   "at": "2026-11-25T13:11:05.398Z",
+   "score": 7,
+   "at": "2026-11-26T04:25:21.132Z",
    "confusing": [
     {
      "where": "Step 1",
-     "why": "This is a placeholder, so the code cannot run, and the same name is used through all four steps."
-    },
-    {
-     "where": "Step 2",
-     "why": "tokenize=False and add_generation_prompt are never explained, so the reader cannot tell why later calls differ."
+     "why": "This is a placeholder with no example id, and no check that the model has a chat template. The whole lesson depends on this choice."
     },
     {
      "where": "Step 3",
-     "why": "'CausalLM' is never explained, so the reader cannot tell what kind of model it loads."
+     "why": "A reader hits this gate in Step 1, but the warning only appears in Step 3."
+    },
+    {
+     "where": "Step 4",
+     "why": "The full-precision model from Step 3 is still on the GPU in the same notebook, so this load can run out of memory. The lesson never says to restart."
     }
    ]
   },
