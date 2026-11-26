@@ -17,6 +17,11 @@ on:
         required: false
         type: boolean
         default: false
+      now:
+        description: Fix now - ignore the 7-day wait for an item that was tried recently (the "Fix now" button on the How it works page opens this form)
+        required: false
+        type: boolean
+        default: true
 permissions:
   contents: read
 concurrency:
@@ -97,6 +102,7 @@ jobs:
         if: steps.open.outputs.open == '0'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMPROVER_NOW: ${{ inputs.now && '1' || '0' }}
         run: node scripts/signals.mjs brief --out /tmp/improver
       - name: Install Claude Code
         if: steps.brief.outputs.actionable == 'true' && steps.scout.outputs.scout != 'true'
