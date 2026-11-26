@@ -76,7 +76,6 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 .tip.on{display:block}
 .tip h5{margin:0 0 4px;font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
 .tip p{margin:0 0 8px;font-size:13.5px;line-height:1.55}
-.tip .last{margin-top:10px;font-size:12.5px;padding:8px 0 0;border-top:1px solid var(--line);overflow-wrap:anywhere}.tip .last a{font-weight:600;white-space:nowrap}
 .spec{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;margin:2px 0 0;font:11.5px/1.5 var(--mono)}
 .spec dt{color:var(--mut)}.spec dd{margin:0;color:var(--fg);overflow-wrap:anywhere}
 .guards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-top:14px}
@@ -125,7 +124,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 .olist .st{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--mut);margin-right:7px;vertical-align:1px}
 .olist .st.ok{background:var(--ok)}.olist .st.flag{background:var(--warn)}.olist .st.run{background:var(--run)}.olist .st.fail{background:var(--bad)}
 .olist .ob{all:unset;cursor:pointer;font-weight:650;border-bottom:1px dotted var(--h,var(--edge))}.olist .ob:focus-visible{outline:2px solid var(--h);outline-offset:2px}
-.olist .more{display:none;margin:8px 0 4px;padding:10px 12px;border-radius:6px;border:1px solid var(--box);background:var(--node)}.olist .it.open .more{display:block}.olist .more .last{margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font-size:13px;overflow-wrap:anywhere}.olist .more p{margin:0 0 8px;font-size:14px}
+.olist .more{display:none;margin:8px 0 4px;padding:10px 12px;border-radius:6px;border:1px solid var(--box);background:var(--node)}.olist .it.open .more{display:block}.olist .more p{margin:0 0 8px;font-size:14px}
 .olist .lk{font:10px var(--mono);color:var(--mut);margin-left:6px;letter-spacing:.06em}
 @media(max-width:760px){.panel{display:none}.olist{display:block}}
 @media(max-width:760px){.olist .it{padding:11px 0 11px 32px}.olist .it::before{top:17px}.olist .it[data-n]::before{top:12px}.olist .it.g::before{top:12px}}
@@ -319,44 +318,68 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
   function t(en,zh){return '<span class="en">'+en+'</span><span class="zh">'+zh+'</span>'}
   function ts(en,zh){return '<tspan class="en">'+esc(en)+'</tspan><tspan class="zh">'+esc(zh)+'</tspan>'}
   function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-  // Keep these specs true to .github/workflows/.
+  // Compact bilingual details; keep triggers and outputs true to .github/workflows/.
   var AGENTS=[
-    {id:'writer',hue:'#8b7cff',on:['on push · inbox/**','推送 inbox/** 时'],ev:'push · notes branch · inbox/** → runs on main',mdl:'Claude · ≤80 turns',rd:['notes, a short rule packet, related lessons, a model lesson','笔记、简短规则卡、相关的课、一篇范例课'],tl:'Read Write Edit Glob Grep · ls · check-copy · check-counts · check-pages',wr:['draft lessons → ONE PR into main for the whole batch','课的草稿 → 整批课只开一个 PR 提交到 main'],tk:'contents · pull-requests · actions: write',gt:['the PR merges by itself once every check is green','所有检查都通过后，PR 自动合并'],tg:['only on a problem','只在出问题时'],g:'github',ic:'CC',en:'Content creator agent',zh:'内容创作者 agent',
-     den:'Turns my raw notes into a lesson for a newcomer to AI, in my voice and to the style guide, checks it once as that newcomer, then opens ONE pull request for the whole batch of lessons.',
-     dzh:'把我的原始笔记写成一篇给 AI 新手的课，用我的语气、按写作指南来写，再以新手的眼光自查一遍，然后为整批课只开一个 pull request。'},
-    {id:'copy-check',hue:'#4f9dff',on:['on every PR · script','每个 PR · 脚本'],ev:'pull_request → main · started by agents after they push',mdl:['script, no AI','脚本，不用 AI'],rd:['every page, banned word list, lessons.js','每一页、禁用词表、lessons.js'],tl:'node scripts/check-copy.mjs · check-security.mjs · check-counts.mjs · check-pages.mjs · ui-check.mjs --fit',wr:['pass / fail checks: leaked keys, unsafe links and scripts, unsafe workflow lines, source names, counts, tags, stray build files, page language, titles, link previews, alt text, headings, EN/中文 twins, a script loaded twice, content wider than a 390px phone or a popup off the side (changed pages only)','通过 / 失败检查：泄露的密钥、不安全的链接和脚本、不安全的工作流写法、来源名称、数量、标签、多余的编译文件、页面语言、标题、链接预览、图片说明、标题层级、中英对应、手机上内容变宽或弹窗跑出屏幕'],tk:['check job: contents:read · status job: write','检查任务：contents:read · 状态任务：可写'],gt:['red blocks the merge','红色就不能合并'],tg:['only when a check fails','只在检查失败时'],g:'github',ic:'SE',en:'Cybersecurity engineer agent',zh:'网络安全工程师 agent',
-     den:'Guards the repo: it blocks leaked API keys and tokens, unsafe links, scripts from unknown sites and workflow lines a stranger could abuse. It also keeps every page free of source names, checks every lesson count and tag against the lesson list, and blocks stray build files. A quick phone-fit check also fails a page that is wider than a 390px screen.',
-     dzh:'守住仓库：拦下泄露的 API 密钥和令牌、不安全的链接、来自陌生网站的脚本，以及陌生人可能利用的工作流写法。它也让每一页不出现来源名称，按课的清单核对每个数量和标签，并拦下多余的编译文件。快速的手机适配检查还会拦下比 390px 屏幕更宽的页面。'},
-    {id:'reviewer',hue:'#f472b6',on:['every PR, once','每个 PR，一次'],ev:'started by the intern agent on a lesson PR · pull_request → main for every other PR',mdl:'Claude · ≤40 turns, tuned from past runs',rd:['the diff, a short rule packet, failing checks, related lessons','改动、简短规则卡、未通过的检查、相关的课'],tl:'Read Write Edit Glob Grep · check-copy · check-counts · check-pages',wr:['one comment with a verdict ✅ / ⚠️ and a Reviewer status; on a lesson PR, its fixes as one commit there','一条带结论 ✅ / ⚠️ 的评论和一个 Reviewer 状态；在课的 PR 上，把修改作为一个提交加进去'],tk:['review job: contents:read · share job: write','审阅任务：contents:read · 分享任务：可写'],gt:['no ✅, no merge; with ✅ and green checks it merges by itself','没有 ✅ 就不能合并；有 ✅ 且检查全绿就自动合并'],tg:['only when it cannot finish; a ⚠️ it cannot fix reaches me once as "needs you"','只在无法完成时；修不好的 ⚠️ 会以“需要你”通知我一次'],g:'github',ic:'BE',en:'Backend engineer agent',zh:'后端工程师 agent',
-     den:'Checks that every code sample would really run (imports, package names, the library\'s real functions, await, model names) and that every fact is true, plus the story and EN/中文. It fixes what it can on that same PR. Every other change, like a script change, gets the same one review. Nothing merges without its ✅.',
-     dzh:'检查每段示例代码是否真的能运行（导入、包名、库里真实的函数、await、模型名），每个事实是否属实，还有故事和中英文。能修的就在同一个 PR 上修好。其他改动（比如脚本的修改）也同样审一次。没有它的 ✅ 就不能合并。'},
-    {id:'reader',hue:'#22d3ee',on:['on each preview','每次预览后'],ev:'deployment_status · preview ready',mdl:'Claude · ≤50 turns, tuned from past runs',rd:['the lessons that changed','改动过的课'],tl:'Read Write Edit Glob Grep · check-copy · check-counts · check-pages',wr:['clarity score, a handful of lessons per run; below 8/10 its fixes as one commit on the lesson PR','清晰度评分，每次只读少数几课；低于 8/10 时把修改作为一个提交加到课的 PR'],tk:['read job: contents:read · share job: write','读取任务：contents:read · 分享任务：可写'],gt:['its fixes go onto the same lesson PR','它的修改加到同一个课的 PR'],tg:['only on a problem; scores go in the daily digest','只在出问题时；评分写进每日汇总'],g:'vercel',ic:'IN',en:'Intern agent',zh:'实习生 agent',
-     den:'An intern who is learning AI. It reads each new lesson to learn from it, says honestly where it got lost and scores how clear it is. Below 8/10 it adds clearer wording to the lesson\'s own PR, once, then hands over to the backend engineer agent.',
-     dzh:'一个正在学 AI 的实习生。它读每篇新课来学习，老实说出哪里看不懂，并给清晰度打分。低于 8/10 时，它把更清楚的写法加到这一课自己的 PR 上（只一次），然后交给后端工程师 agent。'},
-    {id:'ui-check',hue:'#fb923c',on:['clicks each preview','点遍每个预览'],ev:'deployment_status · preview ready',mdl:['script + Claude · ≤14 turns','脚本 + Claude · ≤14 轮'],rd:['the pages a pull request changed (a small sample when shared layout changes; every page on a manual run), in a desktop and a phone browser','拉取请求改动的页面（共用版式改动时抽样；手动运行则测每一页），在桌面和手机浏览器里'],tl:'headless browser · Claude: Read + one result file',wr:['pass / fail status + one PR comment','通过 / 失败状态 + 一条 PR 评论'],tk:['check job: contents:read · share job: write','检查任务：contents:read · 分享任务：可写'],gt:['red blocks the merge','红色就不能合并'],tg:['only when it cannot finish; a red check reaches me once as "needs you"','只在无法完成时；红色检查会以“需要你”通知我一次'],g:'vercel',ic:'FE',en:'Frontend engineer agent',zh:'前端工程师 agent',
-     den:'Uses each preview the way a person does, and cares that every page looks finished on a laptop and a phone: hovers, clicks and Tabs through the pages a pull request changed (every page on a manual run) on a desktop and a phone, and flags popups that overlap, anything you can click but not reach with Tab, pages wider than the screen and script errors. Claude then looks at one desktop and one phone screenshot of each changed page.',
-     dzh:'像真人一样使用每个预览，在意每一页在电脑和手机上都像做完的样子：在桌面和手机上把拉取请求改动的页面（手动运行则是每一页）都悬停、点击、按 Tab 走一遍，标出重叠的弹窗、能点却按 Tab 到不了的东西、比屏幕还宽的页面和脚本错误。然后 Claude 再看一遍改动页面的截图。'},
-    {id:'live-check',hue:'#a3e635',on:['after each merge','每次合并后'],ev:'each merge into main, from auto-merge or a push (waits for Vercel) · or by hand',mdl:['script, no AI','脚本，不用 AI'],rd:['the live site: every page, lesson, link and file, on a desktop and a phone, in EN and 中文','线上网站：每一页、每一课、每个链接和文件，桌面和手机，英文和中文'],tl:'node scripts/live-check.mjs · headless browser',wr:['a pass / fail line on this page; if a merge broke the site, a rollback PR that it merges','这一页上的一行通过 / 失败；如果某次合并弄坏了网站，就开一个回滚 PR 并合并'],tk:['check job: contents:read · rollback and status jobs: write','检查任务：contents:read · 回滚和状态任务：可写'],gt:['it undoes only a merge that broke a site that was fine before','只撤销把原本正常的网站弄坏的那次合并'],tg:['only when something is off or rolled back','只在有问题或回滚时'],g:'vercel',ic:'PE',en:'Product engineer agent',zh:'产品工程师 agent',
-     den:'After every merge into main it waits for Vercel to finish deploying, then uses the real site like a reader: every page and lesson, every link, the counts against the lesson list, 中文, a phone screen and load times. Only real breakage counts, and it looks twice. If that merge broke a site that was fine before, it undoes the merge with a rollback pull request and tells me once.',
-     dzh:'每次合并进 main 后，它等 Vercel 部署完，然后像读者一样使用真实网站：每一页、每一课、每个链接，核对数量和课的清单，还看中文、手机屏幕和加载时间。只有真的坏了才算，而且会看两遍。如果这次合并把原本正常的网站弄坏了，它就用一个回滚 pull request 撤销这次合并，并通知我一次。'},
-    {id:'scope-guard',hue:'#38bdf8',on:['every PR, once','每个 PR，一次'],ev:'pull_request → main · started by the backend engineer agent on agent PRs',mdl:'Claude Haiku · 2 calls, no tools',rd:['only the diff first, then the request (PR title and description)','先只看改动，再对照需求（PR 标题和说明）'],tl:'none: it reads text and answers with a verdict',wr:['a Scope guard status, an area label on the PR and, only on a mismatch, one comment and a red Reviewer status','一个 Scope guard 状态、PR 上的区域标签，只有不一致时才有一条评论和红色的 Reviewer 状态'],tk:['look job: contents:read · share job: write','查看任务：contents:read · 分享任务：可写'],gt:['a change that does more or something else than asked cannot merge; label scope-ok lets one through','改动做得比要求的多或不一样就不能合并；加上 scope-ok 标签才放行'],tg:['only on a problem (via auto-merge)','只在出问题时（经由自动合并）'],g:'github',ic:'SG',en:'Change control agent',zh:'变更管控 agent',
-     den:'Reads only the code changes, without seeing the request, and says in plain words what they do. Then it compares that with what was asked for. A lesson draft may change one track and nothing else; anything extra turns the Reviewer red with a plain reason, so it cannot merge until it is fixed.',
-     dzh:'只读代码改动，不看需求，用大白话说出这些改动做了什么，再与当初的要求对照。一份课的草稿只能改一条路线，别的都不行；多出来的改动会让 Reviewer 变红并给出直白的理由，改好之前不能合并。'},
-    {id:'improver',hue:'#fb7185',on:['4 times a day','每天 4 次'],ev:'schedule · 03:41, 09:41, 15:41, 21:41 UTC · one small PR',mdl:'Claude Sonnet · ≤30 turns, only when there is something to fix; Haiku scout · ≤10 turns, read-only',rd:['the open Quality check issue, the intern\'s latest lesson scores, then an ideas backlog that each role fills by scouting one changed file (max 2 ideas, no repeats); picked by a script with no AI','Quality check 的未解决问题、实习生对各课的最新评分，其次是各角色每次只看一个有变化的文件后留下的想法清单（最多 2 条、不重复）；由不用 AI 的脚本挑选'],tl:'Read Write Edit Glob Grep · check-copy · check-counts · check-pages · check-security',wr:['one small fix PR into main, limited to the files it was given','一个小的修复 PR 到 main，只能改指定的文件'],tk:'contents · pull-requests · actions: write',gt:['one open PR at a time, the same item is not retried for 7 days, and every normal check still applies','同一时间只有一个未合并的 PR，同一件事 7 天内不重试，所有常规检查照常适用'],tg:['only on a problem','只在出问题时'],g:'github',ic:'IM',en:'Improvement engineer agent',zh:'持续改进工程师 agent',
-     den:'Closes the loop: it acts on what other agents already found. A script (no AI) picks one item, a broken page or link from the weekly quality check or the lesson the intern scored lowest, and only then does Claude fix just that, in just those files. Nothing to fix means no AI run and no cost.',
-     dzh:'把回路接起来：处理其他 agent 已经发现的问题。由一个不用 AI 的脚本挑出一件事，比如每周质量检查发现的坏页面或坏链接，或实习生评分最低的课，然后才让 Claude 只改这一处、只改这些文件。没有要修的就不运行 AI，也不花费。'},
-    {id:'news',hue:'#34d399',on:['daily','每天'],ev:'schedule · 01:17 UTC daily · feeds the ideas backlog, opens no PR itself',mdl:['script + Claude Haiku · no tools · skipped when nothing new matches a lesson','脚本 + Claude Haiku · 不用工具 · 没有新内容对得上某课时就跳过'],rd:['official AI blogs and release notes (RSS), only items newer than 3 days that match a lesson','官方 AI 博客和发布说明（RSS），只看 3 天内、且对得上某一课的新内容'],tl:'none: it reads text and answers with a short list',wr:['up to 3 ideas a day, each with its source link, for the improvement engineer to act on','每天最多 3 条想法，附来源链接，交给持续改进工程师 agent 去处理'],tk:'contents: write (agent-status branch only)',gt:['it changes no site file; ideas go through the improvement engineer, the scope guard and auto-merge. New lessons still come only from my notes','它不改任何网站文件；想法由持续改进工程师 agent 处理，并经过范围守卫和自动合并。新课仍然只来自我的笔记'],tg:['only on a problem','只在出问题时'],g:'github',ic:'NW',en:'Industry consultant agent',zh:'行业顾问 agent',
-     den:'Reads what the AI industry published today in official blogs and release notes, and asks one question: does this make a lesson out of date? A post that names a model the lessons use in code always reaches those lessons. If so it leaves a short idea with the source link for the improvement engineer. It refreshes lessons; it never invents new ones.',
-     dzh:'读 AI 行业今天在官方博客和发布说明里发布了什么，只问一个问题：这会让某一课过时吗？点名了课里代码用到的模型的文章，一定会对上那些课。如果会，它就留下一条带来源链接的简短想法，交给持续改进工程师 agent。它只更新旧课，不会自己发明新课。'},
-    {id:'optimizer',hue:'#f59e0b',on:['every 6 hours','每 6 小时'],ev:'schedule · every 6 hours · one focused PR',mdl:'Claude · ≤40 turns',rd:['efficiency report, the smallest relevant source, deterministic checks','效率报告、最小相关源码、确定性检查'],tl:'Read Write Edit Glob Grep · check-copy · check-counts · check-pages · check-security',wr:['one measured efficiency PR into main','一个有前后测量的效率改进 PR 到 main'],tk:'contents · pull-requests · actions: write',gt:['the normal required checks and live rollback still apply','仍要过正常必检，并受线上回滚保护'],tg:['only on a problem','只在出问题时'],g:'github',ic:'OP',en:'Efficiency engineer agent',zh:'效率工程师 agent',
-     den:'Looks for wasted bytes, requests, blocking work, duplicated source, noisy tests and silent failures. It makes one small measurable improvement at a time and leaves anything it cannot prove safe alone.',
-     dzh:'寻找浪费的字节、请求、阻塞工作、重复源码、嘈杂测试和静默失败。每次只做一小步可测量的改进；无法证明安全的改动就不碰。'},
-    {id:'quality',hue:'#2dd4bf',on:['daily scan · Mondays full check','每天巡检 · 每周一全面检查'],ev:'schedule · daily 22:43 UTC (light scan) · Monday 02:00 UTC (full check) · or by hand · never on a PR',mdl:['script, no AI','脚本，不用 AI'],rd:['every page on a desktop and a phone, EN and 中文; every internal link, anchor and project file; the external links; the lesson code boxes. Daily: what readers did, one project package, the docs, a speed budget and files changed again and again','每一页（桌面和手机，英文和中文）；每个内部链接、锚点和项目文件；外部链接；课里的代码块。每天：读者做了什么、一个项目代码包、文档、速度预算，以及被反复修改的文件'],tl:'node scripts/check-a11y.mjs · check-links.mjs · check-code.mjs · axe-core, installed only for the run · daily: node scripts/daily-scan.mjs',wr:['no files and no PR: one open issue titled “Quality check”, updated each week and closed when a run is clean. The daily scan writes its result for the digest and hands lessons that readers marked unclear to the improvement engineer','不写文件，也不开 PR：一个名为 “Quality check” 的 issue，每周更新，检查全部通过时关闭。每天的巡检把结果写给每日摘要，并把读者标为没讲清楚的课交给持续改进工程师 agent'],tk:['check job: contents:read · issue and status jobs: write','检查任务：contents:read · issue 和状态任务：可写'],gt:['it only reports: it never blocks or changes a merge','它只报告：不会拦住或改动任何合并'],tg:['only when it finds a problem','只在发现问题时'],g:'github',ic:'QA',en:'QA engineer agent',zh:'质量保证工程师 agent',
-     den:'Once a week it goes over the whole site like a careful visitor: serious accessibility problems, text that is hard to read, controls the keyboard cannot reach, heavy pages, images without a size, broken links and missing project files, and code samples that do not parse. A dead link on another site is only a warning. It never opens a pull request; it keeps one issue up to date and tells me. Every day it also runs a light scan: which lessons real readers marked as not quite clear, whether one project package still installs and imports, whether the docs still match the repo, a speed budget on a phone, and which files keep being changed.',
-     dzh:'每周像一位细心的访客把整个网站过一遍：严重的无障碍问题、看不清的文字、键盘够不到的控件、过重的页面、没有尺寸的图片、失效的链接和缺失的项目文件，以及无法解析的示例代码。别的网站上的死链只算警告。它从不开 pull request，只维护一个 issue 并通知我。它每天还做一次轻量巡检：真实读者把哪些课标为“不太清楚”、一个项目代码包是否还能安装和导入、文档是否还和仓库一致、手机上的速度预算，以及哪些文件被反复修改。'},
-    {id:'recall',hue:'#facc15',on:['Sundays · 9 AM','每周日 · 早 9 点'],ev:'schedule · Sunday 01:00 UTC · first Sunday: model check',mdl:'Claude · ≤20 turns (+15 monthly)',rd:['the lessons due for review, the lesson list; monthly: model names in lessons','到期该复习的课、课的清单；每月：课里用到的模型名'],tl:'Read · monthly: WebSearch',wr:['no files: one Telegram message','不写文件：只发一条 Telegram'],tk:['think job: contents:read · send job: write','思考任务：contents:read · 发送任务：可写'],gt:['I answer on my phone','我在手机上作答'],tg:['every week: what to review, with questions; monthly: outdated model names','每周：该复习什么，附带问题；每月：过时的模型名'],tga:1,g:'github',ic:'SR',en:'Learning coach agent',zh:'学习教练 agent',
-     den:'Brings old lessons back right before I would forget them (1, 3, 7, 14, 30 days and on), with two quick questions each, and points out the gaps: topics I have not written yet and what to learn next. Once a month it also looks up which AI model names in the lessons are outdated.',
-     dzh:'在我快忘记之前把旧课翻出来（1、3、7、14、30 天……），每课附两道小问题，并指出缺口：还没写的主题和下一步该学什么。每月还会查一次课里哪些模型名已经过时。'}];
+    {id:'writer',hue:'#8b7cff',on:['on push · inbox/**','推送 inbox/** 时'],tg:['only on a problem','只在出问题时'],en:'Content creator agent',zh:'内容创作者 agent',
+     den:'Turns my notes into bilingual lessons in my voice.',
+     dzh:'把我的笔记写成中英双语的课，保留我的语气。',
+     runs:['Notes change on the notes branch, or manually.','笔记分支上的笔记有改动时，或手动运行。'],
+     output:['One pull request for the whole lesson batch.','整批课合在一个 PR 中提交。']},
+    {id:'copy-check',hue:'#4f9dff',on:['on every PR · script','每个 PR · 脚本'],tg:['only when a check fails','只在检查失败时'],en:'Cybersecurity engineer agent',zh:'网络安全工程师 agent',
+     den:'Finds leaked keys, unsafe links, wrong lesson counts and pages wider than a phone.',
+     dzh:'找出泄露的密钥、不安全的链接、课的数量错误和超出手机屏幕的页面。',
+     runs:['Each pull request, or manually.','每个 PR，或手动运行。'],
+     output:['Pass or fail; failures block merging.','通过或失败；失败就不能合并。']},
+    {id:'reviewer',hue:'#f472b6',on:['every PR, once','每个 PR，一次'],tg:['only when it cannot finish; a ⚠️ it cannot fix reaches me once as "needs you"','只在无法完成时；修不好的 ⚠️ 会以“需要你”通知我一次'],en:'Backend engineer agent',zh:'后端工程师 agent',
+     den:'Reviews code samples, facts and English/Chinese consistency before changes can merge.',
+     dzh:'在改动合并前审查示例代码、事实和中英文是否一致。',
+     runs:['Each pull request; lesson drafts follow the intern review.','每个 PR；课的草稿在实习生审阅后进行。'],
+     output:['A required review verdict; lesson-draft fixes on the same PR.','必需的审核结论；课的草稿在原 PR 上修改。']},
+    {id:'reader',hue:'#22d3ee',on:['on each preview','每次预览后'],tg:['only on a problem; scores go in the daily digest','只在出问题时；评分写进每日汇总'],en:'Intern agent',zh:'实习生 agent',
+     den:'Reads each lesson as its intended reader and flags confusing explanations.',
+     dzh:'以每课目标读者的知识水平来读，指出讲不清楚的地方。',
+     runs:['After preview deployments, or manually.','预览部署完成后，或手动运行。'],
+     output:['Scores and comments; under 8/10, fixes only on lesson-draft PRs.','评分与评论；低于 8/10 时，只在课的草稿 PR 上修改。']},
+    {id:'ui-check',hue:'#fb923c',on:['clicks each preview','点遍每个预览'],tg:['only when it cannot finish','只在无法完成时'],en:'Frontend engineer agent',zh:'前端工程师 agent',
+     den:'Tests clicks, keyboard access and layout on desktop and phone previews.',
+     dzh:'在电脑和手机预览中检查点击、键盘操作和页面布局。',
+     runs:['After preview deployments, or manually.','预览部署完成后，或手动运行。'],
+     output:['A status and PR comment, not a required merge check.','检查状态与 PR 评论，不是合并的必需检查。']},
+    {id:'live-check',hue:'#a3e635',on:['after each merge','每次合并后'],tg:['only when something is off or rolled back','只在有问题或回滚时'],en:'Product engineer agent',zh:'产品工程师 agent',
+     den:'Checks live pages, links and scripts after deployment.',
+     dzh:'部署后检查线上页面、链接和脚本。',
+     runs:['After merges, or manually.','合并后，或手动运行。'],
+     output:['A report; a rollback PR only if a merge broke a healthy site, not for layout issues.','检查报告；只有合并弄坏原本正常的网站才开回滚 PR，版式问题不回滚。']},
+    {id:'scope-guard',hue:'#38bdf8',on:['every PR, once','每个 PR，一次'],tg:['only on a problem (via auto-merge)','只在出问题时（经由自动合并）'],en:'Change control agent',zh:'变更管控 agent',
+     den:'Checks that changes match the request and stay within allowed file areas.',
+     dzh:'检查改动是否符合要求，是否只涉及允许修改的文件范围。',
+     runs:['Each pull request, or manually.','每个 PR，或手动运行。'],
+     output:['An area label and verdict; mismatches block merging.','区域标签与结论；不匹配就阻止合并。']},
+    {id:'improver',hue:'#fb7185',on:['4 times a day','每天 4 次'],tg:['only on a problem','只在出问题时'],en:'Improvement engineer agent',zh:'持续改进工程师 agent',
+     den:'Fixes one reported problem, unclear lesson or improvement idea at a time.',
+     dzh:'每次处理一个已报告的问题、一篇没讲清楚的课，或一条改进建议。',
+     runs:['Four times daily, or manually.','每天四次，或手动运行。'],
+     output:['One targeted PR, limited to the selected files.','一个针对性改进 PR，只改指定文件。']},
+    {id:'news',hue:'#34d399',on:['daily','每天'],tg:['only on a problem','只在出问题时'],en:'Industry consultant agent',zh:'行业顾问 agent',
+     den:'Checks official AI announcements for changes that make existing lessons outdated.',
+     dzh:'查看官方 AI 公告，找出哪些新变化会让已有的课过时。',
+     runs:['Daily, or manually.','每天，或手动运行。'],
+     output:['Up to three ideas with sources for the improvement engineer agent; no site edits or new lessons.','最多三条附来源的想法，交给持续改进工程师 agent；不改网站，也不新增课。']},
+    {id:'optimizer',hue:'#f59e0b',on:['every 6 hours','每 6 小时'],tg:['only on a problem','只在出问题时'],en:'Efficiency engineer agent',zh:'效率工程师 agent',
+     den:'Measures wasted bytes, requests and repeated work, then makes one safe improvement.',
+     dzh:'测量多余的数据量、请求和重复工作，再做一项安全的改进。',
+     runs:['Every six hours, or manually.','每六小时，或手动运行。'],
+     output:['At most one focused PR, with before-and-after measurements.','最多一个小范围改进 PR，附前后测量结果。']},
+    {id:'quality',hue:'#2dd4bf',on:['daily scan · Mondays full check','每天巡检 · 每周一全面检查'],tg:['only when it finds a problem','只在发现问题时'],en:'QA engineer agent',zh:'质量保证工程师 agent',
+     den:'Checks accessibility, links, project files and site health without editing the site.',
+     dzh:'检查无障碍体验、链接、项目文件和网站状况，不修改网站。',
+     runs:['Daily scans; full checks Mondays; also manually.','每天巡检，周一全面检查，也可手动运行。'],
+     output:['Daily findings in the digest; weekly problems in one issue. Never blocks merges.','日常发现写入摘要，每周检查的问题记入一个 issue；不阻止合并。']},
+    {id:'recall',hue:'#facc15',on:['Sundays · 9 AM','每周日 · 早 9 点'],tg:['every week: what to review, with questions; monthly: outdated model names','每周：该复习什么，附带问题；每月：过时的模型名'],tga:1,en:'Learning coach agent',zh:'学习教练 agent',
+     den:'Brings back lessons for spaced review and checks for outdated model names monthly.',
+     dzh:'按间隔安排旧课复习，每月再查一次过时的模型名。',
+     runs:['Sundays, or manually.','每周日，或手动运行。'],
+     output:['A Telegram review plan with two questions per due lesson and learning gaps.','Telegram 复习计划：每篇该复习的课两道题，并列出待学主题。']}];
   var NAME={};AGENTS.forEach(function(a){NAME[a.id]=a});
 
   function agoP(iso){var s=(Date.now()-new Date(iso))/1000;if(!(s>=0))return ['',''];
@@ -370,10 +393,9 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
   function stOf(s){return working(s)?'run':s&&PP[s.state]?s.state:''}
   function atOf(s){return working(s)?s.now.at:s&&s.at}
   function V(x){return typeof x==='string'?esc(x):t(esc(x[0]),esc(x[1]))}
-  function specOf(a){if(!a.ev)return '<div class="trig">'+t(a.ten,a.tzh)+'</div>';
-    var m0=Array.isArray(a.mdl)?a.mdl[0]:a.mdl,ty=/no AI/.test(m0)?['Script · no AI','脚本 · 不用 AI']:/^script/.test(m0)?['Script + Claude','脚本 + Claude']:['AI (Claude)','AI（Claude）'];
-    return '<dl class="spec">'+[['type',ty],['on',a.ev],['model',a.mdl],['reads',a.rd],['tools',a.tl],['writes',a.wr],['token',a.tk],['gate',a.gt],['telegram',a.tg]].map(function(r){return '<dt>'+r[0]+'</dt><dd>'+V(r[1])+'</dd>'}).join('')+'</dl>'}
-  function lastOf(s){return s?'<div class="last">'+esc(s.summary||'')+'</div>':''}
+  function specOf(a){return '<dl class="spec">'+[[['Runs','触发'],a.runs],[['Output','产出'],a.output]].map(function(r){return '<dt>'+V(r[0])+'</dt><dd>'+V(r[1])+'</dd>'}).join('')+'</dl>'}
+  // Desktop popups and phone inline details share the same short explanation. Run summaries stay in the feed.
+  function detailsOf(a){return '<p>'+t(a.den,a.dzh)+'</p>'+specOf(a)}
   var f=function(v){return Math.round(v*10)/10};
   var PLANE='<path d="M-6,0.5 L6,-5 L2.5,5.5 L0.5,1.5 Z M0.5,1.5 L6,-5"/>';
   function plane(x,y,hollow,title){return '<g class="pl'+(hollow?' ho':'')+'" transform="translate('+f(x)+','+f(y)+')">'+(title?'<title>'+esc(title)+'</title>':'')+PLANE+'</g>'}
@@ -487,7 +509,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     function li(id){var pl=PLAT[id]===3||PLAT[id]===4?'<span class="lk">'+COLS[PLAT[id]][0]+'</span>':'',n=N[id],a=n.agent&&NAME[n.agent],s=a&&S[a.id],st=stOf(s);
       if(n.tg){var nm=function(L){return L.map(function(a){return a.en.replace(/ agent$/,'')}).join(', ')},nz=function(L){return L.map(function(a){return a.zh.replace(/ agent$/,'')}).join('、')},al=TG().filter(function(a){return a.tga}),pr=TG().filter(function(a){return !a.tga});
         return '<li class="it">'+t('Telegram → me','Telegram → 我')+'<small>'+t('every run: '+nm(al),'每次运行：'+nz(al))+'</small><small>'+t('only on a problem: '+nm(pr),'只在出问题时：'+nz(pr))+'</small></li>'}
-      if(a)return '<li'+(FS[id]?' data-s="'+FS[id]+'"':'')+' class="it ag'+(OPEN===a.id?' open':'')+'" style="--h:'+a.hue+'" data-agent="'+a.id+'"'+(n.seq?' data-n="'+n.seq+'"':'')+'><button class="ob" aria-expanded="'+(OPEN===a.id)+'"><span class="st '+st+'"></span>'+t(a.en,a.zh)+pl+'</button><small class="hx">'+t(a.on[0],a.on[1])+'</small><small>'+(s?(PILL[st]||'')+' · '+ago(atOf(s))+runsOf(s):LIVE?t('no runs yet','还没运行'):t('status offline','状态离线'))+'</small>'+(a.tg?'<small class="tgl">✈ '+t('Telegram: '+a.tg[0],'Telegram：'+a.tg[1])+'</small>':'')+'<div class="more"><p>'+t(a.den,a.dzh)+'</p>'+specOf(a)+lastOf(s)+'</div></li>';
+      if(a)return '<li'+(FS[id]?' data-s="'+FS[id]+'"':'')+' class="it ag'+(OPEN===a.id?' open':'')+'" style="--h:'+a.hue+'" data-agent="'+a.id+'"'+(n.seq?' data-n="'+n.seq+'"':'')+'><button class="ob" aria-expanded="'+(OPEN===a.id)+'"><span class="st '+st+'"></span>'+t(a.en,a.zh)+pl+'</button><small class="hx">'+t(a.on[0],a.on[1])+'</small><small>'+(s?(PILL[st]||'')+' · '+ago(atOf(s))+runsOf(s):LIVE?t('no runs yet','还没运行'):t('status offline','状态离线'))+'</small>'+(a.tg?'<small class="tgl">✈ '+t('Telegram: '+a.tg[0],'Telegram：'+a.tg[1])+'</small>':'')+'<div class="more">'+detailsOf(a)+'</div></li>';
       return '<li'+(FS[id]?' data-s="'+FS[id]+'"':'')+' class="it"'+(n.seq?' data-n="'+n.seq+'"':'')+'>'+t(esc(n.en),esc(n.zh))+pl+(n.lock?'<span class="lk">'+t('REQUIRED','必过')+'</span>':'')+'<small>'+t(esc(n.m[0]),esc(n.m[1]))+'</small></li>'}
     var lh=L.map(function(l,i){return '<li class="h">0'+(i+1)+' · '+t(l[0],l[1])+'</li>'+l[2].map(li).join('')}).join('');
     if(lh===LASTL)return;LASTL=lh;document.getElementById('ov-list').innerHTML=lh;
@@ -513,7 +535,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
   function showTip(el,S,pin){var a=NAME[el.dataset.agent],s=S[a.id];
     document.querySelectorAll('#ov .hot').forEach(function(x){x.classList.remove('hot')});
     PIN=pin?a.id:'';TIP.classList.toggle('pin',pin);TIP.style.setProperty('--h',a.hue||'var(--mut)');
-    TIP.innerHTML='<button class="x" aria-label="Close">×</button><h5>'+t(a.en,a.zh)+(s&&PILL[stOf(s)]?' · '+PILL[stOf(s)]:a.later?' · '+t('planned','计划中'):'')+(s?' · '+ago(atOf(s))+runsOf(s):'')+'</h5><p>'+t(a.den,a.dzh)+'</p>'+specOf(a)+lastOf(s);
+    TIP.innerHTML='<button class="x" aria-label="Close">×</button><h5>'+t(a.en,a.zh)+(s&&PILL[stOf(s)]?' · '+PILL[stOf(s)]:a.later?' · '+t('planned','计划中'):'')+(s?' · '+ago(atOf(s))+runsOf(s):'')+'</h5>'+detailsOf(a);
     TIP.querySelector('.x').onclick=hideTip;
     TIP.classList.add('on');var r=el.getBoundingClientRect(),tw=TIP.offsetWidth,th=TIP.offsetHeight,W=document.documentElement.clientWidth;
     var x=Math.max(10,Math.min(r.left+r.width/2-tw/2,W-tw-10)),y=r.bottom+8;
