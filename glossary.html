@@ -33,12 +33,14 @@
 .chips-l a:focus-visible{box-shadow:0 0 0 2px var(--fg)}
 /* A to Z list */
 .gl-letter{margin:26px 0 8px;font-size:15px;letter-spacing:.14em;color:var(--mut);border-bottom:1px solid var(--line);padding-bottom:4px}
-.gl-it{position:relative;padding:12px 14px 12px 16px;margin:8px 0;border:1px solid var(--line);border-left:4px solid var(--h);border-radius:10px;background:var(--glass);scroll-margin-top:70px}
+.gl-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media(max-width:700px){.gl-cards{grid-template-columns:1fr}}
+.gl-it{position:relative;display:flex;flex-direction:column;padding:12px 14px 12px 16px;margin:0;border:1px solid var(--line);border-left:4px solid var(--h);border-radius:10px;background:var(--glass);scroll-margin-top:70px}
 .gl-it:target{border-color:var(--h);box-shadow:0 0 0 2px color-mix(in srgb,var(--h) 55%,transparent)}
 .gl-t{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px}
 .gl-t b{font-size:16.5px}
 .gl-t .alt{font-size:13.5px;color:var(--mut)}
-.gl-d{margin:4px 0 8px;font-size:15px;line-height:1.55}
+.gl-d{flex:1;margin:4px 0 8px;font-size:15px;line-height:1.55}
 .gl-m{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;font-size:13px;color:var(--mut)}
 .gl-m .tg{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:color-mix(in srgb,var(--h) 55%,var(--fg))}
 html[data-theme=light] .gl-m .tg{color:color-mix(in srgb,var(--h) 30%,var(--fg))}
@@ -154,10 +156,10 @@ html[data-theme=light] .gl-m .tg{color:color-mix(in srgb,var(--h) 30%,var(--fg))
       var tr=TK[g.track],nn=(g.lesson.match(/^\d+/)||[''])[0];
       return '<a href="'+esc(g.track)+'/'+esc(g.lesson)+'">'+'<span class="en">Open the lesson →</span><span class="zh">打开这一课 →</span></a><span>'+(tr?bi(tr.title):esc(g.track))+' · '+esc(nn)+'</span>'}
     listEl.innerHTML=Object.keys(groups).sort().map(function(L){
-      return '<div class="gl-grp" data-l="'+esc(L)+'"><h3 class="gl-letter">'+esc(L)+'</h3>'+groups[L].map(function(g){
+      return '<div class="gl-grp" data-l="'+esc(L)+'"><h3 class="gl-letter">'+esc(L)+'</h3><div class="gl-cards">'+groups[L].map(function(g){
         var t=TH[thIdx[g.theme]];
         return '<article class="gl-it '+thc(g.theme)+'" id="t-'+esc(g.id)+'"><div class="gl-t"><b><span class="en">'+esc(g.en)+'</span><span class="zh">'+esc(g.zh)+'</span></b><span class="alt"><span class="en">'+esc(g.zh)+'</span><span class="zh">'+esc(g.en)+'</span></span></div>'+
-          '<p class="gl-d">'+bi(g.def)+'</p><div class="gl-m"><span class="tg">'+(t?bi(t.title):'')+'</span>'+lessonLink(g)+'</div></article>'}).join('')+'</div>'}).join('');
+          '<p class="gl-d">'+bi(g.def)+'</p><div class="gl-m"><span class="tg">'+(t?bi(t.title):'')+'</span>'+lessonLink(g)+'</div></article>'}).join('')+'</div></div>'}).join('');
 
   }catch(err){try{console.warn('glossary',err)}catch(e2){}}
 })();
