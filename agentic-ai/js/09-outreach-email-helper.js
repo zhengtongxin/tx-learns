@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded',function(){
  var T=TX2.T,$=TX2.$,game=TX2.game,predict=TX2.predict,trace=TX2.trace;TX2.init();
 
- predict($('p3b'),{q:{en:'Without <code>tool_choice="required"</code>, Mailroom replies “Done! The email is on its way.” Lina\'s inbox is empty. Why?',zh:'没有 <code>tool_choice="required"</code> 时，Mailroom 回复“好了！邮件已经发出。”可 Lina 的收件箱是空的。为什么？'},opts:[{k:'a',en:'SMTP is slow, so wait a minute',zh:'SMTP 很慢，再等一分钟'},{k:'b',en:'The model answered in text and never called send_email',zh:'模型只是用文字回答，根本没调用 send_email'},{k:'c',en:'The docstring was too long',zh:'文档字符串太长了'}],a:'b',ex:{en:'Words are not actions. Only a tool call sends. The trace would show no send_email call at all.',zh:'说了不等于做了，只有工具调用才会发送。trace 里会看到压根没有 send_email 调用。'},hint:{en:'Open the trace in your head: is there a tool call in it?',zh:'在脑子里打开 trace：里面有工具调用吗？'}});
+ predict($('p3b'),{q:{en:'Without <code>tool_choice="required"</code>, the Coordinator replies “Done! The email is on its way.” Lina\'s inbox is empty. Why?',zh:'没有 <code>tool_choice="required"</code> 时，Coordinator 回复“好了！邮件已经发出。”可 Lina 的收件箱是空的。为什么？'},opts:[{k:'a',en:'SMTP is slow, so wait a minute',zh:'SMTP 很慢，再等一分钟'},{k:'b',en:'The model answered in text and never called send_email',zh:'模型只是用文字回答，根本没调用 send_email'},{k:'c',en:'The docstring was too long',zh:'文档字符串太长了'}],a:'b',ex:{en:'Words are not actions. Only a tool call sends. The trace would show no send_email call at all.',zh:'说了不等于做了，只有工具调用才会发送。trace 里会看到压根没有 send_email 调用。'},hint:{en:'Open the trace in your head: is there a tool call in it?',zh:'在脑子里打开 trace：里面有工具调用吗？'}});
 
  trace($('t4'),[
   {k:'you',en:'Send the coding club invitation to parents.',zh:'把编程俱乐部的邀请发给家长们。'},
