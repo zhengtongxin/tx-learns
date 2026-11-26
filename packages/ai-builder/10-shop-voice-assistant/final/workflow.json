@@ -1,0 +1,139 @@
+{
+  "name": "Product expert lookup",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "product-expert",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "w1",
+      "webhookId": "product-expert-demo"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/embeddings",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'text-embedding-3-small', input: $json.body.question }) }}",
+        "options": {}
+      },
+      "name": "Embed question",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        0
+      ],
+      "id": "h1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR-PROJECT.supabase.co/rest/v1/rpc/match_documents",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ query_embedding: $json.data[0].embedding, match_count: 3 }) }}",
+        "options": {}
+      },
+      "name": "Search products",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        0
+      ],
+      "id": "h2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Supabase returns one item per matching chunk. Keep the close ones, join them into one answer.\nconst rows = $input.all().map(i => i.json).filter(r => r.similarity > 0.3);\nconst answer = rows.length\n  ? rows.map(r => r.content).join(' ')\n  : 'No information found on that.';\nreturn [{ json: { answer } }];"
+      },
+      "name": "Facts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        0
+      ],
+      "id": "facts"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { answer: $json.answer } }}",
+        "options": {}
+      },
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        960,
+        0
+      ],
+      "id": "r1"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Embed question",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embed question": {
+      "main": [
+        [
+          {
+            "node": "Search products",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search products": {
+      "main": [
+        [
+          {
+            "node": "Facts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facts": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
