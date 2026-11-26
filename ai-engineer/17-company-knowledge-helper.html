@@ -1,8 +1,8 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Company knowledge helper | TX Learns</title>
 <meta name="description" content="Upgrade a basic retrieval chain with smarter chunks, reranking, query rewriting and cited sources, and prove each upgrade with your test set."><meta property="og:title" content="Company knowledge helper | TX Learns"><meta property="og:description" content="Upgrade a basic retrieval chain with smarter chunks, reranking, query rewriting and cited sources, and prove each upgrade with your test set."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-engineer/17-company-knowledge-helper.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
-<meta name="updated" content="2026-11-25">
-<link rel="canonical" href="https://tx-learns.vercel.app/ai-engineer/17-company-knowledge-helper.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=5f3cd6d1"><link rel="stylesheet" href="../assets/teach.css?v=284a1f31"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-engineer/17-company-knowledge-helper.html","url":"https://tx-learns.vercel.app/ai-engineer/17-company-knowledge-helper.html","name":"Company knowledge helper","alternateName":"公司知识助手","description":"Upgrade a basic retrieval chain with smarter chunks, reranking, query rewriting and cited sources, and prove each upgrade with your test set.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Retrieval (RAG)","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI Engineer","url":"https://tx-learns.vercel.app/ai-engineer/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Engineer","item":"https://tx-learns.vercel.app/ai-engineer/index.html"},{"@type":"ListItem","position":3,"name":"Company knowledge helper","item":"https://tx-learns.vercel.app/ai-engineer/17-company-knowledge-helper.html"}]}]}</script></head><body>
+<meta name="updated" content="2026-11-26">
+<link rel="canonical" href="https://tx-learns.vercel.app/ai-engineer/17-company-knowledge-helper.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=5f3cd6d1"><link rel="stylesheet" href="../assets/teach.css?v=284a1f31"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-engineer/17-company-knowledge-helper.html","url":"https://tx-learns.vercel.app/ai-engineer/17-company-knowledge-helper.html","name":"Company knowledge helper","alternateName":"公司知识助手","description":"Upgrade a basic retrieval chain with smarter chunks, reranking, query rewriting and cited sources, and prove each upgrade with your test set.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Retrieval (RAG)","dateModified":"2026-11-26","isPartOf":{"@type":"CollectionPage","name":"AI Engineer","url":"https://tx-learns.vercel.app/ai-engineer/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Engineer","item":"https://tx-learns.vercel.app/ai-engineer/index.html"},{"@type":"ListItem","position":3,"name":"Company knowledge helper","item":"https://tx-learns.vercel.app/ai-engineer/17-company-knowledge-helper.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Retrieval (RAG) · Project</span><span class="zh">检索增强（RAG） · 项目</span></span><h1><span class="en">Company knowledge helper</span><span class="zh">公司知识助手</span></h1><p class="meta"><span class="en">You will upgrade the basic chain with four fixes and prove each one with numbers · ~35 min · hands-on</span><span class="zh">你会用四个改进升级基础检索链，并用数字证明每一个都有效 · 约 35 分钟 · 动手实践</span></p></div>
 <h2><span class="en">Step 1 · Smarter chunks, made once by a model</span><span class="zh">第 1 步 · 更聪明的块，由模型做一次</span></h2>
@@ -24,6 +24,7 @@ from langchain_chroma import Chroma
 class Pieces(BaseModel):
     pieces: list[Piece]
 
+# with_structured_output(Pieces) makes the model answer as a Pieces object (a Pydantic class: named, typed fields), not loose text
 cutter = ChatOpenAI(model="gpt-4.1-mini", temperature=0).with_structured_output(Pieces)
 
 def smart_chunks(doc):
@@ -76,7 +77,9 @@ def fetch(question, history):
             if c.page_content not in seen:
                 seen.add(c.page_content)
                 merged.append(c)
-    return rerank(rewritten, merged)</span></div>
+    return rerank(rewritten, merged) if USE_RERANK else merged[:10]
+
+USE_RERANK = True                                    # set to False to measure what reranking adds</span></div>
 <p class="en">Which upgrade fixes each failure?</p>
 <p class="zh">每个失败该由哪个升级来修？</p><div class="sc" id="g3"></div>
 
@@ -90,7 +93,18 @@ def fetch(question, history):
               "End with a line starting 'Sources:' listing the file names you used.\n\n" + context)
     messages = [("system", system)] + [(m["role"], m["content"]) for m in history]
     messages.append(("user", question))
-    return llm.invoke(messages).content</span></div>
+    return llm.invoke(messages).content
+
+# prove it: the same test set as before, but through fetch(), scored per category.
+# tests = [json.loads(line) for line in open("tests.jsonl")]: each has "question", "keywords" and "category"
+from collections import defaultdict
+hits, asked = defaultdict(int), defaultdict(int)
+for t in tests:
+    found = " ".join(c.page_content for c in fetch(t["question"], [])).lower()
+    asked[t["category"]] += 1
+    hits[t["category"]] += all(k.lower() in found for k in t["keywords"])
+for cat in asked:
+    print(f"{cat:12} {hits[cat]}/{asked[cat]}")</span></div>
 <div class="try" id="p4"></div>
 
 <div class="callout warn"><b class="lbl"><span class="en">What I got wrong</span><span class="zh">我搞错的地方</span></b><span class="en">I used only the rewritten query and good hits disappeared. Search with both. I also ran the slow chunking on every start; run it once.</span><span class="zh">我只用改写后的问题去搜，好的结果反而不见了。两个都搜。我还曾在每次启动时都跑慢速分块；只跑一次。</span></div>
