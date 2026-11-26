@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Terminal agents | TX Learns</title>
+<meta name="description" content="Work with a coding agent in the terminal, and keep control with permission modes"><meta property="og:title" content="Terminal agents | TX Learns"><meta property="og:description" content="Work with a coding agent in the terminal, and keep control with permission modes"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-coder/06-terminal-agents.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-26">
+<link rel="canonical" href="https://tx-learns.vercel.app/ai-coder/06-terminal-agents.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=6d38d6e9"><link rel="stylesheet" href="../assets/teach.css?v=284a1f31"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-coder/06-terminal-agents.html","url":"https://tx-learns.vercel.app/ai-coder/06-terminal-agents.html","name":"Terminal agents","alternateName":"终端智能体","description":"Work with a coding agent in the terminal, and keep control with permission modes","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Vibe engineering","dateModified":"2026-11-26","isPartOf":{"@type":"CollectionPage","name":"AI Coder","url":"https://tx-learns.vercel.app/ai-coder/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Coder","item":"https://tx-learns.vercel.app/ai-coder/index.html"},{"@type":"ListItem","position":3,"name":"Terminal agents","item":"https://tx-learns.vercel.app/ai-coder/06-terminal-agents.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Vibe engineering · Lesson 1</span><span class="zh">专业级氛围工程 · 第 1 课</span></span><h1><span class="en">Terminal agents</span><span class="zh">终端智能体</span></h1><p class="meta"><span class="en">Work with a coding agent in the terminal, and keep control with permission modes · ~11 min · concepts</span><span class="zh">在终端里和编程智能体一起工作，并用权限模式保持掌控 · 约 11 分钟 · 讲概念</span></p></div>
+
+<h2><span class="en">Step 1 · Why the terminal</span><span class="zh">第 1 步 · 为什么用终端</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>terminal agent</b> runs in the command line, next to your code. It works with any editor, runs over SSH on a server, and can be <b>scripted</b>: one command in, one result out, which makes it easy to use in checks and automations.</p>
+<p class="zh" style="margin:0 0 8px"><b>终端智能体</b>在命令行里运行，就在你的代码旁边。它能配任何编辑器，能在服务器上通过 SSH 运行，还能被<b>脚本化</b>：一条命令进去、一个结果出来，很适合放进检查和自动化流程。</p>
+<p class="en" style="margin:0 0 8px"><b>Claude Code</b> (from Anthropic) is the best-known. <b>OpenCode</b> is open source and works with models from many providers. Codex and Gemini each have a command-line tool too. Their habits are alike: start in your project folder, describe the task, approve or refuse each step.</p>
+<p class="zh" style="margin:0 0 8px">最有名的是 <b>Claude Code</b>（Anthropic 出品）。<b>OpenCode</b> 是开源的，能配很多服务商的模型。Codex 和 Gemini 也各有命令行工具。它们的习惯很像：在项目文件夹里启动、描述任务、逐步批准或拒绝。</p>
+</div>
+<div class="codebox" data-file="terminal" data-lang="bash">cd my-project
+claude                      # start an interactive session in this folder
+claude -p "list the TODO comments in src/"   # one answer, then exit (scriptable)</div>
+
+<h2><span class="en">Step 2 · Permissions: you hold the brake</span><span class="zh">第 2 步 · 权限：刹车在你手里</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">By default the agent <b>asks</b> before it edits a file or runs a command. You can loosen this in steps: allow edits without asking, allow specific safe commands such as the test command, or switch on a <b>plan mode</b> where it may only read and propose.</p>
+<p class="zh" style="margin:0 0 8px">默认情况下，智能体改文件或运行命令之前会<b>先问你</b>。你可以分级放宽：允许不经询问地编辑、允许某些安全的命令（比如测试命令），或者打开<b>计划模式</b>，让它只读和提方案。</p>
+<p class="en" style="margin:0 0 8px">Plan first, then execute: ask for a plan, read it, fix it, then let it edit. Most wasted work comes from an agent that charged ahead on a wrong idea.</p>
+<p class="zh" style="margin:0 0 8px">先计划、再执行：先要一份计划，读完、改好，再让它动手。多数白费的功夫，来自智能体在错误想法上一路冲到底。</p>
+</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Choosing and staying safe</span><span class="zh">第 3 步 · 选择与安全</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Pick by fit: a closed tool with the vendor's best model, or an open one where you choose the model and the bill. Try the same small task in two and keep the one you trust.</p>
+<p class="zh" style="margin:0 0 8px">按适合度选：用厂商自家最强模型的闭源工具，或你自己选模型、自己管账单的开源工具。拿同一个小任务在两个里各试一遍，留下你信得过的那个。</p>
+<p class="en" style="margin:0 0 8px">Flags that skip every permission prompt exist. Use them only inside a throwaway sandbox (lesson 12), never on your real laptop with your real keys.</p>
+<p class="zh" style="margin:0 0 8px">确实有“跳过所有权限提示”的开关。只能在用完即弃的沙箱里用（第 12 课），绝不要在装着真实密钥的真实电脑上用。</p>
+</div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Install</b> one terminal agent, open a small project, and ask it to explain the folder layout.</span><span class="zh"><b>安装</b>一个终端智能体，打开一个小项目，让它讲讲文件夹结构。</span></span></label><label><input type="checkbox"><span><span class="en"><b>List</b> three commands you would allow in advance and three you would always want to approve.</span><span class="zh"><b>列出</b>三条你愿意提前放行的命令，和三条永远要你批准的命令。</span></span></label></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A terminal agent sits beside your code and can be scripted.<br>• Claude Code and OpenCode are two examples; habits carry across.<br>• Approve by default, allow safe commands, plan before editing.<br>• Skip-all-permissions only in a disposable sandbox.</p><p class="zh" style="margin:0">• 终端智能体就在你的代码旁边，还能被脚本化。<br>• Claude Code 和 OpenCode 是两个例子；习惯可以通用。<br>• 默认逐步批准，放行安全命令，改动前先计划。<br>• “跳过所有权限”只能用在用完即弃的沙箱里。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Coder</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"prev":[],"tools":{"en":"A terminal, Node.js to install one, and an account or API key for the agent","zh":"终端、用来安装的 Node.js，以及智能体所需的账号或 API 密钥"},"know":{"en":"Briefing an agent and reading a diff.","zh":"会给智能体下简报、会读改动。"},"goals":{"en":["Say why a terminal agent is worth using","Pick a permission level on purpose","Plan before the agent edits"],"zh":["讲清终端智能体的好处","有意识地选择权限级别","让智能体先计划再改动"]}}}</script>
+<script src="../tracks.js?v=1d94b57d"></script><script src="lessons.js?v=389b4305"></script><script src="../assets/site.js?v=91cb2e5f"></script><script src="../assets/teach.js?v=ede6f40f"></script>
+<script src="js/06-terminal-agents.js?v=6ccc4e25"></script></body></html>

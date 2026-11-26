@@ -1,0 +1,47 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Large codebases | TX Learns</title>
+<meta name="description" content="Work in code too big to read: map it, leave notes, test first, change in small steps"><meta property="og:title" content="Large codebases | TX Learns"><meta property="og:description" content="Work in code too big to read: map it, leave notes, test first, change in small steps"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-coder/13-large-codebases.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-26">
+<link rel="canonical" href="https://tx-learns.vercel.app/ai-coder/13-large-codebases.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=6d38d6e9"><link rel="stylesheet" href="../assets/teach.css?v=284a1f31"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-coder/13-large-codebases.html","url":"https://tx-learns.vercel.app/ai-coder/13-large-codebases.html","name":"Large codebases","alternateName":"大型代码库","description":"Work in code too big to read: map it, leave notes, test first, change in small steps","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"Agentic engineering","dateModified":"2026-11-26","isPartOf":{"@type":"CollectionPage","name":"AI Coder","url":"https://tx-learns.vercel.app/ai-coder/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Coder","item":"https://tx-learns.vercel.app/ai-coder/index.html"},{"@type":"ListItem","position":3,"name":"Large codebases","item":"https://tx-learns.vercel.app/ai-coder/13-large-codebases.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Agentic engineering · Lesson 3</span><span class="zh">智能体工程 · 第 3 课</span></span><h1><span class="en">Large codebases</span><span class="zh">大型代码库</span></h1><p class="meta"><span class="en">Work in code too big to read: map it, leave notes, test first, change in small steps · ~11 min · concepts</span><span class="zh">在大到读不完的代码里工作：先画地图、留笔记、先测试、小步改动 · 约 11 分钟 · 讲概念</span></p></div>
+
+<h2><span class="en">Step 1 · Map before you change</span><span class="zh">第 1 步 · 先画地图，再动手</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A real codebase will not fit in any context window, and it does not need to. The agent <b>searches</b> instead of reading everything: it finds the entry points, follows the calls, and opens only what matters.</p>
+<p class="zh" style="margin:0 0 8px">真实的代码库放不进任何上下文窗口，也不需要放进去。智能体靠<b>搜索</b>而不是通读：找到入口、顺着调用走、只打开重要的部分。</p>
+<p class="en" style="margin:0 0 8px">Begin with a <b>read-only</b> task: "map the main folders, the entry points and how a request flows through. Write it to ARCHITECTURE.md." You review the map and fix what it got wrong before anyone changes anything.</p>
+<p class="zh" style="margin:0 0 8px">从一个<b>只读</b>任务开始：“画出主要文件夹、入口，以及一次请求是怎么流转的，写到 ARCHITECTURE.md。”你先审阅这张地图、改正错的地方，然后才让任何人动代码。</p>
+</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Notes the agent leaves for itself</span><span class="zh">第 2 步 · 智能体留给自己的笔记</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The agent forgets between sessions, so give it <b>memory in files</b>. Keep the root AGENTS.md short, and add small AGENTS.md files in subfolders with the rules for that part. Tools that support it load a subfolder's file when the agent works there.</p>
+<p class="zh" style="margin:0 0 8px">智能体在会话之间会忘记，所以给它<b>放在文件里的记忆</b>。根目录的 AGENTS.md 保持简短，再在子文件夹里放小的 AGENTS.md，写那一块的规矩。支持这个功能的工具，会在智能体在那个文件夹里工作时加载它。</p>
+<p class="en" style="margin:0 0 8px">When an agent learns something the hard way (a command that needs a flag, a folder that looks unused but is not), add one line to the right file, so the next session starts smarter.</p>
+<p class="zh" style="margin:0 0 8px">智能体吃过苦头才学到的东西（某条命令必须加某个参数、某个看着没用其实有用的文件夹），就在对应文件里加一行，让下一个会话起点更高。</p>
+</div>
+<div class="codebox" data-file="payments/AGENTS.md" data-lang="md"># payments/
+- All amounts are integer cents. Never use floats here.
+- Run only this folder's tests while working: npm test -- payments
+- legacy/ looks unused but the nightly job imports it. Do not delete.
+- Any change to refund rules needs a person to review.</div>
+
+<h2><span class="en">Step 3 · Change safely, in small steps</span><span class="zh">第 3 步 · 安全地、小步地改</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Before touching old code, add <b>tests that pin down what it does today</b> (characterisation tests), even if the behaviour looks odd. Then change one concern at a time: a rename, a move or a behaviour change, never all together.</p>
+<p class="zh" style="margin:0 0 8px">动老代码之前，先加<b>固定住它今天行为的测试</b>（特征测试），即使行为看着奇怪也先固定下来。然后一次只改一个关注点：改名、搬家、改行为，绝不混在一起。</p>
+<p class="en" style="margin:0 0 8px">Plan first, make one slice, run the tests, commit, repeat. Use a sub-agent to explore so the main session stays small, and keep each pull request something a person can review in ten minutes.</p>
+<p class="zh" style="margin:0 0 8px">先计划、做一小块、跑测试、提交，再重复。用子智能体去探索，让主会话保持小；每个拉取请求都要小到一个人十分钟能审完。</p>
+</div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Ask</b> an agent to map one repository you know and compare its map with what you know. Correct it.</span><span class="zh"><b>让</b>智能体画出你熟悉的一个仓库的地图，对照你自己的了解，把错的改过来。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add</b> a short AGENTS.md to one subfolder with three rules that only that folder needs.</span><span class="zh"><b>加上</b>给一个子文件夹加一份简短的 AGENTS.md，写三条只有这个文件夹才需要的规矩。</span></span></label></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Agents search; they do not read everything.<br>• Start read-only: map, notes, a baseline of tests.<br>• Keep memory in files, near the code it describes.<br>• Pin behaviour with tests, then change one concern at a time.</p><p class="zh" style="margin:0">• 智能体靠搜索，不是通读。<br>• 从只读开始：地图、笔记、测试基线。<br>• 把记忆放在文件里，放在它所描述的代码旁边。<br>• 先用测试固定行为，再一次只改一个关注点。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Coder</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"prev":["12-sandboxing.html"],"tools":{"en":"A terminal agent and any sizeable repository","zh":"一个终端智能体和任意一个像样规模的仓库"},"know":{"en":"Sub-agents, tests and AGENTS.md.","zh":"子智能体、测试和 AGENTS.md。"},"goals":{"en":["Map a repository read-only","Keep layered notes for the agent","Change code in small, tested steps"],"zh":["只读地给仓库画地图","为智能体维护分层的笔记","用有测试的小步骤改代码"]}}}</script>
+<script src="../tracks.js?v=1d94b57d"></script><script src="lessons.js?v=389b4305"></script><script src="../assets/site.js?v=91cb2e5f"></script><script src="../assets/teach.js?v=ede6f40f"></script>
+<script src="js/13-large-codebases.js?v=56dae5bb"></script></body></html>

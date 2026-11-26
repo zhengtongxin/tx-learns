@@ -1,0 +1,65 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sub-agents and hooks | TX Learns</title>
+<meta name="description" content="Split work across sub-agents with their own context, and enforce rules with hooks"><meta property="og:title" content="Sub-agents and hooks | TX Learns"><meta property="og:description" content="Split work across sub-agents with their own context, and enforce rules with hooks"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-coder/11-sub-agents-and-hooks.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-26">
+<link rel="canonical" href="https://tx-learns.vercel.app/ai-coder/11-sub-agents-and-hooks.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=6d38d6e9"><link rel="stylesheet" href="../assets/teach.css?v=284a1f31"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-coder/11-sub-agents-and-hooks.html","url":"https://tx-learns.vercel.app/ai-coder/11-sub-agents-and-hooks.html","name":"Sub-agents and hooks","alternateName":"子智能体与钩子","description":"Split work across sub-agents with their own context, and enforce rules with hooks","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"Agentic engineering","dateModified":"2026-11-26","isPartOf":{"@type":"CollectionPage","name":"AI Coder","url":"https://tx-learns.vercel.app/ai-coder/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Coder","item":"https://tx-learns.vercel.app/ai-coder/index.html"},{"@type":"ListItem","position":3,"name":"Sub-agents and hooks","item":"https://tx-learns.vercel.app/ai-coder/11-sub-agents-and-hooks.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Agentic engineering · Lesson 1</span><span class="zh">智能体工程 · 第 1 课</span></span><h1><span class="en">Sub-agents and hooks</span><span class="zh">子智能体与钩子</span></h1><p class="meta"><span class="en">Split work across sub-agents with their own context, and enforce rules with hooks · ~11 min · concepts</span><span class="zh">把工作分给各有上下文的子智能体，并用钩子强制执行规则 · 约 11 分钟 · 讲概念</span></p></div>
+
+<h2><span class="en">Step 1 · Sub-agents: a fresh desk for one job</span><span class="zh">第 1 步 · 子智能体：为一件事准备的干净桌面</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>sub-agent</b> is a helper the main agent hands one narrow job to. It works in its <b>own context</b> and sends back a short result, so the main conversation stays clean. It does not see the main chat, so the brief must stand alone.</p>
+<p class="zh" style="margin:0 0 8px"><b>子智能体</b>是主智能体把一件窄任务交出去的助手。它在<b>自己的上下文</b>里工作，只送回一个简短的结果，所以主对话保持干净。它看不到主对话，所以交代的简报必须自成一体。</p>
+<p class="en" style="margin:0 0 8px">Good uses: searching a big codebase, reviewing a diff with fresh eyes, running a slow check. You define one in a Markdown file with a name, a description of when to use it, and the tools it may use.</p>
+<p class="zh" style="margin:0 0 8px">适合的用途：搜索大型代码库、用“新鲜的眼睛”审阅改动、运行耗时的检查。你用一个 Markdown 文件来定义：名字、何时使用的描述，以及它能用的工具。</p>
+</div>
+<div class="codebox" data-file=".claude/agents/reviewer.md" data-lang="md">---
+name: reviewer
+description: Reviews a diff for bugs, missing tests and secrets. Use after a change is written.
+tools: Read, Grep, Glob, Bash
+---
+You are a strict code reviewer. You may read and run tests but never edit files.
+Report: must fix, should fix, fine. Quote the file and line for each point.</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Hooks: rules that always run</span><span class="zh">第 2 步 · 钩子：永远会执行的规则</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A line in AGENTS.md is a request; the agent can forget it. A <b>hook</b> is a command your tool runs automatically at a set moment, such as before a tool call or after a file edit. It runs every time, whatever the agent decides.</p>
+<p class="zh" style="margin:0 0 8px">AGENTS.md 里的一行字只是请求，智能体可能忘记。<b>钩子</b>是你的工具在固定时刻自动运行的命令，比如调用工具之前、编辑文件之后。不管智能体怎么决定，它每次都会执行。</p>
+<p class="en" style="margin:0 0 8px">Use hooks for what must always happen: format after each edit, run the tests when the agent says it is done, block a dangerous command.</p>
+<p class="zh" style="margin:0 0 8px">用钩子做“必须永远发生”的事：每次编辑后格式化、智能体说做完时运行测试、拦截危险命令。</p>
+</div>
+<div class="codebox" data-file=".claude/settings.json" data-lang="json">{
+  "hooks": {
+    "PreToolUse": [
+      { "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": ".claude/hooks/guard.sh" }] }
+    ]
+  }
+}</div>
+
+<h2><span class="en">Step 3 · A guard that blocks</span><span class="zh">第 3 步 · 一道会拦截的守卫</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The hook receives the pending tool call as JSON. If it exits with code <b>2</b>, the call is blocked and its message goes back to the agent, which then picks another way.</p>
+<p class="zh" style="margin:0 0 8px">钩子会以 JSON 的形式收到即将执行的工具调用。如果它以退出码 <b>2</b> 结束，这次调用就被拦下，它的提示会回给智能体，让它另想办法。</p>
+<p class="en" style="margin:0 0 8px">Keep guards narrow and fast. A guard that blocks too much teaches people to switch it off.</p>
+<p class="zh" style="margin:0 0 8px">守卫要窄、要快。拦得太多，人们就会学会把它关掉。</p>
+</div>
+<div class="codebox" data-file=".claude/hooks/guard.sh" data-lang="bash">#!/usr/bin/env bash
+# Reads the pending tool call as JSON on stdin. Exit 2 = block it.
+cmd=$(jq -r '.tool_input.command // empty')
+case "$cmd" in
+  *"rm -rf"*|*"git push --force"*)
+    echo "Blocked: a person must run this one." &gt;&amp;2
+    exit 2 ;;
+esac</div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Write</b> a reviewer sub-agent that cannot edit files, and ask it to review your last change.</span><span class="zh"><b>写</b>一个不能改文件的审阅子智能体，让它审阅你最近的一次改动。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add</b> one hook that blocks a command you never want run, and try to trigger it.</span><span class="zh"><b>加上</b>一个钩子，拦截一条你绝不想运行的命令，并试着触发它。</span></span></label></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A sub-agent works in its own context and returns a short result.<br>• Its brief must stand alone: it cannot see your chat.<br>• AGENTS.md asks; a hook enforces.<br>• Exit code 2 blocks a call and tells the agent why.<br>• Keep guards narrow, or people switch them off.</p><p class="zh" style="margin:0">• 子智能体在自己的上下文里工作，只返回简短结果。<br>• 它的简报必须自成一体：它看不到你的对话。<br>• AGENTS.md 是请求；钩子是强制。<br>• 退出码 2 会拦下调用，并告诉智能体原因。<br>• 守卫要窄，否则人们会把它关掉。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Coder</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"prev":[],"tools":{"en":"A terminal agent that supports sub-agents and hooks; jq for the example","zh":"一个支持子智能体和钩子的终端智能体；示例需要 jq"},"know":{"en":"Skills, commands and team workflow.","zh":"技能、命令和团队流程。"},"goals":{"en":["Hand one job to a sub-agent","Choose a hook over a request","Write a guard that blocks"],"zh":["把一件事交给子智能体","该用钩子时不用请求","写一个会拦截的守卫"]}}}</script>
+<script src="../tracks.js?v=1d94b57d"></script><script src="lessons.js?v=389b4305"></script><script src="../assets/site.js?v=91cb2e5f"></script><script src="../assets/teach.js?v=ede6f40f"></script>
+<script src="js/11-sub-agents-and-hooks.js?v=8104db11"></script></body></html>

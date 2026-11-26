@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Swarms and orchestrators | TX Learns</title>
+<meta name="description" content="Run many agents at once with one lead, split by files, and kept on a leash"><meta property="og:title" content="Swarms and orchestrators | TX Learns"><meta property="og:description" content="Run many agents at once with one lead, split by files, and kept on a leash"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-coder/14-swarms-and-orchestrators.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-26">
+<link rel="canonical" href="https://tx-learns.vercel.app/ai-coder/14-swarms-and-orchestrators.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=6d38d6e9"><link rel="stylesheet" href="../assets/teach.css?v=284a1f31"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-coder/14-swarms-and-orchestrators.html","url":"https://tx-learns.vercel.app/ai-coder/14-swarms-and-orchestrators.html","name":"Swarms and orchestrators","alternateName":"智能体群与调度器","description":"Run many agents at once with one lead, split by files, and kept on a leash","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"Agentic engineering","dateModified":"2026-11-26","isPartOf":{"@type":"CollectionPage","name":"AI Coder","url":"https://tx-learns.vercel.app/ai-coder/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Coder","item":"https://tx-learns.vercel.app/ai-coder/index.html"},{"@type":"ListItem","position":3,"name":"Swarms and orchestrators","item":"https://tx-learns.vercel.app/ai-coder/14-swarms-and-orchestrators.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Agentic engineering · Lesson 4</span><span class="zh">智能体工程 · 第 4 课</span></span><h1><span class="en">Swarms and orchestrators</span><span class="zh">智能体群与调度器</span></h1><p class="meta"><span class="en">Run many agents at once with one lead, split by files, and kept on a leash · ~11 min · concepts</span><span class="zh">让多个智能体同时工作：一个负责人、按文件切分，并且受到约束 · 约 11 分钟 · 讲概念</span></p></div>
+
+<h2><span class="en">Step 1 · Orchestrator and workers</span><span class="zh">第 1 步 · 调度者与执行者</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">In a <b>swarm</b>, one <b>orchestrator</b> agent breaks a goal into tasks and hands each to a <b>worker</b> agent. Workers run at the same time, each in its own worktree, and report back. The orchestrator checks the results and puts them together.</p>
+<p class="zh" style="margin:0 0 8px">在<b>智能体群</b>里，一个<b>调度者</b>智能体把目标拆成任务，每个任务交给一个<b>执行者</b>智能体。执行者同时开工，各在自己的 worktree 里，做完回报。调度者检查结果并把它们合起来。</p>
+<p class="en" style="margin:0 0 8px">It pays off when the tasks are <b>independent</b>: many files to convert, many modules to test, many pages to build. It does not pay off for one tangled problem, where agents just wait for each other.</p>
+<p class="zh" style="margin:0 0 8px">任务<b>彼此独立</b>时才划算：很多文件要转换、很多模块要测试、很多页面要搭建。一个纠缠在一起的问题就不划算，因为智能体只是在互相等。</p>
+</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Split so workers never collide</span><span class="zh">第 2 步 · 切分到工人互不冲突</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Two agents editing the same file is how swarms fail. Give every task a list of the <b>files it may touch</b> and the tasks it <b>depends on</b>. Tasks with no shared files and no open dependencies can run together; the rest wait for a later <b>wave</b>.</p>
+<p class="zh" style="margin:0 0 8px">两个智能体改同一个文件，是智能体群失败的典型方式。给每个任务写明<b>它可以碰的文件</b>和它<b>依赖的任务</b>。没有共享文件、依赖也都完成的任务可以一起跑；其余的等到后面的<b>一波</b>。</p>
+<p class="en" style="margin:0 0 8px">Writing the plan as data, not prose, lets a script check it: no unknown dependencies, no circular ones, no two tasks in the same wave sharing a file. You build exactly that planner in the project.</p>
+<p class="zh" style="margin:0 0 8px">把计划写成数据而不是散文，脚本就能检查：没有未知依赖、没有循环依赖、同一波里没有两个任务共享一个文件。你会在项目里做出的就是这样一个规划器。</p>
+</div>
+<div class="codebox" data-file="tasks.json" data-lang="json">[
+  { "id": "api",   "deps": [],      "files": ["src/api.js"] },
+  { "id": "ui",    "deps": ["api"], "files": ["src/ui.js"] },
+  { "id": "tests", "deps": ["api"], "files": ["test/api.test.js"] },
+  { "id": "docs",  "deps": [],      "files": ["README.md"] }
+]</div>
+
+<h2><span class="en">Step 3 · Keep the swarm on a leash</span><span class="zh">第 3 步 · 给群体套上缰绳</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Cost multiplies with every agent. Set a <b>cap</b> on how many run at once, a <b>budget</b> in money or tokens, and a <b>stop rule</b> for tasks that keep failing.</p>
+<p class="zh" style="margin:0 0 8px">每多一个智能体，花费就成倍增加。要设置<b>并发上限</b>、以金钱或 token 计的<b>预算</b>，以及对反复失败的任务的<b>停止规则</b>。</p>
+<p class="en" style="margin:0 0 8px">Always add a <b>check</b>: tests per task, then a separate reviewer agent over the whole result. Let a <b>person merge</b>. More agents make more output, not more correctness.</p>
+<p class="zh" style="margin:0 0 8px">一定要加<b>检查</b>：每个任务有测试，再由一个独立的审阅智能体看整体结果。让<b>人来合并</b>。智能体多了，只是产出多了，不是正确性多了。</p>
+</div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Write</b> a tasks.json for a job of your own with files and dependencies, then group it into waves by hand.</span><span class="zh"><b>写</b>为你自己的一件事写一份带文件和依赖的 tasks.json，再手工把它分成几波。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Decide</b> a cap, a budget and a stop rule before you ever run more than one agent.</span><span class="zh"><b>决定</b>在你同时运行多个智能体之前，先定好并发上限、预算和停止规则。</span></span></label></div>
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• One orchestrator splits the goal; workers run in parallel in their own worktrees.<br>• Swarms suit independent tasks, not one tangled problem.<br>• Give each task its files and dependencies; no shared files in one wave.<br>• Cap the agents, the budget and the retries; a person merges.</p><p class="zh" style="margin:0">• 一个调度者拆目标；执行者在各自的 worktree 里并行。<br>• 智能体群适合独立任务，不适合一个纠缠的问题。<br>• 给每个任务写明文件和依赖；同一波里不共享文件。<br>• 限制智能体数量、预算和重试次数；由人合并。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Coder</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"prev":["13-large-codebases.html"],"tools":{"en":"Only a browser to read; git worktrees and a terminal agent to try it","zh":"只读的话只需要浏览器；想试的话要 git worktree 和终端智能体"},"know":{"en":"Sub-agents and sandboxing.","zh":"子智能体和沙箱。"},"goals":{"en":["Describe the orchestrator and worker pattern","Split work by files and dependencies","Put limits on a swarm"],"zh":["描述调度者与执行者的模式","按文件和依赖切分工作","给智能体群设限"]}}}</script>
+<script src="../tracks.js?v=1d94b57d"></script><script src="lessons.js?v=389b4305"></script><script src="../assets/site.js?v=91cb2e5f"></script><script src="../assets/teach.js?v=ede6f40f"></script>
+<script src="js/14-swarms-and-orchestrators.js?v=ec8a1cde"></script></body></html>
