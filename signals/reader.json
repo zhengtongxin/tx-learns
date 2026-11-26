@@ -1846,109 +1846,109 @@
   },
   "ai-fde/18-swarm-with-a-cap.html": {
    "score": 6,
-   "at": "2026-11-25T13:56:50.960Z",
+   "at": "2026-11-26T04:59:23.783Z",
    "confusing": [
     {
-     "where": "Step 1, Learn",
-     "why": "Rate limit is used before anyone explains it, so I could not tell why runs would share one."
+     "where": "Step 2",
+     "why": "No panel code is shown. The start reply's run id is never read by the page, and the page never calls /runs/{run}/summary, so the acceptance check that the panel and reload match cannot be reached from"
     },
     {
-     "where": "Step 1, code",
-     "why": "await and race are never explained, so I cannot tell why this line is safe."
+     "where": "Step 2 code box",
+     "why": "The Step 2 box defines run_dispatch again, with the same name as Step 1. A newcomer cannot tell whether to replace the Step 1 function or add a second one."
     },
     {
-     "where": "Step 2, code",
-     "why": "Step 2 rewrites run_dispatch and agent from Step 1, but nothing says to replace them, so I could paste both."
+     "where": "Step 1 code box",
+     "why": "asyncio, to_thread, pydantic's BaseModel and Field are used with no explanation. The Learn text does not say what async or a thread is for here."
     }
    ]
   },
   "ai-fde/19-a-judge-with-a-reference-answer.html": {
    "score": 7,
-   "at": "2026-11-25T13:56:50.960Z",
+   "at": "2026-11-26T04:59:23.783Z",
    "confusing": [
     {
-     "where": "Step 1, Learn",
-     "why": "The judge prompt asks only for a grade and two checks; the score is computed from the grade in the code."
+     "where": "Step 1 Learn",
+     "why": "The judge prompt asks only for a letter and two yes/no checks. The 0 to 3 score comes from GRADE_SCORE in code. Grades D and E are never mentioned, though the text says A to F."
     },
     {
-     "where": "Step 1, Learn",
-     "why": "Rubric is never defined, and since the judge gives no number, the disagreement cannot happen."
+     "where": "Step 2 Learn",
+     "why": "It is unclear whether you grade with letters or with numbers. The example file uses numbers like 2, but the judge grades with letters. It also does not say which ten claims."
     },
     {
-     "where": "Step 3, Learn",
-     "why": "I do not know whether three runs is enough, or how the noise number is worked out (the code uses the gap between the highest and lowest average)."
+     "where": "Step 3 code",
+     "why": "Noise is defined only by the code. The Learn does not say that three full judge runs cost money, and real_change is defined but never used."
     }
    ]
   },
   "ai-fde/20-improver-a-human-approves.html": {
    "score": 6,
-   "at": "2026-11-25T13:56:50.960Z",
+   "at": "2026-11-26T04:59:23.783Z",
    "confusing": [
     {
-     "where": "Step 1, Learn",
-     "why": "Practice and held-out are not defined in this lesson; held-out first appears as code."
+     "where": "Step 2 Learn",
+     "why": "Nothing in the lesson calls finish_round(n). The reader cannot tell what starts scoring after approve."
     },
     {
-     "where": "Step 2, Learn",
-     "why": "Nothing in the code shown calls finish_round, so I do not know what starts the test."
+     "where": "Project acceptance",
+     "why": "The Flask routes (config_app.py, recipe_cli.py) are named in the project note but never shown. The hands-on checks are HTTP calls the lesson never builds."
     },
     {
-     "where": "Step 1, code",
-     "why": "A named person appears in the code and never in the prose, so I cannot tell if she is a handler or an example."
+     "where": "Step 1 Learn",
+     "why": "Held-out is used as a term without a definition."
     }
    ]
   },
   "ai-fde/21-hidden-instructions-and-guardrails.html": {
    "score": 8,
-   "at": "2026-11-25T13:56:50.960Z",
+   "at": "2026-11-26T04:59:23.783Z",
    "confusing": [
     {
-     "where": "Step 2, Learn",
-     "why": "The Step 3 code also puts the why text into the refer reason, so only is not true."
+     "where": "Step 3 Learn",
+     "why": "Middleware is not explained. A newcomer does not know it is code that runs around each call and can stop it."
     },
     {
-     "where": "Now make it yours",
-     "why": "Spot check is never taught, yet the S$300 quiz answer depends on it."
+     "where": "Step 1 output",
+     "why": "The output shows the strong model refusing and the small one obeying, but the lesson never says why."
     },
     {
-     "where": "Step 2, expected output",
-     "why": "The grammar is wrong for one, and it looks like a bug."
+     "where": "Step 3 code",
+     "why": "The last step never prints final or states the expected result."
     }
    ]
   },
   "ai-fde/22-gateway-keys-and-policy.html": {
    "score": 7,
-   "at": "2026-11-25T13:56:50.960Z",
+   "at": "2026-11-26T04:59:23.783Z",
    "confusing": [
     {
-     "where": "Step 2, code comment",
-     "why": "The start-up check still needs AGENT_KEY, and its new version is never shown, so I could not finish the swap."
+     "where": "Step 2 Learn",
+     "why": "The start-up check still names AGENT_KEY, and GATEWAY_BACKEND_KEY is never listed as a variable to set. The reader does not know the exact change."
     },
     {
-     "where": "Takeaways",
-     "why": "The check allows any tool with no rule, and only the payment tool has a rule, so it does not fail closed for other tools."
+     "where": "Before you start list",
+     "why": "The lesson never uses OpenAI or openai-agents, so the list asks for an account and a package the reader does not need."
     },
     {
-     "where": "Before you start",
-     "why": "This lesson uses no OpenAI package or key, but the list sends me to get one."
+     "where": "Step 3 Learn",
+     "why": "Four layers are named, but layers.py tests only the backend key and the policy. The agent's instructions and the guardrail are never tested."
     }
    ]
   },
   "ai-fde/23-the-context-layer-as-its-own-service.html": {
-   "score": 7,
-   "at": "2026-11-25T13:56:50.960Z",
+   "score": 6,
+   "at": "2026-11-26T04:59:23.783Z",
    "confusing": [
     {
-     "where": "Step 1, code box",
-     "why": "Two programs (a one-off export and the service) share one box, and the changed lines start mid-box, so I cannot tell which lines go in which file."
+     "where": "Step 1 code box",
+     "why": "The service half uses json and pathlib, but its import line has only hmac, os and flask. Those imports sit in the make_context half of the same box, so the service file fails with NameError if copied "
     },
     {
-     "where": "Step 1, try-it comments",
-     "why": "key is never defined."
+     "where": "Step 2 diagram",
+     "why": "The lesson creates three context files (plans, glossary, manual) plus a manifest. The number 7 is never explained."
     },
     {
-     "where": "Step 3, Learn",
-     "why": "The record keeps file names, sources, dates and a version number, not the text that was read, so a changed text with no version bump cannot be shown."
+     "where": "Step 1 expected output",
+     "why": "The try_it lines are commented out and nothing prints a status code, so the expected 200 and 405 do not come from any run."
     }
    ]
   },
