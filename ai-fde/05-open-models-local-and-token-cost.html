@@ -1,8 +1,8 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Open models and token cost | TX Learns</title>
 <meta name="description" content="Try open-weight and local models on the same claims, shrink the prompt to save tokens, and judge every model on accuracy, cost and speed against a lazy baseline."><meta property="og:title" content="Open models and token cost | TX Learns"><meta property="og:description" content="Try open-weight and local models on the same claims, shrink the prompt to save tokens, and judge every model on accuracy, cost and speed against a lazy baseline."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-fde/05-open-models-local-and-token-cost.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
-<meta name="updated" content="2026-11-25">
-<link rel="canonical" href="https://tx-learns.vercel.app/ai-fde/05-open-models-local-and-token-cost.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=5f3cd6d1"><link rel="stylesheet" href="../assets/teach.css?v=284a1f31"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-fde/05-open-models-local-and-token-cost.html","url":"https://tx-learns.vercel.app/ai-fde/05-open-models-local-and-token-cost.html","name":"Open models and token cost","alternateName":"开源模型与成本","description":"Try open-weight and local models on the same claims, shrink the prompt to save tokens, and judge every model on accuracy, cost and speed against a lazy baseline.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Picking the model for the job","dateModified":"2026-11-25","isPartOf":{"@type":"CollectionPage","name":"AI FDE","url":"https://tx-learns.vercel.app/ai-fde/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI FDE","item":"https://tx-learns.vercel.app/ai-fde/index.html"},{"@type":"ListItem","position":3,"name":"Open models and token cost","item":"https://tx-learns.vercel.app/ai-fde/05-open-models-local-and-token-cost.html"}]}]}</script></head><body>
+<meta name="updated" content="2026-11-26">
+<link rel="canonical" href="https://tx-learns.vercel.app/ai-fde/05-open-models-local-and-token-cost.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=5f3cd6d1"><link rel="stylesheet" href="../assets/teach.css?v=284a1f31"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-fde/05-open-models-local-and-token-cost.html","url":"https://tx-learns.vercel.app/ai-fde/05-open-models-local-and-token-cost.html","name":"Open models and token cost","alternateName":"开源模型与成本","description":"Try open-weight and local models on the same claims, shrink the prompt to save tokens, and judge every model on accuracy, cost and speed against a lazy baseline.","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Picking the model for the job","dateModified":"2026-11-26","isPartOf":{"@type":"CollectionPage","name":"AI FDE","url":"https://tx-learns.vercel.app/ai-fde/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI FDE","item":"https://tx-learns.vercel.app/ai-fde/index.html"},{"@type":"ListItem","position":3,"name":"Open models and token cost","item":"https://tx-learns.vercel.app/ai-fde/05-open-models-local-and-token-cost.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Picking the model for the job · Lesson 2</span><span class="zh">为任务挑模型 · 第 2 课</span></span><h1><span class="en">Open models and token cost</span><span class="zh">开源模型与成本</span></h1><p class="meta"><span class="en">Cut the prompt, try models you can host or run yourself, and judge them on accuracy, cost and speed together · ~20 min · concept with one runnable idea</span><span class="zh">把提示词剪短，试试能托管或自己运行的模型，并把准确率、成本和速度放在一起评判 · 约 20 分钟 · 概念课，附一个可动手的做法</span></p></div>
 
@@ -10,8 +10,10 @@
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en" style="margin:0"><li>Models bill and slow down by <b>tokens</b> (about four letters of English). The full prompt pastes the whole wording into every call, and most of it is irrelevant to one claim.</li><li>Give each claim type only its own sections, and write the JSON compactly. Then check accuracy: trimming can cut the one section a claim needed.</li></ul>
 <ul class="zh" style="margin:0"><li>模型按 <b>token</b>（英文约四个字母）收费，也按 token 变慢。完整提示词每次都把整份条款贴进去，而对一份理赔来说大部分用不上。</li><li>只给每种理赔类型它自己的那几节，JSON 也写得紧凑些。然后检查准确率：剪得太狠可能把某份理赔需要的那一节剪掉。</li></ul></div>
 <div class="codebox" data-file="bench.py" data-lang="python"><span class="dim"># bench.py, continued (build_prompt, claims, POLICIES and key are from the last lesson)
-# each claim now has a type: "delay", "baggage" or "medical"
-WORDING_PARTS = json.load(open("data/wording_sections.json"))   # {"delays": "...", "baggage": "...", ...}
+# two things to add first:
+# 1. in your claims file, give each claim a "type": "delay", "baggage" or "medical"
+# 2. a new file, data/wording_sections.json: the policy wording cut into named parts, one per claim type plus "limits"
+WORDING_PARTS = json.load(open("data/wording_sections.json"))   # {"delays": "...", "baggage": "...", "medical": "...", "limits": "..."}
 
 </span><span class="chg">SECTIONS = {"delay": ["delays", "limits"],
             "baggage": ["baggage", "limits"],
@@ -63,7 +65,8 @@ def run_all(client, model):
 
 # local: run `ollama pull llama3.2` once, then point the client at this computer
 </span><span class="chg">local = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")   # the key is ignored, but the library needs one
-results = run_all(local, "llama3.2")</span></div>
+results = run_all(local, "llama3.2")
+hosted = {m: run_all(gateway, m) for m in OPEN_MODELS}   # gateway is the client bench.py already has</span></div>
 <p class="en">Where does each description fit best?</p>
 <p class="zh">下面每一条更适合哪边？</p><div class="sc" id="g2"></div>
 
@@ -75,12 +78,16 @@ def summary(name, price, results):
     right = sum(matches(decision, key[cid]) for cid, decision, _, _, _ in results)
     </span><span class="chg">cost = sum(tin * price[0] + tout * price[1] for _, _, tin, tout, _ in results) / 1_000_000 / len(results) * 1000
     secs = sum(s for *_, s in results) / len(results)
-    print(f"{name:20} {right}/{len(results)} right  US${cost:.2f} per 1,000  {secs:.1f}s per claim")</span><span class="dim">
+    print(f"{name:34} {right}/{len(results)} right  US${cost:.2f} per 1,000  {secs:.1f}s per claim")</span><span class="dim">
 
+for m in OPEN_MODELS:                           # add each model's price to PRICE first: US$ per million tokens (in, out)
+    summary(m, PRICE[m], hosted[m])
 summary("llama3.2 (local)", (0, 0), results)   # local models cost nothing per token
 
 approve_share = sum(1 for want in key.values() if want["action"] == "approve") / len(key)
-print(f"approving everything scores {approve_share:.0%}")</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字会不同）</span></p><div class="codebox" data-file="output" data-lang="text">llama3.2 (local)     17/25 right  US$0.00 per 1,000  6.8s per claim
+print(f"approving everything scores {approve_share:.0%}")</span></div><p class="en" style="margin:10px 0 2px"><b>Expected output</b> <span style="font-weight:400;opacity:.7">(an example: your numbers will differ)</span></p><p class="zh" style="margin:10px 0 2px"><b>预期输出</b> <span style="font-weight:400;opacity:.7">（示例：你的数字会不同）</span></p><div class="codebox" data-file="output" data-lang="text">meta-llama/llama-3.3-70b-instruct 22/25 right  US$0.11 per 1,000  1.9s per claim
+qwen/qwen-2.5-72b-instruct 21/25 right  US$0.09 per 1,000  2.3s per claim
+llama3.2 (local)     17/25 right  US$0.00 per 1,000  6.8s per claim
 approving everything scores 56%</div>
 <div class="try" id="p3"></div>
 
@@ -91,6 +98,6 @@ approving everything scores 56%</div>
 
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI FDE</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
-<script type="application/json" id="lesson-data">{"p":{"prev":["04-frontier-models-on-real-claims.html"],"tools":{"en":"Python 3, the openai package, Ollama with a small model pulled (qwen2.5:3b), the gateway key from Lesson 4","zh":"Python 3、openai 包、Ollama（拉取小模型 qwen2.5:3b）、前面几课的网关密钥"},"know":{"en":"Your bench.py from Lesson 4 and what a token is.","zh":"前面几课的 bench.py，以及 token 是什么。"},"mins":40,"offline":false,"goals":{"en":["Count tokens before and after trimming a prompt and check accuracy","Compare hosted open-weight models and a local model","Judge models on accuracy, cost and speed together","Compare against the trivial baseline"],"zh":["在精简提示词前后数 token，并检查准确率","对比托管的开源权重模型和本地模型","把准确率、成本和速度放在一起评价模型","和最简单的基线做对比"]}}}</script>
+<script type="application/json" id="lesson-data">{"p":{"prev":["04-frontier-models-on-real-claims.html"],"tools":{"en":"Python 3, the openai package, Ollama with a small model pulled (llama3.2), the gateway key from Lesson 4","zh":"Python 3、openai 包、Ollama（拉取小模型 llama3.2）、前面几课的网关密钥"},"know":{"en":"Your bench.py from Lesson 4 and what a token is.","zh":"前面几课的 bench.py，以及 token 是什么。"},"mins":40,"offline":false,"goals":{"en":["Count tokens before and after trimming a prompt and check accuracy","Compare hosted open-weight models and a local model","Judge models on accuracy, cost and speed together","Compare against the trivial baseline"],"zh":["在精简提示词前后数 token，并检查准确率","对比托管的开源权重模型和本地模型","把准确率、成本和速度放在一起评价模型","和最简单的基线做对比"]}}}</script>
 <script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=37968fc4"></script><script src="../assets/site.js?v=7991ba8c"></script><script src="../assets/teach.js?v=ede6f40f"></script>
 <script src="js/05-open-models-local-and-token-cost.js?v=80589964"></script></body></html>
