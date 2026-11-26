@@ -111,11 +111,19 @@ jobs:
           else
             EDIT="7. Do not edit any file except /tmp/reader.json and /tmp/reader-comment.md."
           fi
+          # Who each lesson is for (level and what it assumes), worked out without AI by a trusted script from main.
+          BRIEF=$(curl -fsS "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/scripts/reader-brief.mjs" -o /tmp/reader-brief.mjs && node /tmp/reader-brief.mjs $FILES || true)
+          [ -n "$BRIEF" ] || BRIEF="- every lesson: read it as a complete newcomer to AI who can read a little Python."
           cat > /tmp/reader-prompt.md <<PROMPT
           You are the intern at TX Learns, a bilingual (EN/中文) interactive learning site about AI. You are learning AI
-          yourself: smart and curious, you can read a little Python, but you are new to AI and have never seen the
-          source material. A new version was just deployed. Read these lessons to learn from them, and be honest about
-          every place you got lost, the way you would tell your mentor. Lessons: $FILES
+          yourself: smart and curious, and you have never seen the source material. A new version was just deployed.
+          Read these lessons to learn from them, and be honest about every place you got lost, the way you would tell
+          your mentor. Lessons: $FILES
+
+          Who each lesson is for (read and score each lesson as THAT reader, not as a beginner every time):
+          $BRIEF
+          What that reader already knows is not a gap. Still flag anything this lesson itself brings in without
+          explaining it: a library, a service, a term, a step, a name in a code box.
 
           1. Read STYLE.md so you know what a good lesson here looks like.
           2. Read each lesson top to bottom in English, then skim the 中文. Look at assets/teach.js only if you need
@@ -123,7 +131,9 @@ jobs:
           3. Note every place you would get stuck: a term used before it is explained, a jump in steps, code you
              could not follow, a quiz whose answer was never taught, an analogy that does not fit, 中文 that reads
              like a word-for-word translation. Also note the one question you would still ask your mentor.
-          4. Score each lesson for clarity from 1 to 10 (8 or more = a newcomer gets it on the first read).
+          4. Score each lesson for clarity from 1 to 10, for the reader it is for: 8 or more = that reader gets it on
+             the first read and could do the steps; 6 or 7 = gets the idea but is stuck in one or two places;
+             5 or less = could not follow a whole step. A long list of small points alone does not make a low score.
           5. Write /tmp/reader.json exactly like:
              {"lessons":[{"file":"...","score":8,"confusing":[{"where":"Step 2","quote":"exact text","why":"...","fix":"..."}]}],
               "summary":"one plain sentence about what a newcomer would struggle with most"}
