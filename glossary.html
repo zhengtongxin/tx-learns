@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AI terms glossary | TX Learns</title>
 <meta name="description" content="The core AI terms used in the lessons, in plain words, with a concept map that groups them by theme and a link to the lesson that teaches each one."><meta property="og:title" content="AI terms glossary | TX Learns"><meta property="og:description" content="The core AI terms used in the lessons, in plain words, with a concept map that groups them by theme and a link to the lesson that teaches each one."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/glossary.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
-<link rel="canonical" href="https://tx-learns.vercel.app/glossary.html"><link rel="icon" href="assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><link rel="stylesheet" href="assets/site.css?v=2ea7ce6f">
+<link rel="canonical" href="https://tx-learns.vercel.app/glossary.html"><link rel="icon" href="assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><link rel="stylesheet" href="assets/site.css?v=a82ada56">
 <style>
 .th-0{--h:hsl(212 75% 58%)}.th-1{--h:hsl(38 90% 52%)}.th-2{--h:hsl(160 60% 42%)}.th-3{--h:hsl(280 55% 62%)}.th-4{--h:hsl(330 65% 58%)}.th-5{--h:hsl(2 70% 56%)}.th-6{--h:hsl(100 50% 44%)}
 .gl-sec{margin-top:36px}
@@ -44,6 +44,7 @@
 .gl-m .tg{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:color-mix(in srgb,var(--h) 55%,var(--fg))}
 html[data-theme=light] .gl-m .tg{color:color-mix(in srgb,var(--h) 30%,var(--fg))}
 .gl-m a{font-weight:600}
+.gl-tools{margin:0 0 18px}.gl-s{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--mut)}.gl-s input{font:inherit;font-size:16px;color:var(--fg);padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:var(--glass);max-width:420px}.gl-f{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 6px}.gl-f button{font:inherit;font-size:13px;color:var(--fg);padding:5px 12px;border-radius:99px;border:1px solid var(--line);background:transparent;cursor:pointer;min-height:32px}.gl-f button[aria-pressed=true]{background:var(--acc,#e8a33d);color:#14110a;border-color:transparent}.gl-it[hidden],.gl-grp[hidden]{display:none}
 </style><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://tx-learns.vercel.app/glossary.html","url":"https://tx-learns.vercel.app/glossary.html","name":"AI terms glossary","description":"The core AI terms used in the lessons, in plain words, with a concept map that groups them by theme and a link to the lesson that teaches each one.","inLanguage":["en","zh"],"isPartOf":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI terms glossary","item":"https://tx-learns.vercel.app/glossary.html"}]}]}</script></head><body>
 <main class="wide">
 <header class="stage compact gl-hero"><div class="orb"></div>
@@ -61,10 +62,11 @@ html[data-theme=light] .gl-m .tg{color:color-mix(in srgb,var(--h) 30%,var(--fg))
 
 <section class="gl-sec" id="terms" aria-labelledby="terms-h">
 <h2 id="terms-h"><span class="en">All terms, A to Z</span><span class="zh">全部词汇，按字母排序</span></h2>
+<div class="gl-tools"><label class="gl-s"><span class="en">Find a term</span><span class="zh">查找词汇</span><input id="gq" type="search" autocomplete="off" placeholder="LLM, RAG, 记忆…" aria-label="Find a term · 查找词汇"></label><div class="gl-f" id="gf" role="group" aria-label="Filter by theme · 按主题筛选"></div><p class="meta" id="gn" aria-live="polite"></p></div>
 <div id="list"></div>
 </section>
 </main>
-<script src="tracks.js?v=a4453d35"></script><script src="glossary.js"></script><script src="assets/site.js?v=62c93d33"></script>
+<script src="tracks.js?v=a4453d35"></script><script src="glossary.js"></script><script src="assets/site.js?v=41946b53"></script>
 <script>
 (function(){
   try{
@@ -159,6 +161,20 @@ html[data-theme=light] .gl-m .tg{color:color-mix(in srgb,var(--h) 30%,var(--fg))
         var t=TH[thIdx[g.theme]];
         return '<article class="gl-it '+thc(g.theme)+'" id="t-'+esc(g.id)+'"><div class="gl-t"><b><span class="en">'+esc(g.en)+'</span><span class="zh">'+esc(g.zh)+'</span></b><span class="alt"><span class="en">'+esc(g.zh)+'</span><span class="zh">'+esc(g.en)+'</span></span></div>'+
           '<p class="gl-d">'+bi(g.def)+'</p><div class="gl-m"><span class="tg">'+(t?bi(t.title):'')+'</span>'+lessonLink(g)+'</div></article>'}).join('')+'</div></div>'}).join('');
+
+    /* search + theme filter over the A to Z list */
+    var gq=document.getElementById('gq'),gf=document.getElementById('gf'),gn=document.getElementById('gn'),cur='';
+    function lang(){return document.documentElement.getAttribute('data-lang')==='zh'||document.documentElement.lang==='zh'?'zh':'en'}
+    gf.innerHTML='<button type="button" data-t="" aria-pressed="true"><span class="en">All</span><span class="zh">全部</span></button>'+TH.map(function(t){return '<button type="button" data-t="'+esc(t.id)+'" aria-pressed="false">'+bi(t.title)+'</button>'}).join('');
+    function applyF(){
+      var q=gq.value.trim().toLowerCase(),n=0;
+      G.forEach(function(g){var el=document.getElementById('t-'+g.id);if(!el)return;
+        var hay=(g.en+' '+g.zh+' '+(g.def.en||'')+' '+(g.def.zh||'')).toLowerCase();
+        var ok=(!cur||g.theme===cur)&&(!q||hay.indexOf(q)>-1);el.hidden=!ok;if(ok)n++});
+      listEl.querySelectorAll('.gl-grp').forEach(function(gr){gr.hidden=!gr.querySelector('.gl-it:not([hidden])')});
+      gn.innerHTML=(q||cur)?(n?'<span class="en">'+n+' matching</span><span class="zh">匹配 '+n+' 个</span>':'<span class="en">No match. Try fewer letters or All.</span><span class="zh">没有匹配。少输几个字，或选“全部”。</span>'):''}
+    gq.addEventListener('input',applyF);
+    gf.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;cur=b.dataset.t;gf.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});applyF()});
 
   }catch(err){try{console.warn('glossary',err)}catch(e2){}}
 })();
