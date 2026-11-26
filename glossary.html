@@ -9,8 +9,8 @@
 .gl-sec>h2{margin:0 0 6px}
 .gl-note{margin:0 0 16px;color:var(--mut);font-size:15px}
 /* concept map: one node per theme, its terms inside */
-.themes{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:clamp(64px,8vw,110px);row-gap:92px;margin-top:18px}
-.theme{position:relative;padding:14px 16px 16px;border:1px solid color-mix(in srgb,var(--h) 55%,var(--line));border-top:3px solid var(--h);border-radius:14px;background:color-mix(in srgb,var(--h) 7%,var(--glass));scroll-margin-top:70px}
+.themes{--box-h:280px;position:relative;display:grid;align-items:start;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:clamp(64px,8vw,110px);row-gap:92px;margin-top:18px}
+.theme{position:relative;display:flex;flex-direction:column;height:var(--box-h);box-sizing:border-box;padding:14px 16px 14px;border:1px solid color-mix(in srgb,var(--h) 55%,var(--line));border-top:3px solid var(--h);border-radius:14px;background:color-mix(in srgb,var(--h) 7%,var(--glass));scroll-margin-top:70px}
 .theme[data-p=models]{grid-area:1/1}.theme[data-p=agents]{grid-area:1/2}.theme[data-p=tools]{grid-area:1/3}
 .theme[data-p=evals]{grid-area:2/1}.theme[data-p=safety]{grid-area:2/2}.theme[data-p=memory]{grid-area:2/3}.theme[data-p=delivery]{grid-area:3/2}
 .cflow{position:absolute;inset:0;pointer-events:none}
@@ -21,8 +21,13 @@
 .theme h3{margin:0 0 2px;font-size:17px}
 .theme h3 .no{font:700 12px ui-monospace,Menlo,Consolas,monospace;color:var(--h);margin-right:8px}
 .theme p{margin:0 0 10px;color:var(--mut);font-size:14px;line-height:1.5}
-@media(max-width:700px){.themes{grid-template-columns:1fr;row-gap:12px}.theme[data-p]{grid-area:auto}.cflow{display:none}}
-.chips-l{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+@media(max-width:700px){.themes{--box-h:260px;grid-template-columns:1fr;row-gap:12px}.theme[data-p]{grid-area:auto}.cflow{display:none}}
+.chips-l{display:flex;flex-wrap:wrap;align-content:flex-start;gap:6px;margin:0;padding:2px;list-style:none;flex:1 1 auto;min-height:0;overflow:hidden}
+.chips-l li[hidden]{display:none}
+.theme.open{height:auto;min-height:var(--box-h)}.theme.open .chips-l{overflow:visible}
+.more-b{align-self:flex-start;margin-top:10px;padding:4px 12px;border-radius:99px;border:1px dashed color-mix(in srgb,var(--h) 70%,var(--line));background:transparent;color:var(--fg);font:600 13px/1.4 inherit;font-family:inherit;cursor:pointer}
+.more-b:hover,.more-b:focus-visible{border-style:solid;background:color-mix(in srgb,var(--h) 16%,transparent);outline:2px solid transparent}.more-b:focus-visible{box-shadow:0 0 0 2px var(--fg)}
+.more-b[hidden]{display:none}
 .chips-l a{display:inline-block;padding:3px 10px;border-radius:99px;border:1px solid color-mix(in srgb,var(--h) 55%,var(--line));background:color-mix(in srgb,var(--h) 9%,transparent);color:var(--fg);font-size:13px;line-height:1.5;text-decoration:none}
 .chips-l a:hover,.chips-l a:focus-visible{border-color:var(--h);background:color-mix(in srgb,var(--h) 22%,transparent);outline:2px solid transparent}
 .chips-l a:focus-visible{box-shadow:0 0 0 2px var(--fg)}
@@ -48,7 +53,7 @@ html[data-theme=light] .gl-m .tg{color:color-mix(in srgb,var(--h) 30%,var(--fg))
 
 <section class="gl-sec" id="map" aria-labelledby="map-h">
 <h2 id="map-h"><span class="en">Concept map</span><span class="zh">概念图</span></h2>
-<p class="gl-note"><span class="en">Seven themes, in order: a model powers an agent, tools and memory extend it, and measuring, safety and delivery keep it honest and running. Tap a term for its meaning.</span><span class="zh">七个主题依次是：模型驱动智能体，工具和记忆扩展它，衡量、安全和上线交付让它可靠、能跑。点词语看解释。</span></p>
+<p class="gl-note"><span class="en">Seven themes, in order: a model powers an agent, tools and memory extend it, and measuring, safety and delivery keep it honest and running. Each box lists its most important terms first. Tap a term for its meaning.</span><span class="zh">七个主题依次是：模型驱动智能体，工具和记忆扩展它，衡量、安全和上线交付让它可靠、能跑。每个框里最重要的词排在最前。点词语看解释。</span></p>
 <div class="themes" id="themes"></div>
 <noscript><p class="gl-note"><span class="en">The term list needs JavaScript. Without it, open the lessons from the home page.</span><span class="zh">词汇列表需要 JavaScript。没有的话，请从首页进入各课。</span></p></noscript>
 </section>
@@ -62,7 +67,7 @@ html[data-theme=light] .gl-m .tg{color:color-mix(in srgb,var(--h) 30%,var(--fg))
 <script>
 (function(){
   try{
-    var G=(window.GLOSSARY||[]).slice(),TH=window.GLOSSARY_THEMES||[],TK={};
+    var G0=(window.GLOSSARY||[]).slice(),G=G0.slice(),TH=window.GLOSSARY_THEMES||[],TK={};
     (window.TRACKS||[]).forEach(function(t){TK[t.id]=t});
     var themesEl=document.getElementById('themes'),listEl=document.getElementById('list');
     if(!themesEl||!listEl)return;
@@ -76,9 +81,29 @@ html[data-theme=light] .gl-m .tg{color:color-mix(in srgb,var(--h) 30%,var(--fg))
     var order=['models','agents','tools','memory','evals','safety','delivery'];
     themesEl.innerHTML=order.map(function(id,n){
       var t=TH[thIdx[id]];if(!t)return '';
-      var terms=G.filter(function(g){return g.theme===id});
+      var terms=G0.filter(function(g){return g.theme===id});
       return '<section class="theme '+thc(id)+'" data-p="'+id+'" id="theme-'+esc(id)+'"><h3><span class="no">'+(n+1)+'</span>'+bi(t.title)+'</h3><p>'+bi(t.blurb)+'</p><ul class="chips-l">'+
-        terms.map(function(g){return '<li><a href="#t-'+esc(g.id)+'" data-t="'+esc(g.id)+'" title="'+esc(g.def.en)+'">'+bi({en:g.en,zh:g.zh})+'</a></li>'}).join('')+'</ul></section>'}).join('');
+        terms.map(function(g){return '<li><a href="#t-'+esc(g.id)+'" data-t="'+esc(g.id)+'" title="'+esc(g.def.en)+'">'+bi({en:g.en,zh:g.zh})+'</a></li>'}).join('')+'</ul>'+
+        '<button type="button" class="more-b" hidden aria-expanded="false" aria-controls="chips-'+esc(id)+'"></button></section>'}).join('');
+    [].forEach.call(themesEl.querySelectorAll('.chips-l'),function(u){u.id='chips-'+u.parentNode.dataset.p});
+
+    /* every box is the same size; a box with more terms than fit shows the most important ones and a Show all button */
+    function fit(){
+      [].forEach.call(themesEl.querySelectorAll('.theme'),function(box){
+        var ul=box.querySelector('.chips-l'),btn=box.querySelector('.more-b'),li=ul.children,open=box.classList.contains('open'),i,n=0;
+        for(i=0;i<li.length;i++)li[i].hidden=false;
+        if(open){btn.hidden=false;btn.innerHTML=bi({en:'Show fewer',zh:'收起'});btn.setAttribute('aria-expanded','true');return}
+        btn.hidden=true;if(ul.scrollHeight<=ul.clientHeight+1)return;
+        btn.hidden=false;btn.innerHTML=bi({en:'Show all',zh:'显示全部'});
+        var lim=ul.offsetTop+ul.clientHeight;for(i=0;i<li.length;i++){if(n||li[i].offsetTop+li[i].offsetHeight>lim){li[i].hidden=true;n++}}
+        btn.innerHTML=bi({en:'Show all · '+n+' more',zh:'显示全部 · 还有 '+n+' 个'});btn.setAttribute('aria-expanded','false')})}
+    themesEl.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.more-b');if(!b)return;
+      var box=b.parentNode,o=!box.classList.contains('open');box.classList.toggle('open',o);fit();
+      if(!o)box.scrollIntoView({block:'nearest'})});
+    fit();
+    new MutationObserver(fit).observe(document.documentElement,{attributes:true,attributeFilter:['data-lang']});
+    var fq=0;window.addEventListener('resize',function(){if(fq)return;fq=requestAnimationFrame(function(){fq=0;fit()})});
+    window.addEventListener('load',fit);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit);
 
     /* arrows: the original flows, drawn from where the nodes actually sit */
     var flow=document.createElement('div');flow.className='cflow';flow.setAttribute('aria-hidden','true');themesEl.appendChild(flow);
