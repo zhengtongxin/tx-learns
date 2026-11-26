@@ -6,8 +6,8 @@
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">From laptop to live · Lesson 2</span><span class="zh">从笔记本到上线 · 第 2 课</span></span><h1><span class="en">Front end and API</span><span class="zh">前端与 API</span></h1><p class="meta"><span class="en">See how a page and a Python API deploy together under one web address · ~25 min · hands-on</span><span class="zh">看懂一个页面和一个 Python API 如何在同一个网址下一起上线 · 约 25 分钟 · 动手实践</span></p></div>
 <h2><span class="en">Step 1 · Two halves, one address</span><span class="zh">第 1 步 · 两半，一个地址</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en"><li>The <b>front end</b> is files the browser downloads, so it can never keep a secret.</li><li>The <b>API</b> runs on the host. It holds the model key and does the real work.</li><li>Put both behind one address, like a shop front and its kitchen.</li></ul>
-<ul class="zh"><li><b>前端</b>是浏览器下载的文件，永远保不住秘密。</li><li><b>API</b> 运行在托管平台上，持有模型密钥，做真正的工作。</li><li>两者放在同一个地址后面，就像店面和后厨。</li></ul></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en"><li>The <b>front end</b> is files the browser downloads, so it can never keep a secret.</li><li>The <b>API</b> runs on the <b>host</b>, the company whose servers run your site (Vercel in this lesson). It holds the model key and does the real work.</li><li>Put both behind one address, like a shop front and its kitchen.</li></ul>
+<ul class="zh"><li><b>前端</b>是浏览器下载的文件，永远保不住秘密。</li><li><b>API</b> 运行在<b>托管平台</b>（用自己的服务器替你运行网站的公司，本课用 Vercel）上，持有模型密钥，做真正的工作。</li><li>两者放在同一个地址后面，就像店面和后厨。</li></ul></div>
 <div class="sc" id="t0"></div>
 <h2><span class="en">Step 2 · Build both halves and join them</span><span class="zh">第 2 步 · 搭好两半并连起来</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><ul class="en"><li>Make the page with one command: <code>create-next-app</code> (Next.js is a toolkit for React pages).</li><li>Put the Python route in an <code>api/</code> folder, with its <b>own</b> <code>api/requirements.txt</code>. Skip it and the page looks fine while the API fails.</li><li>A <code>rewrites</code> rule in <code>vercel.json</code> sends <code>/api/...</code> to Python and the rest to Next.js. If the folder already has a <code>vercel.json</code> or a root <code>requirements.txt</code> from an earlier Python-only deploy, this file replaces the first and <code>api/requirements.txt</code> replaces the second. One site also means no CORS trouble: browsers block a page from calling an API on a different address unless that API allows it, and here both share one address.</li><li>The page calls the <b>relative</b> path <code>/api</code>, so it works on your laptop (<code>vercel dev</code>) and live.</li></ul>
@@ -18,7 +18,7 @@
 from openai import OpenAI</span><span class="dim">
 
 app = FastAPI()
-client = OpenAI()
+client = OpenAI()          # reads the key from the OPENAI_API_KEY environment variable
 
 @app.get("/api")
 def hello():
@@ -70,5 +70,5 @@ vercel          # preview: open the address and test
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Production</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"goals":{"en":["Split a product into a browser front end and an API on the host","Keep secrets in the API, never in front-end files","Route /api/... to Python and the rest to Next.js with one host rule","Test a preview, then promote it to production"],"zh":["把产品拆成浏览器前端和主机上的 API","把密钥放在 API 里，不放进前端文件","用一条主机规则把 /api/... 转给 Python，其余给 Next.js","先测试预览，再提升到生产"]},"prev":["01-what-production-means-ship-first.html"],"tools":{"en":"Node 18+, Python 3, Vercel account and CLI, OpenAI API key","zh":"Node 18+、Python 3、Vercel 账号和命令行工具、OpenAI API 密钥"},"know":{"en":"You deployed the small API in lesson 1 and can read simple React.","zh":"已完成Lesson 1 的小 API 部署，能看懂简单的 React。"},"mins":30,"offline":false}}</script>
-<script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=afade96e"></script><script src="../assets/site.js?v=a53ae783"></script><script src="../assets/teach.js?v=ede6f40f"></script>
+<script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=afade96e"></script><script src="../assets/site.js?v=7991ba8c"></script><script src="../assets/teach.js?v=ede6f40f"></script>
 <script src="js/02-product-in-two-halves.js?v=2ce295b2"></script></body></html>

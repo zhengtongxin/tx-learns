@@ -9,7 +9,7 @@
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Here an agent is a small class with one job that calls a model or a tool. Two price agents:</p><p class="zh" style="margin:0 0 8px">这里的智能体是只做一件事、去调用模型或工具的小类。两个估价智能体：</p>
 <ul class="en"><li><b>Specialist:</b> calls a small model you fine-tuned on prices, running as a remote function on Modal (a service that rents a GPU by the second).</li><li><b>Frontier agent:</b> finds the five most similar items with known prices, shows them in the prompt, then asks a big model for the price. “Similar” works through <b>embeddings</b>: <code>embedder.encode</code> turns a description into a list of numbers, close numbers mean close meaning, and Chroma is the store that searches them.</li></ul><ul class="zh"><li><b>专家：</b>调用你用价格数据微调过的小模型，它作为远程函数跑在 Modal（按秒出租 GPU 的服务）上。</li><li><b>云端模型智能体：</b>找出五个价格已知、最相似的商品，放进提示，再让大模型给出价格。“相似”靠<b>向量</b>（embedding）：<code>embedder.encode</code> 把一段描述变成一串数字，数字相近表示意思相近，Chroma 就是用来搜索这些数字的库。</li></ul>
 <p class="en" style="margin:0">An <b>ensemble agent</b> then combines several estimates with weights fitted on a validation set. Guessers err in different ways, so the mix usually lands closer than any one.</p><p class="zh" style="margin:0"><b>组合智能体</b>再用在验证集上拟合出的权重，把几个估价合起来。估价者犯的错各不相同，混合起来通常比任何一个都更接近真值。</p></div>
-<div class="codebox" data-file="specialist.py" data-lang="python"><span class="dim">import modal
+<div class="codebox" data-file="specialist.py" data-lang="python"><span class="dim">import modal, re
 
 class SpecialistAgent:
     def price(self, description: str) -&gt; float:
@@ -18,6 +18,8 @@ class SpecialistAgent:
 
 </span><span class="chg">class FrontierAgent:
     def __init__(self, store, embedder, client):
+        # store: a Chroma collection you filled with past items (description as the document, price as metadata)
+        # embedder: a sentence-transformers model; client: an OpenAI client
         self.store, self.embedder, self.client = store, embedder, client
 
     def price(self, description: str) -&gt; float:
@@ -26,12 +28,14 @@ class SpecialistAgent:
         lines = [f"{d} costs ${m['price']}" for d, m in zip(near["documents"][0], near["metadatas"][0])]
         ask = "Similar items and what they cost:\n" + "\n".join(lines) + f"\n\nNow price this one, number only: {description}"
         reply = self.client.chat.completions.create(model="your-big-model", messages=[{"role": "user", "content": ask}])
-        return float(reply.choices[0].message.content.strip().lstrip("$"))</span></div>
+        found = re.search(r"\d[\d,]*\.?\d*", reply.choices[0].message.content)   # the first number, even in "About $120 maybe"
+        return float(found.group().replace(",", "")) if found else 0.0</span></div>
 <div class="codebox" data-file="ensemble.py" data-lang="python"><span class="dim">import numpy as np
 from sklearn.linear_model import LinearRegression
 
 </span><span class="chg">class EnsembleAgent:
     def __init__(self, agents, val_guesses, val_truth):
+        # agents: any list of guessers with a price() method. Two here; a third (say a random forest) fits the same way.
         # val_guesses: one column per agent, from validation items
         self.agents = agents
         self.fit = LinearRegression(positive=True).fit(val_guesses, val_truth)
@@ -146,5 +150,5 @@ print(run_planner(handlers))</span></div>
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Engineer</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"goals":{"en":["Build agents as small classes with one job each","Ground a big model's guess in similar items with known prices","Combine several opinions with weights fitted on a validation set","Test the tool loop with fake tools and add a step cap, memory and logs"],"zh":["把智能体写成各管一件事的小类","用已知价格的相似商品支撑大模型的估价","用在验证集上拟合的权重合并多个意见","用假工具测试工具循环，并加步数上限、记忆和日志"]},"prev":["25-putting-a-model-behind-an-api.html","21-price-guesser.html"],"tools":{"en":"Python 3.10+, modal, scikit-learn, pydantic, requests, an OpenAI API key, optionally a Pushover account","zh":"Python 3.10+、modal、scikit-learn、pydantic、requests、OpenAI API 密钥，可选 Pushover 账号"},"know":{"en":"Your deployed price function and price guessers.","zh":"你部署好的估价函数和各个预测器。"},"mins":45,"offline":false}}</script>
-<script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=dcd48bec"></script><script src="../assets/site.js?v=a53ae783"></script><script src="../assets/teach.js?v=ede6f40f"></script>
+<script src="../tracks.js?v=2bfa1a40"></script><script src="lessons.js?v=dcd48bec"></script><script src="../assets/site.js?v=7991ba8c"></script><script src="../assets/teach.js?v=ede6f40f"></script>
 <script src="js/26-agents-that-scan-estimate-decide.js?v=bda35b2f"></script></body></html>
