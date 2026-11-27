@@ -107,6 +107,8 @@ try {
     eq(await page.$$eval('.track-list .cc', a => a.map(x => x.getAttribute('href'))), T.filter(t => (t.domain || 'ai') === 'ai').map(t => t.href), 'the AI tracks, in tracks.js order');
     ok(await page.isVisible('[data-back]'), 'a way back to the subjects');
     await page.click('[data-back]');
+    // The link loads the page again and the cards are drawn after the lesson lists arrive: wait for them, do not race the load.
+    await page.waitForFunction(n => !location.hash && document.querySelectorAll('.track-list .cc').length === n, D.length, { timeout: 10000 }).catch(() => {});
     eq(await page.$$eval('.track-list .cc', a => a.length), D.length, 'back at the subjects');
   });
 
