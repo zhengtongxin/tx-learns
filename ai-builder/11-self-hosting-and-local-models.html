@@ -17,8 +17,10 @@
 <h2><span class="en">Step 2 · Start n8n and a local model</span><span class="zh">第 2 步 · 启动 n8n 和本地模型</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Install <b>Docker</b>, then start n8n with one command. A <b>volume</b> keeps your workflows when the container restarts. Install <b>Ollama</b> to download and run open models, then pull one.</p>
 <p class="zh" style="margin:0 0 8px">安装 <b>Docker</b>，用一条命令启动 n8n。<b>数据卷</b>能让容器重启后工作流还在。安装 <b>Ollama</b> 来下载和运行开源模型，再拉一个模型下来。</p>
-<p class="en" style="margin:0 0 8px">Open <code>http://localhost:5678</code> for n8n. Ollama listens on port 11434.</p>
-<p class="zh" style="margin:0 0 8px">n8n 在 <code>http://localhost:5678</code>，Ollama 监听 11434 端口。</p></div>
+<p class="en" style="margin:0 0 8px">Open <code>http://localhost:5678</code> for n8n. Ollama listens on port 11434; opening <code>http://localhost:11434</code> in a browser should say "Ollama is running".</p>
+<p class="zh" style="margin:0 0 8px">n8n 在 <code>http://localhost:5678</code>。Ollama 监听 11434 端口；在浏览器打开 <code>http://localhost:11434</code>，应该显示 “Ollama is running”。</p>
+<p class="en" style="margin:0 0 8px"><b>Size matters.</b> A model needs roughly its file size in free memory. A small 3-billion-parameter model such as <code>llama3.2</code> is a download of about 2 GB and runs on an ordinary laptop with 8 GB of RAM; models ten times bigger need a strong machine. If a model is slow or the laptop struggles, pick a smaller one.</p>
+<p class="zh" style="margin:0 0 8px"><b>大小很关键。</b>模型大致需要和它文件一样大的空闲内存。像 <code>llama3.2</code> 这样 30 亿参数的小模型，下载约 2 GB，8 GB 内存的普通笔记本就能跑；大十倍的模型需要性能强的机器。模型很慢或电脑吃力，就换更小的。</p></div>
 <div class="codebox" data-file="terminal" data-lang="bash"># start n8n, keeping its data in a volume called n8n_data
 docker volume create n8n_data
 docker run -it --rm --name n8n -p 5678:5678 -v n8n_data:/home/node/.n8n docker.n8n.io/n8nio/n8n
@@ -30,8 +32,10 @@ ollama run llama3.2 "Say hello in five words."</div>
 <h2><span class="en">Step 3 · Connect them</span><span class="zh">第 3 步 · 把两者连起来</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">In n8n add an <b>Ollama Chat Model</b> to your agent and create the credential with a <b>base URL</b>. Here is the trap: n8n runs inside a container, so <code>localhost</code> means the container itself, not your computer.</p>
 <p class="zh" style="margin:0 0 8px">在 n8n 里给智能体接一个 <b>Ollama Chat Model</b>，创建凭证并填写<b>基础地址</b>。这里有个陷阱：n8n 跑在容器里，<code>localhost</code> 指的是容器自己，不是你的电脑。</p>
-<p class="en" style="margin:0 0 8px">• n8n in Docker, Ollama on your machine: use <code>http://host.docker.internal:11434</code>.<br>• Both on the same machine without Docker: use <code>http://localhost:11434</code>.<br>• Do not expose port 5678 to the internet without HTTPS and a login.</p>
-<p class="zh" style="margin:0 0 8px">• n8n 在 Docker 里、Ollama 在你的电脑上：用 <code>http://host.docker.internal:11434</code>。<br>• 两者都在同一台机器上且不用 Docker：用 <code>http://localhost:11434</code>。<br>• 没有 HTTPS 和登录之前，不要把 5678 端口暴露到互联网。</p></div>
+<p class="en" style="margin:0 0 8px">• n8n in Docker, Ollama on your machine: use <code>http://host.docker.internal:11434</code>.<br>• Both on the same machine without Docker: use <code>http://localhost:11434</code>.<br>• On Linux, add <code>--add-host=host.docker.internal:host-gateway</code> to the <code>docker run</code> command, or that name does not exist.<br>• Test it: the credential screen can check the connection, and a failure here is nearly always the wrong URL.<br>• Do not expose port 5678 to the internet without HTTPS and a login.</p>
+<p class="zh" style="margin:0 0 8px">• n8n 在 Docker 里、Ollama 在你的电脑上：用 <code>http://host.docker.internal:11434</code>。<br>• 两者都在同一台机器上且不用 Docker：用 <code>http://localhost:11434</code>。<br>• 在 Linux 上，给 <code>docker run</code> 命令加上 <code>--add-host=host.docker.internal:host-gateway</code>，否则这个名字不存在。<br>• 先测试：凭证页面可以检查连接，这里失败几乎都是地址填错了。<br>• 没有 HTTPS 和登录之前，不要把 5678 端口暴露到互联网。</p>
+<p class="en" style="margin:0 0 8px"><b>The catch for agents.</b> Small local models often fail at <b>tool calling</b>: they answer in words instead of using the Calculator or any other tool. Test it with the lesson 1 question about 18 lessons plus GST. If it fumbles, use a larger model, or keep the local model for plain text steps and let a cloud model run the agent.</p>
+<p class="zh" style="margin:0 0 8px"><b>智能体的难处。</b>小型本地模型常常不会<b>调用工具</b>：它直接用文字回答，而不去用计算器或别的工具。用第 1 课那道“18 节课加消费税”的题测一下。如果它出错，就换更大的模型，或者只让本地模型做纯文字的步骤，智能体仍交给云端模型。</p></div>
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>

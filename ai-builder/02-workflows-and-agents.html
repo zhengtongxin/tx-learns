@@ -20,11 +20,11 @@
 <h2><span class="en">Step 2 · Read a field with an expression</span><span class="zh">第 2 步 · 用表达式读取字段</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">To use a field from the previous node, write an <b>expression</b> inside double curly braces. <code>$json</code> means "the current item".</p>
 <p class="zh" style="margin:0 0 8px">要用上一个节点的字段，就在双花括号里写<b>表达式</b>。<code>$json</code> 表示“当前这个条目”。</p>
-<p class="en" style="margin:0 0 8px">• <code>{{ $json.name }}</code> gives Wei Jie.<br>• <code>{{ $json.amount * 1.09 }}</code> adds 9% tax.<br>• <code>{{ $json.plan }}</code> can fill a message: Hi Wei Jie, your weekend plan is ready.</p>
-<p class="zh" style="margin:0 0 8px">• <code>{{ $json.name }}</code> 得到 Wei Jie。<br>• <code>{{ $json.amount * 1.09 }}</code> 加上 9% 的税。<br>• <code>{{ $json.plan }}</code> 可以填进消息：Hi Wei Jie，你的 weekend 方案已准备好。</p>
+<p class="en" style="margin:0 0 8px">• <code>{{ $json.name }}</code> gives Wei Jie.<br>• <code>{{ ($json.amount * 1.09).toFixed(2) }}</code> adds 9% tax and rounds to cents: 46.33. Without it you get 46.325, which is not a price.<br>• <code>{{ $json.plan }}</code> can fill a message: Hi Wei Jie, your weekend plan is ready.</p>
+<p class="zh" style="margin:0 0 8px">• <code>{{ $json.name }}</code> 得到 Wei Jie。<br>• <code>{{ ($json.amount * 1.09).toFixed(2) }}</code> 加上 9% 的税并保留两位小数：46.33。不写的话会得到 46.325，那不是一个价格。<br>• <code>{{ $json.plan }}</code> 可以填进消息：Hi Wei Jie，你的 weekend 方案已准备好。</p>
 <p class="en" style="margin:0 0 8px">Switch a field to <b>Expression</b> mode and n8n shows a live preview of the result.</p>
 <p class="zh" style="margin:0 0 8px">把字段切到 <b>Expression</b> 模式，n8n 会实时预览结果。</p></div>
-<div class="codebox" data-file="message field" data-lang="text">Hi {{ $json.name }}, your {{ $json.plan }} plan is {{ $json.amount * 1.09 }} dollars with GST.</div>
+<div class="codebox" data-file="message field" data-lang="text">Hi {{ $json.name }}, your {{ $json.plan }} plan is ${{ ($json.amount * 1.09).toFixed(2) }} with GST.</div>
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 3 · Workflow or agent?</span><span class="zh">第 3 步 · 工作流还是智能体？</span></h2>

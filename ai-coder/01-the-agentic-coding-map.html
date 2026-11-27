@@ -12,6 +12,20 @@
 <p class="en" style="margin:0 0 8px">The jump is the last one. An agent has <b>tools</b> (read a file, edit a file, run a command) and keeps going until the task is done or it gets stuck.</p>
 <p class="zh" style="margin:0 0 8px">真正的跳跃在最后一步。智能体手里有<b>工具</b>（读文件、改文件、运行命令），会一直做到任务完成或卡住为止。</p>
 </div>
+<p class="en">The same small job at each level: <i>add a /health route to a Node app, and a test for it</i>.</p>
+<p class="zh">同一件小事，在三个层次上分别怎么做：<i>给一个 Node 应用加一个 /health 路由，再写一个测试</i>。</p>
+<div class="codebox" data-file="one job, three levels" data-lang="text">Autocomplete   You type:  app.get('/hea
+               It offers: lth', (req, res) =&gt; res.json({ ok: true }));
+               You write the test, run it and fix it yourself.
+
+Chat           You paste server.js and ask for a /health route.
+               It replies with a snippet. You paste it in, run the
+               tests yourself, and paste the error back if it fails.
+
+Agent          You say: "Add GET /health returning {ok:true}, add a
+               test, and run npm test until it passes."
+               It opens the files, edits them, runs the tests, reads
+               the failure, fixes it, and reports what it changed.</div>
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 2 · The loop an agent runs</span><span class="zh">第 2 步 · 智能体的循环</span></h2>
@@ -20,6 +34,14 @@
 <p class="en" style="margin:0 0 8px">Your job moves from typing code to <b>setting the goal, giving a way to check, and judging the result</b>. A goal with a check ("make npm test pass") works far better than a goal without one ("make it better").</p>
 <p class="zh" style="margin:0 0 8px">你的工作从敲代码，变成<b>定目标、给出检查办法、评判结果</b>。带检查的目标（“让 npm test 通过”）远比不带检查的目标（“做得更好”）有效。</p>
 </div>
+<div class="codebox" data-file="the same goal, two ways" data-lang="text">Weak:    "Make the login page better."
+         (better how? how will anyone know it worked?)
+
+Strong:  "On the login page, show an error under the password box
+          when the password is under 8 characters. Add a test in
+          login.test.js. Done when npm test passes."
+         (what to change, where, and how to check it)</div>
+
 
 <h2><span class="en">Step 3 · Steer by feel, or by design</span><span class="zh">第 3 步 · 凭感觉，还是靠设计</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><b>Vibe coding</b> means describing what you want and judging the result by running it, without reading every line. It is great for throwaway tools, prototypes and learning.</p>
