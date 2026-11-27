@@ -4,7 +4,7 @@
 <meta name="updated" content="2026-11-27">
 <link rel="canonical" href="https://tx-learns.vercel.app/ai-coder/08-mcp-skills-and-plugins.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=8ad6ba13"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-coder/08-mcp-skills-and-plugins.html","url":"https://tx-learns.vercel.app/ai-coder/08-mcp-skills-and-plugins.html","name":"MCP, skills and plugins","alternateName":"MCP、技能与插件","description":"Extend an agent three ways: MCP for access, skills for know-how, plugins to share both","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Vibe engineering","dateModified":"2026-11-27","isPartOf":{"@type":"CollectionPage","name":"AI Coder","url":"https://tx-learns.vercel.app/ai-coder/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Coder","item":"https://tx-learns.vercel.app/ai-coder/index.html"},{"@type":"ListItem","position":3,"name":"MCP, skills and plugins","item":"https://tx-learns.vercel.app/ai-coder/08-mcp-skills-and-plugins.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
-<div class="hero"><span class="tag"><span class="en">Vibe engineering · Lesson 3</span><span class="zh">专业级氛围工程 · 第 3 课</span></span><h1><span class="en">MCP, skills and plugins</span><span class="zh">MCP、技能与插件</span></h1><p class="meta"><span class="en">Extend an agent three ways: MCP for access, skills for know-how, plugins to share both · ~11 min · concepts</span><span class="zh">用三种方式扩展智能体：MCP 给“通路”，技能给“门道”，插件把它们打包分享 · 约 11 分钟 · 讲概念</span></p></div>
+<div class="hero"><span class="tag"><span class="en">Vibe engineering · Lesson 3</span><span class="zh">专业级氛围工程 · 第 3 课</span></span><h1><span class="en">MCP, skills and plugins</span><span class="zh">MCP、技能与插件</span></h1><p class="meta"><span class="en">Extend an agent three ways: MCP for access, skills for know-how, plugins to share both · ~13 min · concepts</span><span class="zh">用三种方式扩展智能体：MCP 给“通路”，技能给“门道”，插件把它们打包分享 · 约 13 分钟 · 讲概念</span></p></div>
 
 <h2><span class="en">Step 1 · MCP: access to things</span><span class="zh">第 1 步 · MCP：接通外部世界</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">You met <b>MCP</b> as a standard plug between AI apps and tools. For coding it is how an agent reaches your issue tracker, database, docs or browser. A server is added by a few lines of config.</p>
@@ -46,6 +46,17 @@ description: Write a release note from merged changes. Use when asked for a chan
 <p class="en">Sort each one.</p>
 <p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
 
+<h2><span class="en">Step 4 · Why a skill does not load</span><span class="zh">第 4 步 · 技能为什么没被加载</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The agent decides whether to load a skill from its <b>description</b> alone. If the description does not say when to use it, the skill sits unused and you wonder why the agent ignores it. The fix is almost always the description, not the steps.</p>
+<p class="zh" style="margin:0 0 8px">智能体只凭<b>描述</b>来决定要不要加载一个技能。描述里没写“何时使用”，技能就一直闲置，你还纳闷智能体为什么不理它。修复几乎总是改描述，而不是改步骤。</p></div>
+<div class="codebox" data-file="two descriptions of the same skill" data-lang="md"># Never loads
+description: Release stuff.
+
+# Loads when it should
+description: Write a release note from merged changes. Use when asked for a changelog, a release note or "what changed since the last tag".</div>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Write</b> a SKILL.md for one procedure you repeat, then ask the agent to do that job and see if it loads.</span><span class="zh"><b>写</b>为你重复做的一件事写一个 SKILL.md，然后让智能体做这件事，看它会不会加载。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Add</b> one read-only MCP server and write the smallest access it needs.</span><span class="zh"><b>接入</b>一个只读的 MCP 服务器，并写下它所需的最小权限。</span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
@@ -55,4 +66,4 @@ description: Write a release note from merged changes. Use when asked for a chan
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"prev":["07-commands-checkpoints-loops.html"],"tools":{"en":"A terminal agent; Node.js for the MCP example","zh":"一个终端智能体；MCP 示例需要 Node.js"},"know":{"en":"What MCP is (see the AI Builder track).","zh":"知道 MCP 是什么（见 AI 构建者路线）。"},"goals":{"en":["Choose between MCP, a skill and a plugin","Write a SKILL.md","Keep MCP access small"],"zh":["在 MCP、技能和插件之间做选择","写一个 SKILL.md","让 MCP 的权限保持很小"]}}}</script>
 <script src="../tracks.js?v=819ff2a4"></script><script src="lessons.js?v=389b4305"></script><script src="../assets/site.js?v=a0db7d29"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
-<script src="js/08-mcp-skills-and-plugins.js?v=d683d250"></script></body></html>
+<script src="js/08-mcp-skills-and-plugins.js?v=90ecc6fe"></script></body></html>
