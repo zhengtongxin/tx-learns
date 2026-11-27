@@ -146,11 +146,11 @@
       var cur=0,tf=NX||CF[0];for(var wi=0;wi<C.topics.length;wi++){if(C.topics[wi].items.some(function(x){return x.file&&x.file===tf})){cur=wi;break}}
       var draw=function(){
         jr.innerHTML=C.topics.map(function(w){var rd=w.items.filter(function(x){return x.file}).length;
-          return '<section class="wsec"><div class="wph"><div><div class="ey">'+t({en:'Topic '+w.n,zh:'主题 '+w.n})+(w.level?' · '+t(LV[w.level]):'')+'</div><h3>'+t(w.title)+'</h3></div>'+(rd<w.items.length?'<div class="meta">'+t({en:rd+' of '+w.items.length+' lessons available',zh:'已发布 '+rd+' / '+w.items.length+' 课'})+'</div>':'')+'</div>'+
+          return '<section class="wsec"><div class="wph"><div><div class="ey">'+t({en:'Topic '+w.n,zh:'主题 '+w.n})+(w.level?' · '+t(LV[w.level]):'')+'</div><h2>'+t(w.title)+'</h2></div>'+(rd<w.items.length?'<div class="meta">'+t({en:rd+' of '+w.items.length+' lessons available',zh:'已发布 '+rd+' / '+w.items.length+' 课'})+'</div>':'')+'</div>'+
           '<div class="lgrid">'+w.items.map(function(l){
             var no=('0'+l.g).slice(-2),chip='<span class="chip '+l.k+'">'+t(TYPE[l.k])+'</span>';
-            if(l.file){var fin=d[C.id+'/'+l.file];return '<a class="lcard ready spot" href="'+l.file+'"><span class="n">'+no+'</span>'+chip+'<h4>'+t(l.title)+'</h4><span class="st">'+(fin?t({en:'✓ Completed',zh:'✓ 已完成'}):t({en:'Start →',zh:'开始 →'}))+'</span></a>'}
-            return '<div class="lcard soon"><span class="n">'+no+'</span>'+chip+'<h4>'+t(l.title)+'</h4><span class="st">'+t({en:'Coming soon',zh:'即将发布'})+'</span></div>'}).join('')+'</div></section>'}).join('');
+            if(l.file){var fin=d[C.id+'/'+l.file];return '<a class="lcard ready spot" href="'+l.file+'"><span class="n">'+no+'</span>'+chip+'<h3>'+t(l.title)+'</h3><span class="st">'+(fin?t({en:'✓ Completed',zh:'✓ 已完成'}):t({en:'Start →',zh:'开始 →'}))+'</span></a>'}
+            return '<div class="lcard soon"><span class="n">'+no+'</span>'+chip+'<h3>'+t(l.title)+'</h3><span class="st">'+t({en:'Coming soon',zh:'即将发布'})+'</span></div>'}).join('')+'</div></section>'}).join('');
       };
       draw();
       if(CF.length&&started)whatNext(false,function(a){jr.after(a)},NX&&C.lessons.filter(function(x){return x.file===NX})[0],!NX);
