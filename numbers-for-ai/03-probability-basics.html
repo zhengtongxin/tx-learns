@@ -1,0 +1,41 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Probability basics | TX Learns</title>
+<meta name="description" content="Count outcomes to find how likely something is, and combine chances without fooling yourself"><meta property="og:title" content="Probability basics | TX Learns"><meta property="og:description" content="Count outcomes to find how likely something is, and combine chances without fooling yourself"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/numbers-for-ai/03-probability-basics.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/numbers-for-ai.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/numbers-for-ai/03-probability-basics.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/numbers-for-ai/03-probability-basics.html","url":"https://tx-learns.vercel.app/numbers-for-ai/03-probability-basics.html","name":"Probability basics","alternateName":"概率入门","description":"Count outcomes to find how likely something is, and combine chances without fooling yourself","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Everyday statistics","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Numbers for AI","url":"https://tx-learns.vercel.app/numbers-for-ai/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Numbers for AI","item":"https://tx-learns.vercel.app/numbers-for-ai/index.html"},{"@type":"ListItem","position":3,"name":"Probability basics","item":"https://tx-learns.vercel.app/numbers-for-ai/03-probability-basics.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Everyday statistics · Lesson 3</span><span class="zh">日常统计 · 第 3 课</span></span><h1><span class="en">Probability basics</span><span class="zh">概率入门</span></h1><p class="meta"><span class="en">Count outcomes to find how likely something is, and combine chances without fooling yourself · ~10 min · reading and practice</span><span class="zh">通过数结果来判断可能性有多大，并在组合概率时避免被自己骗 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Chance is a fraction</span><span class="zh">第 1 步 · 概率是一个分数</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The <b>probability</b> of something is a number from 0 (never) to 1 (always). When all outcomes are equally likely, it is the number of outcomes you want divided by the number of all outcomes. One roll of a fair die has six outcomes, so the chance of rolling a 4 is 1 ÷ 6, about 0.167. Probabilities also work as percentages: 0.167 is 16.7%.</p>
+<p class="zh" style="margin:0 0 8px">某件事的<b>概率</b>是一个从 0（绝不发生）到 1（必然发生）的数。当所有结果等可能时，概率就是你想要的结果数除以全部结果数。一枚公平骰子掷一次有六种结果，所以掷出 4 的概率是 1 ÷ 6，约 0.167。概率也可以写成百分比：0.167 就是 16.7%。</p></div>
+<div class="codebox" data-file="count.py" data-lang="python">outcomes = [(a, b) for a in "HT" for b in "HT"]   # every result of two coin flips
+wanted = [o for o in outcomes if "H" in o]       # results with at least one head
+print(len(wanted) / len(outcomes))</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Independent chances multiply</span><span class="zh">第 2 步 · 独立事件的概率相乘</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Two events are <b>independent</b> if one does not affect the other, such as two separate dice rolls. The chance that both happen is the product of their chances: two sixes in a row is 1/6 × 1/6, about 0.028. This is why a long chain of steps, each fairly reliable, can be unreliable overall: ten steps that each work 90% of the time work together only about 35% of the time.</p>
+<p class="zh" style="margin:0 0 8px">如果一件事不影响另一件事，两者就是<b>独立</b>的，比如两次分开的掷骰子。两件事都发生的概率等于各自概率的乘积：连续两次掷出 6 的概率是 1/6 × 1/6，约 0.028。这也是为什么一长串步骤，每一步都相当可靠，整体却可能不可靠：十个每步成功率 90% 的步骤，一起成功的概率只有约 35%。</p></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · At least one</span><span class="zh">第 3 步 · 至少一次</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">“At least one” is easiest by turning it around: the chance of at least one success is 1 minus the chance of no success at all. The chance of no six in two rolls is 5/6 × 5/6; so at least one six is 1 − (5/6)², about 0.306, not 2/6. Adding chances like that double-counts the case where both happen. Use this whenever the question says “at least once” or “any”.</p>
+<p class="zh" style="margin:0 0 8px">“至少一次”最容易的算法是反过来想：至少成功一次的概率，等于 1 减去一次都不成功的概率。两次掷骰子都没有 6 的概率是 5/6 × 5/6；所以至少一个 6 的概率是 1 − (5/6)²，约 0.306，而不是 2/6。那样直接相加，会把两次都发生的情况重复算了。凡是问题里说“至少一次”或“任何一个”，都用这个办法。</p></div>
+<div class="try" id="p3"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> list every outcome of a small situation (two coin flips, or two dice) and count the ones you want.</span><span class="zh"><b>试一试：</b>列出一个小情境（两次抛硬币或两个骰子）的所有结果，数出你想要的那些。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> take a process with several steps and multiply their success rates.</span><span class="zh"><b>核对：</b>拿一个有多个步骤的流程，把各步成功率相乘。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Probability is wanted outcomes divided by all outcomes.<br>• Chances that must all happen multiply.<br>• “At least one” is 1 minus the chance of none.</p><p class="zh" style="margin:0">• 概率是想要的结果数除以全部结果数。<br>• 要同时发生的概率相乘。<br>• “至少一次”等于 1 减去一次都没有的概率。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Numbers for AI</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3 for the small examples; reading is enough for the rest","zh":"小例子需要 Python 3；其余只需阅读"},"know":{"en":"Percentages and rates (see “Percentages and rates”).","zh":"知道百分比与比率（见“百分比与比率”）。"},"goals":{"en":["Count favourable outcomes","Multiply independent chances","Use “at least one” correctly"],"zh":["数出有利的结果","把独立事件的概率相乘","正确使用“至少一次”"]},"prev":["02-percentages-and-rates.html"]}}</script>
+<script src="../tracks.js?v=1f998a14"></script><script src="lessons.js?v=741c7829"></script><script src="../assets/site.js?v=cf875a90"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/03-probability-basics.js?v=530a022c"></script></body></html>

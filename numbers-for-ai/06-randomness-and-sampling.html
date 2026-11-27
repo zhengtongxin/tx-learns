@@ -1,0 +1,46 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Randomness and sampling | TX Learns</title>
+<meta name="description" content="Use random choices on purpose, make them repeatable, and judge when a sample can stand for everything"><meta property="og:title" content="Randomness and sampling | TX Learns"><meta property="og:description" content="Use random choices on purpose, make them repeatable, and judge when a sample can stand for everything"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/numbers-for-ai/06-randomness-and-sampling.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/numbers-for-ai.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/numbers-for-ai/06-randomness-and-sampling.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/numbers-for-ai/06-randomness-and-sampling.html","url":"https://tx-learns.vercel.app/numbers-for-ai/06-randomness-and-sampling.html","name":"Randomness and sampling","alternateName":"随机与抽样","description":"Use random choices on purpose, make them repeatable, and judge when a sample can stand for everything","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Numbers models use","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Numbers for AI","url":"https://tx-learns.vercel.app/numbers-for-ai/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Numbers for AI","item":"https://tx-learns.vercel.app/numbers-for-ai/index.html"},{"@type":"ListItem","position":3,"name":"Randomness and sampling","item":"https://tx-learns.vercel.app/numbers-for-ai/06-randomness-and-sampling.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Numbers models use · Lesson 3</span><span class="zh">模型用到的数字 · 第 3 课</span></span><h1><span class="en">Randomness and sampling</span><span class="zh">随机与抽样</span></h1><p class="meta"><span class="en">Use random choices on purpose, make them repeatable, and judge when a sample can stand for everything · ~10 min · reading and practice</span><span class="zh">有意识地使用随机选择，让它们可重复，并判断样本何时能代表整体 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Random, but repeatable</span><span class="zh">第 1 步 · 随机，但可重复</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Models use randomness on purpose: to pick among likely next words, to shuffle training data, to split examples into practice and test sets. Computers produce “random” numbers from a starting number called a <b>seed</b>. Give the same seed and you get the same sequence every time, which is how an experiment can be re-run exactly. No seed means a different result on each run, which is fine for a game and bad for a test you need to repeat.</p>
+<p class="zh" style="margin:0 0 8px">模型有意使用随机性：在可能的下一个词中挑选、打乱训练数据、把样例分成练习集和测试集。计算机用一个叫<b>种子</b>的起始数字产生“随机”数。给同样的种子，每次得到同样的序列，实验才能被精确重跑。不设种子，每次结果不同——玩游戏没问题，但对需要重复的测试就糟了。</p></div>
+<div class="codebox" data-file="seed.py" data-lang="python">import random
+random.seed(1)
+first = [random.randint(1, 6) for _ in range(3)]   # three dice rolls
+random.seed(1)
+second = [random.randint(1, 6) for _ in range(3)]
+print(first == second)</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Take a sample</span><span class="zh">第 2 步 · 抽取样本</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">You rarely check everything, so you check a <b>sample</b> and hope it stands for the whole. A fair way is to choose by chance, so each item has an equal shot. Choosing by position, such as “the first 100 rows”, can be biased if the data is ordered, with all the easy cases at the top. In Python, <code>items[::3]</code> takes every third item: the slice form is <code>[start:stop:step]</code>.</p>
+<p class="zh" style="margin:0 0 8px">你很少会检查全部，所以检查一个<b>样本</b>，并希望它能代表整体。公平的办法是靠机会来选，让每一项被选中的机会均等。按位置选，比如“前 100 行”，如果数据是有序的、所有简单的案例都排在最前面，就会有偏差。在 Python 里，<code>items[::3]</code> 取每隔两个的一项：切片的写法是 <code>[起点:终点:步长]</code>。</p></div>
+<div class="codebox" data-file="slice.py" data-lang="python">items = list(range(10))   # 0 to 9
+print(items[::3])          # every third item, starting at the first</div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · When a sample misleads</span><span class="zh">第 3 步 · 样本何时会误导</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A sample can mislead in two ways. If it is <b>too small</b>, chance dominates: three coin flips can easily give all heads. If it is <b>biased</b>, it leaves out part of what you care about: a survey sent only to people who answer email misses everyone else. More data fixes the first problem, but it does not fix the second, so ask who or what could not end up in the sample.</p>
+<p class="zh" style="margin:0 0 8px">样本可能在两方面误导你。<b>太小</b>，则机会占主导：抛三次硬币完全可能全是正面。<b>有偏</b>，则漏掉了你关心的一部分：只发给会回邮件的人的调查，会漏掉其他所有人。更多数据能解决第一个问题，却解决不了第二个，所以要问：谁或什么不可能进入样本。</p></div>
+<div class="try" id="p3"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> run a random choice twice with and without a seed, and compare the results.</span><span class="zh"><b>试一试：</b>把一个随机选择分别在设置和不设置种子的情况下各跑两次，比较结果。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> think of a recent survey or test and name who could not have been in the sample.</span><span class="zh"><b>核对：</b>想一个最近的调查或测试，说出谁不可能出现在样本里。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A seed makes random choices repeatable.<br>• Choose a sample by chance, not by position.<br>• More data fixes a small sample, not a biased one.</p><p class="zh" style="margin:0">• 种子让随机选择可重复。<br>• 靠机会选样本，不要按位置选。<br>• 更多数据能解决样本小，解决不了样本有偏。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Numbers for AI</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3 for the small examples; reading is enough for the rest","zh":"小例子需要 Python 3；其余只需阅读"},"know":{"en":"Probability basics (see “Probability basics”).","zh":"知道概率入门（见“概率入门”）。"},"goals":{"en":["Make random choices repeatable","Take a sample","Say when a sample misleads"],"zh":["让随机选择可重复","抽取样本","说出样本何时会误导"]},"prev":["03-probability-basics.html"]}}</script>
+<script src="../tracks.js?v=1f998a14"></script><script src="lessons.js?v=741c7829"></script><script src="../assets/site.js?v=cf875a90"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/06-randomness-and-sampling.js?v=d94bc99c"></script></body></html>

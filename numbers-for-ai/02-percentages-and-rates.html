@@ -1,0 +1,46 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Percentages and rates | TX Learns</title>
+<meta name="description" content="Read percentages, changes and rates correctly, and know what each one is a percentage of"><meta property="og:title" content="Percentages and rates | TX Learns"><meta property="og:description" content="Read percentages, changes and rates correctly, and know what each one is a percentage of"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/numbers-for-ai/02-percentages-and-rates.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/numbers-for-ai.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/numbers-for-ai/02-percentages-and-rates.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/numbers-for-ai/02-percentages-and-rates.html","url":"https://tx-learns.vercel.app/numbers-for-ai/02-percentages-and-rates.html","name":"Percentages and rates","alternateName":"百分比与比率","description":"Read percentages, changes and rates correctly, and know what each one is a percentage of","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Everyday statistics","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Numbers for AI","url":"https://tx-learns.vercel.app/numbers-for-ai/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Numbers for AI","item":"https://tx-learns.vercel.app/numbers-for-ai/index.html"},{"@type":"ListItem","position":3,"name":"Percentages and rates","item":"https://tx-learns.vercel.app/numbers-for-ai/02-percentages-and-rates.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Everyday statistics · Lesson 2</span><span class="zh">日常统计 · 第 2 课</span></span><h1><span class="en">Percentages and rates</span><span class="zh">百分比与比率</span></h1><p class="meta"><span class="en">Read percentages, changes and rates correctly, and know what each one is a percentage of · ~10 min · reading and practice</span><span class="zh">正确理解百分比、变化率和比率，并知道每个百分比是相对于谁的 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · A part of a whole</span><span class="zh">第 1 步 · 整体的一部分</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>percentage</b> is a part of a whole, written out of 100. To find it, divide the part by the whole and multiply by 100: 120 correct answers out of 400 is 120 ÷ 400 × 100 = 30%. Everything depends on the whole you chose. Fifty out of a hundred and fifty out of three hundred are both “half” in different ways, and mixing up the whole is the most common mistake.</p>
+<p class="zh" style="margin:0 0 8px"><b>百分比</b>是整体中的一部分，以 100 为基数来表示。算法是用部分除以整体，再乘以 100：400 题答对 120 题，就是 120 ÷ 400 × 100 = 30%。一切都取决于你选的整体。一百里的五十和三百里的一百五十都是“一半”，但含义不同，搞混整体是最常见的错误。</p></div>
+<div class="codebox" data-file="percent.py" data-lang="python">correct = 120
+total = 400
+print(correct / total * 100)   # part divided by whole, times 100</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Percentage change</span><span class="zh">第 2 步 · 百分比变化</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A change is measured against the starting value: (new − old) ÷ old × 100. Percent changes do not undo each other. A price that rises 10% and then falls 10% does not return to where it began, because the second change is measured against a larger number. The same trap hides in “accuracy went up by 5 points” versus “by 5%”: points are a plain difference, percent is relative.</p>
+<p class="zh" style="margin:0 0 8px">变化是相对起点来衡量的：(新值 − 旧值) ÷ 旧值 × 100。百分比变化不能互相抵消。价格先涨 10% 再跌 10%，并不会回到原点，因为第二次变化是相对更大的数计算的。“准确率提高了 5 个百分点”和“提高了 5%”也藏着同样的陷阱：百分点是直接的差，百分比是相对的变化。</p></div>
+<div class="codebox" data-file="change.py" data-lang="python">price = 100
+price = price * 1.10   # up 10%
+price = price * 0.90   # down 10%
+print(round(price, 1))</div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · A percentage of what</span><span class="zh">第 3 步 · 是什么的百分之几</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Always ask what the percentage is of. “A test that is 99% accurate” can still be wrong about most of its positives if the thing it looks for is rare: when only 1 person in 1,000 has a condition, even a small false-alarm rate produces more false alarms than true cases. A <b>rate</b> (such as 3 per 1,000) names both the count and the group, so it is harder to misread than a bare percentage. Sort each statement.</p>
+<p class="zh" style="margin:0 0 8px">永远要问这个百分比是相对什么的。“准确率 99% 的检测”，如果要找的东西很罕见，仍然可能大部分阳性结果是错的：当一千人里只有一人有某种情况，哪怕误报率很小，产生的误报也会比真实病例多。<b>比率</b>（比如每千人 3 例）同时说明了数量和群体，比单独一个百分比更不容易被误读。给每条说法分类。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> find a claim in the news that uses a percentage, and write down what it is a percentage of.</span><span class="zh"><b>试一试：</b>在新闻里找一个用了百分比的说法，写下它是什么的百分比。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> work out one percentage change from real numbers, and say whether it is points or percent.</span><span class="zh"><b>核对：</b>用真实数字算一个百分比变化，并说明它是百分点还是百分比。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A percentage is a part divided by a whole, times 100.<br>• A change is measured against the starting value.<br>• Always ask what the percentage is of.</p><p class="zh" style="margin:0">• 百分比是部分除以整体再乘以 100。<br>• 变化是相对起点值衡量的。<br>• 永远要问百分比是相对什么的。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Numbers for AI</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3 for the small examples; reading is enough for the rest","zh":"小例子需要 Python 3；其余只需阅读"},"know":{"en":"Averages and spread (see “Averages and spread”).","zh":"知道平均数与离散程度（见“平均数与离散程度”）。"},"goals":{"en":["Compute a percentage","Work out a percentage change","Ask “a percentage of what?”"],"zh":["计算百分比","算出百分比变化","追问“是什么的百分之几”"]},"prev":["01-averages-and-spread.html"]}}</script>
+<script src="../tracks.js?v=1f998a14"></script><script src="lessons.js?v=741c7829"></script><script src="../assets/site.js?v=cf875a90"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/02-percentages-and-rates.js?v=9d91918f"></script></body></html>
