@@ -103,6 +103,8 @@
    else a=/^[0-3]$/.test(s2)?+s2:-1}
   if(typeof a!=='number'||a%1!==0||!(a>=0&&a<4)||opts.some(function(x){return !x}))return null;
   var u={};opts.forEach(function(x){u[x.toLowerCase()]=1});if(Object.keys(u).length<4)return null;
+  /* "all of the above" and its kin only make sense with several keys, so a one-key question with them is refused */
+  if(opts.some(function(x){return /^(?:all|none|both)\s+of\s+the\s+(?:above|these)|^(?:以上|上述)(?:都|全部|均)|^(?:以上|上述)(?:皆|都)?(?:不|没)/i.test(x)}))return null;
   if(q.length<12||q.length>700)return null;
   return {q:q,o:opts,a:a,e:String(o.explanation||o.reason||'').trim()}};
  /* Second opinion on the key: the model answers the finished question from the excerpt without seeing the key. */

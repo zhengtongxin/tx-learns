@@ -23,6 +23,8 @@ ok(L.pick([{ id: 1, area: 'a', score: 9 }], 'b', {}, {}, Math.random) === null &
 ok([['{"answer":"B"}', 1], ['{"answer":2}', 2], ['<think>x</think>The answer is C.', 2], ['{"answer":"(d) text"}', 3], ['no idea', -1], ['{"answer":7}', -1]].every(([r, w]) => L.parseVerify(r) === w), 'the second opinion is read as an option, or as none');
 ok(/A\. one\nB\. two/.test(L.verifyPrompt({ text: 'x', q: { q: 'Q?', o: ['one', 'two', 'three', 'four'], a: 1 } })[1].content) && !/answer is|"answer":1/.test(L.verifyPrompt({ text: 'x', q: { q: 'Q?', o: ['one', 'two', 'three', 'four'], a: 1 } })[1].content), 'the second opinion sees the options but not the key');
 ok(L.parseQuestion('{"question":"short","options":["a","b","c","d"],"answer":1}') === null, 'a bad question is refused');
+ok(L.parseQuestion('{"question":"Which step comes first when two members disagree?","options":["Listen to both","Ignore it","Fire one","All of the above"],"answer":0}') === null, 'an "all of the above" option is refused');
+ok(L.parseQuestion('{"question":"哪一步应该最先做，当两位成员意见不合？","options":["先听双方","无视","开除一人","以上都对"],"answer":0}') === null, 'a Chinese "all of the above" option is refused');
 ok(L.parseQuestion('{"question":"Which step comes first when two members disagree?","options":["Listen to both","Ignore it","Fire one","Wait"],"answer":"A"}')?.a === 0, 'a good question parses');
 { const Q = a => L.parseQuestion(JSON.stringify({ question: 'What should the manager do next?', options: ['Ask the team', 'Delegate the task', 'Escalate now', 'Wait a week'], answer: a }))?.a;
   ok(Q('Delegate the task') === 1, 'an answer given as the option text is matched to that option, not read as letter D');
