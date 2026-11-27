@@ -210,12 +210,12 @@
       function tracksOf(dm){return window.TRACKS.filter(function(c){return (c.domain||'ai')===dm.id})}
       var want=(location.hash||'').slice(1),cur=null;D.forEach(function(dm){if(dm.id===want&&tracksOf(dm).length>1)cur=dm});
       /* Two levels: the domains first (AI, project management); a domain with several tracks opens its track list, one with a single track goes straight to it. */
-      var hints=document.querySelectorAll('#topics > .sub, #topics > p.meta');for(var h=0;h<hints.length;h++)hints[h].hidden=!cur;
+      var hints=document.querySelectorAll('#topics > .sub, #topics > p.meta');for(var h=0;h<hints.length;h++)hints[h].hidden=!cur||(hints[h].tagName==='P'&&hints[h].className.indexOf('meta')>-1&&cur.id!=='ai');
       if(cur){var ts=tracksOf(cur);
         hub.innerHTML='<section class="dom"><p class="meta"><a href="tracks.html" data-back>'+t({en:'← All subjects',zh:'← 全部领域'})+'</a></p><h3 class="dom-h">'+(cur.icon?'<span aria-hidden="true">'+cur.icon+'</span> ':'')+t(cur.title)+'</h3>'+(cur.desc?'<p class="meta">'+t(cur.desc)+'</p>':'')+(function(){var en=ts.filter(function(c){return c.entry}),pa=ts.filter(function(c){return !c.entry});
           function list(a,num){return '<div class="tl">'+a.map(function(c,ci){return card(c,num?ci:-1,count(c.id,c.files),c.total>0)}).join('')+'</div>'}
           /* Entry points (pick by who you are) come first; the tracks after them are one path, numbered. A domain without entry points is one numbered path. */
-          if(!en.length||!pa.length)return list(ts,pa.length>1);
+          if(!en.length||!pa.length)return list(ts,pa.length>1&&!pa.every(function(c){return c.bridge}));
           /* Skills tracks (bridge:true) are a toolbox: take only the ones you need, in any order, so they are not numbered; the rest is the numbered path. */
           var br=pa.filter(function(c){return c.bridge}),pt=pa.filter(function(c){return !c.bridge});
           return '<h4 class="dom-g">'+t({en:'Pick where you start',zh:'选一个起点'})+'</h4>'+list(en,false)+(br.length?'<h4 class="dom-g">'+t({en:'Skills toolbox: take what you need, in any order',zh:'技能工具箱：缺什么学什么，顺序随意'})+'</h4>'+list(br,false):'')+(pt.length?'<h4 class="dom-g">'+t({en:'Then the engineering path, in order',zh:'然后按顺序走工程路线'})+'</h4>'+list(pt,true):'')})()+'</section>';return}

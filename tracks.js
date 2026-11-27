@@ -8,7 +8,7 @@ window.DOMAINS=[
  {id:'ai',icon:'🧠',title:{en:'AI',zh:'AI'},desc:{en:'Pick a starting point by who you are, then follow the engineering path to running a customer pilot.',zh:'按你的身份选一个起点，再沿工程路线一路走到带客户做试点。'}},
  {id:'pm',icon:'📋',title:{en:'Project management',zh:'项目管理'},desc:{en:'Plan, lead and close projects, and pass the PMP exam.',zh:'规划、带领并收尾项目，并通过 PMP 考试。'}},
  {id:'itsm',icon:'🛠️',title:{en:'IT service management',zh:'IT 服务管理'},desc:{en:'How IT services create value, and how to pass the ITSM foundation exam.',zh:'IT 服务如何创造价值，以及如何通过 ITSM 基础级考试。'}},
- {id:'skills',icon:'🎓',title:{en:'Learning skills',zh:'学习方法'},desc:{en:'How to study so it stays: practice, review and plans that last.',zh:'怎样学才记得住：练习、复习，以及能坚持的计划。'}},
+ {id:'skills',icon:'🎓',title:{en:'Everyday skills',zh:'通用技能'},desc:{en:'Skills that help with everything else: studying, writing, deciding, working with people and checking claims.',zh:'帮你做好其他一切事情的技能：学习、写作、决策、与人共事和辨别信息。'}},
  {id:'community',icon:'🤝',title:{en:'From learners',zh:'来自学习者'},desc:{en:'Tracks written from learners’ own study notes, on any subject.',zh:'根据学习者自己的学习笔记写成的路线，科目不限。'}}
 ];
 window.TRACKS=[

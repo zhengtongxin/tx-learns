@@ -122,6 +122,15 @@ try {
     const chips = await page.$$eval('.track-list .cc', a => a.map(x => x.querySelector('.chip').textContent));
     T.filter(t => (t.domain || 'ai') === 'ai').forEach((t, i) => ok(t.entry ? chips[i].includes(t.entry.en) && !/Step \d/.test(chips[i]) : t.bridge ? !/Step \d/.test(chips[i]) : /Step \d/.test(chips[i]), `chip of ${t.id}: ${chips[i]}`));
     ok(await page.isVisible('[data-back]'), 'a way back to the subjects');
+    ok(await page.isVisible('#topics > p.meta'), 'the AI starting-point hint shows on the AI subject');
+    // A subject whose tracks are all skills tracks (take any, in any order) has no numbered steps and none of the AI-only hint.
+    if (T.filter(t => t.domain === 'skills').length > 1) {
+      await page.goto(base + 'tracks.html#skills');
+      const sk = await page.$$eval('.track-list .cc', a => a.map(x => (x.querySelector('.chip') || {}).textContent || ''));
+      ok(sk.length > 1 && sk.every(c => !/Step \d/.test(c)), 'skills tracks are not numbered: ' + sk.join(' | '));
+      ok(!(await page.isVisible('#topics > p.meta')), 'the AI starting-point hint is hidden on other subjects');
+      await page.goto(base + 'tracks.html#ai');
+    }
     await page.click('[data-back]');
     // The link loads the page again and the cards are drawn after the lesson lists arrive: wait for them, do not race the load.
     await page.waitForFunction(n => !location.hash && document.querySelectorAll('.track-list .cc').length === n, D.length, { timeout: 10000 }).catch(() => {});
