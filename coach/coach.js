@@ -195,6 +195,12 @@ function streakBox(td,n){
  return '<div class="streak"><svg class="ring" viewBox="0 0 52 52" width="52" height="52" role="img" aria-label="'+(pageLang()==='zh'?'今天：'+td.n+' / '+n+' 题':'Today: '+td.n+' of '+n+' questions')+'"><circle cx="26" cy="26" r="'+R+'" class="rt"/><circle cx="26" cy="26" r="'+R+'" class="rf" stroke-dasharray="'+(C*pct).toFixed(1)+' '+C.toFixed(1)+'" transform="rotate(-90 26 26)"/><text x="26" y="30" text-anchor="middle">'+td.n+'</text></svg>'+
   '<div class="sk"><b>'+(st?'🔥 '+T(st+(st===1?' day':' days'),st+' 天'):T('No streak yet','还没有连续记录'))+'</b><span class="meta">'+T('Today '+td.n+' of '+n+' questions. ','今天 '+td.n+' / '+n+' 题。')+msg+'</span></div>'+
   '<div class="wk" aria-hidden="true">'+wk.map(function(x){return '<i class="'+(x.n?(x.c/x.n>=.7?'hi':'mid'):'')+'" title="'+x.k+(x.n?' · '+x.c+'/'+x.n:'')+'"><u>'+WD[x.wd]+'</u></i>'}).join('')+'</div></div>'}
+/* the coach's word after a round: how it went and how far today's goal has come */
+function coachNote(got,tot){if(!tot)return '';var r=got/tot,td=today(),n=S.perDay,left=Math.max(0,n-td.n),m;
+ m=r>=0.8?T('Solid round. Keep this up and these areas will move to “due for review” instead of “weak”.','这一轮很扎实。保持下去，这些领域会从“薄弱”变成“到期复习”。'):
+  r>=0.5?T('You are getting there. The misses are where the next round will help most.','正在进步。答错的地方，正是下一轮最有帮助的地方。'):
+  T('A hard round, and that is useful: it shows exactly where the gaps are. Redo the misses once, then try again.','这一轮不容易，但很有用：它准确指出了缺口。先把错题重做一遍，再来一轮。');
+ return '<p class="coachnote">'+m+' '+(left?T(left+' more question'+(left===1?'':'s')+' to reach today’s goal.','离今天的目标还差 '+left+' 题。'):T('Today’s goal is reached.','今天的目标已完成。'))+'</p>'}
 function renderToday(){
  var el=$('today'),n=S.perDay,td=today();
  if(!CH.length){el.innerHTML='';return}
@@ -257,6 +263,7 @@ function renderPractice(focus){
   h='<h2>'+T('Round <em>done</em>','本轮<em>完成</em>')+'</h2><p class="lead2">'+T(got+' of '+R.items.length+' right','答对 '+got+' / '+R.items.length)+(R.fail?' <span class="meta">'+T('('+R.fail+' could not be written)','（有 '+R.fail+' 题没能生成）')+'</span>':'')+'</p><ul class="plan">'+Object.keys(by).map(function(k){return '<li><span class="pk">'+by[k].c+'/'+by[k].n+'</span><span>'+aname(k)+'</span></li>'}).join('')+'</ul>';
   if(R.kind==='exam'){var wr=R.items.filter(function(x){return x.res===0});if(wr.length)h+='<h3>'+T('Review','回顾')+'</h3>'+wr.map(function(x){return '<div class="rev"><p class="qt">'+esc(x.q)+'</p><p><b>'+T('Answer','答案')+':</b> '+esc(x.o[x.a])+'</p><p class="meta">'+esc(x.e)+'</p></div>'}).join('')}
   var missed=R.items.filter(function(x){return x.res===0}),nh=nextHint();
+  h+=coachNote(got,R.items.length);
   if(R.kind!=='exam'&&missed.length)h+='<p class="meta">'+T('Your gaps from this round: ','本轮的缺口：')+Object.keys(missed.reduce(function(o,x){o[x.area]=1;return o},{})).map(aname).join(T(', ','、'))+'.</p>';
   if(nh)h+='<p class="meta">'+nh+'</p>';
   h+='<p class="acts">'+(book().length?'<button class="btn pri" data-act="redoset">'+T('Redo my misses now','马上重做错题')+' ('+book().length+')</button><button class="btn" data-act="drill">':'<button class="btn pri" data-act="drill">')+T('Another round','再来一轮')+'</button><button class="btn" data-go="progress">'+T('See my progress','看我的进度')+'</button><button class="btn" data-act="close">'+T('Done','完成')+'</button></p>'}
