@@ -1,110 +1,106 @@
 {
  "lessons": {
   "agentic-ai/01-agentic-workflow.html": {
-   "score": 6,
-   "at": "2026-11-27T02:10:03.900Z",
+   "score": 7,
+   "at": "2026-11-27T04:08:40.896Z",
    "confusing": [
     {
-     "where": "Meta line at the top",
-     "why": "Four accounts and keys (n8n, OpenAI, Marketstack, Google) come before the first idea, but the lesson says ~15 min. A newcomer cannot tell whether the setup is worth it."
+     "where": "Step 3 · Build it, step 4 (Tools)",
+     "why": "Tools take inputs (a ticker, a date, the values for a row) that the model fills in from your question. The lesson never says this, so it is unclear how a price ends up in the Date and Close columns."
     },
     {
-     "where": "Step 3 · 4. Tools",
-     "why": "EoD (end-of-day prices) is never explained in the text. It only appears in a quiz later."
-    },
-    {
-     "where": "Step 3 · 5. Chat, then open Logs",
-     "why": "Tools are never defined. Step 1 gives “Agent = LLM + tools + a loop” and nothing more, so “description” has to be guessed."
+     "where": "Step 3 · Build it, step 5",
+     "why": "“Ticker symbol” and AAPL are never explained. A newcomer may not know a ticker is the short code for a listed company's shares."
     }
    ]
   },
   "agentic-ai/02-agents-and-patterns.html": {
-   "score": 7,
-   "at": "2026-11-27T02:10:03.900Z",
+   "score": 6,
+   "at": "2026-11-27T04:08:40.896Z",
    "confusing": [
     {
-     "where": "Now make it yours, first item",
-     "why": "The reader has not made an LLM call yet (that is lesson 3), and “LLM call” is not defined here."
+     "where": "Step 3 · Five workflow patterns",
+     "why": "Step 2 says a workflow is one where your code fixes the route and the model only fills in each step, and that the difference is who picks the next step. Here the model picks how many pieces run, yet t"
     },
     {
-     "where": "Step 2 code box agent.py",
-     "why": "The inputs are unclear: tools is a list of names while the comment says each carries a description, and choice.name and choice.args are never explained."
+     "where": "Step 2 · Workflow vs agent",
+     "why": "Lesson 1 is titled “Agentic workflow” and builds an agent in n8n, so the word means the wide sense there and the narrow sense here, one lesson apart. The note only lands after the definition."
     },
     {
-     "where": "Step 2 · Learn",
-     "why": "Lesson 1 uses “workflow” for an n8n canvas. The parenthesis clears it up, but a newcomer will stop and reread."
+     "where": "Step 1 · Be the agent",
+     "why": "“Log” is what the agent reads each turn, but it is not defined until the game. A newcomer may not know it is a running list of each tool call and its result."
     }
    ]
   },
   "agentic-ai/03-first-api-calls.html": {
-   "score": 6,
-   "at": "2026-11-27T02:10:03.900Z",
+   "score": 7,
+   "at": "2026-11-27T04:08:40.896Z",
    "confusing": [
     {
-     "where": "Meta line at the top",
-     "why": "The lesson asks for a notebook and a virtual environment but never says how to create, activate or select one. A newcomer stops here."
+     "where": "Step 2 · Make your first call",
+     "why": "“messages”, “role” and “content” are never defined. The reader sees role user with no word on the other roles, and the same roles come up again in lesson 5."
     },
     {
-     "where": "Step 2 code box",
-     "why": "“role” and the message dictionary are never explained. “user”, “system” and “assistant” appear later without a definition."
+     "where": "Step 2 · Make your first call",
+     "why": "The opening “Recap” sends the reader to lessons in another track that they have not read yet. It reads as if the basics were already known."
     },
     {
-     "where": "Step 3 · Learn",
-     "why": "“full” is not defined, and lesson 4 calls the same tier “Large”. The reader cannot tell whether gpt-5.4 is “full”."
+     "where": "Step 3 · Chain three calls",
+     "why": "nano, mini and full stand for sizes in the names gpt-5.4-nano, gpt-5.4-mini and gpt-5.4. The mapping is not explained here; it only appears in lesson 4."
     }
    ]
   },
   "agentic-ai/04-many-models.html": {
    "score": 7,
-   "at": "2026-11-27T02:10:03.900Z",
+   "at": "2026-11-27T04:08:40.896Z",
    "confusing": [
     {
-     "where": "Step 2 · Learn",
-     "why": "“base_url” and “OpenAI-compatible” are never defined, and “reuse the same OpenAI client” can sound as if you need an OpenAI account to use Groq."
+     "where": "Step 2 · One code shape, three swaps",
+     "why": "base_url is never explained (the web address your requests go to), and “provider” is never defined. The table introduces both without a word."
     },
     {
-     "where": "Step 3 code box",
-     "why": "json.loads returns a dictionary; [\"results\"] picks out the list. A reader who knows Python will think the comment is wrong."
+     "where": "Local models",
+     "why": "Running Ollama needs the Ollama app installed and the llama3.2 model downloaded first. The lesson only links to set-up, so the box fails for a reader who skipped the link."
     },
     {
-     "where": "Step 2 · Learn",
-     "why": "An environment variable is never explained."
+     "where": "Step 2 · One code shape, three swaps",
+     "why": "This box uses messages and response, which this lesson never defines. A newcomer copying it alone gets a NameError."
     }
    ]
   },
   "agentic-ai/05-autonomy-and-tools.html": {
    "score": 6,
-   "at": "2026-11-27T02:10:03.900Z",
+   "at": "2026-11-27T04:08:40.896Z",
    "confusing": [
     {
-     "where": "Step 4 code box",
-     "why": "If the fifth reply still asks for tools, the loop ends without answering, and the function returns that message's content, which is usually empty. The callout says the limit “stops it”, but the reader"
+     "where": "Step 2 · Context and memory",
+     "why": "The comment above says summary.txt, but the path is twin/summary.txt. The reader is never told to create the twin folder or the file, so the box fails with FileNotFoundError."
     },
     {
-     "where": "Step 3 code box",
-     "why": "The box has a blank, but the instruction to fill it appears only in the quiz after the box. It looks like broken code."
+     "where": "Step 2 · Context and memory",
+     "why": "The roles “user” and “assistant” are never explained, and lesson 3 did not explain them either."
     },
     {
-     "where": "Step 2 code box",
-     "why": "“role” is never explained. The reader sees system, user, assistant and tool with no definition."
+     "where": "Step 3 · A tool: let the model ask",
+     "why": "The box has a placeholder and the Learn text does not say to fill it in. Only the quiz below asks the question, so the reader may wonder if the code is broken."
     }
    ]
   },
   "agentic-ai/06-career-agent.html": {
    "score": 6,
-   "at": "2026-11-27T02:10:03.900Z",
+   "at": "2026-11-27T04:08:40.896Z",
    "confusing": [
     {
-     "where": "Now make it yours, second item",
-     "why": "The deploy steps assume terminal skills that are not taught here (installing uv, running a command, finding a host's secrets page). Setup is three services deep."
+     "where": "Step 2 · The description is the trigger",
+     "why": "The second tool's JSON is only a comment, so the reader must write it, but the step does not say so. The box also calls itself JSON while it is a Python dict with False."
     },
     {
-     "where": "Step 4 code box",
-     "why": "The result is never sent back to the model, and the lesson does not say where it goes. ALLOWED is also built inside the loop, so it is rebuilt on every call."
+     "where": "Step 4 · From a tool name to a real call, then ship",
+     "why": "Alex's facts (the summary file, the LinkedIn text, context.py) are never introduced, so the reader does not know where the twin gets its answers or what to edit. pypdf is also in the install command w"
     },
     {
-     "where": "Step 2 code box",
-     "why": "The box is labelled as JSON, but False is Python syntax (JSON says false). A reader who knows JSON is confused."
+     "where": "Hero",
+     "why": "Shipping needs an OpenAI key, a Pushover account, uv, Gradio and a hosting account. 20 minutes is optimistic for a newcomer."
     }
    ]
   },
