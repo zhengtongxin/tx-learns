@@ -22,5 +22,10 @@ window.TRACK={id:'pmp',title:{en:'PMP',zh:'PMP 备考'},topics:[
   {k:'f',file:'16-value-and-benefits.html',title:{en:"Value and benefits",zh:"价值与效益"}},
   {k:'c',file:'17-compliance-and-governance.html',title:{en:"Compliance and governance",zh:"合规与治理"}},
   {k:'c',file:'18-organisational-change.html',title:{en:"Organisational change",zh:"组织变革"}},
-  {k:'c',file:'19-closing-a-project.html',title:{en:"Closing a project",zh:"项目收尾"}}]}
+  {k:'c',file:'19-closing-a-project.html',title:{en:"Closing a project",zh:"项目收尾"}}]},
+ {n:5,level:2,title:{en:"Agile delivery",zh:"敏捷交付"},items:[
+  {k:'f',file:'20-backlog-and-user-stories.html',title:{en:"Backlog and user stories",zh:"待办列表与用户故事"}},
+  {k:'c',file:'21-sprints-and-events.html',title:{en:"Sprints and events",zh:"冲刺与会议"}},
+  {k:'c',file:'22-flow-and-metrics.html',title:{en:"Flow and metrics",zh:"流动与度量"}},
+  {k:'c',file:'23-hybrid-and-tailoring.html',title:{en:"Hybrid and tailoring",zh:"混合与裁剪"}}]}
 ]};
