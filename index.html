@@ -86,11 +86,11 @@ html[data-theme=light] .shim{background-image:linear-gradient(100deg,#b36b00 20%
 <p class="acts"><a class="btn pri" href="study/index.html"><span class="en">Open the study coach <i class="ar">→</i></span><span class="zh">打开学习教练 <i class="ar">→</i></span></a></p></article>
 </section>
 </main>
-<script src="tracks.js?v=16bf7140"></script><script src="assets/site.js?v=7794f913"></script>
+<script src="tracks.js?v=9b12c23d"></script><script src="assets/site.js?v=7794f913"></script>
 <script>(function(){
 var el=document.getElementById('pl-tracks'),T=window.TRACKS||[],LV={1:['Beginner','入门'],2:['Intermediate','进阶'],3:['Advanced','高级']};
 function t(o){return '<span class="en">'+o.en+'</span><span class="zh">'+o.zh+'</span>'}
-var DM=window.DOMAINS||[];el.innerHTML=DM.map(function(d,i){return '<li style="--i:'+i+'"><span class="ic" aria-hidden="true">'+d.icon+'</span><b>'+t(d.title)+'</b></li>'}).join('');
+var DM=(window.DOMAINS||[]).filter(function(d){return T.some(function(c){return (c.domain||'ai')===d.id})});el.innerHTML=DM.map(function(d,i){return '<li style="--i:'+i+'"><span class="ic" aria-hidden="true">'+d.icon+'</span><b>'+t(d.title)+'</b></li>'}).join('');
 function sizeDot(){el.style.setProperty('--h',Math.max(0,el.offsetHeight-22)+'px')}sizeDot();addEventListener('resize',sizeDot);
 /* pointer effects: page spotlight, card tilt with a moving glow, magnetic buttons. Skipped for touch and reduced motion. */
 var fine=matchMedia('(hover:hover) and (pointer:fine)').matches,calm=matchMedia('(prefers-reduced-motion: reduce)').matches;if(!fine||calm)return;

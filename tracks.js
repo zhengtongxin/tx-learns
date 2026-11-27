@@ -1,12 +1,13 @@
 /* Order = easiest first. level: 1 Beginner, 2 Intermediate, 3 Advanced = what a track asks of you when you START it (never decreasing down the list);
    a topic's level in <track>/lessons.js is how hard that topic is inside its track.
    entry:{en,zh} marks an entry point (pick by who you are); tracks without it form one numbered path after the entry points.
-   next:['<id>',...] = the tracks the "What next" card offers when this one is finished (same domain; none = the path ends here).
+   next:['<id>',...] = the tracks the "What next" card offers when this one is finished (later tracks of the same domain; left out or [] = the path ends here).
    go:{href,title} = one more link on that card (href from the site root). */
 /* Domains group the tracks on the home page. A track names its domain with domain:'<id>'; add a new domain here and put its tracks after the existing ones. */
 window.DOMAINS=[
  {id:'ai',icon:'🧠',title:{en:'AI',zh:'AI'},desc:{en:'Pick a starting point by who you are, then follow the engineering path to running a customer pilot.',zh:'按你的身份选一个起点，再沿工程路线一路走到带客户做试点。'}},
- {id:'pm',icon:'📋',title:{en:'Project management',zh:'项目管理'},desc:{en:'Plan, lead and close projects, and pass the PMP exam.',zh:'规划、带领并收尾项目，并通过 PMP 考试。'}}
+ {id:'pm',icon:'📋',title:{en:'Project management',zh:'项目管理'},desc:{en:'Plan, lead and close projects, and pass the PMP exam.',zh:'规划、带领并收尾项目，并通过 PMP 考试。'}},
+ {id:'community',icon:'🤝',title:{en:'From learners',zh:'来自学习者'},desc:{en:'Tracks written from learners’ own study notes, on any subject.',zh:'根据学习者自己的学习笔记写成的路线，科目不限。'}}
 ];
 window.TRACKS=[
  {domain:'ai',id:'ai-builder',entry:{en:'No code',zh:'不写代码'},next:['ai-leader','ai-engineer'],before:{en:'Nothing required. No code, and everything runs in a browser first: you build real automations from the first lesson.',zh:'基础要求：无。不用写代码，先在浏览器里做起：第一课就做出真正的自动化。'},after:{en:'Next: AI Leader to decide where AI belongs in a business, or AI Engineer to build with models in code (it needs basic Python first).',zh:'下一步：AI 领导者，学会判断 AI 在业务里该放哪；或 AI 工程师，学会用代码调用模型做东西（需要先会基础 Python）。'},level:1,icon:'🧰',href:'ai-builder/index.html',title:{en:'AI Builder',zh:'AI 构建者'},desc:{en:'Build working AI agents without code: workflows, voice agents, your own documents, and teams of agents.',zh:'不写代码就做出能用的 AI 智能体：工作流、语音智能体、你自己的文档，以及智能体团队。'}},

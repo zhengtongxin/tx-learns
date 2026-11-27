@@ -35,6 +35,29 @@
   var words=(name+' '+kw).toLowerCase().replace(/[^a-z㐀-鿿\s-]/g,' ').split(/\s+/).filter(function(x){return x&&(/[㐀-鿿]/.test(x)||x.length>2)&&!STOP.test(x)});
   /* the id comes from the name, not the line number, so reordering or replacing areas never hands one area's history to another */
   out.push({id:'n-'+name.toLowerCase().replace(/\s+/g,' '),name:{en:name,zh:name},weight:w,kw:words.join(' '),tasks:kw})});return out.slice(0,20)};
+ /* What may leave the device with a track submission: the outline (a short heading per passage), the most frequent terms and,
+    only if the reader asks, short summaries the model wrote in its own words. Never the files, their names or their text. */
+ /* the words that mark a line about where material came from, kept in pieces so the copy check's own word list does not trip on them */
+ var SRCW=['instruc'+'tor','lec'+'turer','plat'+'form','cou'+'rse','课'+'程','讲'+'师','版'+'权'].join('|'),SRC=new RegExp('(https?:\\/\\/|www\\.|@[a-z0-9-]+\\.|©|copyright|all rights reserved|'+SRCW+')','i');
+ L.scrubLine=function(s){s=String(s||'').replace(/\s+/g,' ').trim();if(!s||SRC.test(s)||/^\d+$/.test(s))return '';return s.length>80?s.slice(0,77).replace(/\s+\S*$/,'')+'…':s};
+ L.digest=function(chunks,mats,o){o=o||{};var maxT=o.titles==null?30:o.titles,maxK=o.terms==null?30:o.terms,out={outline:[],terms:[]},freq={};
+  mats.forEach(function(m,i){var seen={},ts=[];chunks.filter(function(c){return c.mat===m.id}).forEach(function(c){
+    var line=L.scrubLine((c.text.split('\n').map(function(x){return x.trim()}).filter(Boolean)[0])||'');if(line&&!seen[line.toLowerCase()]){seen[line.toLowerCase()]=1;ts.push(line)}});
+   if(ts.length>maxT){var st=ts.length/maxT;ts=ts.slice(0,maxT).map(function(_,k){return ts[Math.floor(k*st)]})}
+   out.outline.push({n:i+1,kind:m.word==='slide'?'slides':m.word==='page'?'pages':'text',titles:ts})});
+  chunks.forEach(function(c){var low=c.text.toLowerCase(),seen={};(low.match(/[a-z][a-z-]{3,}/g)||[]).forEach(function(w){if(!STOP.test(w)&&!SRC.test(w)&&!seen[w]){seen[w]=1;freq['e:'+w]=(freq['e:'+w]||0)+1}});
+   (low.match(/[㐀-鿿]{2,}/g)||[]).forEach(function(run){var s2={};for(var i=0;i<run.length-1;i++){var b=run.substr(i,2);if(!s2[b]){s2[b]=1;freq['z:'+b]=(freq['z:'+b]||0)+1}}})});
+  var ks=Object.keys(freq).filter(function(k){return freq[k]>=3}).sort(function(a,b){return freq[b]-freq[a]}),en=ks.filter(function(k){return k[0]==='e'}),zh=ks.filter(function(k){return k[0]==='z'});
+  out.terms=en.slice(0,maxK).map(function(k){return k.slice(2)}).concat(zh.slice(0,Math.min(12,maxK)).map(function(k){return k.slice(2)}));
+  return out};
+ /* a summary must be the model's own words: refuse one that repeats 8 words (or 14 Chinese characters) of the source in a row */
+ L.copied=function(sum,src){var a=String(sum||'').toLowerCase().replace(/[^a-z0-9㐀-鿿]+/g,' ').trim(),b=' '+String(src||'').toLowerCase().replace(/[^a-z0-9㐀-鿿]+/g,' ').trim()+' ',w=a.split(' ').filter(Boolean),i;
+  for(i=0;i+8<=w.length;i++)if(b.indexOf(' '+w.slice(i,i+8).join(' ')+' ')>-1)return true;
+  var za=a.replace(/ /g,''),zb=b.replace(/ /g,'');if(/[㐀-鿿]/.test(za))for(i=0;i+14<=za.length;i++)if(zb.indexOf(za.substr(i,14))>-1)return true;
+  return false};
+ L.sumPrompt=function(c){var zh=c.lang==='zh',lg=zh?'Chinese (简体中文)':'English';
+  return [{role:'system',content:'You summarise study material for a learner. You answer with one JSON object and nothing else. You write only in '+lg+'.'},
+   {role:'user',content:'Excerpt:\n"""\n'+c.text+'\n"""\nSummarise the idea of this excerpt in one or two sentences in '+lg+', in your own words: do not copy phrases from the excerpt, and do not mention any author, publisher or source. JSON: {"summary":"..."}'}]};
  L.assignAreas=function(chunks,domains){chunks.forEach(function(c){var t=L.tokens(c.text),best=null,bs=0;
   domains.forEach(function(d){var s=L.domainScore(t,d.kw);if(s>bs){bs=s;best=d.id}});c.area=best;c.score=bs});return chunks};
  /* strength 0..1 from the last results (1 = right), newest weighted most; null when never tested */
@@ -95,11 +118,16 @@
   return -1};
  L.shuffle=function(item,rnd){var idx=[0,1,2,3];for(var i=3;i>0;i--){var j=Math.floor(rnd()*(i+1)),t=idx[i];idx[i]=idx[j];idx[j]=t}
   return {q:item.q,e:item.e,o:idx.map(function(k){return item.o[k]}),a:idx.indexOf(item.a)}};
+ /* The question, its options and its explanation must be in the language the reader chose on the page, whatever language the material is in. */
+ L.inLang=function(q,lang){var t=[q.q].concat(q.o,[q.e||'']).join(' '),z=L.cjkShare(t);return lang==='zh'?z>0.3:z<0.08};
  L.prompt=function(c){
-  var zh=c.lang==='zh',ctx;
-  if(c.exam)ctx='Exam: '+c.exam+'. Domain: '+c.domain+(c.tasks?' (topics: '+c.tasks+')':'')+'. Write it like a real exam question: a short workplace scenario, then "what should the person do next/best?". Test judgement, not memorised wording.';
+  var zh=c.lang==='zh',cross=c.srcLang&&c.srcLang!==c.lang,ctx;
+  if(c.exam)ctx='Exam: '+c.exam+(c.domain?'. Area: '+c.domain:'')+(c.tasks?' (topics: '+c.tasks+')':'')+'. Write it like a real exam question: a short workplace scenario, then "what should the person do next/best?". Test judgement, not memorised wording.';
   else ctx='Goal: the reader wants to understand the material. Write a question that checks understanding of an idea (why or how), not a trivial fact.';
-  return [{role:'system',content:'You write original multiple-choice study questions. You answer with one JSON object and nothing else.'},
-   {role:'user',content:'Material excerpt:\n"""\n'+c.text+'\n"""\n'+ctx+'\nWrite ONE original question in '+(zh?'Chinese (简体中文)':'English')+', based on the excerpt. Exactly 4 options and exactly one correct option; the wrong options must be plausible. Do not copy a published exam question.\nJSON format: {"question":"...","options":["...","...","...","..."],"answer":0,"explanation":"one or two sentences on why the answer is right"} where answer is the index (0 to 3) of the correct option.'}]};
+  var lg=zh?'Chinese (简体中文)':'English',
+   rule=zh?'Every word of the question, all 4 options and the explanation must be in Chinese (简体中文), even if the excerpt is in English: translate the ideas, and keep a technical term in English in brackets only when it helps.'
+          :'Every word of the question, all 4 options and the explanation must be in English, even if the excerpt is in Chinese: translate the ideas, and keep a technical term in Chinese in brackets only when it helps.';
+  return [{role:'system',content:'You write original multiple-choice study questions. You answer with one JSON object and nothing else. The reader reads '+lg+' only, so you always write in '+lg+'.'},
+   {role:'user',content:'Material excerpt'+(cross?' (in '+(c.srcLang==='zh'?'Chinese':'English')+')':'')+':\n"""\n'+c.text+'\n"""\n'+ctx+'\nWrite ONE original question in '+lg+', based on the excerpt. '+rule+' Exactly 4 options and exactly one correct option; the wrong options must be plausible. Do not copy a published exam question.\nJSON format: {"question":"...","options":["...","...","...","..."],"answer":0,"explanation":"one or two sentences on why the answer is right"} where answer is the index (0 to 3) of the correct option. The JSON keys stay in English; every value is in '+lg+'.'}]};
  if(typeof module!=='undefined'&&module.exports)module.exports=L;else root.CoachLogic=L;
 })(typeof window!=='undefined'?window:globalThis);
