@@ -68,7 +68,7 @@ try {
   }
 
   // 2. Pages, lessons and every link in them.
-  const pages = ['index.html', 'ecosystem.html', 'glossary.html', 'about.html', ...TR.map(t => t.dir + '/index.html'), ...lessons.map(l => l.path)];
+  const pages = ['index.html', 'ecosystem.html', 'glossary.html', 'about.html', 'method.html', 'coach.html', ...TR.map(t => t.dir + '/index.html'), ...lessons.map(l => l.path)];
   const links = new Map();
   const fetched = await pool(pages, p => get(BASE + p));
   for (const [k, p] of pages.entries()) {

@@ -23,7 +23,14 @@ function load(file, name) {
 const tracks = load('tracks.js', 'TRACKS') || [];
 let allTopics = 0, allLessons = 0;
 
-tracks.reduce((prev, tr) => { if (tr.level < prev) say('tracks.js', `"${tr.id}" is level ${tr.level} after a level ${prev} track: list easier tracks first`); return tr.level; }, 1);
+const domains = load('tracks.js', 'DOMAINS') || [];
+const lastLevel = {};
+for (const tr of tracks) {
+  if (!domains.some(d => d.id === tr.domain)) say('tracks.js', `"${tr.id}" needs domain:'<id>' from window.DOMAINS`);
+  const prev = lastLevel[tr.domain] || 1;
+  if (tr.level < prev) say('tracks.js', `"${tr.id}" is level ${tr.level} after a level ${prev} track in its domain: list easier tracks first`);
+  lastLevel[tr.domain] = tr.level;
+}
 for (const tr of tracks) {
   if (![1, 2, 3].includes(tr.level)) say('tracks.js', `"${tr.id}" needs level 1, 2 or 3`);
   for (const k of ['topics', 'total']) if (k in tr) say('tracks.js', `"${tr.id}" has ${k}:${tr[k]} typed by hand. Remove it: the page counts lessons.js.`);

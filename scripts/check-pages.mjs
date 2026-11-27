@@ -93,7 +93,7 @@ const live = TR.flatMap(t => t.T.topics.flatMap(w => w.items).filter(x => x.file
 const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 const want = {
   'sitemap.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<!-- Made by node scripts/check-pages.mjs --fix from lessons.js. Do not edit by hand. -->\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-    ['', 'ecosystem.html', 'glossary.html', 'about.html', ...TR.map(t => t.dir + '/index.html'), ...live.map(x => x.path)].map(u => `<url><loc>${SITE}${u}</loc></url>`).join('\n') + '\n</urlset>\n',
+    ['', 'ecosystem.html', 'glossary.html', 'about.html', 'method.html', 'coach.html', ...TR.map(t => t.dir + '/index.html'), ...live.map(x => x.path)].map(u => `<url><loc>${SITE}${u}</loc></url>`).join('\n') + '\n</urlset>\n',
 };
 const TRACKS = (() => { const c = { window: {} }; vm.runInNewContext(readFileSync(new URL('tracks.js', root), 'utf8'), c, { filename: 'tracks.js' }); return c.window.TRACKS; })();
 const lists = Object.fromEntries(TR.map(t => [t.dir + '/index.html', [/<!-- lessons:start -->[\s\S]*?<!-- lessons:end -->/, '<!-- lessons:start --><noscript><ol>' +
@@ -218,14 +218,16 @@ for (const m of moves) {
   // Once it has stayed quiet, rename the key to Content-Security-Policy to enforce it (keep SECURITY and CSP in step with the site).
   const SECURITY = [['X-Content-Type-Options', 'nosniff'], ['Referrer-Policy', 'strict-origin-when-cross-origin'], ['X-Frame-Options', 'SAMEORIGIN'],
     ['Permissions-Policy', 'camera=(), microphone=(), geolocation=(), browsing-topics=()']];
-  const CSP = ["default-src 'self'", "script-src 'self' 'unsafe-inline'", "style-src 'self' 'unsafe-inline'", "img-src 'self' data: blob:", "font-src 'self'",
-    "connect-src 'self'", "frame-src 'self'", "object-src 'none'", "base-uri 'self'", "form-action 'self'", "frame-ancestors 'self'"].join('; ');
+  const CSP = ["default-src 'self'", "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'", "worker-src 'self' blob:", "style-src 'self' 'unsafe-inline'", "img-src 'self' data: blob:", "font-src 'self'",
+    "connect-src 'self' https://huggingface.co https://*.huggingface.co https://*.hf.co https://raw.githubusercontent.com", "frame-src 'self'", "object-src 'none'", "base-uri 'self'", "form-action 'self'", "frame-ancestors 'self'"].join('; ');
   const want = { ...cfg, headers: [
     { source: '/(.*)', headers: SECURITY.map(([key, value]) => ({ key, value })) },
     { source: '/(.*)', has: [{ type: 'host', value: new URL(SITE).host }], headers: [{ key: 'Content-Security-Policy-Report-Only', value: CSP }] },
     h('/', 'public, max-age=0, must-revalidate'),
     h('/(.*)\\.html', 'public, max-age=0, must-revalidate'),
     // only the files every page references with ?v=<hash> (checked above) are immutable
+    // the study coach's vendored libraries carry their version in the file name, so they never change
+    h('/coach/vendor/(.*)', 'public, max-age=31536000, immutable'),
     h('/assets/(site\\.js|site\\.css|teach\\.js|teach\\.css|build-concepts\\.js|search\\.js)', 'public, max-age=31536000, immutable'),
     // each lesson's own script (<track>/js/NN-slug.js) is versioned the same way
     h('/(' + TR.map(t => t.dir).join('|') + ')/js/(.+\\.js)', 'public, max-age=31536000, immutable'),
