@@ -153,6 +153,7 @@ async function pump(){
    try{var raw=await ENG.chat(Lg.prompt({text:ch.text,lang:pl,srcLang:Lg.lang(ch.text),exam:ex?exam().e.name[pl]+(exam().v.label[pl]?' ('+(pl==='zh'?'考纲：':'outline: ')+exam().v.label[pl]+')':''):'',domain:(a.name&&a.name[pl])||a.dom||'',tasks:a.tasks||''}));
     var q=Lg.parseQuestion(raw);if(q&&!Lg.inLang(q,pl))q=null;
     /* second opinion: the model answers its own question from the passage without the key; a clear disagreement drops the question */
+    if(q&&r.items.concat(S.bank.slice(-30)).some(function(x){return x.chunk===ch.id&&x.lang===pl&&Lg.similar(q,x)})){q=null;r.dup=(r.dup||0)+1}
     if(q){var v=Lg.parseVerify(await ENG.chat(Lg.verifyPrompt({text:ch.text,lang:pl,q:q})));if(v>-1&&v!==q.a){q=null;r.dropped=(r.dropped||0)+1}}
     if(q){q=Lg.shuffle(q,Math.random);S.used[ch.id]=(S.used[ch.id]||0)+1;
      var m=S.mats.filter(function(x){return x.id===ch.mat})[0];
