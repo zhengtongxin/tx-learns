@@ -8,7 +8,7 @@ function T(en,zh){return '<span class="en">'+en+'</span><span class="zh">'+zh+'<
 function PH(en,zh){return document.documentElement.getAttribute('data-lang')==='zh'?zh:en}
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function say(en,zh){var s=$('status');if(s)s.innerHTML=T(en,zh)}
-var S,CH=[],ENG=null,ENGID='',R=null,confirmKey='',persistOK=true;
+var OTHER='x:other',S,CH=[],ENG=null,ENGID='',R=null,confirmKey='',persistOK=true;
 
 /* ---------- storage: IndexedDB, with a plain in-memory fallback and a plain warning ---------- */
 var DB=null,mem={};
@@ -35,14 +35,19 @@ function exam(){
  var e=EX.filter(function(x){return x.id===S.exam})[0]||EX[0];return {e:e,v:e.versions.filter(function(v){return v.id===S.ver})[0]||e.versions[0]}}
 function useExam(){return S.goal==='exam'&&exam().v.domains.length>0}
 function areas(){
- if(useExam()){var d=exam().v.domains;return d.map(function(x){return {id:'x:'+x.id,name:x.name,w:x.weight,kw:x.kw,tasks:x.tasks,dom:x.name.en}})}
+ if(useExam()){var d=exam().v.domains;var out=d.map(function(x){return {id:'x:'+x.id,name:x.name,w:x.weight,kw:x.kw,tasks:x.tasks,dom:x.name.en,lessons:x.lessons}});
+  /* passages whose words match no area are still practised, under "Other" (a tenth of the drill; never in a mini exam, which follows the official shares) */
+  if(CH.some(function(c){return c.area===OTHER})){var tw=0;out.forEach(function(a){tw+=a.w});out.push({id:OTHER,name:{en:'Other',zh:'其他'},w:Math.max(1,Math.round(tw/10)),other:true})}
+  return out}
  return S.mats.map(function(m){return {id:'m:'+m.id,name:{en:esc(m.name),zh:esc(m.name)},w:Math.max(1,m.chars)}})}
+function hasMat(id){return CH.some(function(c){return c.area===id})}
 function aname(id){var a=areas().filter(function(x){return x.id===id})[0];return a?T(a.name.en,a.name.zh):T('Other','其他')}
 function reassign(){
- if(useExam())Lg.assignAreas(CH,areas().map(function(a){return {id:a.id,kw:a.kw}}));
+ if(useExam()){Lg.assignAreas(CH,exam().v.domains.map(function(x){return {id:'x:'+x.id,kw:x.kw}}));CH.forEach(function(c){if(!c.area)c.area=OTHER})}
  else CH.forEach(function(c){c.area='m:'+c.mat;c.score=1})}
 function hist(id){return (S.stats[id]&&S.stats[id].h)||[]}
-function planFor(kind,n){return Lg.plan(areas().map(function(a){return {id:a.id,w:a.w,hist:hist(a.id),last:S.stats[a.id]&&S.stats[a.id].last}}),n,kind,Date.now())}
+/* only areas that have passages get questions; a mini exam leaves "Other" out */
+function planFor(kind,n){return Lg.plan(areas().filter(function(a){return hasMat(a.id)&&!(kind==='exam'&&a.other)}).map(function(a){return {id:a.id,w:a.w,hist:hist(a.id),last:S.stats[a.id]&&S.stats[a.id].last}}),n,kind,Date.now())}
 function today(){return S.days[Lg.dayKey()]||{n:0,c:0}}
 
 /* ---------- reading files ---------- */
@@ -112,7 +117,9 @@ function flatten(plan){var out=[];plan.forEach(function(p){for(var i=0;i<p.k;i++
 async function startRound(kind,n){
  if(!CH.length){say('Add material first.','请先添加资料。');return}
  if(R&&R.busy)return;
- R={kind:kind,slots:flatten(planFor(kind,n)),items:[],i:0,gen:0,busy:false,fail:0,view:'wait'};
+ var slots=flatten(planFor(kind,n));
+ if(!slots.length){say('No passage matches an exam area yet. Add keywords to your areas, or add material that covers them.','还没有文字能对上任何考试领域。请给领域加关键词，或添加覆盖这些领域的资料。');return}
+ R={kind:kind,slots:slots,items:[],i:0,gen:0,busy:false,fail:0,view:'wait'};
  $('practice').hidden=false;renderPractice();$('practice').scrollIntoView({block:'start'});
  try{await ensureModel()}catch(e){R=null;renderPractice();return}
  pump();show()}
@@ -124,7 +131,10 @@ async function pump(){
    var ch=Lg.pick(CH,slot.area,S.miss,S.used,Math.random);if(!ch)break;
    var a=areas().filter(function(x){return x.id===slot.area})[0]||{},ex=useExam();
    try{var raw=await ENG.chat(Lg.prompt({text:ch.text,lang:Lg.lang(ch.text),exam:ex?exam().e.name.en+(exam().v.label.en?' (outline: '+exam().v.label.en+')':''):'',domain:a.dom||'',tasks:a.tasks||''}));
-    var q=Lg.parseQuestion(raw);if(q){q=Lg.shuffle(q,Math.random);S.used[ch.id]=(S.used[ch.id]||0)+1;
+    var q=Lg.parseQuestion(raw);
+    /* second opinion: the model answers its own question from the passage without the key; a clear disagreement drops the question */
+    if(q){var v=Lg.parseVerify(await ENG.chat(Lg.verifyPrompt({text:ch.text,lang:Lg.lang(ch.text),q:q})));if(v>-1&&v!==q.a){q=null;r.dropped=(r.dropped||0)+1}}
+    if(q){q=Lg.shuffle(q,Math.random);S.used[ch.id]=(S.used[ch.id]||0)+1;
      var m=S.mats.filter(function(x){return x.id===ch.mat})[0];
      item={id:'q'+Date.now().toString(36)+r.gen,area:slot.area,chunk:ch.id,q:q.q,o:q.o,a:q.a,e:q.e,loc:ch.loc,mat:m?m.name:'',snip:ch.text.slice(0,420),res:null}}}catch(e){}
   }
@@ -139,13 +149,14 @@ function show(){
  renderPractice(true)}
 function record(it,ok){
  var s=S.stats[it.area]||(S.stats[it.area]={h:[],n:0,c:0,last:0});s.h.push(ok?1:0);if(s.h.length>30)s.h.shift();s.n++;s.c+=ok?1:0;s.last=Date.now();
- var m=S.miss[it.chunk]||0;if(ok){if(m>0)S.miss[it.chunk]=m-1}else S.miss[it.chunk]=m+1;
+ /* it.md = what this answer did to the passage's miss count, so undo takes back exactly that */
+ var m=S.miss[it.chunk]||0;it.md=ok?(m>0?-1:0):1;S.miss[it.chunk]=m+it.md;
  var k=Lg.dayKey(),d=S.days[k]||(S.days[k]={n:0,c:0});d.n++;d.c+=ok?1:0;
  var keys=Object.keys(S.days).sort();while(keys.length>120)delete S.days[keys.shift()];
  it.res=ok?1:0;save()}
 function answer(i){var it=R.items[R.i];if(it.res!=null||it.pick!=null)return;it.pick=i;
  if(R.kind==='exam'){record(it,i===it.a);R.i++;pump();show()}else{record(it,i===it.a);it.counted=true;syncOrig(it);R.view='fb';renderPractice(true);pump();renderBook()}}
-function undo(it){var s=S.stats[it.area];if(s){s.h.pop();s.n--;s.c-=it.res?1:0}var m=S.miss[it.chunk]||0;if(it.res)S.miss[it.chunk]=m+1;else S.miss[it.chunk]=Math.max(0,m-1);
+function undo(it){var s=S.stats[it.area];if(s){s.h.pop();s.n--;s.c-=it.res?1:0}S.miss[it.chunk]=Math.max(0,(S.miss[it.chunk]||0)-(it.md||0));it.md=0;
  var d=S.days[Lg.dayKey()];if(d){d.n--;d.c-=it.res?1:0}it.counted=false}
 /* a right answer you guessed counts as a miss: the strength map should not trust luck */
 function guess(){var it=R.items[R.i];if(!it||!it.counted||it.res!==1||it.guess)return;undo(it);record(it,false);it.counted=true;it.guess=1;save();renderPractice(true)}
@@ -167,8 +178,17 @@ function renderToday(){
   '<label class="per">'+T('Per day','每天')+' <select data-act="perday" aria-label="Questions per day · 每天题数">'+[5,10,20].map(function(x){return '<option'+(x===n?' selected':'')+'>'+x+'</option>'}).join('')+'</select></label></p>'}
 function renderMap(){
  var el=$('map');if(!CH.length){el.innerHTML='';return}
- el.innerHTML='<h2>'+T('Strength <em>map</em>','强弱<em>图</em>')+'</h2><div class="rows">'+areas().map(function(a){var s=Lg.strength(hist(a.id)),p=s==null?0:Math.round(s*100),n=(S.stats[a.id]||{}).n||0;
-  return '<div class="row"><div class="rl">'+T(a.name.en,a.name.zh)+(useExam()?' <span class="meta">'+a.w+'%</span>':'')+'</div><div class="bar" role="img" aria-label="'+(s==null?'Not tested yet · 还没测过':p+'%')+'"><i class="'+(s!=null&&s<0.6?'weak':'')+'" style="width:'+p+'%"></i></div><div class="rv2">'+(s==null?T('not tested','未测'):p+'%')+'</div><div class="meta rn">'+n+'</div></div>'}).join('')+'</div><p class="meta">'+T('Strength blends your recent answers, newest first. The right-hand number is questions answered.','强度综合你近期的作答，越新权重越大。最右边的数字是已答题数。')+'</p>'}
+ el.innerHTML='<h2>'+T('Strength <em>map</em>','强弱<em>图</em>')+'</h2><div class="rows">'+areas().map(function(a){var s=Lg.strength(hist(a.id)),p=s==null?0:Math.round(s*100),n=(S.stats[a.id]||{}).n||0,none=!hasMat(a.id);
+  return '<div class="row"><div class="rl">'+T(a.name.en,a.name.zh)+(useExam()&&!a.other?' <span class="meta">'+a.w+'%</span>':'')+(s!=null&&s<0.6?lessonLinks(a):'')+'</div><div class="bar" role="img" aria-label="'+(s==null?'Not tested yet · 还没测过':p+'%')+'"><i class="'+(s!=null&&s<0.6?'weak':'')+'" style="width:'+p+'%"></i></div><div class="rv2">'+(s==null?(none?T('no material','缺资料'):T('not tested','未测')):p+'%')+'</div><div class="meta rn">'+n+'</div></div>'}).join('')+'</div><p class="meta">'+T('Strength blends your recent answers, newest first. The right-hand number is questions answered.','强度综合你近期的作答，越新权重越大。最右边的数字是已答题数。')+'</p>'+mapNotes()}
+/* what the map cannot show by itself: areas with nothing to ask from, and passages that matched no area */
+function mapNotes(){if(!useExam())return '';var A=areas(),no=A.filter(function(a){return !a.other&&!hasMat(a.id)}),o=CH.filter(function(c){return c.area===OTHER}).length,h='';
+ if(no.length)h+='<p class="meta warn">'+T('No material for: ','缺资料的领域：')+no.map(function(a){return T(a.name.en,a.name.zh)}).join(T(', ','、'))+T('. No questions are asked there until a passage matches: add material, or add keywords to the area.','。在有文字对上之前，这些领域不出题：请添加资料，或给领域加关键词。')+'</p>';
+ if(o)h+='<p class="meta">'+T(o+' of '+CH.length+' passages matched no area. They are practised under “Other” and left out of the mini exam.','共 '+CH.length+' 段文字，其中 '+o+' 段没有对上任何领域。它们归在“其他”里练习，不进小测验。')+'</p>';
+ return h}
+/* a weak area of a ready-made outline points at this site's lessons on it (titles from tracks-index.js) */
+function lessonLinks(a){var L=a.lessons,X=window.TRACK_INDEX&&L&&window.TRACK_INDEX[L.track];if(!X)return '';
+ var f=L.files.filter(function(x){return X.titles[x]});if(!f.length)return '';
+ return '<div class="meta ll">'+T('Lessons on this: ','相关的课：')+f.map(function(x){return '<a href="../'+L.track+'/'+x+'">'+T(esc(X.titles[x].en),esc(X.titles[x].zh))+'</a>'}).join(' · ')+'</div>'}
 function renderMats(){
  $('mats').innerHTML=(S.mats.length?'<p class="meta">'+S.mats.length+' '+T('files','个文件')+' · '+CH.length+' '+T('passages','段文字')+'</p><ul class="files'+(S.mats.length>6?' long':'')+'">'+S.mats.map(function(m){return '<li><span class="fn">'+esc(m.name)+'</span><span class="meta">'+m.pages+' '+(m.word==='slide'?T('slides','张幻灯片'):(m.word==='page'?T('pages','页'):T('text','文本')))+' · '+(m.lang==='zh'?'中文':'English')+'</span><button class="btn sm" data-act="rm" data-id="'+m.id+'" aria-label="Remove '+esc(m.name)+' · 移除">'+T('Remove','移除')+'</button></li>'}).join('')+'</ul>':'')+
   '<label class="drop" id="drop"><input type="file" id="files" multiple accept=".pdf,.pptx,.txt,.md"><span>'+T('Choose files or drop them here · PDF, PPTX, text · English or 中文','选择文件或拖到这里 · PDF、PPTX、文本 · 中英文均可')+'</span></label>'}

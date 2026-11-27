@@ -27,7 +27,7 @@ const m = tryGit('merge', '--no-edit', 'origin/main');
 if (m.ok) { console.log(/Already up to date/.test(m.out) ? 'already up to date' : 'clean merge'); process.exit(0); }
 
 const conflicted = git('diff', '--name-only', '--diff-filter=U').split('\n').filter(Boolean);
-const generated = f => ['sitemap.xml', 'vercel.json', 'assets/related.json'].includes(f) || /^[\w-]+\/(index\.html|lessons\.js)$/.test(f);
+const generated = f => ['sitemap.xml', 'tracks-index.js', 'vercel.json', 'assets/related.json'].includes(f) || /^[\w-]+\/(index\.html|lessons\.js)$/.test(f);
 /* A lesson page the branch did not add (it exists on main's side of the merge base) only clashes because both sides
    rewrote its ?v= hashes; --fix below rebuilds them, so main's copy is taken. */
 const base = git('merge-base', 'origin/main', 'origin/' + branch);

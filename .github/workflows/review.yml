@@ -6,6 +6,9 @@
 #   Telegram that the lesson is ready to approve. One round: if the branch already has a reviewer fix, it only comments.
 #   On any other pull request (scripts, workflows, pages) it runs when the PR opens or gets a new commit, and only
 #   comments. Telegram for those only on ⚠️ or a failed run.
+#   Three things keep it from reading the same change again and again: a draft pull request is not reviewed until it is
+#   marked ready; a change that touches no lesson, project package, script (the shared site scripts included), workflow or API function is read by Haiku
+#   instead of Sonnet; and after a ✅, later commits are reviewed on their own (only what is new since that ✅).
 # Claude runs in a read-only job; a separate job with trusted scripts from main does the writing.
 name: Backend engineer (review)
 on:
@@ -27,7 +30,8 @@ jobs:
   # Marks the reviewer as working (yellow) on the How it works page while this run goes. Trusted scripts from main only.
   working:
     # A lesson's own pull request (writer/ branch) is reviewed only after the reader, which starts this workflow by hand; opening it must not start a second, earlier review.
-    if: ${{ !(github.event_name == 'pull_request' && startsWith(github.head_ref, 'writer/')) }}
+    # A draft is still being worked on: it is reviewed once, when it is marked ready (the ready_for_review event).
+    if: ${{ !(github.event_name == 'pull_request' && (startsWith(github.head_ref, 'writer/') || github.event.pull_request.draft)) }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -63,7 +67,7 @@ jobs:
 
   review:
     # A lesson's own pull request (writer/ branch) is reviewed only after the reader, which starts this workflow by hand; opening it must not start a second, earlier review.
-    if: ${{ !(github.event_name == 'pull_request' && startsWith(github.head_ref, 'writer/')) }}
+    if: ${{ !(github.event_name == 'pull_request' && (startsWith(github.head_ref, 'writer/') || github.event.pull_request.draft)) }}
     runs-on: ubuntu-latest
     outputs:
       base: ${{ steps.info.outputs.base }}
@@ -114,14 +118,24 @@ jobs:
           curl -fsS -o /tmp/review-triage.mjs "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/scripts/review-triage.mjs" || exit 0
           [ "${{ steps.info.outputs.fix }}" = 1 ] && exit 0
           skip=
+          inc=
           if node /tmp/review-triage.mjs /tmp/pr.diff; then skip=1
           else
             # Commits since the last reviewed commit: reuse that verdict when they changed only generated files.
             prev=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate --jq '.[].body' | grep -o 'tx-review sha=[0-9a-f]*' | tail -1 | cut -d= -f2)
             if [ -n "$prev" ] && git cat-file -e "$prev^{commit}" 2>/dev/null \
                && [ "$(gh api "repos/$GITHUB_REPOSITORY/commits/$prev/status" --jq '[.statuses[]|select(.context=="Reviewer")][0].state' 2>/dev/null)" = success ] \
-               && git diff "$prev" HEAD > /tmp/inc.diff && node /tmp/review-triage.mjs /tmp/inc.diff; then skip=1; fi
+               && git diff "$prev" HEAD > /tmp/inc.diff; then
+              if node /tmp/review-triage.mjs /tmp/inc.diff; then skip=1
+              # The rest was read and passed at $prev: review only what is new. Not when main was merged in since (then the
+              # increment is larger than the pull request itself) and never on a lesson's own fix round.
+              elif [ -s /tmp/inc.diff ] && [ "$(wc -c < /tmp/inc.diff)" -lt "$(wc -c < /tmp/pr.diff)" ]; then cp /tmp/inc.diff /tmp/pr.diff; inc=$prev; fi
+            fi
           fi
+          echo "inc=$inc" >> "$GITHUB_OUTPUT"
+          # Sonnet reads anything a reader could copy and run or that guards the site: lessons, their scripts, project packages,
+          # scripts, workflows, the API functions and the shared site scripts. Page, style and wording changes of the site shell go to Haiku.
+          if grep -qE '^\+\+\+ b/([^/ ]+/[0-9][0-9]-[^ ]+\.html|[^/ ]+/js/|[^/ ]+/(lessons|prereqs|projects)\.js|packages/|scripts/|\.github/|api/|coach/|schemas/|evals/|assets/[^ ]+\.js|tracks\.js)' /tmp/pr.diff; then echo "model=sonnet" >> "$GITHUB_OUTPUT"; else echo "model=haiku" >> "$GITHUB_OUTPUT"; fi
           if [ -n "$skip" ]; then
             printf '✅ Ready to merge\n\nNo AI review needed: this change touches only generated files (sitemap, ?v= hashes, related.json, page dates), which the page check rebuilds and verifies. The copy, count and page checks still ran.\n' > /tmp/review-comment.md
             echo "✅ Ready to merge: generated files only, no AI review needed." > /tmp/review-summary.txt
@@ -138,6 +152,8 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           FIX: ${{ steps.info.outputs.fix }}
           STEP: ${{ steps.info.outputs.fix == '1' && 'review-fix' || 'review' }}
+          MODEL: ${{ steps.triage.outputs.model || 'sonnet' }}
+          INC: ${{ steps.triage.outputs.inc }}
         run: |
           set -o pipefail
           if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then unset ANTHROPIC_API_KEY; echo "Auth: Claude subscription"; else unset CLAUDE_CODE_OAUTH_TOKEN; echo "Auth: API key (no CLAUDE_CODE_OAUTH_TOKEN secret)"; fi
@@ -212,8 +228,9 @@ jobs:
           Do not run git.
           PROMPT
           cat /tmp/review-extra.md >> /tmp/review-prompt.md
+          case "$INC" in ''|*[!0-9a-f]*) ;; *) printf '\nThis is a follow-up review. The pull request passed review at commit %s; the diff you were given holds only what changed since then. Judge that, and say so in your comment.\n' "$INC" >> /tmp/review-prompt.md;; esac
           curl -fsS -o /tmp/claude-run.mjs "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/scripts/claude-run.mjs" && CC="node /tmp/claude-run.mjs reviewer" || CC=claude
-          TRACE_STEP="$STEP" $CC --model sonnet --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/review-prompt.md)" --max-turns "$TURNS" \
+          TRACE_STEP="$STEP" $CC --model "$MODEL" --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/review-prompt.md)" --max-turns "$TURNS" \
             --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(node scripts/check-counts.mjs:*),Bash(node scripts/check-pages.mjs:*),Bash(node scripts/rag.mjs:*)" \
             --output-format text | tail -30
       - name: Package the result for the share job
@@ -233,7 +250,7 @@ jobs:
   # A review cancelled by a newer run of the same PR stays quiet: the newer run reports.
   share:
     needs: [review, working]
-    if: ${{ !cancelled() && needs.review.result != 'cancelled' && !(github.event_name == 'pull_request' && startsWith(github.head_ref, 'writer/')) }}
+    if: ${{ !cancelled() && needs.review.result != 'cancelled' && needs.review.result != 'skipped' && !(github.event_name == 'pull_request' && (startsWith(github.head_ref, 'writer/') || github.event.pull_request.draft)) }}
     runs-on: ubuntu-latest
     permissions:
       contents: write

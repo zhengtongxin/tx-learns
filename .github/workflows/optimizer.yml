@@ -1,11 +1,11 @@
-# Efficiency engineer agent: every six hours it looks for one safe, measurable way to make the site or its maintenance
+# Efficiency engineer agent: once a week it looks for one safe, measurable way to make the site or its maintenance
 # pipeline cheaper, faster, smaller, quieter or less fragile. It opens at most one focused pull request per run and never
 # pushes to main. The normal copy check, backend review, preview UI check, automatic merge and live rollback all apply.
 # It may not change the merge guardrails, agent runners, status recording, lesson prose or project starter/reference code.
 name: Efficiency engineer (optimizer)
 on:
   schedule:
-    - cron: '23 */6 * * *'   # 00:23, 06:23, 12:23 and 18:23 UTC
+    - cron: '23 6 * * 1'   # Mondays 06:23 UTC: its first weeks, run every six hours, produced one merged change
   workflow_dispatch:
     inputs:
       dry_run:
@@ -120,7 +120,7 @@ jobs:
           if grep -Eq '^(\.github/|packages/|CLAUDE\.md$|STYLE\.md$|banned-words\.txt$|scripts/(auto-merge|claude-run|record-status|trace)\.mjs$)' /tmp/changed.txt; then
             echo "The optimizer touched a protected file:"; grep -E '^(\.github/|packages/|CLAUDE\.md$|STYLE\.md$|banned-words\.txt$|scripts/(auto-merge|claude-run|record-status|trace)\.mjs$)' /tmp/changed.txt; exit 1
           fi
-          grep -Ev '^(sitemap\.xml|vercel\.json|[^/]+\.html|[^/]+/index\.html|[^/]+/[0-9][0-9]-[^/]*\.html|[^/]+/packages\.js)$' /tmp/changed.txt > /tmp/source-changed.txt || true
+          grep -Ev '^(sitemap\.xml|tracks-index\.js|vercel\.json|[^/]+\.html|[^/]+/index\.html|[^/]+/[0-9][0-9]-[^/]*\.html|[^/]+/packages\.js)$' /tmp/changed.txt > /tmp/source-changed.txt || true
           if [ "$(wc -l < /tmp/source-changed.txt)" -gt 6 ]; then
             echo "The optimizer changed more than six non-generated source files:"; cat /tmp/source-changed.txt; exit 1
           fi

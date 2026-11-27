@@ -33,7 +33,8 @@ Before every commit run the copy, count and page checks; all three must pass. Ev
 
 ```
 index.html, ecosystem.html, glossary.html, about.html   site pages
-tracks.js                    the learning tracks (window.TRACKS)
+tracks.js                    the learning tracks (window.TRACKS): entry points, the path, and what follows each track
+tracks-index.js              generated: every track's lesson files and titles in one file
 <track>/lessons.js           topics and lessons of one track (the only source of counts)
 <track>/NN-slug.html         one lesson per file, widgets in <track>/js/NN-slug.js
 assets/site.css|js           shared layout, nav, progress

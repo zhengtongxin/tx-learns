@@ -33,6 +33,11 @@ for (const tr of tracks) {
 }
 for (const tr of tracks) {
   if (![1, 2, 3].includes(tr.level)) say('tracks.js', `"${tr.id}" needs level 1, 2 or 3`);
+  // What follows a track is named, never guessed from the list order: next:[ids] in the same domain, later in the list.
+  if (!Array.isArray(tr.next)) say('tracks.js', `"${tr.id}" needs next:[...] (the tracks offered when it is finished; [] when the path ends)`);
+  else for (const id of tr.next) { const k = tracks.findIndex(x => x.id === id); if (k < 0 || tracks[k].domain !== tr.domain || k <= tracks.indexOf(tr)) say('tracks.js', `"${tr.id}" names next track "${id}", which must be a later track of the same domain`); }
+  if (tr.go && !(typeof tr.go.href === 'string' && existsSync(join(root, tr.go.href)) && tr.go.title && tr.go.title.en && tr.go.title.zh)) say('tracks.js', `"${tr.id}" has go: without an existing href or an {en,zh} title`);
+  if (tr.entry && !(tr.entry.en && tr.entry.zh)) say('tracks.js', `"${tr.id}" has entry: without {en,zh}`);
   for (const k of ['topics', 'total']) if (k in tr) say('tracks.js', `"${tr.id}" has ${k}:${tr[k]} typed by hand. Remove it: the page counts lessons.js.`);
   const dir = dirname(tr.href);
   const T = load(join(dir, 'lessons.js'), 'TRACK');

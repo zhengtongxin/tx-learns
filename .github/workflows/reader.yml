@@ -1,7 +1,7 @@
 # Intern agent (the reader): an intern who is learning AI. After Vercel finishes a preview deploy, Claude reads the lessons that changed as a newcomer
 # to AI would, scores how clear each one is and flags the confusing parts.
 # On a lesson's own pull request (a writer/ branch into main) it adds its fixes to that pull request as one
-# commit when a lesson scores under 8/10, comments with the scores, and then asks the reviewer agent to review.
+# commit when a lesson scores under 7/10, comments with the scores, and then asks the reviewer agent to review.
 # Anywhere else it only comments. It never opens a separate fix PR and never pushes to main.
 # One round of fixes: it skips its own and the reviewer's fix commits, and fixes a branch at most once.
 name: Intern (reader)
@@ -84,6 +84,14 @@ jobs:
           elif echo "$msg" | grep -qE '^Merge pull request #[0-9]+ from [^ ]+/(writer|reader)/'; then echo "This lesson was already read on its own pull request."; files=
           elif echo "$msg" | grep -qE "^Merge (remote-tracking )?branch '(origin/)?main'"; then echo "This deploy only brings main up to date; those lessons were read on their own pull requests."; files=
           else files=$(git diff --name-only --diff-filter=AM "$SHA^1" "$SHA" -- '*/[0-9]*.html' | tr '\n' ' '); fi
+          # Read only lessons whose own text changed: a change to a shared script rewrites the ?v= hashes of every lesson, and those
+          # lines (and the updated date, canonical link and data blocks) are generated. The triage script comes from main.
+          if [ -z "$FILES" ] && [ -n "$files" ] && curl -fsS -o /tmp/review-triage.mjs "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/scripts/review-triage.mjs"; then
+            keep=
+            for f in $files; do git diff "$SHA^1" "$SHA" -- "$f" > /tmp/one.diff; node /tmp/review-triage.mjs /tmp/one.diff > /dev/null 2>&1 || keep="$keep $f"; done
+            [ "$(echo $keep)" = "$(echo $files)" ] || echo "Skipped lessons that changed only in generated lines."
+            files=$keep
+          fi
           # Cap one run at 6 lessons: a sweep that touches every lesson (a theme or wording change) must not make Claude read them all.
           files=$(echo $files | tr ' ' '\n' | head -6 | tr '\n' ' ')
           files=$(echo $files)
@@ -104,7 +112,7 @@ jobs:
           set -o pipefail
           if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then unset ANTHROPIC_API_KEY; echo "Auth: Claude subscription"; else unset CLAUDE_CODE_OAUTH_TOKEN; echo "Auth: API key (no CLAUDE_CODE_OAUTH_TOKEN secret)"; fi
           if [ "$FIX" = 1 ]; then
-            EDIT="7. Then, only for a lesson you scored under 8, fix what you flagged, in the lesson files only: small wording changes, a missing step or
+            EDIT="7. Then, only for a lesson you scored under 7, fix what you flagged, in the lesson files only: small wording changes, a missing step or
              definition, a clearer analogy. Keep TX's voice, the story and the structure. Change EN and 中文 together.
              Do not touch anything you scored as fine. Run node scripts/check-copy.mjs,
              node scripts/check-counts.mjs and node scripts/check-pages.mjs --fix until all pass."
@@ -222,7 +230,7 @@ jobs:
           echo "low=$low" >> "$GITHUB_OUTPUT"
           url=; pushed=
           cp /tmp/out/reader-comment.md /tmp/c.md
-          if [ "$FIX" = 1 ] && [ -s /tmp/out/fix.patch ] && [ "$low" -lt 8 ]; then
+          if [ "$FIX" = 1 ] && [ -s /tmp/out/fix.patch ] && [ "$low" -lt 7 ]; then
             # The fix lands on the lesson's own pull request, so TX still merges once per lesson.
             cd work
             git apply --include='*/[0-9]*.html' /tmp/out/fix.patch
