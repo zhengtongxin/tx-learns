@@ -2333,6 +2333,42 @@
      "why": "The lesson never says that a cancelled project can be restarted, so this option is untaught."
     }
    ]
+  },
+  "ai-builder/03-docs-and-email.html": {
+   "score": 6,
+   "at": "2026-11-27T13:56:12.462Z",
+   "confusing": [
+    {
+     "where": "Step 4 · Wire the answer into a draft",
+     "why": "Two possible field names are given and the reader is not told which one their setup has. The next expression, $json.output.draft, only works if the parser is attached, and the parser is never explaine"
+    },
+    {
+     "where": "Step 2 · Let AI label and draft",
+     "why": "JSON is never explained. A newcomer does not know what a JSON answer looks like, so Return JSON only is an instruction without a picture."
+    },
+    {
+     "where": "Step 1 diagram and Step 4",
+     "why": "The diagram and its caption send the draft to Google Docs. Step 4 creates a Gmail draft instead, and no step builds a Google Docs node, so the reader cannot tell where the draft really goes."
+    }
+   ]
+  },
+  "ai-builder/12-webhooks-and-sub-workflows.html": {
+   "score": 7,
+   "at": "2026-11-27T13:56:12.462Z",
+   "confusing": [
+    {
+     "where": "Step 4 · Build a protected webhook",
+     "why": "The check is promised and the test is written for it, but no build step adds an IF node or says where it goes. The build only adds a Webhook and a Respond to Webhook node."
+    },
+    {
+     "where": "Step 1 · Split big flows into parts",
+     "why": "The lesson never says how a caller chooses the sub-workflow, how the inputs arrive, or how the result returns to the main flow. The Now make it yours task depends on exactly this."
+    },
+    {
+     "where": "Step 2 · Plan for things to fail",
+     "why": "The message uses workflow.name, execution.lastNodeExecuted and execution.error.message, but the lesson never says the Error Trigger supplies them. Set the error workflow in each workflow's settings al"
+    }
+   ]
   }
  }
 }
