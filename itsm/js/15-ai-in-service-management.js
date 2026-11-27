@@ -1,0 +1,5 @@
+document.addEventListener('DOMContentLoaded',function(){
+ var $=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('p1'),{"q": {"en": "Which describes agentic AI?", "zh": "哪个描述的是代理式 AI？"}, "opts": [{"k": "a", "en": "It pursues a goal and takes actions on its own", "zh": "它追求目标并自行采取行动"}, {"k": "b", "en": "It only stores data", "zh": "它只存储数据"}, {"k": "c", "en": "It prints reports", "zh": "它打印报告"}], "a": "a", "ex": {"en": "Goal pursuit with some autonomy is the mark of agentic AI.", "zh": "带一定自主性地追求目标，是代理式 AI 的特征。"}, "hint": {"en": "Which involves acting?", "zh": "哪个涉及行动？"}});
+ predict($('p2'),{"q": {"en": "An AI assistant gives a customer a wrong answer. Who remains accountable?", "zh": "AI 助手给客户一个错误答案。谁仍然负责？"}, "opts": [{"k": "a", "en": "The organisation and its people", "zh": "组织和相关的人"}, {"k": "b", "en": "Nobody", "zh": "没人"}, {"k": "c", "en": "The customer", "zh": "客户"}], "a": "a", "ex": {"en": "Accountability stays with people.", "zh": "责任仍在人身上。"}, "hint": {"en": "Can software be held accountable?", "zh": "软件能被问责吗？"}});
+});

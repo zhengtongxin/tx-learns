@@ -1,0 +1,5 @@
+document.addEventListener('DOMContentLoaded',function(){
+ var $=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('p1'),{"q": {"en": "There is no penalty for a wrong answer. What should you do with a question you cannot answer?", "zh": "答错不扣分。遇到不会的题该怎么办？"}, "opts": [{"k": "a", "en": "Leave it blank", "zh": "留空"}, {"k": "b", "en": "Eliminate what you can and guess", "zh": "排除能排除的再猜"}, {"k": "c", "en": "Spend five minutes on it", "zh": "花五分钟死磕"}], "a": "b", "ex": {"en": "A guess costs nothing and often wins a mark. Keep the time for other questions.", "zh": "猜错不吃亏，常常还能得分。时间留给其他题。"}, "hint": {"en": "What does a blank earn?", "zh": "留空能得多少分？"}});
+ predict($('p2'),{"q": {"en": "An option says a practice must “always” be used. What does that suggest?", "zh": "某选项说某实践“必须总是”使用。这说明什么？"}, "opts": [{"k": "a", "en": "Probably wrong", "zh": "多半是错的"}, {"k": "b", "en": "Definitely right", "zh": "肯定对"}, {"k": "c", "en": "Ignore the stem", "zh": "忽略题干"}], "a": "a", "ex": {"en": "Absolute words are a warning sign. Check the other options first.", "zh": "绝对化用词是警示信号。先看其他选项。"}, "hint": {"en": "Does real practice have exceptions?", "zh": "实际做法有例外吗？"}});
+});
