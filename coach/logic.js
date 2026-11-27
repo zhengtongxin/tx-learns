@@ -66,6 +66,12 @@
  /* days to wait before an area is due again: 1, 3, 7, 14, 30 as right answers in a row add up; a miss starts over */
  L.GAPS=[1,3,7,14,30];
  L.interval=function(hist){var n=0;for(var i=(hist||[]).length-1;i>=0&&hist[i]===1;i--)n++;return L.GAPS[Math.min(Math.max(n,1),L.GAPS.length)-1]};
+ /* Days in a row with at least one answered question, counted back from today (today may still be empty: the streak is then kept alive until tonight),
+    and the last 7 days as [{k,n,c}] oldest first, for the coach card's week strip. */
+ L.streak=function(days,now){now=now||new Date();var n=0,d=new Date(now.getFullYear(),now.getMonth(),now.getDate()),k=L.dayKey(d);
+  if(!(days[k]&&days[k].n>0))d.setDate(d.getDate()-1);
+  while(days[L.dayKey(d)]&&days[L.dayKey(d)].n>0){n++;d.setDate(d.getDate()-1)}return n};
+ L.week=function(days,now){now=now||new Date();var out=[],i,d;for(i=6;i>=0;i--){d=new Date(now.getFullYear(),now.getMonth(),now.getDate()-i);var k=L.dayKey(d),x=days[k]||{n:0,c:0};out.push({k:k,n:x.n,c:x.c,wd:d.getDay()})}return out};
  L.dayKey=function(d){d=d||new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)};
  L.daysSince=function(ts,now){return ts?Math.floor((now-ts)/864e5):null};
  /* areas [{id,w,hist,last}] -> allocation of n questions. 'exam' follows the weights exactly; 'drill' tilts toward weak, untested and due areas (due = the gap of L.interval has passed). */

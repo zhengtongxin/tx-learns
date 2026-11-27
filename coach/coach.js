@@ -188,6 +188,12 @@ function next(){R.i++;pump();show();renderAll(true)}
 
 /* ---------- rendering ---------- */
 var WHY={new:['Not tested yet','还没测过'],weak:['Weak','薄弱'],due:['Due for review','该复习了'],keep:['Keep warm','保持']};
+function streakBox(td,n){
+ var st=Lg.streak(S.days),wk=Lg.week(S.days),R=22,C=2*Math.PI*R,pct=Math.min(1,td.n/Math.max(1,n)),WD=[T('S','日'),T('M','一'),T('T','二'),T('W','三'),T('T','四'),T('F','五'),T('S','六')];
+ var msg=td.n>=n?T('Goal reached today. Anything more is a bonus.','今天的目标完成了，再做就是加分。'):td.n>0?T('Keep going.','继续保持。'):st>0?T('Do a few questions today to keep your '+st+'-day streak.','今天做几题，保住连续 '+st+' 天的记录。'):T('Answer a few questions today to start a streak.','今天做几题，开始连续记录。');
+ return '<div class="streak"><svg class="ring" viewBox="0 0 52 52" width="52" height="52" role="img" aria-label="'+(pageLang()==='zh'?'今天：'+td.n+' / '+n+' 题':'Today: '+td.n+' of '+n+' questions')+'"><circle cx="26" cy="26" r="'+R+'" class="rt"/><circle cx="26" cy="26" r="'+R+'" class="rf" stroke-dasharray="'+(C*pct).toFixed(1)+' '+C.toFixed(1)+'" transform="rotate(-90 26 26)"/><text x="26" y="30" text-anchor="middle">'+td.n+'</text></svg>'+
+  '<div class="sk"><b>'+(st?'🔥 '+T(st+(st===1?' day':' days'),st+' 天'):T('No streak yet','还没有连续记录'))+'</b><span class="meta">'+T('Today '+td.n+' of '+n+' questions. ','今天 '+td.n+' / '+n+' 题。')+msg+'</span></div>'+
+  '<div class="wk" aria-hidden="true">'+wk.map(function(x){return '<i class="'+(x.n?(x.c/x.n>=.7?'hi':'mid'):'')+'" title="'+x.k+(x.n?' · '+x.c+'/'+x.n:'')+'"><u>'+WD[x.wd]+'</u></i>'}).join('')+'</div></div>'}
 function renderToday(){
  var el=$('today'),n=S.perDay,td=today();
  if(!CH.length){el.innerHTML='';return}
@@ -195,7 +201,7 @@ function renderToday(){
  if(!tested)h=T('Your coach starts with a first round across your material. The answers show where the gaps are.','教练先带你过一遍资料，看你答得怎样，就知道缺口在哪里。');
  else if(!g.any)h=T('No gaps right now. Keep it warm with a short round.','目前没有明显缺口。做一小轮保持手感。');
  else h=(g.weak.length?T('Weak: ','薄弱：')+names(g.weak)+'. ':'')+(g.due.length?T('Due for review: ','该复习：')+names(g.due)+'. ':'')+(g.fresh.length?T('Not tested yet: ','还没测过：')+names(g.fresh)+'. ':'');
- el.innerHTML='<h2>'+T('Your <em>coach</em>','你的<em>教练</em>')+'</h2><p class="lead2">'+h+'</p><p class="meta">'+T('Done today: '+td.n+' of '+n+' questions.','今天已做：'+td.n+' / '+n+' 题。')+'</p>'+
+ el.innerHTML='<h2>'+T('Your <em>coach</em>','你的<em>教练</em>')+'</h2><p class="lead2">'+h+'</p>'+streakBox(td,n)+
   (g.miss.length?'<p class="meta">'+T('Passages you missed most: ','你错得最多的段落：')+g.miss.slice(0,3).map(function(x){return aname(x.c.area)+' · '+esc(x.c.loc)+' ×'+x.n}).join(' ; ')+'</p>':'')+
   '<ul class="plan">'+plan.map(function(p){var w=WHY[p.why];return '<li><span class="pk">'+p.k+'</span><span>'+aname(p.id)+'</span><span class="chip">'+T(w[0],w[1])+'</span></li>'}).join('')+'</ul>'+
   '<p class="acts"><button class="btn pri" data-act="drill">'+T('Practise now','现在练习')+'</button>'+(g.any?'<button class="btn" data-act="gap">'+T('Fix my gaps','补我的缺口')+'</button>':'')+(useExam()?'<button class="btn sm" data-act="exam">'+T('Mini exam · 20 questions','小测验 · 20 题')+'</button>':'')+
