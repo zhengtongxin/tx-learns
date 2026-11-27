@@ -469,3 +469,31 @@ a.menu-btn{text-decoration:none;color:inherit}
 .tpg i{position:absolute;left:0;bottom:0;height:3px;border-radius:3px;background:var(--grad);transition:width .8s cubic-bezier(.2,.8,.2,1)}
 .tpg::before{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:3px;background:var(--line)}
 .tpg span{font-size:12.5px;font-weight:600;color:var(--mut);padding-bottom:6px}
+/* track index: lessons as raised tiles with a pointer spotlight, a done mark and an "up next" glow */
+.journey .lgrid{grid-template-columns:repeat(auto-fill,minmax(min(100%,196px),1fr));gap:14px}
+.journey .lcard,.journey .lcard.ready,.journey .lcard.soon{position:relative;overflow:hidden;min-height:168px;padding:18px 18px 16px;border:1px solid var(--line);border-top:1px solid var(--line);border-radius:18px;background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.015));box-shadow:0 1px 0 rgba(255,255,255,.04) inset;animation:tileIn .55s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*45ms);transition:transform .3s cubic-bezier(.2,.8,.2,1),border-color .3s,box-shadow .3s}
+html[data-theme=light] .journey .lcard,html[data-theme=light] .journey .lcard.ready{background:linear-gradient(160deg,rgba(255,255,255,.9),rgba(255,248,230,.7))}
+.journey .lcard .n{font-size:2.2rem;-webkit-text-stroke:1px color-mix(in srgb,var(--acc) 45%,var(--line))}
+.journey .lcard.ready .n{-webkit-text-stroke:0}
+.journey .lcard.ready:hover{transform:translateY(-6px);border-color:var(--acc);box-shadow:0 18px 44px var(--glow)}
+.journey .lcard.ready:active{transform:translateY(-2px) scale(.99)}
+.journey .lcard.soon{opacity:.5;border-style:dashed;background:none}
+.journey .lcard.done{border-color:color-mix(in srgb,#34d399 45%,var(--line))}
+.journey .lcard.done::before{content:"✓";position:absolute;top:14px;right:14px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;color:#052e1c;background:#34d399;animation:popIn .5s cubic-bezier(.2,1.4,.4,1) both}
+.journey .lcard.done .st{color:#34d399}
+.journey .lcard.up{border-color:var(--acc);box-shadow:0 0 0 1px color-mix(in srgb,var(--acc) 50%,transparent),0 14px 46px var(--glow)}
+.journey .lcard.up::before{content:"";position:absolute;inset:-1px;border-radius:18px;pointer-events:none;border:2px solid var(--acc);opacity:0;animation:upPulse 2.4s ease-in-out infinite}
+.journey .lcard .st{font-size:13.5px}
+@keyframes tileIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes popIn{from{transform:scale(0)}to{transform:scale(1)}}
+@keyframes upPulse{0%,100%{opacity:0;transform:scale(1)}50%{opacity:.55;transform:scale(1.015)}}
+@media(prefers-reduced-motion:reduce){.journey .lcard,.journey .lcard.done::before,.journey .lcard.up::before{animation:none}.journey .lcard.ready:hover{transform:none}}
+/* tracks page: subjects and tracks as raised tiles of equal height */
+.dom .tl{gap:16px;margin-top:16px}
+.dom .tl>.cc{border:1px solid var(--line);border-radius:20px;background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.015));padding:22px;animation:tileIn .55s cubic-bezier(.2,.8,.2,1) both;transition:transform .3s cubic-bezier(.2,.8,.2,1),border-color .3s,box-shadow .3s}
+.dom .tl>.cc:nth-child(2){animation-delay:60ms}.dom .tl>.cc:nth-child(3){animation-delay:120ms}.dom .tl>.cc:nth-child(4){animation-delay:180ms}.dom .tl>.cc:nth-child(5){animation-delay:240ms}.dom .tl>.cc:nth-child(n+6){animation-delay:300ms}
+html[data-theme=light] .dom .tl>.cc{background:linear-gradient(160deg,rgba(255,255,255,.9),rgba(255,248,230,.7))}
+.dom .tl>.cc:hover{transform:translateY(-5px);border-color:var(--acc);box-shadow:0 18px 44px var(--glow)}
+.dom .tl>.cc .orbi{box-shadow:0 6px 22px var(--glow)}
+@media(prefers-reduced-motion:reduce){.dom .tl>.cc{animation:none}.dom .tl>.cc:hover{transform:none}}
+@media(max-width:560px){.journey .lgrid{grid-template-columns:1fr 1fr;gap:10px}.journey .lcard,.journey .lcard.ready,.journey .lcard.soon{min-height:150px;padding:14px}.journey .lcard .n{font-size:1.9rem}.journey .lcard h3{font-size:1rem}}

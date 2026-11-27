@@ -150,8 +150,8 @@
           return '<section class="wsec"><div class="wph"><div><div class="ey">'+t({en:'Topic '+w.n,zh:'主题 '+w.n})+(w.level?' · '+t(LV[w.level]):'')+'</div><h2>'+t(w.title)+'</h2></div>'+tpg(w)+(rd<w.items.length?'<div class="meta">'+t({en:rd+' of '+w.items.length+' lessons available',zh:'已发布 '+rd+' / '+w.items.length+' 课'})+'</div>':'')+'</div>'+
           '<div class="lgrid">'+w.items.map(function(l){
             var no=('0'+l.g).slice(-2),chip='<span class="chip '+l.k+'">'+t(TYPE[l.k])+'</span>';
-            if(l.file){var fin=d[C.id+'/'+l.file];return '<a class="lcard ready spot" href="'+l.file+'"><span class="n">'+no+'</span>'+chip+'<h3>'+t(l.title)+'</h3><span class="st">'+(fin?t({en:'✓ Completed',zh:'✓ 已完成'}):t({en:'Start →',zh:'开始 →'}))+'</span></a>'}
-            return '<div class="lcard soon"><span class="n">'+no+'</span>'+chip+'<h3>'+t(l.title)+'</h3><span class="st">'+t({en:'Coming soon',zh:'即将发布'})+'</span></div>'}).join('')+'</div></section>'}).join('');
+            if(l.file){var fin=d[C.id+'/'+l.file],up=!fin&&l.file===tf;return '<a class="lcard ready spot'+(fin?' done':'')+(up?' up':'')+'" style="--i:'+(l.g%12)+'" href="'+l.file+'"><span class="n">'+no+'</span>'+chip+'<h3>'+t(l.title)+'</h3><span class="st">'+(fin?t({en:'✓ Completed',zh:'✓ 已完成'}):up?t({en:'Up next →',zh:'下一课 →'}):t({en:'Start →',zh:'开始 →'}))+'</span></a>'}
+            return '<div class="lcard soon" style="--i:'+(l.g%12)+'"><span class="n">'+no+'</span>'+chip+'<h3>'+t(l.title)+'</h3><span class="st">'+t({en:'Coming soon',zh:'即将发布'})+'</span></div>'}).join('')+'</div></section>'}).join('');
       };
       draw();
       if(CF.length&&started)whatNext(false,function(a){jr.after(a)},NX&&C.lessons.filter(function(x){return x.file===NX})[0],!NX);
