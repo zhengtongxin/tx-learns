@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Narrowing it down | TX Learns</title>
+<meta name="description" content="Cut the search in half again and again until only the cause is left"><meta property="og:title" content="Narrowing it down | TX Learns"><meta property="og:description" content="Cut the search in half again and again until only the cause is left"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/debugging-basics/03-narrowing-it-down.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/debugging-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/debugging-basics/03-narrowing-it-down.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/debugging-basics/03-narrowing-it-down.html","url":"https://tx-learns.vercel.app/debugging-basics/03-narrowing-it-down.html","name":"Narrowing it down","alternateName":"缩小范围","description":"Cut the search in half again and again until only the cause is left","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Finding the bug","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Debugging","url":"https://tx-learns.vercel.app/debugging-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Debugging","item":"https://tx-learns.vercel.app/debugging-basics/index.html"},{"@type":"ListItem","position":3,"name":"Narrowing it down","item":"https://tx-learns.vercel.app/debugging-basics/03-narrowing-it-down.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Finding the bug · Lesson 3</span><span class="zh">找到问题 · 第 3 课</span></span><h1><span class="en">Narrowing it down</span><span class="zh">缩小范围</span></h1><p class="meta"><span class="en">Cut the search in half again and again until only the cause is left · ~10 min · reading and practice</span><span class="zh">一次次把搜索范围砍掉一半，直到只剩下原因 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Guess, then test</span><span class="zh">第 1 步 · 先猜，再验证</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Staring at code hoping the bug shows itself is slow. Instead, state a guess: “the value is already wrong when it reaches this function”. Then run something that can prove it wrong: print the value there, or call the function alone. A guess that is proven wrong still helps, because it removes a part of the code from the search.</p>
+<p class="zh" style="margin:0 0 8px">盯着代码等问题自己现形很慢。换个办法：说出一个猜测——“值在到达这个函数时就已经不对了”。然后运行一个能推翻它的东西：在那里打印这个值，或单独调用这个函数。被推翻的猜测同样有用，因为它把一部分代码从搜索范围里去掉了。</p></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Halve the search</span><span class="zh">第 2 步 · 对半查找</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">If the data is right at the start and wrong at the end, check the middle. If it is right in the middle, the problem is in the second half; if wrong, in the first. Each check halves what is left. Sixteen steps need only four checks, and a thousand need about ten. This works on code, on data files and on a list of changes.</p>
+<p class="zh" style="margin:0 0 8px">如果数据在开头是对的、结尾是错的，就检查中间。中间是对的，问题就在后半段；是错的，就在前半段。每检查一次，剩下的范围就少一半。十六步只需四次检查，一千步大约十次。这个办法适用于代码、数据文件和一串改动。</p></div>
+<div class="codebox" data-file="halve.py" data-lang="python">lo, hi = 1, 16
+steps = 0
+while lo &lt; hi:
+    mid = (lo + hi) // 2
+    steps += 1
+    if mid &gt;= 11:   # version 11 is the first bad one
+        hi = mid
+    else:
+        lo = mid + 1
+print(lo, steps)</div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Ask when it broke</span><span class="zh">第 3 步 · 问问什么时候坏的</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">If it worked last week, the cause is among the changes since then. Version control (a tool that records every change to your files, such as git) can halve that list for you: mark a version that worked and one that does not, check the version in the middle, and repeat. Finding the single change that broke things is often faster than understanding the whole system. Then read that one change.</p>
+<p class="zh" style="margin:0 0 8px">如果上周还是好的，原因就在这之后的改动里。版本控制（记录你文件每一次改动的工具，比如 git）可以替你把这个清单对半砍：标出一个好的版本和一个坏的版本，检查中间的版本，如此重复。找出那一个导致问题的改动，往往比理解整个系统更快。然后只读这一个改动。</p></div>
+<div class="try" id="p3"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> on a failing script, print the value halfway through to learn which half holds the problem.</span><span class="zh"><b>试一试：</b>在一个出错的脚本里，在中途打印那个值，看看问题在前半还是后半。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> write your guess in one sentence before running anything.</span><span class="zh"><b>核对：</b>运行任何东西之前，先用一句话写下你的猜测。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• State a guess you can test.<br>• Halve the search: check the middle.<br>• When it broke tells you what broke it.</p><p class="zh" style="margin:0">• 说出一个可以验证的猜测。<br>• 对半查找：检查中间。<br>• 什么时候坏的，就能告诉你是什么搞坏的。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Debugging</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3 for the small examples; reading is enough for the rest","zh":"小例子需要 Python 3；其余只需阅读"},"know":{"en":"Reproducing a bug (see “Reproducing a bug”).","zh":"会复现问题（见“复现问题”）。"},"goals":{"en":["Test a guess instead of staring","Halve the search","Use history to find when it broke"],"zh":["验证猜测而不是干盯着看","把搜索范围对半砍","用历史找出什么时候坏的"]},"prev":["02-reproducing-a-bug.html"]}}</script>
+<script src="../tracks.js?v=9d67b172"></script><script src="lessons.js?v=3f03817d"></script><script src="../assets/site.js?v=cf875a90"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/03-narrowing-it-down.js?v=e3808e26"></script></body></html>

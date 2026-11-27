@@ -1,0 +1,53 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reading errors | TX Learns</title>
+<meta name="description" content="Read an error message from the bottom up and learn what it is telling you"><meta property="og:title" content="Reading errors | TX Learns"><meta property="og:description" content="Read an error message from the bottom up and learn what it is telling you"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/debugging-basics/01-reading-errors.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/debugging-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/debugging-basics/01-reading-errors.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/debugging-basics/01-reading-errors.html","url":"https://tx-learns.vercel.app/debugging-basics/01-reading-errors.html","name":"Reading errors","alternateName":"读懂报错","description":"Read an error message from the bottom up and learn what it is telling you","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Finding the bug","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Debugging","url":"https://tx-learns.vercel.app/debugging-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Debugging","item":"https://tx-learns.vercel.app/debugging-basics/index.html"},{"@type":"ListItem","position":3,"name":"Reading errors","item":"https://tx-learns.vercel.app/debugging-basics/01-reading-errors.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Finding the bug · Lesson 1</span><span class="zh">找到问题 · 第 1 课</span></span><h1><span class="en">Reading errors</span><span class="zh">读懂报错</span></h1><p class="meta"><span class="en">Read an error message from the bottom up and learn what it is telling you · ~10 min · reading and practice</span><span class="zh">从下往上读报错信息，弄懂它在告诉你什么 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · The message is a clue</span><span class="zh">第 1 步 · 报错是一条线索</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">An error message is the program telling you what it was doing and why it stopped. Beginners often skim it, feel panic and start changing code at random. Slow down: the message is the most precise information you will get all day.</p>
+<p class="zh" style="margin:0 0 8px">报错信息是程序在告诉你它在做什么、为什么停下来。新手常常扫一眼、心里一慌就开始乱改代码。慢下来：这条信息是你一整天里能拿到的最精确的信息。</p>
+<p class="en" style="margin:0 0 8px">Read it <b>from the bottom up</b>. The last line names the kind of error and says what went wrong. The lines above it are the <b>traceback</b>, the chain of calls that led there, with the most recent call last. Start with the last line, then find the closest line of your own code in the list above.</p>
+<p class="zh" style="margin:0 0 8px">要<b>从下往上</b>读。最后一行说出错误的种类和出了什么问题。它上面是<b>回溯</b>，即一路调用下来的链条，最近的调用排在最后。先看最后一行，再在上面的列表里找离它最近的、你自己写的那行代码。</p></div>
+<div class="codebox" data-file="traceback.txt" data-lang="text">Traceback (most recent call last):
+  File "app.py", line 7, in &lt;module&gt;
+    print(average([]))
+  File "app.py", line 3, in average
+    return total / len(items)
+ZeroDivisionError: division by zero</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Name the kind of error</span><span class="zh">第 2 步 · 说出错误的种类</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The name before the colon tells you the family of the problem. <code>ValueError</code>: the right kind of value, but not an acceptable one. <code>TypeError</code>: the wrong kind of value for the operation. <code>KeyError</code>: a dictionary has no such key. <code>IndexError</code>: a list is not that long. <code>ZeroDivisionError</code>: you divided by zero. Once you can name the family, you know where to look.</p>
+<p class="zh" style="margin:0 0 8px">冒号前面的名字告诉你问题属于哪一类。<code>ValueError</code>：值的种类对，但不被接受。<code>TypeError</code>：值的种类不适合这个操作。<code>KeyError</code>：字典里没有这个键。<code>IndexError</code>：列表没有那么长。<code>ZeroDivisionError</code>：除以了零。能说出类别，就知道该去哪里找。</p></div>
+<div class="codebox" data-file="errors.py" data-lang="python">def f(x):
+    return 10 / x
+
+try:
+    f(0)
+except ZeroDivisionError as e:   # "as e" names the error object
+    print(type(e).__name__, e)   # its kind, then its message</div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Say it in plain words</span><span class="zh">第 3 步 · 用大白话说出来</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Before touching the code, put the message in one plain sentence: “line 7 divided by something that was zero”. Then ask the next question: where did that zero come from? The error shows where the program <i>stopped</i>, and the real cause is often earlier, at the place the bad value was made.</p>
+<p class="zh" style="margin:0 0 8px">动代码之前，先用一句大白话复述这条信息：“第 7 行除以了一个为零的东西”。然后问下一个问题：这个零是从哪来的？报错显示的是程序在哪里<i>停下</i>，真正的原因往往更早，在坏值产生的地方。</p></div>
+<div class="try" id="p3"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> cause one error of each family on purpose and read its last line.</span><span class="zh"><b>试一试：</b>故意制造每一类错误各一个，读它们的最后一行。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> next time something breaks, say the message in one plain sentence before you change anything.</span><span class="zh"><b>核对：</b>下次出错时，先用一句大白话说出信息，再动手改。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Read the traceback from the bottom up.<br>• The error’s name tells you which family of problem it is.<br>• Where it stopped is not always where it began.</p><p class="zh" style="margin:0">• 从下往上读回溯。<br>• 错误的名字告诉你它属于哪一类问题。<br>• 停下的地方不一定是出问题的地方。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Debugging</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3 for the small examples; reading is enough for the rest","zh":"小例子需要 Python 3；其余只需阅读"},"know":{"en":"Basic Python functions and errors (see “Errors and debugging”).","zh":"了解基础 Python 函数和错误（见“错误与调试”）。"},"goals":{"en":["Find the line that matters","Name the kind of error","Say what the message means"],"zh":["找到关键的那一行","说出错误的种类","说清楚信息的意思"]}}}</script>
+<script src="../tracks.js?v=9d67b172"></script><script src="lessons.js?v=3f03817d"></script><script src="../assets/site.js?v=cf875a90"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/01-reading-errors.js?v=fc12eec7"></script></body></html>

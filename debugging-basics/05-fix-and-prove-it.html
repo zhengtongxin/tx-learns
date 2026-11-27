@@ -1,0 +1,46 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fix and prove it | TX Learns</title>
+<meta name="description" content="Fix the cause, add a test that would have caught it and check you broke nothing else"><meta property="og:title" content="Fix and prove it | TX Learns"><meta property="og:description" content="Fix the cause, add a test that would have caught it and check you broke nothing else"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/debugging-basics/05-fix-and-prove-it.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/debugging-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/debugging-basics/05-fix-and-prove-it.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/debugging-basics/05-fix-and-prove-it.html","url":"https://tx-learns.vercel.app/debugging-basics/05-fix-and-prove-it.html","name":"Fix and prove it","alternateName":"修复并证明","description":"Fix the cause, add a test that would have caught it and check you broke nothing else","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Fixing it for good","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Debugging","url":"https://tx-learns.vercel.app/debugging-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Debugging","item":"https://tx-learns.vercel.app/debugging-basics/index.html"},{"@type":"ListItem","position":3,"name":"Fix and prove it","item":"https://tx-learns.vercel.app/debugging-basics/05-fix-and-prove-it.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Fixing it for good · Lesson 2</span><span class="zh">彻底修好 · 第 2 课</span></span><h1><span class="en">Fix and prove it</span><span class="zh">修复并证明</span></h1><p class="meta"><span class="en">Fix the cause, add a test that would have caught it and check you broke nothing else · ~10 min · reading and practice</span><span class="zh">修掉原因，加一个本来能抓住它的测试，并确认没有弄坏别的东西 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Cause, not symptom</span><span class="zh">第 1 步 · 修原因，不修症状</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>symptom</b> is what you see: the crash, the wrong number. The <b>cause</b> is why it happens. Wrapping a crash in a try block that ignores it hides the symptom and leaves the cause, and the bad value flows on to break something else later. Ask “why was this value ever wrong?” until you reach the place it was made, and fix it there.</p>
+<p class="zh" style="margin:0 0 8px"><b>症状</b>是你看到的：崩溃、错的数字。<b>原因</b>是它为什么会发生。把崩溃包进一个忽略它的 try 里，只是藏起了症状、留下了原因，坏值会继续流动，之后弄坏别的东西。一直问“这个值当初为什么会错？”，直到找到它产生的地方，在那里修。</p></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Turn the bug into a test</span><span class="zh">第 2 步 · 把问题变成测试</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Take the minimal example from before and turn it into a test that fails now. Then fix the code until it passes. The test proves the fix worked, and it stays in the project to catch the same bug if someone brings it back. A bug fixed without a test tends to return.</p>
+<p class="zh" style="margin:0 0 8px">拿前面得到的最小示例，把它变成一个现在会失败的测试。然后改代码，直到测试通过。这个测试证明了修复有效，并留在项目里，万一有人把同样的问题带回来，它就能抓住。没有测试的修复，问题往往会回来。</p></div>
+<div class="codebox" data-file="fixed.py" data-lang="python">def last_word(s):
+    return s.split()[-1]   # the fix: split() with no argument skips extra spaces
+
+# the test, written first: assert means "this must be true, or stop with an error"
+# before the fix (split(" ")) it failed; with the fix below it passes
+assert last_word("hi there ") == "there"
+print(last_word("hi there "))
+print(len("  ".split()))   # an edge case, explained in the next step</div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Check the neighbours</span><span class="zh">第 3 步 · 检查相邻的东西</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A fix can break something nearby. Run the whole test suite, not only the new test. Look at the edge cases next to your bug: if a trailing space was the problem, what about an empty string, or only spaces? Notice that the fixed function above would still fail on <code>"  "</code>, because there is no last word to return. Decide what it should do, and write that down as another test.</p>
+<p class="zh" style="margin:0 0 8px">修复可能弄坏附近的东西。要运行整个测试集，而不是只跑新测试。看看你那个问题旁边的边界情况：如果问题是末尾空格，那空字符串或全是空格呢？注意，上面修好的函数遇到 <code>"  "</code> 仍然会出错，因为根本没有最后一个词可返回。决定它应该怎么办，并把这个决定写成另一个测试。</p></div>
+<div class="try" id="p3"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> fix a small bug by first writing the failing test, then the fix.</span><span class="zh"><b>试一试：</b>修一个小问题：先写会失败的测试，再修代码。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> list two edge cases next to your bug and test them too.</span><span class="zh"><b>核对：</b>列出与你的问题相邻的两个边界情况，也测一下。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Fix where the bad value is made, not where it crashes.<br>• Turn the bug into a test before you fix it.<br>• Run everything, and test the edges next door.</p><p class="zh" style="margin:0">• 在坏值产生的地方修，而不是在它崩溃的地方。<br>• 修之前，先把问题变成测试。<br>• 运行全部测试，并测试相邻的边界。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Debugging</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3 for the small examples; reading is enough for the rest","zh":"小例子需要 Python 3；其余只需阅读"},"know":{"en":"Looking inside (see “Looking inside”) and basic tests (see “Test functions”).","zh":"知道如何看清内部（见“看清内部”）和基础测试（见“测试函数”）。"},"goals":{"en":["Fix the cause, not the symptom","Turn the bug into a test","Check the neighbours"],"zh":["修原因，不修症状","把问题变成测试","检查相邻的东西"]},"prev":["04-looking-inside.html"]}}</script>
+<script src="../tracks.js?v=9d67b172"></script><script src="lessons.js?v=3f03817d"></script><script src="../assets/site.js?v=cf875a90"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/05-fix-and-prove-it.js?v=312ae875"></script></body></html>

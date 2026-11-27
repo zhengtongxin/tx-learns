@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Looking inside | TX Learns</title>
+<meta name="description" content="Print, log and step through code to see the real values instead of the ones you assume"><meta property="og:title" content="Looking inside | TX Learns"><meta property="og:description" content="Print, log and step through code to see the real values instead of the ones you assume"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/debugging-basics/04-looking-inside.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/debugging-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/debugging-basics/04-looking-inside.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/debugging-basics/04-looking-inside.html","url":"https://tx-learns.vercel.app/debugging-basics/04-looking-inside.html","name":"Looking inside","alternateName":"看清内部","description":"Print, log and step through code to see the real values instead of the ones you assume","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Fixing it for good","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Debugging","url":"https://tx-learns.vercel.app/debugging-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Debugging","item":"https://tx-learns.vercel.app/debugging-basics/index.html"},{"@type":"ListItem","position":3,"name":"Looking inside","item":"https://tx-learns.vercel.app/debugging-basics/04-looking-inside.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Fixing it for good · Lesson 1</span><span class="zh">彻底修好 · 第 1 课</span></span><h1><span class="en">Looking inside</span><span class="zh">看清内部</span></h1><p class="meta"><span class="en">Print, log and step through code to see the real values instead of the ones you assume · ~10 min · reading and practice</span><span class="zh">用打印、日志和单步运行看到真实的值，而不是你以为的值 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Print with a label</span><span class="zh">第 1 步 · 带标签地打印</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The quickest way to see inside is <code>print</code>. A bare number is hard to read once there are several, so label each value. In Python, <code>f"{x=}"</code> prints the name and the value together. Print what you <i>believe</i> is true at that point, and be ready to be surprised.</p>
+<p class="zh" style="margin:0 0 8px">最快看清内部的办法是 <code>print</code>。一旦有好几个，光秃秃的数字就难读了，所以给每个值加标签。在 Python 里，<code>f"{x=}"</code> 会同时打印名字和值。打印你<i>相信</i>在这一点上成立的东西，并准备好被打脸。</p></div>
+<div class="codebox" data-file="label.py" data-lang="python">x = 3
+items = [1, 2]
+print(f"{x=}")
+print(f"{len(items)=}")</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Facts and assumptions</span><span class="zh">第 2 步 · 事实与假设</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Debugging is mostly finding the one belief that is false: “this list is never empty”, “this runs before that”, “the file has been saved”. Write your beliefs as a list, then check each one with a print or a test. The belief you were most sure of is often the wrong one, because you stopped checking it.</p>
+<p class="zh" style="margin:0 0 8px">调试多半是在找出那个错误的信念：“这个列表从不为空”、“这个先于那个运行”、“文件已经保存了”。把你的信念列成清单，然后逐条用打印或测试检查。你最有把握的那条，往往恰恰是错的，因为你早就不再检查它了。</p></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Logs and debuggers</span><span class="zh">第 3 步 · 日志与调试器</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Prints vanish when you clean up. A <b>log</b> is a print you keep on purpose, with a level (info, warning, error) so you can turn the noise up or down; it is how you look inside a program running somewhere you cannot watch. A <b>debugger</b> pauses the program at a line you choose and lets you look at every variable and step forward one line at a time, with no code changes. Use prints for a quick look, a debugger when you need to explore, and logs for what happens after you have gone home.</p>
+<p class="zh" style="margin:0 0 8px">打印在你清理代码时就消失了。<b>日志</b>是你有意保留的打印，带有级别（信息、警告、错误），可以把噪音调大调小；用它才能看到在你看不到的地方运行的程序。<b>调试器</b>在你选定的某一行暂停程序，让你查看每个变量，并一行一行往下走，不用改代码。快速看一眼用打印，需要探索时用调试器，你下班之后发生的事靠日志。</p></div>
+<div class="codebox" data-file="inside.py" data-lang="python">import logging
+logging.basicConfig(level=logging.INFO)
+logging.info("loaded %d rows", 3)   # a log line that stays in the code
+
+items = []
+breakpoint()   # pauses here so a debugger can inspect items</div>
+<div class="try" id="p3"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> add labelled prints to a function you do not trust and compare them with what you expected.</span><span class="zh"><b>试一试：</b>在一个你不太信任的函数里加带标签的打印，对比你的预期。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> list three beliefs about a bug and test the one you are surest of first.</span><span class="zh"><b>核对：</b>列出关于一个问题的三个信念，先检验你最有把握的那条。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Print values with labels, and expect surprises.<br>• The belief you stopped checking is often the false one.<br>• Prints for a quick look, a debugger to explore, logs for later.</p><p class="zh" style="margin:0">• 带标签地打印值，并预期会有意外。<br>• 你不再检查的那条信念往往是错的。<br>• 打印看一眼，调试器做探索，日志留给之后。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Debugging</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3 for the small examples; reading is enough for the rest","zh":"小例子需要 Python 3；其余只需阅读"},"know":{"en":"Narrowing it down (see “Narrowing it down”).","zh":"会缩小范围（见“缩小范围”）。"},"goals":{"en":["Print values with a label","Tell a fact from an assumption","Know what a debugger adds"],"zh":["带标签地打印值","区分事实和假设","知道调试器多做了什么"]},"prev":["03-narrowing-it-down.html"]}}</script>
+<script src="../tracks.js?v=9d67b172"></script><script src="lessons.js?v=3f03817d"></script><script src="../assets/site.js?v=cf875a90"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/04-looking-inside.js?v=0a33922e"></script></body></html>
