@@ -124,6 +124,10 @@
   if(typeof a==='number')return a%1===0&&a>=0&&a<4?a:-1;
   if(typeof a==='string'){var t=a.trim(),k=t.match(/^\(?([A-Da-d])(?![A-Za-z])/);if(k)return k[1].toUpperCase().charCodeAt(0)-65;if(/^[0-3]$/.test(t))return +t}
   return -1};
+ /* Two questions that ask the same thing (the same passage twice, or a model that repeats itself): the words of the stem, or of the stem with its options, overlap by 70% or more. */
+ L.similar=function(a,b){function w(t){var m=String(t).toLowerCase().match(/[a-z0-9]{3,}|[\u4e00-\u9fff]/g)||[],o={};m.forEach(function(x){o[x]=1});return o}
+  function j(x,y){var k=Object.keys(x),n=0;k.forEach(function(t){if(y[t])n++});var u=k.length+Object.keys(y).length-n;return u?n/u:0}
+  return j(w(a.q),w(b.q))>=0.7||j(w(a.q+' '+a.o.join(' ')),w(b.q+' '+b.o.join(' ')))>=0.7};
  L.shuffle=function(item,rnd){var idx=[0,1,2,3];for(var i=3;i>0;i--){var j=Math.floor(rnd()*(i+1)),t=idx[i];idx[i]=idx[j];idx[j]=t}
   return {q:item.q,e:item.e,o:idx.map(function(k){return item.o[k]}),a:idx.indexOf(item.a)}};
  /* The question, its options and its explanation must be in the language the reader chose on the page, whatever language the material is in. */
