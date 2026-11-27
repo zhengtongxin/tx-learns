@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Scores and thresholds | TX Learns</title>
+<meta name="description" content="Turn a model score into a yes or no, and judge it with precision and recall"><meta property="og:title" content="Scores and thresholds | TX Learns"><meta property="og:description" content="Turn a model score into a yes or no, and judge it with precision and recall"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/numbers-for-ai/05-scores-and-thresholds.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/numbers-for-ai.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/numbers-for-ai/05-scores-and-thresholds.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/numbers-for-ai/05-scores-and-thresholds.html","url":"https://tx-learns.vercel.app/numbers-for-ai/05-scores-and-thresholds.html","name":"Scores and thresholds","alternateName":"分数与阈值","description":"Turn a model score into a yes or no, and judge it with precision and recall","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Numbers models use","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Numbers for AI","url":"https://tx-learns.vercel.app/numbers-for-ai/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Numbers for AI","item":"https://tx-learns.vercel.app/numbers-for-ai/index.html"},{"@type":"ListItem","position":3,"name":"Scores and thresholds","item":"https://tx-learns.vercel.app/numbers-for-ai/05-scores-and-thresholds.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Numbers models use · Lesson 2</span><span class="zh">模型用到的数字 · 第 2 课</span></span><h1><span class="en">Scores and thresholds</span><span class="zh">分数与阈值</span></h1><p class="meta"><span class="en">Turn a model score into a yes or no, and judge it with precision and recall · ~10 min · reading and practice</span><span class="zh">把模型分数变成“是”或“否”，并用精确率和召回率来评价 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · A score is not a decision</span><span class="zh">第 1 步 · 分数不是决定</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Many systems output a <b>score</b>, such as 0.83 for “this email is spam”. To act, you choose a <b>threshold</b>: everything at or above it counts as a yes. A low threshold catches more of what you want but also lets in more false alarms; a high one is stricter but misses more. Where to draw the line is a choice about which mistake costs more, not something the model decides.</p>
+<p class="zh" style="margin:0 0 8px">许多系统输出<b>分数</b>，比如“这封邮件是垃圾邮件”得 0.83。要行动，就得选一个<b>阈值</b>：达到或高于它的都算“是”。阈值低，能抓到更多想要的，但也放进更多误报；阈值高，更严格，但漏掉更多。线划在哪里，是在选择哪种错误代价更大，不是模型能替你决定的。</p></div>
+<div class="codebox" data-file="threshold.py" data-lang="python">scores = [0.9, 0.7, 0.4, 0.2]
+threshold = 0.5
+flagged = [s for s in scores if s &gt;= threshold]   # keep scores at or above it
+print(len(flagged))</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Hits, misses and false alarms</span><span class="zh">第 2 步 · 命中、漏掉和误报</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Compare the flagged items with the truth and count three things: <b>true positives</b> (flagged and really positive), <b>false positives</b> (flagged, but not), and <b>false negatives</b> (missed real ones). For a spam filter, a false positive is a good email in the spam folder, and a false negative is spam in your inbox.</p>
+<p class="zh" style="margin:0 0 8px">把被标记的项目和真实情况对照，数三样东西：<b>真阳性</b>（被标记且确实是阳性）、<b>假阳性</b>（被标记，但其实不是）、<b>假阴性</b>（漏掉的真实阳性）。对垃圾邮件过滤器来说，假阳性是一封正常邮件被放进垃圾箱，假阴性是垃圾邮件出现在收件箱。</p></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Precision and recall</span><span class="zh">第 3 步 · 精确率与召回率</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><b>Precision</b> asks: of everything flagged, how much was right? It is true positives ÷ (true positives + false positives). <b>Recall</b> asks: of everything real, how much did we catch? It is true positives ÷ (true positives + false negatives). Raising the threshold usually lifts precision and lowers recall, and lowering it does the opposite. Quoting one without the other can make a poor system look good. Sort each need.</p>
+<p class="zh" style="margin:0 0 8px"><b>精确率</b>问：被标记的里面，有多少是对的？等于真阳性 ÷（真阳性 + 假阳性）。<b>召回率</b>问：真正存在的里面，我们抓到了多少？等于真阳性 ÷（真阳性 + 假阴性）。提高阈值通常会提高精确率、降低召回率，降低阈值则相反。只报其中一个，会让一个不好的系统看起来很好。给每种需求分类。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> make up ten scores and truth labels, then try two thresholds and count hits, misses and false alarms.</span><span class="zh"><b>试一试：</b>编十个分数和真实标签，试两个阈值，数出命中、漏掉和误报。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> for something you use, decide whether a false alarm or a miss costs more.</span><span class="zh"><b>核对：</b>对你用到的某个东西，判断误报还是漏报代价更高。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A threshold turns a score into a yes or no.<br>• Precision: of the flagged, how many are right. Recall: of the real, how many were caught.<br>• Raising the threshold usually trades recall for precision.</p><p class="zh" style="margin:0">• 阈值把分数变成“是”或“否”。<br>• 精确率：被标记的里有多少是对的。召回率：真实的里抓到多少。<br>• 提高阈值通常是用召回率换精确率。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Numbers for AI</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3 for the small examples; reading is enough for the rest","zh":"小例子需要 Python 3；其余只需阅读"},"know":{"en":"Percentages and rates (see “Percentages and rates”).","zh":"知道百分比与比率（见“百分比与比率”）。"},"goals":{"en":["Pick a threshold","Count hits, misses and false alarms","Say what precision and recall measure"],"zh":["选定阈值","数出命中、漏掉和误报","说出精确率和召回率衡量什么"]},"prev":["02-percentages-and-rates.html"]}}</script>
+<script src="../tracks.js?v=1f998a14"></script><script src="lessons.js?v=741c7829"></script><script src="../assets/site.js?v=cf875a90"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/05-scores-and-thresholds.js?v=b49ff455"></script></body></html>

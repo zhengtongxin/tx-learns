@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vectors and similarity | TX Learns</title>
+<meta name="description" content="Treat a list of numbers as a point, and measure how alike two of them are"><meta property="og:title" content="Vectors and similarity | TX Learns"><meta property="og:description" content="Treat a list of numbers as a point, and measure how alike two of them are"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/numbers-for-ai/04-vectors-and-similarity.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/numbers-for-ai.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/numbers-for-ai/04-vectors-and-similarity.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/numbers-for-ai/04-vectors-and-similarity.html","url":"https://tx-learns.vercel.app/numbers-for-ai/04-vectors-and-similarity.html","name":"Vectors and similarity","alternateName":"向量与相似度","description":"Treat a list of numbers as a point, and measure how alike two of them are","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Numbers models use","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Numbers for AI","url":"https://tx-learns.vercel.app/numbers-for-ai/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Numbers for AI","item":"https://tx-learns.vercel.app/numbers-for-ai/index.html"},{"@type":"ListItem","position":3,"name":"Vectors and similarity","item":"https://tx-learns.vercel.app/numbers-for-ai/04-vectors-and-similarity.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Numbers models use · Lesson 1</span><span class="zh">模型用到的数字 · 第 1 课</span></span><h1><span class="en">Vectors and similarity</span><span class="zh">向量与相似度</span></h1><p class="meta"><span class="en">Treat a list of numbers as a point, and measure how alike two of them are · ~10 min · reading and practice</span><span class="zh">把一列数字当作空间里的一个点，并衡量两个点有多相似 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · A list of numbers as a point</span><span class="zh">第 1 步 · 一列数字就是一个点</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>vector</b> is just a list of numbers, read as a point, or an arrow from the start, in space. <code>[3, 4]</code> is a point 3 across and 4 up. Models turn words, images and sentences into long vectors with hundreds of numbers, so that “alike” things end up close together. You cannot picture 300 directions, but the same arithmetic works on any length.</p>
+<p class="zh" style="margin:0 0 8px"><b>向量</b>就是一列数字，被看作空间里的一个点，或者从原点出发的一支箭头。<code>[3, 4]</code> 是横向 3、纵向 4 的点。模型把词、图片和句子变成有几百个数字的长向量，让“相像”的东西彼此靠近。你无法想象 300 个方向，但同样的算术对任意长度都成立。</p></div>
+<div class="codebox" data-file="length.py" data-lang="python">import math
+v = [3, 4]
+print(math.sqrt(v[0] ** 2 + v[1] ** 2))   # distance from the start</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · The dot product</span><span class="zh">第 2 步 · 点积</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The <b>dot product</b> of two vectors multiplies them position by position and adds the results: for <code>[1, 2]</code> and <code>[3, 4]</code> that is 1×3 + 2×4 = 11. It is large when the two point the same way, zero when they are at right angles, and negative when they point apart. It is the building block of most similarity scores.</p>
+<p class="zh" style="margin:0 0 8px">两个向量的<b>点积</b>，是把它们按位置对应相乘，再把结果相加：<code>[1, 2]</code> 和 <code>[3, 4]</code> 的点积是 1×3 + 2×4 = 11。两者方向一致时它很大，成直角时为零，方向相反时为负。它是大多数相似度分数的基本构件。</p></div>
+<div class="codebox" data-file="dot.py" data-lang="python">a = [1, 2]
+b = [3, 4]
+print(sum(x * y for x, y in zip(a, b)))   # zip pairs them up by position</div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Cosine similarity</span><span class="zh">第 3 步 · 余弦相似度</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Dividing the dot product by both lengths gives the <b>cosine similarity</b>: 1 means the same direction, 0 means unrelated, and −1 means opposite. It ignores how long the vectors are and only compares direction, which is why it works for text, where a long document and a short one on the same topic should still count as alike. Search by meaning compares your question’s vector with stored ones and returns the highest scores.</p>
+<p class="zh" style="margin:0 0 8px">把点积除以两个向量各自的长度，就得到<b>余弦相似度</b>：1 表示方向相同，0 表示不相关，−1 表示相反。它忽略向量有多长，只比较方向，所以适用于文本：同一话题的一篇长文和一篇短文，仍应被视为相像。按含义搜索，就是拿你问题的向量和库里存的向量比较，返回得分最高的。</p></div>
+<div class="try" id="p3"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> compute the dot product of two three-number lists by hand and check it with the code.</span><span class="zh"><b>试一试：</b>手算两个三个数字的列表的点积，再用代码核对。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> think of a search you used where the results matched your meaning, not your words.</span><span class="zh"><b>核对：</b>想一想你用过的一次搜索，结果匹配的是你的意思，而不是你用的词。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A vector is a list of numbers read as a point.<br>• The dot product is large when two point the same way.<br>• Cosine similarity compares direction: 1 is alike, 0 is unrelated.</p><p class="zh" style="margin:0">• 向量是一列被当作点的数字。<br>• 两者方向一致时，点积很大。<br>• 余弦相似度比较方向：1 是相像，0 是不相关。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Numbers for AI</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3 for the small examples; reading is enough for the rest","zh":"小例子需要 Python 3；其余只需阅读"},"know":{"en":"Basic Python lists, and the idea of an average.","zh":"了解基础 Python 列表和平均数的概念。"},"goals":{"en":["Say what a vector is","Compute a dot product and a length","Read a similarity score"],"zh":["说出向量是什么","算出点积和长度","读懂相似度分数"]},"prev":["01-averages-and-spread.html"]}}</script>
+<script src="../tracks.js?v=1f998a14"></script><script src="lessons.js?v=741c7829"></script><script src="../assets/site.js?v=cf875a90"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/04-vectors-and-similarity.js?v=8a23f9db"></script></body></html>
