@@ -4,7 +4,7 @@
 <meta name="updated" content="2026-11-27">
 <link rel="canonical" href="https://tx-learns.vercel.app/ai-coder/14-swarms-and-orchestrators.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=8ad6ba13"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-coder/14-swarms-and-orchestrators.html","url":"https://tx-learns.vercel.app/ai-coder/14-swarms-and-orchestrators.html","name":"Swarms and orchestrators","alternateName":"智能体群与调度器","description":"Run many agents at once with one lead, split by files, and kept on a leash","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Advanced","teaches":"Agentic engineering","dateModified":"2026-11-27","isPartOf":{"@type":"CollectionPage","name":"AI Coder","url":"https://tx-learns.vercel.app/ai-coder/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Coder","item":"https://tx-learns.vercel.app/ai-coder/index.html"},{"@type":"ListItem","position":3,"name":"Swarms and orchestrators","item":"https://tx-learns.vercel.app/ai-coder/14-swarms-and-orchestrators.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
-<div class="hero"><span class="tag"><span class="en">Agentic engineering · Lesson 4</span><span class="zh">智能体工程 · 第 4 课</span></span><h1><span class="en">Swarms and orchestrators</span><span class="zh">智能体群与调度器</span></h1><p class="meta"><span class="en">Run many agents at once with one lead, split by files, and kept on a leash · ~11 min · concepts</span><span class="zh">让多个智能体同时工作：一个负责人、按文件切分，并且受到约束 · 约 11 分钟 · 讲概念</span></p></div>
+<div class="hero"><span class="tag"><span class="en">Agentic engineering · Lesson 4</span><span class="zh">智能体工程 · 第 4 课</span></span><h1><span class="en">Swarms and orchestrators</span><span class="zh">智能体群与调度器</span></h1><p class="meta"><span class="en">Run many agents at once with one lead, split by files, and kept on a leash · ~14 min · concepts</span><span class="zh">让多个智能体同时工作：一个负责人、按文件切分，并且受到约束 · 约 14 分钟 · 讲概念</span></p></div>
 
 <h2><span class="en">Step 1 · Orchestrator and workers</span><span class="zh">第 1 步 · 调度者与执行者</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">In a <b>swarm</b>, one <b>orchestrator</b> agent breaks a goal into tasks and hands each to a <b>worker</b> agent. Workers run at the same time, each in its own worktree, and report back. The orchestrator checks the results and puts them together.</p>
@@ -36,6 +36,31 @@
 <p class="en">Sort each one.</p>
 <p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
 
+<h2><span class="en">Step 4 · From plan to waves</span><span class="zh">第 4 步 · 从计划到几波</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A wave is a set of tasks that can run together. Start with the plan above. <b>api</b> and <b>docs</b> have no dependencies and share no file, so they form wave 1. <b>ui</b> and <b>tests</b> both wait for <b>api</b>, so they could form wave 2.</p>
+<p class="zh" style="margin:0 0 8px">一波就是可以同时运行的一组任务。从上面的计划开始：<b>api</b> 和 <b>docs</b> 没有依赖，也不共享文件，所以是第 1 波。<b>ui</b> 和 <b>tests</b> 都要等 <b>api</b>，本来可以是第 2 波。</p>
+<p class="en" style="margin:0 0 8px">Now suppose both also need to edit <code>src/index.js</code>. The planner must not put them in the same wave. This small script does the grouping and gives three waves, not two.</p>
+<p class="zh" style="margin:0 0 8px">现在假设它们都要改 <code>src/index.js</code>。规划器不能把它们放进同一波。下面这个小脚本负责分组，结果是三波，不是两波。</p></div>
+<div class="codebox" data-file="waves.js" data-lang="js">const tasks = [
+  { id: "api", deps: [], files: ["src/api.js"] },
+  { id: "ui", deps: ["api"], files: ["src/ui.js", "src/index.js"] },
+  { id: "tests", deps: ["api"], files: ["test/api.test.js", "src/index.js"] },
+  { id: "docs", deps: [], files: ["README.md"] },
+];
+const done = new Set(), waves = [];
+while (done.size < tasks.length) {
+  const wave = [], used = new Set();
+  for (const t of tasks) {
+    if (done.has(t.id) || !t.deps.every(d => done.has(d))) continue; // not ready yet
+    if (t.files.some(f => used.has(f))) continue; // a file is already taken in this wave
+    wave.push(t.id); t.files.forEach(f => used.add(f));
+  }
+  wave.forEach(id => done.add(id)); waves.push(wave);
+}
+console.log(waves); // [ [ 'api', 'docs' ], [ 'ui' ], [ 'tests' ] ]</div>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Write</b> a tasks.json for a job of your own with files and dependencies, then group it into waves by hand.</span><span class="zh"><b>写</b>为你自己的一件事写一份带文件和依赖的 tasks.json，再手工把它分成几波。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Decide</b> a cap, a budget and a stop rule before you ever run more than one agent.</span><span class="zh"><b>决定</b>在你同时运行多个智能体之前，先定好并发上限、预算和停止规则。</span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
@@ -45,4 +70,4 @@
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"prev":["13-large-codebases.html"],"tools":{"en":"Only a browser to read; git worktrees and a terminal agent to try it","zh":"只读的话只需要浏览器；想试的话要 git worktree 和终端智能体"},"know":{"en":"Sub-agents and sandboxing.","zh":"子智能体和沙箱。"},"goals":{"en":["Describe the orchestrator and worker pattern","Split work by files and dependencies","Put limits on a swarm"],"zh":["描述调度者与执行者的模式","按文件和依赖切分工作","给智能体群设限"]}}}</script>
 <script src="../tracks.js?v=819ff2a4"></script><script src="lessons.js?v=389b4305"></script><script src="../assets/site.js?v=a0db7d29"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
-<script src="js/14-swarms-and-orchestrators.js?v=ec8a1cde"></script></body></html>
+<script src="js/14-swarms-and-orchestrators.js?v=52d30584"></script></body></html>
