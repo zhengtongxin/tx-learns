@@ -9,8 +9,8 @@
 <h2><span class="en">Step 1 · One loop for the team</span><span class="zh">第 1 步 · 团队共用一个循环</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A steady loop works for people and agents alike: <b>explore</b> the code, <b>plan</b>, <b>build</b> in small steps, <b>test</b>, <b>commit</b>, open a pull request (PR: a proposed change that others review before it joins the main code). Ask for the plan before the code.</p>
 <p class="zh" style="margin:0 0 8px">有一个稳定的循环，人和智能体都适用：<b>探索</b>代码、<b>计划</b>、分小步<b>构建</b>、<b>测试</b>、<b>提交</b>、发起拉取请求（PR：一份先让别人审阅、再并入主代码的改动提议）。先要计划，再要代码。</p>
-<p class="en" style="margin:0 0 8px">For a team, share what the agent reads: commit AGENTS.md, custom commands and skills (see the lesson on MCP, skills and plugins). Everyone gets the same test command, the same rules, the same checks in continuous integration (CI), which runs the tests automatically on every change.</p>
-<p class="zh" style="margin:0 0 8px">对团队来说，要共享智能体读的东西：提交 AGENTS.md、自定义命令和技能（见“MCP、技能与插件”那一课）。每个人都有同一条测试命令、同一套规矩、持续集成（CI，每次改动都会自动跑测试）里同样的检查。</p>
+<p class="en" style="margin:0 0 8px">For a team, share what the agent reads: commit AGENTS.md (a notes file the agent reads at the start of a session), custom commands and skills (see the lesson on MCP, skills and plugins). Everyone gets the same test command, the same rules, the same checks in continuous integration (CI), which runs the tests automatically on every change.</p>
+<p class="zh" style="margin:0 0 8px">对团队来说，要共享智能体读的东西：提交 AGENTS.md（智能体每次开始工作时读的笔记文件）、自定义命令和技能（见“MCP、技能与插件”那一课）。每个人都有同一条测试命令、同一套规矩、持续集成（CI，每次改动都会自动跑测试）里同样的检查。</p>
 </div>
 
 <h2><span class="en">Step 2 · You still own the review</span><span class="zh">第 2 步 · 审阅仍归你</span></h2>
@@ -28,15 +28,15 @@
 <p class="zh" style="margin:0 0 8px">一次只改一件事。如果它在同一个错误想法上试了两次还在打转，就停下来，开一个新会话，把你学到的告诉它。</p>
 </div>
 <div class="codebox" data-file="debug prompt" data-lang="text">Bug: the shares add up to 2 cents too much when 3 people split a 50.35 bill.
-Reproduce: node split.js  (prints 5037, expected 5035)
+Reproduce: node split.js  (node runs a JavaScript file)  (prints 5037, expected 5035)
 Do not change code yet. First list three likely causes, with the file for each.
 Then write a failing test that shows the bug. Only then fix it.</div>
-<p class="en">Sort each one.</p>
-<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+<p class="en">Sort each request to an agent as good or weak.</p>
+<p class="zh">把给智能体的每条请求分成“好”或“弱”。</p><div class="sc" id="g1"></div>
 
 <h2><span class="en">Step 4 · The bug, the test, the fix</span><span class="zh">第 4 步 · bug、测试、修复</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Here is what the debug prompt above produces. The bill is 5035 cents shared by 3 people. The code rounds every share up, so the shares add up to 5037. After listing the causes, the agent's next move is a test that fails for the right reason (a test is a small check that fails while the bug is there, so writing it first proves it catches the bug). The code boxes here are JavaScript, a language you do not need to know: read the comments. the shares must add up to the bill.</p>
-<p class="zh" style="margin:0 0 8px">上面那份调试提示会得到这样的结果。账单是 5035 分，3 个人分摊。代码把每份都向上取整，所以几份加起来是 5037。列出原因之后，智能体的下一步是写一个因为正确原因而失败的测试（测试就是一个小检查：bug 还在时它会失败，所以先写它，就证明它真能抓住这个 bug）。这里的代码是 JavaScript，你不需要会它，看注释就行：几份加起来必须等于账单。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Here is what the debug prompt above produces. The bill is 5035 cents shared by 3 people. The code rounds every share up, so the shares add up to 5037. After listing the causes, the agent's next move is a test that fails for the right reason (a test is a small check that fails while the bug is there, so writing it first proves it catches the bug). The code boxes here are JavaScript, a language you do not need to know: read the comments. The test checks one rule: the shares must add up to the bill.</p>
+<p class="zh" style="margin:0 0 8px">上面那份调试提示会得到这样的结果。账单是 5035 分，3 个人分摊。代码把每份都向上取整，所以几份加起来是 5037。列出原因之后，智能体的下一步是写一个因为正确原因而失败的测试（测试就是一个小检查：bug 还在时它会失败，所以先写它，就证明它真能抓住这个 bug）。这里的代码是 JavaScript，你不需要会它，看注释就行。这个测试只检查一条规则：几份加起来必须等于账单。</p></div>
 <div class="codebox" data-file="split.js, the buggy version and its failing test" data-lang="js">function split(cents, people) {
   // Array(3).fill(x) makes a list of three x; Math.ceil rounds up
   return Array(people).fill(Math.ceil(cents / people));
@@ -50,7 +50,8 @@ assert.strictEqual(parts.reduce((a, b) => a + b, 0), 5035, 'shares must add up t
 <p class="zh" style="margin:0 0 8px">到这时才修：每人先拿向下取整的份额，剩下的几分钱分给前几个人。同一个测试现在通过，而你只需审阅四行改动。</p></div>
 <div class="codebox" data-file="split.js, the fix" data-lang="js">function split(cents, people) {
   const base = Math.floor(cents / people), extra = cents % people; // % is the remainder: 5035 % 3 is 1
-  // Array.from builds a list: the first `extra` people get one more cent
+  // Array.from builds a list; (_, i) => ... is a small function, _ is an unused value and i the position;
+  // `i < extra ? 1 : 0` means 1 if i is below extra, otherwise 0: the first few people get one more cent
   return Array.from({ length: people }, (_, i) => base + (i < extra ? 1 : 0));
 }
 // split(5035, 3) gives [1679, 1678, 1678], which adds up to 5035</div>
