@@ -2,7 +2,7 @@
 <title>Team workflows and debugging | TX Learns</title>
 <meta name="description" content="Use agents inside a team workflow, and give them what they need to debug"><meta property="og:title" content="Team workflows and debugging | TX Learns"><meta property="og:description" content="Use agents inside a team workflow, and give them what they need to debug"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-coder/09-team-workflows-and-debugging.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/ai-coder.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
 <meta name="updated" content="2026-11-27">
-<link rel="canonical" href="https://tx-learns.vercel.app/ai-coder/09-team-workflows-and-debugging.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=12861667"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-coder/09-team-workflows-and-debugging.html","url":"https://tx-learns.vercel.app/ai-coder/09-team-workflows-and-debugging.html","name":"Team workflows and debugging","alternateName":"团队流程与调试","description":"Use agents inside a team workflow, and give them what they need to debug","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Vibe engineering","dateModified":"2026-11-27","isPartOf":{"@type":"CollectionPage","name":"AI Coder","url":"https://tx-learns.vercel.app/ai-coder/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Coder","item":"https://tx-learns.vercel.app/ai-coder/index.html"},{"@type":"ListItem","position":3,"name":"Team workflows and debugging","item":"https://tx-learns.vercel.app/ai-coder/09-team-workflows-and-debugging.html"}]}]}</script></head><body>
+<link rel="canonical" href="https://tx-learns.vercel.app/ai-coder/09-team-workflows-and-debugging.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=8ad6ba13"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-coder/09-team-workflows-and-debugging.html","url":"https://tx-learns.vercel.app/ai-coder/09-team-workflows-and-debugging.html","name":"Team workflows and debugging","alternateName":"团队流程与调试","description":"Use agents inside a team workflow, and give them what they need to debug","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Vibe engineering","dateModified":"2026-11-27","isPartOf":{"@type":"CollectionPage","name":"AI Coder","url":"https://tx-learns.vercel.app/ai-coder/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Coder","item":"https://tx-learns.vercel.app/ai-coder/index.html"},{"@type":"ListItem","position":3,"name":"Team workflows and debugging","item":"https://tx-learns.vercel.app/ai-coder/09-team-workflows-and-debugging.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
 <div class="hero"><span class="tag"><span class="en">Vibe engineering · Lesson 4</span><span class="zh">专业级氛围工程 · 第 4 课</span></span><h1><span class="en">Team workflows and debugging</span><span class="zh">团队流程与调试</span></h1><p class="meta"><span class="en">Use agents inside a team workflow, and give them what they need to debug · ~14 min · concepts</span><span class="zh">把智能体放进团队流程，并给它调试所需要的东西 · 约 14 分钟 · 讲概念</span></p></div>
 
@@ -28,26 +28,29 @@
 <p class="zh" style="margin:0 0 8px">一次只改一件事。如果它在同一个错误想法上试了两次还在打转，就停下来，开一个新会话，把你学到的告诉它。</p>
 </div>
 <div class="codebox" data-file="debug prompt" data-lang="text">Bug: the shares add up to 2 cents too much when 3 people split a 50.35 bill.
-Reproduce: node scripts/try-split.js  (prints 5037, expected 5035)
+Reproduce: node split.js  (prints 5037, expected 5035)
 Do not change code yet. First list three likely causes, with the file for each.
 Then write a failing test that shows the bug. Only then fix it.</div>
 <p class="en">Sort each one.</p>
 <p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
 
 <h2><span class="en">Step 4 · The bug, the test, the fix</span><span class="zh">第 4 步 · bug、测试、修复</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Here is what the debug prompt above produces. The bill is 5035 cents shared by 3 people. The code rounds every share up, so the shares add up to 5037. The agent's first move is a test that fails for the right reason: the shares must add up to the bill.</p>
-<p class="zh" style="margin:0 0 8px">上面那份调试提示会得到这样的结果。账单是 5035 分，3 个人分摊。代码把每份都向上取整，所以几份加起来是 5037。智能体的第一步是写一个因为正确原因而失败的测试：几份加起来必须等于账单。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Here is what the debug prompt above produces. The bill is 5035 cents shared by 3 people. The code rounds every share up, so the shares add up to 5037. After listing the causes, the agent's next move is a test that fails for the right reason (a test is a small check that fails while the bug is there, so writing it first proves it catches the bug). The code boxes here are JavaScript, a language you do not need to know: read the comments. the shares must add up to the bill.</p>
+<p class="zh" style="margin:0 0 8px">上面那份调试提示会得到这样的结果。账单是 5035 分，3 个人分摊。代码把每份都向上取整，所以几份加起来是 5037。列出原因之后，智能体的下一步是写一个因为正确原因而失败的测试（测试就是一个小检查：bug 还在时它会失败，所以先写它，就证明它真能抓住这个 bug）。这里的代码是 JavaScript，你不需要会它，看注释就行：几份加起来必须等于账单。</p></div>
 <div class="codebox" data-file="split.js, the buggy version and its failing test" data-lang="js">function split(cents, people) {
+  // Array(3).fill(x) makes a list of three x; Math.ceil rounds up
   return Array(people).fill(Math.ceil(cents / people));
 }
 const assert = require('node:assert'); // assert stops with an error when a check is false
 const parts = split(5035, 3);
+// reduce adds the list up; strictEqual stops with an error if the two values differ
 assert.strictEqual(parts.reduce((a, b) => a + b, 0), 5035, 'shares must add up to the bill');
 // AssertionError: shares must add up to the bill (5037 !== 5035)</div>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Only now the fix: give everyone the rounded-down share, then hand the leftover cents to the first few people. The same test now passes, and you only have to review a four-line change.</p>
 <p class="zh" style="margin:0 0 8px">到这时才修：每人先拿向下取整的份额，剩下的几分钱分给前几个人。同一个测试现在通过，而你只需审阅四行改动。</p></div>
 <div class="codebox" data-file="split.js, the fix" data-lang="js">function split(cents, people) {
   const base = Math.floor(cents / people), extra = cents % people; // % is the remainder: 5035 % 3 is 1
+  // Array.from builds a list: the first `extra` people get one more cent
   return Array.from({ length: people }, (_, i) => base + (i < extra ? 1 : 0));
 }
 // split(5035, 3) gives [1679, 1678, 1678], which adds up to 5035</div>
