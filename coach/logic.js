@@ -94,29 +94,48 @@
   return low[Math.floor(rnd()*low.length)]};
  L.stripThink=function(s){return s.replace(/<think>[\s\S]*?<\/think>/g,'').replace(/^[\s\S]*<\/think>/,'')};
  /* model output -> {q,o:[4],a,e} or null */
- L.parseQuestion=function(raw){
+ /* one answer as the model wrote it (index, digit, letter, "(B) text" or the option text) -> 0..3, or -1 */
+ function resolveAns(a,opts){
+  if(typeof a==='string'){var s2=a.trim(),bare=s2.toLowerCase(),hit=-1,m;opts.forEach(function(x,k){if(x.toLowerCase()===bare)hit=k});
+   if(hit>-1)return hit;
+   if((m=s2.match(/^\(?([A-Da-d])(?![A-Za-z])/)))return m[1].toUpperCase().charCodeAt(0)-65;
+   return /^[0-3]$/.test(s2)?+s2:-1}
+  return typeof a==='number'&&a%1===0&&a>=0&&a<4?a:-1}
+ /* model output -> {q,o:[4],a,m?,e} or null. With multi, the question must have exactly two keys (m, sorted; a is the first) and must not
+    ask for "the one" answer; without it the question has one key. */
+ L.parseQuestion=function(raw,multi){
   var s=L.stripThink(String(raw||'')).replace(/```(?:json)?/g,''),i=s.indexOf('{'),j=s.lastIndexOf('}');if(i<0||j<i)return null;
   var o;try{o=JSON.parse(s.slice(i,j+1))}catch(e){return null}
-  var q=String(o.question||o.q||'').trim(),opts=o.options||o.choices,a=o.answer;
+  var q=String(o.question||o.q||'').trim(),opts=o.options||o.choices,a=o.answer,m=null;
   if(!Array.isArray(opts)||opts.length!==4||!q)return null;
   opts=opts.map(function(x){return String(x==null?'':x).replace(/^\s*(?:[A-Da-d][\).、:：]|\([A-Da-d]\))\s*/,'').trim()});
-  /* the answer may be an index, a digit, a letter ("B", "b)", "(B) text") or the text of the option itself.
-     The option text is tried first and a letter counts only when it stands alone, so "Delegate the task" and
-     "A project plan" are read as text, not as options D and A. */
-  if(typeof a==='string'){var s2=a.trim(),bare=s2.toLowerCase(),hit=-1,m;opts.forEach(function(x,k){if(x.toLowerCase()===bare)hit=k});
-   if(hit>-1)a=hit;
-   else if((m=s2.match(/^\(?([A-Da-d])(?![A-Za-z])/)))a=m[1].toUpperCase().charCodeAt(0)-65;
-   else a=/^[0-3]$/.test(s2)?+s2:-1}
-  if(typeof a!=='number'||a%1!==0||!(a>=0&&a<4)||opts.some(function(x){return !x}))return null;
+  if(opts.some(function(x){return !x}))return null;
+  if(multi){
+   if(!Array.isArray(o.answers)||o.answers.length!==2)return null;
+   m=o.answers.map(function(x){return resolveAns(x,opts)});
+   if(m.some(function(x){return x<0})||m[0]===m[1])return null;
+   m.sort();a=m[0];
+   if(/\b(?:which one|the one|the single|only one)\b|哪一个|哪一项|唯一/i.test(q))return null}
+  else{a=resolveAns(a,opts);if(a<0)return null}
   var u={};opts.forEach(function(x){u[x.toLowerCase()]=1});if(Object.keys(u).length<4)return null;
   /* "all of the above" and its kin only make sense with several keys, so a one-key question with them is refused */
   if(opts.some(function(x){return /^(?:all|none|both)\s+of\s+the\s+(?:above|these)|^(?:以上|上述)(?:都|全部|均)|^(?:以上|上述)(?:皆|都)?(?:不|没)/i.test(x)}))return null;
   if(q.length<12||q.length>700)return null;
-  return {q:q,o:opts,a:a,e:String(o.explanation||o.reason||'').trim()}};
+  var r={q:q,o:opts,a:a,e:String(o.explanation||o.reason||'').trim()};if(m)r.m=m;return r};
+ /* the keys of a question: one index, or two for a choose-two question */
+ L.keys=function(it){return it.m&&it.m.length?it.m:[it.a]};
+ /* a picked option (or the two picked options of a choose-two question) against the keys */
+ L.right=function(it,pick){var k=L.keys(it),p=[].concat(pick).sort();return p.length===k.length&&k.every(function(x,i){return x===p[i]})};
  /* Second opinion on the key: the model answers the finished question from the excerpt without seeing the key. */
  L.verifyPrompt=function(c){var zh=c.lang==='zh';
   return [{role:'system',content:'You answer one multiple-choice question from the given excerpt. You answer with one JSON object and nothing else.'},
-   {role:'user',content:'Material excerpt:\n"""\n'+c.text+'\n"""\nQuestion: '+c.q.q+'\n'+c.q.o.map(function(x,i){return 'ABCD'.charAt(i)+'. '+x}).join('\n')+'\nWhich option is correct according to the excerpt? JSON format: {"answer":"A"} with the letter of the one correct option.'}]};
+   {role:'user',content:'Material excerpt:\n"""\n'+c.text+'\n"""\nQuestion: '+c.q.q+'\n'+c.q.o.map(function(x,i){return 'ABCD'.charAt(i)+'. '+x}).join('\n')+(c.q.m?'\nWhich TWO options are correct according to the excerpt? JSON format: {"answers":["A","C"]} with the letters of the two correct options.':'\nWhich option is correct according to the excerpt? JSON format: {"answer":"A"} with the letter of the one correct option.')}]};
+ /* its reply to a choose-two question -> the two indexes, sorted, or null when it does not name exactly two (then the question is kept) */
+ L.parseVerifyMulti=function(raw){var s=L.stripThink(String(raw||'')).replace(/```(?:json)?/g,''),i=s.indexOf('{'),j=s.lastIndexOf('}'),a;
+  if(i<0||j<i)return null;try{a=JSON.parse(s.slice(i,j+1)).answers}catch(e){return null}
+  if(!Array.isArray(a)||a.length!==2)return null;
+  var r=a.map(function(x){return typeof x==='string'&&!x.trim()?-1:resolveAns(x,['','','',''])});
+  if(r.some(function(x){return x<0})||r[0]===r[1])return null;return r.sort()};
  /* its reply -> option index 0..3, or -1 when it names none (then the question is kept: only a clear disagreement drops it) */
  L.parseVerify=function(raw){var s=L.stripThink(String(raw||'')).replace(/```(?:json)?/g,''),i=s.indexOf('{'),j=s.lastIndexOf('}'),a;
   if(i>-1&&j>i){try{a=JSON.parse(s.slice(i,j+1)).answer}catch(e){}}
@@ -129,7 +148,9 @@
   function j(x,y){var k=Object.keys(x),n=0;k.forEach(function(t){if(y[t])n++});var u=k.length+Object.keys(y).length-n;return u?n/u:0}
   return j(w(a.q),w(b.q))>=0.7||j(w(a.q+' '+a.o.join(' ')),w(b.q+' '+b.o.join(' ')))>=0.7};
  L.shuffle=function(item,rnd){var idx=[0,1,2,3];for(var i=3;i>0;i--){var j=Math.floor(rnd()*(i+1)),t=idx[i];idx[i]=idx[j];idx[j]=t}
-  return {q:item.q,e:item.e,o:idx.map(function(k){return item.o[k]}),a:idx.indexOf(item.a)}};
+  var r={q:item.q,e:item.e,o:idx.map(function(k){return item.o[k]}),a:idx.indexOf(item.a)};
+  if(item.m){r.m=item.m.map(function(k){return idx.indexOf(k)}).sort();r.a=r.m[0]}
+  return r};
  /* The question, its options and its explanation must be in the language the reader chose on the page, whatever language the material is in. */
  L.inLang=function(q,lang){var t=[q.q].concat(q.o,[q.e||'']).join(' '),z=L.cjkShare(t);return lang==='zh'?z>0.3:z<0.08};
  L.prompt=function(c){
@@ -140,6 +161,6 @@
    rule=zh?'Every word of the question, all 4 options and the explanation must be in Chinese (简体中文), even if the excerpt is in English: translate the ideas, and keep a technical term in English in brackets only when it helps.'
           :'Every word of the question, all 4 options and the explanation must be in English, even if the excerpt is in Chinese: translate the ideas, and keep a technical term in Chinese in brackets only when it helps.';
   return [{role:'system',content:'You write original multiple-choice study questions. You answer with one JSON object and nothing else. The reader reads '+lg+' only, so you always write in '+lg+'.'},
-   {role:'user',content:'Material excerpt'+(cross?' (in '+(c.srcLang==='zh'?'Chinese':'English')+')':'')+':\n"""\n'+c.text+'\n"""\n'+ctx+'\nWrite ONE original question in '+lg+', based on the excerpt. '+rule+' Exactly 4 options and exactly one correct option; the wrong options must be plausible. Do not copy a published exam question.\nJSON format: {"question":"...","options":["...","...","...","..."],"answer":0,"explanation":"one or two sentences on why the answer is right"} where answer is the index (0 to 3) of the correct option. The JSON keys stay in English; every value is in '+lg+'.'}]};
+   {role:'user',content:'Material excerpt'+(cross?' (in '+(c.srcLang==='zh'?'Chinese':'English')+')':'')+':\n"""\n'+c.text+'\n"""\n'+ctx+'\nWrite ONE original question in '+lg+', based on the excerpt. '+rule+' '+(c.multi?'Exactly 4 options and exactly TWO correct options (a "choose two" question: do not say which one, and make the question ask for two); the wrong options must be plausible.':'Exactly 4 options and exactly one correct option; the wrong options must be plausible.')+' Do not copy a published exam question.\nJSON format: '+(c.multi?'{"question":"...","options":["...","...","...","..."],"answers":[0,2],"explanation":"one or two sentences on why these two are right"} where answers holds the two indexes (0 to 3) of the correct options.':'{"question":"...","options":["...","...","...","..."],"answer":0,"explanation":"one or two sentences on why the answer is right"} where answer is the index (0 to 3) of the correct option.')+' The JSON keys stay in English; every value is in '+lg+'.'}]};
  if(typeof module!=='undefined'&&module.exports)module.exports=L;else root.CoachLogic=L;
 })(typeof window!=='undefined'?window:globalThis);

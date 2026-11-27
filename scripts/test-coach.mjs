@@ -23,6 +23,18 @@ ok(L.pick([{ id: 1, area: 'a', score: 9 }], 'b', {}, {}, Math.random) === null &
 ok([['{"answer":"B"}', 1], ['{"answer":2}', 2], ['<think>x</think>The answer is C.', 2], ['{"answer":"(d) text"}', 3], ['no idea', -1], ['{"answer":7}', -1]].every(([r, w]) => L.parseVerify(r) === w), 'the second opinion is read as an option, or as none');
 ok(/A\. one\nB\. two/.test(L.verifyPrompt({ text: 'x', q: { q: 'Q?', o: ['one', 'two', 'three', 'four'], a: 1 } })[1].content) && !/answer is|"answer":1/.test(L.verifyPrompt({ text: 'x', q: { q: 'Q?', o: ['one', 'two', 'three', 'four'], a: 1 } })[1].content), 'the second opinion sees the options but not the key');
 { const D = (y, m, d) => new Date(y, m - 1, d), days = { '2026-11-25': { n: 3, c: 2 }, '2026-11-26': { n: 5, c: 5 }, '2026-11-27': { n: 1, c: 0 } };
+  const mq = JSON.stringify({ question: 'Which two actions help a team resolve a conflict about scope?', options: ['Listen to both sides', 'Ignore it', 'Look for the cause', 'Escalate at once'], answers: [0, 'C'], explanation: 'x' });
+  const mp = L.parseQuestion(mq, true);
+  ok(mp && mp.m.join() === '0,2' && mp.a === 0, 'a choose-two question keeps its two keys');
+  ok(L.parseQuestion(mq) === null || L.parseQuestion(mq).m === undefined, 'without the choose-two flag the answers list is ignored');
+  ok(L.parseQuestion(JSON.stringify({ question: 'Which two actions help a team resolve a conflict about scope?', options: ['Listen to both sides', 'Ignore it', 'Look for the cause', 'Escalate at once'], answers: [1] }), true) === null, 'a choose-two question with one key is refused');
+  ok(L.parseQuestion(JSON.stringify({ question: 'Which two actions help a team resolve a conflict about scope?', options: ['Listen to both sides', 'Ignore it', 'Look for the cause', 'Escalate at once'], answers: [1, 1] }), true) === null, 'a choose-two question with the same key twice is refused');
+  ok(L.parseQuestion(JSON.stringify({ question: 'Which one action helps a team resolve a conflict about scope?', options: ['Listen to both sides', 'Ignore it', 'Look for the cause', 'Escalate at once'], answers: [0, 2] }), true) === null, 'a choose-two question that asks for "the one" answer is refused');
+  const msh = L.shuffle(mp, () => 0.3);
+  ok(L.keys(msh).length === 2 && L.keys(msh).every((k) => ['Listen to both sides', 'Look for the cause'].includes(msh.o[k])), 'shuffling keeps both keys on the right options');
+  ok(L.right(mp, [2, 0]) && !L.right(mp, [0]) && !L.right(mp, [0, 1]), 'a choose-two answer is right only with both keys');
+  ok(L.right({ a: 2 }, 2) && !L.right({ a: 2 }, 1), 'a one-key answer is right only with its key');
+  ok(L.parseVerifyMulti('{"answers":["C","A"]}').join() === '0,2' && L.parseVerifyMulti('{"answer":"A"}') === null && L.parseVerifyMulti('{"answers":["A"]}') === null, 'the second opinion on a choose-two question names two options or none');
   const q1 = { q: 'What should a project manager do first when two members disagree about scope?', o: ['Listen to both sides', 'Ignore it', 'Escalate at once', 'Wait for the sponsor'] };
   ok(L.similar(q1, { q: 'When two members disagree about the scope, what should a project manager do first?', o: ['Hear both sides', 'Ignore it', 'Escalate right away', 'Wait for the sponsor'] }), 'the same question in other words is a repeat');
   ok(!L.similar(q1, { q: 'Which document formally authorises a project and names its sponsor?', o: ['Project charter', 'Risk register', 'Burn-down chart', 'Lessons log'] }), 'a different question is not a repeat');
