@@ -197,6 +197,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 #system[data-f="3"] [data-s]:not([data-s~="3"]){opacity:.2}
 #system[data-f="4"] [data-s]:not([data-s~="4"]){opacity:.2}
 #system[data-f="5"] [data-s]:not([data-s~="5"]){opacity:.2}
+#system[data-f="6"] [data-s]:not([data-s~="6"]){opacity:.2}
 .flow li[tabindex]{cursor:pointer;outline:none;transition:opacity .28s ease}
 .flow li[tabindex]::after{content:"";position:absolute;inset:0 -10px -6px;border-radius:8px;border:1px solid transparent;transition:border-color .28s,background-color .28s;pointer-events:none}
 .flow li.on::after,.flow li:focus-visible::after{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 7%,transparent)}
@@ -341,7 +342,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
    gh:{c:2,y:RT,en:'GitHub',zh:'GitHub',m:['you press Send','你点发送'],dn:'“Send to GitHub” opens GitHub’s new-file page with everything filled in (a long text is copied for you to paste). The site’s owner presses Commit; anyone else submits a pull request that the owner reads before merging. No token and no server of ours is involved.',dz:'“发到 GitHub”会打开 GitHub 的新建文件页并填好全部内容（太长的话会先复制好让你粘贴）。站点拥有者按 Commit；其他人提交的 pull request 会先由拥有者看过再合并。不涉及令牌，也不经过我们的服务器。'},
    track:{c:1,y:RT,en:'New track',zh:'新路线',m:['under “Pick a track”','在“选一条路线”里'],dn:'The site’s content agent drafts lessons from the notes it was sent, in its own words, and says what is missing. After the usual checks the track appears under “From learners” in “Pick a track”, or as one more lesson in the track you chose.',dz:'站点的内容 agent 根据发来的提纲、关键词和笔记，用自己的话起草各课，并写明缺了什么。通过常规检查后，路线出现在“选一条路线”的“来自学习者”里，或作为你所选路线里多出的一课。'},
    goal:{c:1,y:RM,en:'Goal & outline',zh:'目标与考纲',m:['understand · exam shares','弄懂 · 考纲比例'],dn:'You pick “understand the material” or an exam. For an exam, you type its areas and weights from the official outline, or pick a ready-made one.',dz:'你选“弄懂资料”或某场考试。考试的领域和比例由你按官方考纲填写，或选现成考纲。'}};
-  var FS={files:'1',reader:'1',matcher:'1',passages:'1 2',model:'2',writer:'2 4',you:'2 3',grader:'3',analyst:'3 5',strength:'3 5',planner:'4 5',goal:'4',plan:'5',share:'6',gh:'6',track:'6'};
+  var FS={files:'1',reader:'1',matcher:'1',passages:'1 2 6',model:'2 6',writer:'2 4',you:'2 3',grader:'3',analyst:'3 5',strength:'3 5',planner:'4 5',goal:'4',plan:'5',share:'6',gh:'6',track:'6'};
   function geo(n){var a=!!n.agent,w=a?AW:NW,h=a?AH:NH,x=X(n.c);return {x:x,y:n.y,w:w,h:h,l:x-w/2,r:x+w/2,t:n.y-h/2,b:n.y+h/2}}
   function box(id){var n=N[id],g=geo(n),a=n.agent&&NAME[n.agent],o;
    if(a){o='<g class="nd ag" style="--h:'+a.hue+'" data-s="'+FS[id]+'" data-node="'+id+'" tabindex="0" role="button"><rect x="'+f(g.l)+'" y="'+f(g.t)+'" width="'+g.w+'" height="'+g.h+'" rx="6"/>'+
