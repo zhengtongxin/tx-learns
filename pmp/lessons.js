@@ -18,16 +18,20 @@ window.TRACK={id:'pmp',title:{en:'PMP',zh:'PMP 备考'},topics:[
   {k:'c',file:'13-change-control.html',title:{en:"Change control",zh:"变更控制"}},
   {k:'c',file:'14-quality-and-procurement.html',title:{en:"Quality and procurement",zh:"质量与采购"}},
   {k:'c',file:'15-communication-and-handover.html',title:{en:"Communication and handover",zh:"沟通与交接"}}]},
- {n:4,level:2,title:{en:"Business environment",zh:"商业环境"},items:[
+ {n:4,level:2,title:{en:"Planning and resources",zh:"规划与资源"},items:[
+  {k:'f',file:'25-starting-a-project.html',title:{en:"Starting a project",zh:"启动项目"}},
+  {k:'c',file:'26-team-and-resources.html',title:{en:"Team and resources",zh:"团队与资源"}},
+  {k:'c',file:'27-quality-in-depth.html',title:{en:"Quality in depth",zh:"质量详解"}}]},
+ {n:5,level:2,title:{en:"Business environment",zh:"商业环境"},items:[
   {k:'f',file:'16-value-and-benefits.html',title:{en:"Value and benefits",zh:"价值与效益"}},
   {k:'c',file:'17-compliance-and-governance.html',title:{en:"Compliance and governance",zh:"合规与治理"}},
   {k:'c',file:'18-organisational-change.html',title:{en:"Organisational change",zh:"组织变革"}},
   {k:'c',file:'19-closing-a-project.html',title:{en:"Closing a project",zh:"项目收尾"}}]},
- {n:5,level:2,title:{en:"Agile delivery",zh:"敏捷交付"},items:[
+ {n:6,level:2,title:{en:"Agile delivery",zh:"敏捷交付"},items:[
   {k:'f',file:'20-backlog-and-user-stories.html',title:{en:"Backlog and user stories",zh:"待办列表与用户故事"}},
   {k:'c',file:'21-sprints-and-events.html',title:{en:"Sprints and events",zh:"冲刺与会议"}},
   {k:'c',file:'22-flow-and-metrics.html',title:{en:"Flow and metrics",zh:"流动与度量"}},
   {k:'c',file:'23-hybrid-and-tailoring.html',title:{en:"Hybrid and tailoring",zh:"混合与裁剪"}}]},
- {n:6,level:2,title:{en:"Practice",zh:"练习"},items:[
+ {n:7,level:2,title:{en:"Practice",zh:"练习"},items:[
   {k:'c',file:'24-mixed-scenario-drill.html',title:{en:"Mixed scenario drill",zh:"综合情境练习"}}]}
 ]};
