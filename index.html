@@ -1,7 +1,7 @@
 <!doctype html><html lang="en" data-area="landing"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TX Learns – Interactive bilingual learning (EN/中文)</title>
 <meta name="description" content="Two ways to learn, in English and 中文: follow interactive AI tracks, or hand in your own slides and PDFs and let a free in-browser AI quiz you."><meta property="og:title" content="TX Learns"><meta property="og:description" content="Two ways to learn, in English and 中文: follow interactive AI tracks, or hand in your own slides and PDFs and let a free in-browser AI quiz you."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
-<link rel="canonical" href="https://tx-learns.vercel.app/"><link rel="icon" href="assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><link rel="stylesheet" href="assets/site.css?v=92b1bb9f"><style>
+<link rel="canonical" href="https://tx-learns.vercel.app/"><link rel="icon" href="assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><link rel="stylesheet" href="assets/site.css?v=999ad33b"><style>
 /* landing: a slow amber aurora, a pointer spotlight, a tilting glass card pair, words that rise in. All motion is CSS or one small script; reduced-motion and touch get the still version. */
 .aur{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 .aur i{position:absolute;width:62vmax;height:62vmax;border-radius:50%;background:radial-gradient(circle,var(--c) 0,transparent 62%);opacity:.5;will-change:transform}
@@ -72,9 +72,9 @@ html[data-theme=light] .shim{background-image:linear-gradient(100deg,#b36b00 20%
 </header>
 <section class="paths" aria-label="Choose how to learn · 选择学法">
 <h2 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap"><span class="en">Choose how to learn</span><span class="zh">选择学法</span></h2>
-<article class="pcd" style="--k:0"><a class="pcd-h" href="tracks.html"><div class="orbi">🧭</div><h3><span class="en">Pick a track</span><span class="zh">选一条路线</span></h3><p class="meta"><span class="en">AI and project management, lesson by lesson.</span><span class="zh">AI 和项目管理，一课一课学。</span></p></a>
+<article class="pcd" style="--k:0"><a class="pcd-h" href="tracks.html"><div class="orbi" data-ic="🧭"></div><h3><span class="en">Pick a track</span><span class="zh">选一条路线</span></h3><p class="meta"><span class="en">AI and project management, lesson by lesson.</span><span class="zh">AI 和项目管理，一课一课学。</span></p></a>
 <ul class="pcd-l path" id="pl-tracks"></ul><p class="acts"><a class="btn pri" href="tracks.html"><span class="en">See the tracks <i class="ar">→</i></span><span class="zh">查看路线 <i class="ar">→</i></span></a></p></article>
-<article class="pcd" style="--k:1"><a class="pcd-h" href="study/index.html"><div class="orbi">🎯</div><h3><span class="en">Study your own material</span><span class="zh">学你自己的资料</span></h3><p class="meta"><span class="en">Quiz yourself on your own slides and PDFs.</span><span class="zh">用你自己的课件和 PDF 出题考自己。</span></p></a>
+<article class="pcd" style="--k:1"><a class="pcd-h" href="study/index.html"><div class="orbi" data-ic="🎯"></div><h3><span class="en">Study your own material</span><span class="zh">学你自己的资料</span></h3><p class="meta"><span class="en">Quiz yourself on your own slides and PDFs.</span><span class="zh">用你自己的课件和 PDF 出题考自己。</span></p></a>
 <ul class="pcd-l steps">
 <li style="--i:0"><span class="no">1</span><span><b><span class="en">Hand in</span><span class="zh">交资料</span></b> · <span class="en">slides and PDFs, English or 中文</span><span class="zh">课件和 PDF，中英文均可</span></span></li>
 <li style="--i:1"><span class="no">2</span><span><b><span class="en">Get quizzed</span><span class="zh">被出题</span></b> · <span class="en">original questions from an AI in your browser</span><span class="zh">浏览器里的 AI 出原创题</span></span></li>
@@ -86,11 +86,11 @@ html[data-theme=light] .shim{background-image:linear-gradient(100deg,#b36b00 20%
 <p class="acts"><a class="btn pri" href="study/index.html"><span class="en">Open the study coach <i class="ar">→</i></span><span class="zh">打开学习教练 <i class="ar">→</i></span></a></p></article>
 </section>
 </main>
-<script src="tracks.js?v=d73d9d44"></script><script src="assets/site.js?v=5178e715"></script>
+<script src="tracks.js?v=d73d9d44"></script><script src="assets/site.js?v=12adbbc5"></script>
 <script>(function(){
 var el=document.getElementById('pl-tracks'),T=window.TRACKS||[],LV={1:['Beginner','入门'],2:['Intermediate','进阶'],3:['Advanced','高级']};
 function t(o){return '<span class="en">'+o.en+'</span><span class="zh">'+o.zh+'</span>'}
-var DM=(window.DOMAINS||[]).filter(function(d){return T.some(function(c){return (c.domain||'ai')===d.id})});el.innerHTML=DM.map(function(d,i){return '<li style="--i:'+i+'"><span class="ic" aria-hidden="true">'+d.icon+'</span><b>'+t(d.title)+'</b></li>'}).join('');
+var DM=(window.DOMAINS||[]).filter(function(d){return T.some(function(c){return (c.domain||'ai')===d.id})});el.innerHTML=DM.map(function(d,i){return '<li style="--i:'+i+'"><span class="ic" aria-hidden="true">'+txIcon(d.icon)+'</span><b>'+t(d.title)+'</b></li>'}).join('');
 function sizeDot(){el.style.setProperty('--h',Math.max(0,el.offsetHeight-22)+'px')}sizeDot();addEventListener('resize',sizeDot);
 /* pointer effects: page spotlight, card tilt with a moving glow, magnetic buttons. Skipped for touch and reduced motion. */
 var fine=matchMedia('(hover:hover) and (pointer:fine)').matches,calm=matchMedia('(prefers-reduced-motion: reduce)').matches;if(!fine||calm)return;
