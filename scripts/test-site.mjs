@@ -64,9 +64,16 @@ try {
   });
 
   await test('progress', async page => {
-    const end = async () => { await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight)); await page.waitForFunction(k => { try { return !!JSON.parse(localStorage.getItem('learn-done') || '{}')[k]; } catch { return false; } }, key, { timeout: 5000 }); };
+    // Done = at the end of the lesson AND the page open for half a minute (a quick swipe to the pager does not count). The clock is ours, so the test does not wait.
+    await page.clock.install();
+    const bottom = async () => { await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight)); await page.waitForTimeout(400); };
+    const end = async () => { await bottom(); await page.clock.runFor(31000); await page.waitForFunction(k => { try { return !!JSON.parse(localStorage.getItem('learn-done') || '{}')[k]; } catch { return false; } }, key, { timeout: 5000 }); };
     await page.goto(base + lesson);
     ok(!(await store(page, 'learn-done') || {})[key], 'a lesson that was only opened must not count as done');
+    await bottom(); await page.clock.runFor(5000);
+    ok(!(await store(page, 'learn-done') || {})[key], 'a lesson swiped to its end within seconds must not count as done');
+    await page.evaluate(() => window.scrollTo(0, 0)); await page.waitForTimeout(400); await page.clock.runFor(40000);
+    ok(!(await store(page, 'learn-done') || {})[key], 'a lesson left open at its top must not count as done');
     await end();
     eq((await events(page)).filter(e => e.name === 'Lesson done').map(e => e.data), [{ lesson: key }], 'the "Lesson done" event');
     await page.reload(); await end();
@@ -95,7 +102,7 @@ try {
   await test('quiet', async (page, { outside }) => {
     for (const p of ['tracks.html', lesson, first.href]) { await page.goto(base + p, { waitUntil: 'networkidle' }); }
     eq(outside, [], 'requests that left the site');
-    eq(await page.evaluate(() => [...document.scripts].map(s => s.src).filter(s => s && !/\/(assets|js)\/|tracks\.js|lessons\.js/.test(s))), [], 'unexpected scripts');
+    eq(await page.evaluate(() => [...document.scripts].map(s => s.src).filter(s => s && !/\/(assets|js)\/|tracks(-index)?\.js|lessons\.js/.test(s))), [], 'unexpected scripts');
   });
 
   await test('subjects', async page => {
@@ -105,11 +112,26 @@ try {
     eq(await page.$$eval('.track-list .cc', a => a.length), D.length, 'one card per subject');
     await page.goto(base + 'tracks.html#ai');
     eq(await page.$$eval('.track-list .cc', a => a.map(x => x.getAttribute('href'))), T.filter(t => (t.domain || 'ai') === 'ai').map(t => t.href), 'the AI tracks, in tracks.js order');
+    // Entry points (picked by who you are) carry their own label; only the tracks after them are numbered steps.
+    const chips = await page.$$eval('.track-list .cc', a => a.map(x => x.querySelector('.chip').textContent));
+    T.filter(t => (t.domain || 'ai') === 'ai').forEach((t, i) => ok(t.entry ? chips[i].includes(t.entry.en) && !/Step \d/.test(chips[i]) : /Step \d/.test(chips[i]), `chip of ${t.id}: ${chips[i]}`));
     ok(await page.isVisible('[data-back]'), 'a way back to the subjects');
     await page.click('[data-back]');
     // The link loads the page again and the cards are drawn after the lesson lists arrive: wait for them, do not race the load.
     await page.waitForFunction(n => !location.hash && document.querySelectorAll('.track-list .cc').length === n, D.length, { timeout: 10000 }).catch(() => {});
     eq(await page.$$eval('.track-list .cc', a => a.length), D.length, 'back at the subjects');
+  });
+
+  await test('what next', async page => {
+    // After a track's last lesson the card offers exactly the tracks it names in tracks.js (next), never the next one in the list, plus its go link.
+    const X = loadWindow('tracks-index.js').TRACK_INDEX;
+    for (const t of T) {
+      await page.goto(base + t.id + '/' + X[t.id].files.at(-1));
+      await page.waitForSelector('.whatnext', { timeout: 5000 });
+      const want = (t.next || []).map(id => `../${id}/${X[id].files[0]}`).concat(t.go ? ['../' + t.go.href] : []);
+      eq(await page.$$eval('.whatnext a.wn-go', a => a.map(x => x.getAttribute('href'))), want, `links after ${t.id}`);
+      ok((await page.textContent('.whatnext')).includes(t.after.en), `the "after" line of ${t.id}`);
+    }
   });
 
   await test('no script', async page => {

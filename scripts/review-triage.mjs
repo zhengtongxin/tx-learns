@@ -7,7 +7,7 @@
 import { readFileSync } from 'node:fs';
 const file = process.argv[2];
 if (!file) { console.error('usage: review-triage.mjs <diff-file>'); process.exit(2); }
-const GEN_FILES = new Set(['sitemap.xml', 'vercel.json', 'assets/related.json']);
+const GEN_FILES = new Set(['sitemap.xml', 'tracks-index.js', 'vercel.json', 'assets/related.json']);
 // Whole-line patterns only: a line of <meta>/<link> tags that holds the updated date or the canonical link, or a whole JSON script block.
 const TAGS = /^\s*(<(meta|link)\b[^>]*>\s*)+$/;
 const PAGE_GEN = { test: l => (TAGS.test(l) && /<meta name="updated"|<link rel="canonical"/.test(l)) || /^\s*<script type="application\/(ld\+json|json)"( id="lesson-data")?>.*<\/script>\s*$/.test(l) };

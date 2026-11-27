@@ -17,7 +17,7 @@ const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ?
 const ROOT = resolve(arg('root', resolve(dirname(fileURLToPath(import.meta.url)), '..')));
 const [mode] = process.argv.slice(2);
 const read = f => { try { return readFileSync(f, 'utf8'); } catch { return ''; } };
-const GENERATED = /^(sitemap\.xml|vercel\.json|robots\.txt|assets\/related\.json|package-lock\.json)$/;
+const GENERATED = /^(sitemap\.xml|tracks-index\.js|vercel\.json|robots\.txt|assets\/related\.json|package-lock\.json)$/;
 const DIFF_CAP = +arg('cap', 60000);
 
 function rag(args) {

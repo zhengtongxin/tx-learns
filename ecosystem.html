@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>How TX Learns works</title>
 <meta name="description" content="My learning notes, turned into lessons by AI: checked and reviewed before going live, watched afterwards, and rolled back automatically if a merge breaks the site."><meta property="og:title" content="How TX Learns works"><meta property="og:description" content="My learning notes, turned into lessons by AI: checked and reviewed before going live, watched afterwards, and rolled back automatically if a merge breaks the site."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ecosystem.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
-<link rel="canonical" href="https://tx-learns.vercel.app/ecosystem.html"><link rel="icon" href="assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><link rel="stylesheet" href="assets/site.css?v=92b1bb9f">
+<link rel="canonical" href="https://tx-learns.vercel.app/ecosystem.html"><link rel="icon" href="assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><link rel="stylesheet" href="assets/site.css?v=b38ee621">
 <style>
 :root{--mono:ui-monospace,"SF Mono",SFMono-Regular,"JetBrains Mono",Menlo,Consolas,monospace}
 .eco{--edge:color-mix(in srgb,var(--fg) 46%,transparent);--edge2:color-mix(in srgb,var(--fg) 26%,transparent);--box:color-mix(in srgb,var(--fg) 22%,transparent)}
@@ -337,7 +337,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 </section>
 </main>
 <div class="tip" id="tip" role="tooltip"></div>
-<script src="tracks.js?v=d73d9d44"></script><script src="assets/build-concepts.js?v=c5ce02a0"></script><script src="assets/site.js?v=5178e715"></script>
+<script src="tracks.js?v=9b12c23d"></script><script src="assets/build-concepts.js?v=c5ce02a0"></script><script src="assets/site.js?v=7794f913"></script>
 <script>
 (function(){
   function t(en,zh){return '<span class="en">'+en+'</span><span class="zh">'+zh+'</span>'}
@@ -355,16 +355,16 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
      dzh:'找出泄露的密钥、不安全的链接、课的数量错误和超出手机屏幕的页面。',
      runs:['Each pull request, or manually.','每个 PR，或手动运行。'],
      output:['Pass or fail; failures block merging.','通过或失败；失败就不能合并。']},
-    {id:'reviewer',hue:'#f472b6',on:['every PR, once','每个 PR，一次'],tg:['only when it cannot finish; a ⚠️ it cannot fix reaches me once as "needs you"','只在无法完成时；修不好的 ⚠️ 会以“需要你”通知我一次'],en:'Backend engineer agent',zh:'后端工程师 agent',
+    {id:'reviewer',hue:'#f472b6',on:['every ready PR','每个就绪的 PR'],tg:['only when it cannot finish; a ⚠️ it cannot fix reaches me once as "needs you"','只在无法完成时；修不好的 ⚠️ 会以“需要你”通知我一次'],en:'Backend engineer agent',zh:'后端工程师 agent',
      den:'Reviews code samples, facts and English/Chinese consistency before changes can merge.',
      dzh:'在改动合并前审查示例代码、事实和中英文是否一致。',
-     runs:['Each pull request; lesson drafts follow the intern review.','每个 PR；课的草稿在实习生审阅后进行。'],
+     runs:['Each pull request once it is out of draft; lesson drafts follow the intern review.','每个不再是草稿的 PR；课的草稿在实习生审阅后进行。'],
      output:['A required review verdict; lesson-draft fixes on the same PR.','必需的审核结论；课的草稿在原 PR 上修改。']},
     {id:'reader',hue:'#22d3ee',on:['on each preview','每次预览后'],tg:['only on a problem; scores go in the daily digest','只在出问题时；评分写进每日汇总'],en:'Intern agent',zh:'实习生 agent',
      den:'Reads each lesson as its intended reader and flags confusing explanations.',
      dzh:'以每课目标读者的知识水平来读，指出讲不清楚的地方。',
-     runs:['After preview deployments, or manually.','预览部署完成后，或手动运行。'],
-     output:['Scores and comments; under 8/10, fixes only on lesson-draft PRs.','评分与评论；低于 8/10 时，只在课的草稿 PR 上修改。']},
+     runs:['After preview deployments that change a lesson’s own text, or manually.','改到课文本身的预览部署完成后，或手动运行。'],
+     output:['Scores and comments; under 7/10, fixes only on lesson-draft PRs.','评分与评论；低于 7/10 时，只在课的草稿 PR 上修改。']},
     {id:'ui-check',hue:'#fb923c',on:['clicks each preview','点遍每个预览'],tg:['only when it cannot finish','只在无法完成时'],en:'Frontend engineer agent',zh:'前端工程师 agent',
      den:'Tests clicks, keyboard access and layout on desktop and phone previews.',
      dzh:'在电脑和手机预览中检查点击、键盘操作和页面布局。',

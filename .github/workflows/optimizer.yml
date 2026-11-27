@@ -155,7 +155,7 @@ jobs:
           if grep -Eq '^(\.github/|packages/|CLAUDE\.md$|STYLE\.md$|banned-words\.txt$|scripts/(auto-merge|claude-run|record-status|trace|code-queue)\.mjs$)' /tmp/changed.txt; then
             echo "The optimizer touched a protected file:"; grep -E '^(\.github/|packages/|CLAUDE\.md$|STYLE\.md$|banned-words\.txt$|scripts/(auto-merge|claude-run|record-status|trace|code-queue)\.mjs$)' /tmp/changed.txt; exit 1
           fi
-          grep -Ev '^(sitemap\.xml|vercel\.json|[^/]+\.html|[^/]+/index\.html|[^/]+/[0-9][0-9]-[^/]*\.html|[^/]+/packages\.js)$' /tmp/changed.txt > /tmp/source-changed.txt || true
+          grep -Ev '^(sitemap\.xml|tracks-index\.js|vercel\.json|[^/]+\.html|[^/]+/index\.html|[^/]+/[0-9][0-9]-[^/]*\.html|[^/]+/packages\.js)$' /tmp/changed.txt > /tmp/source-changed.txt || true
           if [ "$(wc -l < /tmp/source-changed.txt)" -gt 6 ]; then
             echo "The optimizer changed more than six non-generated source files:"; cat /tmp/source-changed.txt; exit 1
           fi

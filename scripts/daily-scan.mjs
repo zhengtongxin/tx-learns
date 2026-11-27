@@ -162,7 +162,7 @@ async function speed() {
 }
 
 // ---------------------------------------------------------------- rework: the same file changed again and again
-const GENERATED = /^(sitemap\.xml|vercel\.json)$/;
+const GENERATED = /^(sitemap\.xml|tracks-index\.js|vercel\.json)$/;
 // `log` is the text of: git log --first-parent -m --since=<hours> --numstat --format=@%s
 export function reworkFrom(log, min = 3) {
   const by = {}; let prs = 0;

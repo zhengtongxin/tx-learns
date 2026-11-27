@@ -16,6 +16,12 @@ let bad = 0; const ok = (c, m) => { if (!c) { bad++; console.log('✗', m); } el
 ok(L.plan([{ id: 'a', w: 33 }, { id: 'b', w: 41 }, { id: 'c', w: 26 }], 20, 'exam', 0).map(x => x.k).join() === '7,8,5' || true, 'plan runs');
 const p = L.plan([{ id: 'a', w: 50, hist: [1, 1, 1, 1] }, { id: 'b', w: 50, hist: [0, 0, 0, 0] }], 10, 'drill', Date.now());
 ok(p.find(x => x.id === 'b').k > p.find(x => x.id === 'a').k, 'a weak area gets more questions');
+ok([[], [0], [1], [1, 1], [0, 1, 1, 1], [1, 1, 1, 1, 1, 1, 0]].map(h => L.interval(h)).join() === '1,1,1,3,7,1', 'the review gap grows with right answers in a row (1, 3, 7...) and a miss starts it over');
+{ const day = 864e5, now = 40 * day, why = (h, d) => L.plan([{ id: 'a', w: 1, hist: h, last: now - d * day }], 5, 'drill', now)[0].why;
+  ok(why([1, 1, 1], 5) === 'keep' && why([1, 1, 1], 7) === 'due' && why([1], 1) === 'due', 'an area is due only once its own gap has passed'); }
+ok(L.pick([{ id: 1, area: 'a', score: 9 }], 'b', {}, {}, Math.random) === null && L.pick([{ id: 1, area: 'a' }], 'a', {}, {}, Math.random).id === 1, 'an area with no passage of its own gets no question from another area');
+ok([['{"answer":"B"}', 1], ['{"answer":2}', 2], ['<think>x</think>The answer is C.', 2], ['{"answer":"(d) text"}', 3], ['no idea', -1], ['{"answer":7}', -1]].every(([r, w]) => L.parseVerify(r) === w), 'the second opinion is read as an option, or as none');
+ok(/A\. one\nB\. two/.test(L.verifyPrompt({ text: 'x', q: { q: 'Q?', o: ['one', 'two', 'three', 'four'], a: 1 } })[1].content) && !/answer is|"answer":1/.test(L.verifyPrompt({ text: 'x', q: { q: 'Q?', o: ['one', 'two', 'three', 'four'], a: 1 } })[1].content), 'the second opinion sees the options but not the key');
 ok(L.parseQuestion('{"question":"short","options":["a","b","c","d"],"answer":1}') === null, 'a bad question is refused');
 ok(L.parseQuestion('{"question":"Which step comes first when two members disagree?","options":["Listen to both","Ignore it","Fire one","Wait"],"answer":"A"}')?.a === 0, 'a good question parses');
 { const Q = a => L.parseQuestion(JSON.stringify({ question: 'What should the manager do next?', options: ['Ask the team', 'Delegate the task', 'Escalate now', 'Wait a week'], answer: a }))?.a;
@@ -29,6 +35,7 @@ ok(L.parseQuestion('{"question":"Which step comes first when two members disagre
   L.assignAreas(t, D); ok(t.map(c => c.area).join() === 'people,process,biz', 'a passage goes to the area its words belong to, not the one with the longest word list'); }
 { const A = L.parseAreas('Anatomy, 30\nPhysiology 40%\nPharmacology | drug dose receptor | 30\n药理学 20\nAnatomy, 5\n\n, 10');
   ok(A.length === 4 && A.map(x => x.weight).join() === '30,40,30,20', 'areas are read from lines in three forms, duplicates and empty lines skipped');
+  ok(A[0].id === 'n-anatomy' && L.parseAreas('Physiology 40%\nAnatomy, 30')[1].id === A[0].id, 'an area keeps its id when the lines are reordered');
   ok(/receptor/.test(A[2].kw) && A[0].kw === 'anatomy' && A[3].kw === '药理学', 'keywords come from the name or the typed words'); }
 ok(L.inLang({ q: '项目经理应该先做什么？', o: ['先听', '无视', '升级', '等待'], e: '先倾听。' }, 'zh') && !L.inLang({ q: 'What should the manager do first?', o: ['a', 'b', 'c', 'd'], e: '' }, 'zh') && L.inLang({ q: 'What should the manager do first?', o: ['a', 'b', 'c', 'd'], e: '' }, 'en') && !L.inLang({ q: '项目经理应该先做什么？', o: ['先听', '无视', '升级', '等待'], e: '' }, 'en'), 'a question in the wrong language is caught');
 { const m = L.prompt({ text: 'Some English text about risk.', lang: 'zh', srcLang: 'en', exam: '', domain: '', tasks: '' }); ok(/Chinese \(简体中文\)/.test(m[0].content + m[1].content) && /in English/.test(m[1].content), 'the prompt asks for the page language and says the excerpt is in the other one'); }
@@ -46,7 +53,7 @@ const br = await chromium.launch(), out = [];
 const ctx = await br.newContext({ viewport: { width: 1100, height: 900 }, acceptDownloads: true }), pg = await ctx.newPage();
 const errs = []; pg.on('pageerror', e => errs.push(e.message)); pg.on('console', m => m.type() === 'error' && errs.push(m.text()));
 pg.on('request', q => { if (!q.url().startsWith(base) && !q.url().startsWith('data:') && !q.url().startsWith('blob:')) out.push(q.url()); });
-await pg.addInitScript(() => { let n = 0; window.__coachTestEngine = { chat: async (m) => { n++; window.__lastPrompt = JSON.stringify(m); if (/Summarise the idea/.test(window.__lastPrompt)) return JSON.stringify({ summary: /Chinese \(简体中文\)/.test(window.__lastPrompt) ? '这一段讲的是怎样先倾听再决定。' : 'This passage explains how to listen first and decide after.' }); if (/Chinese \(简体中文\)/.test(window.__lastPrompt)) return JSON.stringify({ question: '假问题第 ' + n + ' 个：项目经理应该先做什么？', options: ['先听双方的说法', '直接无视', '马上升级', '等发起人表态'], answer: 0, explanation: '先倾听有助于达成共识。' }); return JSON.stringify({ question: 'Fake question number ' + n + ': what should the project manager do first?', options: ['Listen to both sides', 'Ignore it', 'Escalate at once', 'Wait for the sponsor'], answer: 0, explanation: 'Listening first builds shared understanding.' }); } }; });
+await pg.addInitScript(() => { let n = 0; window.__coachTestEngine = { chat: async (m) => { if (/Which option is correct according to the excerpt/.test(JSON.stringify(m))) { window.__verified = (window.__verified || 0) + 1; return '{"answer":"A"}'; } n++; window.__lastPrompt = JSON.stringify(m); if (/Summarise the idea/.test(window.__lastPrompt)) return JSON.stringify({ summary: /Chinese \(简体中文\)/.test(window.__lastPrompt) ? '这一段讲的是怎样先倾听再决定。' : 'This passage explains how to listen first and decide after.' }); if (/Chinese \(简体中文\)/.test(window.__lastPrompt)) return JSON.stringify({ question: '假问题第 ' + n + ' 个：项目经理应该先做什么？', options: ['先听双方的说法', '直接无视', '马上升级', '等发起人表态'], answer: 0, explanation: '先倾听有助于达成共识。' }); return JSON.stringify({ question: 'Fake question number ' + n + ': what should the project manager do first?', options: ['Listen to both sides', 'Ignore it', 'Escalate at once', 'Wait for the sponsor'], answer: 0, explanation: 'Listening first builds shared understanding.' }); } }; });
 await pg.goto(base + 'study/index.html');
 await pg.waitForSelector('#app:not([hidden])');
 ok(/Get\s*started/i.test(await pg.textContent('#today')), 'first visit shows how to get started');
@@ -65,12 +72,13 @@ await pg.fill('#cname', 'My certification');
 await pg.fill('#ctext', 'People, 33\nProcess | risk schedule budget | 41\nBusiness environment 26');
 await pg.locator('#ctext').blur();
 ok((await pg.evaluate(() => window.__coach.state())).ctext.includes('Process'), 'typed areas are saved');
-ok(st.c.length > 0 && (await pg.evaluate(() => window.__coach.chunks().some(c => c.area === 'x:c1'))), 'passages are matched to the typed areas');
+ok(st.c.length > 0 && (await pg.evaluate(() => window.__coach.chunks().some(c => c.area === 'x:n-process'))), 'passages are matched to the typed areas');
 ok(await pg.locator('#today .plan li').count() >= 2, 'today shows a plan');
 ok(await pg.evaluate(() => document.getElementById('app').hasAttribute('data-ready')), 'with material, practice and the track button come before the setup');
 await pg.click('[data-act=drill]');
 await pg.waitForSelector('.opt');
 ok(/Fake question/.test(await pg.textContent('#practice')), 'a question appears');
+ok(await pg.evaluate(() => window.__verified > 0), 'the answer key gets a second opinion before the question is shown');
 for (let i = 0; i < 10; i++) {
   await pg.waitForSelector('.opt:not([disabled])'); await pg.locator('.opt').nth(i % 2 ? 1 : 0).click();
   await pg.waitForSelector('#nx'); await pg.click('#nx');
@@ -92,18 +100,27 @@ const hist0 = await pg.evaluate(() => Object.values(window.__coach.state().stats
 await pg.locator('.opt').nth(0).click(); await pg.waitForSelector('#nx');
 await pg.click('[data-act=redo]'); await pg.waitForSelector('.opt:not([disabled])');
 ok(await pg.evaluate(() => Object.values(window.__coach.state().stats).reduce((a, s) => a + s.n, 0)) === hist0, 'changing an answer takes the first one back out of the records');
-let guessed = false;
-for (let i = 0; i < 4 && !guessed; i++) { for (let k = 0; k < 4 && !guessed; k++) { await pg.waitForSelector('.opt:not([disabled])'); await pg.locator('.opt').nth(k).click(); await pg.waitForSelector('#nx');
-  if (await pg.locator('[data-act=guess]').count()) { await pg.click('[data-act=guess]'); guessed = true } else { await pg.click('[data-act=redo]'); } } }
+let guessed = false; const missSum = () => pg.evaluate(() => Object.values(window.__coach.state().miss).reduce((a, b) => a + b, 0));
+for (let i = 0; i < 4 && !guessed; i++) { for (let k = 0; k < 4 && !guessed; k++) { await pg.waitForSelector('.opt:not([disabled])'); const m0 = await missSum(); await pg.locator('.opt').nth(k).click(); await pg.waitForSelector('#nx');
+  if (await pg.locator('[data-act=guess]').count()) { await pg.click('[data-act=guess]'); guessed = true; ok(await missSum() === m0 + 1, 'a guess adds exactly one miss to its passage'); } else { await pg.click('[data-act=redo]'); } } }
 ok(guessed && (await pg.evaluate(() => window.__coach.state().stats)) && (await pg.textContent('#practice')).includes('Not quite') === false || guessed, 'a right answer can be marked as a guess');
 for (let i = 0; i < 40 && !(await pg.locator('#practice .lead2').count()); i++) { if (await pg.locator('#nx').count()) await pg.click('#nx'); else if (await pg.locator('.opt:not([disabled])').count()) await pg.locator('.opt').nth(0).click(); else await pg.waitForTimeout(100); }
 await pg.click('[data-act=close]');
+// an area nothing matches is named and gets no questions; passages that match no area are practised under "Other"
+await pg.fill('#ctext', 'Zebras, 50\nBusiness environment, 50'); await pg.locator('#ctext').blur();
+ok(/No material for/.test(await pg.textContent('#map p.warn')) && /Zebras/.test(await pg.textContent('#map p.warn')) && /no material/.test(await pg.textContent('#map .row')), 'an area without material says so');
+ok(await pg.evaluate(() => window.__coach.chunks().some(c => c.area === 'x:other')) && /Other/.test(await pg.textContent('#map')) && /matched no area/.test(await pg.textContent('#map')), 'unmatched passages go to "Other"');
+ok(!/Zebras/.test(await pg.textContent('#today .plan')) && /Other/.test(await pg.textContent('#today .plan')), 'the plan asks nothing from an area without material and includes "Other"');
 // exam mode switch and the old outline
 await pg.selectOption('[data-act=exam-id]', 'pmp');
 await pg.selectOption('[data-act=exam-ver]', '2021');
 ok(/42%/.test(await pg.textContent('#goal')), 'the older outline shows its weights');
 await pg.selectOption('[data-act=exam-ver]', '2026');
 ok(/33%/.test(await pg.textContent('#goal')) && /26%/.test(await pg.textContent('#goal')), 'the current outline shows 33 / 41 / 26');
+// a weak area of the ready-made outline links to this site's lessons on it
+await pg.evaluate(() => { const s = window.__coach.state(); s.stats['x:people'] = { h: [0, 0, 0], n: 3, c: 0, last: Date.now() }; });
+await pg.selectOption('[data-act=exam-ver]', '2021'); await pg.selectOption('[data-act=exam-ver]', '2026');
+ok((await pg.$$eval('#map .ll a', a => a.map(x => x.getAttribute('href')))).includes('../pmp/05-conflict-and-negotiation.html'), 'a weak area lists its lessons');
 // mini exam
 await pg.click('[data-act=exam]');
 await pg.waitForSelector('.opt');
