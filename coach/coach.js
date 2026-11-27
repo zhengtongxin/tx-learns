@@ -195,6 +195,8 @@ function streakBox(td,n){
  return '<div class="streak"><svg class="ring" viewBox="0 0 52 52" width="52" height="52" role="img" aria-label="'+(pageLang()==='zh'?'今天：'+td.n+' / '+n+' 题':'Today: '+td.n+' of '+n+' questions')+'"><circle cx="26" cy="26" r="'+R+'" class="rt"/><circle cx="26" cy="26" r="'+R+'" class="rf" stroke-dasharray="'+(C*pct).toFixed(1)+' '+C.toFixed(1)+'" transform="rotate(-90 26 26)"/><text x="26" y="30" text-anchor="middle">'+td.n+'</text></svg>'+
   '<div class="sk"><b>'+(st?'🔥 '+T(st+(st===1?' day':' days'),st+' 天'):T('No streak yet','还没有连续记录'))+'</b><span class="meta">'+T('Today '+td.n+' of '+n+' questions. ','今天 '+td.n+' / '+n+' 题。')+msg+'</span></div>'+
   '<div class="wk" aria-hidden="true">'+wk.map(function(x){return '<i class="'+(x.n?(x.c/x.n>=.7?'hi':'mid'):'')+'" title="'+x.k+(x.n?' · '+x.c+'/'+x.n:'')+'"><u>'+WD[x.wd]+'</u></i>'}).join('')+'</div></div>'}
+/* "slide 3", "page 2–4", "text 1" as stored -> the page's language */
+function locT(l){l=String(l||'');var m=l.match(/^(slide|page|text)\s+(.+)$/);if(!m)return esc(l);var w={slide:['slide ','第 ',' 张'],page:['page ','第 ',' 页'],text:['text ','第 ',' 段']}[m[1]];return pageLang()==='zh'?esc(w[1]+m[2]+w[2]):esc(l)}
 /* the coach's word after a round: how it went and how far today's goal has come */
 function coachNote(got,tot){if(!tot)return '';var r=got/tot,td=today(),n=S.perDay,left=Math.max(0,n-td.n),m;
  m=r>=0.8?T('Solid round. Keep this up and these areas will move to “due for review” instead of “weak”.','这一轮很扎实。保持下去，这些领域会从“薄弱”变成“到期复习”。'):
@@ -207,9 +209,9 @@ function renderToday(){
  var plan=planFor('drill',n),g=gapInfo(),tested=Object.keys(S.stats).length>0,h,names=function(l){return l.slice(0,3).map(function(x){return T((x.a||x).name.en,(x.a||x).name.zh)}).join(T(', ','、'))};
  if(!tested)h=T('Your coach starts with a first round across your material. The answers show where the gaps are.','教练先带你过一遍资料，看你答得怎样，就知道缺口在哪里。');
  else if(!g.any)h=T('No gaps right now. Keep it warm with a short round.','目前没有明显缺口。做一小轮保持手感。');
- else h=(g.weak.length?T('Weak: ','薄弱：')+names(g.weak)+'. ':'')+(g.due.length?T('Due for review: ','该复习：')+names(g.due)+'. ':'')+(g.fresh.length?T('Not tested yet: ','还没测过：')+names(g.fresh)+'. ':'');
+ else h=(g.weak.length?T('Weak: ','薄弱：')+names(g.weak)+T('. ','。'):'')+(g.due.length?T('Due for review: ','该复习：')+names(g.due)+T('. ','。'):'')+(g.fresh.length?T('Not tested yet: ','还没测过：')+names(g.fresh)+T('. ','。'):'');
  el.innerHTML='<h2>'+T('Your <em>coach</em>','你的<em>教练</em>')+'</h2><p class="lead2">'+h+'</p>'+streakBox(td,n)+
-  (g.miss.length?'<p class="meta">'+T('Passages you missed most: ','你错得最多的段落：')+g.miss.slice(0,3).map(function(x){return aname(x.c.area)+' · '+esc(x.c.loc)+' ×'+x.n}).join(' ; ')+'</p>':'')+
+  (g.miss.length?'<p class="meta">'+T('Passages you missed most: ','你错得最多的段落：')+g.miss.slice(0,3).map(function(x){return aname(x.c.area)+' · '+locT(x.c.loc)+' ×'+x.n}).join(' ; ')+'</p>':'')+
   '<ul class="plan">'+plan.map(function(p){var w=WHY[p.why];return '<li><span class="pk">'+p.k+'</span><span>'+aname(p.id)+'</span><span class="chip">'+T(w[0],w[1])+'</span></li>'}).join('')+'</ul>'+
   '<p class="acts"><button class="btn pri" data-act="drill">'+T('Practise now','现在练习')+'</button>'+(g.any?'<button class="btn" data-act="gap">'+T('Fix my gaps','补我的缺口')+'</button>':'')+(useExam()?'<button class="btn sm" data-act="exam">'+T('Mini exam · 20 questions','小测验 · 20 题')+'</button>':'')+
   '<label class="per">'+T('Per day','每天')+' <select data-act="perday" aria-label="Questions per day · 每天题数">'+[5,10,20].map(function(x){return '<option'+(x===n?' selected':'')+'>'+x+'</option>'}).join('')+'</select></label></p>'}
@@ -238,7 +240,7 @@ function renderGoal(){
    (cu?'<p class="rowf"><label>'+T('Exam name','考试名称')+' <input type="text" id="cname" maxlength="60" value="'+esc(S.cname||'')+'" placeholder="'+esc(PH('e.g. my certification','例如：我要考的证书'))+'"></label></p>'+
      '<p class="rowf"><label>'+T('Areas and weights, one per line','领域和比例，每行一个')+'<textarea id="ctext" rows="5" aria-label="Areas and weights · 领域和比例" placeholder="'+esc(PH('Area one, 40\nArea two, 35\nArea three, 25','领域一, 40\n领域二, 35\n领域三, 25'))+'">'+esc(S.ctext||'')+'</textarea></label></p>'+
      '<p class="meta" id="chint">'+chint(d.length)+'</p>'
-    :'<p class="meta">'+d.map(function(a){return T(a.name.en,a.name.zh)+' '+a.weight+'%'}).join(' · ')+'. '+T('Questions follow these shares. Check them against the','题目按这些比例出。请对照')+' <a href="https://www.pmi.org/certifications/project-management-pmp" target="_blank" rel="noopener noreferrer">'+T('official outline','官方考纲')+'</a>.</p>'):
+    :'<p class="meta">'+d.map(function(a){return T(a.name.en,a.name.zh)+' '+a.weight+'%'}).join(' · ')+T('. ','。')+T('Questions follow these shares. Check them against the','题目按这些比例出。请对照')+' <a href="https://www.pmi.org/certifications/project-management-pmp" target="_blank" rel="noopener noreferrer">'+T('official outline','官方考纲')+'</a>.</p>'):
    '<p class="meta">'+T('Questions spread across your files and lean toward what you miss.','题目分布在你的各个文件里，并偏向你答错的地方。')+'</p>')+'<p class="acts"><button class="btn pri" data-go="model">'+T('Continue: the model','继续：模型')+' →</button></p>'}
 function renderModel(busy,err){
  renderFlow();
@@ -271,7 +273,7 @@ function renderPractice(focus){
   var fb=R.view==='fb';
   h='<p class="meta">'+T('Question '+(R.i+1)+' of '+total,'第 '+(R.i+1)+' / '+total+' 题')+' · '+aname(it.area)+'</p><h3 class="qt" id="qt" tabindex="-1">'+esc(it.q)+'</h3><div class="opts" role="group" aria-labelledby="qt">'+
    it.o.map(function(o,i){var c=fb?(i===it.a?' ok':(i===it.pick?' no':'')):'';return '<button class="opt'+c+'" data-act="opt" data-i="'+i+'"'+(fb?' disabled':'')+'><b>'+'ABCD'[i]+'</b><span>'+esc(o)+'</span></button>'}).join('')+'</div>';
-  if(fb)h+='<div class="fb" aria-live="polite"><p><b>'+(it.pick===it.a?T('Right.','答对了。'):T('Not quite.','不对。'))+'</b> '+esc(it.e)+'</p><details><summary>'+T('From your material','来自你的资料')+': '+esc(it.mat)+', '+esc(it.loc)+'</summary><p class="snip">'+esc(it.snip)+'…</p></details><p class="acts"><button class="btn pri" id="nx" data-act="next">'+(R.i+1>=R.items.length&&R.gen>=total?T('See the result','看结果'):T('Next','下一题'))+'</button>'+(it.pick===it.a&&!it.guess?'<button class="btn sm" data-act="guess">'+T('I guessed','我是蒙的')+'</button>':'')+'<button class="btn sm" data-act="redo">'+T('Change my answer','改我的答案')+'</button><button class="btn sm" data-act="flag">'+T('This question looks wrong: don’t count it','这道题有问题：不计入')+'</button></p></div>'}
+  if(fb)h+='<div class="fb" aria-live="polite"><p><b>'+(it.pick===it.a?T('Right.','答对了。'):T('Not quite.','不对。'))+'</b> '+esc(it.e)+'</p><details><summary>'+T('From your material','来自你的资料')+': '+esc(it.mat)+', '+locT(it.loc)+'</summary><p class="snip">'+esc(it.snip)+'…</p></details><p class="acts"><button class="btn pri" id="nx" data-act="next">'+(R.i+1>=R.items.length&&R.gen>=total?T('See the result','看结果'):T('Next','下一题'))+'</button>'+(it.pick===it.a&&!it.guess?'<button class="btn sm" data-act="guess">'+T('I guessed','我是蒙的')+'</button>':'')+'<button class="btn sm" data-act="redo">'+T('Change my answer','改我的答案')+'</button><button class="btn sm" data-act="flag">'+T('This question looks wrong: don’t count it','这道题有问题：不计入')+'</button></p></div>'}
  el.innerHTML=h;
  if(focus){var f=R.view==='fb'?$('nx'):(R.view==='q'?$('qt'):null);if(f)f.focus()}}
 function renderAll(keepPractice){var ap=$('app');if(ap){if(CH.length)ap.setAttribute('data-ready','');else ap.removeAttribute('data-ready')}renderToday();renderMap();renderMats();renderGoal();renderBackup();renderShare();renderBook();if(!keepPractice)renderPractice();applyView()}
