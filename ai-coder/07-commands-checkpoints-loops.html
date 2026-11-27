@@ -19,8 +19,8 @@ Reply with a short list: must fix, should fix, fine.</div>
 <h2><span class="en">Step 2 · Checkpoints: safe to try</span><span class="zh">第 2 步 · 检查点：放心去试</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>checkpoint</b> is a save point you can return to. Some agents save one automatically before each edit, so you can rewind a bad turn. These cover the agent's file edits, not everything a command did to the outside world.</p>
 <p class="zh" style="margin:0 0 8px"><b>检查点</b>是可以回到的存档。有些智能体在每次编辑之前自动存一个，所以坏的一轮可以倒回去。它们只覆盖智能体对文件的编辑，不包括命令对外部世界做的事。</p>
-<p class="en" style="margin:0 0 8px">The reliable checkpoint is <b>git</b>. Commit before a risky task, and again after each step that works. If it goes wrong, you step back one commit and lose nothing.</p>
-<p class="zh" style="margin:0 0 8px">最可靠的检查点是 <b>git</b>。风险大的任务之前先提交一次，每一步成功之后再提交。出了岔子，退一个提交，什么也不损失。</p>
+<p class="en" style="margin:0 0 8px">The reliable checkpoint is <b>git</b>. Commit before a risky task, and again after each step that works. If it goes wrong, you can return to the last good commit (<code>git reset --hard HEAD~1</code>, or <code>git restore .</code> for changes you have not committed) and lose only the bad step. Anything you never committed is gone.</p>
+<p class="zh" style="margin:0 0 8px">最可靠的检查点是 <b>git</b>。风险大的任务之前先提交一次，每一步成功之后再提交。出了岔子，你可以回到上一个好的提交（<code>git reset --hard HEAD~1</code>；还没提交的改动用 <code>git restore .</code>），只损失那一步坏的。没提交过的内容就找不回来了。</p>
 </div>
 <div class="try" id="p1"></div>
 
@@ -33,16 +33,19 @@ Reply with a short list: must fix, should fix, fine.</div>
 <div class="codebox" data-file="ralph.sh" data-lang="bash">#!/usr/bin/env bash
 # Same brief, fresh agent each round. Stop when TODO.md has no unchecked boxes.
 for round in 1 2 3 4 5 6 7 8; do
+  # --allowedTools: the agent may edit files and run npm test, nothing else, without asking
   claude -p "$(cat PROMPT.md)" --allowedTools "Edit" "Bash(npm test:*)"
+  # the loop commits by itself each round, even if nothing changed
   git add -A &amp;&amp; git commit -m "round $round" --allow-empty -q
+  # grep finds a line with an unticked box "[ ]"; when none is left, break ends the loop
   grep -q '\[ \]' TODO.md || break
 done</div>
 <p class="en">Is this a good job for a loop?</p>
 <p class="zh">这件事适合用循环吗？</p><div class="sc" id="g1"></div>
 
 <h2><span class="en">Step 4 · A brief a loop can finish</span><span class="zh">第 4 步 · 一份循环能做完的简报</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The loop in Step 3 stops when <code>TODO.md</code> has no unchecked box. That is only as honest as the agent: it can tick a box without doing the work. So give every box a check the agent cannot argue with, and tell it to tick a box only when that check passes.</p>
-<p class="zh" style="margin:0 0 8px">第 3 步的循环，在 <code>TODO.md</code> 里没有未勾选的方框时停止。可这只和智能体一样老实：它可以不做事就把方框勾上。所以给每个方框一个它没法抵赖的检查，并要求它只在这个检查通过时才勾选。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The loop in Step 3 stops when <code>TODO.md</code> has no unchecked box. That is only as honest as the agent: it can tick a box without doing the work. And a blocked item keeps its box unticked, so the loop then runs until the round limit, which is why the limit matters. So give every box a check the agent cannot argue with, and tell it to tick a box only when that check passes.</p>
+<p class="zh" style="margin:0 0 8px">第 3 步的循环，在 <code>TODO.md</code> 里没有未勾选的方框时停止。可这只和智能体一样老实：它可以不做事就把方框勾上。而且被卡住的事项方框一直不勾，循环就会一直跑到轮数上限，所以上限很重要。所以给每个方框一个它无法绕过的检查，并要求它只在这个检查通过时才勾选。</p></div>
 <div class="codebox" data-file="PROMPT.md and TODO.md" data-lang="md"># PROMPT.md
 Read TODO.md. Do the first unchecked item only.
 Tick it ONLY if its check passes when you run it. Then stop.
