@@ -1,0 +1,49 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Merge conflicts | TX Learns</title>
+<meta name="description" content="Read the conflict markers, choose what the file should say and finish the merge"><meta property="og:title" content="Merge conflicts | TX Learns"><meta property="og:description" content="Read the conflict markers, choose what the file should say and finish the merge"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/git-basics/06-merge-conflicts.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/pmp.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/git-basics/06-merge-conflicts.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/git-basics/06-merge-conflicts.html","url":"https://tx-learns.vercel.app/git-basics/06-merge-conflicts.html","name":"Merge conflicts","alternateName":"合并冲突","description":"Read the conflict markers, choose what the file should say and finish the merge","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Working with others","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Git basics","url":"https://tx-learns.vercel.app/git-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Git basics","item":"https://tx-learns.vercel.app/git-basics/index.html"},{"@type":"ListItem","position":3,"name":"Merge conflicts","item":"https://tx-learns.vercel.app/git-basics/06-merge-conflicts.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Working with others · Lesson 3</span><span class="zh">与他人协作 · 第 3 课</span></span><h1><span class="en">Merge conflicts</span><span class="zh">合并冲突</span></h1><p class="meta"><span class="en">Read the conflict markers, choose what the file should say and finish the merge · ~10 min · reading and practice</span><span class="zh">读懂冲突标记，决定文件该写什么，并完成合并 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · When a conflict happens</span><span class="zh">第 1 步 · 什么时候会冲突</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Git merges changes line by line. When two branches changed different lines, or different files, Git combines them without asking. A <b>conflict</b> happens only when both branches changed the same lines in different ways, because Git cannot know which one you want. It stops the merge and marks the file.</p>
+<p class="zh" style="margin:0 0 8px">Git 一行一行地合并改动。两个分支改的是不同的行或不同的文件时，Git 会自己合并。只有两个分支以不同方式改了同样的几行，才会产生<b>冲突</b>，因为 Git 无法知道你想要哪一个。它会停下合并并把文件标出来。</p>
+<p class="en" style="margin:0 0 8px">A conflict is normal in team work. It is not a sign that you did something wrong.</p>
+<p class="zh" style="margin:0 0 8px">团队协作里冲突很正常，不代表你做错了什么。</p></div>
+
+<h2><span class="en">Step 2 · Read the markers</span><span class="zh">第 2 步 · 读懂标记</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Git writes both versions into the file between three kinds of lines. Everything between <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> and <code>=======</code> is the version from your current branch. Everything between <code>=======</code> and <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code> is the version from the branch you are merging in. <code>git status</code> shows the file as <code>UU</code>, unmerged on both sides.</p>
+<p class="zh" style="margin:0 0 8px">Git 把两个版本都写进文件里，用三种线隔开。<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> 与 <code>=======</code> 之间是你当前分支的版本，<code>=======</code> 与 <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code> 之间是你正在合并进来的分支的版本。<code>git status</code> 把该文件显示为 <code>UU</code>，表示两边都未合并。</p>
+<p class="en" style="margin:0 0 8px">The markers are only there to help you. They must not stay in the final file.</p>
+<p class="zh" style="margin:0 0 8px">这些标记只是帮你看的，最后的文件里不能留着它们。</p></div>
+<div class="codebox" data-file="prices.txt (during the conflict)" data-lang="text">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+tea 4
+=======
+tea 2
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; sale</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Resolve and finish</span><span class="zh">第 3 步 · 解决并完成</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">To resolve it, open the file, decide what it should say (one version, the other, or a mix), and delete all three marker lines. Then <code>git add</code> the file to say it is resolved and <code>git commit</code> to finish the merge. If you are lost, <code>git merge --abort</code> takes you back to before the merge.</p>
+<p class="zh" style="margin:0 0 8px">要解决冲突，打开文件，决定它该写什么（其中一个版本、另一个版本，或者两者混合），并删掉三种标记行。然后 <code>git add</code> 该文件，表示已解决，再 <code>git commit</code> 完成合并。如果搞乱了，<code>git merge --abort</code> 会带你回到合并之前。</p>
+<p class="en" style="margin:0 0 8px">Put the steps in order.</p>
+<p class="zh" style="margin:0 0 8px">把步骤按顺序排好。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> create a conflict on purpose in a practice repository, then resolve it by hand.</span><span class="zh"><b>试一试：</b>在练习用的仓库里故意制造一次冲突，再手动解决。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> after resolving, search the file for <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> to be sure no marker is left.</span><span class="zh"><b>核对：</b>解决之后，在文件里搜一下 <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>，确认没有留下标记。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A conflict happens only when both sides changed the same lines.<br>• Markers show both versions; you choose the result and delete them.<br>• git add, then git commit finishes the merge.<br>• git merge --abort takes you back to before the merge.</p><p class="zh" style="margin:0">• 只有两边改了同样的行才会冲突。<br>• 标记显示两个版本；结果由你决定，并要删掉它们。<br>• git add，再 git commit，完成合并。<br>• git merge --abort 带你回到合并之前。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Git basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Git installed, and a terminal","zh":"装好 Git，并有一个终端"},"know":{"en":"Branches and pull requests (see “GitHub and pull requests”).","zh":"知道分支和拉取请求（见“GitHub 与拉取请求”）。"},"goals":{"en":["Explain when a conflict happens","Read the conflict markers","Resolve a conflict and finish the merge"],"zh":["解释冲突什么时候出现","读懂冲突标记","解决冲突并完成合并"]},"prev":["05-github-and-pull-requests.html"]}}</script>
+<script src="../tracks.js?v=80fa909f"></script><script src="lessons.js?v=42886b04"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/06-merge-conflicts.js?v=0e66b661"></script></body></html>

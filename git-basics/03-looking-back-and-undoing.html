@@ -1,0 +1,47 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Looking back and undoing | TX Learns</title>
+<meta name="description" content="Read the history, throw away a change you have not committed and undo a commit safely"><meta property="og:title" content="Looking back and undoing | TX Learns"><meta property="og:description" content="Read the history, throw away a change you have not committed and undo a commit safely"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/git-basics/03-looking-back-and-undoing.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/pmp.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/git-basics/03-looking-back-and-undoing.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/git-basics/03-looking-back-and-undoing.html","url":"https://tx-learns.vercel.app/git-basics/03-looking-back-and-undoing.html","name":"Looking back and undoing","alternateName":"回看与撤销","description":"Read the history, throw away a change you have not committed and undo a commit safely","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Saving your work","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Git basics","url":"https://tx-learns.vercel.app/git-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Git basics","item":"https://tx-learns.vercel.app/git-basics/index.html"},{"@type":"ListItem","position":3,"name":"Looking back and undoing","item":"https://tx-learns.vercel.app/git-basics/03-looking-back-and-undoing.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Saving your work · Lesson 3</span><span class="zh">保存你的工作 · 第 3 课</span></span><h1><span class="en">Looking back and undoing</span><span class="zh">回看与撤销</span></h1><p class="meta"><span class="en">Read the history, throw away a change you have not committed and undo a commit safely · ~10 min · reading and practice</span><span class="zh">读懂历史，丢掉还没提交的改动，并安全地撤销一次提交 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Read the history</span><span class="zh">第 1 步 · 读历史</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><code>git log</code> lists commits, newest first. <code>git log --oneline</code> gives one short line each. <code>git show</code> displays one commit’s message and changes. Each commit has an id (a short code such as <code>3f2a9c1</code>) that you can use to point at it.</p>
+<p class="zh" style="margin:0 0 8px"><code>git log</code> 从新到旧列出提交。<code>git log --oneline</code> 每次提交一行。<code>git show</code> 显示某次提交的信息和改动。每次提交都有一个编号（一小串代码，如 <code>3f2a9c1</code>），可以用它来指向这次提交。</p>
+<p class="en" style="margin:0 0 8px">Reading the history is safe: none of these commands changes anything.</p>
+<p class="zh" style="margin:0 0 8px">读历史是安全的：这些命令都不会改变任何东西。</p></div>
+
+<h2><span class="en">Step 2 · Throw away uncommitted work</span><span class="zh">第 2 步 · 丢弃未提交的改动</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">If you changed a file and want it back as in the last commit, run <code>git restore filename</code>. It overwrites your edit with the committed version. This cannot be undone, because Git never saw those edits, so use it only when you are sure.</p>
+<p class="zh" style="margin:0 0 8px">如果你改了某个文件，想让它回到上一次提交时的样子，运行 <code>git restore 文件名</code>。它会用已提交的版本覆盖你的改动。这一步无法撤回，因为 Git 从没记录过那些改动，所以只在确定时才用。</p>
+<p class="en" style="margin:0 0 8px">To unstage a file without losing the edit, use <code>git restore --staged filename</code>.</p>
+<p class="zh" style="margin:0 0 8px">想取消暂存、又不丢改动，用 <code>git restore --staged 文件名</code>。</p></div>
+<div class="codebox" data-file="terminal" data-lang="bash">echo "tea 99" &gt; prices.txt     # a mistake
+git restore prices.txt
+cat prices.txt</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Undo a commit safely</span><span class="zh">第 3 步 · 安全地撤销一次提交</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">To undo a commit that is already in the history, use <code>git revert</code>. It adds a new commit that does the opposite, so the history stays honest and anyone who already has the old commit is not confused. Avoid commands that rewrite history, such as <code>git reset --hard</code>, until you know exactly what they do.</p>
+<p class="zh" style="margin:0 0 8px">要撤销已经进了历史的提交，用 <code>git revert</code>。它会新增一次做相反改动的提交，历史保持真实，已经拿到旧提交的人也不会被搞糊涂。在完全清楚后果之前，不要用会改写历史的命令，比如 <code>git reset --hard</code>。</p>
+<p class="en" style="margin:0 0 8px">Choose the right tool for each situation.</p>
+<p class="zh" style="margin:0 0 8px">为每种情况选对工具。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> break a file on purpose, restore it, then revert one of your own commits.</span><span class="zh"><b>试一试：</b>故意弄坏一个文件再 restore，然后 revert 你自己的一次提交。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> before any undo, run git status and say which place your change is in.</span><span class="zh"><b>核对：</b>任何撤销之前先运行 git status，说出你的改动在哪个地方。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• git log and git show only read the history.<br>• git restore discards uncommitted edits for good.<br>• git revert undoes a commit by adding a new one.<br>• Avoid rewriting shared history.</p><p class="zh" style="margin:0">• git log 和 git show 只读历史。<br>• git restore 会永久丢弃未提交的改动。<br>• git revert 通过新增一次提交来撤销。<br>• 不要改写已共享的历史。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Git basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Git installed, and a terminal","zh":"装好 Git，并有一个终端"},"know":{"en":"Staging and committing (see “Staging and committing”).","zh":"知道暂存与提交（见“暂存与提交”）。"},"goals":{"en":["Read the history with git log","Discard an uncommitted change","Undo a commit without erasing history"],"zh":["用 git log 读历史","丢弃还没提交的改动","在不抹掉历史的前提下撤销一次提交"]},"prev":["02-staging-and-committing.html"]}}</script>
+<script src="../tracks.js?v=80fa909f"></script><script src="lessons.js?v=42886b04"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/03-looking-back-and-undoing.js?v=975885d2"></script></body></html>
