@@ -144,7 +144,6 @@
     }
 
     /* prerequisites + project card + track before/after: each lesson carries its own data as <script type="application/json" id="lesson-data"> (scripts/check-pages.mjs --fix writes it from the track's prereqs.js / projects.js and packages folder); the track before/after comes from tracks.js */
-    function lessonLink(f){var x=C.lessons.filter(function(l){return l.file===f})[0];return x?'<a href="'+f+'">'+t(x.title)+'</a>':''}
     function li(a){return (a||[]).map(function(x){return '<li>'+t(x)+'</li>'}).join('')}
     function renderMeta(){
       var LD={};try{LD=JSON.parse((document.getElementById('lesson-data')||{}).textContent||'{}')}catch(e){}
@@ -272,8 +271,6 @@
     var TZ={'index.html':'TX Learns – 中英双语互动学习','tracks.html':'选一条路线 | TX Learns','study/index.html':'学习教练 | TX Learns','study/about.html':'关于学习教练 | TX Learns','study/how.html':'学习教练如何运作 | TX Learns','ecosystem.html':'TX Learns 如何运作','glossary.html':'AI 词汇表 | TX Learns','about.html':'关于本站 | TX Learns'},TE=document.title;
     function setTitle(){var zh=root.getAttribute('data-lang')==='zh',tl=C&&C.lessons?C.lessons.filter(function(l){return l.file===here})[0]:null,z=!C&&TZ[(AREA==='study'?'study/':'')+here]?TZ[(AREA==='study'?'study/':'')+here]:(tl&&tl.title&&tl.title.zh?tl.title.zh+' | TX Learns':'');document.title=zh&&z?z:TE}
     setTitle();new MutationObserver(setTitle).observe(root,{attributes:true,attributeFilter:['data-lang']});
-    function toast(msg){var el=document.getElementById('toast');if(!el){el=document.createElement('div');el.id='toast';el.className='toast';el.setAttribute('role','status');el.setAttribute('aria-live','polite');el.onclick=function(){el.classList.remove('on')};document.body.appendChild(el)}
-      el.innerHTML=msg;el.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(function(){el.classList.remove('on')},2600)}
     /* detail cards start folded so the lesson itself comes first */
     function fold(el,en,zh){if(!el||!el.parentNode||el.parentNode.classList.contains('fold'))return;var dt=document.createElement('details'),sm=document.createElement('summary');dt.className='fold';sm.innerHTML=t({en:en,zh:zh});el.before(dt);dt.appendChild(sm);dt.appendChild(el)}
     /* "On this page": a contents list beside wide screens, with the section in view highlighted */
@@ -304,7 +301,7 @@
       var lastIn=C.lessons.filter(function(x){return x.w===cl.w}).pop()===cl;
       if(lastIn)whatNext(true,function(a){if(pg)pg.before(a);else{var m3=document.querySelector('main');if(m3)m3.appendChild(a)}},n,!n);
       /* no button: a lesson counts as done once the reader scrolls to its end */
-      if(pg&&'IntersectionObserver' in window){var key=C.id+'/'+here,io=new IntersectionObserver(function(es){if(es.some(function(e){return e.isIntersecting})){io.disconnect();var x=done();if(!x[key]){x[key]=1;set(DONE,JSON.stringify(x));d=x;syncSide();track('Lesson done',{lesson:key})}}});io.observe(pg)}
+      if(pg&&'IntersectionObserver' in window){var key=C.id+'/'+here,endIO=new IntersectionObserver(function(es){if(es.some(function(e){return e.isIntersecting})){endIO.disconnect();var x=done();if(!x[key]){x[key]=1;set(DONE,JSON.stringify(x));d=x;syncSide();track('Lesson done',{lesson:key})}}});endIO.observe(pg)}
       buildToc();
       var dock=document.createElement('div');dock.className='dock';var RR=18,LL=2*Math.PI*RR;
       dock.innerHTML='<button class="dk" data-a="m" title="Menu" aria-label="Open topics menu · 打开主题菜单">☰</button>'+(p?'<a class="dk" href="'+p.file+'" title="Previous" aria-label="Previous lesson · 上一课">‹</a>':'<span class="dk off" aria-hidden="true">‹</span>')+

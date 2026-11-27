@@ -17,6 +17,15 @@ function kvGet(k){return new Promise(function(res){if(!DB)return res(mem[k]);try
 function kvSet(k,v){return new Promise(function(res){if(!DB){mem[k]=v;return res()}try{var tx=DB.transaction('kv','readwrite');tx.objectStore('kv').put(v,k);tx.oncomplete=res;tx.onerror=function(){persistOK=false;mem[k]=v;res()}}catch(e){persistOK=false;mem[k]=v;res()}})}
 var st=0;function save(){clearTimeout(st);st=setTimeout(function(){kvSet('state',S)},250)}
 function saveChunks(){return kvSet('chunks',CH.map(function(c){return {id:c.id,mat:c.mat,loc:c.loc,text:c.text}}))}
+function num(x){x=+x;return isFinite(x)&&x>0?x:0}
+function tidy(s){
+ s.mats=(Array.isArray(s.mats)?s.mats:[]).filter(function(m){return m&&typeof m==='object'&&typeof m.name==='string'}).map(function(m){m.id=String(m.id).replace(/[^\w-]/g,'');m.pages=num(m.pages);m.chars=num(m.chars);return m});
+ if(!Array.isArray(s.bank))s.bank=[];s.bank=s.bank.filter(function(x){return x&&typeof x.q==='string'&&Array.isArray(x.o)&&x.o.length===4&&x.a>=0&&x.a<4});
+ ['stats','miss','used','days'].forEach(function(k){if(!s[k]||typeof s[k]!=='object'||Array.isArray(s[k]))s[k]={}});
+ Object.keys(s.stats).forEach(function(k){var v=s.stats[k];if(!v||typeof v!=='object'){delete s.stats[k];return}v.h=(Array.isArray(v.h)?v.h:[]).map(function(x){return x?1:0});v.n=num(v.n);v.c=num(v.c);v.last=num(v.last)});
+ Object.keys(s.days).forEach(function(k){var v=s.days[k];if(!v||typeof v!=='object'){delete s.days[k];return}v.n=num(v.n);v.c=num(v.c)});
+ if([5,10,20].indexOf(s.perDay)<0)s.perDay=10;if(s.goal!=='exam')s.goal='understand';if(s.model!=='better')s.model='light';
+ return s}
 function fresh(){return {v:1,goal:'understand',exam:'custom',ver:'',cname:'',ctext:'',model:'light',perDay:10,mats:[],stats:{},miss:{},used:{},bank:[],days:{},rounds:0}}
 
 /* ---------- areas ---------- */
@@ -33,8 +42,7 @@ function reassign(){
  if(useExam())Lg.assignAreas(CH,areas().map(function(a){return {id:a.id,kw:a.kw}}));
  else CH.forEach(function(c){c.area='m:'+c.mat;c.score=1})}
 function hist(id){return (S.stats[id]&&S.stats[id].h)||[]}
-function planFor(kind,n){return Lg.plan(areas().map(function(a){return {id:a.id,w:a.w,hist:hist(id0(a)),last:S.stats[a.id]&&S.stats[a.id].last}}),n,kind,Date.now())}
-function id0(a){return a.id}
+function planFor(kind,n){return Lg.plan(areas().map(function(a){return {id:a.id,w:a.w,hist:hist(a.id),last:S.stats[a.id]&&S.stats[a.id].last}}),n,kind,Date.now())}
 function today(){return S.days[Lg.dayKey()]||{n:0,c:0}}
 
 /* ---------- reading files ---------- */
@@ -99,8 +107,8 @@ async function ensureModel(){
  catch(e){var m=e&&e.message;renderModel(false,m==='nogpu'?'nogpu':(m==='nomodel'?'nomodel':'fail'));throw e}}
 
 /* ---------- a round of questions ---------- */
-function flatten(plan){var out=[];plan.forEach(function(p){for(var i=0;i<p.k;i++)out.push({area:p.id})});
- for(var i=out.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=out[i];out[i]=out[j];out[j]=t}return out}
+function mix(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+function flatten(plan){var out=[];plan.forEach(function(p){for(var i=0;i<p.k;i++)out.push({area:p.id})});return mix(out)}
 async function startRound(kind,n){
  if(!CH.length){say('Add material first.','请先添加资料。');return}
  if(R&&R.busy)return;
@@ -143,9 +151,8 @@ function undo(it){var s=S.stats[it.area];if(s){s.h.pop();s.n--;s.c-=it.res?1:0}v
 function guess(){var it=R.items[R.i];if(!it||!it.counted||it.res!==1||it.guess)return;undo(it);record(it,false);it.counted=true;it.guess=1;save();renderPractice(true)}
 /* a slip of the finger: take the answer back and choose again */
 function redo(){var it=R.items[R.i];if(!it||!it.counted)return;undo(it);it.pick=null;it.res=null;it.guess=0;save();R.view='q';renderPractice(true)}
-function flag(){var it=R.items[R.i];if(!it||!it.counted)return;/* take its result back out */
- var s=S.stats[it.area];if(s){s.h.pop();s.n--;s.c-=it.res?1:0}var m=S.miss[it.chunk]||0;if(it.res)S.miss[it.chunk]=m+1;else S.miss[it.chunk]=Math.max(0,m-1);
- var d=S.days[Lg.dayKey()];if(d){d.n--;d.c-=it.res?1:0}it.flag=1;it.counted=false;save();next()}
+/* take its result back out; a question flagged while redoing the wrong-question book leaves the book too */
+function flag(){var it=R.items[R.i];if(!it||!it.counted)return;undo(it);it.flag=1;if(it.orig)it.orig.flag=1;save();next()}
 function next(){R.i++;pump();show();renderAll(true)}
 
 /* ---------- rendering ---------- */
@@ -219,7 +226,7 @@ function renderBook(){
   '<p class="acts"><button class="btn pri" data-act="redoset">'+T('Redo them, shuffled','打乱后重做')+'</button><button class="btn" data-act="print">'+T('Print the book','打印错题本')+'</button></p>'}
 function startRedo(){
  var b=book();if(!b.length||(R&&R.busy))return;
- var items=b.slice().sort(function(){return Math.random()-.5}).map(function(x,i){var q=Lg.shuffle({q:x.q,o:x.o,a:x.a,e:x.e},Math.random);return {id:'r'+Date.now().toString(36)+i,area:x.area,chunk:x.chunk,q:q.q,o:q.o,a:q.a,e:q.e,loc:x.loc,mat:x.mat,snip:x.snip,res:null,orig:x}});
+ var items=mix(b.slice()).map(function(x,i){var q=Lg.shuffle({q:x.q,o:x.o,a:x.a,e:x.e},Math.random);return {id:'r'+Date.now().toString(36)+i,area:x.area,chunk:x.chunk,q:q.q,o:q.o,a:q.a,e:q.e,loc:x.loc,mat:x.mat,snip:x.snip,res:null,orig:x}});
  R={kind:'redo',slots:items.map(function(x){return {area:x.area}}),items:items,i:0,gen:items.length,busy:false,fail:0,view:'q'};
  $('practice').hidden=false;renderPractice();$('practice').scrollIntoView({block:'start'})}
 function printBook(){
@@ -254,7 +261,7 @@ function exportAll(){
  a.href=URL.createObjectURL(blob);a.download='study-coach-'+Lg.dayKey()+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href)},2000)}
 async function importAll(file){
  try{var d=JSON.parse(await file.text());if(d.app!=='tx-learns-coach'||!d.state||!Array.isArray(d.chunks))throw 0;
-  var f=fresh();S=Object.assign(f,d.state);['mats','bank'].forEach(function(k){if(!Array.isArray(S[k]))S[k]=[]});['stats','miss','used','days'].forEach(function(k){if(!S[k]||typeof S[k]!=='object')S[k]={}});
+  S=tidy(Object.assign(fresh(),d.state));
   CH=d.chunks.filter(function(c){return c&&typeof c.text==='string'&&c.id&&c.mat}).slice(0,6000);R=null;reassign();await saveChunks();await kvSet('state',S);renderAll();say('Records imported.','记录已导入。')}
  catch(e){say('That file is not a study coach backup.','这个文件不是学习教练的备份。')}}
 
@@ -295,7 +302,7 @@ document.addEventListener('drop',function(e){if(e.target.closest&&e.target.close
 (async function(){
  DB=await openDB();if(!DB)persistOK=false;
  var s=await kvGet('state'),c=await kvGet('chunks');
- S=Object.assign(fresh(),s||{});CH=Array.isArray(c)?c:[];
+ S=tidy(Object.assign(fresh(),s||{}));CH=Array.isArray(c)?c:[];
  if(S.exam!=='custom'&&!EX.some(function(x){return x.id===S.exam}))S.exam='custom';
  reassign();renderAll();renderModel();$('app').hidden=false;window.__coach={state:function(){return S},chunks:function(){return CH}};
  if(navigator.storage&&navigator.storage.persist)try{navigator.storage.persist()}catch(e){}

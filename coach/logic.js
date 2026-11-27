@@ -66,11 +66,17 @@
   var q=String(o.question||o.q||'').trim(),opts=o.options||o.choices,a=o.answer;
   if(!Array.isArray(opts)||opts.length!==4||!q)return null;
   opts=opts.map(function(x){return String(x==null?'':x).replace(/^\s*(?:[A-Da-d][\).、:：]|\([A-Da-d]\))\s*/,'').trim()});
-  if(typeof a==='string'){var m=a.trim().match(/^[A-Da-d]/);a=m?m[0].toUpperCase().charCodeAt(0)-65:parseInt(a,10)}
-  if(!(a>=0&&a<4)||opts.some(function(x){return !x}))return null;
+  /* the answer may be an index, a digit, a letter ("B", "b)", "(B) text") or the text of the option itself.
+     The option text is tried first and a letter counts only when it stands alone, so "Delegate the task" and
+     "A project plan" are read as text, not as options D and A. */
+  if(typeof a==='string'){var s2=a.trim(),bare=s2.toLowerCase(),hit=-1,m;opts.forEach(function(x,k){if(x.toLowerCase()===bare)hit=k});
+   if(hit>-1)a=hit;
+   else if((m=s2.match(/^\(?([A-Da-d])(?![A-Za-z])/)))a=m[1].toUpperCase().charCodeAt(0)-65;
+   else a=/^[0-3]$/.test(s2)?+s2:-1}
+  if(typeof a!=='number'||a%1!==0||!(a>=0&&a<4)||opts.some(function(x){return !x}))return null;
   var u={};opts.forEach(function(x){u[x.toLowerCase()]=1});if(Object.keys(u).length<4)return null;
   if(q.length<12||q.length>700)return null;
-  return {q:q,o:opts,a:a|0,e:String(o.explanation||o.reason||'').trim()}};
+  return {q:q,o:opts,a:a,e:String(o.explanation||o.reason||'').trim()}};
  L.shuffle=function(item,rnd){var idx=[0,1,2,3];for(var i=3;i>0;i--){var j=Math.floor(rnd()*(i+1)),t=idx[i];idx[i]=idx[j];idx[j]=t}
   return {q:item.q,e:item.e,o:idx.map(function(k){return item.o[k]}),a:idx.indexOf(item.a)}};
  L.prompt=function(c){

@@ -18,6 +18,11 @@ const p = L.plan([{ id: 'a', w: 50, hist: [1, 1, 1, 1] }, { id: 'b', w: 50, hist
 ok(p.find(x => x.id === 'b').k > p.find(x => x.id === 'a').k, 'a weak area gets more questions');
 ok(L.parseQuestion('{"question":"short","options":["a","b","c","d"],"answer":1}') === null, 'a bad question is refused');
 ok(L.parseQuestion('{"question":"Which step comes first when two members disagree?","options":["Listen to both","Ignore it","Fire one","Wait"],"answer":"A"}')?.a === 0, 'a good question parses');
+{ const Q = a => L.parseQuestion(JSON.stringify({ question: 'What should the manager do next?', options: ['Ask the team', 'Delegate the task', 'Escalate now', 'Wait a week'], answer: a }))?.a;
+  ok(Q('Delegate the task') === 1, 'an answer given as the option text is matched to that option, not read as letter D');
+  ok(L.parseQuestion(JSON.stringify({ question: 'Which document comes first here?', options: ['The charter', 'A project plan', 'The budget', 'A risk list'], answer: 'A project plan' }))?.a === 1, 'an option that starts with the word A is not read as letter A');
+  ok(Q('(C) Escalate now') === 2 && Q('b)') === 1 && Q('2') === 2 && Q(3) === 3, 'letters, digits and indexes are read');
+  ok(Q('Something else') === undefined && Q(1.5) === undefined && Q(4) === undefined, 'an answer that names no option is refused'); }
 
 { const g = { window: {} }; globalThis.window = g.window; await import('../coach/exams.js'); const D = globalThis.window.COACH_DOMAINS.D26;
   const t = ['The team leader should negotiate between two members in conflict and coach them with emotional intelligence.', 'Update the risk register, schedule and budget, then review the critical path and quality plan.', 'Check regulatory compliance and the business case so the benefits and organizational strategy stay aligned.'].map(text => ({ text }));

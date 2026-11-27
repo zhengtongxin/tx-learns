@@ -53,11 +53,10 @@ module.exports = async (req, res) => {
       return res.end('{"ok":true}');
     }
     if (req.method !== 'GET') { res.statusCode = 405; return res.end('{"ok":false}'); }
-    const names = [];
-    for (let i = 0; i < DAYS; i++) {
-      const r = await list({ prefix: `prod/${dayOf(Date.now() - i * 864e5)}/`, limit: DAY_CAP });
-      for (const b of r.blobs) names.push(b.pathname);
-    }
+    // The days are independent listings, so they are read together: one slow round trip instead of fourteen in a row.
+    const now = Date.now();
+    const days = await Promise.all(Array.from({ length: DAYS }, (_, i) => list({ prefix: `prod/${dayOf(now - i * 864e5)}/`, limit: DAY_CAP })));
+    const names = days.flatMap(r => r.blobs.map(b => b.pathname));
     res.statusCode = 200; res.setHeader('cache-control', 'public, max-age=0, s-maxage=600');
     return res.end(JSON.stringify({ days: DAYS, lessons: tally(names), updated: new Date().toISOString() }));
   } catch (e) {

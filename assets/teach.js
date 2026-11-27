@@ -18,7 +18,7 @@ function game(el,items,opts,unit){
  }
  draw()}
 function predict(el,o){
- var tries=0,done=false;
+ var done=false;
  el.innerHTML='<b class="lbl">'+T({en:'Your turn',zh:'轮到你'})+'</b><p style="margin:0 0 8px;font-weight:600">'+T(o.q)+'</p><div class="pills">'+o.opts.map(function(x){return '<button class="pill" data-k="'+x.k+'">'+T(x)+'</button>'}).join('')+'</div><div class="fb" role="status" aria-live="polite"></div>';
  el.querySelectorAll('.pill').forEach(function(b){b.onclick=function(e){if(done||b.getAttribute('aria-disabled')==='true')return;
   var ok=b.dataset.k===o.a,fb=el.querySelector('.fb');
