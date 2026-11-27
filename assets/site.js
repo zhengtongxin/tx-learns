@@ -311,7 +311,7 @@
       if(lastIn)whatNext(true,function(a){if(pg)pg.before(a);else{var m3=document.querySelector('main');if(m3)m3.appendChild(a)}},n,!n);
       /* no button: a lesson counts as done once the reader is at its end and has had the page open for half a minute, so a quick swipe to the pager does not count */
       if(pg&&'IntersectionObserver' in window){var key=C.id+'/'+here,T0=Date.now(),MINREAD=30000,atEnd=false,endT=0,
-        fin=function(){if(!atEnd)return;endIO.disconnect();var x=done();if(!x[key]){x[key]=1;set(DONE,JSON.stringify(x));d=x;syncSide();track('Lesson done',{lesson:key})}},
+        fin=function(){if(!atEnd)return;endIO.disconnect();var x=done();if(!x[key]){x[key]=1;set(DONE,JSON.stringify(x));d=x;try{var rv=jget('learn-review',{}),h1=document.querySelector('main h1');rv[key]={t:Date.now(),en:((h1&&h1.querySelector('.en'))||{}).textContent||document.title,zh:((h1&&h1.querySelector('.zh'))||{}).textContent||document.title,h:key};set('learn-review',JSON.stringify(rv))}catch(e){}syncSide();track('Lesson done',{lesson:key})}},
         endIO=new IntersectionObserver(function(es){atEnd=es[es.length-1].isIntersecting;clearTimeout(endT);if(atEnd)endT=setTimeout(fin,Math.max(0,MINREAD-(Date.now()-T0)))});endIO.observe(pg)}
       buildToc();
       var dock=document.createElement('div');dock.className='dock';var RR=18,LL=2*Math.PI*RR;
@@ -397,6 +397,14 @@
       var c=e.target.closest&&e.target.closest('.cc');if(c){var r2=c.getBoundingClientRect(),x=(e.clientX-r2.left)/r2.width-.5,y=(e.clientY-r2.top)/r2.height-.5;c.style.transform='perspective(900px) rotateX('+(-y*5)+'deg) rotateY('+(x*7)+'deg) translateY(-4px)'}});
     document.addEventListener('mouseout',function(e){var c=e.target.closest&&e.target.closest('.cc');if(c&&!c.contains(e.relatedTarget))c.style.transform=''});
     document.querySelectorAll('.zh:not([lang])').forEach(function(e){e.lang='zh-Hans'});document.querySelectorAll('.en:not([lang])').forEach(function(e){e.lang='en'});
+    /* study page: lessons finished 1, 3, 7, 14 or 30 days ago come back as a short review list (kept on this device only) */
+    (function(){var el=document.getElementById('review');if(!el)return;var m=jget('learn-review',{}),now=Date.now(),W=[[1,2],[3,4],[7,9],[14,17],[30,35]],due=[];
+      Object.keys(m).forEach(function(k){var r=m[k],a=(now-(r&&r.t||0))/864e5;if(r&&r.h&&W.some(function(w){return a>=w[0]&&a<w[1]}))due.push(r)});
+      if(!due.length){el.hidden=true;return}
+      function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+      el.innerHTML='<h2><span class="en">Review <em>today</em></span><span class="zh">今日<em>复习</em></span></h2><ul class="rv-l">'+due.slice(0,3).map(function(r){return '<li><a href="'+P+esc(r.h)+'"><span class="en">'+esc(r.en)+'</span><span class="zh">'+esc(r.zh)+'</span></a></li>'}).join('')+'</ul>';el.hidden=false})();
+    /* installable and readable offline: only on the live site over https, never in automated browsers */
+    try{if(location.protocol==='https:'&&!navigator.webdriver){var ml=document.createElement('link');ml.rel='manifest';ml.href='/manifest.webmanifest';document.head.appendChild(ml);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(function(){})}}catch(e){}
     document.querySelectorAll('[data-count]').forEach(countUp);
     var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:0,rootMargin:'0px 0px -8% 0px'});
     document.querySelectorAll('main > h2,main > .card,main > .callout,main > .quiz,main > .stepper,main > .grid,main > .flow,main > .wfwrap,main > p,main > section,main > .track-list').forEach(function(e){e.classList.add('rv');io.observe(e)});
