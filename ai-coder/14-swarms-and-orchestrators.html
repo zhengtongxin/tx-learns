@@ -7,8 +7,8 @@
 <div class="hero"><span class="tag"><span class="en">Agentic engineering · Lesson 4</span><span class="zh">智能体工程 · 第 4 课</span></span><h1><span class="en">Swarms and orchestrators</span><span class="zh">智能体群与调度器</span></h1><p class="meta"><span class="en">Run many agents at once with one lead, split by files, and kept on a leash · ~14 min · concepts</span><span class="zh">让多个智能体同时工作：一个负责人、按文件切分，并且受到约束 · 约 14 分钟 · 讲概念</span></p></div>
 
 <h2><span class="en">Step 1 · Orchestrator and workers</span><span class="zh">第 1 步 · 调度者与执行者</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">In a <b>swarm</b>, one <b>orchestrator</b> agent breaks a goal into tasks and hands each to a <b>worker</b> agent. Workers run at the same time, each in its own worktree, and report back. The orchestrator checks the results and puts them together.</p>
-<p class="zh" style="margin:0 0 8px">在<b>智能体群</b>里，一个<b>调度者</b>智能体把目标拆成任务，每个任务交给一个<b>执行者</b>智能体。执行者同时开工，各在自己的 worktree 里，做完回报。调度者检查结果并把它们合起来。</p>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">In a <b>swarm</b>, one <b>orchestrator</b> agent breaks a goal into tasks and hands each to a <b>worker</b> agent. Workers run at the same time, each in its own worktree (a second checkout of the same repo, in its own folder), and report back. The orchestrator checks the results and puts them together.</p>
+<p class="zh" style="margin:0 0 8px">在<b>智能体群</b>里，一个<b>调度者</b>智能体把目标拆成任务，每个任务交给一个<b>执行者</b>智能体。执行者同时开工，各在自己的 worktree（同一个仓库的另一份检出，放在自己的文件夹里）里，做完回报。调度者检查结果并把它们合起来。</p>
 <p class="en" style="margin:0 0 8px">It pays off when the tasks are <b>independent</b>: many files to convert, many modules to test, many pages to build. It does not pay off for one tangled problem, where agents just wait for each other.</p>
 <p class="zh" style="margin:0 0 8px">任务<b>彼此独立</b>时才划算：很多文件要转换、很多模块要测试、很多页面要搭建。一个纠缠在一起的问题就不划算，因为智能体只是在互相等。</p>
 </div>
@@ -47,7 +47,7 @@
   { id: "tests", deps: ["api"], files: ["test/api.test.js", "src/index.js"] },
   { id: "docs", deps: [], files: ["README.md"] },
 ];
-const done = new Set(), waves = [];
+const done = new Set(), waves = []; // a Set is a list with no repeats
 while (done.size < tasks.length) {
   const wave = [], used = new Set();
   for (const t of tasks) {
@@ -55,6 +55,7 @@ while (done.size < tasks.length) {
     if (t.files.some(f => used.has(f))) continue; // a file is already taken in this wave
     wave.push(t.id); t.files.forEach(f => used.add(f));
   }
+  if (wave.length === 0) throw new Error('stuck: a dependency is missing or circular');
   wave.forEach(id => done.add(id)); waves.push(wave);
 }
 console.log(waves); // [ [ 'api', 'docs' ], [ 'ui' ], [ 'tests' ] ]</div>
