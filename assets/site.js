@@ -45,7 +45,7 @@
     /* Skip link: the first Tab stop, so keyboard users can jump past the top bar, the menu and the dock. */
     var mn=document.querySelector('main');
     if(mn){if(!mn.id)mn.id='main';mn.setAttribute('tabindex','-1');var sk=document.createElement('a');sk.className='skip';sk.href='#'+mn.id;sk.innerHTML=t({en:'Skip to content',zh:'跳到正文'});sk.onclick=function(){setTimeout(function(){mn.focus()},0)};document.body.prepend(sk)}
-    var top=document.createElement('div');top.className='top';
+    var top=document.createElement('header');top.className='top';
     function lk(h,tt,ic,en,zh){return '<a class="icon-btn eco-btn" href="'+h+'" title="'+tt+'" aria-label="'+tt+'">'+ic+'<span class="lbl"> <span class="en">'+en+'</span><span class="zh">'+zh+'</span></span></a>'}
     /* Three parts: the landing page (two choices, no menu), the study coach (its own About and How it works), and the tracks (About, How it works, Glossary). */
     var nav=AREA==='landing'?'':AREA==='study'?'<a class="icon-btn menu-btn" href="'+P+'study/index.html" aria-label="Study coach · 学习教练">🎯 <span class="en">Study coach</span><span class="zh">学习教练</span></a><span class="sp"></span>'+lk(P+'study/about.html','About the coach · 关于学习教练','','About this site','关于本站')+lk(P+'study/how.html','How it works · 运作方式','🌐','How it works','运作方式'):
@@ -314,7 +314,7 @@
         fin=function(){if(!atEnd)return;endIO.disconnect();var x=done();if(!x[key]){x[key]=1;set(DONE,JSON.stringify(x));d=x;try{var rv=jget('learn-review',{}),h1=document.querySelector('main h1');rv[key]={t:Date.now(),en:((h1&&h1.querySelector('.en'))||{}).textContent||document.title,zh:((h1&&h1.querySelector('.zh'))||{}).textContent||document.title,h:key};set('learn-review',JSON.stringify(rv))}catch(e){}syncSide();track('Lesson done',{lesson:key})}},
         endIO=new IntersectionObserver(function(es){atEnd=es[es.length-1].isIntersecting;clearTimeout(endT);if(atEnd)endT=setTimeout(fin,Math.max(0,MINREAD-(Date.now()-T0)))});endIO.observe(pg)}
       buildToc();
-      var dock=document.createElement('div');dock.className='dock';var RR=18,LL=2*Math.PI*RR;
+      var dock=document.createElement('nav');dock.className='dock';dock.setAttribute('aria-label','Lesson navigation · 课程导航');var RR=18,LL=2*Math.PI*RR;
       dock.innerHTML='<button class="dk" data-a="m" title="Menu" aria-label="Open topics menu · 打开主题菜单">☰</button>'+(p?'<a class="dk" href="'+p.file+'" title="Previous" aria-label="Previous lesson · 上一课">‹</a>':'<span class="dk off" aria-hidden="true">‹</span>')+
         '<div class="dk ring" role="progressbar" aria-label="Reading progress · 阅读进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><svg width="44" height="44" viewBox="0 0 44 44"><circle class="bg" cx="22" cy="22" r="'+RR+'"/><circle class="fg" cx="22" cy="22" r="'+RR+'" stroke-dasharray="'+LL+'" stroke-dashoffset="'+LL+'"/></svg><b>0</b></div>'+
         (n?'<a class="dk" href="'+n.file+'" title="Next" aria-label="Next lesson · 下一课">›</a>':'<span class="dk off" aria-hidden="true">›</span>')+'<button class="dk" data-a="t" title="Top" aria-label="Back to top · 回到顶部">↑</button>';
