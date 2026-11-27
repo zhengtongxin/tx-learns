@@ -455,3 +455,17 @@ a.menu-btn{text-decoration:none;color:inherit}
 .dom .tl>.cc .orbi{width:52px;height:52px;border-radius:17px;font-size:26px}
 .dom .tl>.cc h3{font-size:1.2rem;line-height:1.25;letter-spacing:-.03em}
 .dom .tl>.cc .go{font-size:22px;align-self:center}
+
+/* lesson polish: reading line, completion card, topic progress */
+.rdl{position:fixed;left:0;top:0;right:0;height:3px;z-index:70;background:var(--grad);transform-origin:0 50%;transform:scaleX(0);pointer-events:none}
+.donebar{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));z-index:80;display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;max-width:min(92vw,520px);padding:12px 18px;border-radius:18px;background:var(--glass2);border:1px solid color-mix(in srgb,var(--acc) 55%,transparent);box-shadow:0 14px 50px var(--glow);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);opacity:0;transform:translate(-50%,18px) scale(.96);transition:opacity .45s,transform .6s cubic-bezier(.2,.9,.3,1.2)}
+.donebar.on{opacity:1;transform:translate(-50%,0) scale(1)}
+.donebar .dn-t{font-size:15px;color:var(--acc2)}
+.donebar a{text-wrap:balance;font-size:14px;font-weight:700;color:var(--fg);text-decoration:none;border-bottom:1px solid var(--acc)}
+@media(min-width:1100px){.donebar{left:auto;right:24px;transform:translate(0,18px) scale(.96)}.donebar.on{transform:none}}
+@media(prefers-reduced-motion:reduce){.donebar{transition:opacity .2s}.donebar,.donebar.on{transform:translate(-50%,0)}}
+@media(prefers-reduced-motion:reduce) and (min-width:1100px){.donebar,.donebar.on{transform:none}}
+.tpg{position:relative;flex:1 1 100%;max-width:320px;margin:10px auto 0;height:22px;display:flex;align-items:center;justify-content:center}
+.tpg i{position:absolute;left:0;bottom:0;height:3px;border-radius:3px;background:var(--grad);transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.tpg::before{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:3px;background:var(--line)}
+.tpg span{font-size:12.5px;font-weight:600;color:var(--mut);padding-bottom:6px}
