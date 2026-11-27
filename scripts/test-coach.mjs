@@ -22,6 +22,12 @@ ok([[], [0], [1], [1, 1], [0, 1, 1, 1], [1, 1, 1, 1, 1, 1, 0]].map(h => L.interv
 ok(L.pick([{ id: 1, area: 'a', score: 9 }], 'b', {}, {}, Math.random) === null && L.pick([{ id: 1, area: 'a' }], 'a', {}, {}, Math.random).id === 1, 'an area with no passage of its own gets no question from another area');
 ok([['{"answer":"B"}', 1], ['{"answer":2}', 2], ['<think>x</think>The answer is C.', 2], ['{"answer":"(d) text"}', 3], ['no idea', -1], ['{"answer":7}', -1]].every(([r, w]) => L.parseVerify(r) === w), 'the second opinion is read as an option, or as none');
 ok(/A\. one\nB\. two/.test(L.verifyPrompt({ text: 'x', q: { q: 'Q?', o: ['one', 'two', 'three', 'four'], a: 1 } })[1].content) && !/answer is|"answer":1/.test(L.verifyPrompt({ text: 'x', q: { q: 'Q?', o: ['one', 'two', 'three', 'four'], a: 1 } })[1].content), 'the second opinion sees the options but not the key');
+{ const D = (y, m, d) => new Date(y, m - 1, d), days = { '2026-11-25': { n: 3, c: 2 }, '2026-11-26': { n: 5, c: 5 }, '2026-11-27': { n: 1, c: 0 } };
+  ok(L.streak(days, D(2026, 11, 27)) === 3, 'three days in a row count as a streak of 3');
+  ok(L.streak({ '2026-11-25': { n: 3, c: 2 }, '2026-11-26': { n: 5, c: 5 } }, D(2026, 11, 27)) === 2, 'an empty today keeps yesterday\'s streak alive');
+  ok(L.streak({ '2026-11-24': { n: 3, c: 2 } }, D(2026, 11, 27)) === 0, 'a gap of two days ends the streak');
+  ok(L.streak({ '2026-11-27': { n: 0, c: 0 } }, D(2026, 11, 27)) === 0, 'a day with no answers is not a streak day');
+  const w = L.week(days, D(2026, 11, 27)); ok(w.length === 7 && w[6].k === '2026-11-27' && w[6].n === 1 && w[0].n === 0, 'the week strip runs oldest to today'); }
 ok(L.parseQuestion('{"question":"short","options":["a","b","c","d"],"answer":1}') === null, 'a bad question is refused');
 ok(L.parseQuestion('{"question":"Which step comes first when two members disagree?","options":["Listen to both","Ignore it","Fire one","All of the above"],"answer":0}') === null, 'an "all of the above" option is refused');
 ok(L.parseQuestion('{"question":"哪一步应该最先做，当两位成员意见不合？","options":["先听双方","无视","开除一人","以上都对"],"answer":0}') === null, 'a Chinese "all of the above" option is refused');
