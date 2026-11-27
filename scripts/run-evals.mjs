@@ -64,6 +64,33 @@ for (const c of JSON.parse(readFileSync(join(ROOT, 'evals/triage-cases.json'), '
   report(c.name, r.status === c.exit, r.status === c.exit ? '' : `exit ${r.status}, wanted ${c.exit}`);
 }
 
+// ── 1c2. The code review queue (scripts/code-queue.mjs): first every file, then only what changed ──
+{
+  const { pickBatch, remember, hashOf, areaOf, MAX_TRIES } = await import('./code-queue.mjs');
+  const F = (path, area, text, bytes = 10) => ({ path, area, bytes, hash: hashOf(text) });
+  const files = [F('api/a.js', 'eco', 'a1'), F('assets/s.js', 'shell', 's1', 80), F('assets/t.js', 'shell', 't1', 80), F('assets/u.js', 'shell', 'u1', 30)];
+  const state = {}, now = p => files.find(f => f.path === p).hash;
+  const b1 = pickBatch(files, state, 120);
+  report('queue: the first batch stays inside one area', b1.area === 'eco' && b1.batch.length === 1 && b1.left === 3 && b1.batch[0].why === 'new');
+  remember(state, b1.batch, now);
+  const b2 = pickBatch(files, state, 120);
+  report('queue: a batch fills up to the budget and skips what does not fit', b2.batch.map(f => f.path).join() === 'assets/s.js,assets/u.js' && b2.left === 1);
+  remember(state, b2.batch, now); remember(state, pickBatch(files, state, 120).batch, now);
+  report('queue: after the first pass nothing waits', pickBatch(files, state, 120).batch.length === 0);
+  files[1] = F('assets/s.js', 'shell', 's2', 80);
+  const b3 = pickBatch(files, state, 120);
+  report('queue: only the changed file comes back', b3.batch.length === 1 && b3.batch[0].path === 'assets/s.js' && b3.batch[0].why === 'changed');
+  remember(state, [{ path: 'assets/s.js', hash: hashOf('s2') }], () => hashOf('s3'));
+  files[1] = F('assets/s.js', 'shell', 's3', 80);
+  report("queue: the agent's own merged edit does not send the file back", pickBatch(files, state, 120).batch.length === 0);
+  const st2 = {}; remember(st2, [files[0]], now, { failed: true });
+  const again = pickBatch(files.slice(0, 1), st2, 120).batch.length === 1;
+  for (let i = 1; i < MAX_TRIES; i++) remember(st2, [files[0]], now, { failed: true });
+  report('queue: a failed run brings the batch back, and it is let go after the last try', again && pickBatch(files.slice(0, 1), st2, 120).batch.length === 0);
+  report('queue: a page whose only change is a ?v= hash is not changed', hashOf('<script src="a.js?v=0123abcd">') === hashOf('<script src="a.js?v=89efcdab">') && hashOf('x') !== hashOf('y'));
+  report('queue: areas follow areas.json, first match wins', areaOf('coach/logic.js', [{ id: 'a', paths: ['coach/'] }, { id: 'b', paths: ['coach/logic.js'] }]) === 'a' && areaOf('zz.js', []) === 'other');
+}
+
 // ── 1d. The daily scan (scripts/daily-scan.mjs): the docs check, the rework count, the reader signal and the summary ──
 {
   const { drift, reworkFrom, readerSignal, combine } = await import('./daily-scan.mjs');

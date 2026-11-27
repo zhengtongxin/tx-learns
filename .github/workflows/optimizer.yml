@@ -2,6 +2,9 @@
 # pipeline cheaper, faster, smaller, quieter or less fragile. It opens at most one focused pull request per run and never
 # pushes to main. The normal copy check, backend review, preview UI check, automatic merge and live rollback all apply.
 # It may not change the merge guardrails, agent runners, status recording, lesson prose or project starter/reference code.
+# It also reviews the site's own code: scripts/code-queue.mjs (no AI) hands each run a batch of code files it has not read
+# yet. The first pass covers every file; after that only files that changed since they were read come back. While files
+# wait, the run is a code review of that batch; when none wait, it is the usual efficiency run.
 name: Efficiency engineer (optimizer)
 on:
   schedule:
@@ -57,9 +60,18 @@ jobs:
           node-version: 22
       - name: Measure the repository
         run: node scripts/efficiency-report.mjs --out /tmp/efficiency-report.md
+      # The queue script runs from a copy taken before Claude edits anything, so the agent cannot change what gets remembered.
+      - name: Pick the code to review
+        id: queue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p /tmp/trusted && cp scripts/code-queue.mjs scripts/signals.mjs scripts/lib.mjs /tmp/trusted/
+          node /tmp/trusted/code-queue.mjs plan --out /tmp || echo "review=false" >> "$GITHUB_OUTPUT"
       - name: Install Claude Code
         run: npm install -g @anthropic-ai/claude-code
       - name: Find and make one focused improvement
+        id: agent
         env:
           # Prefer TX's Claude subscription (CLAUDE_CODE_OAUTH_TOKEN from `claude setup-token`); the API key is only a fallback.
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -80,8 +92,8 @@ jobs:
           1. Read CLAUDE.md and STYLE.md first. Preserve the bilingual behavior, stories, lesson ordering, progress
              storage, SEO, accessibility, links, project packages and deployment on Vercel.
           2. Do not edit lesson prose, project starter/reference code, `packages/**`, `banned-words.txt`, `CLAUDE.md`,
-             `STYLE.md`, `.github/**`, `scripts/auto-merge.mjs`, `scripts/claude-run.mjs`, `scripts/record-status.mjs`
-             or `scripts/trace.mjs`.
+             `STYLE.md`, `.github/**`, `scripts/auto-merge.mjs`, `scripts/claude-run.mjs`, `scripts/record-status.mjs`,
+             `scripts/trace.mjs` or `scripts/code-queue.mjs`.
           3. Keep source changes small: at most six non-generated source files. Generated HTML/list/cache-version updates
              made by `node scripts/check-pages.mjs --fix` may accompany them.
           4. Make the benefit measurable. State the before and after bytes, request count, blocking operations, repeated
@@ -98,9 +110,27 @@ jobs:
           - Measure: a concrete before/after comparison.
           - Check: which deterministic checks passed.
           PROMPT
+          if [ -s /tmp/code-brief.md ]; then
+          cat >> /tmp/optimizer-prompt.md <<'PROMPT'
+
+          THIS RUN IS A CODE REVIEW. It replaces the search for an efficiency improvement above; the rules above still apply.
+          Read /tmp/code-brief.md, then read every file it lists in full, start to end. Look for real defects only:
+          a wrong result for some input, a failure that is swallowed or unhandled, state that goes out of step, a name
+          reused for two things, a check or test that can pass or fail by timing, dead code nothing calls, the same
+          logic written twice. Do not restyle, rename or reformat working code, and do not "modernise" it.
+          - Fix what you can prove, in the listed files (plus their test file under `scripts/` when a case belongs there).
+            Several small fixes in one pull request are fine when they are all in the listed files.
+          - For each fix, name the concrete input or situation that went wrong before. If you cannot name one, leave it.
+          - When the file has a test (`scripts/run-evals.mjs`, the asserts at the top of `scripts/test-coach.mjs`), add a
+            case that fails before your fix. You may run `node scripts/run-evals.mjs`.
+          - Finding nothing is a good result: change nothing and say which files you read.
+          In `/tmp/optimizer-summary.md`, "Measure" becomes the before/after behaviour of each fix (the input and what
+          happened), and the title line starts with "Code review:".
+          PROMPT
+          fi
           curl -fsS -o /tmp/claude-run.mjs "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/scripts/claude-run.mjs" && CC="node /tmp/claude-run.mjs optimizer" || CC=claude
           $CC --model sonnet --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/optimizer-prompt.md)" --max-turns 40 \
-            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/check-copy.mjs:*),Bash(node scripts/check-counts.mjs:*),Bash(node scripts/check-pages.mjs:*),Bash(node scripts/check-security.mjs:*)" \
+            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/run-evals.mjs:*),Bash(node scripts/check-copy.mjs:*),Bash(node scripts/check-counts.mjs:*),Bash(node scripts/check-pages.mjs:*),Bash(node scripts/check-security.mjs:*)" \
             --output-format text | tail -40
       - name: Guard and verify the change
         id: finish
@@ -109,16 +139,21 @@ jobs:
           GH_TOKEN: ${{ secrets.MERGE_TOKEN || secrets.GITHUB_TOKEN }}
           HAS_MERGE_TOKEN: ${{ secrets.MERGE_TOKEN != '' }}
           DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
+          REVIEW: ${{ steps.queue.outputs.review }}
+          REVIEW_COUNT: ${{ steps.queue.outputs.count }}
+          REVIEW_LEFT: ${{ steps.queue.outputs.left }}
         run: |
           set -euo pipefail
           mkdir -p /tmp/out
+          note=""
+          if [ "$REVIEW" = true ]; then note=" Code review: read ${REVIEW_COUNT} code file(s), ${REVIEW_LEFT} still waiting."; fi
           test -s /tmp/optimizer-summary.md || echo "Efficiency improvement with no written summary." > /tmp/optimizer-summary.md
           {
             git diff --name-only
             git ls-files --others --exclude-standard
           } | sort -u > /tmp/changed.txt
-          if grep -Eq '^(\.github/|packages/|CLAUDE\.md$|STYLE\.md$|banned-words\.txt$|scripts/(auto-merge|claude-run|record-status|trace)\.mjs$)' /tmp/changed.txt; then
-            echo "The optimizer touched a protected file:"; grep -E '^(\.github/|packages/|CLAUDE\.md$|STYLE\.md$|banned-words\.txt$|scripts/(auto-merge|claude-run|record-status|trace)\.mjs$)' /tmp/changed.txt; exit 1
+          if grep -Eq '^(\.github/|packages/|CLAUDE\.md$|STYLE\.md$|banned-words\.txt$|scripts/(auto-merge|claude-run|record-status|trace|code-queue)\.mjs$)' /tmp/changed.txt; then
+            echo "The optimizer touched a protected file:"; grep -E '^(\.github/|packages/|CLAUDE\.md$|STYLE\.md$|banned-words\.txt$|scripts/(auto-merge|claude-run|record-status|trace|code-queue)\.mjs$)' /tmp/changed.txt; exit 1
           fi
           grep -Ev '^(sitemap\.xml|vercel\.json|[^/]+\.html|[^/]+/index\.html|[^/]+/[0-9][0-9]-[^/]*\.html|[^/]+/packages\.js)$' /tmp/changed.txt > /tmp/source-changed.txt || true
           if [ "$(wc -l < /tmp/source-changed.txt)" -gt 6 ]; then
@@ -136,14 +171,14 @@ jobs:
           } | sort -u > /tmp/changed-final.txt
           if [ "$DRY_RUN" = true ]; then
             echo "state=ok" >> "$GITHUB_OUTPUT"
-            echo "summary=Prepared a measured efficiency change in dry-run mode; no pull request was opened." >> "$GITHUB_OUTPUT"
+            echo "summary=Prepared a measured efficiency change in dry-run mode; no pull request was opened.$note" >> "$GITHUB_OUTPUT"
             echo "pr=" >> "$GITHUB_OUTPUT"
             echo "Dry run; leaving without a pull request."
             exit 0
           fi
           if [ ! -s /tmp/source-changed.txt ] && [ ! -s /tmp/changed-final.txt ]; then
             echo "state=ok" >> "$GITHUB_OUTPUT"
-            echo "summary=Found no safe efficiency improvement worth changing this run." >> "$GITHUB_OUTPUT"
+            echo "summary=Found no safe improvement worth changing this run.$note" >> "$GITHUB_OUTPUT"
             echo "pr=" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -172,7 +207,18 @@ jobs:
           fi
           echo "pr=$url" >> "$GITHUB_OUTPUT"
           echo "state=ok" >> "$GITHUB_OUTPUT"
-          echo "summary=Opened one measured efficiency improvement in pull request #$pr." >> "$GITHUB_OUTPUT"
+          echo "summary=Opened one focused improvement in pull request #$pr.$note" >> "$GITHUB_OUTPUT"
+      # Read files leave the queue once Claude has finished with them. A run whose change failed the guard counts a try
+      # (two tries, then the batch is let go); a run where Claude itself could not run remembers nothing, so the batch comes back.
+      - name: Remember which code was reviewed
+        if: ${{ !cancelled() && steps.queue.outputs.review == 'true' && steps.agent.outcome == 'success' && inputs.dry_run != true }}
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OUTCOME: ${{ steps.finish.outcome }}
+        run: |
+          if [ "$OUTCOME" = success ]; then node /tmp/trusted/code-queue.mjs done --batch /tmp/code-batch.json
+          else node /tmp/trusted/code-queue.mjs done --batch /tmp/code-batch.json --failed; fi
       - name: Record what the agent used
         if: ${{ !cancelled() }}
         continue-on-error: true
