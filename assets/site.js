@@ -211,7 +211,7 @@
       /* Two levels: the domains first (AI, project management); a domain with several tracks opens its track list, one with a single track goes straight to it. */
       var hints=document.querySelectorAll('#topics > .sub, #topics > p.meta');for(var h=0;h<hints.length;h++)hints[h].hidden=!cur;
       if(cur){var ts=tracksOf(cur);
-        hub.innerHTML='<section class="dom"><p class="meta"><a href="tracks.html" data-back>'+t({en:'← All subjects',zh:'← 全部学科'})+'</a></p><h3 class="dom-h">'+(cur.icon?'<span aria-hidden="true">'+cur.icon+'</span> ':'')+t(cur.title)+'</h3>'+(cur.desc?'<p class="meta">'+t(cur.desc)+'</p>':'')+(function(){var en=ts.filter(function(c){return c.entry}),pa=ts.filter(function(c){return !c.entry});
+        hub.innerHTML='<section class="dom"><p class="meta"><a href="tracks.html" data-back>'+t({en:'← All subjects',zh:'← 全部领域'})+'</a></p><h3 class="dom-h">'+(cur.icon?'<span aria-hidden="true">'+cur.icon+'</span> ':'')+t(cur.title)+'</h3>'+(cur.desc?'<p class="meta">'+t(cur.desc)+'</p>':'')+(function(){var en=ts.filter(function(c){return c.entry}),pa=ts.filter(function(c){return !c.entry});
           function list(a,num){return '<div class="tl">'+a.map(function(c,ci){return card(c,num?ci:-1,count(c.id,c.files),c.total>0)}).join('')+'</div>'}
           /* Entry points (pick by who you are) come first; the tracks after them are one path, numbered. A domain without entry points is one numbered path. */
           if(!en.length||!pa.length)return list(ts,pa.length>1);
