@@ -41,6 +41,24 @@ git worktree remove ../try-agent</div>
 <p class="en">Sort each one.</p>
 <p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
 
+<h2><span class="en">Step 4 · Audit what the agent could reach</span><span class="zh">第 4 步 · 盘点智能体能碰到什么</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Before you trust a setup, look at it as the agent would. Anything it can read in your shell, it can also repeat, or be tricked into repeating. Three quick checks show most of it.</p>
+<p class="zh" style="margin:0 0 8px">信任一个环境之前，先站在智能体的角度看一遍。它在你的终端里能读到的一切，它也能复述，或者被骗着复述。三个快速检查就能看出大半。</p></div>
+<div class="codebox" data-file="what can the agent read?" data-lang="bash"># 1. Keys sitting in environment variables (the -i makes grep ignore capitals)
+env | grep -iE 'key|token|secret|password'
+
+# 2. Credential folders and files in your home folder
+ls -a ~ | grep -E '^\.(aws|ssh|npmrc|netrc|env)'
+
+# 3. A key committed by accident inside the project
+git ls-files | grep -iE '\.env|secret|credentials'</div>
+<div class="teach"><p class="en" style="margin:0 0 8px">Every line that prints something is a door. Close it in the most direct way: run the agent where the door does not exist. In the container from Step 2, only the project folder is mounted, so your home folder is simply not there, and a throwaway test key goes in by name:</p>
+<p class="zh" style="margin:0 0 8px">每一行只要有输出，就是一扇门。最直接的关法，是让智能体待在没有这扇门的地方。第 2 步的容器只挂载项目文件夹，你的主目录根本不在里面，而一把一次性的测试密钥按名字单独传入：</p></div>
+<div class="codebox" data-file="only what the task needs" data-lang="bash"># Pass ONE throwaway key by name (its value is read from your shell, not typed here)
+docker run --rm -v "$PWD":/work -w /work -e TEST_API_KEY node:20 npm test</div>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Make</b> a worktree for a small task, let your agent work there, and review the diff before merging.</span><span class="zh"><b>做</b>为一个小任务建一个 worktree，让智能体在那里工作，合并前审阅改动。</span></span></label><label><input type="checkbox"><span><span class="en"><b>List</b> every secret your agent could read from your shell today, and plan how to remove each.</span><span class="zh"><b>列出</b>你的智能体今天能从你的 shell 里读到的每一个密钥，并计划怎么移除。</span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
@@ -50,4 +68,4 @@ git worktree remove ../try-agent</div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"prev":["11-sub-agents-and-hooks.html"],"tools":{"en":"git; Docker to try the container example","zh":"git；想试容器示例需要 Docker"},"know":{"en":"Permission modes, hooks and sub-agents.","zh":"权限模式、钩子和子智能体。"},"goals":{"en":["Explain prompt injection","Layer soft and hard limits","Keep secrets out of reach"],"zh":["讲清提示词注入","把软、硬限制分层叠加","让密钥远离智能体"]}}}</script>
 <script src="../tracks.js?v=819ff2a4"></script><script src="lessons.js?v=389b4305"></script><script src="../assets/site.js?v=3a95bfcc"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
-<script src="js/12-sandboxing.js?v=8eb9dc5f"></script></body></html>
+<script src="js/12-sandboxing.js?v=98973bb1"></script></body></html>

@@ -38,11 +38,25 @@ claude -p "list the TODO comments in src/"   # one answer, then exit (scriptable
 <h2><span class="en">Step 3 · Choosing and staying safe</span><span class="zh">第 3 步 · 选择与安全</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Pick by fit: a closed tool with the vendor's best model, or an open one where you choose the model and the bill. Try the same small task in two and keep the one you trust.</p>
 <p class="zh" style="margin:0 0 8px">按适合度选：用厂商自家最强模型的闭源工具，或你自己选模型、自己管账单的开源工具。拿同一个小任务在两个里各试一遍，留下你信得过的那个。</p>
-<p class="en" style="margin:0 0 8px">Flags that skip every permission prompt exist. Use them only inside a throwaway sandbox (lesson 12), never on your real laptop with your real keys.</p>
-<p class="zh" style="margin:0 0 8px">确实有“跳过所有权限提示”的开关。只能在用完即弃的沙箱里用（第 12 课），绝不要在装着真实密钥的真实电脑上用。</p>
+<p class="en" style="margin:0 0 8px">Flags that skip every permission prompt exist. Use them only inside a throwaway sandbox (see Sandboxing), never on your real laptop with your real keys.</p>
+<p class="zh" style="margin:0 0 8px">确实有“跳过所有权限提示”的开关。只能在用完即弃的沙箱里用（见“沙盒”一课），绝不要在装着真实密钥的真实电脑上用。</p>
 </div>
 <p class="en">Sort each one.</p>
 <p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Step 4 · Read a permission file like a gate</span><span class="zh">第 4 步 · 像看一道门那样读权限文件</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A rule matches a pattern, and anything the rules do not name still asks. Take the settings file from Step 2 and ask what each command would do. (Exact matching rules differ between tools and versions, so confirm them in your tool’s own page; the thinking is what carries over.)</p>
+<p class="zh" style="margin:0 0 8px">规则匹配的是某种写法，规则没提到的一概还是要询问。拿第 2 步的设置文件，问问每条命令会怎样。（各工具、各版本的精确匹配规则不同，请到你所用工具自己的页面确认；能带走的是这种思路。）</p></div>
+<div class="codebox" data-file="what happens to each command" data-lang="text">npm test                       runs, no prompt (listed exactly)
+npm test -- --watch            asks: it is not the exact text that was listed
+git diff HEAD~1                runs, no prompt (a git diff command, any arguments)
+git push origin main           asks: nothing allows it
+Read ./.env  (file tool)       refused: denied
+cat .env     (shell command)   asks, but it is NOT covered by the Read rule</div>
+<div class="teach"><p class="en" style="margin:0 0 8px">The last two lines are the lesson. A deny on the file-reading tool does not automatically cover a shell command that reads the same file. A rule file is a convenience for you, not a security boundary. To keep the keys really out of reach, keep them out of the folder, or run the agent in a sandbox where the file is not there.</p>
+<p class="zh" style="margin:0 0 8px">最后两行才是重点。对文件读取工具的禁止，并不会自动覆盖一条读同一个文件的 shell 命令。规则文件是给你方便用的，不是安全边界。要让密钥真正碰不到，就别把它放在项目文件夹里，或者让智能体在没有这个文件的沙盒里运行。</p></div>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
 
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Install</b> one terminal agent, open a small project, and ask it to explain the folder layout.</span><span class="zh"><b>安装</b>一个终端智能体，打开一个小项目，让它讲讲文件夹结构。</span></span></label><label><input type="checkbox"><span><span class="en"><b>List</b> three commands you would allow in advance and three you would always want to approve.</span><span class="zh"><b>列出</b>三条你愿意提前放行的命令，和三条永远要你批准的命令。</span></span></label></div>
@@ -53,4 +67,4 @@ claude -p "list the TODO comments in src/"   # one answer, then exit (scriptable
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"prev":[],"tools":{"en":"A terminal, Node.js to install one, and an account or API key for the agent","zh":"终端、用来安装的 Node.js，以及智能体所需的账号或 API 密钥"},"know":{"en":"Briefing an agent and reading a diff.","zh":"会给智能体下简报、会读改动。"},"goals":{"en":["Say why a terminal agent is worth using","Pick a permission level on purpose","Plan before the agent edits"],"zh":["讲清终端智能体的好处","有意识地选择权限级别","让智能体先计划再改动"]}}}</script>
 <script src="../tracks.js?v=819ff2a4"></script><script src="lessons.js?v=389b4305"></script><script src="../assets/site.js?v=3a95bfcc"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
-<script src="js/06-terminal-agents.js?v=6ccc4e25"></script></body></html>
+<script src="js/06-terminal-agents.js?v=a4c37141"></script></body></html>
