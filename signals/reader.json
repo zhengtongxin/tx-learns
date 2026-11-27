@@ -3372,97 +3372,101 @@
   },
   "cloud-basics/01-servers-and-the-cloud.html": {
    "score": 8,
-   "at": "2026-11-27T19:34:13.133Z",
+   "at": "2026-11-27T19:34:46.269Z",
    "confusing": [
     {
-     "where": "Step 3 · How much do you manage?",
-     "why": "A newcomer who has never called a model meets “model API” as one of three categories, with no explanation of what it is."
+     "where": "Step 3",
+     "why": "\"Patch\" is never explained. A newcomer may not know it means installing security updates."
     },
     {
-     "where": "More practice · first cost quiz",
-     "why": "Nothing says that 0.02 is dollars per hour, so the reader has to guess what the number means before the sum makes sense."
+     "where": "Step 3",
+     "why": "\"Call over the internet\" is used as if it were known. The lesson never says that calling a service means sending a request and getting an answer back."
     }
    ]
   },
   "cloud-basics/02-containers.html": {
-   "score": 6,
-   "at": "2026-11-27T19:34:13.133Z",
+   "score": 7,
+   "at": "2026-11-27T19:34:46.269Z",
    "confusing": [
     {
-     "where": "Step 3 · A Dockerfile",
-     "why": "The five instructions (FROM, WORKDIR, COPY, RUN, CMD) are never named one by one. “python:3.12-slim”, “base” and requirements.txt are also unexplained, so the reader can get the gist but cannot say wh"
+     "where": "Step 3, code box",
+     "why": "\"pip\" and \"requirements.txt\" are never explained. The reader cannot tell what gets installed or from where."
     },
     {
-     "where": "Step 3 · A Dockerfile (CMD quiz)",
-     "why": "The difference between RUN and CMD appears only after the quiz is answered. The reader needs it to answer the question."
+     "where": "Step 3, code box",
+     "why": "The text says COPY brings files in, but the two dots (where from, where to) are not explained."
     },
     {
-     "where": "Step 2 · Image and container",
-     "why": "“Saved them outside” is vague. The reader is not told where or how, and the next lesson does not cover it."
+     "where": "Step 3, code box",
+     "why": "The version tag and \"slim\" are not explained, so the reader does not know what base image this is."
     }
    ]
   },
   "cloud-basics/03-config-and-secrets.html": {
    "score": 7,
-   "at": "2026-11-27T19:34:13.133Z",
+   "at": "2026-11-27T19:34:46.269Z",
    "confusing": [
     {
-     "where": "Step 3 · Secrets never go in git",
-     "why": "“Rotate” is not explained. The next quiz uses “revoke” for the same action, so the reader meets two words for one thing."
+     "where": "Step 3",
+     "why": "\"Secret store\" is not explained, and \"a file that git ignores\" assumes the reader knows .gitignore."
     },
     {
-     "where": "More practice · first quiz",
-     "why": "The lesson only reads environment variables. This line sets one inside the program, which is never taught, so the quiz depends on a step the text does not show."
-    },
-    {
-     "where": "More practice · second quiz",
-     "why": "type(...) and .__name__ are not explained. The fact the answer needs (environment values are text) is taught, but the code itself is hard to read."
+     "where": "Quiz after Step 2",
+     "why": "type(), __name__ and the name PORT appear before anything explains them. The explanation only comes after the answer."
     }
    ]
   },
   "cloud-basics/04-deploying.html": {
    "score": 7,
-   "at": "2026-11-27T19:34:13.133Z",
+   "at": "2026-11-27T19:34:46.269Z",
    "confusing": [
     {
-     "where": "Step 3 · Plan the way back (sort game)",
-     "why": "The sort game under this text sorts items into Integration (CI) and Delivery (CD), which Step 2 taught. Nothing in the game is about order, so the instruction and the game do not match."
+     "where": "Step 3, sorting game",
+     "why": "The sorting game underneath sorts items into CI or CD (integration or delivery). It does not put anything in order, so the instruction and the game do not match."
     },
     {
-     "where": "Step 3 · Plan the way back",
-     "why": "“Tag” is not explained. The reader may think of a git tag or a Docker image tag without knowing which is meant."
+     "where": "Step 2",
+     "why": "A pipeline is described as a list of steps, but the reader is not told what runs it (a service that watches the repository), and services are new to this reader."
+    },
+    {
+     "where": "Quiz 3 (More practice)",
+     "why": "This uses a loop with break and dict.get, neither taught in the lesson. It is a small gap for this reader, but the quiz needs it."
     }
    ]
   },
   "cloud-basics/05-logs-and-monitoring.html": {
    "score": 8,
-   "at": "2026-11-27T19:34:13.133Z",
+   "at": "2026-11-27T19:34:46.269Z",
    "confusing": [
     {
-     "where": "Step 2 · Logs you can search",
-     "why": "JSON is used as a known word and never explained. The code box uses json.loads without saying what it does."
+     "where": "Step 1",
+     "why": "This paragraph packs five ideas together: logs, levels, milliseconds, JSON and json.loads. It is hard to follow in one read."
     },
     {
-     "where": "Step 3 · Metrics and alerts (sort game)",
-     "why": "“Median” is not explained, so the reader cannot tell whether it is an average, a peak or a middle value."
+     "where": "Step 2, code box",
+     "why": "A list comprehension is used without explanation. The same form appears in the quiz."
+    },
+    {
+     "where": "Step 2",
+     "why": "The lesson asks the reader to compare free text with JSON, but only JSON is shown, so there is nothing to compare."
     }
    ]
   },
   "cloud-basics/06-cost-and-scale.html": {
    "score": 7,
-   "at": "2026-11-27T19:34:13.133Z",
+   "at": "2026-11-27T19:34:46.269Z",
    "confusing": [
     {
-     "where": "Step 2 · Estimate before you launch",
-     "why": "The sentence gives a formula that is wrong by a factor of a million. The code divides by a million and multiplies by price_per_million, so someone who follows the sentence gets 270,000,000 instead of "
+     "where": "Step 2",
+     "why": "The text says price per token, but the code uses price_per_million and divides by 1_000_000. The unit does not match, and the underscore number form is not explained."
     },
     {
-     "where": "Step 1 · More users, more machine",
-     "why": "The phrase is not explained. A newcomer does not know that one machine breaking takes everything down."
+     "where": "Step 2, code box",
+     "why": "The 30 is unlabelled. It means days in a month, but the reader has to guess."
     },
     {
-     "where": "Step 1 · More users, more machine",
-     "why": "The reason is missing. The quiz asks why private memory is a problem, but the text does not say that the next request may land on a different copy."
+     "where": "Step 2",
+     "why": "\"Back-of-envelope\" is an idiom a newcomer may not know."
     }
    ]
   }
