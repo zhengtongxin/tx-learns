@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Small scripts | TX Learns</title>
+<meta name="description" content="Save commands in a script, use variables and loops, and check whether a command worked"><meta property="og:title" content="Small scripts | TX Learns"><meta property="og:description" content="Save commands in a script, use variables and loops, and check whether a command worked"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/terminal-basics/06-small-scripts.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/pmp.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/terminal-basics/06-small-scripts.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/terminal-basics/06-small-scripts.html","url":"https://tx-learns.vercel.app/terminal-basics/06-small-scripts.html","name":"Small scripts","alternateName":"小脚本","description":"Save commands in a script, use variables and loops, and check whether a command worked","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Combining and automating","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Terminal basics","url":"https://tx-learns.vercel.app/terminal-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Terminal basics","item":"https://tx-learns.vercel.app/terminal-basics/index.html"},{"@type":"ListItem","position":3,"name":"Small scripts","item":"https://tx-learns.vercel.app/terminal-basics/06-small-scripts.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Combining and automating · Lesson 3</span><span class="zh">组合与自动化 · 第 3 课</span></span><h1><span class="en">Small scripts</span><span class="zh">小脚本</span></h1><p class="meta"><span class="en">Save commands in a script, use variables and loops, and check whether a command worked · ~10 min · reading and practice</span><span class="zh">把命令存进脚本，使用变量和循环，并检查命令是否成功 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · A script is saved commands</span><span class="zh">第 1 步 · 脚本就是存起来的命令</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>script</b> is a text file of commands. Start it with <code>#!/usr/bin/env bash</code> (the “shebang”, which names the interpreter), make it executable and run it with <code>./backup.sh</code>. Anything you repeat more than twice is worth saving.</p>
+<p class="zh" style="margin:0 0 8px"><b>脚本</b>就是一个写满命令的文本文件。开头写上 <code>#!/usr/bin/env bash</code>（叫 shebang，指明解释器），把它设为可执行，再用 <code>./backup.sh</code> 运行。凡是重复超过两次的事，都值得存成脚本。</p></div>
+<div class="codebox" data-file="backup.sh" data-lang="bash">#!/usr/bin/env bash
+set -e
+name="menu"
+cp "$name.txt" "$name.bak"
+echo "Saved $name"</div>
+
+<h2><span class="en">Step 2 · Variables and loops</span><span class="zh">第 2 步 · 变量与循环</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A variable is set without spaces around the equals sign, <code>name="menu"</code>, and read with <code>$name</code>. Quote it, <code>"$name"</code>, so spaces in a value do not split it. A loop repeats for each item: <code>for f in *.txt; do echo "$f"; done</code>.</p>
+<p class="zh" style="margin:0 0 8px">变量赋值时等号两边不能有空格，<code>name="menu"</code>，读取用 <code>$name</code>。读取时加上引号 <code>"$name"</code>，这样值里有空格也不会被拆开。循环对每一项重复一次：<code>for f in *.txt; do echo "$f"; done</code>。</p></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Did it work</span><span class="zh">第 3 步 · 它成功了吗</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Every command finishes with an <b>exit status</b>: 0 means success and anything else means failure. <code>$?</code> holds the last one. <code>cmd1 &amp;&amp; cmd2</code> runs the second only if the first succeeded, and <code>set -e</code> at the top of a script stops it at the first failure instead of carrying on with broken data.</p>
+<p class="zh" style="margin:0 0 8px">每条命令结束时都有一个<b>退出状态</b>：0 表示成功，其他都表示失败。<code>$?</code> 保存最近一个。<code>cmd1 &amp;&amp; cmd2</code> 只在第一条成功时才运行第二条；脚本开头的 <code>set -e</code> 会在第一次失败时就停下，而不是带着错误数据继续。</p>
+<p class="en" style="margin:0 0 8px">Which line is it?</p>
+<p class="zh" style="margin:0 0 8px">是哪一种？</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> write a script that copies a file to a backup name and prints a message.</span><span class="zh"><b>试一试：</b>写一个脚本，把文件复制成备份名并打印一句话。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> make it fail on purpose and see that <code>set -e</code> stops it.</span><span class="zh"><b>核对：</b>故意让它失败，看 <code>set -e</code> 是否让它停下。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A script is saved commands with a shebang first line.<br>• Variables take no spaces around = and need quotes when read.<br>• Exit status 0 is success; set -e stops on failure.</p><p class="zh" style="margin:0">• 脚本是存起来的命令，第一行是 shebang。<br>• 变量赋值时 = 两边无空格，读取时要加引号。<br>• 退出状态 0 是成功；set -e 在失败时停止。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Terminal basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"A terminal (macOS or Linux; on Windows use WSL)","zh":"一个终端（macOS 或 Linux；Windows 用 WSL）"},"know":{"en":"Pipes and permissions (see “Environment and permissions”).","zh":"知道管道与权限（见“环境与权限”）。"},"goals":{"en":["Write and run a script","Use variables and a for loop","Read an exit status"],"zh":["写并运行一个脚本","使用变量和 for 循环","读懂退出状态"]},"prev":["05-environment-and-permissions.html"]}}</script>
+<script src="../tracks.js?v=c1c7bcfb"></script><script src="lessons.js?v=24194f12"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/06-small-scripts.js?v=da6f5da4"></script></body></html>

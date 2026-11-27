@@ -1,0 +1,42 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Environment and permissions | TX Learns</title>
+<meta name="description" content="Use environment variables and PATH, and read and change file permissions"><meta property="og:title" content="Environment and permissions | TX Learns"><meta property="og:description" content="Use environment variables and PATH, and read and change file permissions"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/terminal-basics/05-environment-and-permissions.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/pmp.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/terminal-basics/05-environment-and-permissions.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/terminal-basics/05-environment-and-permissions.html","url":"https://tx-learns.vercel.app/terminal-basics/05-environment-and-permissions.html","name":"Environment and permissions","alternateName":"环境与权限","description":"Use environment variables and PATH, and read and change file permissions","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Combining and automating","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Terminal basics","url":"https://tx-learns.vercel.app/terminal-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Terminal basics","item":"https://tx-learns.vercel.app/terminal-basics/index.html"},{"@type":"ListItem","position":3,"name":"Environment and permissions","item":"https://tx-learns.vercel.app/terminal-basics/05-environment-and-permissions.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Combining and automating · Lesson 2</span><span class="zh">组合与自动化 · 第 2 课</span></span><h1><span class="en">Environment and permissions</span><span class="zh">环境与权限</span></h1><p class="meta"><span class="en">Use environment variables and PATH, and read and change file permissions · ~10 min · reading and practice</span><span class="zh">使用环境变量与 PATH，并读懂、修改文件权限 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Environment variables</span><span class="zh">第 1 步 · 环境变量</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">An <b>environment variable</b> is a named setting that programs can read, such as <code>HOME</code> or an API key. Set one with <code>export NAME=value</code> and read it with <code>$NAME</code>. A variable set in one terminal is not visible in another, and it disappears when the terminal closes unless you save it in your shell profile. API keys belong here or in a <code>.env</code> file, never inside code you share.</p>
+<p class="zh" style="margin:0 0 8px"><b>环境变量</b>是程序可以读取的有名字的设置，比如 <code>HOME</code> 或 API 密钥。用 <code>export 名字=值</code> 设置，用 <code>$名字</code> 读取。在一个终端里设的变量，别的终端看不到；终端关掉就消失，除非写进 shell 的配置文件。API 密钥放在这里或 <code>.env</code> 文件里，绝不写进要分享的代码。</p></div>
+<div class="codebox" data-file="terminal" data-lang="bash">export SHOP=Mei
+echo "Hello $SHOP"</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · PATH</span><span class="zh">第 2 步 · PATH</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">When you type a command name, the shell looks for a program with that name in each folder listed in <code>PATH</code>, in order. “command not found” usually means the program is not installed or its folder is not in <code>PATH</code>. <code>which name</code> shows which file would run.</p>
+<p class="zh" style="margin:0 0 8px">你输入命令名时，shell 会按顺序在 <code>PATH</code> 列出的每个文件夹里找同名程序。“command not found”通常说明程序没装，或它所在的文件夹不在 <code>PATH</code> 里。<code>which 名字</code> 会显示将运行的是哪个文件。</p></div>
+
+<h2><span class="en">Step 3 · Permissions</span><span class="zh">第 3 步 · 权限</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><code>ls -l</code> shows ten characters like <code>-rwxr-xr--</code>. The first says file or folder, then three groups of read, write and execute for the owner, the group and everyone else. A script must be executable to run directly: <code>chmod +x script.sh</code>. <code>chmod 600 file</code> keeps a file private to you. A “Permission denied” error means the permission bits, not a broken file.</p>
+<p class="zh" style="margin:0 0 8px"><code>ls -l</code> 会显示类似 <code>-rwxr-xr--</code> 的十个字符。第一位表示文件还是文件夹，后面三组分别是所有者、所属组和其他人的读、写、执行权限。脚本要可执行才能直接运行：<code>chmod +x script.sh</code>。<code>chmod 600 文件</code> 让文件只有你自己能用。“Permission denied”说的是权限位的问题，不是文件坏了。</p>
+<p class="en" style="margin:0 0 8px">Read or change?</p>
+<p class="zh" style="margin:0 0 8px">是读取还是修改？</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> export a variable, read it, open a second terminal and see that it is not there.</span><span class="zh"><b>试一试：</b>export 一个变量并读取，再开一个终端，看它不在了。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> run <code>ls -l</code> on a script, then add and remove the x permission.</span><span class="zh"><b>核对：</b>对一个脚本运行 <code>ls -l</code>，再加上、去掉 x 权限。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• export sets a variable and $NAME reads it.<br>• PATH lists the folders searched for commands.<br>• chmod changes who may read, write or run a file.</p><p class="zh" style="margin:0">• export 设置变量，$NAME 读取它。<br>• PATH 列出查找命令的文件夹。<br>• chmod 修改谁能读、写、运行文件。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Terminal basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"A terminal (macOS or Linux; on Windows use WSL)","zh":"一个终端（macOS 或 Linux；Windows 用 WSL）"},"know":{"en":"Files and the pipe (see “Pipes and redirects”).","zh":"知道文件和管道（见“管道与重定向”）。"},"goals":{"en":["Set and read environment variables","Explain what PATH does","Read and change permissions with chmod"],"zh":["设置并读取环境变量","说明 PATH 的作用","用 chmod 读懂并修改权限"]},"prev":["04-pipes-and-redirects.html"]}}</script>
+<script src="../tracks.js?v=c1c7bcfb"></script><script src="lessons.js?v=24194f12"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/05-environment-and-permissions.js?v=356ae8c5"></script></body></html>

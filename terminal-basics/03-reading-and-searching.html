@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reading and searching | TX Learns</title>
+<meta name="description" content="Read files, count lines and search file contents and names without opening an editor"><meta property="og:title" content="Reading and searching | TX Learns"><meta property="og:description" content="Read files, count lines and search file contents and names without opening an editor"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/terminal-basics/03-reading-and-searching.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/pmp.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/terminal-basics/03-reading-and-searching.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/terminal-basics/03-reading-and-searching.html","url":"https://tx-learns.vercel.app/terminal-basics/03-reading-and-searching.html","name":"Reading and searching","alternateName":"查看与搜索","description":"Read files, count lines and search file contents and names without opening an editor","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Moving around","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Terminal basics","url":"https://tx-learns.vercel.app/terminal-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Terminal basics","item":"https://tx-learns.vercel.app/terminal-basics/index.html"},{"@type":"ListItem","position":3,"name":"Reading and searching","item":"https://tx-learns.vercel.app/terminal-basics/03-reading-and-searching.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Moving around · Lesson 3</span><span class="zh">在文件系统里移动 · 第 3 课</span></span><h1><span class="en">Reading and searching</span><span class="zh">查看与搜索</span></h1><p class="meta"><span class="en">Read files, count lines and search file contents and names without opening an editor · ~10 min · reading and practice</span><span class="zh">不开编辑器就能读文件、数行数，并按内容和名字搜索 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Look inside a file</span><span class="zh">第 1 步 · 看文件里面</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><code>cat file</code> prints a whole file. For long files use <code>head -n 3 file</code> for the first lines and <code>tail -n 3 file</code> for the last, and <code>wc -l file</code> to count the lines. This is how you peek at logs and data without opening anything.</p>
+<p class="zh" style="margin:0 0 8px"><code>cat 文件</code> 打印整个文件。文件很长时，用 <code>head -n 3 文件</code> 看开头几行，<code>tail -n 3 文件</code> 看最后几行，<code>wc -l 文件</code> 数行数。这样不用打开任何东西就能偷看日志和数据。</p></div>
+<div class="codebox" data-file="terminal" data-lang="bash">cat menu.txt
+head -n 2 menu.txt
+wc -l menu.txt</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Search inside files</span><span class="zh">第 2 步 · 在文件内容里搜索</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><code>grep word file</code> prints the lines that contain the word. <code>-i</code> ignores case, <code>-n</code> shows line numbers, <code>-c</code> counts the matching lines, and <code>-r word folder</code> searches every file in a folder. When something is “somewhere in the project”, grep finds it in a second.</p>
+<p class="zh" style="margin:0 0 8px"><code>grep 词 文件</code> 打印包含该词的行。<code>-i</code> 忽略大小写，<code>-n</code> 显示行号，<code>-c</code> 统计匹配的行数，<code>-r 词 文件夹</code> 搜索文件夹里的每个文件。当东西“在项目里的某处”，grep 一秒就能找到。</p></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Search for names</span><span class="zh">第 3 步 · 按名字找文件</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><code>find folder -name "*.txt"</code> lists files by name, where <code>*</code> matches anything. Use <code>grep</code> when you know what a file says and <code>find</code> when you know what it is called.</p>
+<p class="zh" style="margin:0 0 8px"><code>find 文件夹 -name "*.txt"</code> 按名字列出文件，其中 <code>*</code> 匹配任意内容。知道文件“写了什么”用 <code>grep</code>，知道文件“叫什么”用 <code>find</code>。</p>
+<p class="en" style="margin:0 0 8px">Which tool fits?</p>
+<p class="zh" style="margin:0 0 8px">哪个工具合适？</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> make a small text file with <code>printf</code> and read it with cat, head, tail and wc.</span><span class="zh"><b>试一试：</b>用 <code>printf</code> 做一个小文本文件，再用 cat、head、tail、wc 读它。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> grep for a word two ways, with and without <code>-i</code>.</span><span class="zh"><b>核对：</b>用两种方式 grep 一个词，加和不加 <code>-i</code>。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• cat, head and tail read; wc counts.<br>• grep searches inside files, find searches names.<br>• -i, -n, -c and -r make grep far more useful.</p><p class="zh" style="margin:0">• cat、head、tail 读；wc 计数。<br>• grep 搜索文件内容，find 搜索名字。<br>• -i、-n、-c、-r 让 grep 强大得多。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Terminal basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"A terminal (macOS or Linux; on Windows use WSL)","zh":"一个终端（macOS 或 Linux；Windows 用 WSL）"},"know":{"en":"Files, folders and paths (see “Files and folders”).","zh":"知道文件、文件夹和路径（见“文件与文件夹”）。"},"goals":{"en":["Read a file with cat, head and tail","Count with wc","Search with grep and find"],"zh":["用 cat、head、tail 读文件","用 wc 计数","用 grep 和 find 搜索"]},"prev":["02-files-and-folders.html"]}}</script>
+<script src="../tracks.js?v=c1c7bcfb"></script><script src="lessons.js?v=24194f12"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/03-reading-and-searching.js?v=411f1aa8"></script></body></html>
