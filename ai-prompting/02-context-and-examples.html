@@ -1,0 +1,53 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Context and examples | TX Learns</title>
+<meta name="description" content="Give the assistant the background it cannot guess, and show one example of what you want"><meta property="og:title" content="Context and examples | TX Learns"><meta property="og:description" content="Give the assistant the background it cannot guess, and show one example of what you want"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/ai-prompting/02-context-and-examples.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/pmp.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/ai-prompting/02-context-and-examples.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-prompting/02-context-and-examples.html","url":"https://tx-learns.vercel.app/ai-prompting/02-context-and-examples.html","name":"Context and examples","alternateName":"背景与示例","description":"Give the assistant the background it cannot guess, and show one example of what you want","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Asking clearly","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"AI Prompting","url":"https://tx-learns.vercel.app/ai-prompting/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Prompting","item":"https://tx-learns.vercel.app/ai-prompting/index.html"},{"@type":"ListItem","position":3,"name":"Context and examples","item":"https://tx-learns.vercel.app/ai-prompting/02-context-and-examples.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Asking clearly · Lesson 2</span><span class="zh">把话说清楚 · 第 2 课</span></span><h1><span class="en">Context and examples</span><span class="zh">背景与示例</span></h1><p class="meta"><span class="en">Give the assistant the background it cannot guess, and show one example of what you want · ~10 min · reading and practice</span><span class="zh">把助手猜不到的背景告诉它，再给一个你想要的样子的示例 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Give the background</span><span class="zh">第 1 步 · 把背景交代清楚</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The assistant starts every chat knowing nothing about you. Tell it who the answer is for, what you are trying to achieve and any facts that change the answer, such as a budget or a deadline.</p>
+<p class="zh" style="margin:0 0 8px">每次对话开始，助手对你一无所知。告诉它答案是给谁的、你想达成什么，以及会改变答案的事实，比如预算或截止日期。</p>
+<p class="en" style="margin:0 0 8px">More is not always better. Include what would change the answer, and leave out the rest.</p>
+<p class="zh" style="margin:0 0 8px">不是越多越好。写进会改变答案的内容，其余的不写。</p>
+<p class="en" style="margin:0 0 8px">A customer asks for a refund. Decide what belongs in the prompt.</p>
+<p class="zh" style="margin:0 0 8px">一位客户要求退款。决定哪些内容该写进提示词。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Step 2 · Show one example</span><span class="zh">第 2 步 · 给一个示例</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Describing a style in words is slow and easy to misread. Showing one or two examples of the input and the output you want is faster, because the assistant copies the pattern. This is often called <b>few-shot</b> prompting: “few” means a few examples.</p>
+<p class="zh" style="margin:0 0 8px">用文字描述风格既慢又容易被误读。给一两个“输入和想要的输出”的示例更快，因为助手会照着样子来。这常被称为<b>少样本</b>提示，意思就是给少量几个示例。</p>
+<p class="en" style="margin:0 0 8px">Pick examples that look like the real cases, and say that the new input should follow the same pattern.</p>
+<p class="zh" style="margin:0 0 8px">选和真实情况相似的示例，并说明新的输入要照同样的样子处理。</p></div>
+<div class="codebox" data-file="one example teaches the pattern" data-lang="text">Label each message as Order, Complaint or Other.
+
+Message: "Where is my parcel?"      -&gt; Order
+Message: "The soup was cold."         -&gt; Complaint
+
+Message: "Can I change my pickup time?"
+-&gt;   (the assistant writes the label after the arrow)</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Mark what is what</span><span class="zh">第 3 步 · 标清楚哪是哪</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">When you paste an email or an article into a prompt, put your instructions first and wrap the pasted text in clear marks, such as “Email:” and a line of dashes. Otherwise the assistant may treat part of the pasted text as an instruction.</p>
+<p class="zh" style="margin:0 0 8px">当你把邮件或文章粘进提示词时，先写指令，再用清楚的标记把粘贴的文字围起来，比如“邮件：”加一行横线。否则助手可能把粘贴文字里的某句话当成指令。</p>
+<p class="en" style="margin:0 0 8px">It also keeps your prompt easy to reuse: swap the pasted text and run it again.</p>
+<p class="zh" style="margin:0 0 8px">这也让你的提示词便于复用：换掉粘贴的文字，再跑一次。</p></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> write a labelling prompt with two examples and one new input, like the box above.</span><span class="zh"><b>试一试：</b>写一个带两个示例和一个新输入的分类提示词，像上面那个框一样。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> take out one fact from a prompt and see whether the answer really changes.</span><span class="zh"><b>核对：</b>从提示词里拿掉一条事实，看答案是否真的变了。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• The assistant knows nothing about you until you say it.<br>• Include the facts that change the answer; leave out the rest.<br>• One or two examples teach a pattern faster than a description.<br>• Mark pasted text so it is not mistaken for instructions.</p><p class="zh" style="margin:0">• 你不说，助手对你一无所知。<br>• 写进会改变答案的事实，其余不写。<br>• 一两个示例比描述更快地教会它一个样子。<br>• 把粘贴的文字标出来，避免被当成指令。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Prompting</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Any AI assistant in a browser","zh":"浏览器里任一 AI 助手"},"know":{"en":"The four parts of a prompt (see “What a prompt is”).","zh":"知道提示词的四个部分（见“什么是提示词”）。"},"goals":{"en":["Choose the background worth including","Show one example instead of describing a style","Mark pasted text so it is not mixed with instructions"],"zh":["选出值得写进去的背景","用一个示例代替对风格的描述","把粘贴的文字标出来，不和指令混在一起"]},"prev":["01-what-a-prompt-is.html"]}}</script>
+<script src="../tracks.js?v=0ebd541e"></script><script src="lessons.js?v=103228d0"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/02-context-and-examples.js?v=560a5a99"></script></body></html>
