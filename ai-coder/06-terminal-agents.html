@@ -23,6 +23,17 @@ claude -p "list the TODO comments in src/"   # one answer, then exit (scriptable
 <p class="zh" style="margin:0 0 8px">先计划、再执行：先要一份计划，读完、改好，再让它动手。多数白费的功夫，来自智能体在错误想法上一路冲到底。</p>
 </div>
 <div class="try" id="p1"></div>
+<p class="en">In Claude Code the loosening lives in a small settings file you can commit, so the whole team shares it. Other tools have an equivalent file; the idea is the same.</p>
+<p class="zh">在 Claude Code 里，放宽权限写在一个可以提交的小设置文件里，整个团队共用。别的工具也有类似的文件，思路一样。</p>
+<div class="codebox" data-file=".claude/settings.json (example)" data-lang="json">{
+  "permissions": {
+    "allow": ["Bash(npm test)", "Bash(git diff:*)"],
+    "deny": ["Read(./.env)"]
+  }
+}</div>
+<p class="en">Allowed: the test command and reading diffs, with no prompt. Denied: the agent can never read your <code>.env</code> file of keys. Everything else still asks.</p>
+<p class="zh">允许：运行测试和查看 diff，不再提示。拒绝：智能体永远不能读你放密钥的 <code>.env</code> 文件。其余一切仍然会先询问。</p>
+
 
 <h2><span class="en">Step 3 · Choosing and staying safe</span><span class="zh">第 3 步 · 选择与安全</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Pick by fit: a closed tool with the vendor's best model, or an open one where you choose the model and the bill. Try the same small task in two and keep the one you trust.</p>
