@@ -4,55 +4,46 @@
 <meta name="updated" content="2026-11-27">
 <link rel="canonical" href="https://tx-learns.vercel.app/ai-builder/04-data-and-apis.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=12861667"><link rel="stylesheet" href="../assets/teach.css?v=284a1f31"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/ai-builder/04-data-and-apis.html","url":"https://tx-learns.vercel.app/ai-builder/04-data-and-apis.html","name":"Data and APIs","alternateName":"数据与接口","description":"Call any web service with the HTTP Request node and shape what comes back","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Automating with workflows","dateModified":"2026-11-27","isPartOf":{"@type":"CollectionPage","name":"AI Builder","url":"https://tx-learns.vercel.app/ai-builder/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"AI Builder","item":"https://tx-learns.vercel.app/ai-builder/index.html"},{"@type":"ListItem","position":3,"name":"Data and APIs","item":"https://tx-learns.vercel.app/ai-builder/04-data-and-apis.html"}]}]}</script></head><body>
 <div class="wrap"><nav class="side"></nav><main>
-<div class="hero"><span class="tag"><span class="en">Automating with workflows · Lesson 4</span><span class="zh">用工作流自动化 · 第 4 课</span></span><h1><span class="en">Data and APIs</span><span class="zh">数据与接口</span></h1><p class="meta"><span class="en">Call a real web service with the HTTP Request node, shape what comes back and handle errors · ~15 min · hands-on</span><span class="zh">用 HTTP Request 节点调用真实的网络服务，整理返回的数据并处理错误 · 约 15 分钟 · 动手做</span></p></div>
+<div class="hero"><span class="tag"><span class="en">Automating with workflows · Lesson 4</span><span class="zh">用工作流自动化 · 第 4 课</span></span><h1><span class="en">Data and APIs</span><span class="zh">数据与接口</span></h1><p class="meta"><span class="en">Call any web service with the HTTP Request node and shape what comes back · ~12 min · hands-on</span><span class="zh">用 HTTP Request 节点调用任何网络服务，并整理返回的数据 · 约 12 分钟 · 动手做</span></p></div>
 
-<h2><span class="en">Step 1 · Call a real API</span><span class="zh">第 1 步 · 调用一个真实接口</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Many apps have no n8n node. Almost all have an <b>API</b>, a web address that answers with JSON. The <b>HTTP Request</b> node calls it for you. Free public APIs need no key, so start with one.</p>
-<p class="zh" style="margin:0 0 8px">很多应用没有现成的 n8n 节点，但几乎都有 <b>API</b>：一个会用 JSON 回答的网址。<b>HTTP Request</b> 节点就替你去调用它。免费的公开接口不需要密钥，先拿一个练手。</p>
-<p class="en" style="margin:0 0 8px">• <b>Method:</b> GET reads, POST sends.<br>• <b>URL:</b> the address, without the <code>?...</code> part.<br>• <b>Query parameters:</b> the <code>name=value</code> pairs after the <code>?</code>. Add them as a list in the node, not glued onto the URL.<br>• <b>Authentication:</b> a paid or private API wants a key in a header; save it as a credential, never in the URL.</p>
-<p class="zh" style="margin:0 0 8px">• <b>方法：</b>GET 是读取，POST 是发送。<br>• <b>URL：</b>地址，不含 <code>?</code> 后面的部分。<br>• <b>查询参数：</b><code>?</code> 之后的 <code>名称=值</code>。在节点里按列表添加，不要拼进网址。<br>• <b>认证：</b>收费或私有的接口要在请求头里带密钥；存成凭证，不要写进网址。</p></div>
+<h2><span class="en">Step 1 · Call an API</span><span class="zh">第 1 步 · 调用接口</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Many apps have no n8n node. Almost all have an <b>API</b>, a web address that answers with JSON. The <b>HTTP Request</b> node calls it for you.</p>
+<p class="zh" style="margin:0 0 8px">很多应用没有现成的 n8n 节点，但几乎都有 <b>API</b>：一个会用 JSON 回答的网址。<b>HTTP Request</b> 节点就替你去调用它。</p>
+<p class="en" style="margin:0 0 8px">• <b>Method:</b> GET reads, POST sends.<br>• <b>URL:</b> the address of the service.<br>• <b>Authentication:</b> usually a key in a header; save it as a credential, not in the URL.</p>
+<p class="zh" style="margin:0 0 8px">• <b>方法：</b>GET 是读取，POST 是发送。<br>• <b>URL：</b>服务的地址。<br>• <b>认证：</b>通常是请求头里的密钥；存成凭证，不要写进网址。</p></div>
 <div class="codebox" data-file="HTTP Request settings" data-lang="text">Method:  GET
-URL:     https://api.open-meteo.com/v1/forecast
-Query:   latitude = 1.29          (central Singapore)
-         longitude = 103.85
-         current = temperature_2m,wind_speed_10m
-Result:  one item, shaped like this (your numbers will differ):
-         { "current": { "time": "2026-11-27T14:00", "temperature_2m": 31.2, "wind_speed_10m": 9.4 }, ... }</div>
-<p class="en">Click <b>Execute step</b> and read the Output tab before you build anything: that shape is exactly what every later node sees.</p>
-<p class="zh">点 <b>Execute step</b>，先看输出面板，再动手搭：那个结构就是后面每个节点看到的东西。</p>
+URL:     https://api.example.com/v1/rates?base=SGD
+Auth:    Header Auth, name "Authorization", saved as a credential
+Result:  one item with the JSON the service returned</div>
 
 <h2><span class="en">Step 2 · Shape the result</span><span class="zh">第 2 步 · 整理结果</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The raw answer is rarely what the next node wants. Dots walk into nested JSON: <code>{{ $json.current.temperature_2m }}</code> is 31.2. <b>Edit Fields</b> keeps only the fields you name, an <b>IF</b> node splits the path on a condition, and a <b>Code</b> node handles real logic.</p>
-<p class="zh" style="margin:0 0 8px">原始返回很少正好是下一个节点要的样子。用点号进入嵌套的 JSON：<code>{{ $json.current.temperature_2m }}</code> 就是 31.2。<b>Edit Fields</b> 只留你点名的字段，<b>IF</b> 节点按条件分路，需要真正的逻辑时用 <b>Code</b> 节点。</p>
-<p class="en" style="margin:0 0 8px">In a Code node set <b>Run Once for All Items</b>. <code>$input.first()</code> is the first incoming item; you return a list of new items, each wrapped as <code>{ json: ... }</code>.</p>
-<p class="zh" style="margin:0 0 8px">在 Code 节点里选 <b>Run Once for All Items</b>。<code>$input.first()</code> 是第一个输入条目；你要返回一个新条目的列表，每个都包成 <code>{ json: ... }</code>。</p></div>
-<div class="codebox" data-file="Code node (JavaScript)" data-lang="text">// Turn the weather answer into one decision for the outdoor class.
-const w = $input.first().json.current;      // the nested object from step 1
-const windy = w.wind_speed_10m &gt; 20;         // km/h
-return [{ json: {
-  temp: w.temperature_2m,
-  windy,
-  note: windy ? "Windy: move the class indoors" : "Fine for the outdoor class"
-} }];</div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The raw answer is rarely what the next node wants. Use <b>Edit Fields</b> to keep only what you need, an <b>IF</b> node to split paths, and a <b>Code</b> node when you need real logic.</p>
+<p class="zh" style="margin:0 0 8px">原始返回很少正好是下一个节点要的样子。用 <b>Edit Fields</b> 只留需要的字段，用 <b>IF</b> 节点分路，需要真正的逻辑时再用 <b>Code</b> 节点。</p>
+<p class="en" style="margin:0 0 8px">A <b>Code</b> node runs a few lines of JavaScript on every item. <code>$input.all()</code> is all incoming items; you return a new list.</p>
+<p class="zh" style="margin:0 0 8px"><b>Code</b> 节点会对每个条目运行几行 JavaScript。<code>$input.all()</code> 是所有输入条目，你再返回一个新列表。</p></div>
+<div class="codebox" data-file="Code node (JavaScript)" data-lang="text">// Keep rows over $100 and add a field with the amount in cents.
+const rows = $input.all().map(item =&gt; item.json);
+const big = rows.filter(r =&gt; r.amount &gt; 100);
+return big.map(r =&gt; ({ json: { ...r, cents: Math.round(r.amount * 100) } }));</div>
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 3 · When the API says no</span><span class="zh">第 3 步 · 接口拒绝时</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Every reply carries a <b>status code</b>. Learn the common ones; they tell you what to fix.</p>
 <p class="zh" style="margin:0 0 8px">每个回复都带一个<b>状态码</b>。认得常见的几个，就知道该修什么。</p>
-<p class="en" style="margin:0 0 8px">• <b>400:</b> your request is malformed, often a typo in a parameter name.<br>• <b>401 / 403:</b> the key is missing or not allowed.<br>• <b>404:</b> wrong address or the thing does not exist.<br>• <b>429:</b> too many requests; slow down or add a <b>Wait</b> node.<br>• <b>500:</b> the service itself failed; retry later.</p>
-<p class="zh" style="margin:0 0 8px">• <b>400：</b>请求本身格式不对，常见是参数名拼错。<br>• <b>401 / 403：</b>密钥缺失或没有权限。<br>• <b>404：</b>地址错了，或者东西不存在。<br>• <b>429：</b>请求太多；放慢，或加一个 <b>Wait</b> 节点。<br>• <b>500：</b>服务本身出错；稍后重试。</p>
-<p class="en" style="margin:0 0 8px">In the node's <b>Settings</b> tab, turn on <b>Retry On Fail</b> for temporary errors. By default an error stops the whole run; set <b>On Error</b> to <b>Continue (using error output)</b> to send failures down their own path, for example to a message that tells you.</p>
-<p class="zh" style="margin:0 0 8px">在节点的 <b>Settings</b> 标签里，为临时性错误打开 <b>Retry On Fail</b>（失败重试）。默认情况下一个错误会让整个运行停下；把 <b>On Error</b> 设成 <b>Continue (using error output)</b>，失败的条目就会走单独的一条路，比如发一条消息提醒你。</p></div>
+<p class="en" style="margin:0 0 8px">• <b>401 / 403:</b> the key is missing or not allowed.<br>• <b>404:</b> wrong address or the thing does not exist.<br>• <b>429:</b> too many requests; slow down or add a <b>Wait</b> node.<br>• <b>500:</b> the service itself failed; retry later.</p>
+<p class="zh" style="margin:0 0 8px">• <b>401 / 403：</b>密钥缺失或没有权限。<br>• <b>404：</b>地址错了，或者东西不存在。<br>• <b>429：</b>请求太多；放慢，或加一个 <b>Wait</b> 节点。<br>• <b>500：</b>服务本身出错；稍后重试。</p>
+<p class="en" style="margin:0 0 8px">In the node settings turn on <b>Retry On Fail</b> for temporary errors.</p>
+<p class="zh" style="margin:0 0 8px">在节点设置里为临时性错误打开 <b>Retry On Fail</b>（失败重试）。</p></div>
 <p class="en">Sort each one.</p>
 <p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
 
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
-<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Build</b> the small chain: Manual trigger, HTTP Request (weather for your own area; look up its latitude and longitude on any map), the Code node above, then an IF on <code>windy</code> with a different message on each branch. Run it and check that the right branch lit up.</span><span class="zh"><b>搭</b>这条小链：手动触发，HTTP Request（查你所在地区的天气，在任意地图上查经纬度），上面的 Code 节点，再用 IF 判断 <code>windy</code>，两条分支各发不同的消息。运行后确认亮起的是对的那条分支。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Break it</b> on purpose: change <code>current</code> to <code>currents</code> in the query, run it, and read the status code and message in the error.</span><span class="zh"><b>故意弄坏</b>：把查询里的 <code>current</code> 改成 <code>currents</code>，运行，读一读错误里的状态码和提示。</span></span></label></div>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Call</b> a free public API of your choice and keep two fields from the answer.</span><span class="zh"><b>调用</b>一个你选的免费公开接口，从返回里保留两个字段。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Break it</b> on purpose with a wrong key and read the status code.</span><span class="zh"><b>故意弄坏</b>：用错的密钥，读一读状态码。</span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• The HTTP Request node reaches any service that has an API; read its Output tab first.<br>• Query parameters go in the list; keys go in credentials, never in the URL.<br>• Dots reach nested fields: <code>$json.current.temperature_2m</code>.<br>• Edit Fields, IF and Code shape the data for the next step.<br>• Status codes tell you what to fix: 400 typo, 401 key, 429 rate, 500 retry.</p><p class="zh" style="margin:0">• HTTP Request 节点能连任何有 API 的服务；先看它的输出面板。<br>• 查询参数放进列表；密钥放凭证里，不要写进网址。<br>• 用点号取嵌套字段：<code>$json.current.temperature_2m</code>。<br>• Edit Fields、IF 和 Code 把数据整理成下一步要的样子。<br>• 状态码告诉你该修什么：400 拼写、401 密钥、429 太快、500 重试。</p></div>
+<div class="card"><p class="en" style="margin:0">• The HTTP Request node reaches any service that has an API.<br>• Keep keys in credentials, never in the URL.<br>• Edit Fields, IF and Code shape the data for the next step.<br>• Status codes tell you what to fix: 401 key, 429 rate, 500 retry.<br>• Turn on retry and add waits for the flaky and the rate-limited.</p><p class="zh" style="margin:0">• HTTP Request 节点能连任何有 API 的服务。<br>• 密钥放凭证里，不要写进网址。<br>• Edit Fields、IF 和 Code 把数据整理成下一步要的样子。<br>• 状态码告诉你该修什么：401 看密钥，429 放慢，500 重试。<br>• 不稳定或有限速的接口，要开重试并加等待。</p></div>
 
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Builder</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"prev":["03-docs-and-email.html"],"tools":{"en":"n8n Cloud and a free public API (no key needed)","zh":"n8n Cloud，以及一个免费公开接口（不需要密钥）"},"know":{"en":"Items, JSON and expressions.","zh":"条目、JSON 和表达式。"},"goals":{"en":["Call an API from n8n and read the JSON","Filter and reshape items with Code","Read a status code and decide what to do"],"zh":["在 n8n 里调用接口并读懂 JSON","用 Code 过滤、改造条目","读懂状态码并决定怎么办"]}}}</script>
 <script src="../tracks.js?v=819ff2a4"></script><script src="lessons.js?v=bc7f7459"></script><script src="../assets/site.js?v=a0db7d29"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
-<script src="js/04-data-and-apis.js?v=7efa20ac"></script></body></html>
+<script src="js/04-data-and-apis.js?v=c7cb5921"></script></body></html>
