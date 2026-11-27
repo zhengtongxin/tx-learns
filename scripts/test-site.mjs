@@ -98,6 +98,18 @@ try {
     eq(await page.evaluate(() => [...document.scripts].map(s => s.src).filter(s => s && !/\/(assets|js)\/|tracks\.js|lessons\.js/.test(s))), [], 'unexpected scripts');
   });
 
+  await test('subjects', async page => {
+    // Two levels: the tracks page lists the subjects (AI, project management); a subject with several tracks opens its track list.
+    await page.goto(base + 'tracks.html');
+    const D = loadWindow('tracks.js').DOMAINS;
+    eq(await page.$$eval('.track-list .cc', a => a.length), D.length, 'one card per subject');
+    await page.goto(base + 'tracks.html#ai');
+    eq(await page.$$eval('.track-list .cc', a => a.map(x => x.getAttribute('href'))), T.filter(t => (t.domain || 'ai') === 'ai').map(t => t.href), 'the AI tracks, in tracks.js order');
+    ok(await page.isVisible('[data-back]'), 'a way back to the subjects');
+    await page.click('[data-back]');
+    eq(await page.$$eval('.track-list .cc', a => a.length), D.length, 'back at the subjects');
+  });
+
   await test('no script', async page => {
     await page.goto(base + 'tracks.html');
     eq(await page.$$eval('.track-list a', a => a.map(x => x.getAttribute('href'))), T.map(t => t.href), 'track links, in tracks.js order');

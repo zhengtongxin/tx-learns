@@ -194,8 +194,15 @@
     function card(c,ci,n,ok){return '<a class="cc spot" href="'+c.href+'"><div class="orbi">'+c.icon+'</div><div><h3>'+t(c.title)+'</h3><div class="meta" style="margin-top:4px">'+t(c.desc)+'</div><div class="chips"><span class="chip">'+t({en:'Step '+(ci+1),zh:'第 '+(ci+1)+' 步'})+(c.level?' · '+t(LV[c.level]):'')+'</span>'+(ok&&n?'<span class="chip">'+t({en:n+' of '+c.published+' done',zh:'已完成 '+n+' / '+c.published})+'</span>':'')+'</div>'+pbar(n,c.published||0,'Progress in '+c.title.en+' · '+c.title.zh)+'</div><div class="go">→</div></a>'}
     /* Tracks are grouped by domain (window.DOMAINS in tracks.js); a track names its domain with domain:'<id>'. Step numbers count within a domain. */
     function drawHub(){if(!hub)return;var D=window.DOMAINS&&window.DOMAINS.length?window.DOMAINS:[{id:'ai',title:{en:'AI',zh:'AI'}}];
-      hub.innerHTML=D.map(function(dm){var ts=window.TRACKS.filter(function(c){return (c.domain||'ai')===dm.id});if(!ts.length)return '';
-        return '<section class="dom"><h3 class="dom-h">'+(dm.icon?'<span aria-hidden="true">'+dm.icon+'</span> ':'')+t(dm.title)+'</h3>'+(dm.desc?'<p class="meta">'+t(dm.desc)+'</p>':'')+'<div class="tl">'+ts.map(function(c,ci){return card(c,ci,count(c.id,c.files),c.total>0)}).join('')+'</div></section>'}).join('')}
+      function tracksOf(dm){return window.TRACKS.filter(function(c){return (c.domain||'ai')===dm.id})}
+      var want=(location.hash||'').slice(1),cur=null;D.forEach(function(dm){if(dm.id===want&&tracksOf(dm).length>1)cur=dm});
+      /* Two levels: the domains first (AI, project management); a domain with several tracks opens its track list, one with a single track goes straight to it. */
+      var hints=document.querySelectorAll('#topics > .sub, #topics > p.meta');for(var h=0;h<hints.length;h++)hints[h].hidden=!cur;
+      if(cur){var ts=tracksOf(cur);
+        hub.innerHTML='<section class="dom"><p class="meta"><a href="tracks.html" data-back>'+t({en:'← All subjects',zh:'← 全部学科'})+'</a></p><h3 class="dom-h">'+(cur.icon?'<span aria-hidden="true">'+cur.icon+'</span> ':'')+t(cur.title)+'</h3>'+(cur.desc?'<p class="meta">'+t(cur.desc)+'</p>':'')+'<div class="tl">'+ts.map(function(c,ci){return card(c,ci,count(c.id,c.files),c.total>0)}).join('')+'</div></section>';return}
+      hub.innerHTML='<section class="dom"><div class="tl">'+D.map(function(dm){var ts=tracksOf(dm);if(!ts.length)return '';var href=ts.length>1?'#'+dm.id:ts[0].href;
+        return '<a class="cc spot" href="'+href+'"><div class="orbi">'+(dm.icon||'')+'</div><div><h3>'+t(dm.title)+'</h3>'+(dm.desc?'<div class="meta" style="margin-top:4px">'+t(dm.desc)+'</div>':'')+'</div><div class="go">→</div></a>'}).join('')+'</div></section>'}
+    addEventListener('hashchange',function(){drawHub();scrollTo(0,document.getElementById('topics')?document.getElementById('topics').offsetTop-20:0)});
     function canStore(){try{localStorage.setItem('learn-t','1');localStorage.removeItem('learn-t');return true}catch(e){return false}}
     function drawResume(){
       var T=window.TRACKS,tot=0,fin=0,hasP=false,lookup={};
