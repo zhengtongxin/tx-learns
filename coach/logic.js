@@ -36,7 +36,7 @@
   /* the id comes from the name, not the line number, so reordering or replacing areas never hands one area's history to another */
   out.push({id:'n-'+name.toLowerCase().replace(/\s+/g,' '),name:{en:name,zh:name},weight:w,kw:words.join(' '),tasks:kw})});return out.slice(0,20)};
  /* What may leave the device with a track submission: the outline (a short heading per passage), the most frequent terms and,
-    only if the reader asks, short summaries the model wrote in its own words. Never the files, their names or their text. */
+    the key ideas the model wrote in its own words (up to 30 passages). Never the files, their names or their text. */
  /* the words that mark a line about where material came from, kept in pieces so the copy check's own word list does not trip on them */
  var SRCW=['instruc'+'tor','lec'+'turer','plat'+'form','cou'+'rse','课'+'程','讲'+'师','版'+'权'].join('|'),SRC=new RegExp('(https?:\\/\\/|www\\.|@[a-z0-9-]+\\.|©|copyright|all rights reserved|'+SRCW+')','i');
  L.scrubLine=function(s){s=String(s||'').replace(/\s+/g,' ').trim();if(!s||SRC.test(s)||/^\d+$/.test(s))return '';return s.length>80?s.slice(0,77).replace(/\s+\S*$/,'')+'…':s};
@@ -57,7 +57,7 @@
   return false};
  L.sumPrompt=function(c){var zh=c.lang==='zh',lg=zh?'Chinese (简体中文)':'English';
   return [{role:'system',content:'You summarise study material for a learner. You answer with one JSON object and nothing else. You write only in '+lg+'.'},
-   {role:'user',content:'Excerpt:\n"""\n'+c.text+'\n"""\nSummarise the idea of this excerpt in one or two sentences in '+lg+', in your own words: do not copy phrases from the excerpt, and do not mention any author, publisher or source. JSON: {"summary":"..."}'}]};
+   {role:'user',content:'Excerpt:\n"""\n'+c.text+'\n"""\nSummarise the key idea of this excerpt in two or three sentences in '+lg+', as a study note for someone learning it: say what the idea is and why or when it matters. Use your own words: do not copy phrases from the excerpt, and do not mention any author, publisher, platform or source. JSON: {"summary":"..."}'}]};
  L.assignAreas=function(chunks,domains){chunks.forEach(function(c){var t=L.tokens(c.text),best=null,bs=0;
   domains.forEach(function(d){var s=L.domainScore(t,d.kw);if(s>bs){bs=s;best=d.id}});c.area=best;c.score=bs});return chunks};
  /* strength 0..1 from the last results (1 = right), newest weighted most; null when never tested */
