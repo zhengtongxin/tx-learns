@@ -73,7 +73,7 @@ await pg.fill('#ctext', 'People, 33\nProcess | risk schedule budget | 41\nBusine
 await pg.locator('#ctext').blur();
 ok((await pg.evaluate(() => window.__coach.state())).ctext.includes('Process'), 'typed areas are saved');
 ok(st.c.length > 0 && (await pg.evaluate(() => window.__coach.chunks().some(c => c.area === 'x:n-process'))), 'passages are matched to the typed areas');
-ok(await pg.locator('#today .plan li').count() >= 2, 'today shows a plan');
+ok(await pg.locator('#today .plan li').count() === 1 && /Process/.test(await pg.textContent('#today .plan')) && !/People|Business/.test(await pg.textContent('#today .plan')), 'today plans only the typed area that has material (the other two have none)');
 ok(await pg.evaluate(() => document.getElementById('app').hasAttribute('data-ready')), 'with material, practice and the track button come before the setup');
 await pg.click('[data-act=drill]');
 await pg.waitForSelector('.opt');
