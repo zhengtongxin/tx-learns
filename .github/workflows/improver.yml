@@ -159,7 +159,7 @@ jobs:
           fi
           { git diff --name-only; git ls-files --others --exclude-standard; } | sort -u > /tmp/changed.txt
           # Only the listed files, plus what check-pages --fix generates.
-          bad=$(node -e 'const ok=new Set(process.env.ALLOWED.split(" "));const gen=/^(sitemap\.xml|vercel\.json|assets\/related\.json|[a-z0-9-]+\/index\.html)$/;console.log(require("fs").readFileSync("/tmp/changed.txt","utf8").split("\n").filter(f=>f&&!ok.has(f)&&!gen.test(f)).join("\n"))')
+          bad=$(node -e 'const ok=new Set(process.env.ALLOWED.split(" "));const gen=/^(sitemap\.xml|tracks-index\.js|vercel\.json|assets\/related\.json|[a-z0-9-]+\/index\.html)$/;console.log(require("fs").readFileSync("/tmp/changed.txt","utf8").split("\n").filter(f=>f&&!ok.has(f)&&!gen.test(f)).join("\n"))')
           if [ -n "$bad" ]; then echo "The improver changed files it was not given:"; echo "$bad"; exit 1; fi
           if [ ! -s /tmp/changed.txt ]; then
             echo "state=ok" >> "$GITHUB_OUTPUT"; echo "pr=" >> "$GITHUB_OUTPUT"

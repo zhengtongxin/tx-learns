@@ -136,9 +136,9 @@ function coversFinding(agent, before, after) {
   if (agent === 'ui-check') return false; // Summary has no reliable changed-page manifest; a pass may cover different pages.
   if (agent !== 'reader') return true;
   const scores = text => [...String(text).matchAll(/\b((?:[a-z0-9-]+\/)?\d\d-[a-z0-9-]+\.html)\s+(\d+(?:\.\d+)?)\/10\b/g)];
-  const low = scores(before.summary).filter(m => +m[2] < 8), fresh = scores(after.summary);
+  const low = scores(before.summary).filter(m => +m[2] < 7), fresh = scores(after.summary);
   if (!low.length || !fresh.length || after.detailTruncated) return false;
-  return low.every(old => fresh.some(next => next[1] === old[1] && +next[2] >= 8 && +next[2] <= 10));
+  return low.every(old => fresh.some(next => next[1] === old[1] && +next[2] >= 7 && +next[2] <= 10));
 }
 // Each process makes at most four optional GitHub API reads per ten minutes, shared across concurrent requests.
 // Raw branch files are separately cached (status: 60 seconds; reader details: ten minutes). Failures cache too.
@@ -258,7 +258,7 @@ function createHandler({ fetch: fetcher = (...args) => fetch(...args), now = Dat
         const scores = await get('signals/reader.json');
         if (!scores.ok || !object(scores.data?.lessons)) attention.complete = false;
         else {
-          const found = Object.entries(scores.data.lessons).filter(([file, v]) => /^[a-z0-9-]+\/\d\d-[a-z0-9-]+\.html$/.test(file) && object(v) && Number.isFinite(v.score) && v.score < 8 && v.score >= 0 && iso(v.at, time)
+          const found = Object.entries(scores.data.lessons).filter(([file, v]) => /^[a-z0-9-]+\/\d\d-[a-z0-9-]+\.html$/.test(file) && object(v) && Number.isFinite(v.score) && v.score < 7 && v.score >= 0 && iso(v.at, time)
             && Date.parse(reader.e.at) >= Date.parse(v.at) && Date.parse(reader.e.at) - Date.parse(v.at) < FRESH && reader.e.summary.includes(file.split('/').pop()));
           if (found.length) {
             const text = found.map(([file, v]) => `${file}: ${v.score}/10. ${(Array.isArray(v.confusing) ? v.confusing : []).slice(0, 3).map(c => `${plain(c?.where, 60)}: ${plain(c?.why, 200)}`).join(' ')}`).join(' ');

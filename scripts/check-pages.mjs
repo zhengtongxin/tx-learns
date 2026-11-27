@@ -95,6 +95,9 @@ const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 const want = {
   'sitemap.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<!-- Made by node scripts/check-pages.mjs --fix from lessons.js. Do not edit by hand. -->\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
     ['', 'ecosystem.html', 'glossary.html', 'about.html', 'tracks.html', 'study/index.html', 'study/about.html', 'study/how.html', ...TR.map(t => t.dir + '/index.html'), ...live.map(x => x.path)].map(u => `<url><loc>${SITE}${u}</loc></url>`).join('\n') + '\n</urlset>\n',
+  // One file with every track's published lesson files and titles, so the tracks page and the "What next" card need no request per track.
+  'tracks-index.js': '/* Made by node scripts/check-pages.mjs --fix from each <track>/lessons.js. Do not edit by hand. */\nwindow.TRACK_INDEX=' +
+    JSON.stringify(Object.fromEntries(TR.map(t => { const items = t.T.topics.flatMap(w => w.items), pub = items.filter(x => x.file); return [t.dir, { topics: t.T.topics.length, total: items.length, files: pub.map(x => x.file), titles: Object.fromEntries(pub.map(x => [x.file, x.title])) }]; }))) + ';\n',
 };
 const TRACKS = (() => { const c = { window: {} }; vm.runInNewContext(readFileSync(new URL('tracks.js', root), 'utf8'), c, { filename: 'tracks.js' }); return c.window.TRACKS; })();
 const lists = Object.fromEntries(TR.map(t => [t.dir + '/index.html', [/<!-- lessons:start -->[\s\S]*?<!-- lessons:end -->/, '<!-- lessons:start --><noscript><ol>' +
@@ -128,7 +131,7 @@ const trackMeta = Object.fromEntries(tracksCtx.window.TRACKS.map(t => [t.id, t])
 const LEVELS = { 1: 'Beginner', 2: 'Intermediate', 3: 'Advanced' };
 const sha = (...fs) => createHash('sha1').update(fs.map(f => readFileSync(new URL(f, root))).reduce((a, b) => Buffer.concat([a, b]), Buffer.alloc(0))).digest('hex').slice(0, 8);
 const hashOf = f => sha(f);
-const VERSIONED = /^assets\/(site|teach|build-concepts)\.(js|css)$|^tracks\.js$|^[\w-]+\/lessons\.js$|^[\w-]+\/js\/[\w-]+\.js$/;
+const VERSIONED = /^assets\/(site|teach|build-concepts)\.(js|css)$|^tracks(-index)?\.js$|^[\w-]+\/lessons\.js$|^[\w-]+\/js\/[\w-]+\.js$/;
 const REF = /(\b(?:src|href)=")([^"?#]*)(\?v=[0-9a-f]*)?(")/g;
 const resolve = (page, ref) => { const parts = page.split('/').slice(0, -1); for (const seg of ref.split('/')) { if (seg === '..') parts.pop(); else if (seg !== '.' && seg) parts.push(seg); } return parts.join('/'); };
 const jsonLd = o => '<script type="application/ld+json">' + JSON.stringify(o).replace(/</g, '\\u003c') + '</script>';

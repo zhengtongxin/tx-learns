@@ -33,7 +33,8 @@
   else{name=line;w=1}
   name=name.replace(/[\s,;:：，；|]+$/,'');if(!name||!(w>0)||seen[name.toLowerCase()])return;seen[name.toLowerCase()]=1;
   var words=(name+' '+kw).toLowerCase().replace(/[^a-z㐀-鿿\s-]/g,' ').split(/\s+/).filter(function(x){return x&&(/[㐀-鿿]/.test(x)||x.length>2)&&!STOP.test(x)});
-  out.push({id:'c'+out.length,name:{en:name,zh:name},weight:w,kw:words.join(' '),tasks:kw})});return out.slice(0,20)};
+  /* the id comes from the name, not the line number, so reordering or replacing areas never hands one area's history to another */
+  out.push({id:'n-'+name.toLowerCase().replace(/\s+/g,' '),name:{en:name,zh:name},weight:w,kw:words.join(' '),tasks:kw})});return out.slice(0,20)};
  /* What may leave the device with a track submission: the outline (a short heading per passage), the most frequent terms and,
     only if the reader asks, short summaries the model wrote in its own words. Never the files, their names or their text. */
  /* the words that mark a line about where material came from, kept in pieces so the copy check's own word list does not trip on them */
@@ -62,20 +63,24 @@
  /* strength 0..1 from the last results (1 = right), newest weighted most; null when never tested */
  L.strength=function(hist){if(!hist||!hist.length)return null;var num=1,den=2,w=1;
   for(var i=hist.length-1;i>=0;i--){num+=hist[i]*w;den+=w;w*=0.92}return num/den};
+ /* days to wait before an area is due again: 1, 3, 7, 14, 30 as right answers in a row add up; a miss starts over */
+ L.GAPS=[1,3,7,14,30];
+ L.interval=function(hist){var n=0;for(var i=(hist||[]).length-1;i>=0&&hist[i]===1;i--)n++;return L.GAPS[Math.min(Math.max(n,1),L.GAPS.length)-1]};
  L.dayKey=function(d){d=d||new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)};
  L.daysSince=function(ts,now){return ts?Math.floor((now-ts)/864e5):null};
- /* areas [{id,w,hist,last}] -> allocation of n questions. 'exam' follows the weights exactly; 'drill' tilts toward weak and untested areas. */
+ /* areas [{id,w,hist,last}] -> allocation of n questions. 'exam' follows the weights exactly; 'drill' tilts toward weak, untested and due areas (due = the gap of L.interval has passed). */
  L.plan=function(areas,n,kind,now){
-  var p=areas.map(function(a){var s=L.strength(a.hist),need=s==null?0.65:1-s,ds=L.daysSince(a.last,now),due=ds!=null&&ds>=3?0.15:0;
-   var f=kind==='exam'?1:(0.25+need+due);return {id:a.id,p:Math.max(0,a.w)*f,s:s,ds:ds,tested:s!=null}});
-  var tot=p.reduce(function(x,y){return x+y.p},0)||1,res=p.map(function(x){var e=x.p/tot*n;return {id:x.id,k:Math.floor(e),r:e-Math.floor(e),s:x.s,ds:x.ds,tested:x.tested}});
+  var p=areas.map(function(a){var s=L.strength(a.hist),need=s==null?0.65:1-s,ds=L.daysSince(a.last,now),isDue=ds!=null&&ds>=L.interval(a.hist),due=isDue?0.3:0;
+   var f=kind==='exam'?1:(0.25+need+due);return {id:a.id,p:Math.max(0,a.w)*f,s:s,ds:ds,due:isDue,tested:s!=null}});
+  var tot=p.reduce(function(x,y){return x+y.p},0)||1,res=p.map(function(x){var e=x.p/tot*n;return {id:x.id,k:Math.floor(e),r:e-Math.floor(e),s:x.s,ds:x.ds,due:x.due,tested:x.tested}});
   var left=n-res.reduce(function(x,y){return x+y.k},0);
   res.slice().sort(function(a,b){return b.r-a.r}).slice(0,left).forEach(function(x){x.k++});
-  res.forEach(function(x){x.why=!x.tested?'new':(x.s<0.6?'weak':(x.ds>=3?'due':'keep'))});
+  res.forEach(function(x){x.why=!x.tested?'new':(x.s<0.6?'weak':(x.due?'due':'keep'))});
   return res.filter(function(x){return x.k>0})};
- /* chunk for an area: half the time one the reader missed before, otherwise the least used */
+ /* chunk for an area: half the time one the reader missed before, otherwise the least used. Only that area's own passages: an area with none gets no question
+    (a question written from another area's passage would be scored under the wrong area). */
  L.pick=function(chunks,area,miss,used,rnd){
-  var pool=chunks.filter(function(c){return c.area===area});if(!pool.length)pool=chunks.slice().sort(function(a,b){return (b.score||0)-(a.score||0)}).slice(0,Math.max(5,chunks.length>>3));
+  var pool=chunks.filter(function(c){return c.area===area});
   if(!pool.length)return null;
   var missed=pool.filter(function(c){return miss[c.id]>0});
   if(missed.length&&rnd()<0.5){var t=0;missed.forEach(function(c){t+=miss[c.id]});var r=rnd()*t;for(var i=0;i<missed.length;i++){r-=miss[missed[i].id];if(r<=0)return missed[i]}return missed[0]}
@@ -100,6 +105,17 @@
   var u={};opts.forEach(function(x){u[x.toLowerCase()]=1});if(Object.keys(u).length<4)return null;
   if(q.length<12||q.length>700)return null;
   return {q:q,o:opts,a:a,e:String(o.explanation||o.reason||'').trim()}};
+ /* Second opinion on the key: the model answers the finished question from the excerpt without seeing the key. */
+ L.verifyPrompt=function(c){var zh=c.lang==='zh';
+  return [{role:'system',content:'You answer one multiple-choice question from the given excerpt. You answer with one JSON object and nothing else.'},
+   {role:'user',content:'Material excerpt:\n"""\n'+c.text+'\n"""\nQuestion: '+c.q.q+'\n'+c.q.o.map(function(x,i){return 'ABCD'.charAt(i)+'. '+x}).join('\n')+'\nWhich option is correct according to the excerpt? JSON format: {"answer":"A"} with the letter of the one correct option.'}]};
+ /* its reply -> option index 0..3, or -1 when it names none (then the question is kept: only a clear disagreement drops it) */
+ L.parseVerify=function(raw){var s=L.stripThink(String(raw||'')).replace(/```(?:json)?/g,''),i=s.indexOf('{'),j=s.lastIndexOf('}'),a;
+  if(i>-1&&j>i){try{a=JSON.parse(s.slice(i,j+1)).answer}catch(e){}}
+  if(a==null){var m=s.match(/\b([A-D])\b/);a=m?m[1]:null}
+  if(typeof a==='number')return a%1===0&&a>=0&&a<4?a:-1;
+  if(typeof a==='string'){var t=a.trim(),k=t.match(/^\(?([A-Da-d])(?![A-Za-z])/);if(k)return k[1].toUpperCase().charCodeAt(0)-65;if(/^[0-3]$/.test(t))return +t}
+  return -1};
  L.shuffle=function(item,rnd){var idx=[0,1,2,3];for(var i=3;i>0;i--){var j=Math.floor(rnd()*(i+1)),t=idx[i];idx[i]=idx[j];idx[j]=t}
   return {q:item.q,e:item.e,o:idx.map(function(k){return item.o[k]}),a:idx.indexOf(item.a)}};
  /* The question, its options and its explanation must be in the language the reader chose on the page, whatever language the material is in. */

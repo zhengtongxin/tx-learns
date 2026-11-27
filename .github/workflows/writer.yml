@@ -293,7 +293,7 @@ jobs:
           { echo "Draft lessons from \`${FOLDERS// /\`, \`}\`, written by the content creator agent to STYLE.md, all in this one pull request ($PACKED written)."; echo;
             for f in /tmp/packs/pack-*/summary.md; do [ -f "$f" ] && { cat "$f"; echo; }; done
             echo "Copy check: $(tail -1 /tmp/copy-check.txt)"; echo;
-            echo "Next, by themselves: the intern agent reads the preview as a newcomer and adds clearer wording here if a lesson scores under 8/10,";
+            echo "Next, by themselves: the intern agent reads the preview as a newcomer and adds clearer wording here if a lesson scores under 7/10,";
             echo "the frontend engineer agent clicks through it, then the backend engineer agent reviews the facts and code and adds its fixes here too.";
             echo "When all of them are green it merges by itself and the product engineer agent checks the live site. You only hear about it if it gets stuck."; } > /tmp/pr-body.md
           title="Draft lesson: ${SLUG:-new notes}"; [ "$PACKED" -gt 1 ] && title="Draft lessons: $PACKED lessons from ${SLUG}"

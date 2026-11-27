@@ -190,7 +190,7 @@
        (scripts/check-counts.mjs fails a PR that types one). Progress is completed / PUBLISHED lessons; planned lessons are shown separately. */
     var hub=document.querySelector('.track-list'),rsm=document.getElementById('resume');
     function pbar(n,tot,label){return '<div class="mini" role="progressbar" aria-label="'+label+'" aria-valuemin="0" aria-valuemax="'+tot+'" aria-valuenow="'+n+'" aria-valuetext="'+n+' / '+tot+'"><i style="width:'+(tot?n/tot*100:0)+'%"></i></div>'}
-    function card(c,ci,n,ok){return '<a class="cc spot" href="'+c.href+'"><div class="orbi">'+c.icon+'</div><div><h3>'+t(c.title)+'</h3><div class="meta" style="margin-top:4px">'+t(c.desc)+'</div><div class="chips"><span class="chip">'+t({en:'Step '+(ci+1),zh:'第 '+(ci+1)+' 步'})+(c.level?' · '+t(LV[c.level]):'')+'</span>'+(ok&&n?'<span class="chip">'+t({en:n+' of '+c.published+' done',zh:'已完成 '+n+' / '+c.published})+'</span>':'')+'</div>'+pbar(n,c.published||0,'Progress in '+c.title.en+' · '+c.title.zh)+'</div><div class="go">→</div></a>'}
+    function card(c,ci,n,ok){return '<a class="cc spot" href="'+c.href+'"><div class="orbi">'+c.icon+'</div><div><h3>'+t(c.title)+'</h3><div class="meta" style="margin-top:4px">'+t(c.desc)+'</div><div class="chips"><span class="chip">'+(c.entry?t(c.entry):ci>-1?t({en:'Step '+(ci+1),zh:'第 '+(ci+1)+' 步'}):'')+(c.level?((c.entry||ci>-1)?' · ':'')+t({en:'Starts at '+LV[c.level].en.toLowerCase(),zh:LV[c.level].zh+'起步'}):'')+'</span>'+(ok&&n?'<span class="chip">'+t({en:n+' of '+c.published+' done',zh:'已完成 '+n+' / '+c.published})+'</span>':'')+'</div>'+pbar(n,c.published||0,'Progress in '+c.title.en+' · '+c.title.zh)+'</div><div class="go">→</div></a>'}
     /* Tracks are grouped by domain (window.DOMAINS in tracks.js); a track names its domain with domain:'<id>'. Step numbers count within a domain. */
     function drawHub(){if(!hub)return;var D=window.DOMAINS&&window.DOMAINS.length?window.DOMAINS:[{id:'ai',title:{en:'AI',zh:'AI'}}];
       function tracksOf(dm){return window.TRACKS.filter(function(c){return (c.domain||'ai')===dm.id})}
@@ -198,7 +198,11 @@
       /* Two levels: the domains first (AI, project management); a domain with several tracks opens its track list, one with a single track goes straight to it. */
       var hints=document.querySelectorAll('#topics > .sub, #topics > p.meta');for(var h=0;h<hints.length;h++)hints[h].hidden=!cur;
       if(cur){var ts=tracksOf(cur);
-        hub.innerHTML='<section class="dom"><p class="meta"><a href="tracks.html" data-back>'+t({en:'← All subjects',zh:'← 全部学科'})+'</a></p><h3 class="dom-h">'+(cur.icon?'<span aria-hidden="true">'+cur.icon+'</span> ':'')+t(cur.title)+'</h3>'+(cur.desc?'<p class="meta">'+t(cur.desc)+'</p>':'')+'<div class="tl">'+ts.map(function(c,ci){return card(c,ci,count(c.id,c.files),c.total>0)}).join('')+'</div></section>';return}
+        hub.innerHTML='<section class="dom"><p class="meta"><a href="tracks.html" data-back>'+t({en:'← All subjects',zh:'← 全部学科'})+'</a></p><h3 class="dom-h">'+(cur.icon?'<span aria-hidden="true">'+cur.icon+'</span> ':'')+t(cur.title)+'</h3>'+(cur.desc?'<p class="meta">'+t(cur.desc)+'</p>':'')+(function(){var en=ts.filter(function(c){return c.entry}),pa=ts.filter(function(c){return !c.entry});
+          function list(a,num){return '<div class="tl">'+a.map(function(c,ci){return card(c,num?ci:-1,count(c.id,c.files),c.total>0)}).join('')+'</div>'}
+          /* Entry points (pick by who you are) come first; the tracks after them are one path, numbered. A domain without entry points is one numbered path. */
+          if(!en.length||!pa.length)return list(ts,pa.length>1);
+          return '<h4 class="dom-g">'+t({en:'Pick where you start',zh:'选一个起点'})+'</h4>'+list(en,false)+'<h4 class="dom-g">'+t({en:'Then the engineering path, in order',zh:'然后按顺序走工程路线'})+'</h4>'+list(pa,true)})()+'</section>';return}
       hub.innerHTML='<section class="dom"><div class="tl">'+D.map(function(dm){var ts=tracksOf(dm);if(!ts.length)return '';var href=ts.length>1?'#'+dm.id:ts[0].href;
         return '<a class="cc spot" href="'+href+'"><div class="orbi">'+(dm.icon||'')+'</div><div><h3>'+t(dm.title)+'</h3>'+(dm.desc?'<div class="meta" style="margin-top:4px">'+t(dm.desc)+'</div>':'')+'</div><div class="go">→</div></a>'}).join('')+'</div></section>'}
     addEventListener('hashchange',function(){drawHub();scrollTo(0,document.getElementById('topics')?document.getElementById('topics').offsetTop-20:0)});
@@ -222,22 +226,12 @@
         '<div class="cc rs-all"><div><div class="ey">'+t({en:'All tracks',zh:'全部路线'})+'</div><div style="font-weight:700">'+t({en:fin+' of '+tot+' published lessons completed',zh:'已完成 '+fin+' / '+tot+' 课（已发布）'})+'</div>'+pbar(fin,tot,'Overall progress · 总进度')+'</div></div></div>'+
         (canStore()?'':'<p class="meta warn">'+t({en:'This browser is blocking saved progress.',zh:'这个浏览器禁止保存数据。'})+'</p>');
     }
-    if(window.TRACKS&&(hub||rsm)){
-      /* Every track's lessons.js is read in parallel (fetch); a page opened from disk, where fetch is blocked, falls back to one script tag at a time. */
-      function absorb(c,T){if(T&&T.topics){c.topics=T.topics.length;c.total=0;c.published=0;c.files=[];c.titles={};T.topics.forEach(function(w){c.total+=w.items.length;w.items.forEach(function(x){if(x.file){c.published++;c.files.push(x.file);c.titles[x.file]=x.title}})})}}
-      function finish(){drawHub();drawResume()}
-      function viaScript(c,done){var sc=document.createElement('script');sc.src=c.href.replace(/[^\/]*$/,'')+'lessons.js';
-        sc.onload=sc.onerror=function(){var T=window.TRACK;try{delete window.TRACK}catch(e){window.TRACK=undefined}absorb(c,T);done()};document.body.appendChild(sc)}
-      Promise.all(window.TRACKS.map(function(c){
-        return fetch(c.href.replace(/[^\/]*$/,'')+'lessons.js').then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(src){var w={};new Function('window',src)(w);absorb(c,w.TRACK);return 0}).catch(function(){return c})
-      })).then(function(miss){var q=miss.filter(Boolean);(function next(){var c=q.shift();if(!c)return finish();viaScript(c,next)})()})}
+    /* Progress needs every track's lesson files and titles: tracks-index.js (window.TRACK_INDEX, written by scripts/check-pages.mjs --fix from each lessons.js) holds them in one file. */
+    function absorb(){var X=window.TRACK_INDEX||{};(window.TRACKS||[]).forEach(function(c){var x=X[c.id];if(x){c.topics=x.topics;c.total=x.total;c.files=x.files;c.titles=x.titles;c.published=x.files.length}})}
+    function withIndex(cb){if(window.TRACK_INDEX)return cb();var sc=document.createElement('script');sc.src=P+'tracks-index.js';sc.onload=sc.onerror=function(){cb()};document.body.appendChild(sc)}
+    if(window.TRACKS&&(hub||rsm))withIndex(function(){absorb();drawHub();drawResume()});
 
-    /* What next: a card pointing to the next lesson in this track or, when the track is finished, to the next track in tracks.js order. Links come from lessons.js and tracks.js. */
-    function nextTrack(cb){var TS=window.TRACKS||[],i=-1;TS.forEach(function(c,k){if(C&&c.id===C.id)i=k});
-      (function step(k){var c=TS[k];if(i<0||!c)return cb(null);
-        fetch('../'+c.id+'/lessons.js').then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(src){
-          var w={};new Function('window',src)(w);var f=null;((w.TRACK||{}).topics||[]).forEach(function(tp){tp.items.forEach(function(l){if(l.file&&!f)f=l})});
-          if(f)cb({c:c,l:f});else step(k+1)}).catch(function(){cb(null)})})(i+1)}
+    /* What next: a card pointing to the next lesson in this track or, when the track is finished, to the tracks it names in tracks.js (next:['<id>',...], always in its own subject) and its optional go:{href,title} link. The track's "after" line is always shown, also when nothing follows. */
     function whatNext(host,place,nl,fin){
       var cur=C&&window.TRACKS?window.TRACKS.filter(function(x){return x.id===C.id})[0]:null;
       function show(h,why){var a=document.createElement('aside');a.className='card whatnext';a.setAttribute('aria-label','What next · 下一步');
@@ -245,11 +239,13 @@
       if(nl){var tp=C.topics.filter(function(w){return w.n===nl.w})[0],cw=C.lessons[C.lessons.indexOf(nl)-1];
         var why=(host&&tp&&cw&&cw.w!==nl.w)?'<p>'+t({en:'You have finished this topic. Next topic: ',zh:'这个主题学完了。下一个主题：'})+t(tp.title)+'</p>':'';
         show('<a class="btn pri wn-go" href="'+nl.file+'"><small>'+t({en:'Next lesson',zh:'下一课'})+'</small> '+t(nl.title)+' →</a>',why);return}
-      if(!fin)return;
-      nextTrack(function(r){if(!r)return;
-        var base='../'+r.c.id+'/',after=cur&&cur.after?'<p>'+t(cur.after)+'</p>':'<p>'+t({en:'You have finished this track.',zh:'这条路线学完了。'})+'</p>',
-          pre=r.c.before?'<p class="meta">'+t({en:'Before you start it: ',zh:'开始之前：'})+t(r.c.before)+'</p>':'';
-        show('<a class="btn pri wn-go" href="'+base+r.l.file+'"><small>'+t({en:'Next track',zh:'下一条路线'})+' · '+t(r.c.title)+'</small> '+t(r.l.title)+' →</a> <a class="btn" href="../'+r.c.href+'">'+t({en:'Track overview',zh:'路线总览'})+'</a>'+pre,after)})}
+      if(!fin||!cur)return;
+      withIndex(function(){var X=window.TRACK_INDEX||{},h='',pre='';
+        (cur.next||[]).forEach(function(id,k){var c=window.TRACKS.filter(function(x){return x.id===id&&(x.domain||'ai')===(cur.domain||'ai')})[0],x=X[id];if(!c||!x||!x.files.length)return;
+          h+='<a class="btn'+(h?'':' pri')+' wn-go" href="../'+id+'/'+x.files[0]+'"><small>'+t({en:'Next track',zh:'下一条路线'})+' · '+t(c.title)+'</small> '+t(x.titles[x.files[0]])+' →</a> ';
+          if(c.before&&!pre)pre=(cur.next.length>1?'':'<p class="meta">'+t({en:'Before you start it: ',zh:'开始之前：'})+t(c.before)+'</p>')});
+        if(cur.go)h+='<a class="btn'+(h?'':' pri')+' wn-go" href="../'+cur.go.href+'">'+t(cur.go.title)+' →</a> ';
+        show(h+pre,cur.after?'<p>'+t(cur.after)+'</p>':'<p>'+t({en:'You have finished this track.',zh:'这条路线学完了。'})+'</p>')})}
     /* "Download all files": a store-only .zip built in the browser (no library), so the folder layout survives */
     function crc32(u){var t=crc32.t;if(!t){t=crc32.t=[];for(var n=0;n<256;n++){var c=n;for(var k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}}var r=-1;for(var i=0;i<u.length;i++)r=t[(r^u[i])&255]^(r>>>8);return(r^-1)>>>0}
     function makeZip(list){var enc=new TextEncoder(),parts=[],cen=[],off=0;
@@ -300,8 +296,10 @@
       /* last published lesson of its topic: the What next card */
       var lastIn=C.lessons.filter(function(x){return x.w===cl.w}).pop()===cl;
       if(lastIn)whatNext(true,function(a){if(pg)pg.before(a);else{var m3=document.querySelector('main');if(m3)m3.appendChild(a)}},n,!n);
-      /* no button: a lesson counts as done once the reader scrolls to its end */
-      if(pg&&'IntersectionObserver' in window){var key=C.id+'/'+here,endIO=new IntersectionObserver(function(es){if(es.some(function(e){return e.isIntersecting})){endIO.disconnect();var x=done();if(!x[key]){x[key]=1;set(DONE,JSON.stringify(x));d=x;syncSide();track('Lesson done',{lesson:key})}}});endIO.observe(pg)}
+      /* no button: a lesson counts as done once the reader is at its end and has had the page open for half a minute, so a quick swipe to the pager does not count */
+      if(pg&&'IntersectionObserver' in window){var key=C.id+'/'+here,T0=Date.now(),MINREAD=30000,atEnd=false,endT=0,
+        fin=function(){if(!atEnd)return;endIO.disconnect();var x=done();if(!x[key]){x[key]=1;set(DONE,JSON.stringify(x));d=x;syncSide();track('Lesson done',{lesson:key})}},
+        endIO=new IntersectionObserver(function(es){atEnd=es[es.length-1].isIntersecting;clearTimeout(endT);if(atEnd)endT=setTimeout(fin,Math.max(0,MINREAD-(Date.now()-T0)))});endIO.observe(pg)}
       buildToc();
       var dock=document.createElement('div');dock.className='dock';var RR=18,LL=2*Math.PI*RR;
       dock.innerHTML='<button class="dk" data-a="m" title="Menu" aria-label="Open topics menu · 打开主题菜单">☰</button>'+(p?'<a class="dk" href="'+p.file+'" title="Previous" aria-label="Previous lesson · 上一课">‹</a>':'<span class="dk off" aria-hidden="true">‹</span>')+

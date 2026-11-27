@@ -16,7 +16,7 @@ import { dirname, join } from 'node:path';
 
 const git = (...a) => execFileSync('git', ['-c', 'core.quotePath=false', ...a], { encoding: 'utf8', maxBuffer: 1 << 28 });
 const lines = s => s.split('\n').filter(Boolean);
-const generated = f => ['sitemap.xml', 'vercel.json', 'assets/related.json'].includes(f);
+const generated = f => ['sitemap.xml', 'tracks-index.js', 'vercel.json', 'assets/related.json'].includes(f);
 // Lines of a page that check-pages --fix rewrites; a changed page counts only for what else changed in it.
 const GEN_LINE = '(\\?v=[0-9a-f]{6,}|name="updated"|rel="canonical"|application/ld\\+json|id="lesson-data")';
 const scratch = f => /^inbox\//.test(f) || f === '.writer-summary.md';
@@ -39,7 +39,7 @@ if (cmd === 'pack') {
   let patch = pages.length ? git('diff', '-U3', '--no-color', `-I${GEN_LINE}`, '--', ...pages) : '';
   writeFileSync(join(out, 'changes.patch'), patch);
   // New files: everything untracked and not scratch (new lessons are .html, so only the generated rule does not apply to them).
-  const fresh = lines(git('ls-files', '--others', '--exclude-standard')).filter(f => !scratch(f) && !['sitemap.xml', 'vercel.json', 'assets/related.json'].includes(f));
+  const fresh = lines(git('ls-files', '--others', '--exclude-standard')).filter(f => !scratch(f) && !['sitemap.xml', 'tracks-index.js', 'vercel.json', 'assets/related.json'].includes(f));
   for (const f of fresh) { mkdirSync(dirname(join(out, 'files', f)), { recursive: true }); copyFileSync(f, join(out, 'files', f)); }
   writeFileSync(join(out, 'new-files.txt'), fresh.join('\n') + (fresh.length ? '\n' : ''));
   if (existsSync('.writer-summary.md')) copyFileSync('.writer-summary.md', join(out, 'summary.md'));
