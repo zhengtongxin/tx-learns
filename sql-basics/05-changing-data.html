@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Changing data | TX Learns</title>
+<meta name="description" content="Add, change and remove rows with INSERT, UPDATE and DELETE, and why WHERE matters most"><meta property="og:title" content="Changing data | TX Learns"><meta property="og:description" content="Add, change and remove rows with INSERT, UPDATE and DELETE, and why WHERE matters most"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/sql-basics/05-changing-data.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/sql-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/sql-basics/05-changing-data.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/sql-basics/05-changing-data.html","url":"https://tx-learns.vercel.app/sql-basics/05-changing-data.html","name":"Changing data","alternateName":"修改数据","description":"Add, change and remove rows with INSERT, UPDATE and DELETE, and why WHERE matters most","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Connecting and changing","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"SQL basics","url":"https://tx-learns.vercel.app/sql-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"SQL basics","item":"https://tx-learns.vercel.app/sql-basics/index.html"},{"@type":"ListItem","position":3,"name":"Changing data","item":"https://tx-learns.vercel.app/sql-basics/05-changing-data.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Connecting and changing · Lesson 2</span><span class="zh">连接与修改 · 第 2 课</span></span><h1><span class="en">Changing data</span><span class="zh">修改数据</span></h1><p class="meta"><span class="en">Add, change and remove rows with INSERT, UPDATE and DELETE, and why WHERE matters most · ~10 min · reading and practice</span><span class="zh">用 INSERT、UPDATE、DELETE 增加、修改和删除行，以及为什么 WHERE 最要紧 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Three ways to change</span><span class="zh">第 1 步 · 三种修改</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><code>INSERT INTO menu VALUES (...)</code> adds a row. <code>UPDATE menu SET price = 3.5 WHERE name = 'tea'</code> changes values. <code>DELETE FROM menu WHERE name = 'toast'</code> removes rows. Always say which columns you are filling in an <code>INSERT</code>, so a later column change does not scramble it.</p>
+<p class="zh" style="margin:0 0 8px"><code>INSERT INTO menu VALUES (...)</code> 新增一行。<code>UPDATE menu SET price = 3.5 WHERE name = 'tea'</code> 修改值。<code>DELETE FROM menu WHERE name = 'toast'</code> 删除行。写 <code>INSERT</code> 时要明确列出填的是哪些列，这样以后表结构变了也不会错位。</p></div>
+<div class="codebox" data-file="changes.sql" data-lang="sql">INSERT INTO menu (name, price, kind)
+VALUES ('soup', 4.0, 'food');
+UPDATE menu SET price = 3.5 WHERE name = 'tea';
+DELETE FROM menu WHERE name = 'toast';</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · The missing WHERE</span><span class="zh">第 2 步 · 漏写的 WHERE</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><code>UPDATE</code> and <code>DELETE</code> with no <code>WHERE</code> hit <b>every row</b>. This is the classic disaster. Habit: write the <code>WHERE</code> first, run the same condition as a <code>SELECT</code> to see what it will touch, and only then change the data.</p>
+<p class="zh" style="margin:0 0 8px"><code>UPDATE</code> 和 <code>DELETE</code> 不写 <code>WHERE</code> 会作用于<b>每一行</b>。这是最经典的事故。好习惯：先写 <code>WHERE</code>，用同样的条件跑一次 <code>SELECT</code> 看它会碰到哪些行，然后才真正修改数据。</p></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · All or nothing</span><span class="zh">第 3 步 · 要么全做要么不做</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>transaction</b> groups several changes so that they all succeed or none do. Moving money means subtracting from one account and adding to another; a crash between the two must not lose it. <code>BEGIN</code>, the changes, then <code>COMMIT</code> (or <code>ROLLBACK</code> to undo).</p>
+<p class="zh" style="margin:0 0 8px"><b>事务</b>把几个修改打成一组，要么全部成功，要么全不生效。转账要从一个账户扣、再给另一个账户加，两步之间崩溃也不能把钱弄丢。<code>BEGIN</code>、修改，然后 <code>COMMIT</code>（或用 <code>ROLLBACK</code> 撤销）。</p>
+<p class="en" style="margin:0 0 8px">Which statement?</p>
+<p class="zh" style="margin:0 0 8px">是哪条语句？</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> insert, update and delete one row in a scratch database.</span><span class="zh"><b>试一试：</b>在一个练习用的数据库里插入、修改、删除一行。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> before any UPDATE, run its WHERE as a SELECT first.</span><span class="zh"><b>核对：</b>每次 UPDATE 之前，先把它的 WHERE 当 SELECT 跑一遍。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• INSERT adds, UPDATE changes, DELETE removes.<br>• Without WHERE, UPDATE and DELETE hit every row.<br>• A transaction makes several changes all-or-nothing.</p><p class="zh" style="margin:0">• INSERT 新增，UPDATE 修改，DELETE 删除。<br>• 没有 WHERE，UPDATE 和 DELETE 会作用于每一行。<br>• 事务让几个修改要么全做，要么全不做。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>SQL basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3 (it includes SQLite), or any SQL playground","zh":"Python 3（自带 SQLite），或任意 SQL 在线练习"},"know":{"en":"JOIN and WHERE (see “Joining tables”).","zh":"会用 JOIN 和 WHERE（见“连接多张表”）。"},"goals":{"en":["Use INSERT, UPDATE and DELETE","Explain why a missing WHERE is dangerous","Say what a transaction protects"],"zh":["使用 INSERT、UPDATE、DELETE","解释为什么漏写 WHERE 很危险","说出事务保护什么"]},"prev":["04-joining-tables.html"]}}</script>
+<script src="../tracks.js?v=33590c5f"></script><script src="lessons.js?v=eb27f9c6"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/05-changing-data.js?v=58805e8f"></script></body></html>

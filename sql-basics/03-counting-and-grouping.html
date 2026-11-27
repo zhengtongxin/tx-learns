@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Counting and grouping | TX Learns</title>
+<meta name="description" content="Summarise many rows into one answer with COUNT, SUM and AVG, and split the answer by group"><meta property="og:title" content="Counting and grouping | TX Learns"><meta property="og:description" content="Summarise many rows into one answer with COUNT, SUM and AVG, and split the answer by group"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/sql-basics/03-counting-and-grouping.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/sql-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/sql-basics/03-counting-and-grouping.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/sql-basics/03-counting-and-grouping.html","url":"https://tx-learns.vercel.app/sql-basics/03-counting-and-grouping.html","name":"Counting and grouping","alternateName":"计数与分组","description":"Summarise many rows into one answer with COUNT, SUM and AVG, and split the answer by group","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Asking questions of data","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"SQL basics","url":"https://tx-learns.vercel.app/sql-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"SQL basics","item":"https://tx-learns.vercel.app/sql-basics/index.html"},{"@type":"ListItem","position":3,"name":"Counting and grouping","item":"https://tx-learns.vercel.app/sql-basics/03-counting-and-grouping.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Asking questions of data · Lesson 3</span><span class="zh">向数据提问 · 第 3 课</span></span><h1><span class="en">Counting and grouping</span><span class="zh">计数与分组</span></h1><p class="meta"><span class="en">Summarise many rows into one answer with COUNT, SUM and AVG, and split the answer by group · ~10 min · reading and practice</span><span class="zh">用 COUNT、SUM、AVG 把很多行汇总成一个答案，并按组拆开 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · One answer from many rows</span><span class="zh">第 1 步 · 多行变一个答案</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">An <b>aggregate</b> function squeezes many rows into one value: <code>COUNT(*)</code> counts rows, <code>SUM(price)</code> adds, <code>AVG(price)</code> averages, <code>MIN</code> and <code>MAX</code> find the smallest and largest. Put a <code>WHERE</code> first to summarise only some rows.</p>
+<p class="zh" style="margin:0 0 8px"><b>聚合</b>函数把很多行压成一个值：<code>COUNT(*)</code> 数行数，<code>SUM(price)</code> 求和，<code>AVG(price)</code> 求平均，<code>MIN</code> 和 <code>MAX</code> 找最小和最大。先加一个 <code>WHERE</code>，就只汇总其中一部分行。</p></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · GROUP BY</span><span class="zh">第 2 步 · GROUP BY</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><code>GROUP BY kind</code> splits the rows into groups with the same <code>kind</code> and gives each group its own summary: <code>SELECT kind, COUNT(*) FROM menu GROUP BY kind</code>. <code>HAVING</code> filters the groups after they are summed, the way <code>WHERE</code> filters rows before.</p>
+<p class="zh" style="margin:0 0 8px"><code>GROUP BY kind</code> 把 <code>kind</code> 相同的行分成一组，并给每组各自汇总：<code>SELECT kind, COUNT(*) FROM menu GROUP BY kind</code>。<code>HAVING</code> 在汇总之后筛选分组，就像 <code>WHERE</code> 在汇总之前筛选行。</p></div>
+<div class="codebox" data-file="queries.sql" data-lang="sql">SELECT kind, COUNT(*), AVG(price)
+FROM menu
+GROUP BY kind
+HAVING COUNT(*) &gt; 2;</div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Which function</span><span class="zh">第 3 步 · 用哪个函数</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Match each question to its function.</p>
+<p class="zh" style="margin:0 0 8px">把每个问题对应到它的函数。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> count and average a column of your own data.</span><span class="zh"><b>试一试：</b>对你自己数据里的某一列求数量和平均值。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> add GROUP BY to find the same numbers per category.</span><span class="zh"><b>核对：</b>加上 GROUP BY，按类别求出同样的数字。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• COUNT, SUM, AVG, MIN and MAX turn many rows into one value.<br>• GROUP BY gives each group its own summary.<br>• WHERE filters rows, HAVING filters groups.</p><p class="zh" style="margin:0">• COUNT、SUM、AVG、MIN、MAX 把很多行变成一个值。<br>• GROUP BY 让每组各有各的汇总。<br>• WHERE 筛选行，HAVING 筛选分组。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>SQL basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3 (it includes SQLite), or any SQL playground","zh":"Python 3（自带 SQLite），或任意 SQL 在线练习"},"know":{"en":"WHERE and ORDER BY (see “Filtering and sorting”).","zh":"会用 WHERE 和 ORDER BY（见“筛选与排序”）。"},"goals":{"en":["Use COUNT, SUM, AVG, MIN and MAX","Group rows with GROUP BY","Filter groups with HAVING"],"zh":["使用 COUNT、SUM、AVG、MIN、MAX","用 GROUP BY 分组","用 HAVING 筛选分组"]},"prev":["02-filtering-and-sorting.html"]}}</script>
+<script src="../tracks.js?v=33590c5f"></script><script src="lessons.js?v=eb27f9c6"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/03-counting-and-grouping.js?v=94628916"></script></body></html>

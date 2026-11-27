@@ -1,0 +1,46 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Design and indexes | TX Learns</title>
+<meta name="description" content="Shape tables so data stays clean, and speed up lookups with an index"><meta property="og:title" content="Design and indexes | TX Learns"><meta property="og:description" content="Shape tables so data stays clean, and speed up lookups with an index"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/sql-basics/06-design-and-indexes.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/sql-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/sql-basics/06-design-and-indexes.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/sql-basics/06-design-and-indexes.html","url":"https://tx-learns.vercel.app/sql-basics/06-design-and-indexes.html","name":"Design and indexes","alternateName":"设计与索引","description":"Shape tables so data stays clean, and speed up lookups with an index","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Connecting and changing","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"SQL basics","url":"https://tx-learns.vercel.app/sql-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"SQL basics","item":"https://tx-learns.vercel.app/sql-basics/index.html"},{"@type":"ListItem","position":3,"name":"Design and indexes","item":"https://tx-learns.vercel.app/sql-basics/06-design-and-indexes.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Connecting and changing · Lesson 3</span><span class="zh">连接与修改 · 第 3 课</span></span><h1><span class="en">Design and indexes</span><span class="zh">设计与索引</span></h1><p class="meta"><span class="en">Shape tables so data stays clean, and speed up lookups with an index · ~10 min · reading and practice</span><span class="zh">把表设计得让数据保持干净，并用索引加快查找 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Shape the table</span><span class="zh">第 1 步 · 设计表</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Each table holds <b>one kind of thing</b>, and each column holds <b>one value</b> (not “tea, cake” in a cell). Give every table a primary key. Pick a sensible type for each column: numbers for amounts, text for names. For money prefer whole cents (an integer) to avoid rounding surprises.</p>
+<p class="zh" style="margin:0 0 8px">每张表只装<b>一类东西</b>，每列只放<b>一个值</b>（不要在一个格子里写“tea, cake”）。每张表都要有主键。给每列选合适的类型：金额用数字，名字用文本。金额最好用整数“分”来存，避免舍入带来的意外。</p>
+<p class="en" style="margin:0 0 8px">Which design is cleaner?</p>
+<p class="zh" style="margin:0 0 8px">哪种设计更干净？</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Step 2 · Constraints</span><span class="zh">第 2 步 · 约束</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><b>Constraints</b> make the database refuse bad data: <code>NOT NULL</code> (a value is required), <code>UNIQUE</code> (no duplicates), <code>CHECK (price &gt;= 0)</code> (a rule) and <code>FOREIGN KEY</code> (must point at a real row). Catching a mistake at the door is far cheaper than cleaning it up later.</p>
+<p class="zh" style="margin:0 0 8px"><b>约束</b>让数据库拒绝坏数据：<code>NOT NULL</code>（必填）、<code>UNIQUE</code>（不许重复）、<code>CHECK (price &gt;= 0)</code>（一条规则）、<code>FOREIGN KEY</code>（必须指向真实存在的行）。在门口拦住错误，比事后清理便宜得多。</p></div>
+<div class="codebox" data-file="schema.sql" data-lang="sql">CREATE TABLE menu (
+  id    INTEGER PRIMARY KEY,
+  name  TEXT NOT NULL UNIQUE,
+  price REAL CHECK (price &gt;= 0)
+);</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Indexes</span><span class="zh">第 3 步 · 索引</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Without help, finding one row in a big table means reading every row. An <b>index</b> is a sorted side structure on a column, like a book’s index: <code>CREATE INDEX idx_menu_name ON menu(name)</code>. Lookups on that column get fast, but every insert and update must also maintain the index, and it uses space. Index the columns you search or join on, not everything.</p>
+<p class="zh" style="margin:0 0 8px">没有帮助的话，在大表里找一行就得把每一行都读一遍。<b>索引</b>是建在某一列上的有序辅助结构，就像书后的索引：<code>CREATE INDEX idx_menu_name ON menu(name)</code>。这一列上的查找会变快，但每次插入和更新也要维护索引，并占用空间。给你常用来搜索或连接的列建索引，而不是给所有列都建。</p></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> sketch the tables for something you track, with a primary key and one foreign key.</span><span class="zh"><b>试一试：</b>为你记录的某件事画出几张表，包括主键和一个外键。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> add a <code>CHECK</code> or <code>UNIQUE</code> rule and try to break it.</span><span class="zh"><b>核对：</b>加一条 <code>CHECK</code> 或 <code>UNIQUE</code> 规则，再试着去违反它。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• One kind of thing per table, one value per cell, store each fact once.<br>• Constraints stop bad data at the door.<br>• An index speeds lookups but costs writes and space.</p><p class="zh" style="margin:0">• 每张表一类东西，每格一个值，每个事实只存一次。<br>• 约束在门口拦住坏数据。<br>• 索引加快查找，但要付出写入和空间的代价。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>SQL basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3 (it includes SQLite), or any SQL playground","zh":"Python 3（自带 SQLite），或任意 SQL 在线练习"},"know":{"en":"Changing data and JOIN (see “Changing data”).","zh":"会修改数据和 JOIN（见“修改数据”）。"},"goals":{"en":["Choose a key and column types","Add constraints that protect the data","Explain what an index trades"],"zh":["选择主键和列类型","加上保护数据的约束","说清索引在交换什么"]},"prev":["05-changing-data.html"]}}</script>
+<script src="../tracks.js?v=33590c5f"></script><script src="lessons.js?v=eb27f9c6"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/06-design-and-indexes.js?v=78a0e910"></script></body></html>

@@ -1,0 +1,42 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Filtering and sorting | TX Learns</title>
+<meta name="description" content="Keep only the rows you want with WHERE and put them in order with ORDER BY"><meta property="og:title" content="Filtering and sorting | TX Learns"><meta property="og:description" content="Keep only the rows you want with WHERE and put them in order with ORDER BY"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/sql-basics/02-filtering-and-sorting.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/sql-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/sql-basics/02-filtering-and-sorting.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/sql-basics/02-filtering-and-sorting.html","url":"https://tx-learns.vercel.app/sql-basics/02-filtering-and-sorting.html","name":"Filtering and sorting","alternateName":"筛选与排序","description":"Keep only the rows you want with WHERE and put them in order with ORDER BY","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Asking questions of data","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"SQL basics","url":"https://tx-learns.vercel.app/sql-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"SQL basics","item":"https://tx-learns.vercel.app/sql-basics/index.html"},{"@type":"ListItem","position":3,"name":"Filtering and sorting","item":"https://tx-learns.vercel.app/sql-basics/02-filtering-and-sorting.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Asking questions of data · Lesson 2</span><span class="zh">向数据提问 · 第 2 课</span></span><h1><span class="en">Filtering and sorting</span><span class="zh">筛选与排序</span></h1><p class="meta"><span class="en">Keep only the rows you want with WHERE and put them in order with ORDER BY · ~10 min · reading and practice</span><span class="zh">用 WHERE 只留下想要的行，用 ORDER BY 给它们排序 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · WHERE</span><span class="zh">第 1 步 · WHERE</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><code>WHERE</code> keeps only the rows that make a condition true: <code>WHERE price &gt; 4</code>. Comparisons are <code>=</code>, <code>&lt;&gt;</code> (not equal), <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code>. Text goes in single quotes: <code>WHERE kind = 'food'</code>. <code>LIKE 'c%'</code> matches text starting with c.</p>
+<p class="zh" style="margin:0 0 8px"><code>WHERE</code> 只保留让条件为真的行：<code>WHERE price &gt; 4</code>。比较符有 <code>=</code>、<code>&lt;&gt;</code>（不等于）、<code>&lt;</code>、<code>&gt;</code>、<code>&lt;=</code>、<code>&gt;=</code>。文本要放在单引号里：<code>WHERE kind = 'food'</code>。<code>LIKE 'c%'</code> 匹配以 c 开头的文本。</p></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · AND, OR and ORDER BY</span><span class="zh">第 2 步 · AND、OR 与 ORDER BY</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><code>AND</code> needs both conditions, <code>OR</code> needs either. Use brackets when you mix them. <code>ORDER BY price</code> sorts from low to high, and <code>ORDER BY price DESC</code> from high to low. Without <code>ORDER BY</code> the database promises no particular order.</p>
+<p class="zh" style="margin:0 0 8px"><code>AND</code> 要求两个条件都满足，<code>OR</code> 满足其一即可。混用时加括号。<code>ORDER BY price</code> 从小到大排，<code>ORDER BY price DESC</code> 从大到小排。不写 <code>ORDER BY</code>，数据库不保证任何顺序。</p></div>
+<div class="codebox" data-file="queries.sql" data-lang="sql">SELECT name, price FROM menu
+WHERE kind = 'drink' AND price &lt; 4.5
+ORDER BY price DESC;</div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Which rows survive</span><span class="zh">第 3 步 · 哪些行留下</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">For the menu (tea 3.0, coffee 4.5, cake 5.0, toast 2.5, juice 4.0), decide whether each name stays for <code>WHERE price &gt;= 4</code>.</p>
+<p class="zh" style="margin:0 0 8px">对这份菜单（tea 3.0、coffee 4.5、cake 5.0、toast 2.5、juice 4.0），判断每个名字在 <code>WHERE price &gt;= 4</code> 下是否留下。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> ask your data for the three most expensive items.</span><span class="zh"><b>试一试：</b>让数据告诉你最贵的三样东西。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> change <code>&gt;</code> to <code>&gt;=</code> and see which row appears.</span><span class="zh"><b>核对：</b>把 <code>&gt;</code> 改成 <code>&gt;=</code>，看多出哪一行。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• WHERE keeps rows that make a condition true.<br>• AND needs both, OR needs either.<br>• ORDER BY sorts; DESC reverses it.</p><p class="zh" style="margin:0">• WHERE 保留让条件为真的行。<br>• AND 要两者都满足，OR 满足其一即可。<br>• ORDER BY 排序，DESC 反过来。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>SQL basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3 (it includes SQLite), or any SQL playground","zh":"Python 3（自带 SQLite），或任意 SQL 在线练习"},"know":{"en":"SELECT and FROM (see “Tables and SELECT”).","zh":"会写 SELECT 和 FROM（见“表与 SELECT”）。"},"goals":{"en":["Filter with WHERE","Combine conditions with AND and OR","Sort with ORDER BY"],"zh":["用 WHERE 筛选","用 AND 和 OR 组合条件","用 ORDER BY 排序"]},"prev":["01-tables-and-select.html"]}}</script>
+<script src="../tracks.js?v=33590c5f"></script><script src="lessons.js?v=eb27f9c6"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/02-filtering-and-sorting.js?v=82498629"></script></body></html>
