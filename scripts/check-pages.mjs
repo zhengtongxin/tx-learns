@@ -253,5 +253,13 @@ try {
     else if (hit.title.en !== l.en || hit.title.zh !== l.zh) bad('assets/build-concepts.js', `${c.id}: title of ${l.f} differs from lessons.js`);
   }
 } catch (e) { bad('assets/build-concepts.js', 'cannot read: ' + e.message); }
+// Each track has its own link-preview image: two identical files mean one track shows another's name when shared.
+try {
+  const seen = {};
+  for (const f of readdirSync(new URL('assets/og/', root)).filter(x => x.endsWith('.png'))) {
+    const h = createHash('sha1').update(readFileSync(new URL('assets/og/' + f, root))).digest('hex');
+    if (seen[h]) bad('assets/og/' + f, `identical to assets/og/${seen[h]}, so shared links would show the wrong track name`); else seen[h] = f;
+  }
+} catch (e) { bad('assets/og', 'cannot read: ' + e.message); }
 if (problems.length) { console.log(`✗ Page check failed (${problems.length}):\n` + problems.map(x => '  - ' + x).join('\n')); process.exit(1); }
 console.log(`✓ Page check passed: ${pages.length} pages have lang, title, description, link previews, favicon, alt text, heading order, EN/中文 twins and an updated date on each lesson; sitemap, lesson list and start links match lessons.js.`);
