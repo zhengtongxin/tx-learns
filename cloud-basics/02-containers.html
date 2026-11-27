@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Containers | TX Learns</title>
+<meta name="description" content="Package an app with what it needs so it runs the same on every machine"><meta property="og:title" content="Containers | TX Learns"><meta property="og:description" content="Package an app with what it needs so it runs the same on every machine"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/cloud-basics/02-containers.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/cloud-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/cloud-basics/02-containers.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/cloud-basics/02-containers.html","url":"https://tx-learns.vercel.app/cloud-basics/02-containers.html","name":"Containers","alternateName":"容器","description":"Package an app with what it needs so it runs the same on every machine","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Where code runs","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Cloud basics","url":"https://tx-learns.vercel.app/cloud-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Cloud basics","item":"https://tx-learns.vercel.app/cloud-basics/index.html"},{"@type":"ListItem","position":3,"name":"Containers","item":"https://tx-learns.vercel.app/cloud-basics/02-containers.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Where code runs · Lesson 2</span><span class="zh">代码在哪里运行 · 第 2 课</span></span><h1><span class="en">Containers</span><span class="zh">容器</span></h1><p class="meta"><span class="en">Package an app with what it needs so it runs the same on every machine · ~10 min · reading and practice</span><span class="zh">把应用连同它需要的东西打包，在每台机器上运行结果都一样 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Works on my machine</span><span class="zh">第 1 步 · 在我电脑上能跑</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Code depends on more than itself: the language version, installed packages, system files. It runs on your laptop and breaks on the server because one of those differs. A <b>container</b> packages the app <i>and</i> everything it needs into one unit that behaves the same wherever it runs.</p>
+<p class="zh" style="margin:0 0 8px">代码依赖的不止它自己：语言版本、安装的包、系统文件。它在你的笔记本上能跑，到服务器上就坏了，因为其中一样不同。<b>容器</b>把应用<i>连同</i>它需要的一切打包成一个整体，无论在哪里运行，行为都一样。</p></div>
+
+<h2><span class="en">Step 2 · Image and container</span><span class="zh">第 2 步 · 镜像与容器</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">An <b>image</b> is the sealed recipe-plus-ingredients: read-only and shareable. A <b>container</b> is one running copy started from an image. One image can start ten containers, each a fresh copy of the same sealed recipe. Stop a container and its inner changes vanish unless you saved them outside.</p>
+<p class="zh" style="margin:0 0 8px"><b>镜像</b>是封好的“菜谱加食材”：只读，可以共享。<b>容器</b>是从镜像启动的一个运行中的副本。一个镜像可以启动十个容器，每个都是同一份封好的配方的全新副本。容器停止后，里面的改动会消失，除非存到了外面。</p></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · A Dockerfile</span><span class="zh">第 3 步 · Dockerfile</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>Dockerfile</b> is the recipe for an image, written as steps: start from a base, copy files in, install packages, say what to run. <code>FROM</code> picks the base to start from, <code>WORKDIR</code> sets the folder inside, <code>COPY</code> brings files in, <code>RUN</code> executes a command while the image is being built (here, installing packages), and <code>CMD</code> is the command that runs each time a container starts. Because it is text, it lives in git next to the code.</p>
+<p class="zh" style="margin:0 0 8px"><b>Dockerfile</b> 是镜像的配方，按步骤写：从一个基础镜像开始、复制文件进去、安装依赖、说明要运行什么。<code>FROM</code> 选定起点用的基础镜像，<code>WORKDIR</code> 设定里面的工作文件夹，<code>COPY</code> 把文件带进去，<code>RUN</code> 在构建镜像时执行一条命令（这里是安装依赖），<code>CMD</code> 是每次容器启动时运行的命令。因为它是文本，可以和代码一起放进 git。</p></div>
+<div class="codebox" data-file="Dockerfile" data-lang="text">FROM python:3.12-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+CMD ["python", "app.py"]</div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> read a Dockerfile from any open project and say what each line does.</span><span class="zh"><b>试一试：</b>读任意开源项目的 Dockerfile，说出每一行做什么。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> explain image versus container to a friend in two sentences.</span><span class="zh"><b>核对：</b>用两句话向朋友解释镜像和容器的区别。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A container bundles an app with what it needs, so it behaves the same everywhere.<br>• An image is the sealed recipe; a container is one running copy.<br>• A Dockerfile writes the recipe as text steps.</p><p class="zh" style="margin:0">• 容器把应用和它需要的东西打包，所以处处行为一致。<br>• 镜像是封好的配方；容器是一个运行中的副本。<br>• Dockerfile 把配方写成文本步骤。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Cloud basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3 for the small examples; reading is enough for the rest","zh":"小例子需要 Python 3；其余只需阅读"},"know":{"en":"Servers and the cloud (see “Servers and the cloud”).","zh":"知道服务器和云（见“服务器与云”）。"},"goals":{"en":["Explain “works on my machine”","Say what an image and a container are","Read a simple Dockerfile"],"zh":["解释“在我电脑上能跑”","说出镜像和容器分别是什么","读懂一个简单的 Dockerfile"]},"prev":["01-servers-and-the-cloud.html"]}}</script>
+<script src="../tracks.js?v=6bda028d"></script><script src="lessons.js?v=5cbe137d"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/02-containers.js?v=a48e13c9"></script></body></html>

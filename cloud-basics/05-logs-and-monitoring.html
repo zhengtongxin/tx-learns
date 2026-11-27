@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Logs and monitoring | TX Learns</title>
+<meta name="description" content="See what a running app is doing, and be told when something is wrong"><meta property="og:title" content="Logs and monitoring | TX Learns"><meta property="og:description" content="See what a running app is doing, and be told when something is wrong"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/cloud-basics/05-logs-and-monitoring.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/cloud-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/cloud-basics/05-logs-and-monitoring.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/cloud-basics/05-logs-and-monitoring.html","url":"https://tx-learns.vercel.app/cloud-basics/05-logs-and-monitoring.html","name":"Logs and monitoring","alternateName":"日志与监控","description":"See what a running app is doing, and be told when something is wrong","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Keeping it running","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Cloud basics","url":"https://tx-learns.vercel.app/cloud-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Cloud basics","item":"https://tx-learns.vercel.app/cloud-basics/index.html"},{"@type":"ListItem","position":3,"name":"Logs and monitoring","item":"https://tx-learns.vercel.app/cloud-basics/05-logs-and-monitoring.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Keeping it running · Lesson 2</span><span class="zh">让它持续运行 · 第 2 课</span></span><h1><span class="en">Logs and monitoring</span><span class="zh">日志与监控</span></h1><p class="meta"><span class="en">See what a running app is doing, and be told when something is wrong · ~10 min · reading and practice</span><span class="zh">看见运行中的应用在做什么，并在出问题时得到通知 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · You cannot see a server</span><span class="zh">第 1 步 · 你看不见服务器</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">On a laptop you watch the screen. On a server nobody does, so the app has to <b>leave a trail</b>. A <b>log</b> is that trail: one line per event, with a time, a level (<code>INFO</code>, <code>WARNING</code>, <code>ERROR</code>) and facts that help later: which request, which user id, how long it took. <code>ms</code> means milliseconds, and JSON is text that writes data as named values, which <code>json.loads</code> turns into Python dictionaries. Never log secrets or whole private messages.</p>
+<p class="zh" style="margin:0 0 8px">在笔记本上你盯着屏幕。服务器上没人盯，所以应用得<b>留下痕迹</b>。<b>日志</b>就是这条痕迹：一个事件一行，有时间、级别（<code>INFO</code>、<code>WARNING</code>、<code>ERROR</code>），以及日后有用的事实：哪个请求、哪个用户编号、花了多久。<code>ms</code> 指毫秒；JSON 是用“名字加值”写数据的文本，<code>json.loads</code> 把它变成 Python 字典。绝不记录密钥或完整的私人消息。</p></div>
+
+<h2><span class="en">Step 2 · Logs you can search</span><span class="zh">第 2 步 · 能搜索的日志</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A line of free text is hard to count. A line of <b>structured</b> JSON can be filtered and totalled by a program. Compare what you can ask of each.</p>
+<p class="zh" style="margin:0 0 8px">一行自由文本很难统计。一行<b>结构化</b>的 JSON 可以被程序过滤和汇总。比较一下你能向它们问什么。</p></div>
+<div class="codebox" data-file="logs.py" data-lang="python">import json
+
+lines = [
+  '{"level": "INFO", "ms": 120}',
+  '{"level": "ERROR", "ms": 900}',
+  '{"level": "INFO", "ms": 80}',
+]
+records = [json.loads(x) for x in lines]
+errors = [r for r in records if r["level"] == "ERROR"]
+print(len(errors))</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Metrics and alerts</span><span class="zh">第 3 步 · 指标与告警</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Logs answer “what happened to this request”. <b>Metrics</b> are numbers over time that answer “is it healthy”: error rate, response time, queue length. An <b>alert</b> tells a person when a metric crosses a line. Alert on what users feel (errors up, pages slow), not on every twitch: an alert that fires daily and means nothing teaches everyone to ignore it. Decide which are worth waking someone.</p>
+<p class="zh" style="margin:0 0 8px">日志回答“这个请求怎么了”。<b>指标</b>是随时间变化的数字，回答“是否健康”：错误率、响应时间、队列长度。<b>告警</b>在指标越线时通知人。针对用户感受到的问题告警（错误变多、页面变慢），而不是每次小波动：天天响又没意义的告警，会教大家忽略它。判断哪些值得叫醒一个人。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> write one log line for an event in a small program, with a level and two facts.</span><span class="zh"><b>试一试：</b>给一个小程序里的事件写一条日志，包含级别和两个事实。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> list three signals you would watch for an app you know, and which would wake you.</span><span class="zh"><b>核对：</b>为你熟悉的一个应用列出三个要盯的指标，说出哪个值得叫醒你。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A server is invisible, so the app must leave logs.<br>• Structured logs can be searched and counted by a program.<br>• Alert on what users feel, and keep alerts rare enough to trust.</p><p class="zh" style="margin:0">• 服务器看不见，所以应用必须留下日志。<br>• 结构化日志可以被程序搜索和统计。<br>• 针对用户感受到的问题告警，并让告警少到值得信任。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Cloud basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3 for the small examples; reading is enough for the rest","zh":"小例子需要 Python 3；其余只需阅读"},"know":{"en":"Deploying (see “Deploying”) and basic Python.","zh":"知道部署（见“部署”）并会基础 Python。"},"goals":{"en":["Write a useful log line","Pick a few signals worth watching","Set an alert that is not noise"],"zh":["写出一条有用的日志","选出几个值得盯的指标","设一个不是噪音的告警"]},"prev":["04-deploying.html"]}}</script>
+<script src="../tracks.js?v=6bda028d"></script><script src="lessons.js?v=5cbe137d"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/05-logs-and-monitoring.js?v=60c407fb"></script></body></html>

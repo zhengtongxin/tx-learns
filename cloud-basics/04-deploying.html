@@ -1,0 +1,38 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Deploying | TX Learns</title>
+<meta name="description" content="Get a change from your laptop to real users in small, checked, reversible steps"><meta property="og:title" content="Deploying | TX Learns"><meta property="og:description" content="Get a change from your laptop to real users in small, checked, reversible steps"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/cloud-basics/04-deploying.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/cloud-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/cloud-basics/04-deploying.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/cloud-basics/04-deploying.html","url":"https://tx-learns.vercel.app/cloud-basics/04-deploying.html","name":"Deploying","alternateName":"部署","description":"Get a change from your laptop to real users in small, checked, reversible steps","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Keeping it running","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Cloud basics","url":"https://tx-learns.vercel.app/cloud-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Cloud basics","item":"https://tx-learns.vercel.app/cloud-basics/index.html"},{"@type":"ListItem","position":3,"name":"Deploying","item":"https://tx-learns.vercel.app/cloud-basics/04-deploying.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Keeping it running · Lesson 1</span><span class="zh">让它持续运行 · 第 1 课</span></span><h1><span class="en">Deploying</span><span class="zh">部署</span></h1><p class="meta"><span class="en">Get a change from your laptop to real users in small, checked, reversible steps · ~10 min · reading and practice</span><span class="zh">把改动从你的笔记本，用小步、有检查、可撤回的方式送到真实用户手里 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Stages, not a leap</span><span class="zh">第 1 步 · 一站一站，不是一步跳</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A safe change moves through <b>environments</b> of rising stakes: your laptop, a shared <b>staging</b> copy that mimics the real thing, then <b>production</b> where users are. Each stage catches what the last could not: staging has real settings and data shapes, production has real traffic.</p>
+<p class="zh" style="margin:0 0 8px">一个安全的改动会依次经过风险越来越高的<b>环境</b>：你的笔记本，一个模仿真实环境的共享<b>预发</b>副本，最后是用户所在的<b>生产</b>环境。每一站抓住上一站抓不到的问题：预发有真实的设置和数据形态，生产有真实的流量。</p></div>
+
+<h2><span class="en">Step 2 · The pipeline</span><span class="zh">第 2 步 · 流水线</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><b>Continuous integration</b> (CI) runs the tests on every push, so a broken change is caught within minutes. <b>Continuous delivery</b> (CD) goes further and ships every change that passes, automatically or with one click. The result is a <b>pipeline</b>: push, test, build, deploy. A <b>pull request</b> is a proposal to merge your branch into the main one, and <b>merging</b> means combining it in. Small frequent changes are safer than rare giant ones because each is easy to understand and undo.</p>
+<p class="zh" style="margin:0 0 8px"><b>持续集成</b>（CI）在每次推送时运行测试，坏改动几分钟内就被发现。<b>持续交付</b>（CD）更进一步，把每个通过的改动自动发布，或点一下就发布。结果就是一条<b>流水线</b>：推送、测试、构建、部署。<b>拉取请求</b>是请求把你的分支合并进主分支的提议，<b>合并</b>就是把它并进去。小而频繁的改动比稀少的巨大改动更安全，因为每一个都容易理解、容易撤回。</p></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Plan the way back</span><span class="zh">第 3 步 · 先想好退路</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Before you ship, know how you will undo it. A <b>rollback</b> puts the last good version back; it works best when each release is a labelled image or tag you can redeploy. Roll back first and investigate afterwards: users should not wait while you debug. Put each action in the right order.</p>
+<p class="zh" style="margin:0 0 8px">发布之前，先想好怎么撤回。<b>回滚</b>是把上一个好的版本放回去；如果每次发布都是有标签的镜像或标签，可以重新部署，就最顺畅。先回滚、再调查：用户不该等你调试。把每个动作排进正确的阶段。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> write down the stages a change goes through in a project you know, from laptop to users.</span><span class="zh"><b>试一试：</b>写下你熟悉的项目里，一个改动从笔记本到用户要经过的阶段。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> say how you would roll it back, in one sentence.</span><span class="zh"><b>核对：</b>用一句话说出你会怎么回滚。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Changes move through environments of rising stakes.<br>• CI checks every change; CD ships the ones that pass.<br>• Know your rollback before you ship; roll back first, debug later.</p><p class="zh" style="margin:0">• 改动依次经过风险递增的环境。<br>• CI 检查每个改动；CD 发布通过的那些。<br>• 发布前先想好回滚；先回滚，后调试。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Cloud basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3 for the small examples; reading is enough for the rest","zh":"小例子需要 Python 3；其余只需阅读"},"know":{"en":"Git branches and tests (see “Branches” and “Tests that run themselves”).","zh":"知道 git 分支和测试（见“分支”和“自动运行的测试”）。"},"goals":{"en":["Name the stages a change passes through","Explain continuous integration and delivery","Plan a rollback"],"zh":["说出改动要经过的阶段","解释持续集成和持续交付","规划一次回滚"]}}}</script>
+<script src="../tracks.js?v=6bda028d"></script><script src="lessons.js?v=5cbe137d"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/04-deploying.js?v=18725e44"></script></body></html>
