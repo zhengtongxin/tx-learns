@@ -1,110 +1,110 @@
 {
  "lessons": {
   "agentic-ai/01-agentic-workflow.html": {
-   "score": 7,
-   "at": "2026-11-27T01:57:55.371Z",
+   "score": 6,
+   "at": "2026-11-27T02:10:03.900Z",
    "confusing": [
     {
-     "where": "Step 3 · Build it, item 4 (Tools)",
-     "why": "EoD and Close are never explained in the lesson text. Only the practice widget says end-of-day."
+     "where": "Meta line at the top",
+     "why": "Four accounts and keys (n8n, OpenAI, Marketstack, Google) come before the first idea, but the lesson says ~15 min. A newcomer cannot tell whether the setup is worth it."
     },
     {
-     "where": "Step 3 · Build it, item 5",
-     "why": "The reader is told to open Logs but not where it is on the n8n screen."
+     "where": "Step 3 · 4. Tools",
+     "why": "EoD (end-of-day prices) is never explained in the text. It only appears in a quiz later."
     },
     {
-     "where": "Intro",
-     "why": "Four accounts and a paid key come before any idea. The reader cannot tell which parts cost money."
+     "where": "Step 3 · 5. Chat, then open Logs",
+     "why": "Tools are never defined. Step 1 gives “Agent = LLM + tools + a loop” and nothing more, so “description” has to be guessed."
     }
    ]
   },
   "agentic-ai/02-agents-and-patterns.html": {
    "score": 7,
-   "at": "2026-11-27T01:57:55.371Z",
+   "at": "2026-11-27T02:10:03.900Z",
    "confusing": [
     {
+     "where": "Now make it yours, first item",
+     "why": "The reader has not made an LLM call yet (that is lesson 3), and “LLM call” is not defined here."
+    },
+    {
+     "where": "Step 2 code box agent.py",
+     "why": "The inputs are unclear: tools is a list of names while the comment says each carries a description, and choice.name and choice.args are never explained."
+    },
+    {
      "where": "Step 2 · Learn",
-     "why": "Lesson 1 already used workflow for the n8n canvas. Here it means something narrower, so the same word now has two meanings and the reader has to unlearn one."
-    },
-    {
-     "where": "Step 3 · Five patterns, orchestrator-worker",
-     "why": "The rule just given is that the model picks the next step in an agent. Here the model decides how many pieces to make, yet the card calls it a workflow. A newcomer cannot tell which side it is on."
-    },
-    {
-     "where": "Step 2 · agent.py code box",
-     "why": "The comment sends the reader to a lesson that comes later, and the phrase tool description is not yet explained."
+     "why": "Lesson 1 uses “workflow” for an n8n canvas. The parenthesis clears it up, but a newcomer will stop and reread."
     }
    ]
   },
   "agentic-ai/03-first-api-calls.html": {
-   "score": 7,
-   "at": "2026-11-27T01:57:55.371Z",
+   "score": 6,
+   "at": "2026-11-27T02:10:03.900Z",
    "confusing": [
     {
-     "where": "Step 2 · code box",
-     "why": "role is never explained. The reader does not know that user means the person speaking, or that assistant and system roles exist."
+     "where": "Meta line at the top",
+     "why": "The lesson asks for a notebook and a virtual environment but never says how to create, activate or select one. A newcomer stops here."
     },
     {
-     "where": "Step 2 · Learn",
-     "why": "The text names four steps, but the box is longer than four lines, including a check for a missing key that the text never mentions."
+     "where": "Step 2 code box",
+     "why": "“role” and the message dictionary are never explained. “user”, “system” and “assistant” appear later without a definition."
     },
     {
-     "where": "Step 2 · code box",
-     "why": "The lesson never says how OpenAI() finds the key. Only the sorting game explains it, and the reader needs that before running the code."
+     "where": "Step 3 · Learn",
+     "why": "“full” is not defined, and lesson 4 calls the same tier “Large”. The reader cannot tell whether gpt-5.4 is “full”."
     }
    ]
   },
   "agentic-ai/04-many-models.html": {
-   "score": 6,
-   "at": "2026-11-27T01:57:55.371Z",
+   "score": 7,
+   "at": "2026-11-27T02:10:03.900Z",
    "confusing": [
     {
      "where": "Step 2 · Learn",
-     "why": "This is the main idea of the step and it is never explained. The reader can copy the table values but cannot say what base_url is or what it does."
+     "why": "“base_url” and “OpenAI-compatible” are never defined, and “reuse the same OpenAI client” can sound as if you need an OpenAI account to use Groq."
     },
     {
-     "where": "Step 3 · Local models",
-     "why": "Ollama needs its app installed and llama3.2 downloaded before the code works. The lesson points the set-up to another track and never says the model must be downloaded first."
+     "where": "Step 3 code box",
+     "why": "json.loads returns a dictionary; [\"results\"] picks out the list. A reader who knows Python will think the comment is wrong."
     },
     {
-     "where": "Step 2 · code box",
-     "why": "messages is used but never defined in this box, so the snippet does not run on its own."
+     "where": "Step 2 · Learn",
+     "why": "An environment variable is never explained."
     }
    ]
   },
   "agentic-ai/05-autonomy-and-tools.html": {
-   "score": 7,
-   "at": "2026-11-27T01:57:55.371Z",
+   "score": 6,
+   "at": "2026-11-27T02:10:03.900Z",
    "confusing": [
     {
-     "where": "Step 2 · code box",
-     "why": "client is used here but never created in this lesson. The reader has to remember it from lesson 3."
+     "where": "Step 4 code box",
+     "why": "If the fifth reply still asks for tools, the loop ends without answering, and the function returns that message's content, which is usually empty. The callout says the limit “stops it”, but the reader"
     },
     {
-     "where": "Step 3 · code box",
-     "why": "The wrapper with type and function is not explained. The JSON from the step above is nested inside another dict without a comment on why."
+     "where": "Step 3 code box",
+     "why": "The box has a blank, but the instruction to fill it appears only in the quiz after the box. It looks like broken code."
     },
     {
-     "where": "Step 3 · code box",
-     "why": "The blank is a quiz, but the Learn text does not say to fill it in. A reader may think the code is broken."
+     "where": "Step 2 code box",
+     "why": "“role” is never explained. The reader sees system, user, assistant and tool with no definition."
     }
    ]
   },
   "agentic-ai/06-career-agent.html": {
    "score": 6,
-   "at": "2026-11-27T01:57:55.371Z",
+   "at": "2026-11-27T02:10:03.900Z",
    "confusing": [
     {
-     "where": "Step 4 · checklist after the code",
-     "why": "Step 1 says Pushover is set up under Step 4, but the sign-up is an unlabelled checkbox after the code, and it looks optional. The reader may skip it and never see a phone buzz."
+     "where": "Now make it yours, second item",
+     "why": "The deploy steps assume terminal skills that are not taught here (installing uv, running a command, finding a host's secrets page). Setup is three services deep."
     },
     {
-     "where": "Step 4 · Deploy checkbox",
-     "why": "The lesson never says which folder to open (starter or final) or how to get the files. Project files is undefined."
+     "where": "Step 4 code box",
+     "why": "The result is never sent back to the model, and the lesson does not say where it goes. ALLOWED is also built inside the loop, so it is rebuilt on every call."
     },
     {
-     "where": "Step 4 · Deploy checkbox",
-     "why": "pypdf is installed but never explained or used in the lesson text. Uv, Gradio and hosting are also named without a one-line explanation."
+     "where": "Step 2 code box",
+     "why": "The box is labelled as JSON, but False is Python syntax (JSON says false). A reader who knows JSON is confused."
     }
    ]
   },
