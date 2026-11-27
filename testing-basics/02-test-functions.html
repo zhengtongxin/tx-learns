@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Test functions | TX Learns</title>
+<meta name="description" content="Organise checks into small named test functions that a runner finds and runs"><meta property="og:title" content="Test functions | TX Learns"><meta property="og:description" content="Organise checks into small named test functions that a runner finds and runs"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/testing-basics/02-test-functions.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/testing-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/testing-basics/02-test-functions.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/testing-basics/02-test-functions.html","url":"https://tx-learns.vercel.app/testing-basics/02-test-functions.html","name":"Test functions","alternateName":"测试函数","description":"Organise checks into small named test functions that a runner finds and runs","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Checking your code","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Testing basics","url":"https://tx-learns.vercel.app/testing-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Testing basics","item":"https://tx-learns.vercel.app/testing-basics/index.html"},{"@type":"ListItem","position":3,"name":"Test functions","item":"https://tx-learns.vercel.app/testing-basics/02-test-functions.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Checking your code · Lesson 2</span><span class="zh">检查你的代码 · 第 2 课</span></span><h1><span class="en">Test functions</span><span class="zh">测试函数</span></h1><p class="meta"><span class="en">Organise checks into small named test functions that a runner finds and runs · ~10 min · reading and practice</span><span class="zh">把检查整理成小而有名字的测试函数，让测试运行器自己找到并运行 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · One test, one idea</span><span class="zh">第 1 步 · 一个测试，一个想法</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Group asserts into functions that each check <b>one idea</b>, named for it: <code>test_zero_items_cost_nothing</code>. When it fails, the name alone tells you what broke. A test runner such as <b>pytest</b> finds every function whose name starts with <code>test_</code>, runs them all, and reports which passed and which failed instead of stopping at the first.</p>
+<p class="zh" style="margin:0 0 8px">把 assert 分组到各自只检查<b>一个想法</b>的函数里，并用它命名：<code>test_zero_items_cost_nothing</code>。失败时，光看名字就知道什么坏了。<b>pytest</b> 这样的测试运行器会找出所有以 <code>test_</code> 开头的函数，全部运行，并报告哪些通过、哪些失败，而不是在第一个失败处停下。</p></div>
+<div class="codebox" data-file="test_shop.py" data-lang="python">from shop import total
+
+def test_total_multiplies():
+    assert total(2, 3.0) == 6.0
+
+def test_zero_items_cost_nothing():
+    assert total(0, 9.9) == 0</div>
+
+<h2><span class="en">Step 2 · Arrange, act, assert</span><span class="zh">第 2 步 · 准备、执行、断言</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A readable test has three beats: <b>arrange</b> the input, <b>act</b> by calling the code, <b>assert</b> on the result. Keep them in that order and keep each test short. A test that needs a page of setup is a sign the code under test does too much.</p>
+<p class="zh" style="margin:0 0 8px">好读的测试有三拍：<b>准备</b>输入，<b>执行</b>——调用代码，<b>断言</b>结果。保持这个顺序，让每个测试都很短。一个需要一页准备工作的测试，说明被测的代码做的事太多了。</p></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Good test names</span><span class="zh">第 3 步 · 好的测试名</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Which name tells you what broke?</p>
+<p class="zh" style="margin:0 0 8px">哪个名字能告诉你什么坏了？</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> split a long check into three small named tests.</span><span class="zh"><b>试一试：</b>把一个长长的检查拆成三个小而有名字的测试。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> read only the test names and see if they describe the behaviour.</span><span class="zh"><b>核对：</b>只读测试名，看它们是否描述了行为。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• One test checks one idea and is named for it.<br>• A runner finds test_ functions and reports every result.<br>• Arrange, act, assert, in that order.</p><p class="zh" style="margin:0">• 一个测试检查一个想法，并以它命名。<br>• 运行器找出 test_ 函数，并报告每个结果。<br>• 准备、执行、断言，按这个顺序。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Testing basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3","zh":"Python 3"},"know":{"en":"assert (see “Assertions”).","zh":"会用 assert（见“断言”）。"},"goals":{"en":["Write a test function","Name tests so failures explain themselves","Run all tests with a runner"],"zh":["写一个测试函数","起个能自我说明的测试名","用运行器跑全部测试"]},"prev":["01-assertions.html"]}}</script>
+<script src="../tracks.js?v=e601a3df"></script><script src="lessons.js?v=9200e4fc"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/02-test-functions.js?v=0c42d24a"></script></body></html>

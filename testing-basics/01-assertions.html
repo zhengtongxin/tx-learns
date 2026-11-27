@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Assertions | TX Learns</title>
+<meta name="description" content="Turn “it looks right” into a check that says pass or fail, using assert"><meta property="og:title" content="Assertions | TX Learns"><meta property="og:description" content="Turn “it looks right” into a check that says pass or fail, using assert"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/testing-basics/01-assertions.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/testing-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/testing-basics/01-assertions.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/testing-basics/01-assertions.html","url":"https://tx-learns.vercel.app/testing-basics/01-assertions.html","name":"Assertions","alternateName":"断言","description":"Turn “it looks right” into a check that says pass or fail, using assert","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Checking your code","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Testing basics","url":"https://tx-learns.vercel.app/testing-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Testing basics","item":"https://tx-learns.vercel.app/testing-basics/index.html"},{"@type":"ListItem","position":3,"name":"Assertions","item":"https://tx-learns.vercel.app/testing-basics/01-assertions.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Checking your code · Lesson 1</span><span class="zh">检查你的代码 · 第 1 课</span></span><h1><span class="en">Assertions</span><span class="zh">断言</span></h1><p class="meta"><span class="en">Turn “it looks right” into a check that says pass or fail, using assert · ~10 min · reading and practice</span><span class="zh">用 assert 把“看起来对”变成会说通过或失败的检查 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Looking is not checking</span><span class="zh">第 1 步 · 看一眼不叫检查</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Running code and glancing at the output proves little: you may not notice a wrong number, and tomorrow you will not remember what “right” looked like. A <b>test</b> writes the expected answer down and lets the computer compare, every time, in a second. Edit the code at 11 pm and the test tells you if you broke something.</p>
+<p class="zh" style="margin:0 0 8px">运行代码、扫一眼输出，证明不了多少：你可能没注意到错的数字，明天也记不得“对”的样子。<b>测试</b>把期望的答案写下来，让电脑每一次都在一秒内比对。半夜十一点改了代码，测试会告诉你有没有改坏。</p></div>
+
+<h2><span class="en">Step 2 · assert</span><span class="zh">第 2 步 · assert</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><code>assert condition</code> does nothing if the condition is true and stops with an <code>AssertionError</code> if it is false. Add a message after a comma to say what went wrong. A test is usually a call with a known answer: <code>assert total(2, 3.0) == 6.0</code>.</p>
+<p class="zh" style="margin:0 0 8px"><code>assert 条件</code> 在条件为真时什么都不做，为假时就用 <code>AssertionError</code> 停下。逗号后可以加一句说明出了什么问题。测试通常就是一次已知答案的调用：<code>assert total(2, 3.0) == 6.0</code>。</p></div>
+<div class="codebox" data-file="check.py" data-lang="python">def total(qty, price):
+    return qty * price
+
+assert total(2, 3.0) == 6.0
+assert total(0, 9.9) == 0, "zero items should cost nothing"
+print("all good")</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Pass or fail</span><span class="zh">第 3 步 · 通过还是失败</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">For <code>def double(n): return n * 2</code>, decide whether each assert passes.</p>
+<p class="zh" style="margin:0 0 8px">对 <code>def double(n): return n * 2</code>，判断每个 assert 是否通过。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> write three asserts for a function you wrote earlier.</span><span class="zh"><b>试一试：</b>给你之前写的一个函数写三条 assert。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> break the function on purpose and see an assert fail.</span><span class="zh"><b>核对：</b>故意把函数改坏，看一条 assert 失败。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A test writes down the expected answer and checks it automatically.<br>• assert is silent when true and raises AssertionError when false.<br>• Add a message so a failure explains itself.</p><p class="zh" style="margin:0">• 测试把期望的答案写下来，并自动检查。<br>• assert 为真时沉默，为假时抛出 AssertionError。<br>• 加一句说明，让失败自己讲清楚。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Testing basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3","zh":"Python 3"},"know":{"en":"Basic Python functions.","zh":"会写基本的 Python 函数。"},"goals":{"en":["Say why tests beat looking at output","Write an assert","Read an AssertionError"],"zh":["说出测试为什么胜过肉眼看输出","写出 assert","读懂 AssertionError"]}}}</script>
+<script src="../tracks.js?v=e601a3df"></script><script src="lessons.js?v=9200e4fc"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/01-assertions.js?v=3c54862f"></script></body></html>
