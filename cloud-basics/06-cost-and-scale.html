@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cost and scale | TX Learns</title>
+<meta name="description" content="Understand what grows when users do, and keep the bill from surprising you"><meta property="og:title" content="Cost and scale | TX Learns"><meta property="og:description" content="Understand what grows when users do, and keep the bill from surprising you"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/cloud-basics/06-cost-and-scale.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/pmp.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/cloud-basics/06-cost-and-scale.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/cloud-basics/06-cost-and-scale.html","url":"https://tx-learns.vercel.app/cloud-basics/06-cost-and-scale.html","name":"Cost and scale","alternateName":"成本与扩展","description":"Understand what grows when users do, and keep the bill from surprising you","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Keeping it running","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Cloud basics","url":"https://tx-learns.vercel.app/cloud-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Cloud basics","item":"https://tx-learns.vercel.app/cloud-basics/index.html"},{"@type":"ListItem","position":3,"name":"Cost and scale","item":"https://tx-learns.vercel.app/cloud-basics/06-cost-and-scale.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Keeping it running · Lesson 3</span><span class="zh">让它持续运行 · 第 3 课</span></span><h1><span class="en">Cost and scale</span><span class="zh">成本与扩展</span></h1><p class="meta"><span class="en">Understand what grows when users do, and keep the bill from surprising you · ~10 min · reading and practice</span><span class="zh">弄清用户变多时什么会增长，并避免账单吓你一跳 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · More users, more machine</span><span class="zh">第 1 步 · 用户多了，机器也要多</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">When load grows you can <b>scale up</b>: one bigger machine, simple but with a ceiling and a single point of failure. Or you can <b>scale out</b>: more copies behind a <b>load balancer</b> that shares the traffic, which survives one copy failing but needs the app to keep no private state in memory. Many platforms add and remove copies for you as traffic changes.</p>
+<p class="zh" style="margin:0 0 8px">负载增加时，可以<b>纵向扩展</b>：换一台更大的机器，简单，但有上限，也是单点故障。也可以<b>横向扩展</b>：在<b>负载均衡器</b>后面放更多副本，由它分摊流量，某个副本挂了也不怕，但要求应用不在内存里保存私有状态。很多平台会随流量自动增减副本。</p></div>
+
+<h2><span class="en">Step 2 · Estimate before you launch</span><span class="zh">第 2 步 · 上线前先估算</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Cloud bills are usage times price. Estimate with a back-of-envelope sum: requests per day, cost per request, plus the machines that are on whether anyone visits or not. For an AI feature the big line is usually <b>tokens</b>: calls per day times tokens per call times the price per token.</p>
+<p class="zh" style="margin:0 0 8px">云账单就是用量乘以单价。用一个粗略的算式先估：每天的请求数、每个请求的成本，再加上不管有没有人访问都开着的机器。对 AI 功能来说，大头通常是 <b>token</b>：每天调用次数乘以每次的 token 数，再乘以每个 token 的价格。</p></div>
+<div class="codebox" data-file="estimate.py" data-lang="python">calls_per_day = 2000
+tokens_per_call = 1500
+price_per_million = 3.0   # example price, in dollars
+
+tokens = calls_per_day * tokens_per_call * 30
+print(round(tokens / 1_000_000 * price_per_million, 2))</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Guard the bill</span><span class="zh">第 3 步 · 守住账单</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Surprises come from forgotten machines, a loop that calls a paid service forever, or traffic you did not expect. Set a <b>budget</b> with an alert at 50% and 80%, give each key a spending limit, tag resources so you know what each is for, and switch off what you no longer use. Sort each habit.</p>
+<p class="zh" style="margin:0 0 8px">惊喜（吓人的那种）来自被遗忘的机器、无限循环调用付费服务，或没预料到的流量。设一个<b>预算</b>，在 50% 和 80% 时告警；给每个密钥设支出上限；给资源打标签，知道每个是干什么的；不用的就关掉。给每个习惯分类。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> estimate the monthly cost of an idea of yours using requests, price and always-on machines.</span><span class="zh"><b>试一试：</b>用请求数、单价和一直开着的机器，估算你的某个点子每月的成本。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> find where your provider lets you set a budget alert and a spending cap.</span><span class="zh"><b>核对：</b>找一找你的服务商在哪里能设预算告警和支出上限。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Scale up is one bigger machine; scale out is more copies behind a load balancer.<br>• A bill is usage times price: estimate it before you launch.<br>• Budgets, caps and tags stop a surprise bill.</p><p class="zh" style="margin:0">• 纵向是一台更大的机器；横向是负载均衡器后面更多的副本。<br>• 账单是用量乘以单价：上线前先估算。<br>• 预算、上限和标签能防止账单惊喜。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Cloud basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3 for the small examples; reading is enough for the rest","zh":"小例子需要 Python 3；其余只需阅读"},"know":{"en":"Logs and monitoring (see “Logs and monitoring”).","zh":"知道日志与监控（见“日志与监控”）。"},"goals":{"en":["Tell scaling up from scaling out","Estimate a monthly cost","Set a budget and an alert"],"zh":["分清纵向和横向扩展","估算每月成本","设定预算和告警"]},"prev":["05-logs-and-monitoring.html"]}}</script>
+<script src="../tracks.js?v=6bda028d"></script><script src="lessons.js?v=5cbe137d"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/06-cost-and-scale.js?v=66d99836"></script></body></html>
