@@ -54,6 +54,23 @@ Strong:  "On the login page, show an error under the password box
 <p class="en">Sort each one.</p>
 <p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
 
+<h2><span class="en">Step 4 · Read a run like a transcript</span><span class="zh">第 4 步 · 像读记录一样读一次运行</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">You rarely watch an agent type. You read what it did afterwards, so learn to spot the loop in a log. Here is a short run for the goal “make npm test pass”:</p>
+<p class="zh" style="margin:0 0 8px">你很少盯着智能体打字，多数时候是事后读它做了什么，所以要学会在日志里认出那个循环。下面是目标“让 npm test 通过”的一次简短运行：</p></div>
+<div class="codebox" data-file="a run, read top to bottom" data-lang="text">1  read   src/price.js, test/price.test.js
+2  plan   "total() ignores the discount; apply it before tax"
+3  edit   src/price.js  (+2 -1)
+4  run    npm test
+5  check  1 failing: expected 94.5, got 95.04
+6  plan   "tax should apply to the discounted amount only"
+7  edit   src/price.js  (+1 -1)
+8  run    npm test
+9  check  all 12 passing</div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Read it for two things: <b>did a check actually happen</b> (lines 5 and 9), and <b>did the second round learn from the first</b> (line 6 uses the failure on line 5). A run with edits but no run-and-check line is a guess, however confident the summary sounds.</p>
+<p class="zh" style="margin:0 0 8px">读它看两件事：<b>有没有真的检查过</b>（第 5、9 行），以及<b>第二轮有没有从第一轮学到东西</b>（第 6 行用了第 5 行的失败）。只有编辑、没有运行和检查的记录就是猜测，不管总结听起来多自信。</p></div>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Name</b> one thing you did last month that an agent could have done, and which level you would use.</span><span class="zh"><b>说出</b>上个月你做过的一件事，智能体本可以代劳，并选一个层次。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Try</b> any coding tool you have with one small task, and note whether it acted or only answered.</span><span class="zh"><b>试一试</b>用你手头任何一个编程工具做一件小事，记下它是动手做了，还是只回答了。</span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
@@ -63,4 +80,4 @@ Strong:  "On the login page, show an error under the password box
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"prev":[],"tools":{"en":"Only a browser","zh":"只需要浏览器"},"know":{"en":"Nothing. You have seen an AI chatbot.","zh":"无需基础。见过 AI 聊天机器人即可。"},"goals":{"en":["Tell autocomplete, chat and an agent apart","Describe the loop an agent runs","Choose feel or design by what a mistake costs"],"zh":["分清补全、对话和智能体","讲清智能体的循环","按出错代价选择凭感觉还是靠设计"]}}}</script>
 <script src="../tracks.js?v=819ff2a4"></script><script src="lessons.js?v=389b4305"></script><script src="../assets/site.js?v=3a95bfcc"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
-<script src="js/01-the-agentic-coding-map.js?v=4eb27921"></script></body></html>
+<script src="js/01-the-agentic-coding-map.js?v=ca1b052e"></script></body></html>
