@@ -1,0 +1,47 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Keys and authentication | TX Learns</title>
+<meta name="description" content="Prove who you are to an API with a key, and keep that key out of places where it can leak"><meta property="og:title" content="Keys and authentication | TX Learns"><meta property="og:description" content="Prove who you are to an API with a key, and keep that key out of places where it can leak"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/web-basics/04-keys-and-authentication.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/web-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/web-basics/04-keys-and-authentication.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/web-basics/04-keys-and-authentication.html","url":"https://tx-learns.vercel.app/web-basics/04-keys-and-authentication.html","name":"Keys and authentication","alternateName":"密钥与身份验证","description":"Prove who you are to an API with a key, and keep that key out of places where it can leak","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Using APIs","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Web basics","url":"https://tx-learns.vercel.app/web-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Web basics","item":"https://tx-learns.vercel.app/web-basics/index.html"},{"@type":"ListItem","position":3,"name":"Keys and authentication","item":"https://tx-learns.vercel.app/web-basics/04-keys-and-authentication.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Using APIs · Lesson 1</span><span class="zh">使用 API · 第 1 课</span></span><h1><span class="en">Keys and authentication</span><span class="zh">密钥与身份验证</span></h1><p class="meta"><span class="en">Prove who you are to an API with a key, and keep that key out of places where it can leak · ~10 min · reading and practice</span><span class="zh">用密钥向 API 证明你是谁，并让密钥远离可能泄露的地方 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Who is asking</span><span class="zh">第 1 步 · 是谁在请求</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A server needs to know who is calling, to bill the right account and to stop strangers. An <b>API key</b> is a long secret string that stands for your account. Whoever holds the key can act as you and spend your money, so treat it like a password.</p>
+<p class="zh" style="margin:0 0 8px">服务器需要知道是谁在调用，好向正确的账户计费，也好挡住陌生人。<b>API 密钥</b>是一长串代表你账户的机密字符。谁拿到密钥，谁就能冒充你、花你的钱，所以要像对待密码一样对待它。</p>
+<p class="en" style="margin:0 0 8px">Keys usually travel in a header, most often <code>Authorization: Bearer &lt;key&gt;</code>. A missing or wrong key gets a <code>401</code>.</p>
+<p class="zh" style="margin:0 0 8px">密钥通常放在头信息里发送，最常见的是 <code>Authorization: Bearer &lt;密钥&gt;</code>。缺失或错误的密钥会得到 <code>401</code>。</p></div>
+
+<h2><span class="en">Step 2 · Keep it secret</span><span class="zh">第 2 步 · 守住机密</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Never write a key into code you share, a screenshot or a chat. Put it in an environment variable (or a <code>.env</code> file that your version control ignores) and read it from there. If a key leaks, <b>revoke it and make a new one</b> at once: deleting the file does not help, because copies already exist.</p>
+<p class="zh" style="margin:0 0 8px">别把密钥写进要分享的代码、截图或聊天里。把它放进环境变量（或被版本管理忽略的 <code>.env</code> 文件），再从那里读取。密钥一旦泄露，<b>立刻吊销并重新生成</b>：把文件删掉没用，因为副本已经存在了。</p></div>
+<div class="codebox" data-file="read_key.py" data-lang="python">import os
+
+key = os.environ.get("SHOP_API_KEY")
+if not key:
+    raise SystemExit("Set SHOP_API_KEY first")
+headers = {"Authorization": "Bearer " + key}
+print(sorted(headers))</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Safe or leaky</span><span class="zh">第 3 步 · 安全还是会泄露</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Decide where a key is safe.</p>
+<p class="zh" style="margin:0 0 8px">判断密钥放在哪里是安全的。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> store a pretend key in an environment variable and read it from Python.</span><span class="zh"><b>试一试：</b>把一个假想的密钥放进环境变量，再用 Python 读取。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> search one of your projects for the word “key” or “secret” in code.</span><span class="zh"><b>核对：</b>在你的某个项目里搜一搜代码中有没有 “key” 或 “secret”。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• An API key stands for your account; treat it like a password.<br>• Send it in a header and read it from an environment variable.<br>• If it leaks, revoke it and make a new one.</p><p class="zh" style="margin:0">• API 密钥代表你的账户，要像对待密码一样对待它。<br>• 在头信息里发送，从环境变量里读取。<br>• 一旦泄露，吊销并重新生成。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Web basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"A browser, and Python 3 for the code boxes","zh":"一个浏览器，代码框用 Python 3"},"know":{"en":"JSON and headers (see “JSON data”).","zh":"知道 JSON 和头信息（见“JSON 数据”）。"},"goals":{"en":["Say what an API key is for","Send a key in a header","Keep a key out of shared code"],"zh":["说出 API 密钥的用途","在头信息里发送密钥","不让密钥进入共享的代码"]},"prev":["03-json-data.html"]}}</script>
+<script src="../tracks.js?v=47f4cacf"></script><script src="lessons.js?v=1efa406f"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/04-keys-and-authentication.js?v=53849971"></script></body></html>

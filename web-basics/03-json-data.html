@@ -1,0 +1,51 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JSON data | TX Learns</title>
+<meta name="description" content="Read and write JSON, the format almost every API uses, and avoid its common slips"><meta property="og:title" content="JSON data | TX Learns"><meta property="og:description" content="Read and write JSON, the format almost every API uses, and avoid its common slips"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/web-basics/03-json-data.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/web-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/web-basics/03-json-data.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/web-basics/03-json-data.html","url":"https://tx-learns.vercel.app/web-basics/03-json-data.html","name":"JSON data","alternateName":"JSON 数据","description":"Read and write JSON, the format almost every API uses, and avoid its common slips","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"How the web talks","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Web basics","url":"https://tx-learns.vercel.app/web-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Web basics","item":"https://tx-learns.vercel.app/web-basics/index.html"},{"@type":"ListItem","position":3,"name":"JSON data","item":"https://tx-learns.vercel.app/web-basics/03-json-data.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">How the web talks · Lesson 3</span><span class="zh">网络怎样对话 · 第 3 课</span></span><h1><span class="en">JSON data</span><span class="zh">JSON 数据</span></h1><p class="meta"><span class="en">Read and write JSON, the format almost every API uses, and avoid its common slips · ~10 min · reading and practice</span><span class="zh">读写几乎所有 API 都在用的 JSON 格式，并避开它常见的小错 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · What JSON looks like</span><span class="zh">第 1 步 · JSON 长什么样</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><b>JSON</b> is plain text that holds structured data. It has objects in braces <code>{}</code> with <code>"key": value</code> pairs, lists in brackets <code>[]</code>, and values that are strings, numbers, <code>true</code>, <code>false</code> or <code>null</code>. Keys and strings use <b>double quotes</b> only. No trailing commas and no comments.</p>
+<p class="zh" style="margin:0 0 8px"><b>JSON</b> 是装着结构化数据的纯文本。花括号 <code>{}</code> 里是 <code>"键": 值</code> 的对象，方括号 <code>[]</code> 里是列表，值可以是字符串、数字、<code>true</code>、<code>false</code> 或 <code>null</code>。键和字符串只能用<b>双引号</b>。不允许末尾多余的逗号，也不允许注释。</p></div>
+<div class="codebox" data-file="order.json" data-lang="json">{
+  "id": 42,
+  "items": ["tea", "cake"],
+  "paid": true,
+  "note": null
+}</div>
+
+<h2><span class="en">Step 2 · JSON and Python</span><span class="zh">第 2 步 · JSON 与 Python</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">In Python the <code>json</code> module converts both ways: <code>json.loads(text)</code> turns JSON text into dictionaries and lists, and <code>json.dumps(data)</code> turns them back into text. <code>true</code> becomes <code>True</code> and <code>null</code> becomes <code>None</code>.</p>
+<p class="zh" style="margin:0 0 8px">在 Python 里，<code>json</code> 模块能双向转换：<code>json.loads(文本)</code> 把 JSON 文本变成字典和列表，<code>json.dumps(数据)</code> 再变回文本。<code>true</code> 会变成 <code>True</code>，<code>null</code> 会变成 <code>None</code>。</p></div>
+<div class="codebox" data-file="read.py" data-lang="python">import json
+
+text = '{"id": 42, "items": ["tea", "cake"], "paid": true}'
+order = json.loads(text)
+print(order["items"][1], order["paid"])</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Common slips</span><span class="zh">第 3 步 · 常见的小错</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Most “invalid JSON” errors are the same few slips: single quotes, a trailing comma, an unquoted key, or a comment. A parser refuses the whole text for any of them, so read the error’s position.</p>
+<p class="zh" style="margin:0 0 8px">大多数“JSON 无效”都是那几个小错：单引号、末尾多余的逗号、没加引号的键，或写了注释。解析器会因其中任何一个拒绝整段文本，所以看一下报错指出的位置。</p>
+<p class="en" style="margin:0 0 8px">Valid or not?</p>
+<p class="zh" style="margin:0 0 8px">有效还是无效？</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> write a small JSON document about yourself and check it in a JSON checker or with <code>json.loads</code>.</span><span class="zh"><b>试一试：</b>写一小段关于你自己的 JSON，并用 JSON 检查工具或 <code>json.loads</code> 检查。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> break it on purpose with a trailing comma and read the error.</span><span class="zh"><b>核对：</b>故意加一个末尾逗号弄坏它，读一读报错。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• JSON is text with objects, lists, strings, numbers, true, false and null.<br>• Double quotes only; no trailing commas or comments.<br>• json.loads reads it and json.dumps writes it.</p><p class="zh" style="margin:0">• JSON 是由对象、列表、字符串、数字、true、false 和 null 组成的文本。<br>• 只用双引号；不能有末尾逗号和注释。<br>• json.loads 读取，json.dumps 写出。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Web basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"A browser, and Python 3 for the code boxes","zh":"一个浏览器，代码框用 Python 3"},"know":{"en":"Status codes and headers (see “Status codes and headers”).","zh":"知道状态码和头信息（见“状态码与头信息”）。"},"goals":{"en":["Read a JSON document","Spot invalid JSON","Turn JSON into Python data and back"],"zh":["读懂 JSON 文档","认出无效的 JSON","在 JSON 与 Python 数据之间互相转换"]},"prev":["02-status-codes-and-headers.html"]}}</script>
+<script src="../tracks.js?v=47f4cacf"></script><script src="lessons.js?v=1efa406f"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/03-json-data.js?v=c3d72d68"></script></body></html>

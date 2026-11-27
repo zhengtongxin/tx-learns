@@ -1,0 +1,51 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Calling an API | TX Learns</title>
+<meta name="description" content="Make a request from code, check the status, read the JSON and handle a failure"><meta property="og:title" content="Calling an API | TX Learns"><meta property="og:description" content="Make a request from code, check the status, read the JSON and handle a failure"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/web-basics/05-calling-an-api.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/web-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/web-basics/05-calling-an-api.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/web-basics/05-calling-an-api.html","url":"https://tx-learns.vercel.app/web-basics/05-calling-an-api.html","name":"Calling an API","alternateName":"调用 API","description":"Make a request from code, check the status, read the JSON and handle a failure","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Using APIs","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Web basics","url":"https://tx-learns.vercel.app/web-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Web basics","item":"https://tx-learns.vercel.app/web-basics/index.html"},{"@type":"ListItem","position":3,"name":"Calling an API","item":"https://tx-learns.vercel.app/web-basics/05-calling-an-api.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Using APIs · Lesson 2</span><span class="zh">使用 API · 第 2 课</span></span><h1><span class="en">Calling an API</span><span class="zh">调用 API</span></h1><p class="meta"><span class="en">Make a request from code, check the status, read the JSON and handle a failure · ~10 min · reading and practice</span><span class="zh">用代码发出请求，检查状态，读取 JSON，并处理失败 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · A first call</span><span class="zh">第 1 步 · 第一次调用</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">With the <code>requests</code> package a call is a few lines: pick the method, pass the URL, read the answer. <code>response.status_code</code> is the number and <code>response.json()</code> turns the body into Python data. Always check the status before using the body.</p>
+<p class="zh" style="margin:0 0 8px">用 <code>requests</code> 包，一次调用只要几行：选方法、传网址、读结果。<code>response.status_code</code> 是状态码，<code>response.json()</code> 把正文变成 Python 数据。使用正文之前，一定要先检查状态。</p></div>
+<div class="codebox" data-file="get_price.py" data-lang="python">import requests
+
+r = requests.get(
+    "https://api.example.com/menu/tea",
+    params={"size": "large"},
+    timeout=10,
+)
+if r.status_code == 200:
+    print(r.json()["price"])
+else:
+    print("failed:", r.status_code)</div>
+
+<h2><span class="en">Step 2 · Sending data</span><span class="zh">第 2 步 · 发送数据</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">To create something, send a <code>POST</code> with a JSON body: <code>requests.post(url, json=data)</code> sets the <code>Content-Type</code> header and writes the JSON for you. Add a <b>timeout</b> to every call so a slow server cannot hang your program forever.</p>
+<p class="zh" style="margin:0 0 8px">要创建东西，就发送带 JSON 正文的 <code>POST</code>：<code>requests.post(url, json=data)</code> 会替你设好 <code>Content-Type</code> 头并写出 JSON。每次调用都加上<b>超时</b>，这样慢吞吞的服务器就不会让你的程序永远卡住。</p></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · When it fails</span><span class="zh">第 3 步 · 失败的时候</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Networks fail. Wrap the call so a failure becomes a clear message, not a crash: check the status, catch exceptions such as a timeout, and for 5xx or 429 retry a few times with a growing pause.</p>
+<p class="zh" style="margin:0 0 8px">网络是会失败的。把调用包起来，让失败变成一条清楚的信息，而不是崩溃：检查状态，捕获超时等异常；遇到 5xx 或 429，用逐渐变长的间隔重试几次。</p>
+<p class="en" style="margin:0 0 8px">What should the code do?</p>
+<p class="zh" style="margin:0 0 8px">代码该怎么做？</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> call a public API (for example a weather or joke API) and print one field from the JSON.</span><span class="zh"><b>试一试：</b>调用一个公开的 API（比如天气或笑话 API），打印 JSON 里的一个字段。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> point the call at a wrong path and make your code print a clear message.</span><span class="zh"><b>核对：</b>把调用指向一个错误的路径，让你的代码打印出清楚的信息。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Check the status before reading the body.<br>• Use json= to send JSON and always set a timeout.<br>• Retry 5xx and 429; fix 401 and 404.</p><p class="zh" style="margin:0">• 读取正文之前先检查状态。<br>• 用 json= 发送 JSON，并始终设置超时。<br>• 重试 5xx 和 429；修正 401 和 404。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Web basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"A browser, and Python 3 for the code boxes","zh":"一个浏览器，代码框用 Python 3"},"know":{"en":"Keys and JSON (see “Keys and authentication”).","zh":"知道密钥和 JSON（见“密钥与身份验证”）。"},"goals":{"en":["Send a GET and a POST from Python","Check the status before reading","Handle an error calmly"],"zh":["用 Python 发 GET 和 POST","读取之前先检查状态","冷静地处理错误"]},"prev":["04-keys-and-authentication.html"]}}</script>
+<script src="../tracks.js?v=47f4cacf"></script><script src="lessons.js?v=1efa406f"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/05-calling-an-api.js?v=c747746a"></script></body></html>

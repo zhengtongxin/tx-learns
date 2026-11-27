@@ -1,0 +1,46 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Status codes and headers | TX Learns</title>
+<meta name="description" content="Read the number that says how a request went and the headers that travel with it"><meta property="og:title" content="Status codes and headers | TX Learns"><meta property="og:description" content="Read the number that says how a request went and the headers that travel with it"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/web-basics/02-status-codes-and-headers.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/web-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/web-basics/02-status-codes-and-headers.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/web-basics/02-status-codes-and-headers.html","url":"https://tx-learns.vercel.app/web-basics/02-status-codes-and-headers.html","name":"Status codes and headers","alternateName":"状态码与头信息","description":"Read the number that says how a request went and the headers that travel with it","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"How the web talks","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Web basics","url":"https://tx-learns.vercel.app/web-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Web basics","item":"https://tx-learns.vercel.app/web-basics/index.html"},{"@type":"ListItem","position":3,"name":"Status codes and headers","item":"https://tx-learns.vercel.app/web-basics/02-status-codes-and-headers.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">How the web talks · Lesson 2</span><span class="zh">网络怎样对话 · 第 2 课</span></span><h1><span class="en">Status codes and headers</span><span class="zh">状态码与头信息</span></h1><p class="meta"><span class="en">Read the number that says how a request went and the headers that travel with it · ~10 min · reading and practice</span><span class="zh">读懂说明请求结果的数字，以及随请求一起走的头信息 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · The number first</span><span class="zh">第 1 步 · 先看数字</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Every response starts with a <b>status code</b>, grouped by its first digit. <b>2xx</b> means success (<code>200</code> OK, <code>201</code> created). <b>3xx</b> means look elsewhere (a redirect). <b>4xx</b> means <i>you</i> got something wrong: <code>400</code> bad request, <code>401</code> not signed in, <code>403</code> not allowed, <code>404</code> not found, <code>429</code> too many requests. <b>5xx</b> means the <i>server</i> failed: <code>500</code>, <code>503</code>.</p>
+<p class="zh" style="margin:0 0 8px">每个响应都以<b>状态码</b>开头，按第一位数字分组。<b>2xx</b> 表示成功（<code>200</code> 正常，<code>201</code> 已创建）。<b>3xx</b> 表示去别处看（重定向）。<b>4xx</b> 表示<i>你</i>这边有问题：<code>400</code> 请求有误，<code>401</code> 未登录，<code>403</code> 不允许，<code>404</code> 找不到，<code>429</code> 请求太多。<b>5xx</b> 表示<i>服务器</i>出了故障：<code>500</code>、<code>503</code>。</p>
+<p class="en" style="margin:0 0 8px">The first digit tells you whose problem it is, which decides what you do next.</p>
+<p class="zh" style="margin:0 0 8px">第一位数字告诉你是谁的问题，这决定了你接下来怎么做。</p>
+<p class="en" style="margin:0 0 8px">Put each code in its family.</p>
+<p class="zh" style="margin:0 0 8px">把每个状态码放进它所属的一类。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Step 2 · Headers</span><span class="zh">第 2 步 · 头信息</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><b>Headers</b> are name: value lines sent with a request or response, carrying information about the message rather than the data itself. Common ones: <code>Content-Type</code> (what format the body is, such as <code>application/json</code>), <code>Authorization</code> (who is asking) and <code>Accept</code> (what formats the client can read).</p>
+<p class="zh" style="margin:0 0 8px"><b>头信息</b>是随请求或响应一起发送的“名字: 值”行，携带的是关于这条消息的信息，而不是数据本身。常见的有：<code>Content-Type</code>（正文是什么格式，例如 <code>application/json</code>）、<code>Authorization</code>（谁在请求）、<code>Accept</code>（客户端能读什么格式）。</p></div>
+<div class="codebox" data-file="response" data-lang="text">HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"item": "tea", "price": 3}</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Reading a failure</span><span class="zh">第 3 步 · 读懂失败</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">When a call fails, read the code before anything else. A <code>401</code> means fix your key. A <code>404</code> means fix the address. A <code>429</code> means slow down and retry later. A <code>500</code> is not your fault, so retry a little later rather than changing your request.</p>
+<p class="zh" style="margin:0 0 8px">调用失败时，先看状态码。<code>401</code> 要去查你的密钥；<code>404</code> 要去查地址；<code>429</code> 要放慢并稍后重试；<code>500</code> 不是你的错，隔一会儿重试，而不是改你的请求。</p></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> open a page that does not exist on any site and note the 404.</span><span class="zh"><b>试一试：</b>打开任一网站上不存在的页面，留意那个 404。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> in the network panel, find a response’s Content-Type.</span><span class="zh"><b>核对：</b>在网络面板里，找到某个响应的 Content-Type。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• The first digit of a status code says whose problem it is.<br>• Headers describe the message, not the data.<br>• Retry on 5xx and 429; fix your request on 4xx.</p><p class="zh" style="margin:0">• 状态码第一位说明是谁的问题。<br>• 头信息描述消息本身，而不是数据。<br>• 遇到 5xx 和 429 重试；遇到其他 4xx 修正你的请求。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Web basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"A browser, and Python 3 for the code boxes","zh":"一个浏览器，代码框用 Python 3"},"know":{"en":"Requests and responses (see “Requests and responses”).","zh":"知道请求和响应（见“请求与响应”）。"},"goals":{"en":["Read a status code","Tell client errors from server errors","Say what headers are for"],"zh":["读懂状态码","分清客户端错误与服务器错误","说出头信息的用途"]},"prev":["01-requests-and-responses.html"]}}</script>
+<script src="../tracks.js?v=47f4cacf"></script><script src="lessons.js?v=1efa406f"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/02-status-codes-and-headers.js?v=00681693"></script></body></html>
