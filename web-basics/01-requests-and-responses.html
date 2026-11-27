@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Requests and responses | TX Learns</title>
+<meta name="description" content="See what happens between typing an address and seeing a page, and read a URL part by part"><meta property="og:title" content="Requests and responses | TX Learns"><meta property="og:description" content="See what happens between typing an address and seeing a page, and read a URL part by part"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/web-basics/01-requests-and-responses.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/web-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/web-basics/01-requests-and-responses.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/web-basics/01-requests-and-responses.html","url":"https://tx-learns.vercel.app/web-basics/01-requests-and-responses.html","name":"Requests and responses","alternateName":"请求与响应","description":"See what happens between typing an address and seeing a page, and read a URL part by part","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"How the web talks","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Web basics","url":"https://tx-learns.vercel.app/web-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Web basics","item":"https://tx-learns.vercel.app/web-basics/index.html"},{"@type":"ListItem","position":3,"name":"Requests and responses","item":"https://tx-learns.vercel.app/web-basics/01-requests-and-responses.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">How the web talks · Lesson 1</span><span class="zh">网络怎样对话 · 第 1 课</span></span><h1><span class="en">Requests and responses</span><span class="zh">请求与响应</span></h1><p class="meta"><span class="en">See what happens between typing an address and seeing a page, and read a URL part by part · ~10 min · reading and practice</span><span class="zh">看清从输入网址到看见页面之间发生了什么，并逐段读懂一个网址 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Ask, then answer</span><span class="zh">第 1 步 · 一问一答</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Almost everything on the web is the same two-step: a <b>client</b> (your browser or a program) sends a <b>request</b>, and a <b>server</b> sends back a <b>response</b>. The server does not remember you between requests unless something in the request says who you are. That is the whole model, and an API call is just this exchange done by code.</p>
+<p class="zh" style="margin:0 0 8px">网络上几乎一切都是同样的两步：<b>客户端</b>（浏览器或程序）发出<b>请求</b>，<b>服务器</b>返回<b>响应</b>。除非请求里带着说明你是谁的东西，否则服务器在两次请求之间并不记得你。这就是全部模型，而 API 调用不过是由代码来做这一问一答。</p>
+<p class="en" style="margin:0 0 8px">A request names a <b>method</b> (what to do) and a <b>URL</b> (where). <code>GET</code> reads, <code>POST</code> sends new data, <code>PUT</code> or <code>PATCH</code> changes, <code>DELETE</code> removes.</p>
+<p class="zh" style="margin:0 0 8px">请求包含<b>方法</b>（做什么）和<b>网址</b>（在哪）。<code>GET</code> 读取，<code>POST</code> 发送新数据，<code>PUT</code> 或 <code>PATCH</code> 修改，<code>DELETE</code> 删除。</p></div>
+
+<h2><span class="en">Step 2 · Read a URL</span><span class="zh">第 2 步 · 读懂网址</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A URL has parts: the <b>scheme</b> (<code>https</code>), the <b>host</b> (<code>shop.example.com</code>), the <b>path</b> (<code>/menu/tea</code>) and the <b>query</b> after a <code>?</code> (<code>size=large&amp;sugar=0</code>), written as name=value pairs joined by <code>&amp;</code>.</p>
+<p class="zh" style="margin:0 0 8px">网址由几部分组成：<b>协议</b>（<code>https</code>）、<b>主机</b>（<code>shop.example.com</code>）、<b>路径</b>（<code>/menu/tea</code>），以及 <code>?</code> 后面的<b>查询参数</b>（<code>size=large&amp;sugar=0</code>），写成用 <code>&amp;</code> 连接的 名字=值。</p></div>
+<div class="codebox" data-file="urls.py" data-lang="python">from urllib.parse import urlparse, parse_qs
+
+u = urlparse("https://shop.example.com/menu/tea?size=large&amp;sugar=0")
+print(u.netloc)
+print(u.path)
+print(parse_qs(u.query))</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Which method</span><span class="zh">第 3 步 · 用哪个方法</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Pick the method by what you want. Reading must never change anything, which is why a link you click is a <code>GET</code>.</p>
+<p class="zh" style="margin:0 0 8px">按你想做的事选方法。读取绝不应该改变任何东西，所以你点的链接是 <code>GET</code>。</p>
+<p class="en" style="margin:0 0 8px">Sort each action.</p>
+<p class="zh" style="margin:0 0 8px">给每个动作分类。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> take any address from your browser and name its scheme, host, path and query.</span><span class="zh"><b>试一试：</b>取浏览器里的任一网址，说出它的协议、主机、路径和查询参数。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> open your browser’s network panel and find one request and its response.</span><span class="zh"><b>核对：</b>打开浏览器的网络面板，找到一个请求和它的响应。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A client sends a request and a server sends a response.<br>• A URL is scheme, host, path and query.<br>• GET reads, POST creates, DELETE removes.</p><p class="zh" style="margin:0">• 客户端发请求，服务器回响应。<br>• 网址由协议、主机、路径和查询参数组成。<br>• GET 读取，POST 新建，DELETE 删除。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Web basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"A browser, and Python 3 for the code boxes","zh":"一个浏览器，代码框用 Python 3"},"know":{"en":"Nothing needed.","zh":"无需基础。"},"goals":{"en":["Describe a request and a response","Name the parts of a URL","Say what a method does"],"zh":["说出请求和响应各是什么","说出网址的各个部分","说出请求方法的作用"]}}}</script>
+<script src="../tracks.js?v=47f4cacf"></script><script src="lessons.js?v=1efa406f"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/01-requests-and-responses.js?v=7fb0f75a"></script></body></html>

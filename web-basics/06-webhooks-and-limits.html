@@ -1,0 +1,40 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Webhooks and limits | TX Learns</title>
+<meta name="description" content="Let a service call you instead of polling, and live within rate limits and pagination"><meta property="og:title" content="Webhooks and limits | TX Learns"><meta property="og:description" content="Let a service call you instead of polling, and live within rate limits and pagination"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/web-basics/06-webhooks-and-limits.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/web-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/web-basics/06-webhooks-and-limits.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/web-basics/06-webhooks-and-limits.html","url":"https://tx-learns.vercel.app/web-basics/06-webhooks-and-limits.html","name":"Webhooks and limits","alternateName":"Webhook 与限额","description":"Let a service call you instead of polling, and live within rate limits and pagination","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Using APIs","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Web basics","url":"https://tx-learns.vercel.app/web-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Web basics","item":"https://tx-learns.vercel.app/web-basics/index.html"},{"@type":"ListItem","position":3,"name":"Webhooks and limits","item":"https://tx-learns.vercel.app/web-basics/06-webhooks-and-limits.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Using APIs · Lesson 3</span><span class="zh">使用 API · 第 3 课</span></span><h1><span class="en">Webhooks and limits</span><span class="zh">Webhook 与限额</span></h1><p class="meta"><span class="en">Let a service call you instead of polling, and live within rate limits and pagination · ~10 min · reading and practice</span><span class="zh">让服务来调用你而不是你去轮询，并在限速和分页之内工作 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Do not keep asking</span><span class="zh">第 1 步 · 别一直问</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Asking “is it done yet?” every few seconds is <b>polling</b>: wasteful and slow. A <b>webhook</b> flips it: you give the service a URL of yours, and when something happens it sends <i>you</i> a <code>POST</code>. Your server answers <code>200</code> quickly and does the real work afterwards. Because anyone can post to a public URL, check the signature or secret the service sends before trusting the message.</p>
+<p class="zh" style="margin:0 0 8px">每隔几秒问一次“好了没”叫<b>轮询</b>：浪费又慢。<b>Webhook</b> 把它倒过来：你把自己的一个网址交给服务，事情一发生，它就给<i>你</i>发一个 <code>POST</code>。你的服务器迅速回答 <code>200</code>，之后再做真正的工作。因为任何人都能向公开网址发 POST，所以相信消息之前，要先核对服务随消息发来的签名或密钥。</p></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Rate limits</span><span class="zh">第 2 步 · 限速</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Services cap how many calls you may make, for example 60 a minute. Go over and you get <code>429</code>, often with a <code>Retry-After</code> header saying how many seconds to wait. Respect it: wait that long, or space your calls out, instead of hammering.</p>
+<p class="zh" style="margin:0 0 8px">服务会限制你的调用次数，比如每分钟 60 次。超了就会得到 <code>429</code>，往往还带一个 <code>Retry-After</code> 头，说明要等多少秒。请遵守：等够这么久，或把调用间隔拉开，而不是猛敲。</p></div>
+
+<h2><span class="en">Step 3 · Long lists</span><span class="zh">第 3 步 · 很长的列表</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A list of thousands is returned in <b>pages</b>. Each response holds a chunk and a way to the next: a page number or a <code>next</code> cursor. Loop until there is no next, and collect as you go.</p>
+<p class="zh" style="margin:0 0 8px">几千条的列表会<b>分页</b>返回。每个响应里有一块数据，以及去下一页的方式：页码或 <code>next</code> 游标。循环到没有下一页为止，边走边收集。</p>
+<p class="en" style="margin:0 0 8px">Which problem does each idea solve?</p>
+<p class="zh" style="margin:0 0 8px">每个办法解决什么问题？</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> in your own words, describe one thing you currently check repeatedly that a webhook could announce instead.</span><span class="zh"><b>试一试：</b>用你自己的话，描述一件你现在反复去查、但可以让 webhook 主动通知你的事。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> write a loop that keeps asking for pages until a result says there is no next.</span><span class="zh"><b>核对：</b>写一个循环，不断请求下一页，直到结果说没有下一页。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A webhook lets the service call you instead of you polling.<br>• Respect rate limits and Retry-After.<br>• Loop through pages until there is no next.</p><p class="zh" style="margin:0">• webhook 让服务来调用你，而不是你去轮询。<br>• 遵守限速和 Retry-After。<br>• 循环翻页，直到没有下一页。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Web basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"A browser, and Python 3 for the code boxes","zh":"一个浏览器，代码框用 Python 3"},"know":{"en":"Calling an API (see “Calling an API”).","zh":"会调用 API（见“调用 API”）。"},"goals":{"en":["Explain a webhook","Handle rate limits","Page through a long list"],"zh":["说清 Webhook 是什么","应对限速","翻页读取很长的列表"]},"prev":["05-calling-an-api.html"]}}</script>
+<script src="../tracks.js?v=47f4cacf"></script><script src="lessons.js?v=1efa406f"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/06-webhooks-and-limits.js?v=cf790a7a"></script></body></html>
