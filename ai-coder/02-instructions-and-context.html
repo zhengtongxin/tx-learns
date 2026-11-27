@@ -46,6 +46,29 @@
 <p class="en">Should it go in AGENTS.md?</p>
 <p class="zh">该不该写进 AGENTS.md？</p><div class="sc" id="g1"></div>
 
+<h2><span class="en">Step 4 · A bloated file and a tight one</span><span class="zh">第 4 步 · 臃肿的文件与精简的文件</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The usual mistake is writing a file that sounds helpful but tells the agent nothing new. Compare two versions of the same section.</p>
+<p class="zh" style="margin:0 0 8px">常见的错误，是写出一份听起来有用、却没告诉智能体任何新东西的文件。对比同一部分的两个版本。</p>
+</div>
+<div class="codebox" data-file="AGENTS.md (bloated)" data-lang="md">## Guidelines
+- Write clean, readable, well-structured code.
+- Follow best practices and be careful with edge cases.
+- Our app helps customers book appointments at shops.
+- Remember that a booking has a start time and an end time.
+- Always think step by step before answering.</div>
+<div class="codebox" data-file="AGENTS.md (tight)" data-lang="md">## Rules
+- Times are stored in UTC; convert only when displaying.
+- Prices are integer cents. Never use floating point for money.
+- A booking cannot overlap another booking for the same shop (see src/overlap.js).
+- Run npm test before saying you are done.</div>
+<div class="teach"><p class="en" style="margin:0 0 8px">Every line in the first file is something the agent already does, or can read from the code in a second. Every line in the second is a fact it would get wrong without being told. Ask of each line: <b>if I deleted this, would the agent make a mistake?</b> If not, delete it.</p>
+<p class="zh" style="margin:0 0 8px">第一份里的每一行，要么智能体本来就会做，要么看一眼代码就知道。第二份里的每一行，都是不说就会弄错的事实。对每一行问一句：<b>删掉它，智能体会不会出错？</b>不会，就删。</p>
+<p class="en" style="margin:0 0 8px">One more habit: when the agent makes the same mistake twice, add one line that prevents it. The file grows from real mistakes, not from guesses.</p>
+<p class="zh" style="margin:0 0 8px">再养成一个习惯：智能体同一个错误犯了两次，就加一行来防止它。这份文件是从真实的错误里长出来的，不是靠猜。</p>
+</div>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Write</b> an AGENTS.md of under 25 lines for a project of yours: commands, three rules and one boundary.</span><span class="zh"><b>写</b>为你的一个项目写一份不超过 25 行的 AGENTS.md：命令、三条规矩、一条边界。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Test</b> it: start a fresh agent session and ask it to describe how to run the tests. Fix what it gets wrong.</span><span class="zh"><b>检验</b>：开一个新的智能体会话，让它说明怎么跑测试。哪里错了就改哪里。</span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
@@ -55,4 +78,4 @@
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"prev":["01-the-agentic-coding-map.html"],"tools":{"en":"Only a browser to read; any coding agent to try it","zh":"只读的话只需要浏览器；想试的话要任一编程智能体"},"know":{"en":"What an agent is.","zh":"知道什么是智能体。"},"goals":{"en":["Explain why context is limited and why it matters","Write a short AGENTS.md","Keep a session clean"],"zh":["讲清上下文为什么有限、为什么重要","写一份简短的 AGENTS.md","保持会话干净"]}}}</script>
 <script src="../tracks.js?v=819ff2a4"></script><script src="lessons.js?v=389b4305"></script><script src="../assets/site.js?v=a0db7d29"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
-<script src="js/02-instructions-and-context.js?v=a08f99b9"></script></body></html>
+<script src="js/02-instructions-and-context.js?v=f8be0532"></script></body></html>
