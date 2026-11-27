@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Patterns in the wild | TX Learns</title>
+<meta name="description" content="Use regex on AI output and messy data, and know where it stops being the right tool"><meta property="og:title" content="Patterns in the wild | TX Learns"><meta property="og:description" content="Use regex on AI output and messy data, and know where it stops being the right tool"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/regex-basics/06-patterns-in-the-wild.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/regex-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/regex-basics/06-patterns-in-the-wild.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/regex-basics/06-patterns-in-the-wild.html","url":"https://tx-learns.vercel.app/regex-basics/06-patterns-in-the-wild.html","name":"Patterns in the wild","alternateName":"实战中的模式","description":"Use regex on AI output and messy data, and know where it stops being the right tool","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Using patterns","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Text patterns","url":"https://tx-learns.vercel.app/regex-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Text patterns","item":"https://tx-learns.vercel.app/regex-basics/index.html"},{"@type":"ListItem","position":3,"name":"Patterns in the wild","item":"https://tx-learns.vercel.app/regex-basics/06-patterns-in-the-wild.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Using patterns · Lesson 3</span><span class="zh">使用模式 · 第 3 课</span></span><h1><span class="en">Patterns in the wild</span><span class="zh">实战中的模式</span></h1><p class="meta"><span class="en">Use regex on AI output and messy data, and know where it stops being the right tool · ~10 min · reading and practice</span><span class="zh">在 AI 输出和凌乱数据上用正则，并知道它在哪里不再是合适的工具 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Greedy by default</span><span class="zh">第 1 步 · 默认是贪婪的</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Quantifiers are <b>greedy</b>: they grab as much as they can. <code>&lt;.+&gt;</code> on <code>&lt;b&gt;hi&lt;/b&gt;</code> matches the whole string, not just the first tag. Add <code>?</code> to make it <b>lazy</b>, taking as little as possible: <code>&lt;.+?&gt;</code>. Greedy versus lazy is the most common regex surprise.</p>
+<p class="zh" style="margin:0 0 8px">量词默认是<b>贪婪</b>的：能多吃就多吃。<code>&lt;.+&gt;</code> 作用在 <code>&lt;b&gt;hi&lt;/b&gt;</code> 上会匹配整个字符串，而不只是第一个标签。加上 <code>?</code> 变成<b>懒惰</b>匹配，尽可能少取：<code>&lt;.+?&gt;</code>。贪婪与懒惰是正则里最常见的意外。</p></div>
+<div class="codebox" data-file="greedy.py" data-lang="python">import re
+
+s = "&lt;b&gt;hi&lt;/b&gt;"
+print(re.findall(r"&lt;.+&gt;", s))
+print(re.findall(r"&lt;.+?&gt;", s))</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Regex for AI output</span><span class="zh">第 2 步 · 用正则处理 AI 输出</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Models often wrap what you want in chatter: “Sure! The answer is 42.” A pattern can pull out just the number, or the text between code fences. Always code the miss: if there is no match, retry or report it, never assume. And test the pattern on the odd cases (no number, two numbers, a negative) before you trust it.</p>
+<p class="zh" style="margin:0 0 8px">模型常常把你要的东西包在闲聊里：“好的！答案是 42。”一个模式就能只取出那个数字，或取出代码围栏之间的文本。一定要处理“没匹配到”的情况：没有匹配就重试或报告，绝不要想当然。信任模式之前，先用怪情况测一测（没有数字、两个数字、负数）。</p></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Know when to stop</span><span class="zh">第 3 步 · 知道何时停手</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Regex is for <b>flat</b> patterns. Nested or recursive formats (HTML, JSON, code) need a real parser, such as <code>json.loads</code>. A giant pattern nobody can read is also a sign to stop: split the job into smaller steps. Decide for each task.</p>
+<p class="zh" style="margin:0 0 8px">正则适合<b>扁平</b>的模式。嵌套或递归的格式（HTML、JSON、代码）需要真正的解析器，比如 <code>json.loads</code>。一个没人看得懂的巨大模式也是该停手的信号：把任务拆成更小的步骤。为每个任务做判断。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> extract a price like 12.50 from three different AI-style sentences.</span><span class="zh"><b>试一试：</b>从三句不同的 AI 风格语句里提取形如 12.50 的价格。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> add a case with no price and handle it without an error.</span><span class="zh"><b>核对：</b>加一个没有价格的例子，处理它而不报错。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Quantifiers are greedy; add ? to make them lazy.<br>• Always code the no-match case and test odd inputs.<br>• Regex for flat patterns, a parser for nested formats.</p><p class="zh" style="margin:0">• 量词是贪婪的；加 ? 变成懒惰。<br>• 永远要处理没有匹配的情况，并测试怪输入。<br>• 正则用于扁平模式，嵌套格式用解析器。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Text patterns</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3","zh":"Python 3"},"know":{"en":"Replacing and splitting (see “Replacing and splitting”).","zh":"知道替换与拆分（见“替换与拆分”）。"},"goals":{"en":["Avoid greedy matches","Test a pattern with edge cases","Know when to use a parser instead"],"zh":["避免贪婪匹配","用边界情况测试模式","知道什么时候该用解析器"]},"prev":["05-replacing-and-splitting.html"]}}</script>
+<script src="../tracks.js?v=7ead1968"></script><script src="lessons.js?v=a0ff1234"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/06-patterns-in-the-wild.js?v=c92b13b8"></script></body></html>
