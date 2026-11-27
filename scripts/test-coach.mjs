@@ -32,6 +32,12 @@ ok(L.parseQuestion('{"question":"Which step comes first when two members disagre
   ok(/receptor/.test(A[2].kw) && A[0].kw === 'anatomy' && A[3].kw === '药理学', 'keywords come from the name or the typed words'); }
 ok(L.inLang({ q: '项目经理应该先做什么？', o: ['先听', '无视', '升级', '等待'], e: '先倾听。' }, 'zh') && !L.inLang({ q: 'What should the manager do first?', o: ['a', 'b', 'c', 'd'], e: '' }, 'zh') && L.inLang({ q: 'What should the manager do first?', o: ['a', 'b', 'c', 'd'], e: '' }, 'en') && !L.inLang({ q: '项目经理应该先做什么？', o: ['先听', '无视', '升级', '等待'], e: '' }, 'en'), 'a question in the wrong language is caught');
 { const m = L.prompt({ text: 'Some English text about risk.', lang: 'zh', srcLang: 'en', exam: '', domain: '', tasks: '' }); ok(/Chinese \(简体中文\)/.test(m[0].content + m[1].content) && /in English/.test(m[1].content), 'the prompt asks for the page language and says the excerpt is in the other one'); }
+{ const ch = [{ mat: 'a', text: 'Risk management basics\nA risk register lists each risk and its owner, and the register is reviewed often.' }, { mat: 'a', text: 'Risk management basics\nrisk register budget owner' }, { mat: 'a', text: 'Visit www.example.com for the course\nrisk register budget owner' }, { mat: 'a', text: '风险管理入门\n风险登记册记录每一项风险，风险登记册要常常复查，风险登记册。' }];
+  const d = L.digest(ch, [{ id: 'a', word: 'slide' }]);
+  ok(d.outline[0].titles.join('|') === 'Risk management basics|风险管理入门', 'the outline keeps one heading per passage, once, and drops a line that names a link or a course');
+  ok(d.terms.includes('register') && d.terms.includes('risk') && d.terms.includes('风险'), 'key terms come from both languages');
+  ok(L.copied('The risk register lists each risk and its owner and is reviewed often', ch[0].text) === true && L.copied('Keep a list of risks, who owns them, and look at it often.', ch[0].text) === false, 'a summary that repeats the source is refused, a rewrite is kept');
+  ok(L.scrubLine('© 2024 Some Author. All rights reserved') === '' && L.scrubLine('  Plan  the   work ') === 'Plan the work', 'copyright and link lines are dropped'); }
 if (!fx) { process.exit(bad ? 1 : 0); }
 const mime = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.bcmap': 'application/octet-stream' };
 const srv = createServer((q, r) => { let f = join(root, decodeURIComponent(q.url.split('?')[0])); if (f.endsWith('/')) f += 'index.html'; if (!existsSync(f)) { r.writeHead(404); r.end(); return; } r.writeHead(200, { 'content-type': mime[extname(f)] || 'application/octet-stream' }); r.end(readFileSync(f)); }).listen(0);
@@ -40,7 +46,7 @@ const br = await chromium.launch(), out = [];
 const ctx = await br.newContext({ viewport: { width: 1100, height: 900 }, acceptDownloads: true }), pg = await ctx.newPage();
 const errs = []; pg.on('pageerror', e => errs.push(e.message)); pg.on('console', m => m.type() === 'error' && errs.push(m.text()));
 pg.on('request', q => { if (!q.url().startsWith(base) && !q.url().startsWith('data:') && !q.url().startsWith('blob:')) out.push(q.url()); });
-await pg.addInitScript(() => { let n = 0; window.__coachTestEngine = { chat: async (m) => { n++; window.__lastPrompt = JSON.stringify(m); if (/Chinese \(简体中文\)/.test(window.__lastPrompt)) return JSON.stringify({ question: '假问题第 ' + n + ' 个：项目经理应该先做什么？', options: ['先听双方的说法', '直接无视', '马上升级', '等发起人表态'], answer: 0, explanation: '先倾听有助于达成共识。' }); return JSON.stringify({ question: 'Fake question number ' + n + ': what should the project manager do first?', options: ['Listen to both sides', 'Ignore it', 'Escalate at once', 'Wait for the sponsor'], answer: 0, explanation: 'Listening first builds shared understanding.' }); } }; });
+await pg.addInitScript(() => { let n = 0; window.__coachTestEngine = { chat: async (m) => { n++; window.__lastPrompt = JSON.stringify(m); if (/Summarise the idea/.test(window.__lastPrompt)) return JSON.stringify({ summary: /Chinese \(简体中文\)/.test(window.__lastPrompt) ? '这一段讲的是怎样先倾听再决定。' : 'This passage explains how to listen first and decide after.' }); if (/Chinese \(简体中文\)/.test(window.__lastPrompt)) return JSON.stringify({ question: '假问题第 ' + n + ' 个：项目经理应该先做什么？', options: ['先听双方的说法', '直接无视', '马上升级', '等发起人表态'], answer: 0, explanation: '先倾听有助于达成共识。' }); return JSON.stringify({ question: 'Fake question number ' + n + ': what should the project manager do first?', options: ['Listen to both sides', 'Ignore it', 'Escalate at once', 'Wait for the sponsor'], answer: 0, explanation: 'Listening first builds shared understanding.' }); } }; });
 await pg.goto(base + 'study/index.html');
 await pg.waitForSelector('#app:not([hidden])');
 ok(/Get\s*started/i.test(await pg.textContent('#today')), 'first visit shows how to get started');
@@ -124,7 +130,10 @@ await pg.check('#nok'); await pg.click('[data-act=share]');
 const opened = await pg.evaluate(() => window.__opened);
 ok(opened.length === 1 && /^https:\/\/github\.com\/zhengtongxin\/tx-learns\/new\/notes\?filename=inbox%2F/.test(opened[0]), 'share opens the GitHub new-file page on the notes branch');
 ok(/Track: new/.test(decodeURIComponent(opened[0])) && /Subject: community/.test(decodeURIComponent(opened[0])), 'a new track is the default, so no TRACK file is needed');
-ok(decodeURIComponent(opened[0]).includes('risk register') && !/Fake question|Conflict/.test(decodeURIComponent(opened[0])), 'the link carries the notes, not the material');
+{ const dec = decodeURIComponent(opened[0]), cs = await pg.evaluate(() => window.__coach.chunks().map(c => c.text));
+  ok(dec.includes('risk register') && /## Outline of my material/.test(dec) && /## Key terms/.test(dec), 'the link carries the notes, an outline and key terms');
+  ok(!/t\.pptx|t\.pdf|Fake question/.test(dec) && !cs.some(t => dec.includes(t.slice(0, 100))), 'the link carries no file name and no passage of the material');
+  ok(/Material 1 \(slides\)/.test(await pg.inputValue('#npreview')), 'the preview shows what will be sent'); }
 await pg.selectOption('[data-act=track]', 'ai-leader'); await pg.click('[data-act=share]');
 ok(/Track: ai-leader/.test(decodeURIComponent((await pg.evaluate(() => window.__opened))[1])) && !/Subject:/.test(decodeURIComponent((await pg.evaluate(() => window.__opened))[1])), 'a lesson for an existing track names that track');
 // the model and the questions follow the page language, whatever language the material is in
@@ -133,6 +142,13 @@ await pg.evaluate(() => window.__coach.state().bank.length = 0);
 await pg.click('[data-act=drill]'); await pg.waitForSelector('.opt');
 ok(/假问题/.test(await pg.textContent('#practice')) && /Chinese \(简体中文\)/.test(await pg.evaluate(() => window.__lastPrompt)), 'a Chinese page gets Chinese questions from English slides');
 await pg.click('.top [data-l=en]'); await pg.reload(); await pg.waitForSelector('#app:not([hidden])');
+// short summaries in the model's own words, then a submission too long for one link is copied instead
+await pg.click('[data-act=sums]'); await pg.waitForFunction(() => (window.__coach.state().sums || []).length > 0 && /Redo the short summaries/.test(document.getElementById('share').textContent), null, { timeout: 30000 });
+ok(/listen first/.test(await pg.inputValue('#npreview')) && /Condensed points/.test(await pg.inputValue('#npreview')), 'AI summaries join the submission');
+await pg.evaluate(() => { window.__clip = ''; Object.defineProperty(navigator, 'clipboard', { value: { writeText: async t => { window.__clip = t; } }, configurable: true }); window.__opened = []; window.open = (u) => { window.__opened.push(u); return null; }; });
+await pg.check('#nok');
+await pg.fill('#nbody', 'Stakeholders are engaged by influence and interest, é. '.repeat(120).replace(/[a-z]/g, c => c === 'e' ? '界' : c).slice(0, 3900)); await pg.click('[data-act=share]');
+ok(/too long for one link|太长/.test(await pg.textContent('#share')) && (await pg.evaluate(() => window.__clip)).includes('Material 1') && !/value=/.test((await pg.evaluate(() => window.__opened))[0] || ''), 'a long submission is copied and GitHub opens an empty editor');
 // reload keeps them
 await pg.reload(); await pg.waitForSelector('#app:not([hidden])');
 ok(await pg.locator('#mats .files li').count() === 2, 'records survive a reload');
