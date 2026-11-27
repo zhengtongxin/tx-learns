@@ -1,0 +1,49 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Functions | TX Learns</title>
+<meta name="description" content="Wrap steps in a function, pass values in, and get a result back with return"><meta property="og:title" content="Functions | TX Learns"><meta property="og:description" content="Wrap steps in a function, pass values in, and get a result back with return"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/python-basics/05-functions.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/pmp.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/python-basics/05-functions.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/python-basics/05-functions.html","url":"https://tx-learns.vercel.app/python-basics/05-functions.html","name":"Functions","alternateName":"函数","description":"Wrap steps in a function, pass values in, and get a result back with return","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Decisions and reuse","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Python basics","url":"https://tx-learns.vercel.app/python-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Python basics","item":"https://tx-learns.vercel.app/python-basics/index.html"},{"@type":"ListItem","position":3,"name":"Functions","item":"https://tx-learns.vercel.app/python-basics/05-functions.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Decisions and reuse · Lesson 2</span><span class="zh">判断与复用 · 第 2 课</span></span><h1><span class="en">Functions</span><span class="zh">函数</span></h1><p class="meta"><span class="en">Wrap steps in a function, pass values in, and get a result back with return · ~10 min · reading and practice</span><span class="zh">把步骤包进函数，传值进去，再用 return 取回结果 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Define once, call many times</span><span class="zh">第 1 步 · 定义一次，调用多次</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>function</b> is a named block of steps. <code>def</code> defines it, and the indented lines are its body. Nothing runs until you <b>call</b> it by name with brackets. Functions save you from copying the same lines again and again, and give each idea a name.</p>
+<p class="zh" style="margin:0 0 8px"><b>函数</b>是一段有名字的步骤。<code>def</code> 用来定义它，缩进的那些行是函数体。只有用名字加括号去<b>调用</b>它，它才会运行。函数让你不必一遍遍复制同样的几行，也给每个想法起了名字。</p>
+<p class="en" style="margin:0 0 8px">A good function does one job, and its name says which: <code>add_tax</code>, <code>clean_name</code>.</p>
+<p class="zh" style="margin:0 0 8px">好的函数只做一件事，名字说明是哪件：<code>add_tax</code>、<code>clean_name</code>。</p></div>
+<div class="codebox" data-file="functions.py" data-lang="python">def add_tax(price, rate=0.09):
+    return round(price * (1 + rate), 2)
+
+print(add_tax(10))
+print(add_tax(10, 0.1))</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Parameters and return</span><span class="zh">第 2 步 · 参数与 return</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><b>Parameters</b> are the names a function gives to the values you pass in. A parameter can have a <b>default</b>, used when you leave it out, like <code>rate=0.09</code>. <code>return</code> sends a result back to the caller, who can store it or print it.</p>
+<p class="zh" style="margin:0 0 8px"><b>参数</b>是函数给你传进来的值起的名字。参数可以有<b>默认值</b>，你不传时就用它，比如 <code>rate=0.09</code>。<code>return</code> 把结果送回给调用的人，对方可以存起来或打印出来。</p>
+<p class="en" style="margin:0 0 8px"><code>print</code> only shows something on the screen. <code>return</code> hands a value back. A function with no return gives back <code>None</code>.</p>
+<p class="zh" style="margin:0 0 8px"><code>print</code> 只是把东西显示在屏幕上，<code>return</code> 是把一个值交回去。没有 return 的函数交回的是 <code>None</code>。</p></div>
+
+<h2><span class="en">Step 3 · Return or print</span><span class="zh">第 3 步 · return 还是 print</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">If another line of code needs the answer, return it. If a person needs to read it, print it, ideally outside the function. A function that returns can be reused anywhere, while one that only prints cannot be calculated with.</p>
+<p class="zh" style="margin:0 0 8px">如果别的代码要用这个结果，就 return。如果是要给人看，就 print，最好放在函数外面。会 return 的函数可以到处复用，只会 print 的函数则不能拿去计算。</p>
+<p class="en" style="margin:0 0 8px">Decide which one each situation needs.</p>
+<p class="zh" style="margin:0 0 8px">判断每种情况需要哪一种。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> write <code>clean_name(text)</code> that strips spaces and capitalises, then call it on three names.</span><span class="zh"><b>试一试：</b>写一个 <code>clean_name(text)</code>，去掉首尾空格并首字母大写，再对三个名字调用它。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> change a function from print to return and see what you can now do with the result.</span><span class="zh"><b>核对：</b>把一个函数从 print 改成 return，看看现在能拿结果做什么。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• def defines a function; calling it runs it.<br>• Parameters take values in; defaults fill gaps.<br>• return hands a value back; print only displays.<br>• One function, one job, a clear name.</p><p class="zh" style="margin:0">• def 定义函数；调用它才会运行。<br>• 参数接收传入的值；默认值补上空缺。<br>• return 把值交回去；print 只是显示。<br>• 一个函数一件事，名字要清楚。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Python basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3, installed or in an online editor","zh":"Python 3（本机安装或在线编辑器均可）"},"know":{"en":"Decisions and loops (see “Decisions and loops”).","zh":"知道判断与循环（见“判断与循环”）。"},"goals":{"en":["Define and call a function","Use parameters, defaults and return","Tell return from print"],"zh":["定义并调用函数","使用参数、默认值和 return","分清 return 和 print"]},"prev":["04-decisions-and-loops.html"]}}</script>
+<script src="../tracks.js?v=1bf1f398"></script><script src="lessons.js?v=4c5b5ddb"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/05-functions.js?v=a7651dde"></script></body></html>

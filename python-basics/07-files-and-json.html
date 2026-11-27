@@ -1,0 +1,58 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Files and JSON | TX Learns</title>
+<meta name="description" content="Read and write text files, and turn JSON text into lists and dictionaries and back"><meta property="og:title" content="Files and JSON | TX Learns"><meta property="og:description" content="Read and write text files, and turn JSON text into lists and dictionaries and back"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/python-basics/07-files-and-json.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/pmp.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/python-basics/07-files-and-json.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/python-basics/07-files-and-json.html","url":"https://tx-learns.vercel.app/python-basics/07-files-and-json.html","name":"Files and JSON","alternateName":"文件与 JSON","description":"Read and write text files, and turn JSON text into lists and dictionaries and back","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Data and the web","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Python basics","url":"https://tx-learns.vercel.app/python-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Python basics","item":"https://tx-learns.vercel.app/python-basics/index.html"},{"@type":"ListItem","position":3,"name":"Files and JSON","item":"https://tx-learns.vercel.app/python-basics/07-files-and-json.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Data and the web · Lesson 1</span><span class="zh">数据与网络 · 第 1 课</span></span><h1><span class="en">Files and JSON</span><span class="zh">文件与 JSON</span></h1><p class="meta"><span class="en">Read and write text files, and turn JSON text into lists and dictionaries and back · ~10 min · reading and practice</span><span class="zh">读写文本文件，并在 JSON 文字与列表、字典之间互相转换 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Read and write files</span><span class="zh">第 1 步 · 读写文件</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Use <code>with open(path, ...) as f:</code> to work with a file. The <code>with</code> closes the file for you even if something fails. The mode says what you want: <code>"r"</code> to read (the default), <code>"w"</code> to write (this erases what was there) and <code>"a"</code> to add to the end. Give <code>encoding="utf-8"</code> so that 中文 and emoji survive.</p>
+<p class="zh" style="margin:0 0 8px">用 <code>with open(path, ...) as f:</code> 来操作文件。<code>with</code> 会在用完后帮你关闭文件，哪怕中途出错。模式说明你要做什么：<code>"r"</code> 读（默认），<code>"w"</code> 写（会清掉原有内容），<code>"a"</code> 追加到末尾。写上 <code>encoding="utf-8"</code>，中文和表情符号才不会乱码。</p>
+<p class="en" style="margin:0 0 8px">The path is relative to where you run the program, so “file not found” usually means you are in a different folder than you thought.</p>
+<p class="zh" style="margin:0 0 8px">路径是相对于你运行程序的位置的，所以“找不到文件”通常是因为你所在的文件夹和你以为的不一样。</p></div>
+<div class="codebox" data-file="files.py" data-lang="python">with open("notes.txt", "w", encoding="utf-8") as f:
+    f.write("first line\n")
+    f.write("second line\n")
+
+with open("notes.txt", encoding="utf-8") as f:
+    for line in f:
+        print(line.strip())</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · JSON is text for data</span><span class="zh">第 2 步 · JSON 是数据的文字形式</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><b>JSON</b> is a plain-text format for data that looks like Python dictionaries and lists. Almost every web service speaks it. <code>json.loads(text)</code> turns JSON text into Python values, and <code>json.dumps(value)</code> turns Python values into JSON text.</p>
+<p class="zh" style="margin:0 0 8px"><b>JSON</b> 是一种纯文本的数据格式，长得像 Python 的字典和列表。几乎所有网络服务都使用它。<code>json.loads(text)</code> 把 JSON 文字变成 Python 值，<code>json.dumps(value)</code> 把 Python 值变成 JSON 文字。</p>
+<p class="en" style="margin:0 0 8px">Small differences to remember: JSON needs double quotes, and it writes <code>true</code>, <code>false</code> and <code>null</code> where Python writes <code>True</code>, <code>False</code> and <code>None</code>.</p>
+<p class="zh" style="margin:0 0 8px">要记住几个小差别：JSON 必须用双引号，并且把 Python 的 <code>True</code>、<code>False</code>、<code>None</code> 写成 <code>true</code>、<code>false</code>、<code>null</code>。</p></div>
+<div class="codebox" data-file="jsondemo.py" data-lang="python">import json
+
+raw = '{"name": "Mei", "scores": [80, 90]}'
+data = json.loads(raw)
+print(data["name"], sum(data["scores"]))
+print(json.dumps({"ok": True, "n": 2}))</div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Pick the right tool</span><span class="zh">第 3 步 · 选对工具</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">For one-off notes, use a plain text file. For structured data you will read again, use JSON. For a spreadsheet of rows, a CSV file is the usual choice. The same rule applies to the data that your AI programs save: plain text for logs, JSON for settings and results.</p>
+<p class="zh" style="margin:0 0 8px">一次性的笔记，用纯文本文件。以后还要读取的结构化数据，用 JSON。表格式的一行行数据，一般用 CSV。你的 AI 程序保存的数据也适用同样的规则：日志用纯文本，设置和结果用 JSON。</p>
+<p class="en" style="margin:0 0 8px">Choose a format for each need.</p>
+<p class="zh" style="margin:0 0 8px">为每种需求选一种格式。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> save a dictionary of your favourite foods to a JSON file, then read it back and print one entry.</span><span class="zh"><b>试一试：</b>把一个装着你喜欢的食物的字典存成 JSON 文件，再读回来打印其中一项。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> run the write code twice and see why “a” and “w” give different files.</span><span class="zh"><b>核对：</b>把写文件的代码运行两次，看看 “a” 和 “w” 为什么得到不同的文件。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Use with open(...) so the file is always closed.<br>• "w" erases, "a" adds; add encoding="utf-8".<br>• json.loads reads JSON text; json.dumps writes it.<br>• JSON uses double quotes, true, false and null.</p><p class="zh" style="margin:0">• 用 with open(...)，文件总会被关闭。<br>• "w" 清空，"a" 追加；加上 encoding="utf-8"。<br>• json.loads 读 JSON 文字；json.dumps 写 JSON 文字。<br>• JSON 用双引号，以及 true、false、null。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Python basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3, installed or in an online editor","zh":"Python 3（本机安装或在线编辑器均可）"},"know":{"en":"Errors (see “Errors and debugging”).","zh":"知道报错与调试（见“报错与调试”）。"},"goals":{"en":["Read and write a text file safely","Parse JSON into Python values","Write Python values out as JSON"],"zh":["安全地读写文本文件","把 JSON 解析成 Python 值","把 Python 值写成 JSON"]},"prev":["06-errors-and-debugging.html"]}}</script>
+<script src="../tracks.js?v=1bf1f398"></script><script src="lessons.js?v=4c5b5ddb"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/07-files-and-json.js?v=f342e073"></script></body></html>

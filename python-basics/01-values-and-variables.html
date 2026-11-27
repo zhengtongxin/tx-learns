@@ -1,0 +1,53 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Values and variables | TX Learns</title>
+<meta name="description" content="Store values under names, change them, and print what you stored"><meta property="og:title" content="Values and variables | TX Learns"><meta property="og:description" content="Store values under names, change them, and print what you stored"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/python-basics/01-values-and-variables.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/pmp.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/python-basics/01-values-and-variables.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/python-basics/01-values-and-variables.html","url":"https://tx-learns.vercel.app/python-basics/01-values-and-variables.html","name":"Values and variables","alternateName":"值与变量","description":"Store values under names, change them, and print what you stored","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"First programs","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Python basics","url":"https://tx-learns.vercel.app/python-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Python basics","item":"https://tx-learns.vercel.app/python-basics/index.html"},{"@type":"ListItem","position":3,"name":"Values and variables","item":"https://tx-learns.vercel.app/python-basics/01-values-and-variables.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">First programs · Lesson 1</span><span class="zh">第一批程序 · 第 1 课</span></span><h1><span class="en">Values and variables</span><span class="zh">值与变量</span></h1><p class="meta"><span class="en">Store values under names, change them, and print what you stored · ~10 min · reading and practice</span><span class="zh">把值存在名字下，修改它们，并把存下的内容打印出来 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Run a line, read the output</span><span class="zh">第 1 步 · 运行一行，读懂输出</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>program</b> is a list of instructions that Python carries out from top to bottom. <code>print(...)</code> is an instruction that shows something on the screen. Run each line and read what comes back before you move on.</p>
+<p class="zh" style="margin:0 0 8px"><b>程序</b>就是一串指令，Python 从上到下依次执行。<code>print(...)</code> 这条指令把内容显示在屏幕上。每运行一行，先看清输出，再往下走。</p>
+<p class="en" style="margin:0 0 8px">Text goes inside quotes. Numbers do not. Python ignores everything after a <code>#</code> on a line, so you can leave notes for yourself.</p>
+<p class="zh" style="margin:0 0 8px">文字要放在引号里，数字不用。一行里 <code>#</code> 后面的内容 Python 会忽略，可以用来给自己写备注。</p></div>
+<div class="codebox" data-file="first.py" data-lang="python">print("Hello")
+print(2 + 3)   # a number, no quotes
+print("2 + 3")  # text, shown as written</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Variables hold values</span><span class="zh">第 2 步 · 变量存放值</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>variable</b> is a name that points to a value. <code>age = 30</code> stores 30 under the name <code>age</code>. The single <code>=</code> means “store”, not “equals”. Later lines can use the name, and you can store a new value under it any time.</p>
+<p class="zh" style="margin:0 0 8px"><b>变量</b>是一个指向某个值的名字。<code>age = 30</code> 把 30 存在名字 <code>age</code> 下面。单个 <code>=</code> 的意思是“存进去”，不是“等于”。后面的行可以使用这个名字，你也可以随时往里存新的值。</p>
+<p class="en" style="margin:0 0 8px">Choose names that say what the value is: <code>total_price</code>, not <code>x</code>. Names cannot start with a digit or contain spaces.</p>
+<p class="zh" style="margin:0 0 8px">名字要说明这个值是什么：用 <code>total_price</code>，别用 <code>x</code>。名字不能以数字开头，也不能含空格。</p></div>
+<div class="codebox" data-file="variables.py" data-lang="python">age = 30
+name = "Mei"
+print(name, age)
+age = age + 1
+print(age)</div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Every value has a type</span><span class="zh">第 3 步 · 每个值都有类型</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Every value has a <b>type</b>. The four to know first are <code>int</code> (whole numbers), <code>float</code> (numbers with a decimal point), <code>str</code> (text) and <code>bool</code> (<code>True</code> or <code>False</code>). <code>type(x)</code> tells you which one you have.</p>
+<p class="zh" style="margin:0 0 8px">每个值都有<b>类型</b>。最先要认识四种：<code>int</code>（整数）、<code>float</code>（带小数点的数）、<code>str</code>（文字）和 <code>bool</code>（<code>True</code> 或 <code>False</code>）。<code>type(x)</code> 会告诉你它是哪一种。</p>
+<p class="en" style="margin:0 0 8px">Types decide what you can do: you can add two numbers, but adding a number to text is an error. Sort each value by its type.</p>
+<p class="zh" style="margin:0 0 8px">类型决定你能做什么：两个数可以相加，但把数字和文字相加会报错。给每个值按类型分类。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> make three variables (your name, your age, whether you like coffee) and print each with its type.</span><span class="zh"><b>试一试：</b>建三个变量（你的名字、年龄、是否喜欢咖啡），并把每个变量连同类型打印出来。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> change one variable and predict the output before you run the program again.</span><span class="zh"><b>核对：</b>改一个变量，再运行之前先预测输出。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A program runs top to bottom; print shows a value.<br>• A variable is a name for a value; = stores it.<br>• Four first types: int, float, str, bool.<br>• You cannot add text and a number with +.</p><p class="zh" style="margin:0">• 程序从上到下运行；print 显示一个值。<br>• 变量是值的名字；= 表示存进去。<br>• 最先要认识的四种类型：int、float、str、bool。<br>• 不能用 + 把文字和数字相加。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Python basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3, installed or in an online editor","zh":"Python 3（本机安装或在线编辑器均可）"},"know":{"en":"Nothing needed.","zh":"无需基础。"},"goals":{"en":["Run a line of Python and read its output","Store a value in a variable and change it","Name the type of a value"],"zh":["运行一行 Python 并读懂输出","把值存进变量并修改它","说出一个值的类型"]}}}</script>
+<script src="../tracks.js?v=1bf1f398"></script><script src="lessons.js?v=4c5b5ddb"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/01-values-and-variables.js?v=dd41aa7b"></script></body></html>

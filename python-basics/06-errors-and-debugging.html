@@ -1,0 +1,61 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Errors and debugging | TX Learns</title>
+<meta name="description" content="Read an error message, catch errors you expect, and track down a bug step by step"><meta property="og:title" content="Errors and debugging | TX Learns"><meta property="og:description" content="Read an error message, catch errors you expect, and track down a bug step by step"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/python-basics/06-errors-and-debugging.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/pmp.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/python-basics/06-errors-and-debugging.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/python-basics/06-errors-and-debugging.html","url":"https://tx-learns.vercel.app/python-basics/06-errors-and-debugging.html","name":"Errors and debugging","alternateName":"报错与调试","description":"Read an error message, catch errors you expect, and track down a bug step by step","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Decisions and reuse","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Python basics","url":"https://tx-learns.vercel.app/python-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Python basics","item":"https://tx-learns.vercel.app/python-basics/index.html"},{"@type":"ListItem","position":3,"name":"Errors and debugging","item":"https://tx-learns.vercel.app/python-basics/06-errors-and-debugging.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Decisions and reuse · Lesson 3</span><span class="zh">判断与复用 · 第 3 课</span></span><h1><span class="en">Errors and debugging</span><span class="zh">报错与调试</span></h1><p class="meta"><span class="en">Read an error message, catch errors you expect, and track down a bug step by step · ~10 min · reading and practice</span><span class="zh">读懂报错信息，捕获你预料到的错误，并一步步查出 bug · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Read the error</span><span class="zh">第 1 步 · 读懂报错</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">When Python fails it prints a <b>traceback</b>. Read it from the bottom: the last line names the kind of error and says what went wrong, and the lines above point to the file and line number. Most errors are one of a few kinds: <code>NameError</code> (a name that does not exist), <code>TypeError</code> (the wrong type for an operation), <code>ValueError</code> (the right type, a bad value) and <code>IndexError</code> or <code>KeyError</code> (a missing position or key).</p>
+<p class="zh" style="margin:0 0 8px">Python 出错时会打印一份 <b>traceback</b>。要从最后一行往上读：最后一行说明错误的种类和出了什么问题，往上几行指出文件和行号。大多数错误就是那么几种：<code>NameError</code>（用了不存在的名字）、<code>TypeError</code>（运算用错了类型）、<code>ValueError</code>（类型对但值不对）、<code>IndexError</code> 或 <code>KeyError</code>（位置或键不存在）。</p>
+<p class="en" style="margin:0 0 8px">Match each message to its cause.</p>
+<p class="zh" style="margin:0 0 8px">把每条信息配到它的原因。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Step 2 · Catch what you expect</span><span class="zh">第 2 步 · 捕获预料中的错误</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">If a line may fail in a way you can predict, wrap it in <code>try</code> and name the error in <code>except</code>. The program then carries on instead of stopping. Name the specific error, such as <code>ValueError</code>, so a different, unexpected error is still shown.</p>
+<p class="zh" style="margin:0 0 8px">如果某一行可能以你能预料的方式失败，就把它包进 <code>try</code>，并在 <code>except</code> 里写出具体的错误。这样程序会继续运行而不是停下来。要写具体的错误名，比如 <code>ValueError</code>，这样别的、没预料到的错误仍然会显示出来。</p>
+<p class="en" style="margin:0 0 8px">Do not hide every error with a bare except: you would lose the clue that tells you what is wrong.</p>
+<p class="zh" style="margin:0 0 8px">不要用一个什么都接的 except 把所有错误都藏起来：你会丢掉提示你哪里出错的线索。</p></div>
+<div class="codebox" data-file="safe.py" data-lang="python">def to_int(text):
+    try:
+        return int(text)
+    except ValueError:
+        return None
+
+print(to_int("42"))
+print(to_int("forty"))</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Find the bug</span><span class="zh">第 3 步 · 找出 bug</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>bug</b> is code that does not do what you meant. Find it by narrowing down: print the values at key points, check each step against what you expected, and test the smallest input that fails. Change one thing at a time and run again.</p>
+<p class="zh" style="margin:0 0 8px"><b>bug</b> 就是没有按你的本意工作的代码。用缩小范围的办法去找：在关键位置打印出值，对照预期检查每一步，并用最小的会失败的输入来测。每次只改一处再运行。</p>
+<p class="en" style="margin:0 0 8px">Say what you expect before you run. When the result differs, you have found where to look.</p>
+<p class="zh" style="margin:0 0 8px">运行之前先说出你预期的结果。结果和预期不同的地方，就是该查的地方。</p></div>
+<div class="codebox" data-file="bug.py" data-lang="python">def average(nums):
+    total = 0
+    for n in nums:
+        total = total + n
+    return total / len(nums)
+
+print(average([4, 6]))   # expect 5.0
+print(average([]))       # what happens?</div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> make three different errors on purpose and read each message from the bottom up.</span><span class="zh"><b>试一试：</b>故意制造三种不同的错误，每条信息都从下往上读。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> fix the average function so an empty list returns 0.</span><span class="zh"><b>核对：</b>修好 average 函数，让空列表返回 0。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Read a traceback from the bottom: the last line names the error.<br>• Catch a specific, expected error with try and except.<br>• Do not hide all errors with a bare except.<br>• Find bugs by narrowing down, one change at a time.</p><p class="zh" style="margin:0">• traceback 从下往上读：最后一行写着错误名。<br>• 用 try 和 except 捕获具体的、预料中的错误。<br>• 不要用一个什么都接的 except 藏起所有错误。<br>• 用缩小范围的办法找 bug，每次只改一处。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Python basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3, installed or in an online editor","zh":"Python 3（本机安装或在线编辑器均可）"},"know":{"en":"Functions (see “Functions”).","zh":"知道函数（见“函数”）。"},"goals":{"en":["Read a traceback from the bottom up","Catch an expected error with try and except","Find a bug by narrowing it down"],"zh":["从下往上读 traceback","用 try 和 except 捕获预料中的错误","一步步缩小范围找出 bug"]},"prev":["05-functions.html"]}}</script>
+<script src="../tracks.js?v=1bf1f398"></script><script src="lessons.js?v=4c5b5ddb"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/06-errors-and-debugging.js?v=86c9d470"></script></body></html>

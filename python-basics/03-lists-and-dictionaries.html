@@ -1,0 +1,50 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lists and dictionaries | TX Learns</title>
+<meta name="description" content="Hold many values in a list, label values in a dictionary, and pick the right one"><meta property="og:title" content="Lists and dictionaries | TX Learns"><meta property="og:description" content="Hold many values in a list, label values in a dictionary, and pick the right one"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/python-basics/03-lists-and-dictionaries.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/pmp.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/python-basics/03-lists-and-dictionaries.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/python-basics/03-lists-and-dictionaries.html","url":"https://tx-learns.vercel.app/python-basics/03-lists-and-dictionaries.html","name":"Lists and dictionaries","alternateName":"列表与字典","description":"Hold many values in a list, label values in a dictionary, and pick the right one","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"First programs","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Python basics","url":"https://tx-learns.vercel.app/python-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Python basics","item":"https://tx-learns.vercel.app/python-basics/index.html"},{"@type":"ListItem","position":3,"name":"Lists and dictionaries","item":"https://tx-learns.vercel.app/python-basics/03-lists-and-dictionaries.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">First programs · Lesson 3</span><span class="zh">第一批程序 · 第 3 课</span></span><h1><span class="en">Lists and dictionaries</span><span class="zh">列表与字典</span></h1><p class="meta"><span class="en">Hold many values in a list, label values in a dictionary, and pick the right one · ~10 min · reading and practice</span><span class="zh">用列表装很多个值，用字典给值贴标签，并选对合适的那一种 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · A list keeps things in order</span><span class="zh">第 1 步 · 列表按顺序存放</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>list</b> holds several values in square brackets: <code>["tea", "milk"]</code>. Items have a position, counted from 0, so <code>shop[0]</code> is the first and <code>shop[-1]</code> is the last. <code>append</code> adds to the end and <code>len</code> counts the items.</p>
+<p class="zh" style="margin:0 0 8px"><b>列表</b>用方括号装着若干个值：<code>["tea", "milk"]</code>。每一项有位置，从 0 开始数，所以 <code>shop[0]</code> 是第一个，<code>shop[-1]</code> 是最后一个。<code>append</code> 在末尾追加，<code>len</code> 数项数。</p>
+<p class="en" style="margin:0 0 8px">Use a list when the order matters or when you have many of the same kind of thing.</p>
+<p class="zh" style="margin:0 0 8px">顺序重要，或者有很多同类的东西时，用列表。</p></div>
+<div class="codebox" data-file="collections.py" data-lang="python">shop = ["tea", "milk"]
+shop.append("eggs")
+print(len(shop), shop[0], shop[-1])
+prices = {"tea": 3, "milk": 4}
+prices["eggs"] = 5
+print(prices["milk"], len(prices))</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · A dictionary labels values</span><span class="zh">第 2 步 · 字典给值贴标签</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>dictionary</b> stores pairs of a key and a value in curly brackets: <code>{"tea": 3}</code>. You look a value up by its key, <code>prices["tea"]</code>, instead of by a position. Setting a new key adds it, and setting an existing key replaces its value.</p>
+<p class="zh" style="margin:0 0 8px"><b>字典</b>用花括号存放“键和值”的配对：<code>{"tea": 3}</code>。你通过键来查值，<code>prices["tea"]</code>，而不是通过位置。设置一个新键就是添加，设置已有的键就是替换它的值。</p>
+<p class="en" style="margin:0 0 8px">Use a dictionary when each value has a name, such as a record with a name and a price.</p>
+<p class="zh" style="margin:0 0 8px">每个值都有名字时用字典，比如带名称和价格的一条记录。</p></div>
+
+<h2><span class="en">Step 3 · Pick the right container</span><span class="zh">第 3 步 · 选对容器</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Ask one question: do I find things by position or by name? Position and order point to a list. A name or label points to a dictionary.</p>
+<p class="zh" style="margin:0 0 8px">只问一个问题：我是按位置找，还是按名字找？看位置和顺序就用列表，看名字或标签就用字典。</p>
+<p class="en" style="margin:0 0 8px">Choose a container for each need.</p>
+<p class="zh" style="margin:0 0 8px">为每种需求选一个容器。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> build a dictionary of three items and their prices, then print the most expensive one’s name.</span><span class="zh"><b>试一试：</b>建一个含三件商品和价格的字典，打印最贵那件的名字。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> predict what <code>len()</code> returns for a list and for a dictionary, then check.</span><span class="zh"><b>核对：</b>先预测 <code>len()</code> 对列表和字典各返回什么，再核对。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A list is ordered and read by position from 0.<br>• A dictionary is read by key.<br>• append adds to a list; setting a key adds or replaces in a dictionary.<br>• Ask: position or name?</p><p class="zh" style="margin:0">• 列表有顺序，按位置从 0 读取。<br>• 字典按键读取。<br>• append 往列表里加；给字典键赋值是添加或替换。<br>• 先问：按位置，还是按名字？</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Python basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3, installed or in an online editor","zh":"Python 3（本机安装或在线编辑器均可）"},"know":{"en":"Text and numbers (see “Text and numbers”).","zh":"知道文字和数字（见“文字与数字”）。"},"goals":{"en":["Make a list and read items by position","Make a dictionary and read values by key","Choose between a list and a dictionary"],"zh":["建立列表并按位置读取","建立字典并按键读取值","在列表和字典之间做选择"]},"prev":["02-text-and-numbers.html"]}}</script>
+<script src="../tracks.js?v=1bf1f398"></script><script src="lessons.js?v=4c5b5ddb"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/03-lists-and-dictionaries.js?v=a7888038"></script></body></html>

@@ -1,0 +1,53 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Text and numbers | TX Learns</title>
+<meta name="description" content="Join and format text, do arithmetic, and turn text into numbers and back"><meta property="og:title" content="Text and numbers | TX Learns"><meta property="og:description" content="Join and format text, do arithmetic, and turn text into numbers and back"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/python-basics/02-text-and-numbers.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/pmp.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/python-basics/02-text-and-numbers.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/python-basics/02-text-and-numbers.html","url":"https://tx-learns.vercel.app/python-basics/02-text-and-numbers.html","name":"Text and numbers","alternateName":"文字与数字","description":"Join and format text, do arithmetic, and turn text into numbers and back","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"First programs","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Python basics","url":"https://tx-learns.vercel.app/python-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Python basics","item":"https://tx-learns.vercel.app/python-basics/index.html"},{"@type":"ListItem","position":3,"name":"Text and numbers","item":"https://tx-learns.vercel.app/python-basics/02-text-and-numbers.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">First programs · Lesson 2</span><span class="zh">第一批程序 · 第 2 课</span></span><h1><span class="en">Text and numbers</span><span class="zh">文字与数字</span></h1><p class="meta"><span class="en">Join and format text, do arithmetic, and turn text into numbers and back · ~10 min · reading and practice</span><span class="zh">拼接和格式化文字，做算术，并在文字和数字之间转换 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Work with text</span><span class="zh">第 1 步 · 处理文字</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Text has built-in <b>methods</b>, which are actions you call with a dot: <code>name.upper()</code> makes capitals, <code>name.title()</code> capitalises each word, and <code>len(name)</code> counts the characters. Text values never change in place: a method gives you a new one, so store it if you want to keep it.</p>
+<p class="zh" style="margin:0 0 8px">文字自带一些<b>方法</b>，也就是用点来调用的动作：<code>name.upper()</code> 变大写，<code>name.title()</code> 让每个词首字母大写，<code>len(name)</code> 数字符个数。文字不会原地改变：方法会返回一个新的值，想留住就要存起来。</p>
+<p class="en" style="margin:0 0 8px">An <b>f-string</b> puts values into text: write <code>f"..."</code> and put the value in curly brackets. It is the clearest way to build a message.</p>
+<p class="zh" style="margin:0 0 8px"><b>f-string</b> 能把值放进文字里：写成 <code>f"..."</code>，把值放在花括号里。这是拼出一条消息最清楚的办法。</p></div>
+<div class="codebox" data-file="text.py" data-lang="python">name = "mei"
+shout = name.upper()
+print(shout)
+print(len(name))
+print(f"Hello, {name.title()}!")</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Arithmetic</span><span class="zh">第 2 步 · 算术</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The operators are <code>+ - * /</code>, plus <code>//</code> for division that drops the remainder, <code>%</code> for the remainder, and <code>**</code> for powers. A plain <code>/</code> always gives a float, even for 6 / 3.</p>
+<p class="zh" style="margin:0 0 8px">运算符有 <code>+ - * /</code>，另外 <code>//</code> 是去掉余数的除法，<code>%</code> 取余数，<code>**</code> 是乘方。普通的 <code>/</code> 永远得到浮点数，即使是 6 / 3。</p>
+<p class="en" style="margin:0 0 8px">Match each job to the operator.</p>
+<p class="zh" style="margin:0 0 8px">把每项任务配到对应的运算符。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Step 3 · Convert between text and numbers</span><span class="zh">第 3 步 · 文字与数字互转</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Input from a file, a form or a user arrives as text. To calculate with it, convert it: <code>int("42")</code> gives 42 and <code>float("3.5")</code> gives 3.5. To put a number into text, use <code>str(42)</code> or an f-string.</p>
+<p class="zh" style="margin:0 0 8px">来自文件、表单或用户的输入都是文字。要拿它计算，先转换：<code>int("42")</code> 得到 42，<code>float("3.5")</code> 得到 3.5。要把数字放进文字，用 <code>str(42)</code> 或 f-string。</p>
+<p class="en" style="margin:0 0 8px">If the text is not a valid number, the conversion fails with an error. You will learn to handle that in a later lesson.</p>
+<p class="zh" style="margin:0 0 8px">如果文字不是合法的数，转换会报错。你会在后面的课学到怎么处理。</p></div>
+<div class="codebox" data-file="convert.py" data-lang="python">price = "12"
+qty = 3
+print(int(price) * qty)
+print(price * qty)</div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> ask for two numbers as text, convert them and print their sum in a sentence with an f-string.</span><span class="zh"><b>试一试：</b>用文字形式拿到两个数，转换后用 f-string 把它们的和写进一句话里。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> compute 17 // 5 and 17 % 5 by hand, then run them.</span><span class="zh"><b>核对：</b>先手算 17 // 5 和 17 % 5，再运行核对。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• String methods return new text; store it to keep it.<br>• An f-string puts values into a sentence.<br>• / keeps decimals, // drops the remainder, % is the remainder.<br>• Convert text input with int() or float() before calculating.</p><p class="zh" style="margin:0">• 字符串方法返回新文字；想保留就存起来。<br>• f-string 把值放进句子里。<br>• / 保留小数，// 去掉余数，% 是余数。<br>• 先用 int() 或 float() 转换文字输入，再计算。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Python basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3, installed or in an online editor","zh":"Python 3（本机安装或在线编辑器均可）"},"know":{"en":"Variables and types (see “Values and variables”).","zh":"知道变量和类型（见“值与变量”）。"},"goals":{"en":["Use common string methods and f-strings","Do arithmetic with the right operator","Convert between text and numbers"],"zh":["使用常见的字符串方法和 f-string","用对运算符做算术","在文字和数字之间转换"]},"prev":["01-values-and-variables.html"]}}</script>
+<script src="../tracks.js?v=1bf1f398"></script><script src="lessons.js?v=4c5b5ddb"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/02-text-and-numbers.js?v=9a192786"></script></body></html>
