@@ -54,15 +54,15 @@ esac</div>
 <p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
 
 <h2><span class="en">Step 4 · Test the guard, then see what slips past</span><span class="zh">第 4 步 · 测试守卫，再看什么能溜过去</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A hook is code, so test it like code: feed it a pending call and check the exit code. Save the guard from Step 3 as <code>guard.sh</code>, then send it a fake tool call as JSON. (<code>jq</code> is a small command-line tool that reads JSON; <code>echo $?</code> prints the exit code of the last command.)</p>
-<p class="zh" style="margin:0 0 8px">钩子是代码，就要像测代码一样测它：喂给它一个待执行的调用，看退出码。把第 3 步的守卫存成 <code>guard.sh</code>，再用 JSON 给它发一个假的工具调用。（<code>jq</code> 是读取 JSON 的命令行小工具；<code>echo $?</code> 会打印上一条命令的退出码。）</p></div>
-<div class="codebox" data-file="test the guard" data-lang="bash">echo '{"tool_input":{"command":"rm -rf build"}}' | ./guard.sh
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A hook is code, so test it like code: feed it a pending call and check the exit code. Save the guard from Step 3 as <code>guard.sh</code> (run it with <code>bash guard.sh</code>, so it needs no extra setup), then send it a fake tool call as JSON. (<code>jq</code> is a small command-line tool that reads JSON; <code>echo $?</code> prints the exit code of the last command.)</p>
+<p class="zh" style="margin:0 0 8px">钩子是代码，就要像测代码一样测它：喂给它一个待执行的调用，看退出码。把第 3 步的守卫存成 <code>guard.sh</code>（用 <code>bash guard.sh</code> 运行，不用额外设置），再用 JSON 给它发一个假的工具调用。（<code>jq</code> 是读取 JSON 的命令行小工具；<code>echo $?</code> 会打印上一条命令的退出码。）</p></div>
+<div class="codebox" data-file="test the guard" data-lang="bash">echo '{"tool_input":{"command":"rm -rf build"}}' | bash guard.sh
 echo $?      # 2: blocked, the message went to stderr
 
-echo '{"tool_input":{"command":"rm  -rf build"}}' | ./guard.sh
+echo '{"tool_input":{"command":"rm  -rf build"}}' | bash guard.sh
 echo $?      # 0: two spaces, and it slipped past
 
-echo '{"tool_input":{"command":"git push -f origin main"}}' | ./guard.sh
+echo '{"tool_input":{"command":"git push -f origin main"}}' | bash guard.sh
 echo $?      # 0: the short flag slipped past too</div>
 <div class="teach"><p class="en" style="margin:0 0 8px">Exact-text matching is fragile. A pattern is better, for instance <code>grep -Eq 'rm +-[a-z]*(rf|fr)|git +push .*(--force|-f)( |$)'</code>, which catches the extra space, <code>rm -fr</code> and <code>-f</code>. It still misses a disguised command such as <code>sh -c "r""m -rf x"</code>, and it blocks a harmless <code>echo "rm -rf"</code>.</p>
 <p class="zh" style="margin:0 0 8px">按原文匹配很脆弱。用模式更好，比如 <code>grep -Eq 'rm +-[a-z]*(rf|fr)|git +push .*(--force|-f)( |$)'</code>，它能抓住多出来的空格、<code>rm -fr</code> 和 <code>-f</code>。但它仍然漏掉伪装过的命令，比如 <code>sh -c "r""m -rf x"</code>，还会误拦无害的 <code>echo "rm -rf"</code>。</p>

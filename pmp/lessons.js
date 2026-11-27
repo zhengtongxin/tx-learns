@@ -27,5 +27,7 @@ window.TRACK={id:'pmp',title:{en:'PMP',zh:'PMP 备考'},topics:[
   {k:'f',file:'20-backlog-and-user-stories.html',title:{en:"Backlog and user stories",zh:"待办列表与用户故事"}},
   {k:'c',file:'21-sprints-and-events.html',title:{en:"Sprints and events",zh:"冲刺与会议"}},
   {k:'c',file:'22-flow-and-metrics.html',title:{en:"Flow and metrics",zh:"流动与度量"}},
-  {k:'c',file:'23-hybrid-and-tailoring.html',title:{en:"Hybrid and tailoring",zh:"混合与裁剪"}}]}
+  {k:'c',file:'23-hybrid-and-tailoring.html',title:{en:"Hybrid and tailoring",zh:"混合与裁剪"}}]},
+ {n:6,level:2,title:{en:"Practice",zh:"练习"},items:[
+  {k:'c',file:'24-mixed-scenario-drill.html',title:{en:"Mixed scenario drill",zh:"综合情境练习"}}]}
 ]};
