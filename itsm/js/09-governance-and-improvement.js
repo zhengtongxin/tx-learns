@@ -1,0 +1,5 @@
+document.addEventListener('DOMContentLoaded',function(){
+ var $=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('p1'),{"q": {"en": "Which is a governance activity?", "zh": "哪项属于治理活动？"}, "opts": [{"k": "a", "en": "Setting the policy that all changes must be assessed", "zh": "制定“所有变更必须评估”的政策"}, {"k": "b", "en": "Resetting one user’s password", "zh": "为某个用户重置密码"}, {"k": "c", "en": "Fixing a broken printer", "zh": "修一台坏掉的打印机"}], "a": "a", "ex": {"en": "Directing policy is governance; the others are operations.", "zh": "制定政策属于治理，另外两项是日常运营。"}, "hint": {"en": "Which one sets direction?", "zh": "哪个是在设定方向？"}});
+ predict($('p2'),{"q": {"en": "In the improvement model, which question comes straight after “Where are we now?”", "zh": "在改进模型里，“我们现在在哪？”之后紧接着问什么？"}, "opts": [{"k": "a", "en": "Where do we want to be?", "zh": "我们想去哪？"}, {"k": "b", "en": "Did we get there?", "zh": "我们到了吗？"}, {"k": "c", "en": "Take action", "zh": "行动"}], "a": "a", "ex": {"en": "Current state, then target state.", "zh": "先看现状，再看目标。"}, "hint": {"en": "You cannot plan a route without a destination.", "zh": "没有目的地就没法规划路线。"}});
+});

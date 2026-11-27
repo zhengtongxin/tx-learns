@@ -7,6 +7,10 @@ window.COACH_EXAMS=[{
  versions:[
   {id:'2026',label:{en:'Exam from July 2026',zh:'2026 年 7 月起的考试'},domains:'D26'},
   {id:'2021',label:{en:'Exam before July 2026',zh:'2026 年 7 月前的考试'},domains:'D21'}
+ ]},{
+ id:'itsm',name:{en:'ITSM foundation',zh:'ITSM 基础级'},
+ versions:[
+  {id:'v5',label:{en:'Foundation, newest edition',zh:'基础级，最新版本'},domains:'ITSM'}
  ]}];
 (function(){
  var people={id:'people',lessons:{track:'pmp',files:['04-leading-a-team.html','05-conflict-and-negotiation.html','06-stakeholders.html','07-agile-roles.html']},name:{en:'People',zh:'人员'},kw:'conflict team leadership leader stakeholder negotiat motivat emotional intelligence training mentor coaching ground rules virtual collaborat servant empower impediment blocker agreement 冲突 团队 领导 干系人 相关方 谈判 激励 情商 培训 辅导 虚拟团队 赋能 障碍 协议 基本规则',tasks:'manage conflict; lead a team; support team performance; empower team members and stakeholders; train the team; build a team; remove impediments and blockers; negotiate agreements; collaborate with stakeholders; build shared understanding; support virtual teams; define team ground rules; mentor stakeholders; use emotional intelligence'};
@@ -14,5 +18,14 @@ window.COACH_EXAMS=[{
  var biz=function(w){return {id:'biz',lessons:{track:'pmp',files:['16-value-and-benefits.html','17-compliance-and-governance.html','18-organisational-change.html','19-closing-a-project.html']},name:{en:'Business Environment',zh:'商业环境'},weight:w,kw:'compliance benefit value strategy organizational change external environment business case market regulatory law policy sustainab benefits realization governance legal 合规 效益 价值 战略 组织变革 外部环境 商业论证 市场 法规 法律 政策 可持续 收益实现',tasks:'manage compliance; evaluate and deliver benefits and value; address changes in the external business environment; support organizational change'}};
  function mk(a,b,c){var p=Object.assign({},people,{weight:a}),q=Object.assign({},process,{weight:b});return [p,q,biz(c)]}
  window.COACH_DOMAINS={D26:mk(33,41,26),D21:mk(42,50,8)};
+ /* ITSM: weights are the shares training providers report for the newest foundation syllabus (not checked against the official file). */
+ var L=function(f){return {track:'itsm',files:f}};
+ window.COACH_DOMAINS.ITSM=[
+  {id:'terms',lessons:L(['03-value-and-co-creation.html','04-outcomes-costs-risks.html','05-products-and-services.html']),name:{en:'Key terms',zh:'关键术语'},weight:30,kw:'service value co-creation outcome output cost risk customer user sponsor utility warranty product offering relationship consumer provider stakeholder 服务 价值 共创 成果 产出 成本 风险 客户 用户 发起人 效用 保障 产品 关系 相关方',tasks:'define service, value and co-creation; tell output from outcome; define cost and risk; tell utility from warranty; name the service relationship parts'},
+  {id:'dims',lessons:L(['06-four-dimensions.html']),name:{en:'Four dimensions',zh:'四个维度'},weight:10,kw:'dimension organisation people information technology partner supplier value stream process PESTLE political economic social legal environmental 维度 组织 人员 信息 技术 合作伙伴 供应商 价值流 流程 外部因素',tasks:'name the four dimensions; place an issue in a dimension; name outside factors'},
+  {id:'life',lessons:L(['07-product-and-service-lifecycle.html']),name:{en:'Lifecycle',zh:'生命周期'},weight:10,kw:'lifecycle discover design acquire build transition operate deliver support iterative value chain plan improve engage 生命周期 发现 设计 获取 构建 过渡 运营 交付 支持 迭代 价值链',tasks:'name the lifecycle activities; say what each does; explain iteration'},
+  {id:'vs',lessons:L(['08-guiding-principles.html','09-governance-and-improvement.html','10-incidents-and-problems.html','11-change-and-release.html','12-service-desk-and-requests.html','13-service-levels-and-relationships.html']),name:{en:'Value system',zh:'价值系统'},weight:40,kw:'guiding principle governance continual improvement practice incident problem known error workaround change enablement release service desk service request knowledge configuration service level SLA event monitoring supplier relationship 指导原则 治理 持续改进 实践 事件 问题 已知错误 临时办法 变更 发布 服务台 服务请求 知识 配置 服务水平 协议 监控 供应商 关系',tasks:'apply the guiding principles; explain governance and improvement; handle incidents and problems; classify changes; run the service desk; set and measure service levels'},
+  {id:'more',lessons:L(['14-value-streams.html','15-ai-in-service-management.html','16-working-with-other-frameworks.html']),name:{en:'Value streams, AI and other frameworks',zh:'价值流、AI 与其他框架'},weight:10,kw:'value stream map waiting core enabling AI generative agentic governance DevOps PRINCE2 SRE continuous integration delivery project method 价值流 价值流图 等待 人工智能 生成式 代理式 DevOps 项目 持续集成 持续交付 框架',tasks:'map a value stream; tell kinds of AI apart; keep people accountable for AI; fit service management with DevOps and project methods'}
+ ];
  window.COACH_EXAMS.forEach(function(e){e.versions.forEach(function(v){v.domains=window.COACH_DOMAINS[v.domains]})});
 })();

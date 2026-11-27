@@ -1,0 +1,5 @@
+document.addEventListener('DOMContentLoaded',function(){
+ var $=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
+ predict($('p1'),{"q": {"en": "All internal targets are green, yet customers are unhappy. This is…", "zh": "内部指标全绿，客户却不满意。这是…"}, "opts": [{"k": "a", "en": "The watermelon effect", "zh": "西瓜效应"}, {"k": "b", "en": "A known error", "zh": "已知错误"}, {"k": "c", "en": "A standard change", "zh": "标准变更"}], "a": "a", "ex": {"en": "Targets did not reflect the customer’s experience.", "zh": "指标没有反映客户的体验。"}, "hint": {"en": "Green outside, red inside.", "zh": "外面绿、里面红。"}});
+ predict($('p2'),{"q": {"en": "A disk is 80% full and the monitor raises an alert, but nothing has failed yet. What type of event is it?", "zh": "磁盘已用 80%，监控发出告警，但还没有故障。这是哪类事件？"}, "opts": [{"k": "a", "en": "A warning", "zh": "警告"}, {"k": "b", "en": "An exception", "zh": "异常"}, {"k": "c", "en": "Informational", "zh": "信息性"}], "a": "a", "ex": {"en": "It signals a risk before failure.", "zh": "它在故障之前发出风险信号。"}, "hint": {"en": "Has anything broken?", "zh": "有东西坏了吗？"}});
+});
