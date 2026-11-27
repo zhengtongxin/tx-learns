@@ -144,9 +144,10 @@
     var jr=document.querySelector('.journey');
     if(C&&jr){
       var cur=0,tf=NX||CF[0];for(var wi=0;wi<C.topics.length;wi++){if(C.topics[wi].items.some(function(x){return x.file&&x.file===tf})){cur=wi;break}}
+      var tpg=function(w){var tot=w.items.filter(function(x){return x.file}).length,dn=w.items.filter(function(x){return x.file&&d[C.id+'/'+x.file]}).length;if(!dn)return '';return '<div class="tpg" role="progressbar" aria-valuemin="0" aria-valuemax="'+tot+'" aria-valuenow="'+dn+'"><i style="width:'+Math.round(100*dn/tot)+'%"></i><span>'+t({en:dn+' of '+tot+' done',zh:'已完成 '+dn+' / '+tot})+'</span></div>'};
       var draw=function(){
         jr.innerHTML=C.topics.map(function(w){var rd=w.items.filter(function(x){return x.file}).length;
-          return '<section class="wsec"><div class="wph"><div><div class="ey">'+t({en:'Topic '+w.n,zh:'主题 '+w.n})+(w.level?' · '+t(LV[w.level]):'')+'</div><h2>'+t(w.title)+'</h2></div>'+(rd<w.items.length?'<div class="meta">'+t({en:rd+' of '+w.items.length+' lessons available',zh:'已发布 '+rd+' / '+w.items.length+' 课'})+'</div>':'')+'</div>'+
+          return '<section class="wsec"><div class="wph"><div><div class="ey">'+t({en:'Topic '+w.n,zh:'主题 '+w.n})+(w.level?' · '+t(LV[w.level]):'')+'</div><h2>'+t(w.title)+'</h2></div>'+tpg(w)+(rd<w.items.length?'<div class="meta">'+t({en:rd+' of '+w.items.length+' lessons available',zh:'已发布 '+rd+' / '+w.items.length+' 课'})+'</div>':'')+'</div>'+
           '<div class="lgrid">'+w.items.map(function(l){
             var no=('0'+l.g).slice(-2),chip='<span class="chip '+l.k+'">'+t(TYPE[l.k])+'</span>';
             if(l.file){var fin=d[C.id+'/'+l.file];return '<a class="lcard ready spot" href="'+l.file+'"><span class="n">'+no+'</span>'+chip+'<h3>'+t(l.title)+'</h3><span class="st">'+(fin?t({en:'✓ Completed',zh:'✓ 已完成'}):t({en:'Start →',zh:'开始 →'}))+'</span></a>'}
@@ -309,9 +310,15 @@
       /* last published lesson of its topic: the What next card */
       var lastIn=C.lessons.filter(function(x){return x.w===cl.w}).pop()===cl;
       if(lastIn)whatNext(true,function(a){if(pg)pg.before(a);else{var m3=document.querySelector('main');if(m3)m3.appendChild(a)}},n,!n);
+      /* a small moment when a lesson counts as done: a burst over the dock and a card with the next lesson (not shown to people who ask for less motion beyond the card itself) */
+      function celebrate(nx){var old=document.querySelector('.donebar');if(old)old.remove();var b=document.createElement('div');b.className='donebar';b.setAttribute('role','status');
+        b.innerHTML='<b class="dn-t"><span class="en">✓ Lesson complete</span><span class="zh">✓ 本课完成</span></b>'+(nx?'<a href="'+nx.file+'"><span class="en">Next: '+nx.title.en+' →</span><span class="zh">下一课：'+nx.title.zh+' →</span></a>':'<a href="index.html"><span class="en">Back to the track →</span><span class="zh">回到路线 →</span></a>');
+        document.body.appendChild(b);requestAnimationFrame(function(){b.classList.add('on')});
+        var dk=document.querySelector('.dock'),r=dk?dk.getBoundingClientRect():{left:innerWidth/2,top:innerHeight-60,width:0};burst(r.left+r.width/2,r.top);
+        setTimeout(function(){b.classList.remove('on');setTimeout(function(){b.remove()},500)},9000)}
       /* no button: a lesson counts as done once the reader is at its end and has had the page open for half a minute, so a quick swipe to the pager does not count */
       if(pg&&'IntersectionObserver' in window){var key=C.id+'/'+here,T0=Date.now(),MINREAD=30000,atEnd=false,endT=0,
-        fin=function(){if(!atEnd)return;endIO.disconnect();var x=done();if(!x[key]){x[key]=1;set(DONE,JSON.stringify(x));d=x;try{var rv=jget('learn-review',{}),h1=document.querySelector('main h1');rv[key]={t:Date.now(),en:((h1&&h1.querySelector('.en'))||{}).textContent||document.title,zh:((h1&&h1.querySelector('.zh'))||{}).textContent||document.title,h:key};set('learn-review',JSON.stringify(rv))}catch(e){}syncSide();track('Lesson done',{lesson:key})}},
+        fin=function(){if(!atEnd)return;endIO.disconnect();var x=done();if(!x[key]){x[key]=1;set(DONE,JSON.stringify(x));d=x;try{var rv=jget('learn-review',{}),h1=document.querySelector('main h1');rv[key]={t:Date.now(),en:((h1&&h1.querySelector('.en'))||{}).textContent||document.title,zh:((h1&&h1.querySelector('.zh'))||{}).textContent||document.title,h:key};set('learn-review',JSON.stringify(rv))}catch(e){}syncSide();track('Lesson done',{lesson:key});celebrate(n)}},
         endIO=new IntersectionObserver(function(es){atEnd=es[es.length-1].isIntersecting;clearTimeout(endT);if(atEnd)endT=setTimeout(fin,Math.max(0,MINREAD-(Date.now()-T0)))});endIO.observe(pg)}
       buildToc();
       var dock=document.createElement('nav');dock.className='dock';dock.setAttribute('aria-label','Lesson navigation · 本课导航');var RR=18,LL=2*Math.PI*RR;
@@ -407,6 +414,8 @@
     try{if(location.protocol==='https:'&&!navigator.webdriver){var ml=document.createElement('link');ml.rel='manifest';ml.href='/manifest.webmanifest';document.head.appendChild(ml);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(function(){})}}catch(e){}
     document.querySelectorAll('[data-count]').forEach(countUp);
     var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:0,rootMargin:'0px 0px -8% 0px'});
-    document.querySelectorAll('main > h2,main > .card,main > .callout,main > .quiz,main > .stepper,main > .grid,main > .flow,main > .wfwrap,main > p,main > section,main > .track-list').forEach(function(e){e.classList.add('rv');io.observe(e)});
+    /* lesson pages: a thin reading line at the top of the screen */
+    if(document.querySelector('main > .pager')){var rl=document.createElement('i');rl.className='rdl';rl.setAttribute('aria-hidden','true');document.body.appendChild(rl);var rq=0,rd2=function(){rq=0;var h=document.documentElement,m=h.scrollHeight-h.clientHeight;rl.style.transform='scaleX('+(m>0?Math.min(1,h.scrollTop/m):0)+')'};addEventListener('scroll',function(){if(!rq)rq=requestAnimationFrame(rd2)},{passive:true});rd2()}
+    document.querySelectorAll('main > h2,main > .card,main > .callout,main > .quiz,main > .stepper,main > .grid,main > .flow,main > .wfwrap,main > p,main > section,main > .track-list,main > .teach,main > .codebox,main > .try,main > .cl').forEach(function(e){e.classList.add('rv');io.observe(e)});
   });
 })();

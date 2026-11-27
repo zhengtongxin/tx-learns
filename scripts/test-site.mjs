@@ -3,7 +3,7 @@
 // It opens a local copy of the site in a headless browser and uses it the way a reader does. No AI, about ten seconds.
 //   language    EN/中文 switch changes the page language and the tab title, and is remembered
 //   theme       the theme button switches and is remembered
-//   progress    a lesson counts as done once the reader reaches its end (one "Lesson done" event, once), and the home page then
+//   progress    a lesson shows a thin reading line, counts as done once the reader reaches its end (one "Lesson done" event, once; a completion card appears, and the track page shows the topic's progress), and the home page then
 //               offers to continue with the next lesson
 //   feedback    "Was this lesson clear?" sends one anonymous event (lesson and answer only), thanks the reader, asks once
 //   pager       a lesson links to the next lesson of its track
@@ -66,6 +66,7 @@ try {
   await test('progress', async page => {
     // Done = at the end of the lesson AND the page open for half a minute (a quick swipe to the pager does not count). The clock is ours, so the test does not wait.
     await page.clock.install();
+    await page.addInitScript(() => { new MutationObserver(() => { if (document.querySelector('.donebar a')) window.__sawDone = true; }).observe(document, { childList: true, subtree: true }); });
     const bottom = async () => { await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight)); await page.waitForTimeout(400); };
     const end = async () => { await bottom(); await page.clock.runFor(31000); await page.waitForFunction(k => { try { return !!JSON.parse(localStorage.getItem('learn-done') || '{}')[k]; } catch { return false; } }, key, { timeout: 5000 }); };
     await page.goto(base + lesson);
@@ -74,10 +75,15 @@ try {
     ok(!(await store(page, 'learn-done') || {})[key], 'a lesson swiped to its end within seconds must not count as done');
     await page.evaluate(() => window.scrollTo(0, 0)); await page.waitForTimeout(400); await page.clock.runFor(40000);
     ok(!(await store(page, 'learn-done') || {})[key], 'a lesson left open at its top must not count as done');
+    ok(await page.locator('.rdl').count() === 1, 'a lesson should show the thin reading line');
     await end();
+    ok(await page.evaluate(() => !!window.__sawDone), 'finishing a lesson should show a completion card with a link');
     eq((await events(page)).filter(e => e.name === 'Lesson done').map(e => e.data), [{ lesson: key }], 'the "Lesson done" event');
     await page.reload(); await end();
     eq((await events(page)).filter(e => e.name === 'Lesson done').length, 0, '"Lesson done" events on a second read');
+    await page.goto(base + first.id + '/index.html');
+    await page.waitForSelector('.tpg');
+    eq(await page.getAttribute('.tpg', 'aria-valuenow'), '1', 'the topic that holds the finished lesson should show 1 done');
     await page.goto(base + 'tracks.html');
     const href = await page.getAttribute('a[data-start]', 'href');
     ok(L.length < 2 || href.endsWith(L[1].path), `the home button should continue at ${L[1] && L[1].path}, it points at ${href}`);
