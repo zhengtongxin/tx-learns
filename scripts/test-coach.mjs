@@ -30,6 +30,8 @@ ok(L.parseQuestion('{"question":"Which step comes first when two members disagre
 { const A = L.parseAreas('Anatomy, 30\nPhysiology 40%\nPharmacology | drug dose receptor | 30\n药理学 20\nAnatomy, 5\n\n, 10');
   ok(A.length === 4 && A.map(x => x.weight).join() === '30,40,30,20', 'areas are read from lines in three forms, duplicates and empty lines skipped');
   ok(/receptor/.test(A[2].kw) && A[0].kw === 'anatomy' && A[3].kw === '药理学', 'keywords come from the name or the typed words'); }
+ok(L.inLang({ q: '项目经理应该先做什么？', o: ['先听', '无视', '升级', '等待'], e: '先倾听。' }, 'zh') && !L.inLang({ q: 'What should the manager do first?', o: ['a', 'b', 'c', 'd'], e: '' }, 'zh') && L.inLang({ q: 'What should the manager do first?', o: ['a', 'b', 'c', 'd'], e: '' }, 'en') && !L.inLang({ q: '项目经理应该先做什么？', o: ['先听', '无视', '升级', '等待'], e: '' }, 'en'), 'a question in the wrong language is caught');
+{ const m = L.prompt({ text: 'Some English text about risk.', lang: 'zh', srcLang: 'en', exam: '', domain: '', tasks: '' }); ok(/Chinese \(简体中文\)/.test(m[0].content + m[1].content) && /in English/.test(m[1].content), 'the prompt asks for the page language and says the excerpt is in the other one'); }
 if (!fx) { process.exit(bad ? 1 : 0); }
 const mime = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.bcmap': 'application/octet-stream' };
 const srv = createServer((q, r) => { let f = join(root, decodeURIComponent(q.url.split('?')[0])); if (f.endsWith('/')) f += 'index.html'; if (!existsSync(f)) { r.writeHead(404); r.end(); return; } r.writeHead(200, { 'content-type': mime[extname(f)] || 'application/octet-stream' }); r.end(readFileSync(f)); }).listen(0);
@@ -38,7 +40,7 @@ const br = await chromium.launch(), out = [];
 const ctx = await br.newContext({ viewport: { width: 1100, height: 900 }, acceptDownloads: true }), pg = await ctx.newPage();
 const errs = []; pg.on('pageerror', e => errs.push(e.message)); pg.on('console', m => m.type() === 'error' && errs.push(m.text()));
 pg.on('request', q => { if (!q.url().startsWith(base) && !q.url().startsWith('data:') && !q.url().startsWith('blob:')) out.push(q.url()); });
-await pg.addInitScript(() => { let n = 0; window.__coachTestEngine = { chat: async () => { n++; return JSON.stringify({ question: 'Fake question number ' + n + ': what should the project manager do first?', options: ['Listen to both sides', 'Ignore it', 'Escalate at once', 'Wait for the sponsor'], answer: 0, explanation: 'Listening first builds shared understanding.' }); } }; });
+await pg.addInitScript(() => { let n = 0; window.__coachTestEngine = { chat: async (m) => { n++; window.__lastPrompt = JSON.stringify(m); if (/Chinese \(简体中文\)/.test(window.__lastPrompt)) return JSON.stringify({ question: '假问题第 ' + n + ' 个：项目经理应该先做什么？', options: ['先听双方的说法', '直接无视', '马上升级', '等发起人表态'], answer: 0, explanation: '先倾听有助于达成共识。' }); return JSON.stringify({ question: 'Fake question number ' + n + ': what should the project manager do first?', options: ['Listen to both sides', 'Ignore it', 'Escalate at once', 'Wait for the sponsor'], answer: 0, explanation: 'Listening first builds shared understanding.' }); } }; });
 await pg.goto(base + 'study/index.html');
 await pg.waitForSelector('#app:not([hidden])');
 ok(/Get\s*started/i.test(await pg.textContent('#today')), 'first visit shows how to get started');
@@ -48,7 +50,7 @@ const st = await pg.evaluate(() => ({ s: window.__coach.state(), c: window.__coa
 ok(st.s.mats.length === 2 && st.c.length >= 2, 'a PPTX and a PDF are read into chunks (' + st.c.length + ')');
 ok(st.s.mats.some(m => m.lang === 'en') && st.c.some(c => /Conflict|conflict/.test(c.text)), 'slide text is extracted');
 ok(st.s.goal === 'understand' && st.s.exam === 'custom', 'the default goal is subject-neutral: understand the material, no ready-made exam');
-ok(!/PMP/.test(await pg.textContent('#goal')) && !/PMP/.test(await pg.textContent('main')), 'the tool page does not mention PMP until an outline is chosen');
+ok(!/PMP/.test(await pg.textContent('#goal')) && !/PMP/.test(await pg.textContent('#today')) && !/PMP/.test(await pg.textContent('#map')), 'the tool page does not mention PMP until an outline is chosen');
 ok(await pg.locator('#map .row').count() === 2, 'by default the strength map has one area per file');
 // any exam: the reader names it and enters its areas and weights
 await pg.check('input[value=exam]');
@@ -59,6 +61,7 @@ await pg.locator('#ctext').blur();
 ok((await pg.evaluate(() => window.__coach.state())).ctext.includes('Process'), 'typed areas are saved');
 ok(st.c.length > 0 && (await pg.evaluate(() => window.__coach.chunks().some(c => c.area === 'x:c1'))), 'passages are matched to the typed areas');
 ok(await pg.locator('#today .plan li').count() >= 2, 'today shows a plan');
+ok(await pg.evaluate(() => document.getElementById('app').hasAttribute('data-ready')), 'with material, practice and the track button come before the setup');
 await pg.click('[data-act=drill]');
 await pg.waitForSelector('.opt');
 ok(/Fake question/.test(await pg.textContent('#practice')), 'a question appears');
@@ -120,7 +123,16 @@ ok(await pg.locator('[data-act=share]').isDisabled(), 'share stays off until the
 await pg.check('#nok'); await pg.click('[data-act=share]');
 const opened = await pg.evaluate(() => window.__opened);
 ok(opened.length === 1 && /^https:\/\/github\.com\/zhengtongxin\/tx-learns\/new\/notes\?filename=inbox%2F/.test(opened[0]), 'share opens the GitHub new-file page on the notes branch');
+ok(/Track: new/.test(decodeURIComponent(opened[0])) && /Subject: community/.test(decodeURIComponent(opened[0])), 'a new track is the default, so no TRACK file is needed');
 ok(decodeURIComponent(opened[0]).includes('risk register') && !/Fake question|Conflict/.test(decodeURIComponent(opened[0])), 'the link carries the notes, not the material');
+await pg.selectOption('[data-act=track]', 'ai-leader'); await pg.click('[data-act=share]');
+ok(/Track: ai-leader/.test(decodeURIComponent((await pg.evaluate(() => window.__opened))[1])) && !/Subject:/.test(decodeURIComponent((await pg.evaluate(() => window.__opened))[1])), 'a lesson for an existing track names that track');
+// the model and the questions follow the page language, whatever language the material is in
+await pg.click('.top [data-l=zh]');
+await pg.evaluate(() => window.__coach.state().bank.length = 0);
+await pg.click('[data-act=drill]'); await pg.waitForSelector('.opt');
+ok(/假问题/.test(await pg.textContent('#practice')) && /Chinese \(简体中文\)/.test(await pg.evaluate(() => window.__lastPrompt)), 'a Chinese page gets Chinese questions from English slides');
+await pg.click('.top [data-l=en]'); await pg.reload(); await pg.waitForSelector('#app:not([hidden])');
 // reload keeps them
 await pg.reload(); await pg.waitForSelector('#app:not([hidden])');
 ok(await pg.locator('#mats .files li').count() === 2, 'records survive a reload');

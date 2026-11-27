@@ -39,7 +39,11 @@ export function rules(branch, areas, trackIds) {
   if (!key) return [];
   const r = AREAS.branches[key], bad = [];
   if (real.length > r.maxAreas) bad.push(`${r.why} This one changes ${real.length} areas (${real.join(', ')}).`);
-  else if (r.only === 'track' && real.some(a => !trackIds.includes(a))) bad.push(`${r.why} This one also changes: ${real.filter(a => !trackIds.includes(a)).join(', ')}.`);
+  else if (r.only === 'track') {
+    const extra = real.filter(a => !trackIds.includes(a) && !(r.alsoAllowed || []).includes(a));
+    if (extra.length) bad.push(`${r.why} This one also changes: ${extra.join(', ')}.`);
+    else if (real.filter(a => trackIds.includes(a)).length > 1) bad.push(`${r.why} This one changes more than one track (${real.filter(a => trackIds.includes(a)).join(', ')}).`);
+  }
   return bad;
 }
 
