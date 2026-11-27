@@ -2164,37 +2164,37 @@
   },
   "ai-coder/06-terminal-agents.html": {
    "score": 7,
-   "at": "2026-11-27T13:24:03.354Z",
+   "at": "2026-11-27T14:52:49.482Z",
    "confusing": [
     {
-     "where": "Step 3 · Choosing and staying safe (sort game)",
-     "why": "The game says reading is always safe to allow, but the settings example two steps earlier denies reading .env. The lesson never says why reading a key file is risky."
+     "where": "Step 2, Learn",
+     "why": "Step 4 then shows that cat .env is not covered by the Read deny and would only prompt. The reader cannot tell what the deny really protects."
     },
     {
-     "where": "Step 1 · Why the terminal",
-     "why": "SSH is named but not explained. A reader who has finished the beginner lessons may not know it is a secure remote login."
+     "where": "Step 1, Learn",
+     "why": "SSH is never explained. A reader who has not used it does not know it is a way to log in to another computer."
     },
     {
-     "where": "Step 2 · Permissions: you hold the brake",
-     "why": "'Commit' is a git word, and git is not in this lesson's list of things to have set up."
+     "where": "Step 2, settings example",
+     "why": "The Bash(...) rule form and the :* suffix are not explained. Step 4 hints at them but never names them."
     }
    ]
   },
   "ai-coder/12-sandboxing.html": {
-   "score": 7,
-   "at": "2026-11-27T13:24:03.354Z",
+   "score": 6,
+   "at": "2026-11-27T14:52:49.482Z",
    "confusing": [
     {
-     "where": "Step 2 · Layers, from soft to hard",
-     "why": "A container is used as if known, but the Docker example that follows depends on it."
+     "where": "Step 2, code box",
+     "why": "The docker commands that follow use $PWD, the current folder, but the lesson never says to change into ../try-agent. As written, install and tests run in the main copy, not the worktree."
     },
     {
-     "where": "Step 2 · Layers, code box",
-     "why": "The flags -v, -w and --rm, the image node:20 and npm ci are never explained. The comment says what the step is for, not what the words mean."
+     "where": "Step 2, code box",
+     "why": "Docker, container images, node:20 and the flags -v, -w, --rm and --network none are never explained. The text says container but not what one is."
     },
     {
-     "where": "Step 2 · Layers, code box",
-     "why": "Worktree is only described in passing as 'a separate branch or worktree'. The -b flag and the ../ path are not explained."
+     "where": "Step 3 vs Step 4",
+     "why": "Step 4 then passes the key into the container as an environment variable (-e TEST_API_KEY), which is the very thing Step 3 forbids. The reader is left unsure which rule holds."
     }
    ]
   },
@@ -2597,6 +2597,24 @@
     {
      "where": "Step 3, the Learn text and More practice",
      "why": "Gantt chart and sponsor are used without a word on what they are, and the reader needs both to follow the report question."
+    }
+   ]
+  },
+  "ai-coder/11-sub-agents-and-hooks.html": {
+   "score": 6,
+   "at": "2026-11-27T14:52:49.482Z",
+   "confusing": [
+    {
+     "where": "Step 1, quiz under the reviewer box",
+     "why": "This quiz sits in the sub-agent step, before hooks are introduced in Step 2. Its answer cannot be worked out from what has been taught so far."
+    },
+    {
+     "where": "Step 2, Learn",
+     "why": "AGENTS.md is never explained. A newcomer does not know it is a plain file of standing instructions that the agent reads."
+    },
+    {
+     "where": "Step 2 hook config and Step 3 guard",
+     "why": "PreToolUse and matcher are not explained, and the JSON shape of the pending call is not shown until Step 4."
     }
    ]
   }
