@@ -1,0 +1,49 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tests that run themselves | TX Learns</title>
+<meta name="description" content="Run tests on every change automatically and keep them fast, trusted and worth the effort"><meta property="og:title" content="Tests that run themselves | TX Learns"><meta property="og:description" content="Run tests on every change automatically and keep them fast, trusted and worth the effort"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/testing-basics/06-tests-that-run-themselves.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/testing-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/testing-basics/06-tests-that-run-themselves.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/testing-basics/06-tests-that-run-themselves.html","url":"https://tx-learns.vercel.app/testing-basics/06-tests-that-run-themselves.html","name":"Tests that run themselves","alternateName":"自动运行的测试","description":"Run tests on every change automatically and keep them fast, trusted and worth the effort","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Testing in practice","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Testing basics","url":"https://tx-learns.vercel.app/testing-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Testing basics","item":"https://tx-learns.vercel.app/testing-basics/index.html"},{"@type":"ListItem","position":3,"name":"Tests that run themselves","item":"https://tx-learns.vercel.app/testing-basics/06-tests-that-run-themselves.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Testing in practice · Lesson 3</span><span class="zh">测试的实际做法 · 第 3 课</span></span><h1><span class="en">Tests that run themselves</span><span class="zh">自动运行的测试</span></h1><p class="meta"><span class="en">Run tests on every change automatically and keep them fast, trusted and worth the effort · ~10 min · reading and practice</span><span class="zh">让测试在每次改动时自动运行，并保持快速、可信、值得投入 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Run on every change</span><span class="zh">第 1 步 · 每次改动都运行</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Tests you must remember to run get skipped. <b>Continuous integration</b> (CI) runs them automatically on a server every time you push code or open a pull request, and shows a green tick or a red cross next to the change. Many teams make a green tick a rule before merging, so a break is caught in minutes, not in production.</p>
+<p class="zh" style="margin:0 0 8px">需要你记得去跑的测试，迟早会被跳过。<b>持续集成</b>（CI）在每次你推送代码或发起拉取请求时，自动在服务器上运行它们，并在改动旁边显示绿勾或红叉。许多团队规定绿勾才能合并，这样问题几分钟内就被发现，而不是等到线上。</p></div>
+<div class="codebox" data-file="ci.yml" data-lang="yaml">name: tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install pytest
+      - run: pytest</div>
+
+<h2><span class="en">Step 2 · Fast and repeatable</span><span class="zh">第 2 步 · 快速且可重复</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A test suite people trust is <b>fast</b> (seconds), <b>repeatable</b> (same result every run) and <b>independent</b> (any order, alone or together). A test that fails one run in twenty is worse than none: people learn to ignore red. Common causes are the clock, random numbers, shared files and the network. Fix the clock, seed the randomness, use temporary folders and fakes.</p>
+<p class="zh" style="margin:0 0 8px">值得信任的测试集是<b>快</b>的（几秒）、<b>可重复</b>的（每次结果相同）、<b>相互独立</b>的（顺序任意，单独或一起跑都行）。每二十次才失败一次的测试比没有还糟：大家会学会无视红灯。常见原因是时钟、随机数、共享文件和网络。固定时钟、给随机数设种子、用临时文件夹和替身。</p></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · What is worth testing</span><span class="zh">第 3 步 · 什么值得测</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">You cannot test everything, so spend effort where a bug would cost most: money, user data, rules that change often, and anything that broke before. A test for a bug you already fixed (a <b>regression test</b>) is the best value of all. Do not test the language or a library, only your own logic.</p>
+<p class="zh" style="margin:0 0 8px">你不可能什么都测，所以把力气花在出了 bug 代价最大的地方：钱、用户数据、经常变化的规则，以及以前坏过的东西。给已经修好的 bug 写的测试（<b>回归测试</b>）性价比最高。不要去测语言或第三方库，只测你自己的逻辑。</p>
+<p class="en" style="margin:0 0 8px">Worth a test or not?</p>
+<p class="zh" style="margin:0 0 8px">值得测吗？</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> list the three places a bug would cost you most and check each has a test.</span><span class="zh"><b>试一试：</b>列出出了 bug 对你代价最大的三个地方，看每个是否都有测试。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> when you next fix a bug, write the test that would have caught it first.</span><span class="zh"><b>核对：</b>下次修 bug 时，先写出能抓住它的测试。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• CI runs tests on every change so nobody has to remember.<br>• Trusted tests are fast, repeatable and independent.<br>• Spend effort on costly risks, and add a test for every bug you fix.</p><p class="zh" style="margin:0">• CI 在每次改动时运行测试，没人需要记得。<br>• 可信的测试快速、可重复、相互独立。<br>• 把力气花在代价高的风险上，每修一个 bug 就补一个测试。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Testing basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3","zh":"Python 3"},"know":{"en":"Testing AI output (see “Testing AI output”).","zh":"知道怎样测试 AI 的输出（见“测试 AI 的输出”）。"},"goals":{"en":["Say what continuous integration does","Keep tests fast and repeatable","Decide what is worth testing"],"zh":["说出持续集成做什么","让测试又快又可重复","判断什么值得测"]},"prev":["05-testing-ai-output.html"]}}</script>
+<script src="../tracks.js?v=e601a3df"></script><script src="lessons.js?v=9200e4fc"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/06-tests-that-run-themselves.js?v=1bb7cfa9"></script></body></html>

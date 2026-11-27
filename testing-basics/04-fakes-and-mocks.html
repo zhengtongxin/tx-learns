@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fakes and mocks | TX Learns</title>
+<meta name="description" content="Test code that calls the network or a model by swapping the slow, costly part for a stand-in"><meta property="og:title" content="Fakes and mocks | TX Learns"><meta property="og:description" content="Test code that calls the network or a model by swapping the slow, costly part for a stand-in"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/testing-basics/04-fakes-and-mocks.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/testing-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/testing-basics/04-fakes-and-mocks.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/testing-basics/04-fakes-and-mocks.html","url":"https://tx-learns.vercel.app/testing-basics/04-fakes-and-mocks.html","name":"Fakes and mocks","alternateName":"替身与模拟","description":"Test code that calls the network or a model by swapping the slow, costly part for a stand-in","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Testing in practice","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Testing basics","url":"https://tx-learns.vercel.app/testing-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Testing basics","item":"https://tx-learns.vercel.app/testing-basics/index.html"},{"@type":"ListItem","position":3,"name":"Fakes and mocks","item":"https://tx-learns.vercel.app/testing-basics/04-fakes-and-mocks.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Testing in practice · Lesson 1</span><span class="zh">测试的实际做法 · 第 1 课</span></span><h1><span class="en">Fakes and mocks</span><span class="zh">替身与模拟</span></h1><p class="meta"><span class="en">Test code that calls the network or a model by swapping the slow, costly part for a stand-in · ~10 min · reading and practice</span><span class="zh">测试会调用网络或模型的代码：把又慢又贵的部分换成替身 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Keep tests offline</span><span class="zh">第 1 步 · 让测试离线</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A test that calls a real web API or an AI model is slow, costs money, needs a key and fails when the wifi does, for reasons that have nothing to do with your code. Pass the risky part <b>in</b> as a parameter, and in tests hand over a <b>fake</b>: a tiny stand-in that returns a fixed answer.</p>
+<p class="zh" style="margin:0 0 8px">一个会调用真实 Web API 或 AI 模型的测试，又慢、又花钱、还要密钥，而且 wifi 一断就失败，这些都和你的代码无关。把有风险的部分作为参数<b>传进来</b>，测试时递给它一个<b>替身</b>：一个返回固定答案的小东西。</p></div>
+<div class="codebox" data-file="greet.py" data-lang="python">def greeting(get_name):
+    return "Hello, " + get_name()
+
+# real use: greeting(lambda: ask_user())
+# in a test:
+assert greeting(lambda: "Mei") == "Hello, Mei"</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Record what happened</span><span class="zh">第 2 步 · 记录发生了什么</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>mock</b> is a fake that also remembers how it was used, so the test can check <i>what the code asked for</i>: that the model was called once, with the right prompt. In Python <code>unittest.mock.Mock</code> does this for you: <code>m.assert_called_once_with("hi")</code>.</p>
+<p class="zh" style="margin:0 0 8px"><b>模拟对象</b>是会记住自己如何被使用的替身，这样测试就能检查<i>代码向它要了什么</i>：模型被调用了一次，并且用了正确的提示词。在 Python 里 <code>unittest.mock.Mock</code> 替你做到这一点：<code>m.assert_called_once_with("hi")</code>。</p></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Real or fake</span><span class="zh">第 3 步 · 真实还是替身</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Decide what a unit test should use.</p>
+<p class="zh" style="margin:0 0 8px">判断单元测试应该用什么。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> take a function that calls a service and pass the call in as a parameter.</span><span class="zh"><b>试一试：</b>找一个会调用某服务的函数，把这个调用改成参数传进来。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> run its test with wifi off and see it still pass.</span><span class="zh"><b>核对：</b>关掉 wifi 运行它的测试，看它仍然通过。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Tests should not call paid, slow or flaky services.<br>• Pass the risky part in, and hand a fake to the test.<br>• A mock also records how it was called.</p><p class="zh" style="margin:0">• 测试不该调用付费、缓慢或不稳定的服务。<br>• 把有风险的部分传进来，测试时递一个替身。<br>• 模拟对象还会记录自己如何被调用。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Testing basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3","zh":"Python 3"},"know":{"en":"Edge cases (see “Edge cases”).","zh":"知道边界情况（见“边界情况”）。"},"goals":{"en":["Explain why tests should not call real services","Swap a dependency for a fake","Check what was asked of a fake"],"zh":["说明为什么测试不该调用真实服务","把依赖换成替身","检查替身被要求做了什么"]},"prev":["03-edge-cases.html"]}}</script>
+<script src="../tracks.js?v=e601a3df"></script><script src="lessons.js?v=9200e4fc"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/04-fakes-and-mocks.js?v=2a7def8d"></script></body></html>

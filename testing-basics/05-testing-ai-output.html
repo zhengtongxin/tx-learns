@@ -1,0 +1,50 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Testing AI output | TX Learns</title>
+<meta name="description" content="Check answers that are different every time, by testing properties and a small set of examples"><meta property="og:title" content="Testing AI output | TX Learns"><meta property="og:description" content="Check answers that are different every time, by testing properties and a small set of examples"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/testing-basics/05-testing-ai-output.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/testing-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/testing-basics/05-testing-ai-output.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/testing-basics/05-testing-ai-output.html","url":"https://tx-learns.vercel.app/testing-basics/05-testing-ai-output.html","name":"Testing AI output","alternateName":"测试 AI 的输出","description":"Check answers that are different every time, by testing properties and a small set of examples","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Testing in practice","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Testing basics","url":"https://tx-learns.vercel.app/testing-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Testing basics","item":"https://tx-learns.vercel.app/testing-basics/index.html"},{"@type":"ListItem","position":3,"name":"Testing AI output","item":"https://tx-learns.vercel.app/testing-basics/05-testing-ai-output.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Testing in practice · Lesson 2</span><span class="zh">测试的实际做法 · 第 2 课</span></span><h1><span class="en">Testing AI output</span><span class="zh">测试 AI 的输出</span></h1><p class="meta"><span class="en">Check answers that are different every time, by testing properties and a small set of examples · ~10 min · reading and practice</span><span class="zh">检查每次都不一样的回答：测试性质，并用一小组样例 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Properties, not exact text</span><span class="zh">第 1 步 · 测性质，不测原文</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A model rarely gives the same words twice, so <code>assert reply == "Sure!"</code> is brittle. Test <b>properties</b> that must always hold: the reply is not empty, it is valid JSON, it contains one of the allowed labels, it is under 200 words, it does not leak the system prompt.</p>
+<p class="zh" style="margin:0 0 8px">模型很少两次给出同样的措辞，所以 <code>assert reply == "Sure!"</code> 很脆弱。要测的是<b>必须始终成立的性质</b>：回答不为空、是合法的 JSON、包含允许的标签之一、少于 200 词、没有泄露系统提示。</p></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Validate the shape</span><span class="zh">第 2 步 · 校验形状</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">When your program depends on a structure, parse it and check it before use. Ask the model for JSON, load it, and reject anything missing a required key or using a value outside the allowed set. A validator turns a surprise in production into a clear error you can test.</p>
+<p class="zh" style="margin:0 0 8px">当你的程序依赖某种结构时，使用之前先解析并检查。让模型输出 JSON，加载它，拒绝缺少必需键或值超出允许范围的结果。校验器把线上的意外变成可以测试的清楚错误。</p></div>
+<div class="codebox" data-file="validate.py" data-lang="python">import json
+
+ALLOWED = {"positive", "negative", "neutral"}
+
+def parse_label(raw):
+    data = json.loads(raw)
+    if data.get("label") not in ALLOWED:
+        raise ValueError("bad label")
+    return data["label"]</div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · A small evaluation set</span><span class="zh">第 3 步 · 一小组评估样例</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Keep 20 to 50 real examples with the answer you want, and run them after every change to the prompt. Count how many pass, and treat a drop as a failed test. This is an <b>eval</b>: the unit test of AI work. Add every real failure you meet to the set so it can never come back unnoticed.</p>
+<p class="zh" style="margin:0 0 8px">准备 20 到 50 个真实样例及你想要的答案，每次改提示词后都跑一遍。数一数通过多少个，把下降当作测试失败。这就是<b>评估</b>：AI 工作的单元测试。每遇到一个真实的失败，就加进样例集，让它再也不能悄悄回来。</p>
+<p class="en" style="margin:0 0 8px">Property or exact text?</p>
+<p class="zh" style="margin:0 0 8px">测性质还是测原文？</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> write five examples with wanted answers for a prompt you use.</span><span class="zh"><b>试一试：</b>为你常用的一个提示词写五个带期望答案的样例。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> add one validator that rejects an answer outside your allowed set.</span><span class="zh"><b>核对：</b>加一个校验器，拒绝允许集合之外的回答。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Test properties that must always hold, not exact wording.<br>• Parse and validate structured output before using it.<br>• Keep a small eval set and treat a drop as a failing test.</p><p class="zh" style="margin:0">• 测必须始终成立的性质，而不是精确措辞。<br>• 使用结构化输出之前先解析并校验。<br>• 保留一小组评估样例，把下降当作失败的测试。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Testing basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3","zh":"Python 3"},"know":{"en":"Fakes and mocks (see “Fakes and mocks”).","zh":"知道替身与模拟（见“替身与模拟”）。"},"goals":{"en":["Test properties instead of exact text","Parse and validate model output","Keep a small evaluation set"],"zh":["测试性质而不是精确文本","解析并校验模型输出","保留一小组评估样例"]},"prev":["04-fakes-and-mocks.html"]}}</script>
+<script src="../tracks.js?v=e601a3df"></script><script src="lessons.js?v=9200e4fc"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/05-testing-ai-output.js?v=f634cdf5"></script></body></html>
