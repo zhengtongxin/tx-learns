@@ -1,0 +1,47 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Least privilege | TX Learns</title>
+<meta name="description" content="Give every person, program and key only the access it needs, so a mistake stays small"><meta property="og:title" content="Least privilege | TX Learns"><meta property="og:description" content="Give every person, program and key only the access it needs, so a mistake stays small"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/security-basics/04-least-privilege.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/security-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/security-basics/04-least-privilege.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/security-basics/04-least-privilege.html","url":"https://tx-learns.vercel.app/security-basics/04-least-privilege.html","name":"Least privilege","alternateName":"最小权限","description":"Give every person, program and key only the access it needs, so a mistake stays small","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Limiting the damage","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Safe code","url":"https://tx-learns.vercel.app/security-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Safe code","item":"https://tx-learns.vercel.app/security-basics/index.html"},{"@type":"ListItem","position":3,"name":"Least privilege","item":"https://tx-learns.vercel.app/security-basics/04-least-privilege.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Limiting the damage · Lesson 1</span><span class="zh">限制损失 · 第 1 课</span></span><h1><span class="en">Least privilege</span><span class="zh">最小权限</span></h1><p class="meta"><span class="en">Give every person, program and key only the access it needs, so a mistake stays small · ~10 min · reading and practice</span><span class="zh">只给每个人、程序和密钥它需要的权限，让失误的影响保持很小 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Small doors, small damage</span><span class="zh">第 1 步 · 门越小，损失越小</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The rule of <b>least privilege</b> says each person, program and key gets only the access its job needs and nothing more. It does not stop mistakes or break-ins. It limits how far they go. A key that can only read one folder, stolen, exposes one folder. An all-powerful key, stolen, exposes everything.</p>
+<p class="zh" style="margin:0 0 8px"><b>最小权限</b>原则是：每个人、程序和密钥只拿到完成工作所需的权限，不多给。它不能阻止失误或入侵，但能限制影响范围。只能读一个文件夹的密钥被偷，只暴露一个文件夹；万能密钥被偷，一切都暴露。</p></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Check before you act</span><span class="zh">第 2 步 · 行动前先检查</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Two checks are easy to confuse. <b>Authentication</b> asks who you are. <b>Authorization</b> asks what you are allowed to do. Passing the first does not give you the second, so every action that matters checks permission on the server, every time, never only by hiding a button in the page.</p>
+<p class="zh" style="margin:0 0 8px">有两种检查容易混淆。<b>认证</b>问你是谁；<b>授权</b>问你被允许做什么。通过前者不代表拥有后者，所以每个重要操作都要在服务器端每次检查权限，而不是只靠在页面上隐藏按钮。</p></div>
+<div class="codebox" data-file="roles.py" data-lang="python">ROLES = {"viewer": {"read"}, "editor": {"read", "write"}}
+
+def allowed(role, action):
+    return action in ROLES.get(role, set())
+
+print(allowed("viewer", "write"))
+print(allowed("editor", "write"))
+print(allowed("guest", "read"))</div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Split by role</span><span class="zh">第 3 步 · 按角色拆分</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Create separate keys and accounts for separate jobs: one for reading, one for writing, one per service, one for each environment. When a person leaves or a key leaks, you remove one door without rebuilding the house. Unknown roles get nothing by default: the safe answer to “not sure” is “no”. Sort each grant.</p>
+<p class="zh" style="margin:0 0 8px">为不同的工作创建不同的密钥和账号：一个读，一个写，每个服务一个，每个环境一个。有人离开或密钥泄露时，只需关掉一扇门，不用重建整座房子。未知角色默认什么都没有：对“不确定”的安全回答是“不行”。给每个授权分类。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> list the keys your project uses and write what each one really needs to do.</span><span class="zh"><b>试一试：</b>列出你项目用到的密钥，写下每个真正需要做什么。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> find one key with more power than its job needs and plan a smaller one.</span><span class="zh"><b>核对：</b>找出一个权限超过工作需要的密钥，计划换成更小的。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Give each person, program and key only what its job needs.<br>• Authentication is who you are; authorization is what you may do.<br>• When unsure, the default answer is no.</p><p class="zh" style="margin:0">• 每个人、程序和密钥只拿到工作需要的权限。<br>• 认证是你是谁；授权是你能做什么。<br>• 不确定时，默认答案是“不行”。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Safe code</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3 for the small examples; reading is enough for the rest","zh":"小例子需要 Python 3；其余只需阅读"},"know":{"en":"Secrets and keys (see “Secrets and keys”).","zh":"知道密钥（见“密钥与凭证”）。"},"goals":{"en":["State the rule of least privilege","Check permission before acting","Split access by role"],"zh":["说出最小权限原则","行动前检查权限","按角色拆分权限"]},"prev":["01-secrets-and-keys.html"]}}</script>
+<script src="../tracks.js?v=8d67e437"></script><script src="lessons.js?v=688d999d"></script><script src="../assets/site.js?v=cf875a90"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/04-least-privilege.js?v=f949068a"></script></body></html>

@@ -1,0 +1,42 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Safe dependencies | TX Learns</title>
+<meta name="description" content="Trust the packages you install only as far as you have checked them, and keep them current"><meta property="og:title" content="Safe dependencies | TX Learns"><meta property="og:description" content="Trust the packages you install only as far as you have checked them, and keep them current"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/security-basics/05-safe-dependencies.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/security-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/security-basics/05-safe-dependencies.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/security-basics/05-safe-dependencies.html","url":"https://tx-learns.vercel.app/security-basics/05-safe-dependencies.html","name":"Safe dependencies","alternateName":"安全的依赖","description":"Trust the packages you install only as far as you have checked them, and keep them current","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Limiting the damage","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Safe code","url":"https://tx-learns.vercel.app/security-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Safe code","item":"https://tx-learns.vercel.app/security-basics/index.html"},{"@type":"ListItem","position":3,"name":"Safe dependencies","item":"https://tx-learns.vercel.app/security-basics/05-safe-dependencies.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Limiting the damage · Lesson 2</span><span class="zh">限制损失 · 第 2 课</span></span><h1><span class="en">Safe dependencies</span><span class="zh">安全的依赖</span></h1><p class="meta"><span class="en">Trust the packages you install only as far as you have checked them, and keep them current · ~10 min · reading and practice</span><span class="zh">只在核对过的范围内信任你安装的包，并让它们保持更新 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Packages are other people’s code</span><span class="zh">第 1 步 · 包是别人的代码</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Every package you install runs with the same access as your own code, and it brings its own dependencies too. Most are fine, but two things go wrong: a package may have a <b>known flaw</b> that is fixed in a later version, or a bad one may <b>pretend to be</b> a good one with a nearly identical name. A typo in an install command can fetch the wrong thing.</p>
+<p class="zh" style="margin:0 0 8px">你安装的每个包都以与你自己的代码相同的权限运行，它还会带来自己的依赖。绝大多数没问题，但有两种情况会出事：包可能有<b>已知漏洞</b>，在后来的版本里才修复；或者坏包用几乎一样的名字<b>冒充</b>好包。安装命令里的一个拼写错误就可能装来错误的东西。</p></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Pin the versions</span><span class="zh">第 2 步 · 固定版本</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>pinned</b> version such as <code>requests==2.31.0</code> says exactly which release you tested. Without pins, a fresh install tomorrow may bring a different release than the one that worked today. Keep the list in a requirements file in your project so everyone, and your server, installs the same set.</p>
+<p class="zh" style="margin:0 0 8px"><b>固定</b>的版本，如 <code>requests==2.31.0</code>，说明了你测试过的确切版本。不固定的话，明天重新安装可能拿到与今天能用的不同的版本。把清单放在项目的 requirements 文件里，让所有人和你的服务器装的都是同一套。</p></div>
+<div class="codebox" data-file="pins.py" data-lang="python">line = "requests==2.31.0"
+name, version = line.split("==")
+print(name)
+print(version.split(".")[0])</div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Update on purpose</span><span class="zh">第 3 步 · 有计划地更新</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Pinned does not mean frozen. Check for security fixes regularly with the tool your language provides, update one package at a time, run your tests, then commit the new pin. Before adding a new package, ask four quick questions: do I need it, is it widely used, is it still maintained, and is the name spelled exactly right? A small function you can write yourself is better than a new dependency.</p>
+<p class="zh" style="margin:0 0 8px">固定不等于冻结。用你所用语言提供的工具定期检查安全修复，一次更新一个包，跑测试，再提交新的版本号。添加新包之前，快速问四个问题：我真的需要它吗，用的人多吗，还有人维护吗，名字拼写完全正确吗？自己能写的小函数，比新增一个依赖更好。</p></div>
+<div class="try" id="p3"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> open a requirements file and check that every line has a pinned version.</span><span class="zh"><b>试一试：</b>打开一个 requirements 文件，检查每一行是否都固定了版本。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> pick one dependency and find out when it was last updated.</span><span class="zh"><b>核对：</b>挑一个依赖，查查它最近一次更新是什么时候。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A package runs with your code’s access.<br>• Pin versions so installs are repeatable.<br>• Add a package only when needed, and update on purpose.</p><p class="zh" style="margin:0">• 包以和你的代码相同的权限运行。<br>• 固定版本，让安装可重复。<br>• 只在需要时添加包，并有计划地更新。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Safe code</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3 for the small examples; reading is enough for the rest","zh":"小例子需要 Python 3；其余只需阅读"},"know":{"en":"Installing packages (see “Packages and web APIs”).","zh":"知道如何安装包（见“包与网络 API”）。"},"goals":{"en":["Explain why a package is a risk","Pin versions","Update on purpose"],"zh":["解释包为什么有风险","固定版本","有计划地更新"]},"prev":["01-secrets-and-keys.html"]}}</script>
+<script src="../tracks.js?v=8d67e437"></script><script src="lessons.js?v=688d999d"></script><script src="../assets/site.js?v=cf875a90"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/05-safe-dependencies.js?v=edd97d90"></script></body></html>

@@ -1,0 +1,47 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Untrusted input | TX Learns</title>
+<meta name="description" content="Treat everything a user sends as data, never as code, and stop injection"><meta property="og:title" content="Untrusted input | TX Learns"><meta property="og:description" content="Treat everything a user sends as data, never as code, and stop injection"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/security-basics/03-untrusted-input.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/security-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/security-basics/03-untrusted-input.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/security-basics/03-untrusted-input.html","url":"https://tx-learns.vercel.app/security-basics/03-untrusted-input.html","name":"Untrusted input","alternateName":"不可信的输入","description":"Treat everything a user sends as data, never as code, and stop injection","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Protecting data","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Safe code","url":"https://tx-learns.vercel.app/security-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Safe code","item":"https://tx-learns.vercel.app/security-basics/index.html"},{"@type":"ListItem","position":3,"name":"Untrusted input","item":"https://tx-learns.vercel.app/security-basics/03-untrusted-input.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Protecting data · Lesson 3</span><span class="zh">保护数据 · 第 3 课</span></span><h1><span class="en">Untrusted input</span><span class="zh">不可信的输入</span></h1><p class="meta"><span class="en">Treat everything a user sends as data, never as code, and stop injection · ~10 min · reading and practice</span><span class="zh">把用户发来的一切当作数据而非代码，防住注入 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Input can become code</span><span class="zh">第 1 步 · 输入可能变成代码</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Anything that comes from outside is <b>untrusted input</b>: form fields, URLs, files, API calls, even text a model returns. The classic mistake is gluing it into a command, such as a SQL query. If the input contains query syntax, it changes what the query means. That is <b>injection</b>.</p>
+<p class="zh" style="margin:0 0 8px">凡是来自外部的都是<b>不可信的输入</b>：表单字段、网址、文件、API 调用，甚至模型返回的文字。经典错误是把它直接拼进命令，比如 SQL 查询。如果输入里带有查询语法，就会改变查询的含义，这就是<b>注入</b>。</p></div>
+<div class="codebox" data-file="inject.py" data-lang="python">import sqlite3
+
+db = sqlite3.connect(":memory:")
+db.execute("create table u(name text, pin text)")
+db.execute("insert into u values('ann','1111'),('bob','2222')")
+name = "x' OR '1'='1"
+sql = "select name from u where name='" + name + "'"
+print(len(db.execute(sql).fetchall()))</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Use placeholders</span><span class="zh">第 2 步 · 使用占位符</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The fix is to keep the command and the data apart. With a <b>placeholder</b> (<code>?</code>), the database receives the query and the value separately and treats the value only as text to match, never as syntax. Do this for every query built from outside values, with no exceptions for “safe-looking” input.</p>
+<p class="zh" style="margin:0 0 8px">办法是把命令和数据分开。用<b>占位符</b>（<code>?</code>）时，数据库分别接收查询和值，只把值当作要匹配的文本，从不当作语法。凡是用外部值构造的查询都这样做，不要因为输入“看起来安全”就例外。</p></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Check what you accept</span><span class="zh">第 3 步 · 检查你接受什么</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Placeholders protect the query; <b>validation</b> protects the rest. Decide what a valid value looks like (a number between 1 and 100, an email-shaped string, one of three choices), accept only that, and reject everything else with a clear message. Prefer an allow-list of what is good over a block-list of what is bad, because you will never think of every bad case. Sort each practice.</p>
+<p class="zh" style="margin:0 0 8px">占位符保护查询；<b>校验</b>保护其余部分。先决定合法的值长什么样（1 到 100 的数字、像邮箱的字符串、三个选项之一），只接受这些，其余一律明确拒绝。优先用“允许什么”的清单，而不是“禁止什么”的清单，因为你永远想不全所有坏情况。给每种做法分类。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> rewrite one query you built by joining strings so that it uses placeholders.</span><span class="zh"><b>试一试：</b>把你用拼接字符串写的一个查询改成用占位符。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> for one form, write down exactly what a valid value looks like.</span><span class="zh"><b>核对：</b>为一个表单写下合法的值到底长什么样。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Everything from outside is untrusted.<br>• Use placeholders so data never becomes syntax.<br>• Validate with an allow-list of what is valid.</p><p class="zh" style="margin:0">• 一切来自外部的内容都不可信。<br>• 用占位符，让数据永远变不成语法。<br>• 用“合法值清单”做校验。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Safe code</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3 for the small examples; reading is enough for the rest","zh":"小例子需要 Python 3；其余只需阅读"},"know":{"en":"Basic SQL (see “Tables and SELECT”).","zh":"了解基础 SQL（见“表与 SELECT”）。"},"goals":{"en":["Explain injection","Use placeholders in a query","Validate before you trust"],"zh":["解释注入","在查询里使用占位符","先校验再信任"]},"prev":["01-secrets-and-keys.html"]}}</script>
+<script src="../tracks.js?v=8d67e437"></script><script src="lessons.js?v=688d999d"></script><script src="../assets/site.js?v=cf875a90"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/03-untrusted-input.js?v=89b6da33"></script></body></html>
