@@ -1,0 +1,41 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Debugging with AI | TX Learns</title>
+<meta name="description" content="Give an assistant what it needs to help, and check what it tells you before you trust it"><meta property="og:title" content="Debugging with AI | TX Learns"><meta property="og:description" content="Give an assistant what it needs to help, and check what it tells you before you trust it"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/debugging-basics/06-debugging-with-ai.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/debugging-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/debugging-basics/06-debugging-with-ai.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/debugging-basics/06-debugging-with-ai.html","url":"https://tx-learns.vercel.app/debugging-basics/06-debugging-with-ai.html","name":"Debugging with AI","alternateName":"和 AI 一起调试","description":"Give an assistant what it needs to help, and check what it tells you before you trust it","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Fixing it for good","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Debugging","url":"https://tx-learns.vercel.app/debugging-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Debugging","item":"https://tx-learns.vercel.app/debugging-basics/index.html"},{"@type":"ListItem","position":3,"name":"Debugging with AI","item":"https://tx-learns.vercel.app/debugging-basics/06-debugging-with-ai.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Fixing it for good · Lesson 3</span><span class="zh">彻底修好 · 第 3 课</span></span><h1><span class="en">Debugging with AI</span><span class="zh">和 AI 一起调试</span></h1><p class="meta"><span class="en">Give an assistant what it needs to help, and check what it tells you before you trust it · ~10 min · reading and practice</span><span class="zh">给助手足够的信息让它帮上忙，并在相信之前先核对它说的 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Brief it like a colleague</span><span class="zh">第 1 步 · 像对同事一样交代</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">An assistant can only work with what you paste. “It does not work” gets a generic answer. Give it what you gathered in this track: the <b>exact error</b> (the full last lines), the <b>smallest code</b> that shows it, what you <b>expected</b>, what you <b>got</b> and what you already <b>tried</b>. A minute spent writing that is usually a better answer, and sometimes you solve it while writing.</p>
+<p class="zh" style="margin:0 0 8px">助手只能用你贴给它的东西。“它不能用”只会得到泛泛的回答。把你在本路线里收集的东西给它：<b>确切的报错</b>（完整的最后几行）、能显示问题的<b>最小代码</b>、你<b>预期</b>什么、<b>得到</b>什么，以及你已经<b>试过</b>什么。花一分钟写这些，通常换来更好的回答，有时写着写着你自己就解决了。</p></div>
+<div class="codebox" data-file="brief.py" data-lang="python">fields = {"error": "KeyError: 'name'", "expected": "greeting", "got": "crash"}
+print("; ".join(f"{k}={v}" for k, v in fields.items()))</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · A suggestion is a guess</span><span class="zh">第 2 步 · 建议只是猜测</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A suggested fix sounds confident whether it is right or not. Treat it as a guess in the same way as your own: ask what it predicts, then test that. Run your reproduction before and after. If the assistant changes five things at once, ask for one change at a time, so you can tell which one mattered. Watch for fixes that hide the error instead of removing the cause.</p>
+<p class="zh" style="margin:0 0 8px">建议的修复无论对错，听起来都很有把握。要像对待你自己的猜测一样对待它：问它预测了什么，然后去验证。在修改前后各运行一次你的复现。如果助手一次改了五样，就让它一次只改一处，这样你才知道哪一处起了作用。留意那些只是掩盖错误而不是消除原因的修复。</p></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Keep the understanding</span><span class="zh">第 3 步 · 把理解留在自己这里</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The goal is not a green test but knowing why the bug happened. After a fix, say the cause in one sentence in your own words. If you cannot, ask the assistant to explain it, and then check that explanation against the code. Add the test, note the cause in the commit message and move on. Next time, you will recognise the family of problem without help. Sort each habit.</p>
+<p class="zh" style="margin:0 0 8px">目标不是让测试变绿，而是弄清问题为什么发生。修好之后，用自己的话用一句话说出原因。如果说不出，就让助手解释，再拿解释去对照代码。加上测试，在提交信息里写下原因，然后继续。下一次，你自己就能认出这类问题。给每个习惯分类。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> write a five-part bug report for your last bug, even if you already fixed it.</span><span class="zh"><b>试一试：</b>为你最近一个问题写一份五部分的描述，即使已经修好了。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> after your next AI-suggested fix, write the cause in one sentence before you commit.</span><span class="zh"><b>核对：</b>下一次采纳 AI 建议的修复后，提交之前先用一句话写下原因。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Give the assistant the error, the smallest code, expected, got and tried.<br>• Treat a suggested fix as a guess and test it.<br>• Keep the understanding: say the cause yourself.</p><p class="zh" style="margin:0">• 给助手报错、最小代码、预期、实际和已试过的。<br>• 把建议的修复当作猜测，并去验证。<br>• 把理解留给自己：亲口说出原因。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Debugging</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3 for the small examples; reading is enough for the rest","zh":"小例子需要 Python 3；其余只需阅读"},"know":{"en":"The earlier lessons of this track.","zh":"本路线前面的课。"},"goals":{"en":["Write a useful bug report","Treat a suggested fix as a guess","Keep the understanding yourself"],"zh":["写出有用的问题描述","把建议的修复当作猜测","自己保留理解"]},"prev":["05-fix-and-prove-it.html"]}}</script>
+<script src="../tracks.js?v=9d67b172"></script><script src="lessons.js?v=3f03817d"></script><script src="../assets/site.js?v=cf875a90"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/06-debugging-with-ai.js?v=6050da92"></script></body></html>

@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reproducing a bug | TX Learns</title>
+<meta name="description" content="Make a bug happen on demand, with the smallest input that still shows it"><meta property="og:title" content="Reproducing a bug | TX Learns"><meta property="og:description" content="Make a bug happen on demand, with the smallest input that still shows it"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/debugging-basics/02-reproducing-a-bug.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/debugging-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/debugging-basics/02-reproducing-a-bug.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/debugging-basics/02-reproducing-a-bug.html","url":"https://tx-learns.vercel.app/debugging-basics/02-reproducing-a-bug.html","name":"Reproducing a bug","alternateName":"复现问题","description":"Make a bug happen on demand, with the smallest input that still shows it","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Finding the bug","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Debugging","url":"https://tx-learns.vercel.app/debugging-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Debugging","item":"https://tx-learns.vercel.app/debugging-basics/index.html"},{"@type":"ListItem","position":3,"name":"Reproducing a bug","item":"https://tx-learns.vercel.app/debugging-basics/02-reproducing-a-bug.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Finding the bug · Lesson 2</span><span class="zh">找到问题 · 第 2 课</span></span><h1><span class="en">Reproducing a bug</span><span class="zh">复现问题</span></h1><p class="meta"><span class="en">Make a bug happen on demand, with the smallest input that still shows it · ~10 min · reading and practice</span><span class="zh">让问题能随时出现，并找到仍能触发它的最小输入 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · If you cannot repeat it, you cannot fix it</span><span class="zh">第 1 步 · 不能重现，就修不了</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A bug you cannot trigger is a bug you cannot test a fix for. The first job is to find the exact steps and input that make it happen every time. Write them down: the input, what you did, what you expected and what you got instead. If it happens only sometimes, note what differed between the times it worked and the times it did not.</p>
+<p class="zh" style="margin:0 0 8px">不能触发的问题，你就没法验证修复是否有效。第一件事是找出每次都能让它发生的确切步骤和输入。把它们写下来：输入是什么、你做了什么、你预期什么、实际得到什么。如果只是偶尔发生，就记下成功和失败的几次之间有什么不同。</p></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Shrink the example</span><span class="zh">第 2 步 · 缩小示例</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Take the failing case and cut it down: remove inputs, lines and settings one at a time, and after each cut check that the bug still happens. Stop when removing anything more makes it disappear. What is left is a <b>minimal example</b>, often only a few lines, and the cause is usually visible in it.</p>
+<p class="zh" style="margin:0 0 8px">拿到会出错的案例，把它削减：一次去掉一个输入、一行代码或一项设置，每去掉一样就检查问题是否还在。再去掉就消失时停下。剩下的就是<b>最小示例</b>，通常只有几行，原因往往一眼就能看出来。</p></div>
+<div class="codebox" data-file="minimal.py" data-lang="python">def last_word(s):
+    return s.split(" ")[-1]
+
+print(repr(last_word("hi there ")))</div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Make it repeatable</span><span class="zh">第 3 步 · 让它可重复</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Remove what changes between runs. Fix the input instead of typing it fresh, use the same data file, set the same random seed and note the versions you ran. Once a script makes the bug appear in one command, you can try fixes quickly and prove each one. Sort each habit.</p>
+<p class="zh" style="margin:0 0 8px">去掉每次运行之间会变的东西。把输入固定下来，而不是每次重新输入；用同一份数据文件；设置同样的随机种子；记下用的版本。一旦有个脚本一条命令就能让问题出现，你就能快速试修复、并逐个验证。给每个习惯分类。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> take a bug you hit recently and cut it down to the smallest input that still fails.</span><span class="zh"><b>试一试：</b>拿一个你最近碰到的问题，削减到仍会失败的最小输入。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> write the four lines: input, steps, expected, actual.</span><span class="zh"><b>核对：</b>写下四行：输入、步骤、预期、实际。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Find steps that trigger the bug every time.<br>• Shrink the example until nothing more can go.<br>• Fix the input and seed so the failure repeats.</p><p class="zh" style="margin:0">• 找到每次都能触发问题的步骤。<br>• 不断缩小示例，直到再也不能去掉东西。<br>• 固定输入和随机种子，让失败可以重复。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Debugging</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3 for the small examples; reading is enough for the rest","zh":"小例子需要 Python 3；其余只需阅读"},"know":{"en":"Reading errors (see “Reading errors”).","zh":"会读报错（见“读懂报错”）。"},"goals":{"en":["Say why reproducing comes first","Shrink an example","Write down exact steps"],"zh":["说出为什么先复现","缩小示例","写下精确的步骤"]},"prev":["01-reading-errors.html"]}}</script>
+<script src="../tracks.js?v=9d67b172"></script><script src="lessons.js?v=3f03817d"></script><script src="../assets/site.js?v=cf875a90"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/02-reproducing-a-bug.js?v=fe31b3b0"></script></body></html>
