@@ -28,7 +28,7 @@ const ctx = await br.newContext({ viewport: { width: 1100, height: 900 }, accept
 const errs = []; pg.on('pageerror', e => errs.push(e.message)); pg.on('console', m => m.type() === 'error' && errs.push(m.text()));
 pg.on('request', q => { if (!q.url().startsWith(base) && !q.url().startsWith('data:') && !q.url().startsWith('blob:')) out.push(q.url()); });
 await pg.addInitScript(() => { let n = 0; window.__coachTestEngine = { chat: async () => { n++; return JSON.stringify({ question: 'Fake question number ' + n + ': what should the project manager do first?', options: ['Listen to both sides', 'Ignore it', 'Escalate at once', 'Wait for the sponsor'], answer: 0, explanation: 'Listening first builds shared understanding.' }); } }; });
-await pg.goto(base + 'coach.html');
+await pg.goto(base + 'study/index.html');
 await pg.waitForSelector('#app:not([hidden])');
 ok(/Get\s*started/i.test(await pg.textContent('#today')), 'first visit shows how to get started');
 await pg.setInputFiles('#files', [join(fx, 't.pptx'), join(fx, 't.pdf')]);

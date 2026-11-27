@@ -41,7 +41,7 @@ const events = page => page.evaluate(() => window.txq || []);
 
 try {
   await test('language', async page => {
-    await page.goto(base + 'index.html');
+    await page.goto(base + 'tracks.html');
     eq(await page.getAttribute('html', 'data-lang'), 'en', 'starting language');
     const title = await page.title();
     await page.click('.top [data-l="zh"]');
@@ -54,7 +54,7 @@ try {
   });
 
   await test('theme', async page => {
-    await page.goto(base + 'index.html');
+    await page.goto(base + 'tracks.html');
     const before = await page.getAttribute('html', 'data-theme');
     await page.click('.top .th');
     const after = await page.getAttribute('html', 'data-theme');
@@ -71,7 +71,7 @@ try {
     eq((await events(page)).filter(e => e.name === 'Lesson done').map(e => e.data), [{ lesson: key }], 'the "Lesson done" event');
     await page.reload(); await end();
     eq((await events(page)).filter(e => e.name === 'Lesson done').length, 0, '"Lesson done" events on a second read');
-    await page.goto(base + 'index.html');
+    await page.goto(base + 'tracks.html');
     const href = await page.getAttribute('a[data-start]', 'href');
     ok(L.length < 2 || href.endsWith(L[1].path), `the home button should continue at ${L[1] && L[1].path}, it points at ${href}`);
   });
@@ -93,13 +93,13 @@ try {
   });
 
   await test('quiet', async (page, { outside }) => {
-    for (const p of ['index.html', lesson, first.href]) { await page.goto(base + p, { waitUntil: 'networkidle' }); }
+    for (const p of ['tracks.html', lesson, first.href]) { await page.goto(base + p, { waitUntil: 'networkidle' }); }
     eq(outside, [], 'requests that left the site');
     eq(await page.evaluate(() => [...document.scripts].map(s => s.src).filter(s => s && !/\/(assets|js)\/|tracks\.js|lessons\.js/.test(s))), [], 'unexpected scripts');
   });
 
   await test('no script', async page => {
-    await page.goto(base + 'index.html');
+    await page.goto(base + 'tracks.html');
     eq(await page.$$eval('.track-list a', a => a.map(x => x.getAttribute('href'))), T.map(t => t.href), 'track links, in tracks.js order');
     await page.goto(base + first.href);
     const Tk = loadWindow(`${first.id}/lessons.js`).TRACK;
@@ -108,7 +108,7 @@ try {
 
   await test('no storage', async page => {
     await page.addInitScript(() => { const deny = () => { throw new DOMException('denied', 'SecurityError'); }; Storage.prototype.getItem = deny; Storage.prototype.setItem = deny; Storage.prototype.removeItem = deny; });
-    for (const p of ['index.html', first.href, lesson]) await page.goto(base + p);
+    for (const p of ['tracks.html', first.href, lesson]) await page.goto(base + p);
     await page.click('.fbk [data-v="yes"]');
     ok(await page.isVisible('.fbk [role="status"]'), 'feedback should still work for this visit');
   });
