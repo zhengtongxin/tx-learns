@@ -1,0 +1,40 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tables and SELECT | TX Learns</title>
+<meta name="description" content="Read data from a table with SELECT and see why databases beat a pile of spreadsheets"><meta property="og:title" content="Tables and SELECT | TX Learns"><meta property="og:description" content="Read data from a table with SELECT and see why databases beat a pile of spreadsheets"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/sql-basics/01-tables-and-select.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/sql-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/sql-basics/01-tables-and-select.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/sql-basics/01-tables-and-select.html","url":"https://tx-learns.vercel.app/sql-basics/01-tables-and-select.html","name":"Tables and SELECT","alternateName":"表与 SELECT","description":"Read data from a table with SELECT and see why databases beat a pile of spreadsheets","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Asking questions of data","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"SQL basics","url":"https://tx-learns.vercel.app/sql-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"SQL basics","item":"https://tx-learns.vercel.app/sql-basics/index.html"},{"@type":"ListItem","position":3,"name":"Tables and SELECT","item":"https://tx-learns.vercel.app/sql-basics/01-tables-and-select.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Asking questions of data · Lesson 1</span><span class="zh">向数据提问 · 第 1 课</span></span><h1><span class="en">Tables and SELECT</span><span class="zh">表与 SELECT</span></h1><p class="meta"><span class="en">Read data from a table with SELECT and see why databases beat a pile of spreadsheets · ~10 min · reading and practice</span><span class="zh">用 SELECT 从表里读数据，并明白数据库为什么比一堆表格强 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Tables, rows, columns</span><span class="zh">第 1 步 · 表、行、列</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>database</b> stores data in <b>tables</b>. A table is a grid: each <b>column</b> has a name and a type (<code>name</code> text, <code>price</code> number), and each <b>row</b> is one record. Unlike a loose spreadsheet, a database enforces the shape, handles many users at once and can answer questions about millions of rows in a blink. <b>SQL</b> is the language for asking.</p>
+<p class="zh" style="margin:0 0 8px"><b>数据库</b>把数据存在<b>表</b>里。表是一张网格：每一<b>列</b>有名字和类型（<code>name</code> 是文本，<code>price</code> 是数字），每一<b>行</b>是一条记录。和随手的表格不同，数据库会强制保证形状，能同时服务很多用户，还能瞬间回答关于上百万行数据的问题。<b>SQL</b> 就是用来提问的语言。</p></div>
+
+<h2><span class="en">Step 2 · SELECT and FROM</span><span class="zh">第 2 步 · SELECT 与 FROM</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><code>SELECT</code> says which columns you want and <code>FROM</code> says which table. <code>SELECT *</code> means every column. <code>LIMIT 3</code> keeps only the first three rows. Keywords are not case sensitive, but writing them in capitals makes a query easier to read.</p>
+<p class="zh" style="margin:0 0 8px"><code>SELECT</code> 说明要哪几列，<code>FROM</code> 说明哪张表。<code>SELECT *</code> 表示所有列。<code>LIMIT 3</code> 只保留前三行。关键字不分大小写，但写成大写能让查询更好读。</p></div>
+<div class="codebox" data-file="queries.sql" data-lang="sql">SELECT name, price FROM menu;
+SELECT * FROM menu LIMIT 3;</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Name the part</span><span class="zh">第 3 步 · 认出各部分</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Put each piece of the vocabulary in its place.</p>
+<p class="zh" style="margin:0 0 8px">把每个词汇放到它该在的位置。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> run the two queries in Python’s <code>sqlite3</code> or an online SQL playground.</span><span class="zh"><b>试一试：</b>在 Python 的 <code>sqlite3</code> 或在线 SQL 练习场里运行这两条查询。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> list the columns of a spreadsheet you use and pick a type for each.</span><span class="zh"><b>核对：</b>列出你平时用的某个表格的各列，并给每列选一种类型。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A table has typed columns and one row per record.<br>• SELECT picks columns, FROM picks the table.<br>• LIMIT keeps only the first rows.</p><p class="zh" style="margin:0">• 表有带类型的列，每条记录一行。<br>• SELECT 选列，FROM 选表。<br>• LIMIT 只保留前几行。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>SQL basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3 (it includes SQLite), or any SQL playground","zh":"Python 3（自带 SQLite），或任意 SQL 在线练习"},"know":{"en":"Nothing needed.","zh":"无需基础。"},"goals":{"en":["Say what a table, row and column are","Write a SELECT","Limit the rows you get back"],"zh":["说出表、行、列各是什么","写出 SELECT 语句","限制返回的行数"]}}}</script>
+<script src="../tracks.js?v=ae7d0e2d"></script><script src="lessons.js?v=eb27f9c6"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/01-tables-and-select.js?v=8ce5b917"></script></body></html>

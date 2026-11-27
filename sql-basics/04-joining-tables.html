@@ -1,0 +1,41 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Joining tables | TX Learns</title>
+<meta name="description" content="Keep each fact in one place and use keys and JOIN to bring related tables back together"><meta property="og:title" content="Joining tables | TX Learns"><meta property="og:description" content="Keep each fact in one place and use keys and JOIN to bring related tables back together"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/sql-basics/04-joining-tables.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/sql-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/sql-basics/04-joining-tables.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/sql-basics/04-joining-tables.html","url":"https://tx-learns.vercel.app/sql-basics/04-joining-tables.html","name":"Joining tables","alternateName":"连接多张表","description":"Keep each fact in one place and use keys and JOIN to bring related tables back together","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Connecting and changing","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"SQL basics","url":"https://tx-learns.vercel.app/sql-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"SQL basics","item":"https://tx-learns.vercel.app/sql-basics/index.html"},{"@type":"ListItem","position":3,"name":"Joining tables","item":"https://tx-learns.vercel.app/sql-basics/04-joining-tables.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Connecting and changing · Lesson 1</span><span class="zh">连接与修改 · 第 1 课</span></span><h1><span class="en">Joining tables</span><span class="zh">连接多张表</span></h1><p class="meta"><span class="en">Keep each fact in one place and use keys and JOIN to bring related tables back together · ~10 min · reading and practice</span><span class="zh">让每个事实只存一处，再用键和 JOIN 把相关的表重新合在一起 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · One fact, one place</span><span class="zh">第 1 步 · 一个事实，一个地方</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">If every order row repeated the customer’s name, a spelling fix would mean editing hundreds of rows. Instead each customer lives once in a <code>customers</code> table with a unique <b>primary key</b> <code>id</code>, and each order stores only that number in a <b>foreign key</b> column <code>customer_id</code>. The link is a number, not a copy.</p>
+<p class="zh" style="margin:0 0 8px">如果每条订单都重复写客户姓名，改个拼写就要改几百行。更好的做法是：每个客户只在 <code>customers</code> 表里存一次，带一个唯一的<b>主键</b> <code>id</code>；每条订单只在<b>外键</b>列 <code>customer_id</code> 里存这个编号。链接靠的是编号，而不是复制。</p></div>
+
+<h2><span class="en">Step 2 · JOIN</span><span class="zh">第 2 步 · JOIN</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><code>JOIN ... ON</code> lines up rows from two tables where the key matches. An <code>INNER JOIN</code> keeps only rows that have a match on both sides. A <code>LEFT JOIN</code> keeps every row of the left table and fills the missing side with <code>NULL</code>, which is how you find customers with no orders.</p>
+<p class="zh" style="margin:0 0 8px"><code>JOIN ... ON</code> 把两张表中键相同的行对在一起。<code>INNER JOIN</code> 只保留两边都有匹配的行。<code>LEFT JOIN</code> 保留左表的所有行，缺失的一边用 <code>NULL</code> 补上，这正是找出“没有订单的客户”的办法。</p></div>
+<div class="codebox" data-file="queries.sql" data-lang="sql">SELECT customers.name, orders.item
+FROM customers
+JOIN orders ON orders.customer_id = customers.id;</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Keep or drop</span><span class="zh">第 3 步 · 保留还是丢掉</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">For customers Mei (2 orders), Raj (1 order) and Ann (none), decide who appears in each join.</p>
+<p class="zh" style="margin:0 0 8px">对客户 Mei（2 条订单）、Raj（1 条订单）和 Ann（没有订单），判断每种连接里谁会出现。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> split a spreadsheet you own into two tables linked by an id.</span><span class="zh"><b>试一试：</b>把你手上的一张表格拆成两张用编号链接的表。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> find one question that needs a LEFT JOIN rather than an inner one.</span><span class="zh"><b>核对：</b>找出一个必须用 LEFT JOIN 而不是内连接才能回答的问题。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Store each fact once and link tables by keys.<br>• INNER JOIN keeps matches only; LEFT JOIN keeps all left rows.<br>• A missing match shows up as NULL.</p><p class="zh" style="margin:0">• 每个事实只存一次，用键链接各表。<br>• INNER JOIN 只留匹配的；LEFT JOIN 保留左表所有行。<br>• 没有匹配的一侧显示为 NULL。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>SQL basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3 (it includes SQLite), or any SQL playground","zh":"Python 3（自带 SQLite），或任意 SQL 在线练习"},"know":{"en":"Grouping and counting (see “Counting and grouping”).","zh":"会分组和计数（见“计数与分组”）。"},"goals":{"en":["Say what primary and foreign keys do","Write an INNER JOIN","Explain what LEFT JOIN adds"],"zh":["说出主键和外键的作用","写出 INNER JOIN","说明 LEFT JOIN 多出了什么"]},"prev":["03-counting-and-grouping.html"]}}</script>
+<script src="../tracks.js?v=ae7d0e2d"></script><script src="lessons.js?v=eb27f9c6"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/04-joining-tables.js?v=f6f31513"></script></body></html>
