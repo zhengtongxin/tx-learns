@@ -25,6 +25,15 @@
  L.domainScore=function(tokSet,kw){var n=0,k=kw.toLowerCase().split(/\s+/),toks=Object.keys(tokSet);
   k.forEach(function(w){if(!w)return;if(/[㐀-鿿]/.test(w)){for(var i=0;i<w.length-1;i++)if(tokSet[w.substr(i,2)]){n+=1;break}}
    else for(var j=0;j<toks.length;j++)if(toks[j].indexOf(w)===0){n+=1;break}});return n/Math.sqrt(k.length||1)};
+ /* Areas typed by the reader for any exam: one per line, "Name, 30", "Name 30%" or "Name | keyword keyword | 30". Keywords default to the words of the name. */
+ L.parseAreas=function(text){var out=[],seen={};String(text||'').split(/\r?\n/).forEach(function(line){line=line.trim();if(!line)return;
+  var parts=line.split('|').map(function(x){return x.trim()}),name,w,kw='',m;
+  if(parts.length>=2&&/^\d+(\.\d+)?\s*%?$/.test(parts[parts.length-1])){w=parseFloat(parts[parts.length-1]);name=parts[0];kw=parts.slice(1,-1).join(' ')}
+  else if((m=line.match(/^(.*?)[\s,;:：，；\t]+(\d+(?:\.\d+)?)\s*%?$/))){name=m[1].trim();w=parseFloat(m[2])}
+  else{name=line;w=1}
+  name=name.replace(/[\s,;:：，；|]+$/,'');if(!name||!(w>0)||seen[name.toLowerCase()])return;seen[name.toLowerCase()]=1;
+  var words=(name+' '+kw).toLowerCase().replace(/[^a-z㐀-鿿\s-]/g,' ').split(/\s+/).filter(function(x){return x&&(/[㐀-鿿]/.test(x)||x.length>2)&&!STOP.test(x)});
+  out.push({id:'c'+out.length,name:{en:name,zh:name},weight:w,kw:words.join(' '),tasks:kw})});return out.slice(0,20)};
  L.assignAreas=function(chunks,domains){chunks.forEach(function(c){var t=L.tokens(c.text),best=null,bs=0;
   domains.forEach(function(d){var s=L.domainScore(t,d.kw);if(s>bs){bs=s;best=d.id}});c.area=best;c.score=bs});return chunks};
  /* strength 0..1 from the last results (1 = right), newest weighted most; null when never tested */
