@@ -179,7 +179,7 @@ function record(it,ok){
  var keys=Object.keys(S.days).sort();while(keys.length>120)delete S.days[keys.shift()];
  it.res=ok?1:0;save()}
 /* a choose-two question: a tap picks or drops an option (a third pick drops the oldest), "Check" sends the two */
-function toggle(i){var it=R.items[R.i];if(!it||!it.m||it.res!=null||it.pick!=null)return;var x=it.sel||(it.sel=[]),k=x.indexOf(i);if(k>-1)x.splice(k,1);else{x.push(i);if(x.length>2)x.shift()}renderPractice(true)}
+function toggle(i){var it=R.items[R.i];if(!it||!it.m||it.res!=null||it.pick!=null)return;var x=it.sel||(it.sel=[]),k=x.indexOf(i);if(k>-1)x.splice(k,1);else{x.push(i);if(x.length>2)x.shift()}renderPractice(false);var b=document.querySelector('#practice [data-act=opt][data-i="'+i+'"]');if(b)b.focus()}
 function submitMulti(){var it=R.items[R.i];if(!it||!it.m||!it.sel||it.sel.length!==2)return;var p=it.sel.slice().sort();delete it.sel;settle(it,p)}
 function answer(i){var it=R.items[R.i];if(it.m){toggle(i);return}if(it.res!=null||it.pick!=null)return;settle(it,i)}
 function settle(it,p){it.pick=p;var ok=Lg.right(it,p);
