@@ -35,6 +35,31 @@ Proof:    3 studios say yes to the price before we build the rest.</div>
 <p class="en">Sort each one.</p>
 <p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
 
+<h2><span class="en">Step 4 · A cancel the rule forgot</span><span class="zh">第 4 步 · 规则漏掉的一次取消</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A test that passes only proves the cases you wrote. Ask the agent for the <b>edge cases</b> of your one rule, then try each by hand. Here a first version of <code>cancel</code> promotes the first person on the waitlist every time someone cancels:</p>
+<p class="zh" style="margin:0 0 8px">通过的测试只证明你写过的那些情况。让智能体列出这条核心规则的<b>边界情况</b>，再逐个亲手试。下面是 <code>cancel</code> 的初版：每次有人取消，就把候补第一位补进来：</p></div>
+<div class="codebox" data-file="cancel, first version" data-lang="js">function cancel(cls, name) {
+  cls.booked = cls.booked.filter(n => n !== name);
+  if (cls.waitlist.length) cls.booked.push(cls.waitlist.shift());
+}
+
+// 2 seats, booked: Ann and Bo, waitlist: Cy
+cancel(cls, "Zed");   // Zed never booked this class
+// cls.booked is now Ann, Bo, Cy: three people in two seats</div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The rule “never more than the seats” broke, because the code assumed the person cancelling was booked. The fix is a single check, plus removing a waitlisted person who cancels:</p>
+<p class="zh" style="margin:0 0 8px">“人数永不超过座位数”被打破了，因为代码默认取消的人一定订了位。修法只要一个判断，再加上：候补的人取消时，要把他从候补里移除：</p></div>
+<div class="codebox" data-file="cancel, fixed" data-lang="js">function cancel(cls, name) {
+  const had = cls.booked.includes(name);
+  cls.booked = cls.booked.filter(n => n !== name);
+  cls.waitlist = cls.waitlist.filter(n => n !== name);
+  if (had && cls.waitlist.length) cls.booked.push(cls.waitlist.shift());
+}
+// cancel(cls, "Zed")  -> booked and waitlist unchanged
+// cancel(cls, "Cy")   -> Cy leaves the waitlist, nobody moves in
+// cancel(cls, "Ann")  -> Ann leaves, the first waitlisted person moves in</div>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Fill</b> mvp.txt for a small business you know: one user, one pain, one paid thing, a not-now list.</span><span class="zh"><b>填写</b>为你认识的一家小生意填写 mvp.txt：一个用户、一个痛点、一个付费点、一张暂不做清单。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Make</b> the tests in starter/ pass with your agent, then add one test about a cancel with an empty waitlist.</span><span class="zh"><b>做到</b>让智能体把 starter/ 里的测试跑通，再加一个“候补为空时取消”的测试。</span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
@@ -44,4 +69,4 @@ Proof:    3 studios say yes to the price before we build the rest.</div>
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"prev":["04-quick-bill-splitter.html"],"tools":{"en":"Node.js 18+, any coding agent; optionally a Vercel account","zh":"Node.js 18+、任一编程智能体；可选 Vercel 账号"},"know":{"en":"Briefing an agent with a test.","zh":"会用测试给智能体下简报。"},"goals":{"en":["Cut an idea to a one-sheet MVP","Test the one rule that matters","Plan to charge before building billing"],"zh":["把点子削成一页纸的 MVP","测试最关键的规则","先收费，再做计费系统"]}},"j":{"goal":{"en":"Plan a small paid product on one sheet and build and test its core booking rule with an agent.","zh":"用一页纸规划一个可收费的小产品，并让智能体做出、测试它的核心预订规则。"},"deliver":{"en":"A filled-in mvp.txt and a booking.js that passes test_booking.js: seat limit, waitlist and cancel promotion.","zh":"一份填好的 mvp.txt，和一个通过 test_booking.js 的 booking.js：座位上限、候补、取消递补。"},"level":1,"mins":40,"accept":{"en":["node test_booking.js in final/ prints an ok line and needs no key or network.","A class never holds more people than its seats.","Cancelling moves the first waitlisted person in, in order.","Booking the same person twice does not create two seats.","mvp.txt names one user, one pain, one price and a not-now list."],"zh":["在 final/ 里运行 node test_booking.js，打印 ok 行，不需要密钥和网络。","一节课的人数永不超过座位数。","取消后，候补按顺序第一位补上。","同一个人订两次，不会占两个位子。","mvp.txt 写清了一个用户、一个痛点、一个价格和暂不做清单。"]},"fail":[{"en":"The waitlist order flips: new people were added to the front, not the back.","zh":"候补顺序反了：新来的被加到了队首，而不是队尾。"},{"en":"A cancelled person stays on the list: remove them from both the seats and the waitlist.","zh":"取消的人还留在名单里：座位和候补里都要删掉。"},{"en":"The agent added accounts and email: it ignored the not-now list. Put the list in AGENTS.md.","zh":"智能体加了账号和邮件：它没理会暂不做清单。把清单写进 AGENTS.md。"}],"stretch":[{"en":"Put a simple web page in front of the functions.","zh":"在函数前面放一个简单的网页。"},{"en":"Add a payment link and show it after a booking.","zh":"加一个付款链接，订位后显示。"},{"en":"Ask three real people the price question.","zh":"把价格问题拿去问三个真人。"}],"pkg":{"dir":"packages/ai-coder/05-class-booking-prototype","files":["README.txt","env.example","final/booking.js","final/mvp.txt","final/test_booking.js","starter/booking.js","starter/mvp.txt","starter/test_booking.js"],"note":{"en":"Needs only Node.js for the offline check. A payment link and hosting are optional and billed by those services. Use test mode for payments until you mean it.","zh":"离线检查只需要 Node.js。付款链接和托管是可选的，由对应服务计费。认真上线之前，付款请用测试模式。"}},"solution":{"en":"The finished version is in the final/ folder. Open it after you have tried it yourself and compare your work with it. Do not copy it: check that yours does the same jobs, then note one place where the reference chose differently and decide which you prefer.","zh":"完成版在 final/ 文件夹里。先自己做，再打开它与你的作品对照。不要照抄：先看你的是否完成同样的事，再找出一处参考版做法不同的地方，判断你更喜欢哪种。"}},"f":["README.txt","env.example","final/booking.js","final/mvp.txt","final/test_booking.js","starter/booking.js","starter/mvp.txt","starter/test_booking.js"]}</script>
 <script src="../tracks.js?v=819ff2a4"></script><script src="lessons.js?v=389b4305"></script><script src="../assets/site.js?v=3a95bfcc"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
-<script src="js/05-class-booking-prototype.js?v=5b44e808"></script></body></html>
+<script src="js/05-class-booking-prototype.js?v=1a79398d"></script></body></html>
