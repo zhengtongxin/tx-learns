@@ -29,6 +29,22 @@
 <p class="zh" style="margin:0 0 8px">• <b>认证：</b>要求请求头带密钥，并最先校验。<br>• <b>校验：</b>缺少你要的字段，就拒绝。<br>• <b>快速回应：</b>先快速回答，慢的活放后面。</p></div>
 <div class="try" id="p1"></div>
 
+<h2><span class="en">Step 4 · Build a protected webhook</span><span class="zh">第 4 步 · 搭一个受保护的 webhook</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Do it</span><span class="zh">动手</span></b><p class="en" style="margin:0 0 8px">Add a <b>Webhook</b> node, set Method to POST and Path to <code>lead</code>. Under Authentication choose <b>Header Auth</b> and create a credential: name <code>X-Api-Key</code>, value a long random string. n8n now rejects any call without that header before your workflow runs. Add a <b>Respond to Webhook</b> node at the end, or set Respond to “Immediately” if the slow work can happen afterwards.</p>
+<p class="zh" style="margin:0 0 8px">添加一个 <b>Webhook</b> 节点，Method 选 POST，Path 填 <code>lead</code>。Authentication 选 <b>Header Auth</b>，新建凭证：名称 <code>X-Api-Key</code>，值填一长串随机字符。这样没带这个请求头的调用，在进入你的工作流之前就会被 n8n 拒绝。最后加一个 <b>Respond to Webhook</b> 节点；如果慢的工作可以放到后面做，就把 Respond 设为 “Immediately”。</p>
+<p class="en" style="margin:0 0 8px">While you build, click “Listen for test event” and call the <b>Test URL</b>. It only works while n8n is listening. After you activate the workflow, use the <b>Production URL</b> instead (<code>/webhook/lead</code> rather than <code>/webhook-test/lead</code>).</p>
+<p class="zh" style="margin:0 0 8px">搭建时点 “Listen for test event”，再调用<b>测试地址</b>（Test URL），它只在 n8n 正在监听时有效。激活工作流之后，改用<b>正式地址</b>（Production URL），即 <code>/webhook/lead</code>，不是 <code>/webhook-test/lead</code>。</p></div>
+<div class="codebox" data-file="call it from a terminal" data-lang="bash">curl -X POST "https://YOUR-N8N/webhook-test/lead" \
+  -H "X-Api-Key: YOUR-SECRET" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Mei","email":"mei@example.com"}'
+
+# without the -H "X-Api-Key" line, n8n refuses the call</div>
+<p class="en">Then check three things: the right key works, a missing or wrong key is refused, and a body without <code>email</code> is rejected by an IF node that checks it before anything else runs.</p>
+<p class="zh">然后检查三件事：正确的密钥能通过；缺少或错误的密钥被拒绝；缺少 <code>email</code> 的请求体会被最前面的 IF 节点拦下，不再往下执行。</p>
+<div class="try" id="x2"></div>
+<div class="try" id="x3"></div>
+
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Move</b> one repeated job into a sub-workflow and call it from two flows.</span><span class="zh"><b>把</b>一个重复的活放进子工作流，并在两个流程里调用。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Create</b> an error workflow and break a node on purpose to see the message.</span><span class="zh"><b>创建</b>一个错误工作流，故意弄坏一个节点，看收到的消息。</span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
@@ -38,4 +54,4 @@
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"prev":["11-self-hosting-and-local-models.html"],"tools":{"en":"n8n Cloud or your own n8n","zh":"n8n Cloud 或你自己的 n8n"},"know":{"en":"Webhooks and API status codes.","zh":"Webhook 和接口状态码。"},"goals":{"en":["Build and call a sub-workflow","Set up retries and an error workflow","Protect a webhook with a secret"],"zh":["做出并调用子工作流","设置重试和错误工作流","用密钥保护 webhook"]}}}</script>
 <script src="../tracks.js?v=819ff2a4"></script><script src="lessons.js?v=bc7f7459"></script><script src="../assets/site.js?v=a0db7d29"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
-<script src="js/12-webhooks-and-sub-workflows.js?v=6c231e33"></script></body></html>
+<script src="js/12-webhooks-and-sub-workflows.js?v=10b0710a"></script></body></html>
