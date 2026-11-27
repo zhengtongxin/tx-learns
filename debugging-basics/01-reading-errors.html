@@ -11,6 +11,12 @@
 <p class="zh" style="margin:0 0 8px">报错信息是程序在告诉你它在做什么、为什么停下来。新手常常扫一眼、心里一慌就开始乱改代码。慢下来：这条信息是你一整天里能拿到的最精确的信息。</p>
 <p class="en" style="margin:0 0 8px">Read it <b>from the bottom up</b>. The last line names the kind of error and says what went wrong. The lines above it are the <b>traceback</b>, the chain of calls that led there, with the most recent call last. Start with the last line, then find the closest line of your own code in the list above.</p>
 <p class="zh" style="margin:0 0 8px">要<b>从下往上</b>读。最后一行说出错误的种类和出了什么问题。它上面是<b>回溯</b>，即一路调用下来的链条，最近的调用排在最后。先看最后一行，再在上面的列表里找离它最近的、你自己写的那行代码。</p></div>
+<div class="codebox" data-file="traceback.txt" data-lang="text">Traceback (most recent call last):
+  File "app.py", line 7, in &lt;module&gt;
+    print(average([]))
+  File "app.py", line 3, in average
+    return total / len(items)
+ZeroDivisionError: division by zero</div>
 <div class="try" id="p1"></div>
 
 <h2><span class="en">Step 2 · Name the kind of error</span><span class="zh">第 2 步 · 说出错误的种类</span></h2>
@@ -21,8 +27,8 @@
 
 try:
     f(0)
-except ZeroDivisionError as e:
-    print(type(e).__name__, e)</div>
+except ZeroDivisionError as e:   # "as e" names the error object
+    print(type(e).__name__, e)   # its kind, then its message</div>
 <div class="try" id="p2"></div>
 
 <h2><span class="en">Step 3 · Say it in plain words</span><span class="zh">第 3 步 · 用大白话说出来</span></h2>

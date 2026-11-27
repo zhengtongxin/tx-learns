@@ -23,6 +23,12 @@ print(f"{len(items)=}")</div>
 <h2><span class="en">Step 3 · Logs and debuggers</span><span class="zh">第 3 步 · 日志与调试器</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Prints vanish when you clean up. A <b>log</b> is a print you keep on purpose, with a level (info, warning, error) so you can turn the noise up or down; it is how you look inside a program running somewhere you cannot watch. A <b>debugger</b> pauses the program at a line you choose and lets you look at every variable and step forward one line at a time, with no code changes. Use prints for a quick look, a debugger when you need to explore, and logs for what happens after you have gone home.</p>
 <p class="zh" style="margin:0 0 8px">打印在你清理代码时就消失了。<b>日志</b>是你有意保留的打印，带有级别（信息、警告、错误），可以把噪音调大调小；用它才能看到在你看不到的地方运行的程序。<b>调试器</b>在你选定的某一行暂停程序，让你查看每个变量，并一行一行往下走，不用改代码。快速看一眼用打印，需要探索时用调试器，你下班之后发生的事靠日志。</p></div>
+<div class="codebox" data-file="inside.py" data-lang="python">import logging
+logging.basicConfig(level=logging.INFO)
+logging.info("loaded %d rows", 3)   # a log line that stays in the code
+
+items = []
+breakpoint()   # pauses here so a debugger can inspect items</div>
 <div class="try" id="p3"></div>
 
 <h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
