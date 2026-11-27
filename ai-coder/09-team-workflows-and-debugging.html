@@ -7,15 +7,15 @@
 <div class="hero"><span class="tag"><span class="en">Vibe engineering · Lesson 4</span><span class="zh">专业级氛围工程 · 第 4 课</span></span><h1><span class="en">Team workflows and debugging</span><span class="zh">团队流程与调试</span></h1><p class="meta"><span class="en">Use agents inside a team workflow, and give them what they need to debug · ~14 min · concepts</span><span class="zh">把智能体放进团队流程，并给它调试所需要的东西 · 约 14 分钟 · 讲概念</span></p></div>
 
 <h2><span class="en">Step 1 · One loop for the team</span><span class="zh">第 1 步 · 团队共用一个循环</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A steady loop works for people and agents alike: <b>explore</b> the code, <b>plan</b>, <b>build</b> in small steps, <b>test</b>, <b>commit</b>, open a pull request. Ask for the plan before the code.</p>
-<p class="zh" style="margin:0 0 8px">有一个稳定的循环，人和智能体都适用：<b>探索</b>代码、<b>计划</b>、分小步<b>构建</b>、<b>测试</b>、<b>提交</b>、发起拉取请求。先要计划，再要代码。</p>
-<p class="en" style="margin:0 0 8px">For a team, share what the agent reads: commit AGENTS.md, custom commands and skills. Everyone gets the same test command, the same rules, the same checks in continuous integration (CI).</p>
-<p class="zh" style="margin:0 0 8px">对团队来说，要共享智能体读的东西：提交 AGENTS.md、自定义命令和技能。每个人都有同一条测试命令、同一套规矩、持续集成（CI）里同样的检查。</p>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A steady loop works for people and agents alike: <b>explore</b> the code, <b>plan</b>, <b>build</b> in small steps, <b>test</b>, <b>commit</b>, open a pull request (PR: a proposed change that others review before it joins the main code). Ask for the plan before the code.</p>
+<p class="zh" style="margin:0 0 8px">有一个稳定的循环，人和智能体都适用：<b>探索</b>代码、<b>计划</b>、分小步<b>构建</b>、<b>测试</b>、<b>提交</b>、发起拉取请求（PR：一份先让别人审阅、再并入主代码的改动提议）。先要计划，再要代码。</p>
+<p class="en" style="margin:0 0 8px">For a team, share what the agent reads: commit AGENTS.md, custom commands and skills (see the lesson on MCP, skills and plugins). Everyone gets the same test command, the same rules, the same checks in continuous integration (CI), which runs the tests automatically on every change.</p>
+<p class="zh" style="margin:0 0 8px">对团队来说，要共享智能体读的东西：提交 AGENTS.md、自定义命令和技能（见“MCP、技能与插件”那一课）。每个人都有同一条测试命令、同一套规矩、持续集成（CI，每次改动都会自动跑测试）里同样的检查。</p>
 </div>
 
 <h2><span class="en">Step 2 · You still own the review</span><span class="zh">第 2 步 · 审阅仍归你</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Agent-written code is code you are responsible for. Read the diff like a colleague's: does it match the plan, are there tests, any new dependency, any secret, any change you did not ask for?</p>
-<p class="zh" style="margin:0 0 8px">智能体写的代码，你要负责。像读同事的代码那样读它的改动：和计划一致吗？有测试吗？有没有新依赖、有没有密钥、有没有你没要求的改动？</p>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Agent-written code is code you are responsible for. Read the diff (the lines the change adds and removes) like a colleague's: does it match the plan, are there tests, any new dependency (a library the code now needs), any secret (a key or password that must never be committed), any change you did not ask for?</p>
+<p class="zh" style="margin:0 0 8px">智能体写的代码，你要负责。像读同事的代码那样读它的改动（改动新增和删除的那些行）：和计划一致吗？有测试吗？有没有新依赖（代码现在需要的某个库）、有没有密钥（绝不能提交的钥匙或密码）、有没有你没要求的改动？</p>
 <p class="en" style="margin:0 0 8px">Keep pull requests <b>small and single-purpose</b>. A 2,000-line agent diff is a review nobody can do, and the checks are only as good as the review behind them.</p>
 <p class="zh" style="margin:0 0 8px">拉取请求要<b>小而专一</b>。2,000 行的智能体改动没人审得了，而检查的可靠程度，取决于背后那次审阅。</p>
 </div>
@@ -37,17 +37,17 @@ Then write a failing test that shows the bug. Only then fix it.</div>
 <h2><span class="en">Step 4 · The bug, the test, the fix</span><span class="zh">第 4 步 · bug、测试、修复</span></h2>
 <div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Here is what the debug prompt above produces. The bill is 5035 cents shared by 3 people. The code rounds every share up, so the shares add up to 5037. The agent's first move is a test that fails for the right reason: the shares must add up to the bill.</p>
 <p class="zh" style="margin:0 0 8px">上面那份调试提示会得到这样的结果。账单是 5035 分，3 个人分摊。代码把每份都向上取整，所以几份加起来是 5037。智能体的第一步是写一个因为正确原因而失败的测试：几份加起来必须等于账单。</p></div>
-<div class="codebox" data-file="split.js, the failing test" data-lang="js">function split(cents, people) {
+<div class="codebox" data-file="split.js, the buggy version and its failing test" data-lang="js">function split(cents, people) {
   return Array(people).fill(Math.ceil(cents / people));
 }
-const assert = require('node:assert');
+const assert = require('node:assert'); // assert stops with an error when a check is false
 const parts = split(5035, 3);
 assert.strictEqual(parts.reduce((a, b) => a + b, 0), 5035, 'shares must add up to the bill');
 // AssertionError: shares must add up to the bill (5037 !== 5035)</div>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Only now the fix: give everyone the rounded-down share, then hand the leftover cents to the first few people. The same test now passes, and you can read a four-line diff.</p>
-<p class="zh" style="margin:0 0 8px">到这时才修：每人先拿向下取整的份额，剩下的几分钱分给前几个人。同一个测试现在通过，而你要审的只是四行改动。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Only now the fix: give everyone the rounded-down share, then hand the leftover cents to the first few people. The same test now passes, and you only have to review a four-line change.</p>
+<p class="zh" style="margin:0 0 8px">到这时才修：每人先拿向下取整的份额，剩下的几分钱分给前几个人。同一个测试现在通过，而你只需审阅四行改动。</p></div>
 <div class="codebox" data-file="split.js, the fix" data-lang="js">function split(cents, people) {
-  const base = Math.floor(cents / people), extra = cents % people;
+  const base = Math.floor(cents / people), extra = cents % people; // % is the remainder: 5035 % 3 is 1
   return Array.from({ length: people }, (_, i) => base + (i < extra ? 1 : 0));
 }
 // split(5035, 3) gives [1679, 1678, 1678], which adds up to 5035</div>
