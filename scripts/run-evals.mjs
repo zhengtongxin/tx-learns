@@ -91,6 +91,18 @@ for (const c of JSON.parse(readFileSync(join(ROOT, 'evals/triage-cases.json'), '
   report('queue: areas follow areas.json, first match wins', areaOf('coach/logic.js', [{ id: 'a', paths: ['coach/'] }, { id: 'b', paths: ['coach/logic.js'] }]) === 'a' && areaOf('zz.js', []) === 'other');
 }
 
+// ── 1c3. The scope guard's first answer (scripts/scope-guard.mjs tidyBlind): long is cut, not thrown away ──
+{
+  const { tidyBlind } = await import('./scope-guard.mjs');
+  const { validate } = await import('./validate.mjs');
+  const schema = JSON.parse(readFileSync(join(ROOT, 'schemas/scope-blind.schema.json'), 'utf8'));
+  const long = tidyBlind({ summary: 'word '.repeat(300), changes: [...Array(30).keys()].map(i => `change ${i} ` + 'x'.repeat(300)).concat([{ change: 'an object line' }, 7]) }, schema);
+  report('scope: an over-long first answer is cut to the schema and stays usable', !!long && validate(schema, long).length === 0 && long.summary.length <= 600 && long.changes.length === 20);
+  const short = tidyBlind({ summary: 'Adds a page.', changes: ['adds a.html', { change: 'links it' }] }, schema);
+  report('scope: a short answer is kept as it is; a line given as an object is read', short.summary === 'Adds a page.' && short.changes.join('|') === 'adds a.html|links it');
+  report('scope: an answer with no summary is still refused', tidyBlind({ changes: ['x'] }, schema) === null && tidyBlind(null, schema) === null && tidyBlind([], schema) === null);
+}
+
 // ── 1d. The daily scan (scripts/daily-scan.mjs): the docs check, the rework count, the reader signal and the summary ──
 {
   const { drift, reworkFrom, readerSignal, combine } = await import('./daily-scan.mjs');
