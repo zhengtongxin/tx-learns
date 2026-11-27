@@ -53,10 +53,11 @@ const br = await chromium.launch(), out = [];
 const ctx = await br.newContext({ viewport: { width: 1100, height: 900 }, acceptDownloads: true }), pg = await ctx.newPage();
 const errs = []; pg.on('pageerror', e => errs.push(e.message)); pg.on('console', m => m.type() === 'error' && errs.push(m.text()));
 pg.on('request', q => { if (!q.url().startsWith(base) && !q.url().startsWith('data:') && !q.url().startsWith('blob:')) out.push(q.url()); });
-await pg.addInitScript(() => { let n = 0; window.__coachTestEngine = { chat: async (m) => { if (/Which option is correct according to the excerpt/.test(JSON.stringify(m))) { window.__verified = (window.__verified || 0) + 1; return '{"answer":"A"}'; } n++; window.__lastPrompt = JSON.stringify(m); if (/Summarise the idea/.test(window.__lastPrompt)) return JSON.stringify({ summary: /Chinese \(简体中文\)/.test(window.__lastPrompt) ? '这一段讲的是怎样先倾听再决定。' : 'This passage explains how to listen first and decide after.' }); if (/Chinese \(简体中文\)/.test(window.__lastPrompt)) return JSON.stringify({ question: '假问题第 ' + n + ' 个：项目经理应该先做什么？', options: ['先听双方的说法', '直接无视', '马上升级', '等发起人表态'], answer: 0, explanation: '先倾听有助于达成共识。' }); return JSON.stringify({ question: 'Fake question number ' + n + ': what should the project manager do first?', options: ['Listen to both sides', 'Ignore it', 'Escalate at once', 'Wait for the sponsor'], answer: 0, explanation: 'Listening first builds shared understanding.' }); } }; });
+await pg.addInitScript(() => { let n = 0; window.__coachTestEngine = { chat: async (m) => { if (/Which option is correct according to the excerpt/.test(JSON.stringify(m))) { window.__verified = (window.__verified || 0) + 1; return '{"answer":"A"}'; } n++; window.__lastPrompt = JSON.stringify(m); if (/Summarise the key idea/.test(window.__lastPrompt)) return JSON.stringify({ summary: /Chinese \(简体中文\)/.test(window.__lastPrompt) ? '这一段讲的是怎样先倾听再决定。' : 'This passage explains how to listen first and decide after.' }); if (/Chinese \(简体中文\)/.test(window.__lastPrompt)) return JSON.stringify({ question: '假问题第 ' + n + ' 个：项目经理应该先做什么？', options: ['先听双方的说法', '直接无视', '马上升级', '等发起人表态'], answer: 0, explanation: '先倾听有助于达成共识。' }); return JSON.stringify({ question: 'Fake question number ' + n + ': what should the project manager do first?', options: ['Listen to both sides', 'Ignore it', 'Escalate at once', 'Wait for the sponsor'], answer: 0, explanation: 'Listening first builds shared understanding.' }); } }; });
+const v = n => pg.click('#flow [data-go=' + n + ']');
 await pg.goto(base + 'study/index.html');
 await pg.waitForSelector('#app:not([hidden])');
-ok(/Get\s*started/i.test(await pg.textContent('#today')), 'first visit shows how to get started');
+ok((await pg.evaluate(() => window.__coach.view())) === 'mats' && await pg.locator('#s-mats').isVisible() && !(await pg.locator('#s-goal').isVisible()) && await pg.locator('#flow [data-go=practice]').isDisabled(), 'a first visit starts at the material step and the practice steps are locked');
 await pg.setInputFiles('#files', [join(fx, 't.pptx'), join(fx, 't.pdf')]);
 await pg.waitForFunction(() => document.querySelectorAll('#mats .files li').length === 2, null, { timeout: 30000 });
 const st = await pg.evaluate(() => ({ s: window.__coach.state(), c: window.__coach.chunks() }));
@@ -65,6 +66,9 @@ ok(st.s.mats.some(m => m.lang === 'en') && st.c.some(c => /Conflict|conflict/.te
 ok(st.s.goal === 'understand' && st.s.exam === 'custom', 'the default goal is subject-neutral: understand the material, no ready-made exam');
 ok(!/PMP/.test(await pg.textContent('#goal')) && !/PMP/.test(await pg.textContent('#today')) && !/PMP/.test(await pg.textContent('#map')), 'the tool page does not mention PMP until an outline is chosen');
 ok(await pg.locator('#map .row').count() === 2, 'by default the strength map has one area per file');
+ok(await pg.locator('#flow [data-go=practice]').isEnabled(), 'with material the practice steps unlock');
+await pg.click('#s-mats [data-go=goal]'); ok(await pg.locator('#s-goal').isVisible() && !(await pg.locator('#s-mats').isVisible()), 'Continue leads from the material to the goal, one panel at a time');
+await pg.click('#s-goal [data-go=model]'); ok(await pg.locator('#s-model').isVisible(), 'and from the goal to the model'); await v('goal');
 // any exam: the reader names it and enters its areas and weights
 await pg.check('input[value=exam]');
 ok(/Add at least one area/.test(await pg.textContent('#goal')), 'an exam with no areas yet says so');
@@ -74,9 +78,10 @@ await pg.locator('#ctext').blur();
 ok((await pg.evaluate(() => window.__coach.state())).ctext.includes('Process'), 'typed areas are saved');
 ok(st.c.length > 0 && (await pg.evaluate(() => window.__coach.chunks().some(c => c.area === 'x:n-process'))), 'passages are matched to the typed areas');
 ok(await pg.locator('#today .plan li').count() === 1 && /Process/.test(await pg.textContent('#today .plan')) && !/People|Business/.test(await pg.textContent('#today .plan')), 'today plans only the typed area that has material (the other two have none)');
-ok(await pg.evaluate(() => document.getElementById('app').hasAttribute('data-ready')), 'with material, practice and the track button come before the setup');
-await pg.click('[data-act=drill]');
+// the model step starts the first round by itself once the model is ready
+await v('model'); await pg.click('[data-act=load]');
 await pg.waitForSelector('.opt');
+ok((await pg.evaluate(() => window.__coach.view())) === 'practice' && await pg.locator('#practice').isVisible() && !(await pg.locator('#s-model').isVisible()), 'once the model is ready the flow moves on to practice and starts a round');
 ok(/Fake question/.test(await pg.textContent('#practice')), 'a question appears');
 ok(await pg.evaluate(() => window.__verified > 0), 'the answer key gets a second opinion before the question is shown');
 for (let i = 0; i < 10; i++) {
@@ -88,10 +93,13 @@ await pg.waitForSelector('#practice .lead2');
 const after = await pg.evaluate(() => window.__coach.state());
 ok(Object.values(after.stats).reduce((a, s) => a + s.n, 0) === 10, '10 answers recorded');
 ok(after.days[Object.keys(after.days)[0]].n === 10, 'today count is 10');
-await pg.click('[data-act=close]');
+await pg.click('[data-act=close]'); ok(await pg.locator('#today').isVisible(), 'after a round you are back at today’s plan');
+ok(/Your coach|你的教练/.test(await pg.textContent('#today')), 'the plan is a coach card');
+if (await pg.locator('#today [data-act=gap]').count()) { await pg.click('#today [data-act=gap]'); await pg.waitForSelector('.opt'); ok(await pg.evaluate(() => window.__coach.view()) === 'practice', 'a gap round starts from the coach card'); await pg.evaluate(() => document.querySelector('[data-act=opt]').click()); await v('practice'); }
 ok(await pg.locator('#map .row').count() === 3, 'strength map has the three exam areas');
 // wrong-question book: missed questions are kept, redone shuffled, a slip can be taken back, a lucky guess counts as a miss, the book prints
 ok(/to redo|待重做/.test(await pg.textContent('#book')), 'missed questions go into the wrong-question book');
+await v('progress');
 const nBook = await pg.evaluate(() => window.__coach.state().bank.filter(x => x.res === 0 && !x.flag && !x.done).length);
 await pg.evaluate(() => { window.__printed = 0; window.print = () => { window.__printed++; }; });
 await pg.click('[data-act=print]'); ok(await pg.evaluate(() => window.__printed) === 1 && (await pg.locator('#printarea .pq').count()) === nBook, 'the book prints every question in full');
@@ -106,6 +114,7 @@ for (let i = 0; i < 4 && !guessed; i++) { for (let k = 0; k < 4 && !guessed; k++
 ok(guessed && (await pg.evaluate(() => window.__coach.state().stats)) && (await pg.textContent('#practice')).includes('Not quite') === false || guessed, 'a right answer can be marked as a guess');
 for (let i = 0; i < 40 && !(await pg.locator('#practice .lead2').count()); i++) { if (await pg.locator('#nx').count()) await pg.click('#nx'); else if (await pg.locator('.opt:not([disabled])').count()) await pg.locator('.opt').nth(0).click(); else await pg.waitForTimeout(100); }
 await pg.click('[data-act=close]');
+await v('goal');
 // an area nothing matches is named and gets no questions; passages that match no area are practised under "Other"
 await pg.fill('#ctext', 'Zebras, 50\nBusiness environment, 50'); await pg.locator('#ctext').blur();
 ok(/No material for/.test(await pg.textContent('#map p.warn')) && /Zebras/.test(await pg.textContent('#map p.warn')) && /no material/.test(await pg.textContent('#map .row')), 'an area without material says so');
@@ -122,22 +131,24 @@ await pg.evaluate(() => { const s = window.__coach.state(); s.stats['x:people'] 
 await pg.selectOption('[data-act=exam-ver]', '2021'); await pg.selectOption('[data-act=exam-ver]', '2026');
 ok((await pg.$$eval('#map .ll a', a => a.map(x => x.getAttribute('href')))).includes('../pmp/05-conflict-and-negotiation.html'), 'a weak area lists its lessons');
 // mini exam
-await pg.click('[data-act=exam]');
+await v('practice'); await pg.click('[data-act=exam]');
 await pg.waitForSelector('.opt');
 for (let i = 0; i < 20; i++) { await pg.waitForSelector('.opt', { timeout: 10000 }).catch(() => {}); if (await pg.locator('#practice .lead2').count()) break; await pg.locator('.opt').first().click(); }
 await pg.waitForSelector('#practice .lead2');
 ok(true, 'mini exam finishes');
 await pg.click('[data-act=close]');
 // understand goal
-await pg.check('input[value=understand]');
+await v('goal'); await pg.check('input[value=understand]');
 ok(await pg.locator('#map .row').count() === 2, 'understand mode has one area per file');
 // backup round trip
+await v('mats');
 const [dl] = await Promise.all([pg.waitForEvent('download'), pg.click('[data-act=export]')]);
 const path = await dl.path(); const before = await pg.evaluate(() => JSON.stringify(window.__coach.state().stats));
 await pg.click('[data-act=reset]'); await pg.click('[data-act=reset]');
 ok(await pg.locator('#mats .files li').count() === 0, 'erase clears the material');
 await pg.setInputFiles('#imp', path); await pg.waitForFunction(() => document.querySelectorAll('#mats .files li').length === 2);
 ok(await pg.evaluate(() => JSON.stringify(window.__coach.state().stats)) === before, 'import restores the records');
+await v('track');
 // share notes: the button stays off until the notes and the promise are there, then opens GitHub's new-file page with no uploaded material
 await pg.evaluate(() => { window.__opened = []; window.open = (u) => { window.__opened.push(u); return null; }; });
 ok(await pg.locator('[data-act=share]').isDisabled(), 'share is off with no notes');
@@ -156,12 +167,12 @@ ok(/Track: ai-leader/.test(decodeURIComponent((await pg.evaluate(() => window.__
 // the model and the questions follow the page language, whatever language the material is in
 await pg.click('.top [data-l=zh]');
 await pg.evaluate(() => window.__coach.state().bank.length = 0);
-await pg.click('[data-act=drill]'); await pg.waitForSelector('.opt');
+await v('practice'); await pg.click('[data-act=drill]'); await pg.waitForSelector('.opt');
 ok(/假问题/.test(await pg.textContent('#practice')) && /Chinese \(简体中文\)/.test(await pg.evaluate(() => window.__lastPrompt)), 'a Chinese page gets Chinese questions from English slides');
 await pg.click('.top [data-l=en]'); await pg.reload(); await pg.waitForSelector('#app:not([hidden])');
-// short summaries in the model's own words, then a submission too long for one link is copied instead
-await pg.click('[data-act=sums]'); await pg.waitForFunction(() => (window.__coach.state().sums || []).length > 0 && /Redo the short summaries/.test(document.getElementById('share').textContent), null, { timeout: 30000 });
-ok(/listen first/.test(await pg.inputValue('#npreview')) && /Condensed points/.test(await pg.inputValue('#npreview')), 'AI summaries join the submission');
+// key ideas in the model's own words, then a submission too long for one link is copied instead
+await v('track'); await pg.click('[data-act=sums]'); await pg.waitForFunction(() => (window.__coach.state().sums || []).length > 0 && /Write them again/.test(document.getElementById('share').textContent), null, { timeout: 30000 });
+ok(/listen first/.test(await pg.inputValue('#npreview')) && /Key ideas from my material/.test(await pg.inputValue('#npreview')), 'AI summaries join the submission');
 await pg.evaluate(() => { window.__clip = ''; Object.defineProperty(navigator, 'clipboard', { value: { writeText: async t => { window.__clip = t; } }, configurable: true }); window.__opened = []; window.open = (u) => { window.__opened.push(u); return null; }; });
 await pg.check('#nok');
 await pg.fill('#nbody', 'Stakeholders are engaged by influence and interest, é. '.repeat(120).replace(/[a-z]/g, c => c === 'e' ? '界' : c).slice(0, 3900)); await pg.click('[data-act=share]');

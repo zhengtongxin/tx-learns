@@ -91,7 +91,7 @@ async function addFiles(files){
 function dropMat(id){S.mats=S.mats.filter(function(m){return m.id!==id});CH=CH.filter(function(c){return c.mat!==id})}
 
 /* ---------- the model (open weights, in the browser) ---------- */
-function setProg(p,txt){var b=$('mprog');if(b){b.hidden=false;b.value=Math.round((p||0)*100)}var l=$('mline');if(l&&txt)l.textContent=txt}
+function setProg(p,txt){['mprog','pprog'].forEach(function(i){var b=$(i);if(b){b.hidden=false;b.value=Math.round((p||0)*100)}});['mline','pline'].forEach(function(i){var l=$(i);if(l&&txt)l.textContent=txt})}
 async function loadModel(){
  if(window.__coachTestEngine){ENG=window.__coachTestEngine;return ENG}
  if(!navigator.gpu)throw new Error('nogpu');
@@ -114,22 +114,40 @@ async function ensureModel(){
 
 /* ---------- a round of questions ---------- */
 function mix(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+/* the gaps the coach names: weak areas, areas never tested, areas due for review, and the passages missed most */
+function gapInfo(){
+ var now=Date.now(),weak=[],fresh=[],due=[],soon=null;
+ areas().filter(function(a){return hasMat(a.id)}).forEach(function(a){var h=hist(a.id),v=Lg.strength(h),last=S.stats[a.id]&&S.stats[a.id].last;
+  if(v==null){fresh.push(a);return}
+  if(v<0.6)weak.push({a:a,p:Math.round(v*100)});
+  var left=last?Lg.interval(h)-Lg.daysSince(last,now):0;
+  if(left<=0)due.push(a);else if(!soon||left<soon.d)soon={a:a,d:left}});
+ weak.sort(function(x,y){return x.p-y.p});
+ var miss=Object.keys(S.miss).filter(function(k){return S.miss[k]>0}).map(function(k){return {c:CH.filter(function(c){return c.id===k})[0],n:S.miss[k]}}).filter(function(x){return x.c}).sort(function(x,y){return y.n-x.n}).slice(0,6);
+ return {weak:weak,fresh:fresh,due:due,miss:miss,soon:soon,any:!!(weak.length||miss.length||due.length)}}
+/* a gap round: the passages you missed first, then the weakest areas */
+function gapSlots(n){
+ var g=gapInfo(),out=g.miss.slice(0,Math.min(n,6)).map(function(x){return {area:x.c.area,chunk:x.c.id}});
+ if(out.length<n){var rest=planFor('drill',n-out.length).filter(function(p){return p.why==='weak'||p.why==='due'});if(!rest.length)rest=planFor('drill',n-out.length);flatten(rest).forEach(function(x){if(out.length<n)out.push(x)})}
+ return mix(out)}
+function nextHint(){var g=gapInfo();if(g.due.length)return T('Due for review now: '+g.due.slice(0,3).map(function(a){return a.name.en}).join(', ')+'.','现在该复习：'+g.due.slice(0,3).map(function(a){return a.name.zh}).join('、')+'。');
+ if(g.soon)return T('Next review: '+g.soon.a.name.en+' '+(g.soon.d===1?'tomorrow':'in '+g.soon.d+' days')+'.','下次复习：'+g.soon.a.name.zh+(g.soon.d===1?'，明天。':'，'+g.soon.d+' 天后。'));return ''}
 function flatten(plan){var out=[];plan.forEach(function(p){for(var i=0;i<p.k;i++)out.push({area:p.id})});return mix(out)}
 async function startRound(kind,n){
  if(!CH.length){say('Add material first.','请先添加资料。');return}
  if(R&&R.busy)return;
- var slots=flatten(planFor(kind,n));
+ var slots=kind==='gap'?gapSlots(n):flatten(planFor(kind,n));
  if(!slots.length){say('No passage matches an exam area yet. Add keywords to your areas, or add material that covers them.','还没有文字能对上任何考试领域。请给领域加关键词，或添加覆盖这些领域的资料。');return}
  R={kind:kind,slots:slots,items:[],i:0,gen:0,busy:false,fail:0,view:'wait'};
- $('practice').hidden=false;renderPractice();$('practice').scrollIntoView({block:'start'});
- try{await ensureModel()}catch(e){R=null;renderPractice();return}
+ go('practice');renderPractice();
+ try{await ensureModel()}catch(e){R=null;renderPractice();go('model');return}
  pump();show()}
 async function pump(){
  var r=R;if(!r||r.busy)return;r.busy=true;
  while(R===r&&r.gen<r.slots.length&&r.items.length-r.i<2){
   var slot=r.slots[r.gen],item=null;
   for(var tries=0;tries<3&&!item&&R===r;tries++){
-   var ch=Lg.pick(CH,slot.area,S.miss,S.used,Math.random);if(!ch)break;
+   var ch=slot.chunk?CH.filter(function(c){return c.id===slot.chunk})[0]:Lg.pick(CH,slot.area,S.miss,S.used,Math.random);if(!ch)break;
    var a=areas().filter(function(x){return x.id===slot.area})[0]||{},ex=useExam();
    var pl=pageLang();
    try{var raw=await ENG.chat(Lg.prompt({text:ch.text,lang:pl,srcLang:Lg.lang(ch.text),exam:ex?exam().e.name[pl]+(exam().v.label[pl]?' ('+(pl==='zh'?'考纲：':'outline: ')+exam().v.label[pl]+')':''):'',domain:(a.name&&a.name[pl])||a.dom||'',tasks:a.tasks||''}));
@@ -172,16 +190,20 @@ function next(){R.i++;pump();show();renderAll(true)}
 var WHY={new:['Not tested yet','还没测过'],weak:['Weak','薄弱'],due:['Due for review','该复习了'],keep:['Keep warm','保持']};
 function renderToday(){
  var el=$('today'),n=S.perDay,td=today();
- if(!CH.length){el.innerHTML='<h2>'+T('Get <em>started</em>','开始<em>吧</em>')+'</h2><ol class="steps"><li>'+T('Add your slides or PDFs below.','在下面添加你的课件或 PDF。')+'</li><li>'+T('Pick a goal: understand the material, or prepare for an exam.','选目标：弄懂资料，或通过考试。')+'</li><li>'+T('Download the free model once, then practise.','一次性下载免费模型，然后开始练习。')+'</li></ol>';return}
- var plan=planFor('drill',n);
- el.innerHTML='<h2>'+T('Practise <em>today</em>','今天<em>练什么</em>')+'</h2><p class="meta">'+T('Done today: '+td.n+' of '+n+' questions.','今天已做：'+td.n+' / '+n+' 题。')+'</p>'+
+ if(!CH.length){el.innerHTML='';return}
+ var plan=planFor('drill',n),g=gapInfo(),tested=Object.keys(S.stats).length>0,h,names=function(l){return l.slice(0,3).map(function(x){return T((x.a||x).name.en,(x.a||x).name.zh)}).join(T(', ','、'))};
+ if(!tested)h=T('Your coach starts with a first round across your material. The answers show where the gaps are.','教练先带你过一遍资料，看你答得怎样，就知道缺口在哪里。');
+ else if(!g.any)h=T('No gaps right now. Keep it warm with a short round.','目前没有明显缺口。做一小轮保持手感。');
+ else h=(g.weak.length?T('Weak: ','薄弱：')+names(g.weak)+'. ':'')+(g.due.length?T('Due for review: ','该复习：')+names(g.due)+'. ':'')+(g.fresh.length?T('Not tested yet: ','还没测过：')+names(g.fresh)+'. ':'');
+ el.innerHTML='<h2>'+T('Your <em>coach</em>','你的<em>教练</em>')+'</h2><p class="lead2">'+h+'</p><p class="meta">'+T('Done today: '+td.n+' of '+n+' questions.','今天已做：'+td.n+' / '+n+' 题。')+'</p>'+
+  (g.miss.length?'<p class="meta">'+T('Passages you missed most: ','你错得最多的段落：')+g.miss.slice(0,3).map(function(x){return aname(x.c.area)+' · '+esc(x.c.loc)+' ×'+x.n}).join(' ; ')+'</p>':'')+
   '<ul class="plan">'+plan.map(function(p){var w=WHY[p.why];return '<li><span class="pk">'+p.k+'</span><span>'+aname(p.id)+'</span><span class="chip">'+T(w[0],w[1])+'</span></li>'}).join('')+'</ul>'+
-  '<p class="acts"><button class="btn pri" data-act="drill">'+T('Practise now','现在练习')+'</button>'+(useExam()?'<button class="btn" data-act="exam">'+T('Mini exam · 20 questions','小测验 · 20 题')+'</button>':'')+
-  (S.rounds>0||Object.keys(S.stats).length?'<button class="btn" data-act="goshare">'+T('Turn this into a track','把这个变成路线')+'</button>':'')+'<label class="per">'+T('Per day','每天')+' <select data-act="perday" aria-label="Questions per day · 每天题数">'+[5,10,20].map(function(x){return '<option'+(x===n?' selected':'')+'>'+x+'</option>'}).join('')+'</select></label></p>'}
+  '<p class="acts"><button class="btn pri" data-act="drill">'+T('Practise now','现在练习')+'</button>'+(g.any?'<button class="btn" data-act="gap">'+T('Fix my gaps','补我的缺口')+'</button>':'')+(useExam()?'<button class="btn sm" data-act="exam">'+T('Mini exam · 20 questions','小测验 · 20 题')+'</button>':'')+
+  '<label class="per">'+T('Per day','每天')+' <select data-act="perday" aria-label="Questions per day · 每天题数">'+[5,10,20].map(function(x){return '<option'+(x===n?' selected':'')+'>'+x+'</option>'}).join('')+'</select></label></p>'}
 function renderMap(){
  var el=$('map');if(!CH.length){el.innerHTML='';return}
  el.innerHTML='<h2>'+T('Strength <em>map</em>','强弱<em>图</em>')+'</h2><div class="rows">'+areas().map(function(a){var s=Lg.strength(hist(a.id)),p=s==null?0:Math.round(s*100),n=(S.stats[a.id]||{}).n||0,none=!hasMat(a.id);
-  return '<div class="row"><div class="rl">'+T(a.name.en,a.name.zh)+(useExam()&&!a.other?' <span class="meta">'+a.w+'%</span>':'')+(s!=null&&s<0.6?lessonLinks(a):'')+'</div><div class="bar" role="img" aria-label="'+(s==null?'Not tested yet · 还没测过':p+'%')+'"><i class="'+(s!=null&&s<0.6?'weak':'')+'" style="width:'+p+'%"></i></div><div class="rv2">'+(s==null?(none?T('no material','缺资料'):T('not tested','未测')):p+'%')+'</div><div class="meta rn">'+n+'</div></div>'}).join('')+'</div><p class="meta">'+T('Strength blends your recent answers, newest first. The right-hand number is questions answered.','强度综合你近期的作答，越新权重越大。最右边的数字是已答题数。')+'</p>'+mapNotes()}
+  return '<div class="row"><div class="rl">'+T(a.name.en,a.name.zh)+(useExam()&&!a.other?' <span class="meta">'+a.w+'%</span>':'')+(s!=null&&s<0.6?lessonLinks(a):'')+'</div><div class="bar" role="img" aria-label="'+(s==null?'Not tested yet · 还没测过':p+'%')+'"><i class="'+(s!=null&&s<0.6?'weak':'')+'" style="width:'+p+'%"></i></div><div class="rv2">'+(s==null?(none?T('no material','缺资料'):T('not tested','未测')):p+'%')+'</div><div class="meta rn">'+n+'</div></div>'}).join('')+'</div><p class="meta">'+T('Strength blends your recent answers, newest first. The right-hand number is questions answered.','强度综合你近期的作答，越新权重越大。最右边的数字是已答题数。')+'</p>'+mapNotes()+'<p class="acts"><button class="btn pri" data-go="practice">'+T('Practise now','现在练习')+'</button>'+'<button class="btn" data-go="track">'+T('Turn it into a track','变成一条路线')+'</button></p>'}
 /* what the map cannot show by itself: areas with nothing to ask from, and passages that matched no area */
 function mapNotes(){if(!useExam())return '';var A=areas(),no=A.filter(function(a){return !a.other&&!hasMat(a.id)}),o=CH.filter(function(c){return c.area===OTHER}).length,h='';
  if(no.length)h+='<p class="meta warn">'+T('No material for: ','缺资料的领域：')+no.map(function(a){return T(a.name.en,a.name.zh)}).join(T(', ','、'))+T('. No questions are asked there until a passage matches: add material, or add keywords to the area.','。在有文字对上之前，这些领域不出题：请添加资料，或给领域加关键词。')+'</p>';
@@ -193,7 +215,7 @@ function lessonLinks(a){var L=a.lessons,X=window.TRACK_INDEX&&L&&window.TRACK_IN
  return '<div class="meta ll">'+T('Lessons on this: ','相关的课：')+f.map(function(x){return '<a href="../'+L.track+'/'+x+'">'+T(esc(X.titles[x].en),esc(X.titles[x].zh))+'</a>'}).join(' · ')+'</div>'}
 function renderMats(){
  $('mats').innerHTML=(S.mats.length?'<p class="meta">'+S.mats.length+' '+T('files','个文件')+' · '+CH.length+' '+T('passages','段文字')+'</p><ul class="files'+(S.mats.length>6?' long':'')+'">'+S.mats.map(function(m){return '<li><span class="fn">'+esc(m.name)+'</span><span class="meta">'+m.pages+' '+(m.word==='slide'?T('slides','张幻灯片'):(m.word==='page'?T('pages','页'):T('text','文本')))+' · '+(m.lang==='zh'?'中文':'English')+'</span><button class="btn sm" data-act="rm" data-id="'+m.id+'" aria-label="Remove '+esc(m.name)+' · 移除">'+T('Remove','移除')+'</button></li>'}).join('')+'</ul>':'')+
-  '<label class="drop" id="drop"><input type="file" id="files" multiple accept=".pdf,.pptx,.txt,.md"><span>'+T('Choose files or drop them here · PDF, PPTX, text · English or 中文','选择文件或拖到这里 · PDF、PPTX、文本 · 中英文均可')+'</span></label>'}
+  '<label class="drop" id="drop"><input type="file" id="files" multiple accept=".pdf,.pptx,.txt,.md"><span>'+T('Choose files or drop them here · PDF, PPTX, text · English or 中文','选择文件或拖到这里 · PDF、PPTX、文本 · 中英文均可')+'</span></label><p class="meta">'+T('Private: your files are read on this device and never uploaded. No login.','私密：文件只在这台设备上读取，从不上传。不用登录。')+'</p>'+(CH.length?'<p class="acts"><button class="btn pri" data-go="goal">'+T('Continue: your goal','继续：你的目标')+' →</button></p>':'')}
 function chint(n){return T('Copy these from the exam’s official outline. Add words to help the matching with “Area | word word | 30”.','请抄自该考试的官方考纲。想让匹配更准，可以写成“领域 | 关键词 关键词 | 30”。')+(n?'':' <b>'+T('Add at least one area; until then questions follow your files.','至少填一个领域；在此之前，题目按你的文件出。')+'</b>')}
 function renderGoal(){
  var x=exam(),d=x.v.domains,cu=S.exam==='custom';
@@ -204,8 +226,9 @@ function renderGoal(){
      '<p class="rowf"><label>'+T('Areas and weights, one per line','领域和比例，每行一个')+'<textarea id="ctext" rows="5" aria-label="Areas and weights · 领域和比例" placeholder="'+esc(PH('Area one, 40\nArea two, 35\nArea three, 25','领域一, 40\n领域二, 35\n领域三, 25'))+'">'+esc(S.ctext||'')+'</textarea></label></p>'+
      '<p class="meta" id="chint">'+chint(d.length)+'</p>'
     :'<p class="meta">'+d.map(function(a){return T(a.name.en,a.name.zh)+' '+a.weight+'%'}).join(' · ')+'. '+T('Questions follow these shares. Check them against the','题目按这些比例出。请对照')+' <a href="https://www.pmi.org/certifications/project-management-pmp" target="_blank" rel="noopener noreferrer">'+T('official outline','官方考纲')+'</a>.</p>'):
-   '<p class="meta">'+T('Questions spread across your files and lean toward what you miss.','题目分布在你的各个文件里，并偏向你答错的地方。')+'</p>')}
+   '<p class="meta">'+T('Questions spread across your files and lean toward what you miss.','题目分布在你的各个文件里，并偏向你答错的地方。')+'</p>')+'<p class="acts"><button class="btn pri" data-go="model">'+T('Continue: the model','继续：模型')+' →</button></p>'}
 function renderModel(busy,err){
+ renderFlow();
  var gpu=!!navigator.gpu||!!window.__coachTestEngine,ready=!!ENG&&(window.__coachTestEngine||ENGID);
  var msg=err==='nogpu'?T('This browser or computer cannot run the model (it needs WebGPU). Use desktop Chrome or Edge.','这个浏览器或电脑无法运行模型（需要 WebGPU）。请用电脑版 Chrome 或 Edge。'):
   err==='nomodel'?T('The model list changed. Please report it on GitHub.','模型列表已变化。请到 GitHub 报告。'):err==='fail'?T('The download or start failed. Check your connection and try again.','下载或启动失败。请检查网络后重试。'):'';
@@ -213,20 +236,23 @@ function renderModel(busy,err){
   '<p class="acts"><button class="btn'+(ready?'':' pri')+'" data-act="load"'+(busy||!gpu?' disabled':'')+'>'+(ready?T('Model ready','模型已就绪'):busy?T('Starting…','启动中…'):T('Download and start the model','下载并启动模型'))+'</button></p>'+
   '<progress id="mprog" max="100" value="0"'+(busy?'':' hidden')+' aria-label="Model download · 模型下载"></progress><p class="meta" id="mline" aria-live="polite"></p>'+
   (!navigator.gpu&&!window.__coachTestEngine?'<p class="warn">'+T('This browser has no WebGPU. You can still add material and see the plan, but questions need desktop Chrome or Edge.','这个浏览器没有 WebGPU。你仍可添加资料、查看计划，但出题需要电脑版 Chrome 或 Edge。')+'</p>':'')+(msg?'<p class="warn">'+msg+'</p>':'')+
-  '<p class="meta">'+T('Open models (Qwen3, Apache 2.0), run by your own browser. The first download is large and is kept by the browser for next time.','开源模型（Qwen3，Apache 2.0），由你自己的浏览器运行。首次下载较大，浏览器会留着供下次使用。')+'</p>'}
+  '<p class="meta">'+T('Open models (Qwen3, Apache 2.0), run by your own browser on desktop Chrome or Edge. The first download is large and is kept by the browser for next time. A small model: some questions will be wrong, so use “looks wrong” on them.','开源模型（Qwen3，Apache 2.0），由你自己的浏览器在电脑版 Chrome 或 Edge 上运行。首次下载较大，浏览器会留着供下次使用。模型较小，有些题会出错：用“有问题”按钮标出来。')+'</p>'+(ready&&CH.length?'<p class="acts"><button class="btn pri" data-go="practice">'+T('Start practising','开始练习')+' →</button></p>':'')}
 function renderBackup(){
  $('backup').innerHTML='<p class="acts"><button class="btn" data-act="export">'+T('Export my records','导出我的记录')+'</button><label class="btn">'+T('Import','导入')+'<input type="file" id="imp" accept=".json,application/json" hidden></label>'+
   '<button class="btn" data-act="reset">'+(confirmKey==='reset'?T('Click again to erase everything','再点一次，清除全部'):T('Erase everything','清除全部'))+'</button></p>'+
   '<p class="meta">'+T('Your records and the text of your files live only in this browser. Export to back them up or move to another device; the file contains your materials’ text, so keep it private.','你的记录和资料文字只保存在这个浏览器里。可导出来备份或换设备；导出的文件含有资料文字，请妥善保管。')+(persistOK?'':' <b>'+T('This browser blocks saving: export before you leave.','这个浏览器禁止保存：离开前请先导出。')+'</b>')+'</p>'}
 function renderPractice(focus){
  var el=$('practice');if(!R){el.hidden=true;el.innerHTML='';return}
- el.hidden=false;var h='',it=R.items[R.i],total=R.slots.length;
- if(R.view==='wait'){h='<p class="meta" aria-live="polite">'+T('Writing question '+(Math.min(R.items.length,total-1)+1)+' of '+total+'… the first one takes a little while.','正在出第 '+(Math.min(R.items.length,total-1)+1)+' / '+total+' 题…第一题要稍等。')+'</p>'}
+ el.hidden=V!=='practice';var h='',it=R.items[R.i],total=R.slots.length;
+ if(R.view==='wait'){h='<p class="meta" aria-live="polite">'+T('Writing question '+(Math.min(R.items.length,total-1)+1)+' of '+total+'… the first one takes a little while.','正在出第 '+(Math.min(R.items.length,total-1)+1)+' / '+total+' 题…第一题要稍等。')+'</p><progress id="pprog" max="100" value="0" hidden aria-label="Model download · 模型下载"></progress><p class="meta" id="pline" aria-live="polite"></p>'}
  else if(R.view==='end'){
   var got=R.items.filter(function(x){return x.res===1}).length,by={};R.items.forEach(function(x){var b=by[x.area]||(by[x.area]={n:0,c:0});if(x.res!=null){b.n++;b.c+=x.res}});
   h='<h2>'+T('Round <em>done</em>','本轮<em>完成</em>')+'</h2><p class="lead2">'+T(got+' of '+R.items.length+' right','答对 '+got+' / '+R.items.length)+(R.fail?' <span class="meta">'+T('('+R.fail+' could not be written)','（有 '+R.fail+' 题没能生成）')+'</span>':'')+'</p><ul class="plan">'+Object.keys(by).map(function(k){return '<li><span class="pk">'+by[k].c+'/'+by[k].n+'</span><span>'+aname(k)+'</span></li>'}).join('')+'</ul>';
   if(R.kind==='exam'){var wr=R.items.filter(function(x){return x.res===0});if(wr.length)h+='<h3>'+T('Review','回顾')+'</h3>'+wr.map(function(x){return '<div class="rev"><p class="qt">'+esc(x.q)+'</p><p><b>'+T('Answer','答案')+':</b> '+esc(x.o[x.a])+'</p><p class="meta">'+esc(x.e)+'</p></div>'}).join('')}
-  h+='<p class="acts"><button class="btn pri" data-act="drill">'+T('Another round','再来一轮')+'</button><button class="btn" data-act="close">'+T('Done','完成')+'</button></p>'}
+  var missed=R.items.filter(function(x){return x.res===0}),nh=nextHint();
+  if(R.kind!=='exam'&&missed.length)h+='<p class="meta">'+T('Your gaps from this round: ','本轮的缺口：')+Object.keys(missed.reduce(function(o,x){o[x.area]=1;return o},{})).map(aname).join(T(', ','、'))+'.</p>';
+  if(nh)h+='<p class="meta">'+nh+'</p>';
+  h+='<p class="acts">'+(book().length?'<button class="btn pri" data-act="redoset">'+T('Redo my misses now','马上重做错题')+' ('+book().length+')</button><button class="btn" data-act="drill">':'<button class="btn pri" data-act="drill">')+T('Another round','再来一轮')+'</button><button class="btn" data-go="progress">'+T('See my progress','看我的进度')+'</button><button class="btn" data-act="close">'+T('Done','完成')+'</button></p>'}
  else if(it){
   var fb=R.view==='fb';
   h='<p class="meta">'+T('Question '+(R.i+1)+' of '+total,'第 '+(R.i+1)+' / '+total+' 题')+' · '+aname(it.area)+'</p><h3 class="qt" id="qt" tabindex="-1">'+esc(it.q)+'</h3><div class="opts" role="group" aria-labelledby="qt">'+
@@ -234,9 +260,30 @@ function renderPractice(focus){
   if(fb)h+='<div class="fb" aria-live="polite"><p><b>'+(it.pick===it.a?T('Right.','答对了。'):T('Not quite.','不对。'))+'</b> '+esc(it.e)+'</p><details><summary>'+T('From your material','来自你的资料')+': '+esc(it.mat)+', '+esc(it.loc)+'</summary><p class="snip">'+esc(it.snip)+'…</p></details><p class="acts"><button class="btn pri" id="nx" data-act="next">'+(R.i+1>=R.items.length&&R.gen>=total?T('See the result','看结果'):T('Next','下一题'))+'</button>'+(it.pick===it.a&&!it.guess?'<button class="btn sm" data-act="guess">'+T('I guessed','我是蒙的')+'</button>':'')+'<button class="btn sm" data-act="redo">'+T('Change my answer','改我的答案')+'</button><button class="btn sm" data-act="flag">'+T('This question looks wrong: don’t count it','这道题有问题：不计入')+'</button></p></div>'}
  el.innerHTML=h;
  if(focus){var f=R.view==='fb'?$('nx'):(R.view==='q'?$('qt'):null);if(f)f.focus()}}
-function renderAll(keepPractice){var ap=$('app');if(ap){if(CH.length)ap.setAttribute('data-ready','');else ap.removeAttribute('data-ready')}renderToday();renderMap();renderMats();renderGoal();renderBackup();renderShare();renderBook();if(!keepPractice)renderPractice()}
+function renderAll(keepPractice){var ap=$('app');if(ap){if(CH.length)ap.setAttribute('data-ready','');else ap.removeAttribute('data-ready')}renderToday();renderMap();renderMats();renderGoal();renderBackup();renderShare();renderBook();if(!keepPractice)renderPractice();applyView()}
 
 
+
+/* ---------- one flow: a bar of steps, and only the panel you are on ---------- */
+var V='mats';
+function modelReady(){return !!ENG&&!!(window.__coachTestEngine||ENGID)}
+function goalLabel(){return S.goal==='exam'?((S.exam==='custom'?(S.cname||'').trim():exam().e.name[pageLang()])||T('Exam','考试')):T('Understand','弄懂资料')}
+function renderFlow(){
+ var el=$('flow');if(!el)return;var has=CH.length>0,td=today(),bk=book().length;
+ var it=[['mats','1 ',T('Material','资料'),has?S.mats.length+' '+T('files','个文件'):T('add files','添加文件'),1],
+  ['goal','2 ',T('Goal','目标'),goalLabel(),1],
+  ['model','3 ',T('Model','模型'),modelReady()?T('ready','已就绪'):T('not started','未启动'),1],
+  null,
+  ['practice','',T('Practise','练习'),has?td.n+' / '+S.perDay+' '+T('today','今天'):'',has],
+  ['progress','',T('Progress','进度'),has&&bk?bk+' '+T('to redo','待重做'):'',has],
+  ['track','',T('Track','路线'),'',has]];
+ el.innerHTML=it.map(function(x){if(!x)return '<span class="sep" aria-hidden="true"></span>';
+  return '<button type="button" data-go="'+x[0]+'"'+(x[0]===V?' aria-current="step"':'')+(x[4]?'':' disabled')+'><b>'+(x[1]?'<i>'+x[1]+'</i>':'')+x[2]+'</b><small>'+(x[3]||'&nbsp;')+'</small></button>'}).join('')}
+function applyView(){
+ if(!CH.length&&V!=='mats'&&V!=='goal'&&V!=='model')V='mats';
+ document.querySelectorAll('#app > section[data-v]').forEach(function(sec){sec.hidden=sec.dataset.v!==V||(sec.id==='practice'&&!R)||sec.id==='review'});
+ renderFlow()}
+function go(v,quiet){V=v;applyView();var ap=$('app');if(ap&&!quiet&&ap.scrollIntoView)ap.scrollIntoView({block:'start'})}
 
 /* ---------- wrong-question book: what you missed or guessed, redone shuffled, printable ---------- */
 function book(){return S.bank.filter(function(x){return x.res===0&&!x.flag&&!x.done})}
@@ -250,7 +297,7 @@ function startRedo(){
  var b=book();if(!b.length||(R&&R.busy))return;
  var items=mix(b.slice()).map(function(x,i){var q=Lg.shuffle({q:x.q,o:x.o,a:x.a,e:x.e},Math.random);return {id:'r'+Date.now().toString(36)+i,area:x.area,chunk:x.chunk,q:q.q,o:q.o,a:q.a,e:q.e,loc:x.loc,mat:x.mat,snip:x.snip,res:null,orig:x}});
  R={kind:'redo',slots:items.map(function(x){return {area:x.area}}),items:items,i:0,gen:items.length,busy:false,fail:0,view:'q'};
- $('practice').hidden=false;renderPractice();$('practice').scrollIntoView({block:'start'})}
+ go('practice');renderPractice()}
 function printBook(){
  var b=book(),el=$('printarea');if(!el||!b.length)return;
  el.innerHTML='<h1>'+T('My wrong-question book','我的错题本')+'</h1>'+b.map(function(x,i){return '<div class="pq"><p><b>'+(i+1)+'.</b> '+esc(x.q)+'</p><ol type="A">'+x.o.map(function(o){return '<li>'+esc(o)+'</li>'}).join('')+'</ol><p><b>'+T('Answer','答案')+':</b> '+'ABCD'.charAt(x.a)+'. '+esc(x.o[x.a])+'</p><p>'+esc(x.e)+'</p></div>'}).join('');
@@ -268,7 +315,7 @@ function shareBody(o){
  if(useExam()){var x=exam();sec+='\n## Exam areas\n'+x.v.domains.map(function(a){return '- '+a.name.en+': '+a.weight+'%'}).join('\n')+'\n'}
  if(dg.outline.some(function(m){return m.titles.length}))sec+='\n## Outline of my material (the first line of each passage, cut short)\n'+dg.outline.filter(function(m){return m.titles.length}).map(function(m){return '### Material '+m.n+' ('+m.kind+')\n'+m.titles.map(function(x,i){return (i+1)+'. '+x}).join('\n')}).join('\n\n')+'\n';
  if(dg.terms.length)sec+='\n## Key terms\n'+dg.terms.join(', ')+'\n';
- if((o.sums==null?true:o.sums)&&S.sums&&S.sums.length)sec+='\n## Condensed points (written by the AI in its own words)\n'+S.sums.map(function(x){return '- '+x}).join('\n')+'\n';
+ if((o.sums==null?true:o.sums)&&S.sums&&S.sums.length)sec+='\n## Key ideas from my material (written by the AI in its own words)\n'+S.sums.map(function(x){return '- '+x}).join('\n')+'\n';
  t='# '+topic+'\n\nTrack: '+tr+'\n'+(tr==='new'?'Subject: community\n':'')+'Language: '+pageLang()+'\n'+sec+'\n## Where I was weak\n'+(weak.length?weak.slice(0,4).map(function(a){return '- '+a.n+': '+a.p+'% right in my practice'}).join('\n'):'- (no practice yet)')+'\n\n## What I learned, in my own words\n'+((S.notes||'').trim()||'(none yet)')+'\n';
  return {topic:topic,text:t,content:dg.outline.some(function(m){return m.titles.length})||dg.terms.length>0}}
 /* one GitHub link when it fits (a prefilled link only holds so much); otherwise the full text is copied and pasted into the editor */
@@ -282,28 +329,33 @@ function shareUrl(){
  b=shareBody({titles:60,terms:40});return {url:mk(b,false),text:b.text,clip:true,content:b.content}}
 function shareOK(){var u=shareUrl();return !!S.shareOk&&((S.notes||'').trim().length>=40||u.content)&&u.text.length<60000}
 function outline(){return areas().map(function(a){return '## '+a.name.en+'\n- '}).join('\n\n')}
-var sBusy=false;
-function pickSums(){var n=Math.min(10,CH.length),out=[],st=CH.length/Math.max(1,n);for(var i=0;i<n;i++)out.push(CH[Math.floor(i*st)]);return out}
+var sBusy=false,sStop=false;
+/* up to 30 passages, spread evenly over all the material, so the notes cover all of it */
+function pickSums(){var n=Math.min(30,CH.length),out=[],st=CH.length/Math.max(1,n);for(var i=0;i<n;i++)out.push(CH[Math.floor(i*st)]);return out}
 async function makeSums(){
- if(sBusy||!CH.length)return;sBusy=true;renderShare();
- try{await ensureModel()}catch(e){sBusy=false;renderShare();return}
- var pl=pageLang(),picks=pickSums(),out=[],i;
- for(i=0;i<picks.length;i++){
-  say('Summarising '+(i+1)+' of '+picks.length+'…','正在概括 '+(i+1)+' / '+picks.length+'…');
+ if(sBusy||!CH.length)return;sBusy=true;sStop=false;renderShare();
+ try{await ensureModel()}catch(e){sBusy=false;renderShare();go('model');return}
+ var pl=pageLang(),picks=pickSums(),out=[],i;S.sums=[];
+ for(i=0;i<picks.length&&!sStop;i++){
+  var pp=$('sline');if(pp)pp.textContent=T('Writing note '+(i+1)+' of '+picks.length+'…','正在写第 '+(i+1)+' / '+picks.length+' 条…');
   try{var raw=Lg.stripThink(await ENG.chat(Lg.sumPrompt({text:picks[i].text,lang:pl}))),a=raw.indexOf('{'),b=raw.lastIndexOf('}'),o=JSON.parse(raw.slice(a,b+1)),sm=String(o.summary||'').trim(),z=Lg.cjkShare(sm);
-   if(sm.length>=15&&sm.length<=400&&!Lg.copied(sm,picks[i].text)&&Lg.scrubLine(sm)===sm&&(pl==='zh'?z>0.3:z<0.08))out.push(sm)}catch(e){}}
- S.sums=out;save();sBusy=false;say(out.length+' short summaries added; check them below.',out.length+' 条简短概括已加入，请在下面核对。');renderShare()}
+   if(sm.length>=15&&sm.length<=500&&!Lg.copied(sm,picks[i].text)&&Lg.scrubLine(sm)===sm&&(pl==='zh'?z>0.3:z<0.08)){out.push(sm);S.sums=out.slice();save()}}catch(e){}}
+ sBusy=false;say(out.length+' notes written; read them below before you send.',out.length+' 条笔记已写好，发送前请在下面核对。');renderShare()}
 function renderShare(){
- var el=$('share');if(!el)return;var n=(S.notes||''),u=shareUrl(),ok=shareOK(),tr=S.noteTrack||'new';
- el.innerHTML='<p>'+T('One click sends what you studied to GitHub, and the content creator agent turns it into a track in the knowledge base. What goes is built here in your browser: an outline of headings, the key terms, any short summaries you add, and your own notes. Your files and their names are never sent; the outline holds only the first line of each passage. Check it in the box below first.','一键把你学的内容发到 GitHub，内容创作 agent 会把它写成知识库里的一条路线。发出去的内容在你的浏览器里生成：标题提纲、关键词、你加的简短概括，以及你自己的笔记。你的文件和文件名不会被发送；提纲里只有每段的第一行。发送前请先在下面的框里检查。')+'</p>'+
- '<p class="rowf"><label>'+T('Topic','主题')+' <input type="text" id="ntopic" maxlength="60" value="'+esc(S.noteTopic||'')+'" placeholder="'+esc(defTopic())+'"></label>'+
+ var el=$('share');if(!el)return;var n=(S.notes||''),u=shareUrl(),ok=shareOK(),tr=S.noteTrack||'new',ns=(S.sums||[]).length;
+ el.innerHTML='<p class="meta">'+T('The model reads your material here in your browser and writes the key ideas in its own words. Those notes, an outline of headings and your own words go to GitHub; the content creator agent turns them into a track. Your files and their names never leave your device.','模型在你的浏览器里读你的资料，用它自己的话写出要点。这些笔记、标题提纲和你自己的话会发到 GitHub，由内容创作 agent 写成一条路线。你的文件和文件名不会离开你的设备。')+'</p>'+
+ '<h3>'+T('1 · Let the model write the notes','1 · 让模型写笔记')+'</h3>'+
+ '<p class="acts"><button class="btn'+(ns?'':' pri')+'" data-act="sums"'+(sBusy?' disabled':'')+'>'+(sBusy?T('Writing…','正在写…'):(ns?T('Write them again','重新写'):T('Write the notes with the AI','用 AI 写笔记')))+'</button>'+(sBusy?'<button class="btn sm" data-act="sstop">'+T('Stop','停止')+'</button>':'')+'</p>'+
+ '<p class="meta" id="sline" aria-live="polite">'+(ns?T(ns+' notes from your material, up to 30 passages spread over all of it.',ns+' 条笔记，来自分布在全部资料里的至多 30 段。'):T('It reads up to 30 passages spread over all your material. It takes a few minutes; you can stop and keep what is done.','它会读分布在全部资料里的至多 30 段，需要几分钟；可以中途停止，已写好的会保留。'))+'</p>'+
+ '<h3>'+T('2 · Topic and place','2 · 主题和去处')+'</h3><p class="rowf"><label>'+T('Topic','主题')+' <input type="text" id="ntopic" maxlength="60" value="'+esc(S.noteTopic||'')+'" placeholder="'+esc(defTopic())+'"></label>'+
  ' <label>'+T('Goes to','放到')+' <select data-act="track" aria-label="Where it goes · 放到哪里"><option value="new"'+(tr==='new'?' selected':'')+'>A new track · 一条新路线</option>'+trackChoices().map(function(t){return '<option value="'+t.id+'"'+(t.id===tr?' selected':'')+'>One more lesson in '+esc(t.en)+' · 加到 '+esc(t.zh)+'</option>'}).join('')+'</select></label></p>'+
- (CH.length?'<p class="acts"><button class="btn sm" data-act="sums"'+(sBusy?' disabled':'')+'>'+(sBusy?T('Summarising…','正在概括…'):(S.sums&&S.sums.length?T('Redo the short summaries','重新生成简短概括'):T('Add short summaries with the AI (slower)','用 AI 加简短概括（较慢）')))+'</button></p>':'')+
- '<textarea id="nbody" rows="5" maxlength="4000" aria-label="Your notes · 你的笔记" placeholder="Your own notes: what clicked, what confused you · 你自己的笔记：哪里想通了，哪里没懂">'+esc(n)+'</textarea>'+
+ '<h3>'+T('3 · Your own words (optional)','3 · 你自己的话（可选）')+'</h3>'+
+ '<textarea id="nbody" rows="4" maxlength="4000" aria-label="Your notes · 你的笔记" placeholder="Your own notes: what clicked, what confused you · 你自己的笔记：哪里想通了，哪里没懂">'+esc(n)+'</textarea>'+
  (n.trim()?'':'<p class="acts"><button class="btn sm" data-act="outline">'+T('Start from my areas','按我的领域列个提纲')+'</button></p>')+
- '<label class="meta" for="npreview">'+T('What will be sent (you can still change your notes above):','将要发送的内容（上面的笔记仍可修改）：')+'</label><textarea id="npreview" rows="8" readonly aria-label="What will be sent · 将要发送的内容">'+esc(u.text)+'</textarea>'+
+ '<h3>'+T('4 · Check and send','4 · 检查并发送')+'</h3>'+
+ '<label class="meta" for="npreview">'+T('What will be sent:','将要发送的内容：')+'</label><textarea id="npreview" rows="8" readonly aria-label="What will be sent · 将要发送的内容">'+esc(u.text)+'</textarea>'+
  '<label class="chk"><input type="checkbox" id="nok"'+(S.shareOk?' checked':'')+'> <span>'+T('I have read what will be sent. It has no pasted slides or text and no names of the material’s provider or platform, and I understand it becomes public.','我看过将要发送的内容：里面没有粘贴的课件或原文，也没有资料提供方或平台的名字，我明白它会公开。')+'</span></label>'+
- '<p class="acts"><button class="btn pri" data-act="share"'+(ok?'':' disabled')+'>'+T('Send to GitHub','发到 GitHub')+'</button></p>'+
+ '<p class="acts"><button class="btn pri" data-act="share"'+(ok?'':' disabled')+'>'+T('Send to GitHub','发到 GitHub')+'</button><button class="btn" data-go="practice">'+T('Back to practice','回到练习')+'</button></p>'+
  '<p class="meta">'+T('This opens GitHub with everything filled in; you need a GitHub account. If you own the site, press “Commit changes” and the track is written for you. Anyone else gets a pull request, and nothing is merged until the site owner has read it.','这会打开 GitHub 并填好全部内容；你需要一个 GitHub 账号。站点拥有者按“Commit changes”，路线就会自动生成。其他人会发起一个 pull request，站点拥有者看过之前不会合并。')+' <b id="clipnote">'+clipNote(u.clip)+'</b></p>'}
 function clipNote(c){return c?T('It is too long for one link, so it is copied for you: paste it into the editor with Ctrl or ⌘ + V.','内容太长，一个链接装不下，所以会先复制好：在编辑器里按 Ctrl 或 ⌘ + V 粘贴。'):''}
 function doShare(){var u=shareUrl();if(!shareOK())return;
@@ -324,6 +376,7 @@ async function importAll(file){
 
 /* ---------- events ---------- */
 document.addEventListener('click',function(e){
+ var g=e.target.closest&&e.target.closest('[data-go]');if(g&&!g.disabled){go(g.dataset.go);return}
  var b=e.target.closest&&e.target.closest('[data-act]');if(!b||b.tagName==='SELECT')return;var a=b.dataset.act;
  if(a!=='reset'&&confirmKey){confirmKey='';renderBackup()}
  if(a==='drill'){if(R&&R.busy&&R.view!=='end')return;startRound('drill',S.perDay)}
@@ -333,16 +386,17 @@ document.addEventListener('click',function(e){
  else if(a==='flag')flag();
  else if(a==='guess'){guess();syncOrig(R.items[R.i])}
  else if(a==='redoset')startRedo();
+ else if(a==='gap')startRound('gap',S.perDay);
  else if(a==='print')printBook();
  else if(a==='redo'){redo();syncOrig(R.items[R.i])}
  else if(a==='close'){R=null;renderAll()}
  else if(a==='rm'){dropMat(b.dataset.id);reassign();saveChunks();save();renderAll()}
- else if(a==='load')ensureModel().catch(function(){});
+ else if(a==='load')ensureModel().then(function(){renderFlow();if(V==='model'&&CH.length){go('practice');startRound('drill',S.perDay)}}).catch(function(){});
  else if(a==='export')exportAll();
  else if(a==='share')doShare();
  else if(a==='sums')makeSums();
+ else if(a==='sstop')sStop=true;
  else if(a==='outline'){S.notes=outline();save();renderShare()}
- else if(a==='goshare'){var sh=$('share');if(sh)sh.scrollIntoView({behavior:'smooth',block:'start'})}
  else if(a==='reset'){if(confirmKey==='reset'){S=fresh();CH=[];R=null;confirmKey='';kvSet('state',S);saveChunks();renderAll();say('Everything erased.','已全部清除。')}else{confirmKey='reset';renderBackup()}}});
 document.addEventListener('change',function(e){var x=e.target;
  if(x.id==='files'){addFiles(x.files);x.value=''}
@@ -353,7 +407,7 @@ document.addEventListener('change',function(e){var x=e.target;
  else if(x.dataset&&x.dataset.act==='track'){S.noteTrack=x.value;save();renderShare()}
  else if(x.dataset&&x.dataset.act==='perday'){S.perDay=+x.value;save();renderToday()}
  else if(x.dataset&&x.dataset.act==='exam-id'){S.exam=x.value;S.ver=S.exam==='custom'?'':exam().e.versions[0].id;reassign();save();renderAll()}
- else if(x.id==='cname'||x.id==='ctext'){S.cname=($('cname')||{}).value!=null?$('cname').value:S.cname;S.ctext=($('ctext')||{}).value!=null?$('ctext').value:S.ctext;reassign();save();var h=$('chint');if(h)h.innerHTML=chint(exam().v.domains.length);renderToday();renderMap();renderShare();renderBook()}
+ else if(x.id==='cname'||x.id==='ctext'){S.cname=($('cname')||{}).value!=null?$('cname').value:S.cname;S.ctext=($('ctext')||{}).value!=null?$('ctext').value:S.ctext;reassign();save();var h=$('chint');if(h)h.innerHTML=chint(exam().v.domains.length);renderToday();renderMap();renderShare();renderBook();renderFlow()}
  else if(x.dataset&&x.dataset.act==='exam-ver'){S.ver=x.value;reassign();save();renderAll()}});
 document.addEventListener('input',function(e){var x=e.target;if(x.id==='nbody'||x.id==='ntopic'){if(x.id==='nbody')S.notes=x.value;else S.noteTopic=x.value;save();var b=document.querySelector('[data-act=share]');if(b)b.disabled=!shareOK();var su=shareUrl(),pv=$('npreview'),cn=$('clipnote');if(pv)pv.value=su.text;if(cn)cn.innerHTML=clipNote(su.clip)}});
 document.addEventListener('dragover',function(e){if(e.target.closest&&e.target.closest('#drop'))e.preventDefault()});
@@ -365,7 +419,7 @@ document.addEventListener('drop',function(e){if(e.target.closest&&e.target.close
  var s=await kvGet('state'),c=await kvGet('chunks');
  S=tidy(Object.assign(fresh(),s||{}));CH=Array.isArray(c)?c:[];
  if(S.exam!=='custom'&&!EX.some(function(x){return x.id===S.exam}))S.exam='custom';
- reassign();renderAll();renderModel();$('app').hidden=false;window.__coach={state:function(){return S},chunks:function(){return CH}};
+ reassign();V=CH.length?'practice':'mats';renderAll();renderModel();$('app').hidden=false;window.__coach={state:function(){return S},chunks:function(){return CH},view:function(){return V}};
  if(navigator.storage&&navigator.storage.persist)try{navigator.storage.persist()}catch(e){}
 })();
 })();
