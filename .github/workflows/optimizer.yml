@@ -4,7 +4,9 @@
 # It may not change the merge guardrails, agent runners, status recording, lesson prose or project starter/reference code.
 # It also reviews the site's own code: scripts/code-queue.mjs (no AI) hands each run a batch of code files it has not read
 # yet. The first pass covers every file; after that only files that changed since they were read come back. While files
-# wait, the run is a code review of that batch; when none wait, it is the usual efficiency run.
+# wait, the run is a code review of that batch. When none wait, Claude does not run at all, except once a week (the
+# first run on Monday, UTC) and on a manual run, when it is the usual efficiency run: that search rarely finds
+# something new, so it no longer spends four Sonnet runs a day.
 name: Efficiency engineer (optimizer)
 on:
   schedule:
@@ -65,13 +67,21 @@ jobs:
         id: queue
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT: ${{ github.event_name }}
         run: |
           mkdir -p /tmp/trusted && cp scripts/code-queue.mjs scripts/signals.mjs scripts/lib.mjs /tmp/trusted/
           node /tmp/trusted/code-queue.mjs plan --out /tmp || echo "review=false" >> "$GITHUB_OUTPUT"
+          # review: code waits to be read. efficiency: nothing waits, and it is the weekly slot or a manual run. idle: nothing to do, no AI.
+          if [ -s /tmp/code-brief.md ]; then mode=review
+          elif [ "$EVENT" = workflow_dispatch ] || { [ "$(date -u +%u)" = 1 ] && [ "$(date -u +%H)" -lt 6 ]; }; then mode=efficiency
+          else mode=idle; fi
+          echo "mode=$mode" >> "$GITHUB_OUTPUT"; echo "Mode: $mode"
       - name: Install Claude Code
+        if: ${{ steps.queue.outputs.mode != 'idle' }}
         run: npm install -g @anthropic-ai/claude-code
       - name: Find and make one focused improvement
         id: agent
+        if: ${{ steps.queue.outputs.mode != 'idle' }}
         env:
           # Prefer TX's Claude subscription (CLAUDE_CODE_OAUTH_TOKEN from `claude setup-token`); the API key is only a fallback.
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -142,9 +152,16 @@ jobs:
           REVIEW: ${{ steps.queue.outputs.review }}
           REVIEW_COUNT: ${{ steps.queue.outputs.count }}
           REVIEW_LEFT: ${{ steps.queue.outputs.left }}
+          MODE: ${{ steps.queue.outputs.mode }}
         run: |
           set -euo pipefail
           mkdir -p /tmp/out
+          if [ "$MODE" = idle ]; then
+            echo "state=ok" >> "$GITHUB_OUTPUT"
+            echo "summary=No code changed since it was last reviewed, so nothing ran. The efficiency check runs on Mondays." >> "$GITHUB_OUTPUT"
+            echo "pr=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           note=""
           if [ "$REVIEW" = true ]; then note=" Code review: read ${REVIEW_COUNT} code file(s), ${REVIEW_LEFT} still waiting."; fi
           test -s /tmp/optimizer-summary.md || echo "Efficiency improvement with no written summary." > /tmp/optimizer-summary.md
