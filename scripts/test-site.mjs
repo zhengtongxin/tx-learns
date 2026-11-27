@@ -101,7 +101,7 @@ try {
   await test('subjects', async page => {
     // Two levels: the tracks page lists the subjects (AI, project management); a subject with several tracks opens its track list.
     await page.goto(base + 'tracks.html');
-    const D = loadWindow('tracks.js').DOMAINS;
+    const D = loadWindow('tracks.js').DOMAINS.filter(d => T.some(t => (t.domain || 'ai') === d.id));
     eq(await page.$$eval('.track-list .cc', a => a.length), D.length, 'one card per subject');
     await page.goto(base + 'tracks.html#ai');
     eq(await page.$$eval('.track-list .cc', a => a.map(x => x.getAttribute('href'))), T.filter(t => (t.domain || 'ai') === 'ai').map(t => t.href), 'the AI tracks, in tracks.js order');

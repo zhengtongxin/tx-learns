@@ -5,6 +5,7 @@
 var Lg=window.CoachLogic,EX=window.COACH_EXAMS,BASE=document.currentScript.src.replace(/[^\/]*$/,'');
 var $=function(id){return document.getElementById(id)};
 function T(en,zh){return '<span class="en">'+en+'</span><span class="zh">'+zh+'</span>'}
+function pageLang(){return document.documentElement.getAttribute('data-lang')==='zh'?'zh':'en'}
 function PH(en,zh){return document.documentElement.getAttribute('data-lang')==='zh'?zh:en}
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function say(en,zh){var s=$('status');if(s)s.innerHTML=T(en,zh)}
@@ -123,10 +124,11 @@ async function pump(){
   for(var tries=0;tries<3&&!item&&R===r;tries++){
    var ch=Lg.pick(CH,slot.area,S.miss,S.used,Math.random);if(!ch)break;
    var a=areas().filter(function(x){return x.id===slot.area})[0]||{},ex=useExam();
-   try{var raw=await ENG.chat(Lg.prompt({text:ch.text,lang:Lg.lang(ch.text),exam:ex?exam().e.name.en+(exam().v.label.en?' (outline: '+exam().v.label.en+')':''):'',domain:a.dom||'',tasks:a.tasks||''}));
-    var q=Lg.parseQuestion(raw);if(q){q=Lg.shuffle(q,Math.random);S.used[ch.id]=(S.used[ch.id]||0)+1;
+   var pl=pageLang();
+   try{var raw=await ENG.chat(Lg.prompt({text:ch.text,lang:pl,srcLang:Lg.lang(ch.text),exam:ex?exam().e.name[pl]+(exam().v.label[pl]?' ('+(pl==='zh'?'考纲：':'outline: ')+exam().v.label[pl]+')':''):'',domain:(a.name&&a.name[pl])||a.dom||'',tasks:a.tasks||''}));
+    var q=Lg.parseQuestion(raw);if(q&&!Lg.inLang(q,pl))q=null;if(q){q=Lg.shuffle(q,Math.random);S.used[ch.id]=(S.used[ch.id]||0)+1;
      var m=S.mats.filter(function(x){return x.id===ch.mat})[0];
-     item={id:'q'+Date.now().toString(36)+r.gen,area:slot.area,chunk:ch.id,q:q.q,o:q.o,a:q.a,e:q.e,loc:ch.loc,mat:m?m.name:'',snip:ch.text.slice(0,420),res:null}}}catch(e){}
+     item={id:'q'+Date.now().toString(36)+r.gen,area:slot.area,chunk:ch.id,q:q.q,o:q.o,a:q.a,e:q.e,lang:pl,loc:ch.loc,mat:m?m.name:'',snip:ch.text.slice(0,420),res:null}}}catch(e){}
   }
   if(R!==r)break;
   r.gen++;if(item){r.items.push(item);S.bank.push(item);if(S.bank.length>300)S.bank.shift();save()}else r.fail++;
@@ -164,7 +166,7 @@ function renderToday(){
  el.innerHTML='<h2>'+T('Practise <em>today</em>','今天<em>练什么</em>')+'</h2><p class="meta">'+T('Done today: '+td.n+' of '+n+' questions.','今天已做：'+td.n+' / '+n+' 题。')+'</p>'+
   '<ul class="plan">'+plan.map(function(p){var w=WHY[p.why];return '<li><span class="pk">'+p.k+'</span><span>'+aname(p.id)+'</span><span class="chip">'+T(w[0],w[1])+'</span></li>'}).join('')+'</ul>'+
   '<p class="acts"><button class="btn pri" data-act="drill">'+T('Practise now','现在练习')+'</button>'+(useExam()?'<button class="btn" data-act="exam">'+T('Mini exam · 20 questions','小测验 · 20 题')+'</button>':'')+
-  '<label class="per">'+T('Per day','每天')+' <select data-act="perday" aria-label="Questions per day · 每天题数">'+[5,10,20].map(function(x){return '<option'+(x===n?' selected':'')+'>'+x+'</option>'}).join('')+'</select></label></p>'}
+  (S.rounds>0||Object.keys(S.stats).length?'<button class="btn" data-act="goshare">'+T('Turn this into a track','把这个变成路线')+'</button>':'')+'<label class="per">'+T('Per day','每天')+' <select data-act="perday" aria-label="Questions per day · 每天题数">'+[5,10,20].map(function(x){return '<option'+(x===n?' selected':'')+'>'+x+'</option>'}).join('')+'</select></label></p>'}
 function renderMap(){
  var el=$('map');if(!CH.length){el.innerHTML='';return}
  el.innerHTML='<h2>'+T('Strength <em>map</em>','强弱<em>图</em>')+'</h2><div class="rows">'+areas().map(function(a){var s=Lg.strength(hist(a.id)),p=s==null?0:Math.round(s*100),n=(S.stats[a.id]||{}).n||0;
@@ -212,7 +214,7 @@ function renderPractice(focus){
   if(fb)h+='<div class="fb" aria-live="polite"><p><b>'+(it.pick===it.a?T('Right.','答对了。'):T('Not quite.','不对。'))+'</b> '+esc(it.e)+'</p><details><summary>'+T('From your material','来自你的资料')+': '+esc(it.mat)+', '+esc(it.loc)+'</summary><p class="snip">'+esc(it.snip)+'…</p></details><p class="acts"><button class="btn pri" id="nx" data-act="next">'+(R.i+1>=R.items.length&&R.gen>=total?T('See the result','看结果'):T('Next','下一题'))+'</button>'+(it.pick===it.a&&!it.guess?'<button class="btn sm" data-act="guess">'+T('I guessed','我是蒙的')+'</button>':'')+'<button class="btn sm" data-act="redo">'+T('Change my answer','改我的答案')+'</button><button class="btn sm" data-act="flag">'+T('This question looks wrong: don’t count it','这道题有问题：不计入')+'</button></p></div>'}
  el.innerHTML=h;
  if(focus){var f=R.view==='fb'?$('nx'):(R.view==='q'?$('qt'):null);if(f)f.focus()}}
-function renderAll(keepPractice){renderToday();renderMap();renderMats();renderGoal();renderBackup();renderShare();renderBook();if(!keepPractice)renderPractice()}
+function renderAll(keepPractice){var ap=$('app');if(ap){if(CH.length)ap.setAttribute('data-ready','');else ap.removeAttribute('data-ready')}renderToday();renderMap();renderMats();renderGoal();renderBackup();renderShare();renderBook();if(!keepPractice)renderPractice()}
 
 
 
@@ -236,23 +238,29 @@ function printBook(){
 
 /* ---------- share notes (opens GitHub's own new-file page; nothing is sent from here) ---------- */
 var REPO='zhengtongxin/tx-learns',MAXV=6000;
+function defTopic(){return (S.noteTopic||'').trim()||(S.exam==='custom'?(S.cname||'').trim():exam().e.name.en)||((S.mats[0]&&S.mats[0].name)||'').replace(/\.[a-z0-9]+$/i,'').trim()||PH('My notes','我的笔记')}
+/* where the notes go: a brand-new track (default), or one more lesson in an existing track */
+function trackChoices(){return (window.TRACKS||[]).map(function(t){return {id:t.id,en:t.title.en,zh:t.title.zh}})}
 function shareBody(){
- var x=exam(),weak=areas().map(function(a){var v=Lg.strength(hist(a.id));return {n:a.name.en,p:v==null?null:Math.round(v*100)}}).filter(function(a){return a.p!=null}).sort(function(a,b){return a.p-b.p});
- var topic=(S.noteTopic||'').trim()||x.e.name.en;
- var t='# '+topic+'\n\nExam outline: '+x.e.name.en+' ('+x.v.label.en+')\nSuggested track: '+(S.noteTrack||'new').trim()+'\n\n## Where I was weak\n'+(weak.length?weak.slice(0,4).map(function(a){return '- '+a.n+': '+a.p+'% right in my practice'}).join('\n'):'- (no practice yet)')+'\n\n## What I learned, in my own words\n'+(S.notes||'').trim()+'\n';
+ var weak=areas().map(function(a){var v=Lg.strength(hist(a.id));return {n:a.name.en,p:v==null?null:Math.round(v*100)}}).filter(function(a){return a.p!=null}).sort(function(a,b){return a.p-b.p});
+ var topic=defTopic(),tr=S.noteTrack||'new';
+ var t='# '+topic+'\n\nTrack: '+tr+'\n'+(tr==='new'?'Subject: community\n':'')+'Language: '+pageLang()+'\n\n## Where I was weak\n'+(weak.length?weak.slice(0,4).map(function(a){return '- '+a.n+': '+a.p+'% right in my practice'}).join('\n'):'- (no practice yet)')+'\n\n## What I learned, in my own words\n'+(S.notes||'').trim()+'\n';
  return {topic:topic,text:t}}
 function shareUrl(){
  var b=shareBody(),slug=b.topic.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40)||'notes',
   folder=slug+'-'+Lg.dayKey().replace(/-/g,'')+'-'+Math.random().toString(36).slice(2,6);
  return {url:'https://github.com/'+REPO+'/new/notes?filename='+encodeURIComponent('inbox/'+folder+'/notes.md')+'&value='+encodeURIComponent(b.text)+'&message='+encodeURIComponent('Add study notes: '+b.topic),len:b.text.length}}
+function outline(){return areas().map(function(a){return '## '+a.name.en+'\n- '}).join('\n\n')}
 function renderShare(){
- var el=$('share');if(!el)return;var n=(S.notes||''),ok=!!S.shareOk&&n.trim().length>=40,u=shareUrl();
- el.innerHTML='<p>'+T('Turn what you learned into a pull request, so it can join the knowledge base. Write the key points in your own words. Weak areas are added by name only; your files are never sent.','把你学到的变成一个 pull request，让它有机会加入知识库。用你自己的话写要点。薄弱领域只带名称，你的文件不会被发送。')+'</p>'+
- '<p class="rowf"><label>'+T('Topic','主题')+' <input type="text" id="ntopic" maxlength="60" value="'+esc(S.noteTopic||'')+'" placeholder="'+esc(S.goal==='exam'&&S.exam!=='custom'?exam().e.name.en:(S.cname||''))+'"></label></p>'+
+ var el=$('share');if(!el)return;var n=(S.notes||''),ok=!!S.shareOk&&n.trim().length>=40,u=shareUrl(),tr=S.noteTrack||'new';
+ el.innerHTML='<p>'+T('One click sends what you learned to GitHub, and the content creator agent turns it into a track in the knowledge base. Write the key points in your own words; your weak areas go along by name only, and your files are never sent.','一键把你学到的发到 GitHub，内容创作 agent 会把它写成知识库里的一条路线。用你自己的话写要点；薄弱领域只带名称，你的文件不会被发送。')+'</p>'+
+ '<p class="rowf"><label>'+T('Topic','主题')+' <input type="text" id="ntopic" maxlength="60" value="'+esc(S.noteTopic||'')+'" placeholder="'+esc(defTopic())+'"></label>'+
+ ' <label>'+T('Goes to','放到')+' <select data-act="track" aria-label="Where it goes · 放到哪里"><option value="new"'+(tr==='new'?' selected':'')+'>A new track · 一条新路线</option>'+trackChoices().map(function(t){return '<option value="'+t.id+'"'+(t.id===tr?' selected':'')+'>One more lesson in '+esc(t.en)+' · 加到 '+esc(t.zh)+'</option>'}).join('')+'</select></label></p>'+
  '<textarea id="nbody" rows="7" maxlength="4000" aria-label="Your notes · 你的笔记" placeholder="Key points, in your own words · 用你自己的话写要点">'+esc(n)+'</textarea>'+
+ (n.trim()?'':'<p class="acts"><button class="btn sm" data-act="outline">'+T('Start from my areas','按我的领域列个提纲')+'</button></p>')+
  '<label class="chk"><input type="checkbox" id="nok"'+(S.shareOk?' checked':'')+'> <span>'+T('These are my own words. They contain no pasted slides or text, and no names of the material’s provider or platform. I understand they become public.','这是我自己的话，没有粘贴课件或原文，也没有资料提供方或平台的名字。我明白提交后内容会公开。')+'</span></label>'+
- '<p class="acts"><button class="btn pri" data-act="share"'+(ok?'':' disabled')+'>'+T('Open on GitHub to submit','在 GitHub 上提交')+'</button></p>'+
- '<p class="meta">'+T('This opens GitHub with your notes filled in; you need a GitHub account. GitHub makes a copy for you and opens the pull request. Nothing is merged until the site owner reviews it.','这会打开 GitHub 并填好你的笔记；你需要一个 GitHub 账号。GitHub 会为你建一份副本并发起 pull request。站点负责人审核之前不会合并。')+(u.len>MAXV?' <b>'+T('Too long for one link: shorten it.','太长，一个链接装不下：请缩短。')+'</b>':'')+'</p>'}
+ '<p class="acts"><button class="btn pri" data-act="share"'+(ok?'':' disabled')+'>'+T('Send to GitHub','发到 GitHub')+'</button></p>'+
+ '<p class="meta">'+T('This opens GitHub with everything filled in; you need a GitHub account. If you own the site, press “Commit changes” and the track is written for you. Anyone else gets a pull request, and nothing is merged until the site owner has read it.','这会打开 GitHub 并填好全部内容；你需要一个 GitHub 账号。站点拥有者按“Commit changes”，路线就会自动生成。其他人会发起一个 pull request，站点拥有者看过之前不会合并。')+(u.len>MAXV?' <b>'+T('Too long for one link: shorten it.','太长，一个链接装不下：请缩短。')+'</b>':'')+'</p>'}
 function doShare(){var u=shareUrl();if(!S.shareOk||(S.notes||'').trim().length<40||u.len>MAXV)return;window.open(u.url,'_blank','noopener,noreferrer')}
 
 /* ---------- backup ---------- */
@@ -283,6 +291,8 @@ document.addEventListener('click',function(e){
  else if(a==='load')ensureModel().catch(function(){});
  else if(a==='export')exportAll();
  else if(a==='share')doShare();
+ else if(a==='outline'){S.notes=outline();save();renderShare()}
+ else if(a==='goshare'){var sh=$('share');if(sh)sh.scrollIntoView({behavior:'smooth',block:'start'})}
  else if(a==='reset'){if(confirmKey==='reset'){S=fresh();CH=[];R=null;confirmKey='';kvSet('state',S);saveChunks();renderAll();say('Everything erased.','已全部清除。')}else{confirmKey='reset';renderBackup()}}});
 document.addEventListener('change',function(e){var x=e.target;
  if(x.id==='files'){addFiles(x.files);x.value=''}
@@ -290,6 +300,7 @@ document.addEventListener('change',function(e){var x=e.target;
  else if(x.id==='imp'){if(x.files[0])importAll(x.files[0]);x.value=''}
  else if(x.name==='goal'){S.goal=x.value;reassign();save();renderAll()}
  else if(x.name==='model'){S.model=x.value;save();if(ENGID&&!window.__coachTestEngine){ENG=null;ENGID=''}renderModel()}
+ else if(x.dataset&&x.dataset.act==='track'){S.noteTrack=x.value;save();renderShare()}
  else if(x.dataset&&x.dataset.act==='perday'){S.perDay=+x.value;save();renderToday()}
  else if(x.dataset&&x.dataset.act==='exam-id'){S.exam=x.value;S.ver=S.exam==='custom'?'':exam().e.versions[0].id;reassign();save();renderAll()}
  else if(x.id==='cname'||x.id==='ctext'){S.cname=($('cname')||{}).value!=null?$('cname').value:S.cname;S.ctext=($('ctext')||{}).value!=null?$('ctext').value:S.ctext;reassign();save();var h=$('chint');if(h)h.innerHTML=chint(exam().v.domains.length);renderToday();renderMap();renderShare();renderBook()}

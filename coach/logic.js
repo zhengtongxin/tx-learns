@@ -79,11 +79,16 @@
   return {q:q,o:opts,a:a,e:String(o.explanation||o.reason||'').trim()}};
  L.shuffle=function(item,rnd){var idx=[0,1,2,3];for(var i=3;i>0;i--){var j=Math.floor(rnd()*(i+1)),t=idx[i];idx[i]=idx[j];idx[j]=t}
   return {q:item.q,e:item.e,o:idx.map(function(k){return item.o[k]}),a:idx.indexOf(item.a)}};
+ /* The question, its options and its explanation must be in the language the reader chose on the page, whatever language the material is in. */
+ L.inLang=function(q,lang){var t=[q.q].concat(q.o,[q.e||'']).join(' '),z=L.cjkShare(t);return lang==='zh'?z>0.3:z<0.08};
  L.prompt=function(c){
-  var zh=c.lang==='zh',ctx;
-  if(c.exam)ctx='Exam: '+c.exam+'. Domain: '+c.domain+(c.tasks?' (topics: '+c.tasks+')':'')+'. Write it like a real exam question: a short workplace scenario, then "what should the person do next/best?". Test judgement, not memorised wording.';
+  var zh=c.lang==='zh',cross=c.srcLang&&c.srcLang!==c.lang,ctx;
+  if(c.exam)ctx='Exam: '+c.exam+(c.domain?'. Area: '+c.domain:'')+(c.tasks?' (topics: '+c.tasks+')':'')+'. Write it like a real exam question: a short workplace scenario, then "what should the person do next/best?". Test judgement, not memorised wording.';
   else ctx='Goal: the reader wants to understand the material. Write a question that checks understanding of an idea (why or how), not a trivial fact.';
-  return [{role:'system',content:'You write original multiple-choice study questions. You answer with one JSON object and nothing else.'},
-   {role:'user',content:'Material excerpt:\n"""\n'+c.text+'\n"""\n'+ctx+'\nWrite ONE original question in '+(zh?'Chinese (简体中文)':'English')+', based on the excerpt. Exactly 4 options and exactly one correct option; the wrong options must be plausible. Do not copy a published exam question.\nJSON format: {"question":"...","options":["...","...","...","..."],"answer":0,"explanation":"one or two sentences on why the answer is right"} where answer is the index (0 to 3) of the correct option.'}]};
+  var lg=zh?'Chinese (简体中文)':'English',
+   rule=zh?'Every word of the question, all 4 options and the explanation must be in Chinese (简体中文), even if the excerpt is in English: translate the ideas, and keep a technical term in English in brackets only when it helps.'
+          :'Every word of the question, all 4 options and the explanation must be in English, even if the excerpt is in Chinese: translate the ideas, and keep a technical term in Chinese in brackets only when it helps.';
+  return [{role:'system',content:'You write original multiple-choice study questions. You answer with one JSON object and nothing else. The reader reads '+lg+' only, so you always write in '+lg+'.'},
+   {role:'user',content:'Material excerpt'+(cross?' (in '+(c.srcLang==='zh'?'Chinese':'English')+')':'')+':\n"""\n'+c.text+'\n"""\n'+ctx+'\nWrite ONE original question in '+lg+', based on the excerpt. '+rule+' Exactly 4 options and exactly one correct option; the wrong options must be plausible. Do not copy a published exam question.\nJSON format: {"question":"...","options":["...","...","...","..."],"answer":0,"explanation":"one or two sentences on why the answer is right"} where answer is the index (0 to 3) of the correct option. The JSON keys stay in English; every value is in '+lg+'.'}]};
  if(typeof module!=='undefined'&&module.exports)module.exports=L;else root.CoachLogic=L;
 })(typeof window!=='undefined'?window:globalThis);
