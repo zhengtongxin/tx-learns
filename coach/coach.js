@@ -189,7 +189,29 @@ function renderPractice(focus){
   if(fb)h+='<div class="fb" aria-live="polite"><p><b>'+(it.pick===it.a?T('Right.','答对了。'):T('Not quite.','不对。'))+'</b> '+esc(it.e)+'</p><details><summary>'+T('From your material','来自你的资料')+': '+esc(it.mat)+', '+esc(it.loc)+'</summary><p class="snip">'+esc(it.snip)+'…</p></details><p class="acts"><button class="btn pri" id="nx" data-act="next">'+(R.i+1>=R.items.length&&R.gen>=total?T('See the result','看结果'):T('Next','下一题'))+'</button><button class="btn sm" data-act="flag">'+T('This question looks wrong: don’t count it','这道题有问题：不计入')+'</button></p></div>'}
  el.innerHTML=h;
  if(focus){var f=R.view==='fb'?$('nx'):(R.view==='q'?$('qt'):null);if(f)f.focus()}}
-function renderAll(keepPractice){renderToday();renderMap();renderMats();renderGoal();renderBackup();if(!keepPractice)renderPractice()}
+function renderAll(keepPractice){renderToday();renderMap();renderMats();renderGoal();renderBackup();renderShare();if(!keepPractice)renderPractice()}
+
+
+/* ---------- share notes (opens GitHub's own new-file page; nothing is sent from here) ---------- */
+var REPO='zhengtongxin/tx-learns',MAXV=6000;
+function shareBody(){
+ var x=exam(),weak=areas().map(function(a){var v=Lg.strength(hist(a.id));return {n:a.name.en,p:v==null?null:Math.round(v*100)}}).filter(function(a){return a.p!=null}).sort(function(a,b){return a.p-b.p});
+ var topic=(S.noteTopic||'').trim()||x.e.name.en;
+ var t='# '+topic+'\n\nExam outline: '+x.e.name.en+' ('+x.v.label.en+')\nSuggested track: '+(S.noteTrack||'new').trim()+'\n\n## Where I was weak\n'+(weak.length?weak.slice(0,4).map(function(a){return '- '+a.n+': '+a.p+'% right in my practice'}).join('\n'):'- (no practice yet)')+'\n\n## What I learned, in my own words\n'+(S.notes||'').trim()+'\n';
+ return {topic:topic,text:t}}
+function shareUrl(){
+ var b=shareBody(),slug=b.topic.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40)||'notes',
+  folder=slug+'-'+Lg.dayKey().replace(/-/g,'')+'-'+Math.random().toString(36).slice(2,6);
+ return {url:'https://github.com/'+REPO+'/new/notes?filename='+encodeURIComponent('inbox/'+folder+'/notes.md')+'&value='+encodeURIComponent(b.text)+'&message='+encodeURIComponent('Add study notes: '+b.topic),len:b.text.length}}
+function renderShare(){
+ var el=$('share');if(!el)return;var n=(S.notes||''),ok=!!S.shareOk&&n.trim().length>=40,u=shareUrl();
+ el.innerHTML='<p>'+T('Turn what you learned into a pull request, so it can join the knowledge base. Write the key points in your own words. Weak areas are added by name only; your files are never sent.','把你学到的变成一个 pull request，让它有机会加入知识库。用你自己的话写要点。薄弱领域只带名称，你的文件不会被发送。')+'</p>'+
+ '<p class="rowf"><label>'+T('Topic','主题')+' <input type="text" id="ntopic" maxlength="60" value="'+esc(S.noteTopic||'')+'" placeholder="'+esc(exam().e.name.en)+'"></label></p>'+
+ '<textarea id="nbody" rows="7" maxlength="4000" aria-label="Your notes · 你的笔记" placeholder="Key points, in your own words · 用你自己的话写要点">'+esc(n)+'</textarea>'+
+ '<label class="chk"><input type="checkbox" id="nok"'+(S.shareOk?' checked':'')+'> <span>'+T('These are my own words. They contain no pasted slides or text, and no names of the material’s provider or platform. I understand they become public.','这是我自己的话，没有粘贴课件或原文，也没有资料提供方或平台的名字。我明白提交后内容会公开。')+'</span></label>'+
+ '<p class="acts"><button class="btn pri" data-act="share"'+(ok?'':' disabled')+'>'+T('Open on GitHub to submit','在 GitHub 上提交')+'</button></p>'+
+ '<p class="meta">'+T('This opens GitHub with your notes filled in; you need a GitHub account. GitHub makes a copy for you and opens the pull request. Nothing is merged until the site owner reviews it.','这会打开 GitHub 并填好你的笔记；你需要一个 GitHub 账号。GitHub 会为你建一份副本并发起 pull request。站点负责人审核之前不会合并。')+(u.len>MAXV?' <b>'+T('Too long for one link: shorten it.','太长，一个链接装不下：请缩短。')+'</b>':'')+'</p>'}
+function doShare(){var u=shareUrl();if(!S.shareOk||(S.notes||'').trim().length<40||u.len>MAXV)return;window.open(u.url,'_blank','noopener,noreferrer')}
 
 /* ---------- backup ---------- */
 function exportAll(){
@@ -214,15 +236,18 @@ document.addEventListener('click',function(e){
  else if(a==='rm'){dropMat(b.dataset.id);reassign();saveChunks();save();renderAll()}
  else if(a==='load')ensureModel().catch(function(){});
  else if(a==='export')exportAll();
+ else if(a==='share')doShare();
  else if(a==='reset'){if(confirmKey==='reset'){S=fresh();CH=[];R=null;confirmKey='';kvSet('state',S);saveChunks();renderAll();say('Everything erased.','已全部清除。')}else{confirmKey='reset';renderBackup()}}});
 document.addEventListener('change',function(e){var x=e.target;
  if(x.id==='files'){addFiles(x.files);x.value=''}
+ else if(x.id==='nok'){S.shareOk=x.checked;save();renderShare()}
  else if(x.id==='imp'){if(x.files[0])importAll(x.files[0]);x.value=''}
  else if(x.name==='goal'){S.goal=x.value;reassign();save();renderAll()}
  else if(x.name==='model'){S.model=x.value;save();if(ENGID&&!window.__coachTestEngine){ENG=null;ENGID=''}renderModel()}
  else if(x.dataset&&x.dataset.act==='perday'){S.perDay=+x.value;save();renderToday()}
  else if(x.dataset&&x.dataset.act==='exam-id'){S.exam=x.value;S.ver=exam().e.versions[0].id;reassign();save();renderAll()}
  else if(x.dataset&&x.dataset.act==='exam-ver'){S.ver=x.value;reassign();save();renderAll()}});
+document.addEventListener('input',function(e){var x=e.target;if(x.id==='nbody'||x.id==='ntopic'){if(x.id==='nbody')S.notes=x.value;else S.noteTopic=x.value;save();var b=document.querySelector('[data-act=share]');if(b){var okk=!!S.shareOk&&(S.notes||'').trim().length>=40&&shareUrl().len<=MAXV;b.disabled=!okk}}});
 document.addEventListener('dragover',function(e){if(e.target.closest&&e.target.closest('#drop'))e.preventDefault()});
 document.addEventListener('drop',function(e){if(e.target.closest&&e.target.closest('#drop')){e.preventDefault();addFiles(e.dataTransfer.files)}});
 

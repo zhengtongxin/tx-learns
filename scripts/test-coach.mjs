@@ -74,6 +74,15 @@ await pg.click('[data-act=reset]'); await pg.click('[data-act=reset]');
 ok(await pg.locator('#mats .files li').count() === 0, 'erase clears the material');
 await pg.setInputFiles('#imp', path); await pg.waitForFunction(() => document.querySelectorAll('#mats .files li').length === 2);
 ok(await pg.evaluate(() => JSON.stringify(window.__coach.state().stats)) === before, 'import restores the records');
+// share notes: the button stays off until the notes and the promise are there, then opens GitHub's new-file page with no uploaded material
+await pg.evaluate(() => { window.__opened = []; window.open = (u) => { window.__opened.push(u); return null; }; });
+ok(await pg.locator('[data-act=share]').isDisabled(), 'share is off with no notes');
+await pg.fill('#nbody', 'Stakeholders are engaged by influence and interest, and a risk register is reviewed at every stage gate.');
+ok(await pg.locator('[data-act=share]').isDisabled(), 'share stays off until the own-words box is ticked');
+await pg.check('#nok'); await pg.click('[data-act=share]');
+const opened = await pg.evaluate(() => window.__opened);
+ok(opened.length === 1 && /^https:\/\/github\.com\/zhengtongxin\/tx-learns\/new\/notes\?filename=inbox%2F/.test(opened[0]), 'share opens the GitHub new-file page on the notes branch');
+ok(decodeURIComponent(opened[0]).includes('risk register') && !/Fake question|Conflict/.test(decodeURIComponent(opened[0])), 'the link carries the notes, not the material');
 // reload keeps them
 await pg.reload(); await pg.waitForSelector('#app:not([hidden])');
 ok(await pg.locator('#mats .files li').count() === 2, 'records survive a reload');
