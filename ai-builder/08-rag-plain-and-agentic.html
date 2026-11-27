@@ -28,6 +28,26 @@
 <p class="zh" style="margin:0 0 8px">要告诉模型：只能依据这些段落回答，不够时要直说。</p></div>
 <div class="try" id="p1"></div>
 
+<h2><span class="en">Step 4 · What the model actually receives</span><span class="zh">第 4 步 · 模型实际收到什么</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The model never sees your whole document store. It sees one message: your instruction, the few passages the search returned, and the question. Everything it can get right or wrong is in that message, so read it as the model would.</p>
+<p class="zh" style="margin:0 0 8px">模型从来看不到你整个文档库。它收到的只是一条消息：你的指令、搜索返回的几段内容，再加上问题。它能答对或答错的一切，都在这条消息里，所以要像模型那样去读它。</p></div>
+<div class="codebox" data-file="what the model receives" data-lang="text">Answer only from the passages below. If they do not
+contain the answer, say "I do not have that" and stop.
+
+Passage 1 (price-list-2024.pdf):
+  Air fryer 5L ... $119. Warranty 1 year.
+
+Passage 2 (price-list-2025.pdf):
+  Air fryer 5L ... $129. Warranty 2 years.
+
+Question: How much is the 5-litre air fryer?</div>
+<div class="teach"><p class="en" style="margin:0 0 8px">Two passages disagree. The model cannot tell which is current, so it may pick either, or mention both. The mistake is not in the model: an old price list is still stored (a stale chunk). The fix is on your side: remove the 2024 file and re-ingest, or put the year in each passage so the instruction can say "prefer the newest".</p>
+<p class="zh" style="margin:0 0 8px">两段内容互相矛盾。模型分不出哪个是最新的，所以可能选其中一个，也可能两个都提。错不在模型：旧价目表还存着（过期块）。要在你这边修：删掉 2024 年的文件再重新入库，或者在每段里带上年份，让指令可以写“以最新的为准”。</p>
+<p class="en" style="margin:0 0 8px">Notice what the passage labels give you for free: the source file name lets the answer say where it came from, and lets you check it.</p>
+<p class="zh" style="margin:0 0 8px">再注意段落标签白送你的好处：来源文件名让回答能说明出处，也让你能核对。</p></div>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Write</b> three questions about a document of your own and mark each plain or agentic.</span><span class="zh"><b>写出</b>三个关于你自己某份文档的问题，标注各用普通还是智能体式。</span></span></label><label><input type="checkbox"><span><span class="en"><b>List</b> one question your documents cannot answer, and decide what the agent should say.</span><span class="zh"><b>列出</b>一个你的文档回答不了的问题，并决定智能体该怎么说。</span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
@@ -37,4 +57,4 @@
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"prev":["07-voice-meets-workflows.html"],"tools":{"en":"Only a browser","zh":"只需要浏览器"},"know":{"en":"Agents with tools.","zh":"带工具的智能体。"},"goals":{"en":["Explain RAG in two sentences","Tell plain RAG from agentic RAG","Name three ways RAG goes wrong"],"zh":["用两句话讲清 RAG","分清普通 RAG 和智能体式 RAG","说出 RAG 出错的三种情形"]}}}</script>
 <script src="../tracks.js?v=819ff2a4"></script><script src="lessons.js?v=bc7f7459"></script><script src="../assets/site.js?v=a0db7d29"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
-<script src="js/08-rag-plain-and-agentic.js?v=cf2c5c97"></script></body></html>
+<script src="js/08-rag-plain-and-agentic.js?v=ca8f360f"></script></body></html>
