@@ -1,44 +1,428 @@
 <!doctype html><html lang="en" data-area="study"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>How it works | TX Learns</title>
-<meta name="description" content="A five-step loop for learning anything you must pass or master: hand in your material, get quizzed, find weak spots, drill by exam weight, repeat."><meta property="og:title" content="How it works | TX Learns"><meta property="og:description" content="A five-step loop for learning anything you must pass or master: hand in your material, get quizzed, find weak spots, drill by exam weight, repeat."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/study/how.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<title>How the study coach works | TX Learns</title>
+<meta name="description" content="From your slides and PDFs to what to practise today: the agents that run in your own browser, the guardrails that keep your material private and the ideas behind them."><meta property="og:title" content="How the study coach works | TX Learns"><meta property="og:description" content="From your slides and PDFs to what to practise today: the agents that run in your own browser, the guardrails that keep your material private and the ideas behind them."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/study/how.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
 <link rel="canonical" href="https://tx-learns.vercel.app/study/how.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=92b1bb9f">
 <style>
-.mth{max-width:760px;margin:0 auto;padding-bottom:48px}
-.loop{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:0;counter-reset:s}
-.loop li{display:grid;grid-template-columns:44px 1fr;gap:4px 14px;padding:16px 0;border-top:1px solid var(--line);line-height:1.65;color:var(--mut)}
-.loop li:last-child{border-bottom:1px solid var(--line)}
-.loop li::before{counter-increment:s;content:counter(s);grid-row:1/3;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;background:#ffc83d;color:#1d1d1f}
-.loop b{color:var(--fg);font-weight:600}
-.mth .back{margin:14px 0 0;text-align:center;color:var(--mut)}
-.mth h2{text-align:center}.mth .acts{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:26px}
-.mth ul.facts{list-style:none;margin:10px 0 0;padding:0}.mth ul.facts li{padding:10px 0;border-top:1px solid var(--line);color:var(--mut);line-height:1.65}.mth ul.facts b{color:var(--fg);font-weight:600}
-</style><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://tx-learns.vercel.app/study/how.html","url":"https://tx-learns.vercel.app/study/how.html","name":"How it works","description":"A five-step loop for learning anything you must pass or master: hand in your material, get quizzed, find weak spots, drill by exam weight, repeat.","inLanguage":["en","zh"],"isPartOf":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"How it works","item":"https://tx-learns.vercel.app/study/how.html"}]}]}</script></head><body>
-<main class="wide">
-<header class="stage compact"><div class="orb"></div>
-<h1 class="mega"><span class="en">Learn <em>by being tested</em></span><span class="zh">被考，<em>才学得会</em></span></h1>
-<p class="sub"><span class="en">Reading feels like learning. Being quizzed shows what you actually know. This is the loop TX uses, and the study coach runs it for you.</span><span class="zh">读完会觉得自己学会了，被考一下才知道真正会什么。这是 TX 自己用的循环，学习教练替你跑完它。</span></p>
+
+:root{--mono:ui-monospace,"SF Mono",SFMono-Regular,"JetBrains Mono",Menlo,Consolas,monospace}
+.eco{--edge:color-mix(in srgb,var(--fg) 46%,transparent);--edge2:color-mix(in srgb,var(--fg) 26%,transparent);--box:color-mix(in srgb,var(--fg) 22%,transparent)}
+.eco h2 .no{font-family:var(--mono);font-size:.5em;font-weight:600;color:var(--mut);letter-spacing:.04em;vertical-align:.35em;margin-right:12px}
+.conn{display:none;margin:0 auto 10px;max-width:760px;font-size:14px;color:var(--mut);text-align:center;padding:10px 16px;border:1px dashed var(--line);border-radius:8px}
+.conn.on{display:block}
+.code{font-family:var(--mono);font-size:.86em;padding:1px 6px;border-radius:4px;background:var(--glass);border:1px solid var(--line)}
+
+/* the system: one diagram, two views */
+.panel{position:relative;margin-top:18px;padding:10px;border-radius:10px;border:1px solid var(--line);background-color:color-mix(in srgb,var(--node) 88%,transparent);background-image:radial-gradient(color-mix(in srgb,var(--fg) 9%,transparent) 1px,transparent 1.2px);background-size:22px 22px}
+.panel svg{display:block;width:100%;height:auto}
+.panel text{fill:var(--fg);font-family:var(--sans)}
+.panel .t{font-size:13.5px;font-weight:600}
+.panel .m,.panel .lb{font:10.5px var(--mono);fill:var(--mut)}
+.panel .lb{font-size:10px}
+.panel .col{font:10.5px var(--mono);letter-spacing:.14em;fill:var(--mut)}
+.panel .col .n{fill:var(--fg)}
+.panel .band{fill:color-mix(in srgb,var(--fg) 2.5%,transparent)}
+.panel .rule{stroke:var(--line);stroke-width:1}
+.panel .nd rect{fill:var(--node);stroke:var(--box);stroke-width:1.2}
+.panel .nd.ag rect{stroke:var(--edge)}
+.panel .nd.sm .t{font-size:12.5px}
+.panel .nd.ev rect{stroke-dasharray:5 4;fill:transparent}
+.panel .nd.planned rect{stroke-dasharray:3 3;fill:transparent}.panel .nd.planned text{fill:var(--mut)}
+.panel .nd[data-agent]{cursor:pointer;outline:none}
+.panel .nd[data-agent]:hover rect,.panel .nd[data-agent]:focus-visible rect,.panel .nd.hot rect{stroke:var(--fg);stroke-width:1.6}
+.panel .nd.ag rect{fill:color-mix(in srgb,var(--h) 14%,var(--node));stroke:var(--h);stroke-width:1.5}
+.panel .nd.ag .t{font-size:13.5px;font-weight:700}
+.panel .nd.ag .code{font:700 10px var(--mono);fill:color-mix(in srgb,var(--h) 75%,var(--fg));letter-spacing:.06em}
+.panel .nd.ag .hx,.olist .hx{font:10.5px var(--mono);fill:color-mix(in srgb,var(--h) 75%,var(--fg));color:color-mix(in srgb,var(--h) 75%,var(--fg))}
+.panel .nd.ag.run rect{filter:drop-shadow(0 0 10px color-mix(in srgb,var(--h) 70%,transparent))}
+.panel .nd.ag:hover rect,.panel .nd.ag:focus-visible rect,.panel .nd.ag.hot rect{stroke:var(--h);stroke-width:2.4;filter:drop-shadow(0 0 12px color-mix(in srgb,var(--h) 60%,transparent))}
+html[data-theme=light] .panel .nd.ag .hx,html[data-theme=light] .olist .hx,html[data-theme=light] .panel .nd.ag .code{fill:color-mix(in srgb,var(--h) 30%,var(--fg));color:color-mix(in srgb,var(--h) 30%,var(--fg))}
+html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(--fg))}
+.tip{border-top:3px solid var(--h,var(--box))}
+.olist .it.ag{border-left-color:var(--box)}
+.olist .it.ag a{font-weight:650;border-bottom-color:var(--h)}
+.olist .it.ag:not([data-n])::before{background:color-mix(in srgb,var(--h) 35%,var(--node));border-color:var(--h)}
+.panel .nd.ag .seq rect{fill:var(--fg);stroke:none;filter:none}
+.panel .seq rect{fill:var(--fg)}.panel .seq text{fill:var(--bg);font:700 10.5px var(--mono)}
+.panel .lock rect{fill:var(--fg)}.panel .lock path{fill:none;stroke:var(--fg);stroke-width:1.6}
+.panel .dot{fill:var(--mut)}.panel .dot.ok{fill:var(--ok)}.panel .dot.flag{fill:var(--warn)}.panel .dot.run{fill:var(--run)}.panel .dot.fail{fill:var(--bad)}
+.panel .ring{fill:none;stroke:var(--run);stroke-width:1.5;animation:pr 2.2s ease-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes pr{from{opacity:.9;transform:scale(1)}to{opacity:0;transform:scale(2.6)}}
+.panel .e{fill:none;stroke:var(--edge);stroke-width:1.5}
+.panel .e.lp{stroke-dasharray:5 4}
+.panel .e.ck{stroke:var(--edge2);stroke-dasharray:1.5 3.5;stroke-linecap:round}
+.panel marker path{fill:var(--edge)}
+.panel .foot{font:10.5px var(--mono);fill:var(--mut)}
+/* Telegram: a plane on each agent (filled = pings me every run, hollow = only on a problem) and one node for my phone */
+.panel .pl path,.key .kpl path{fill:var(--fg);stroke:var(--fg);stroke-width:1.1;stroke-linejoin:round}
+.panel .pl.ho path,.key .kpl.ho path{fill:none}.key svg.kpl{width:13px;height:13px}
+.panel .nd.tgn rect.bx{stroke:var(--edge);stroke-width:1.4}
+.panel .tgd{stroke-width:1.6}
+.olist .tgl{font:11px var(--mono);color:var(--mut)}
+.key{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin:22px 0 8px;font:11.5px var(--mono);color:var(--mut)}
+.key .kg{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:var(--glass)}
+.key .kg>b{flex:0 0 100%;font:700 10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg)}
+.key span{display:inline-flex;align-items:center;gap:7px}
+.key .ln{display:inline-block;width:24px;border-top:1.5px solid var(--edge)}
+.key .ln.lp{border-top-style:dashed}.key .ln.ck{border-top:2px dotted var(--edge2)}
+.key .dt{width:8px;height:8px;border-radius:50%;background:var(--mut)}
+.key .sq{display:inline-grid;place-items:center;width:16px;height:14px;border-radius:2px;background:var(--fg);color:var(--bg);font-size:9.5px;font-weight:700}
+.key svg{width:11px;height:13px}
+.kb{margin:12px 0 0;text-align:center;font:12px/1.6 var(--mono);color:var(--mut)}
+.kb b{color:var(--fg);font-weight:600}
+/* the one popup: it lives on <body>, outside the glass panels, so no later card or panel can paint over it, and its background is solid */
+.tip{position:absolute;z-index:45;display:none;width:min(380px,calc(100vw - 20px));padding:12px 14px;border-radius:8px;border:1px solid var(--box);background:var(--node);box-shadow:0 18px 50px rgba(0,0,0,.45);font-size:13.5px;line-height:1.55;pointer-events:none;isolation:isolate}
+@media (hover:hover){.tip.on{pointer-events:auto}}
+.tip.pin{pointer-events:auto}.tip .x{float:right;margin:-4px -6px 0 8px;border:0;background:none;color:var(--mut);font-size:18px;line-height:1;cursor:pointer;display:none}.tip.pin .x{display:block}
+.tip.on{display:block}
+.tip h5{margin:0 0 4px;font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+.tip p{margin:0 0 8px;font-size:13.5px;line-height:1.55}
+.spec{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;margin:2px 0 0;font:11.5px/1.5 var(--mono)}
+.spec dt{color:var(--mut)}.spec dd{margin:0;color:var(--fg);overflow-wrap:anywhere}
+.guards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-top:14px}
+.guard{margin:0;padding:14px 16px;border-radius:8px;display:flex;flex-direction:column;gap:8px}
+.guard h4{margin:0;font-size:15.5px;font-weight:700;line-height:1.3}
+.guard .who{margin-top:auto;padding-top:8px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}
+.guard .who em{margin:0;color:var(--mut)}
+.guard .tags{display:flex;flex-wrap:wrap;gap:4px}
+.guard .tags i{font:600 11px/1 var(--mono);font-style:normal;padding:3px 6px;border-radius:3px;color:color-mix(in srgb,var(--h) 80%,var(--fg));border:1px solid color-mix(in srgb,var(--h) 60%,transparent);background:color-mix(in srgb,var(--h) 14%,transparent)}
+.guard .tags i.all{--h:var(--mut);color:var(--fg)}
+.guard .stat{display:flex;align-items:baseline;gap:10px;padding:6px 0 8px;border-bottom:1px solid var(--line)}
+.guard .stat b{display:inline;white-space:nowrap;font:700 30px/1 var(--mono);letter-spacing:-.02em}
+.guard .stat span{font:11.5px/1.35 var(--mono);color:var(--mut);text-transform:none;letter-spacing:0}
+.guard p{margin:0;font-size:13.5px;line-height:1.5}
+.guard em{display:block;margin-bottom:1px;font:700 10px var(--mono);font-style:normal;letter-spacing:.08em;text-transform:uppercase}
+.guard .risk{color:var(--mut)}.guard .risk em{color:var(--bad)}
+.guard .imp em{color:var(--ok)}
+.plumb{margin-top:14px;font:12px/1.7 var(--mono);color:var(--mut);text-align:center;overflow-wrap:anywhere}
+.plumb b{color:var(--fg);font-weight:600}
+/* breathing room */
+.eco section{margin-top:110px}.eco section>p{max-width:700px;line-height:1.8;margin-top:14px}
+.eco-hero{padding-bottom:12px}.statusbar{margin-top:36px;padding:12px 20px;gap:10px 22px}
+.panel{margin-top:36px;padding:28px 24px}
+.panel .e.ck{display:none}
+.key{gap:14px;margin:32px 0 14px}.key .kg{padding:14px 18px;gap:10px 18px}
+.kb{margin-top:26px}.plumb{margin-top:22px}
+.guards{display:block;grid-template-columns:none;list-style:none;margin:32px 0 0;padding:0;border-top:2px solid var(--ok)}
+.guard{display:grid;grid-template-columns:34px 1fr auto;gap:4px 16px;align-items:baseline;padding:16px 4px;border-bottom:1px solid var(--line)}
+.guard .gn{font:700 12px var(--mono);color:var(--mut)}
+.guard .gt b{font-size:15.5px}.guard .gl{display:block;margin-top:3px;font-size:14px;color:var(--mut);line-height:1.5}
+.guard .stat{display:flex;align-items:baseline;gap:8px;padding:0;border:0;text-align:right}.guard .stat b{font:700 20px var(--mono);color:var(--ok)}.guard .stat span{font:11.5px var(--mono);color:var(--mut);max-width:150px;text-align:left}
+.sub3{margin:44px 0 6px;font:600 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.feed li{padding:14px 6px}.rule-line{margin-top:72px}
+@media(max-width:760px){.eco section{margin-top:72px}.guard{grid-template-columns:28px 1fr;padding:15px 0}.guard .stat{grid-column:2;justify-content:flex-start;text-align:left}.statusbar{padding:12px 14px}.olist .it{padding:13px 0 13px 34px}.olist .it::before{top:19px}.olist .it[data-n]::before,.olist .it.g::before{top:14px}.key{margin-top:26px}}
+/* phone: the diagrams become ordered lists */
+.olist{display:none;list-style:none;margin:16px 0 0;padding:0}
+.olist .h{font:11px var(--mono);color:var(--mut);letter-spacing:.14em;text-transform:uppercase;margin:16px 0 4px}
+.olist .h:first-child{margin-top:0}
+.olist .it{position:relative;padding:7px 0 7px 32px;border-left:1px solid var(--box);margin-left:10px;font-size:14.5px;line-height:1.45}
+.olist .it::before{content:"";position:absolute;left:-5px;top:13px;width:9px;height:9px;border-radius:50%;background:var(--node);border:1px solid var(--edge)}
+.olist .it[data-n]::before{content:attr(data-n);left:-10px;top:8px;width:19px;height:17px;border-radius:3px;border:0;background:var(--fg);color:var(--bg);font:700 10.5px/17px var(--mono);text-align:center}
+.olist .it.lp{color:var(--mut)}.olist .it.lp::before{border-style:dashed}
+.olist .it.g::before{content:"TX";left:-11px;top:8px;width:21px;height:17px;border-radius:3px;border:1px solid var(--fg);font:700 9px/15px var(--mono);text-align:center;color:var(--fg)}
+.olist small{display:block;font:11px var(--mono);color:var(--mut)}
+.olist a{color:var(--fg);text-decoration:none;border-bottom:1px dotted var(--edge)}
+.olist .st{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--mut);margin-right:7px;vertical-align:1px}
+.olist .st.ok{background:var(--ok)}.olist .st.flag{background:var(--warn)}.olist .st.run{background:var(--run)}.olist .st.fail{background:var(--bad)}
+.olist .ob{all:unset;cursor:pointer;font-weight:650;border-bottom:1px dotted var(--h,var(--edge))}.olist .ob:focus-visible{outline:2px solid var(--h);outline-offset:2px}
+.olist .more{display:none;margin:8px 0 4px;padding:10px 12px;border-radius:6px;border:1px solid var(--box);background:var(--node)}.olist .it.open .more{display:block}.olist .more p{margin:0 0 8px;font-size:14px}
+.olist .lk{font:10px var(--mono);color:var(--mut);margin-left:6px;letter-spacing:.06em}
+@media(max-width:760px){.panel{display:none}.olist{display:block}}
+@media(max-width:760px){.olist .it{padding:11px 0 11px 32px}.olist .it::before{top:17px}.olist .it[data-n]::before{top:12px}.olist .it.g::before{top:12px}}
+@media(prefers-reduced-motion:reduce){.panel .ring{animation:none}}
+/* concepts used to build the site */
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px;margin-top:30px;list-style:none;padding:0}
+.bcn{margin:0;border-radius:10px;border:1px solid color-mix(in srgb,var(--acc) 35%,var(--line));background:color-mix(in srgb,var(--acc) 6%,var(--glass))}
+.bcn.soon{border-style:dashed;background:transparent}
+.bcn a{display:flex;gap:10px;align-items:center;padding:10px 12px;color:var(--fg);text-decoration:none;border-radius:10px}.bcn a:hover,.bcn a:focus-visible{background:color-mix(in srgb,var(--acc) 14%,transparent)}
+.bcn .ic{font-size:17px;width:30px;height:30px;flex:none;display:grid;place-items:center;border-radius:8px;background:color-mix(in srgb,var(--acc) 22%,transparent)}
+.bcn .bt{min-width:0;display:flex;flex-direction:column;gap:1px}.bcn b{font-size:14px;line-height:1.3}
+.bcn .bu{font-size:12.5px;line-height:1.4;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:760px){.cgrid{grid-template-columns:1fr}.bcn .bu{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}}
+/* activity */
+.feed{list-style:none;margin:14px 0 0;padding:0}
+.feed li{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:baseline;padding:11px 4px;border-bottom:1px solid var(--line);font-size:14px;line-height:1.5}
+.feed .dot{width:8px;height:8px;border-radius:50%;background:var(--mut);transform:translateY(-1px)}
+.feed .dot.ok{background:var(--ok)}.feed .dot.flag{background:var(--warn)}.feed .dot.run{background:var(--run)}.feed .dot.fail{background:var(--bad)}
+.feed .tm{font:12px var(--mono);color:var(--mut);white-space:nowrap}
+.feed .tx{overflow-wrap:anywhere}
+.feed .empty{display:block;color:var(--mut);border:0}
+.rule-line{margin-top:40px;text-align:center;font-size:15px;color:var(--mut)}
+.rule-line b{color:var(--fg)}
+/* design pass: one rhythm, amber accent, quieter chrome */
+.eco{--ink:var(--acc)}
+.eco .orb{opacity:.22;top:40%}
+.eco-hero{padding:44px 0 0}
+.eco-hero .mega{line-height:1.08;letter-spacing:-.035em;margin:.5em 0 .35em}
+.eco-hero .sub{max-width:min(1100px,100%);margin:0 auto;line-height:1.65}
+.statusbar{margin-top:24px;padding:8px 16px;gap:6px 20px;font-size:12px;max-width:none;width:fit-content;border-radius:999px}
+.eco section{margin-top:84px;padding-top:28px;border-top:1px solid var(--line)}
+.eco h2{letter-spacing:-.02em;margin:0}
+.eco h2 .no{color:var(--acc2);margin-right:10px}
+.eco section>p{max-width:min(1100px,100%);text-wrap:balance;margin-top:10px;line-height:1.7;color:var(--mut)}
+.eco section>p b{color:var(--fg)}
+.eco section>p.kb,.eco section>p.plumb,.eco section>p.conn{max-width:none}
+.panel{margin-top:24px;padding:16px;border-radius:14px}
+.panel .nd.ag rect{fill:color-mix(in srgb,var(--h) 9%,var(--node));stroke:color-mix(in srgb,var(--h) 70%,transparent);stroke-width:1.2}
+.panel .band{fill:transparent}
+.key{display:flex;flex-wrap:wrap;gap:8px 26px;margin:18px 0 0;padding:0}
+.key .kg{padding:0;border:0;background:none;gap:6px 14px;flex:0 1 auto}
+.key .kg>b{flex:0 0 auto;color:var(--mut)}
+.kb{margin-top:14px;text-align:left}.plumb{margin-top:8px;text-align:left}
+.guards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));column-gap:44px;margin-top:22px;border-top:0}
+.guard{grid-template-columns:24px 1fr auto;padding:13px 0;gap:2px 12px;align-items:start;border-bottom:1px solid var(--line)}
+.guard .gt b{font-size:15px}.guard .gl{font-size:13.5px;margin-top:2px}
+.guard .stat{padding:3px 9px;border-radius:999px;border:1px solid color-mix(in srgb,var(--acc) 40%,transparent);background:color-mix(in srgb,var(--acc) 9%,transparent);white-space:nowrap;gap:5px;align-items:baseline}
+.guard .stat b{font-size:14px;color:var(--acc)}.guard .stat span{font-size:11px;max-width:none}
+.cgrid{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;margin-top:20px}
+.bcn a{padding:8px 11px;gap:9px}.bcn .ic{width:26px;height:26px;font-size:15px;border-radius:7px}
+.bcn b{font-size:13.5px}.bcn .bu{display:none}
+.sub3{margin:30px 0 2px}
+.rule-line{margin:56px auto 0;max-width:640px}
+.eco-hero.stage{padding-bottom:0}.eco-hero+section{margin-top:48px}.key .kg{padding-right:26px;border-right:1px solid var(--line)}.key .kg:last-child{border:0;padding:0}.guard .gn{padding-top:2px}
+
+@media(max-width:760px){.eco-hero{padding-top:28px}.eco section{margin-top:56px}.cgrid{grid-template-columns:1fr 1fr}.bcn b{font-size:13px}.bcn .ic{display:none}.guard{grid-template-columns:22px 1fr}.guard .stat{grid-column:2;justify-self:start;margin-top:6px}}
+/* round 2: left-aligned, fewer frames, 44px touch targets */
+.eco-hero.stage{text-align:center}.eco-hero .sub{margin:0 auto;max-width:min(1100px,100%)}
+.statusbar{margin-left:auto;margin-right:auto;justify-content:center;border:0;background:none;padding:0;border-radius:0;margin-top:18px}
+.cgrid{gap:2px 12px}
+.bcn,.bcn.soon{border:0;background:none;border-radius:8px}
+.bcn.soon a{opacity:.62}
+.olist .ob{display:flex;align-items:center;min-height:44px;width:100%;box-sizing:border-box;border-bottom:0}
+.olist .it.ag{padding-top:0;padding-bottom:6px}.olist .it.ag::before{top:16px}
+.olist .more{margin:2px 0 8px}
+@media(max-width:760px){.dsk{display:none}.cgrid{grid-template-columns:1fr}.bcn a{min-height:44px}}
+/* step hover: light up the boxes and arrows of one step, dim the rest (nothing is hidden or collapsed) */
+#system [data-s]{transition:opacity .28s ease}
+#system[data-f="1"] [data-s]:not([data-s~="1"]),#system[data-f="2"] [data-s]:not([data-s~="2"]){opacity:.2}
+#system[data-f="3"] [data-s]:not([data-s~="3"]){opacity:.2}
+#system[data-f="4"] [data-s]:not([data-s~="4"]){opacity:.2}
+#system[data-f="5"] [data-s]:not([data-s~="5"]){opacity:.2}
+.flow li[tabindex]{cursor:pointer;outline:none;transition:opacity .28s ease}
+.flow li[tabindex]::after{content:"";position:absolute;inset:0 -10px -6px;border-radius:8px;border:1px solid transparent;transition:border-color .28s,background-color .28s;pointer-events:none}
+.flow li.on::after,.flow li:focus-visible::after{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 7%,transparent)}
+#system[data-f] .flow li[tabindex]:not(.on){opacity:.55}
+@media(prefers-reduced-motion:reduce){#system [data-s],.flow li[tabindex],.flow li[tabindex]::after{transition:none}}
+/* round 2b: simple flow, case study, folded details, nav, health */
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 0}
+.btn{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;min-height:44px;padding:0 22px;border-radius:999px;background:var(--acc);color:#1a1200;border:1px solid transparent;font-weight:600;font-size:14.5px;line-height:1.2;text-decoration:none}
+.btn.ghost{background:none;color:var(--fg);border:1px solid var(--line)}
+.btn:hover,.btn:focus-visible{filter:brightness(1.1)}
+.pnav{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 22px;margin:26px 0 0;font:600 12.5px var(--mono);letter-spacing:.04em}
+.pnav a{color:var(--mut);text-decoration:none;padding:8px 0;min-height:20px}.pnav a:hover,.pnav a:focus-visible{color:var(--acc2)}
+.flow{list-style:none;margin:26px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:0 26px;counter-reset:f}
+.flow li{position:relative;padding-top:34px;border-top:1px solid var(--line)}
+.flow li>b{position:absolute;top:-1px;left:0;padding:3px 0 0;border-top:2px solid var(--acc);font:700 12px var(--mono);color:var(--acc2);width:26px}
+.flow h3{margin:0 0 6px;font-weight:700}
+.flow p{margin:0 0 10px;line-height:1.6;color:var(--mut)}
+.ty{display:inline-block;margin:0 6px 0 0;padding:2px 8px;border-radius:999px;font:600 10.5px var(--mono);font-style:normal;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);color:var(--mut)}
+.ty.ai{color:var(--acc2);border-color:color-mix(in srgb,var(--acc) 45%,transparent)}
+.full{margin-top:34px;border-top:1px solid var(--line);padding-top:6px}
+.full>summary,.morebox>summary{cursor:pointer;list-style:none;padding:12px 0;min-height:44px;box-sizing:border-box;font:600 13.5px var(--sans);color:var(--acc2)}
+.full>summary::-webkit-details-marker,.morebox>summary::-webkit-details-marker,.feed summary::-webkit-details-marker{display:none}
+.full>summary::before,.morebox>summary::before{content:"+ ";font-family:var(--mono)}.full[open]>summary::before,.morebox[open]>summary::before{content:"− "}
+.full>p{max-width:640px;margin:8px 0 0;line-height:1.7;color:var(--mut)}
+.eco .start{margin-top:10px;font-size:14.5px;color:var(--mut)}
+.health{list-style:none;margin:6px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:0 26px}
+.health li{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.health .dot{width:8px;height:8px;border-radius:50%;background:var(--mut);flex:none}
+.health .dot.ok{background:var(--ok)}.health .dot.flag{background:var(--warn)}.health .dot.run{background:var(--run)}.health .dot.fail{background:var(--bad)}
+.health .hv{margin-left:auto;font:12px var(--mono);color:var(--mut)}
+.feed li.fi{display:block;padding:0}
+.feed summary{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:baseline;padding:11px 4px;min-height:44px;box-sizing:border-box;cursor:pointer;list-style:none}
+.feed .fd{margin:0 0 12px 20px;font-size:13px;line-height:1.6;color:var(--mut);overflow-wrap:anywhere}.feed .fl{font:600 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;margin-right:6px}
+.flow{align-items:start}.flow li{margin:0}
+.eco details.full,.eco details.morebox,.eco .feed details{background:none;border:0;border-radius:0;padding:0;margin:0}
+.eco details.full{margin-top:34px;border-top:1px solid var(--line)}
+#guards{grid-template-columns:1fr;max-width:min(760px,100%);margin-left:auto;margin-right:auto}.morebox .guards{margin-top:0}
+.eco .feed summary,.eco .full>summary,.eco .morebox>summary{font-weight:600}
+@media(max-width:900px){.flow{gap:26px}}
+@media(max-width:560px){.pnav{gap:0 18px}}
+/* guardrails and concepts: short labels, the explanation in the shared popup */
+#guards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:8px 12px;max-width:none;margin:26px 0 0;border:0}
+#guards .guard{display:flex;flex-direction:row;text-align:left;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--glass);cursor:pointer;outline:none;transition:border-color .2s,background-color .2s}
+#guards .guard:hover,#guards .guard:focus-visible,#guards .guard.nhot{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 8%,var(--glass))}
+#guards .guard .gt b{font-size:14px;line-height:1.35}
+#guards .guard .stat{flex:none;width:auto;margin:0;padding:2px 8px;gap:5px}#guards .guard .gt{flex:1;min-width:0;text-align:left}
+#guards .guard .stat span{display:none}
+.tip .nstat{margin:0;font:12px var(--mono);color:var(--mut)}.tip .nstat b{color:var(--ok);font-size:14px}
+.bcn.nhot,.bcn:has(.nhot){border-color:var(--acc)}.bcn a{transition:background-color .2s}
+@media(prefers-reduced-motion:reduce){#guards .guard,.bcn a{transition:none}}
+/* round 3: guardrail icons, nicer concept chips (no number pills; concept clicks only open the note) */
+#guards .guard{gap:12px;justify-content:flex-start}
+#guards .guard .gi{flex:none;width:34px;height:34px;display:grid;place-items:center;border-radius:10px;font-size:17px;background:color-mix(in srgb,var(--ok) 14%,transparent);border:1px solid color-mix(in srgb,var(--ok) 30%,transparent);transition:transform .2s}
+#guards .guard:hover .gi,#guards .guard:focus-visible .gi,#guards .guard.nhot .gi{transform:scale(1.08)}
+#guards .guard .gt{flex:1}
+.cgrid{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-top:22px}
+.bcn{border-radius:12px;border:1px solid var(--line);background:var(--glass);transition:border-color .2s,transform .2s,background-color .2s}
+.bcn:hover,.bcn:has(a:focus-visible),.bcn:has(.nhot){border-color:var(--acc);transform:translateY(-1px)}
+.bcn a{padding:11px 13px;cursor:pointer}
+.bcn .ic{width:34px;height:34px;border-radius:10px;font-size:18px}
+.bcn b{font-size:14px}
+@media(prefers-reduced-motion:reduce){.bcn,#guards .guard .gi{transition:none}.bcn:hover{transform:none}}
+/* grouped guardrails and ideas: one card style, one-line titles */
+#guards.groups,#cgrid.groups{margin:16px 0 0;border:0;display:block;max-width:none}
+.groups .gh{margin:18px 0 8px;text-align:left}.groups .gh:first-child{margin-top:0}#guardrails,#concepts{margin-top:44px}#guardrails>p,#concepts>p{margin-bottom:0}#guards.groups,#cgrid.groups{margin-top:16px}
+.gl2{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:8px}
+.gl2>li{height:56px;box-sizing:border-box}.gl2>.bcn a{height:100%;box-sizing:border-box;padding-top:0;padding-bottom:0}#guards .guard{padding-top:0;padding-bottom:0}
+#guards .guard b,.bcn b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bcn .bt{min-width:0;flex:1}
+/* Attention: decisions first, technical reports only when opened. */
+
+</style>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://tx-learns.vercel.app/study/how.html","url":"https://tx-learns.vercel.app/study/how.html","name":"How the study coach works","description":"From your slides and PDFs to what to practise today: the agents that run in your own browser, the guardrails that keep your material private and the ideas behind them.","inLanguage":["en","zh"],"isPartOf":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"How the study coach works","item":"https://tx-learns.vercel.app/study/how.html"}]}]}</script></head><body>
+<main class="wide eco">
+<header class="stage compact eco-hero"><div class="orb"></div>
+<span class="eyebrow"><span class="en">Under the hood · system view</span><span class="zh">幕后 · 系统视图</span></span>
+<h1 class="mega"><span class="en">From your slides to what to practise today.</span><span class="zh">从你的课件，到今天该练什么。</span></h1>
+<p class="sub"><span class="en">Six small agents, all running in your own browser, turn your files into questions and your answers into a plan.</span><span class="zh">六个小 agent 都在你自己的浏览器里运行，把你的文件变成题目，把你的答案变成计划。</span></p>
+<nav class="pnav" aria-label="On this page"><a href="#system"><span class="en">System</span><span class="zh">系统</span></a><a href="#guardrails"><span class="en">Guardrails</span><span class="zh">护栏</span></a><a href="#concepts"><span class="en">Ideas</span><span class="zh">概念</span></a></nav>
 </header>
-<div class="mth">
-<ol class="loop">
-<li><span><b><span class="en">Hand in your material</span><span class="zh">交出资料</span></b></span><span><span class="en">Slides and PDFs, in English or 中文. They stay on your device.</span><span class="zh">课件和 PDF，中英文都行。资料只留在你的设备上。</span></span></li>
-<li><span><b><span class="en">Get quizzed to diagnose</span><span class="zh">出题诊断</span></b></span><span><span class="en">The AI writes original questions from your material. A first round shows where you stand.</span><span class="zh">AI 根据你的资料出原创题。第一轮告诉你现在在哪。</span></span></li>
-<li><span><b><span class="en">Find the weak spots</span><span class="zh">找出薄弱点</span></b></span><span><span class="en">Every answer updates a strength map by knowledge area, down to the passages you missed.</span><span class="zh">每次作答都会更新按知识领域划分的强弱图，细到你答错的段落。</span></span></li>
-<li><span><b><span class="en">Drill by the exam weight</span><span class="zh">按考纲比例刷题</span></b></span><span><span class="en">If the goal is a certificate, questions follow the exam outline's content weighting, tilted toward your weak areas.</span><span class="zh">目标是考证时，出题比例跟随考纲的内容占比，并向你的弱项倾斜。</span></span></li>
-<li><span><b><span class="en">Re-analyse and repeat</span><span class="zh">重新分析，再来一轮</span></b></span><span><span class="en">The weak spots are recomputed after each round and a short daily plan says what to practise today.</span><span class="zh">每轮之后重新计算弱项，并用一份简短的每日计划告诉你今天练什么。</span></span></li>
+
+<section id="system">
+<h2><span class="en">How a study round works</span><span class="zh">一轮学习是怎么跑的</span></h2>
+<p><span class="en">Five steps, then the full system, left to right. Hover or tap an agent for details.</span><span class="zh">先是五步，再是完整系统，从左往右读。移上去或点一下 agent 看详情。</span></p>
+<ol class="flow" role="group" aria-label="Five steps of the study loop · 学习循环的五步">
+<li><b>1</b><h3><span class="en">Hand in material</span><span class="zh">交出资料</span></h3><p><span class="en">Your slides and PDFs are read on your device and cut into short passages.</span><span class="zh">你的课件和 PDF 在你的设备上读取，切成短段落。</span></p><i class="ty me"><span class="en">you</span><span class="zh">你</span></i></li>
+<li><b>2</b><h3><span class="en">Get quizzed</span><span class="zh">出题诊断</span></h3><p><span class="en">An open model writes one original question per passage, while you answer the one before.</span><span class="zh">开源模型为每个段落写一道原创题，在你答上一题时就已经在写下一题。</span></p><i class="ty ai"><span class="en">ai</span><span class="zh">AI</span></i></li>
+<li><b>3</b><h3><span class="en">Find weak spots</span><span class="zh">找出薄弱点</span></h3><p><span class="en">Each answer is marked and updates a strength map, down to the passage you missed.</span><span class="zh">每个答案都会批改，并更新强弱图，细到你答错的段落。</span></p><i class="ty ai"><span class="en">ai</span><span class="zh">AI</span></i></li>
+<li><b>4</b><h3><span class="en">Drill by weight</span><span class="zh">按比例刷题</span></h3><p><span class="en">With an exam goal, questions follow the outline’s shares, tilted toward your weak areas.</span><span class="zh">考证目标下，题目按考纲比例，并向你的弱项倾斜。</span></p><i class="ty ai"><span class="en">ai</span><span class="zh">AI</span></i></li>
+<li><b>5</b><h3><span class="en">Re-analyse</span><span class="zh">重新分析</span></h3><p><span class="en">After each round the plan is rebuilt: today’s questions, weakest first.</span><span class="zh">每轮之后重建计划：今天的题目，最弱的排在前面。</span></p><i class="ty ai"><span class="en">ai</span><span class="zh">AI</span></i></li>
 </ol>
-<ul class="facts">
-<li><span class="en"><b>Free, private.</b> The AI is an open model that runs in your browser. No login and no server: your records live in this browser, with export and import to back up or move.</span><span class="zh"><b>免费、私密。</b>AI 是在你浏览器里运行的开源模型。不用登录，也没有服务器：记录只在这个浏览器里，可以导出、导入来备份或换设备。</span></li>
-<li><span class="en"><b>Plain limits.</b> Desktop Chrome or Edge, a one-time download of about 1 to 2 GB, text only, and a smaller model than the big chat apps, so check answers you doubt.</span><span class="zh"><b>说清限制。</b>电脑版 Chrome 或 Edge，首次下载约 1 到 2 GB，只读文字，模型比大型聊天应用小，有疑问的答案请自己核对。</span></li>
-</ul>
-<h2 style="margin-top:34px"><span class="en">Under the <em>hood</em></span><span class="zh">背后的<em>原理</em></span></h2>
-<ul class="facts">
-<li><span class="en"><b>Read.</b> Your PDF, PPTX or text is read on your device and cut into short passages.</span><span class="zh"><b>读取。</b>你的 PDF、PPTX 或文本在你的设备上读取，切成短段落。</span></li>
-<li><span class="en"><b>Match.</b> For an exam goal, each passage is matched to an exam area by topic words, so questions follow the outline’s shares.</span><span class="zh"><b>匹配。</b>考证目标下，按主题词把每个段落对应到考纲的某个领域，让题目比例跟随考纲。</span></li>
-<li><span class="en"><b>Ask.</b> An open model in your browser writes one original multiple-choice question from a passage, while you answer the one before.</span><span class="zh"><b>出题。</b>浏览器里的开源模型根据一个段落写一道原创选择题，在你答上一题时就已经在写下一题。</span></li>
-<li><span class="en"><b>Weigh.</b> Each answer updates that area’s strength, newest answers counting most, and remembers the passage you missed.</span><span class="zh"><b>计分。</b>每次作答都会更新该领域的强度，越新的答案权重越大，并记住你答错的段落。</span></li>
-<li><span class="en"><b>Plan.</b> Weak, untested and overdue areas get more questions in today’s plan; a mini exam follows the outline’s shares exactly.</span><span class="zh"><b>计划。</b>弱项、没测过和该复习的领域在今天的计划里题更多；小测验则严格按考纲比例出题。</span></li>
-</ul>
-<p class="acts"><a class="btn pri big" href="index.html"><span class="en">Open the study coach →</span><span class="zh">打开学习教练 →</span></a></p>
-</div>
+<div class="panel" id="ov-panel"><svg id="ov" viewBox="0 0 1100 510" role="group" aria-label="System diagram: files, passages, question writer, you, grader, weak-spot analyst, planner"></svg></div>
+<ol class="olist" id="ov-list"></ol>
+<div class="key" id="key"></div>
+<p class="kb"><span class="en">Everything above runs in <b>your browser</b>. Nothing is sent to a server.</span><span class="zh">以上一切都在<b>你的浏览器</b>里运行，不会发给任何服务器。</span></p>
+</section>
+
+<section id="guardrails">
+<h2><span class="en">Guardrails</span><span class="zh">护栏</span></h2>
+<p><span class="en">What keeps your material private and the questions honest.</span><span class="zh">什么让你的资料保持私密，让题目靠得住。</span></p>
+<div class="groups" id="guards" role="group" aria-label="Guardrails · 护栏"></div>
+</section>
+
+<section id="concepts">
+<h2><span class="en">Ideas to learn</span><span class="zh">可以学的概念</span></h2>
+<p><span class="en">What the study coach is built from. Hover or tap one to see what it is.</span><span class="zh">学习教练用到的想法。移上去或点一下，看它是什么。</span></p>
+<div class="groups" id="cgrid"></div>
+</section>
 </main>
-<script src="../assets/site.js?v=50672dc8"></script></body></html>
+<div class="tip" id="tip" role="tooltip"></div>
+<script src="../assets/site.js?v=50672dc8"></script>
+<script>
+(function(){
+  function t(en,zh){return '<span class="en">'+en+'</span><span class="zh">'+zh+'</span>'}
+  function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function ts(en,zh){return '<tspan class="en">'+esc(en)+'</tspan><tspan class="zh">'+esc(zh)+'</tspan>'}
+  var f=function(v){return Math.round(v*10)/10};
+  // The six agents. All of them run in the reader's browser (coach/coach.js); keep their triggers and outputs true to it.
+  var A=[
+   {id:'reader',hue:'#4cc9f0',en:'Reader agent',zh:'读取 agent',on:['on file added','添加文件时'],den:'Reads a PDF, PowerPoint or text file on your device and cuts it into short passages. Scanned pages and pictures are skipped.',dzh:'在你的设备上读取 PDF、PowerPoint 或文本文件，切成短段落。扫描页和图片会被跳过。',runs:['when you add a file','你添加文件时'],output:['passages with their page or slide','带页码或幻灯片号的段落']},
+   {id:'matcher',hue:'#8b7cff',en:'Matcher agent',zh:'匹配 agent',on:['on goal change','目标变化时'],den:'Decides which exam area each passage belongs to by its topic words, so questions can follow the outline’s shares. With the goal “understand”, each file is its own area.',dzh:'按主题词判断每个段落属于考纲的哪个领域，让题目能跟随考纲比例。目标是“弄懂资料”时，每个文件就是一个领域。',runs:['when you change goal or outline','你更换目标或考纲时'],output:['passages tagged by area','按领域标注的段落']},
+   {id:'writer',hue:'#ff9f1c',en:'Question writer agent',zh:'出题 agent',on:['on round start','开始一轮时'],den:'The open model writes one original multiple-choice question from one passage, in the passage’s language. It writes the next question while you answer the current one. Half the time it picks a passage you missed before.',dzh:'开源模型根据一个段落，用段落的语言写一道原创选择题。在你答当前题时就已经在写下一题。有一半的时候它会选你以前答错的段落。',runs:['each round, one question ahead','每一轮，提前一题'],output:['question, 4 options, explanation','题目、4 个选项、解析']},
+   {id:'grader',hue:'#2ec4b6',en:'Grader agent',zh:'批改 agent',on:['on each answer','每次作答'],den:'Marks your answer, shows the explanation and the passage the question came from. If a question looks wrong, one click removes its result.',dzh:'批改你的答案，显示解析和题目出自的段落。如果题目有问题，点一下就撤销它的结果。',runs:['each answer you give','你每次作答'],output:['right or wrong, explanation','对错与解析']},
+   {id:'analyst',hue:'#f15bb5',en:'Weak-spot agent',zh:'弱项 agent',on:['after each answer','每次作答后'],den:'Updates each area’s strength from your recent answers, newest counting most, and remembers which passages you missed.',dzh:'根据你近期的答案更新每个领域的强度，越新的权重越大，并记住你答错的段落。',runs:['after every answer','每次作答后'],output:['strength map, missed passages','强弱图、答错的段落']},
+   {id:'planner',hue:'#9bde4c',en:'Planner agent',zh:'计划 agent',on:['on open · after a round','打开时 · 一轮后'],den:'Builds today’s plan: how many questions per area, weak and untested areas first, overdue ones topped up. A mini exam follows the outline’s shares exactly.',dzh:'生成今天的计划：每个领域出几题，弱项和没测过的优先，久未练的补上。小测验则严格按考纲比例。',runs:['when you open the tool, after a round','你打开工具时、每轮之后'],output:['today’s plan, weighted questions','今天的计划、加权出题']}];
+  var NAME={};A.forEach(function(a){NAME[a.id]=a});
+  var CW=1100/6,X=function(c){return CW/2+c*CW},NW=148,NH=46,AW=150,AH=84,RT=100,RA=212,RM=325,RB=440;
+  var COLS=[['INPUT','输入'],['READ','读取'],['MATCH','匹配'],['PASSAGES','段落'],['AI IN YOUR BROWSER','你浏览器里的 AI'],['YOU','你']];
+  var N={
+   files:{c:0,y:RA,en:'Your files',zh:'你的文件',m:['PDF · PPTX · text','PDF · PPTX · 文本'],dn:'Slides and PDFs in English or 中文. They are read on your device and never uploaded.',dz:'中英文的课件和 PDF。它们在你的设备上读取，从不上传。'},
+   reader:{c:1,y:RA,agent:'reader'},matcher:{c:2,y:RA,agent:'matcher'},
+   passages:{c:3,y:RA,en:'Passages by area',zh:'按领域的段落',m:['kept in this browser','存在这个浏览器里'],dn:'The text of your files, cut into passages and tagged by area. Stored only in this browser (IndexedDB); export it to back up.',dz:'你文件的文字，切成段落并按领域标注。只存在这个浏览器里（IndexedDB），可导出备份。'},
+   model:{c:4,y:RT,en:'Open model',zh:'开源模型',m:['Qwen3 · WebGPU','Qwen3 · WebGPU'],dn:'An open-weight model your browser runs on your graphics chip. The first start downloads about 1 to 2 GB once; after that it is cached.',dz:'开放权重模型，由你的浏览器在显卡上运行。第一次启动下载约 1 到 2 GB，之后会缓存。'},
+   writer:{c:4,y:RA,agent:'writer'},
+   you:{c:5,y:RA,en:'You',zh:'你',m:['answer each question','回答每道题'],dn:'You answer, one question at a time. In a mini exam the explanations wait until the end.',dz:'你一次回答一道题。小测验的解析要到最后才显示。'},
+   grader:{c:5,y:RB,agent:'grader'},analyst:{c:4,y:RB,agent:'analyst'},
+   strength:{c:3,y:RB,en:'Strength map',zh:'强弱图',m:['saved in this browser','存在这个浏览器里'],dn:'One bar per area, from your recent answers. Weak areas get more questions next time.',dz:'每个领域一根条，来自你近期的答案。弱项下次会分到更多题。'},
+   planner:{c:2,y:RB,agent:'planner'},
+   plan:{c:1,y:RB,en:'Today’s plan',zh:'今天的计划',m:['what to practise','今天练什么'],dn:'Shown when you open the tool: questions per area and why (weak, not tested yet, due for review).',dz:'打开工具时显示：每个领域几题，以及原因（薄弱、还没测过、该复习）。'},
+   goal:{c:1,y:RM,en:'Goal & outline',zh:'目标与考纲',m:['understand · exam shares','弄懂 · 考纲比例'],dn:'You pick “understand the material” or an exam. For PMP, the shares come from the current official outline (People 33%, Process 41%, Business Environment 26%).',dz:'你选“弄懂资料”或某场考试。PMP 的比例来自当前官方考纲（人员 33%、过程 41%、商业环境 26%）。'}};
+  var FS={files:'1',reader:'1',matcher:'1',passages:'1 2',model:'2',writer:'2 4',you:'2 3',grader:'3',analyst:'3 5',strength:'3 5',planner:'4 5',goal:'4',plan:'5'};
+  function geo(n){var a=!!n.agent,w=a?AW:NW,h=a?AH:NH,x=X(n.c);return {x:x,y:n.y,w:w,h:h,l:x-w/2,r:x+w/2,t:n.y-h/2,b:n.y+h/2}}
+  function box(id){var n=N[id],g=geo(n),a=n.agent&&NAME[n.agent],o;
+   if(a){o='<g class="nd ag" style="--h:'+a.hue+'" data-s="'+FS[id]+'" data-node="'+id+'" tabindex="0" role="button"><rect x="'+f(g.l)+'" y="'+f(g.t)+'" width="'+g.w+'" height="'+g.h+'" rx="6"/>'+
+     '<text class="t" x="'+f(g.l+12)+'" y="'+(g.y-23)+'"'+(a.en.length>16?' style="font-size:11.5px"':'')+'>'+ts(a.en.replace(/ agent$/,''),a.zh.replace(/ agent$/,''))+'</text>'+
+     '<circle class="dot ok" cx="'+f(g.l+17)+'" cy="'+(g.y-11.5)+'" r="4.5"/><text class="hx" x="'+f(g.l+28)+'" y="'+(g.y-8)+'">agent</text>'+
+     '<text class="hx" x="'+f(g.l+12)+'" y="'+(g.y+9)+'">'+ts(a.on[0],a.on[1])+'</text><text class="m" x="'+f(g.l+12)+'" y="'+(g.y+26)+'">'+ts('in your browser','在你的浏览器里')+'</text></g>';return o}
+   return '<g class="nd" data-s="'+FS[id]+'" data-node="'+id+'" tabindex="0" role="button"><rect x="'+f(g.l)+'" y="'+f(g.t)+'" width="'+g.w+'" height="'+g.h+'" rx="4"/><text class="t" x="'+f(g.x)+'" y="'+(g.y-3)+'" text-anchor="middle">'+ts(n.en,n.zh)+'</text><text class="m" x="'+f(g.x)+'" y="'+(g.y+13)+'" text-anchor="middle">'+ts(n.m[0],n.m[1])+'</text></g>'}
+  function e(cls,d,s,col){return '<path class="e '+cls+'" d="'+d+'" data-s="'+s+'"'+(col?' style="stroke:'+col+'"':'')+' marker-end="url(#ah)"/>'}
+  function lab(x,y,en,zh,s){return '<text class="lb" data-s="'+s+'" x="'+f(x)+'" y="'+f(y)+'" text-anchor="middle">'+ts(en,zh)+'</text>'}
+  function Hr(a,b,s){var A=geo(N[a]),B=geo(N[b]);return e('','M'+f(A.r)+','+A.y+' H'+f(B.l-2),s)}
+  function Hl(a,b,s){var A=geo(N[a]),B=geo(N[b]);return e('','M'+f(A.l)+','+A.y+' H'+f(B.r+2),s)}
+  function V(a,b,s){var A=geo(N[a]),B=geo(N[b]);return e('','M'+f(A.x)+','+f(A.b)+' V'+f(B.t-2),s)}
+  function draw(){
+   var o='<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z"/></marker></defs>';
+   COLS.forEach(function(c,i){var x0=i*CW;if(i%2===0)o+='<rect class="band" x="'+f(x0+3)+'" y="6" width="'+f(CW-6)+'" height="498" rx="6"/>';
+    o+='<text class="col" x="'+f(x0+16)+'" y="32"><tspan class="n">0'+(i+1)+'</tspan>  '+ts(c[0],c[1])+'</text><line class="rule" x1="'+f(x0+16)+'" y1="44" x2="'+f(x0+CW-16)+'" y2="44"/>'});
+   var pl=geo(N.planner),gl=geo(N.goal),wr=geo(N.writer);
+   o+=Hr('files','reader','1')+Hr('reader','matcher','1')+Hr('matcher','passages','1')+Hr('passages','writer','2')+Hr('writer','you','2')+V('model','writer','2')+V('you','grader','3')+Hl('grader','analyst','3')+Hl('analyst','strength','3')+Hl('strength','planner','5')+Hl('planner','plan','5');
+   o+=e('','M'+f(gl.r)+','+gl.y+' H'+f(pl.x-30)+' V'+f(pl.t-2),'4');
+   o+=e('lp','M'+f(pl.x+30)+','+f(pl.t)+' V'+gl.y+' H'+f(wr.x)+' V'+f(wr.b+2),'4');
+   o+=lab(geo(N.you).x+34,(geo(N.you).b+geo(N.grader).t)/2,'answer','作答','3')+lab((gl.r+pl.x-30)/2+10,gl.y-8,'exam shares','考纲比例','4')+lab((pl.x+wr.x)/2+30,gl.y-8,'weighted questions','加权出题','4');
+   Object.keys(N).forEach(function(id){o+=box(id)});
+   document.getElementById('ov').innerHTML=o}
+  draw();
+  // phone: the same path as an ordered list; tapping an agent opens its details in place
+  var ORDER=[['Hand in material','交出资料',['files','reader','matcher','passages']],['Get quizzed','出题',['model','writer','you']],['Find weak spots','找弱点',['grader','analyst','strength']],['Plan the next round','计划下一轮',['goal','planner','plan']]];
+  function spec(a){return '<dl class="spec"><dt>'+t('Runs','触发')+'</dt><dd>'+t(a.runs[0],a.runs[1])+'</dd><dt>'+t('Output','产出')+'</dt><dd>'+t(a.output[0],a.output[1])+'</dd></dl>'}
+  function details(id){var n=N[id],a=n.agent&&NAME[n.agent];return a?'<p>'+t(a.den,a.dzh)+'</p>'+spec(a):'<p>'+t(n.dn,n.dz)+'</p>'}
+  document.getElementById('ov-list').innerHTML=ORDER.map(function(l,i){return '<li class="h">0'+(i+1)+' · '+t(l[0],l[1])+'</li>'+l[2].map(function(id){var n=N[id],a=n.agent&&NAME[n.agent];
+   return a?'<li class="it ag" style="--h:'+a.hue+'" data-s="'+FS[id]+'"><button class="ob" aria-expanded="false"><span class="st ok"></span>'+t(a.en,a.zh)+'</button><small class="hx">'+t(a.on[0],a.on[1])+'</small><div class="more">'+details(id)+'</div></li>':
+    '<li class="it" data-s="'+FS[id]+'">'+t(esc(n.en),esc(n.zh))+'<small>'+t(esc(n.m[0]),esc(n.m[1]))+'</small></li>'}).join('')}).join('');
+  document.querySelectorAll('#ov-list .ob').forEach(function(b){b.onclick=function(){var it=b.parentNode,was=it.classList.contains('open');
+   document.querySelectorAll('#ov-list .it.open').forEach(function(x){x.classList.remove('open');x.querySelector('.ob').setAttribute('aria-expanded','false')});
+   if(!was){it.classList.add('open');b.setAttribute('aria-expanded','true')}}});
+  // key
+  function kg(h,items){return '<div class="kg"><b>'+h+'</b>'+items.join('')+'</div>'}
+  document.getElementById('key').innerHTML=kg(t('Lines','线条'),['<span><i class="ln"></i>'+t('data flows','数据流向')+'</span>','<span><i class="ln lp"></i>'+t('feedback loop','反馈回路')+'</span>'])+
+   kg(t('Boxes','方框'),['<span><i class="dt" style="background:#ff9f1c"></i>'+t('AI agent in your browser','你浏览器里的 AI agent')+'</span>','<span><i class="dt"></i>'+t('your data, or you','你的数据，或你自己')+'</span>']);
+  // step hover (copied from the lesson system page): light up one step, dim the rest
+  (function(){var sys=document.getElementById('system'),steps=sys.querySelectorAll('.flow li'),pinned='';
+   function set(n){if(n)sys.setAttribute('data-f',n);else sys.removeAttribute('data-f');steps.forEach(function(l,i){var on=String(i+1)===n;l.classList.toggle('on',on);l.setAttribute('aria-pressed',on&&pinned===n?'true':'false')})}
+   steps.forEach(function(l,i){var n=String(i+1);l.tabIndex=0;l.setAttribute('role','button');l.setAttribute('aria-pressed','false');
+    l.onmouseenter=function(){if(!pinned)set(n)};l.onmouseleave=function(){if(!pinned)set('')};l.onfocus=function(){if(!pinned)set(n)};l.onblur=function(){if(!pinned)set('')};
+    var tog=function(){pinned=pinned===n?'':n;set(pinned||n);if(!pinned&&!l.matches(':hover')&&document.activeElement!==l)set('')};
+    l.onclick=tog;l.onkeydown=function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();tog()}}});
+   document.addEventListener('keydown',function(ev){if(ev.key==='Escape'&&pinned){pinned='';set('')}});
+   document.addEventListener('click',function(ev){if(pinned&&!ev.target.closest('.flow li')&&!ev.target.closest('#ov-panel,#ov-list')){pinned='';set('')}})})();
+  // the one popup, on <body>: hover or focus shows it, click or tap pins it, Escape closes it
+  var TIP=document.getElementById('tip'),PIN='',HT=0;
+  function holdTip(){clearTimeout(HT)}function softHide(){clearTimeout(HT);HT=setTimeout(function(){if(!PIN)hideTip()},220)}
+  function hideTip(){clearTimeout(HT);PIN='';TIP.classList.remove('on','pin');document.querySelectorAll('#ov .hot,.nhot').forEach(function(x){x.classList.remove('hot','nhot')})}
+  function wire(el,title,html,hue,link){
+   function show(pin){TIP.classList.toggle('pin',!!pin);TIP.style.setProperty('--h',hue||'var(--acc)');TIP.innerHTML='<button class="x" aria-label="Close">×</button><h5>'+title+'</h5>'+html;TIP.querySelector('.x').onclick=hideTip;
+    document.querySelectorAll('#ov .hot,.nhot').forEach(function(x){x.classList.remove('hot','nhot')});TIP.classList.add('on');
+    var r=el.getBoundingClientRect(),tw=TIP.offsetWidth,th=TIP.offsetHeight,W=document.documentElement.clientWidth,x=Math.max(10,Math.min(r.left+r.width/2-tw/2,W-tw-10)),y=r.bottom+8;
+    if(y+th>innerHeight-8&&r.top-th-8>60)y=r.top-th-8;TIP.style.left=(x+scrollX)+'px';TIP.style.top=(y+scrollY)+'px';el.classList.add(el.closest('#ov')?'hot':'nhot');PIN=pin?'_':''}
+   el.addEventListener('mouseenter',function(){holdTip();if(!PIN)show(0)});el.addEventListener('mouseleave',function(){if(!PIN)softHide()});
+   el.addEventListener('focus',function(){if(!PIN)show(0)});el.addEventListener('blur',function(){if(!PIN)hideTip()});
+   el.addEventListener('click',function(ev){ev.stopPropagation();if(link)ev.preventDefault();if(PIN&&(el.classList.contains('hot')||el.classList.contains('nhot')))hideTip();else show(1)});
+   if(!link)el.addEventListener('keydown',function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();el.click()}})}
+  TIP.addEventListener('mouseenter',holdTip);TIP.addEventListener('mouseleave',function(){if(!PIN)softHide()});
+  document.addEventListener('click',function(ev){if(PIN&&!TIP.contains(ev.target))hideTip()});document.addEventListener('keydown',function(ev){if(ev.key==='Escape')hideTip()});
+  document.querySelectorAll('#ov .nd').forEach(function(el){var n=N[el.dataset.node],a=n.agent&&NAME[n.agent];wire(el,a?t(a.en,a.zh):t(esc(n.en),esc(n.zh)),details(el.dataset.node),a&&a.hue)});
+  // guardrails and ideas: short labels, the explanation in the popup
+  var G=[['Your files stay here','你的文件留在这里','🔒','Files are read in your browser. Their text is kept only in this browser and is never uploaded.','文件在你的浏览器里读取。文字只保存在这个浏览器里，从不上传。'],
+   ['No login, no server','不登录，没有服务器','🚫','There is nothing to sign in to and no server holding your records.','没有账号要登录，也没有服务器保存你的记录。'],
+   ['Backup is yours','备份由你掌握','💾','Export your records to a file and import them on another device. The file contains your materials’ text, so keep it private.','把记录导出成文件，在另一台设备上导入。文件含有资料文字，请妥善保管。'],
+   ['An open model','开源模型','🧩','The model is open (Qwen3, Apache 2.0) and runs on your device. No paid API, no usage bill.','模型是开源的（Qwen3，Apache 2.0），在你的设备上运行。没有付费 API，也没有用量账单。'],
+   ['One download','只下载一次','⬇️','The model downloads once when you click the button, about 1 to 2 GB. Nothing downloads before that.','你点按钮时模型下载一次，约 1 到 2 GB。在那之前什么都不会下载。'],
+   ['Original questions','原创题目','✍️','Every question is written fresh from your passage. No question bank is copied.','每道题都根据你的段落重新写。不会复制任何题库。'],
+   ['Outline shares','按考纲比例','⚖️','Exam questions follow the official content shares of each area. The outline version is yours to pick.','考试题目按官方各领域的内容占比。考纲版本由你选择。'],
+   ['Wrong questions can go','错题可以删','🚩','A small model gets some questions wrong. One click removes a bad question’s result from your map.','小模型有些题会出错。点一下就能把坏题的结果从你的强弱图里去掉。'],
+   ['Plain limits','把限制说清楚','ℹ️','Desktop Chrome or Edge, text only, a smaller model than the big chat apps. Check answers you doubt.','电脑版 Chrome 或 Edge，只读文字，模型比大型聊天应用小。有疑问的答案请自己核对。']];
+  var GG=[[['Your privacy','你的隐私'],[0,1,2]],[['The AI','AI'],[3,4,8]],[['The questions','题目'],[5,6,7]]];
+  document.getElementById('guards').innerHTML=GG.map(function(gr){return '<h3 class="sub3 gh">'+t(gr[0][0],gr[0][1])+'</h3><ul class="gl2" role="group">'+gr[1].map(function(i){var g=G[i];return '<li class="guard" tabindex="0" role="button" data-i="'+i+'"><span class="gi" aria-hidden="true">'+g[2]+'</span><span class="gt"><b>'+t(g[0],g[1])+'</b></span></li>'}).join('')+'</ul>'}).join('');
+  document.querySelectorAll('#guards .guard').forEach(function(el){var g=G[el.dataset.i];wire(el,t(g[0],g[1]),'<p>'+t(g[3],g[4])+'</p>',0)});
+  var C=[['Local first','本地优先','🏠','Keeping data on the device it belongs to: here, IndexedDB in your browser.','把数据留在它所属的设备上：这里是你浏览器里的 IndexedDB。'],
+   ['WebGPU','WebGPU','⚡','A browser feature that lets a page use your graphics chip. It is what makes a model run in a tab.','一项浏览器功能，让网页能用你的显卡。它让模型能在一个标签页里运行。'],
+   ['Open-weight model','开放权重模型','🔓','A model whose trained weights anyone may download and run, so it costs nothing per question.','训练好的权重人人可下载运行的模型，所以每道题都不花钱。'],
+   ['Passages','段落切分','✂️','Long files are cut into short passages, so each question is based on one idea.','长文件被切成短段落，让每道题都基于一个知识点。'],
+   ['Exam blueprint','考纲蓝图','🗺️','An exam’s official split of content into areas with percentages. It decides how many questions each area gets.','考试官方把内容分成若干领域并给出百分比。它决定每个领域出几题。'],
+   ['Structured output','结构化输出','🧱','The model is asked for a strict JSON question, which the page checks before showing it.','要求模型输出严格的 JSON 题目，页面检查通过后才显示。'],
+   ['Recency weighting','近期加权','⏳','Newer answers count more than old ones, so the map follows how you are now.','新答案比旧答案权重大，强弱图反映你现在的状态。'],
+   ['Spaced practice','间隔练习','🔁','Areas you have not practised for a few days are topped up, because memory fades.','几天没练的领域会补上，因为记忆会衰退。']];
+  document.getElementById('cgrid').innerHTML='<ul class="gl2">'+C.map(function(c,i){return '<li class="bcn"><a href="#concepts" data-i="'+i+'"><span class="ic" aria-hidden="true">'+c[2]+'</span><span class="bt"><b>'+t(c[0],c[1])+'</b></span></a></li>'}).join('')+'</ul>';
+  document.querySelectorAll('#cgrid a').forEach(function(el){var c=C[el.dataset.i];wire(el,t(c[0],c[1]),'<p>'+t(c[3],c[4])+'</p>',0,1)});
+})();
+</script></body></html>

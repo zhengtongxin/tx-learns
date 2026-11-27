@@ -2,8 +2,22 @@
 <title>TX Learns – Interactive bilingual learning (EN/中文)</title>
 <meta name="description" content="Two ways to learn, in English and 中文: follow interactive AI tracks, or hand in your own slides and PDFs and let a free in-browser AI quiz you."><meta property="og:title" content="TX Learns"><meta property="og:description" content="Two ways to learn, in English and 中文: follow interactive AI tracks, or hand in your own slides and PDFs and let a free in-browser AI quiz you."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
 <link rel="canonical" href="https://tx-learns.vercel.app/"><link rel="icon" href="assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><link rel="stylesheet" href="assets/site.css?v=92b1bb9f"><style>
-.paths{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:0 clamp(24px,4vw,64px);max-width:980px;margin:34px auto 0}
-.paths .cc{grid-template-columns:auto 1fr auto}.paths .cc h3{font-size:clamp(1.3rem,2.4vw,1.7rem);line-height:1.2}
+.paths{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:20px;max-width:1000px;margin:30px auto 0}
+.pcd{display:flex;flex-direction:column;padding:clamp(20px,3vw,30px);border:1px solid var(--line);border-radius:22px;background:linear-gradient(160deg,color-mix(in srgb,var(--fg) 6%,transparent),var(--glass))}
+.pcd:hover,.pcd:focus-within{border-color:color-mix(in srgb,var(--acc) 70%,var(--line))}
+.pcd-h{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:center;color:var(--fg);text-decoration:none}
+.pcd-h .orbi{grid-row:1/3;width:52px;height:52px;border-radius:16px;background:var(--grad);display:grid;place-items:center;font-size:26px}
+.pcd-h h3{margin:0;font-size:clamp(1.3rem,2.4vw,1.7rem);line-height:1.2;letter-spacing:-.03em}
+.pcd-h .meta{margin:0}
+.pcd-l{list-style:none;margin:18px 0 20px;padding:0;flex:1}
+.pcd-l li{display:flex;align-items:center;gap:10px;padding:9px 2px;border-top:1px solid var(--line);color:var(--mut);line-height:1.45}
+.pcd-l li b{color:var(--fg);font-weight:600}
+.pcd-l .ic{width:24px;text-align:center;flex:none}
+.pcd-l .lv{margin-left:auto;font-size:12.5px;white-space:nowrap}
+.pcd-l .no{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#ffc83d;color:#1d1d1f;font-size:12.5px;font-weight:700}
+.pcd .acts{margin:0}
+.pcd .tgs{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0 0 16px;color:var(--acc2);font-size:13.5px;font-weight:600}.pcd .tgs>span::before{content:"✓ "}
+.land-note{max-width:1000px;margin:22px auto 0;text-align:center;color:var(--mut)}
 </style><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://tx-learns.vercel.app/#site","name":"TX Learns","url":"https://tx-learns.vercel.app/","inLanguage":["en","zh"],"description":"Two ways to learn, in English and 中文: follow interactive AI tracks, or hand in your own slides and PDFs and let a free in-browser AI quiz you."}]}</script></head><body>
 <main class="wide">
 <header class="stage home"><div class="orb"></div>
@@ -13,8 +27,20 @@
 </header>
 <section class="paths" aria-label="Choose how to learn · 选择学法">
 <h2 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap"><span class="en">Choose how to learn</span><span class="zh">选择学法</span></h2>
-<a class="cc spot" href="tracks.html"><div class="orbi">🧭</div><div><h3><span class="en">Pick a track</span><span class="zh">选一条路线</span></h3><div class="meta" style="margin-top:4px"><span class="en">Interactive lessons on AI, from your first agent to a customer pilot. Easiest first.</span><span class="zh">AI 互动课，从第一个智能体到客户试点。由易到难。</span></div></div><div class="go">→</div></a>
-<a class="cc spot" href="study/index.html"><div class="orbi">🎯</div><div><h3><span class="en">Study your own material</span><span class="zh">学你自己的资料</span></h3><div class="meta" style="margin-top:4px"><span class="en">Hand in your slides and PDFs. A free AI in your browser quizzes you and finds your weak spots.</span><span class="zh">交出你的课件和 PDF。浏览器里的免费 AI 出题考你，找出薄弱点。</span></div></div><div class="go">→</div></a>
+<article class="pcd"><a class="pcd-h" href="tracks.html"><div class="orbi">🧭</div><h3><span class="en">Pick a track</span><span class="zh">选一条路线</span></h3><p class="meta"><span class="en">Interactive AI lessons, easiest first.</span><span class="zh">AI 互动课，由易到难。</span></p></a>
+<ul class="pcd-l" id="pl-tracks"></ul><p class="acts"><a class="btn pri" href="tracks.html"><span class="en">See the tracks →</span><span class="zh">查看路线 →</span></a></p></article>
+<article class="pcd"><a class="pcd-h" href="study/index.html"><div class="orbi">🎯</div><h3><span class="en">Study your own material</span><span class="zh">学你自己的资料</span></h3><p class="meta"><span class="en">Quiz yourself on your own slides and PDFs.</span><span class="zh">用你自己的课件和 PDF 出题考自己。</span></p></a>
+<ul class="pcd-l">
+<li><span class="no">1</span><span><b><span class="en">Hand in</span><span class="zh">交资料</span></b> · <span class="en">slides and PDFs, English or 中文</span><span class="zh">课件和 PDF，中英文均可</span></span></li>
+<li><span class="no">2</span><span><b><span class="en">Get quizzed</span><span class="zh">被出题</span></b> · <span class="en">original questions from an AI in your browser</span><span class="zh">浏览器里的 AI 出原创题</span></span></li>
+<li><span class="no">3</span><span><b><span class="en">Find weak spots</span><span class="zh">找弱点</span></b> · <span class="en">a strength map by area</span><span class="zh">按领域的强弱图</span></span></li>
+<li><span class="no">4</span><span><b><span class="en">Drill by exam weight</span><span class="zh">按考纲刷题</span></b> · <span class="en">PMP first</span><span class="zh">先支持 PMP</span></span></li>
+<li><span class="no">5</span><span><b><span class="en">Practise daily</span><span class="zh">每日练习</span></b> · <span class="en">a plan of what to practise today</span><span class="zh">今天练什么的计划</span></span></li></ul>
+<p class="tgs"><span><span class="en">Free</span><span class="zh">免费</span></span><span><span class="en">Private: stays on your device</span><span class="zh">私密：留在你的设备上</span></span><span><span class="en">No login</span><span class="zh">不用登录</span></span></p>
+<p class="acts"><a class="btn pri" href="study/index.html"><span class="en">Open the study coach →</span><span class="zh">打开学习教练 →</span></a></p></article>
 </section>
 </main>
-<script src="assets/site.js?v=50672dc8"></script></body></html>
+<script src="tracks.js?v=dd6a6460"></script><script src="assets/site.js?v=50672dc8"></script>
+<script>(function(){var el=document.getElementById('pl-tracks'),T=window.TRACKS||[],LV={1:['Beginner','入门'],2:['Intermediate','进阶'],3:['Advanced','高级']};
+function t(o){return '<span class="en">'+o.en+'</span><span class="zh">'+o.zh+'</span>'}
+el.innerHTML=T.map(function(c){var l=LV[c.level]||LV[1];return '<li><span class="ic" aria-hidden="true">'+c.icon+'</span><b>'+t(c.title)+'</b><span class="lv">'+t({en:l[0],zh:l[1]})+'</span></li>'}).join('')})()</script></body></html>
