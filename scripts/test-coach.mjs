@@ -22,6 +22,9 @@ ok(L.parseQuestion('{"question":"Which step comes first when two members disagre
 { const g = { window: {} }; globalThis.window = g.window; await import('../coach/exams.js'); const D = globalThis.window.COACH_DOMAINS.D26;
   const t = ['The team leader should negotiate between two members in conflict and coach them with emotional intelligence.', 'Update the risk register, schedule and budget, then review the critical path and quality plan.', 'Check regulatory compliance and the business case so the benefits and organizational strategy stay aligned.'].map(text => ({ text }));
   L.assignAreas(t, D); ok(t.map(c => c.area).join() === 'people,process,biz', 'a passage goes to the area its words belong to, not the one with the longest word list'); }
+{ const A = L.parseAreas('Anatomy, 30\nPhysiology 40%\nPharmacology | drug dose receptor | 30\n药理学 20\nAnatomy, 5\n\n, 10');
+  ok(A.length === 4 && A.map(x => x.weight).join() === '30,40,30,20', 'areas are read from lines in three forms, duplicates and empty lines skipped');
+  ok(/receptor/.test(A[2].kw) && A[0].kw === 'anatomy' && A[3].kw === '药理学', 'keywords come from the name or the typed words'); }
 if (!fx) { process.exit(bad ? 1 : 0); }
 const mime = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.bcmap': 'application/octet-stream' };
 const srv = createServer((q, r) => { let f = join(root, decodeURIComponent(q.url.split('?')[0])); if (f.endsWith('/')) f += 'index.html'; if (!existsSync(f)) { r.writeHead(404); r.end(); return; } r.writeHead(200, { 'content-type': mime[extname(f)] || 'application/octet-stream' }); r.end(readFileSync(f)); }).listen(0);
@@ -39,7 +42,17 @@ await pg.waitForFunction(() => document.querySelectorAll('#mats .files li').leng
 const st = await pg.evaluate(() => ({ s: window.__coach.state(), c: window.__coach.chunks() }));
 ok(st.s.mats.length === 2 && st.c.length >= 2, 'a PPTX and a PDF are read into chunks (' + st.c.length + ')');
 ok(st.s.mats.some(m => m.lang === 'en') && st.c.some(c => /Conflict|conflict/.test(c.text)), 'slide text is extracted');
-ok(st.c.some(c => /Risk|risk/.test(c.text) && c.area), 'chunks are matched to exam areas');
+ok(st.s.goal === 'understand' && st.s.exam === 'custom', 'the default goal is subject-neutral: understand the material, no ready-made exam');
+ok(!/PMP/.test(await pg.textContent('#goal')) && !/PMP/.test(await pg.textContent('main')), 'the tool page does not mention PMP until an outline is chosen');
+ok(await pg.locator('#map .row').count() === 2, 'by default the strength map has one area per file');
+// any exam: the reader names it and enters its areas and weights
+await pg.check('input[value=exam]');
+ok(/Add at least one area/.test(await pg.textContent('#goal')), 'an exam with no areas yet says so');
+await pg.fill('#cname', 'My certification');
+await pg.fill('#ctext', 'People, 33\nProcess | risk schedule budget | 41\nBusiness environment 26');
+await pg.locator('#ctext').blur();
+ok((await pg.evaluate(() => window.__coach.state())).ctext.includes('Process'), 'typed areas are saved');
+ok(st.c.length > 0 && (await pg.evaluate(() => window.__coach.chunks().some(c => c.area === 'x:c1'))), 'passages are matched to the typed areas');
 ok(await pg.locator('#today .plan li').count() >= 2, 'today shows a plan');
 await pg.click('[data-act=drill]');
 await pg.waitForSelector('.opt');
@@ -72,6 +85,7 @@ ok(guessed && (await pg.evaluate(() => window.__coach.state().stats)) && (await 
 for (let i = 0; i < 40 && !(await pg.locator('#practice .lead2').count()); i++) { if (await pg.locator('#nx').count()) await pg.click('#nx'); else if (await pg.locator('.opt:not([disabled])').count()) await pg.locator('.opt').nth(0).click(); else await pg.waitForTimeout(100); }
 await pg.click('[data-act=close]');
 // exam mode switch and the old outline
+await pg.selectOption('[data-act=exam-id]', 'pmp');
 await pg.selectOption('[data-act=exam-ver]', '2021');
 ok(/42%/.test(await pg.textContent('#goal')), 'the older outline shows its weights');
 await pg.selectOption('[data-act=exam-ver]', '2026');

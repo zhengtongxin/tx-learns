@@ -5,6 +5,7 @@
 var Lg=window.CoachLogic,EX=window.COACH_EXAMS,BASE=document.currentScript.src.replace(/[^\/]*$/,'');
 var $=function(id){return document.getElementById(id)};
 function T(en,zh){return '<span class="en">'+en+'</span><span class="zh">'+zh+'</span>'}
+function PH(en,zh){return document.documentElement.getAttribute('data-lang')==='zh'?zh:en}
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function say(en,zh){var s=$('status');if(s)s.innerHTML=T(en,zh)}
 var S,CH=[],ENG=null,ENGID='',R=null,confirmKey='',persistOK=true;
@@ -16,16 +17,20 @@ function kvGet(k){return new Promise(function(res){if(!DB)return res(mem[k]);try
 function kvSet(k,v){return new Promise(function(res){if(!DB){mem[k]=v;return res()}try{var tx=DB.transaction('kv','readwrite');tx.objectStore('kv').put(v,k);tx.oncomplete=res;tx.onerror=function(){persistOK=false;mem[k]=v;res()}}catch(e){persistOK=false;mem[k]=v;res()}})}
 var st=0;function save(){clearTimeout(st);st=setTimeout(function(){kvSet('state',S)},250)}
 function saveChunks(){return kvSet('chunks',CH.map(function(c){return {id:c.id,mat:c.mat,loc:c.loc,text:c.text}}))}
-function fresh(){return {v:1,goal:'exam',exam:'pmp',ver:'2026',model:'light',perDay:10,mats:[],stats:{},miss:{},used:{},bank:[],days:{},rounds:0}}
+function fresh(){return {v:1,goal:'understand',exam:'custom',ver:'',cname:'',ctext:'',model:'light',perDay:10,mats:[],stats:{},miss:{},used:{},bank:[],days:{},rounds:0}}
 
 /* ---------- areas ---------- */
-function exam(){var e=EX.filter(function(x){return x.id===S.exam})[0]||EX[0];return {e:e,v:e.versions.filter(function(v){return v.id===S.ver})[0]||e.versions[0]}}
+function exam(){
+ /* any exam: the reader names it and lists its areas and weights; ready-made outlines (EX) are presets */
+ if(S.exam==='custom'){var nm=(S.cname||'').trim()||'My exam';return {e:{id:'custom',name:{en:nm,zh:nm},versions:[]},v:{label:{en:'',zh:''},domains:Lg.parseAreas(S.ctext)}}}
+ var e=EX.filter(function(x){return x.id===S.exam})[0]||EX[0];return {e:e,v:e.versions.filter(function(v){return v.id===S.ver})[0]||e.versions[0]}}
+function useExam(){return S.goal==='exam'&&exam().v.domains.length>0}
 function areas(){
- if(S.goal==='exam'){var d=exam().v.domains;return d.map(function(x){return {id:'x:'+x.id,name:x.name,w:x.weight,kw:x.kw,tasks:x.tasks,dom:x.name.en}})}
+ if(useExam()){var d=exam().v.domains;return d.map(function(x){return {id:'x:'+x.id,name:x.name,w:x.weight,kw:x.kw,tasks:x.tasks,dom:x.name.en}})}
  return S.mats.map(function(m){return {id:'m:'+m.id,name:{en:esc(m.name),zh:esc(m.name)},w:Math.max(1,m.chars)}})}
 function aname(id){var a=areas().filter(function(x){return x.id===id})[0];return a?T(a.name.en,a.name.zh):T('Other','其他')}
 function reassign(){
- if(S.goal==='exam')Lg.assignAreas(CH,areas().map(function(a){return {id:a.id,kw:a.kw}}));
+ if(useExam())Lg.assignAreas(CH,areas().map(function(a){return {id:a.id,kw:a.kw}}));
  else CH.forEach(function(c){c.area='m:'+c.mat;c.score=1})}
 function hist(id){return (S.stats[id]&&S.stats[id].h)||[]}
 function planFor(kind,n){return Lg.plan(areas().map(function(a){return {id:a.id,w:a.w,hist:hist(id0(a)),last:S.stats[a.id]&&S.stats[a.id].last}}),n,kind,Date.now())}
@@ -109,8 +114,8 @@ async function pump(){
   var slot=r.slots[r.gen],item=null;
   for(var tries=0;tries<3&&!item&&R===r;tries++){
    var ch=Lg.pick(CH,slot.area,S.miss,S.used,Math.random);if(!ch)break;
-   var a=areas().filter(function(x){return x.id===slot.area})[0]||{},ex=S.goal==='exam';
-   try{var raw=await ENG.chat(Lg.prompt({text:ch.text,lang:Lg.lang(ch.text),exam:ex?exam().e.name.en+' (outline: '+exam().v.label.en+')':'',domain:a.dom||'',tasks:a.tasks||''}));
+   var a=areas().filter(function(x){return x.id===slot.area})[0]||{},ex=useExam();
+   try{var raw=await ENG.chat(Lg.prompt({text:ch.text,lang:Lg.lang(ch.text),exam:ex?exam().e.name.en+(exam().v.label.en?' (outline: '+exam().v.label.en+')':''):'',domain:a.dom||'',tasks:a.tasks||''}));
     var q=Lg.parseQuestion(raw);if(q){q=Lg.shuffle(q,Math.random);S.used[ch.id]=(S.used[ch.id]||0)+1;
      var m=S.mats.filter(function(x){return x.id===ch.mat})[0];
      item={id:'q'+Date.now().toString(36)+r.gen,area:slot.area,chunk:ch.id,q:q.q,o:q.o,a:q.a,e:q.e,loc:ch.loc,mat:m?m.name:'',snip:ch.text.slice(0,420),res:null}}}catch(e){}
@@ -147,24 +152,29 @@ function next(){R.i++;pump();show();renderAll(true)}
 var WHY={new:['Not tested yet','还没测过'],weak:['Weak','薄弱'],due:['Due for review','该复习了'],keep:['Keep warm','保持']};
 function renderToday(){
  var el=$('today'),n=S.perDay,td=today();
- if(!CH.length){el.innerHTML='<h2>'+T('Get <em>started</em>','开始<em>吧</em>')+'</h2><ol class="steps"><li>'+T('Add your slides or PDFs below.','在下面添加你的课件或 PDF。')+'</li><li>'+T('Pick a goal: understand the material, or pass an exam.','选目标：弄懂资料，或通过考试。')+'</li><li>'+T('Download the free model once, then practise.','一次性下载免费模型，然后开始练习。')+'</li></ol>';return}
+ if(!CH.length){el.innerHTML='<h2>'+T('Get <em>started</em>','开始<em>吧</em>')+'</h2><ol class="steps"><li>'+T('Add your slides or PDFs below.','在下面添加你的课件或 PDF。')+'</li><li>'+T('Pick a goal: understand the material, or prepare for an exam.','选目标：弄懂资料，或通过考试。')+'</li><li>'+T('Download the free model once, then practise.','一次性下载免费模型，然后开始练习。')+'</li></ol>';return}
  var plan=planFor('drill',n);
  el.innerHTML='<h2>'+T('Practise <em>today</em>','今天<em>练什么</em>')+'</h2><p class="meta">'+T('Done today: '+td.n+' of '+n+' questions.','今天已做：'+td.n+' / '+n+' 题。')+'</p>'+
   '<ul class="plan">'+plan.map(function(p){var w=WHY[p.why];return '<li><span class="pk">'+p.k+'</span><span>'+aname(p.id)+'</span><span class="chip">'+T(w[0],w[1])+'</span></li>'}).join('')+'</ul>'+
-  '<p class="acts"><button class="btn pri" data-act="drill">'+T('Practise now','现在练习')+'</button>'+(S.goal==='exam'?'<button class="btn" data-act="exam">'+T('Mini exam · 20 questions','小测验 · 20 题')+'</button>':'')+
+  '<p class="acts"><button class="btn pri" data-act="drill">'+T('Practise now','现在练习')+'</button>'+(useExam()?'<button class="btn" data-act="exam">'+T('Mini exam · 20 questions','小测验 · 20 题')+'</button>':'')+
   '<label class="per">'+T('Per day','每天')+' <select data-act="perday" aria-label="Questions per day · 每天题数">'+[5,10,20].map(function(x){return '<option'+(x===n?' selected':'')+'>'+x+'</option>'}).join('')+'</select></label></p>'}
 function renderMap(){
  var el=$('map');if(!CH.length){el.innerHTML='';return}
  el.innerHTML='<h2>'+T('Strength <em>map</em>','强弱<em>图</em>')+'</h2><div class="rows">'+areas().map(function(a){var s=Lg.strength(hist(a.id)),p=s==null?0:Math.round(s*100),n=(S.stats[a.id]||{}).n||0;
-  return '<div class="row"><div class="rl">'+T(a.name.en,a.name.zh)+(S.goal==='exam'?' <span class="meta">'+a.w+'%</span>':'')+'</div><div class="bar" role="img" aria-label="'+(s==null?'Not tested yet · 还没测过':p+'%')+'"><i class="'+(s!=null&&s<0.6?'weak':'')+'" style="width:'+p+'%"></i></div><div class="rv2">'+(s==null?T('not tested','未测'):p+'%')+'</div><div class="meta rn">'+n+'</div></div>'}).join('')+'</div><p class="meta">'+T('Strength blends your recent answers, newest first. The right-hand number is questions answered.','强度综合你近期的作答，越新权重越大。最右边的数字是已答题数。')+'</p>'}
+  return '<div class="row"><div class="rl">'+T(a.name.en,a.name.zh)+(useExam()?' <span class="meta">'+a.w+'%</span>':'')+'</div><div class="bar" role="img" aria-label="'+(s==null?'Not tested yet · 还没测过':p+'%')+'"><i class="'+(s!=null&&s<0.6?'weak':'')+'" style="width:'+p+'%"></i></div><div class="rv2">'+(s==null?T('not tested','未测'):p+'%')+'</div><div class="meta rn">'+n+'</div></div>'}).join('')+'</div><p class="meta">'+T('Strength blends your recent answers, newest first. The right-hand number is questions answered.','强度综合你近期的作答，越新权重越大。最右边的数字是已答题数。')+'</p>'}
 function renderMats(){
  $('mats').innerHTML=(S.mats.length?'<p class="meta">'+S.mats.length+' '+T('files','个文件')+' · '+CH.length+' '+T('passages','段文字')+'</p><ul class="files'+(S.mats.length>6?' long':'')+'">'+S.mats.map(function(m){return '<li><span class="fn">'+esc(m.name)+'</span><span class="meta">'+m.pages+' '+(m.word==='slide'?T('slides','张幻灯片'):(m.word==='page'?T('pages','页'):T('text','文本')))+' · '+(m.lang==='zh'?'中文':'English')+'</span><button class="btn sm" data-act="rm" data-id="'+m.id+'" aria-label="Remove '+esc(m.name)+' · 移除">'+T('Remove','移除')+'</button></li>'}).join('')+'</ul>':'')+
   '<label class="drop" id="drop"><input type="file" id="files" multiple accept=".pdf,.pptx,.txt,.md"><span>'+T('Choose files or drop them here · PDF, PPTX, text · English or 中文','选择文件或拖到这里 · PDF、PPTX、文本 · 中英文均可')+'</span></label>'}
+function chint(n){return T('Copy these from the exam’s official outline. Add words to help the matching with “Area | word word | 30”.','请抄自该考试的官方考纲。想让匹配更准，可以写成“领域 | 关键词 关键词 | 30”。')+(n?'':' <b>'+T('Add at least one area; until then questions follow your files.','至少填一个领域；在此之前，题目按你的文件出。')+'</b>')}
 function renderGoal(){
- var x=exam(),d=x.v.domains;
- $('goal').innerHTML='<div class="seg2" role="radiogroup" aria-label="Goal · 目标"><label><input type="radio" name="goal" value="understand"'+(S.goal==='understand'?' checked':'')+'> '+T('Understand the material','弄懂这份资料')+'</label><label><input type="radio" name="goal" value="exam"'+(S.goal==='exam'?' checked':'')+'> '+T('Pass an exam','通过一场考试')+'</label></div>'+
-  (S.goal==='exam'?'<p class="rowf"><label>'+T('Exam','考试')+' <select data-act="exam-id" aria-label="Exam · 考试">'+EX.map(function(e){return '<option value="'+e.id+'"'+(e.id===S.exam?' selected':'')+'>'+e.name.en+'</option>'}).join('')+'</select></label> <label>'+T('Outline','考纲')+' <select data-act="exam-ver" aria-label="Outline version · 考纲版本">'+x.e.versions.map(function(v){return '<option value="'+v.id+'"'+(v.id===S.ver?' selected':'')+'>'+v.label.en+' · '+v.label.zh+'</option>'}).join('')+'</select></label></p>'+
-   '<p class="meta">'+d.map(function(a){return T(a.name.en,a.name.zh)+' '+a.weight+'%'}).join(' · ')+'. '+T('Questions follow these shares. Check them against the','题目按这些比例出。请对照')+' <a href="https://www.pmi.org/certifications/project-management-pmp" target="_blank" rel="noopener noreferrer">'+T('official outline','官方考纲')+'</a>.</p>':
+ var x=exam(),d=x.v.domains,cu=S.exam==='custom';
+ $('goal').innerHTML='<div class="seg2" role="radiogroup" aria-label="Goal · 目标"><label><input type="radio" name="goal" value="understand"'+(S.goal==='understand'?' checked':'')+'> '+T('Understand the material','弄懂这份资料')+'</label><label><input type="radio" name="goal" value="exam"'+(S.goal==='exam'?' checked':'')+'> '+T('Prepare for an exam','备考某场考试')+'</label></div>'+
+  (S.goal==='exam'?'<p class="rowf"><label>'+T('Exam','考试')+' <select data-act="exam-id" aria-label="Exam · 考试"><option value="custom"'+(cu?' selected':'')+'>My own exam, enter its areas · 我自己的考试，填写领域</option>'+EX.map(function(e){return '<option value="'+e.id+'"'+(e.id===S.exam?' selected':'')+'>Ready-made outline: '+e.name.en+' · 现成考纲：'+e.name.zh+'</option>'}).join('')+'</select></label>'+
+   (cu?'':' <label>'+T('Outline','考纲')+' <select data-act="exam-ver" aria-label="Outline version · 考纲版本">'+x.e.versions.map(function(v){return '<option value="'+v.id+'"'+(v.id===S.ver?' selected':'')+'>'+v.label.en+' · '+v.label.zh+'</option>'}).join('')+'</select></label>')+'</p>'+
+   (cu?'<p class="rowf"><label>'+T('Exam name','考试名称')+' <input type="text" id="cname" maxlength="60" value="'+esc(S.cname||'')+'" placeholder="'+esc(PH('e.g. my certification','例如：我要考的证书'))+'"></label></p>'+
+     '<p class="rowf"><label>'+T('Areas and weights, one per line','领域和比例，每行一个')+'<textarea id="ctext" rows="5" aria-label="Areas and weights · 领域和比例" placeholder="'+esc(PH('Area one, 40\nArea two, 35\nArea three, 25','领域一, 40\n领域二, 35\n领域三, 25'))+'">'+esc(S.ctext||'')+'</textarea></label></p>'+
+     '<p class="meta" id="chint">'+chint(d.length)+'</p>'
+    :'<p class="meta">'+d.map(function(a){return T(a.name.en,a.name.zh)+' '+a.weight+'%'}).join(' · ')+'. '+T('Questions follow these shares. Check them against the','题目按这些比例出。请对照')+' <a href="https://www.pmi.org/certifications/project-management-pmp" target="_blank" rel="noopener noreferrer">'+T('official outline','官方考纲')+'</a>.</p>'):
    '<p class="meta">'+T('Questions spread across your files and lean toward what you miss.','题目分布在你的各个文件里，并偏向你答错的地方。')+'</p>')}
 function renderModel(busy,err){
  var gpu=!!navigator.gpu||!!window.__coachTestEngine,ready=!!ENG&&(window.__coachTestEngine||ENGID);
@@ -231,7 +241,7 @@ function shareUrl(){
 function renderShare(){
  var el=$('share');if(!el)return;var n=(S.notes||''),ok=!!S.shareOk&&n.trim().length>=40,u=shareUrl();
  el.innerHTML='<p>'+T('Turn what you learned into a pull request, so it can join the knowledge base. Write the key points in your own words. Weak areas are added by name only; your files are never sent.','把你学到的变成一个 pull request，让它有机会加入知识库。用你自己的话写要点。薄弱领域只带名称，你的文件不会被发送。')+'</p>'+
- '<p class="rowf"><label>'+T('Topic','主题')+' <input type="text" id="ntopic" maxlength="60" value="'+esc(S.noteTopic||'')+'" placeholder="'+esc(exam().e.name.en)+'"></label></p>'+
+ '<p class="rowf"><label>'+T('Topic','主题')+' <input type="text" id="ntopic" maxlength="60" value="'+esc(S.noteTopic||'')+'" placeholder="'+esc(S.goal==='exam'&&S.exam!=='custom'?exam().e.name.en:(S.cname||''))+'"></label></p>'+
  '<textarea id="nbody" rows="7" maxlength="4000" aria-label="Your notes · 你的笔记" placeholder="Key points, in your own words · 用你自己的话写要点">'+esc(n)+'</textarea>'+
  '<label class="chk"><input type="checkbox" id="nok"'+(S.shareOk?' checked':'')+'> <span>'+T('These are my own words. They contain no pasted slides or text, and no names of the material’s provider or platform. I understand they become public.','这是我自己的话，没有粘贴课件或原文，也没有资料提供方或平台的名字。我明白提交后内容会公开。')+'</span></label>'+
  '<p class="acts"><button class="btn pri" data-act="share"'+(ok?'':' disabled')+'>'+T('Open on GitHub to submit','在 GitHub 上提交')+'</button></p>'+
@@ -274,7 +284,8 @@ document.addEventListener('change',function(e){var x=e.target;
  else if(x.name==='goal'){S.goal=x.value;reassign();save();renderAll()}
  else if(x.name==='model'){S.model=x.value;save();if(ENGID&&!window.__coachTestEngine){ENG=null;ENGID=''}renderModel()}
  else if(x.dataset&&x.dataset.act==='perday'){S.perDay=+x.value;save();renderToday()}
- else if(x.dataset&&x.dataset.act==='exam-id'){S.exam=x.value;S.ver=exam().e.versions[0].id;reassign();save();renderAll()}
+ else if(x.dataset&&x.dataset.act==='exam-id'){S.exam=x.value;S.ver=S.exam==='custom'?'':exam().e.versions[0].id;reassign();save();renderAll()}
+ else if(x.id==='cname'||x.id==='ctext'){S.cname=($('cname')||{}).value!=null?$('cname').value:S.cname;S.ctext=($('ctext')||{}).value!=null?$('ctext').value:S.ctext;reassign();save();var h=$('chint');if(h)h.innerHTML=chint(exam().v.domains.length);renderToday();renderMap();renderShare();renderBook()}
  else if(x.dataset&&x.dataset.act==='exam-ver'){S.ver=x.value;reassign();save();renderAll()}});
 document.addEventListener('input',function(e){var x=e.target;if(x.id==='nbody'||x.id==='ntopic'){if(x.id==='nbody')S.notes=x.value;else S.noteTopic=x.value;save();var b=document.querySelector('[data-act=share]');if(b){var okk=!!S.shareOk&&(S.notes||'').trim().length>=40&&shareUrl().len<=MAXV;b.disabled=!okk}}});
 document.addEventListener('dragover',function(e){if(e.target.closest&&e.target.closest('#drop'))e.preventDefault()});
@@ -285,7 +296,7 @@ document.addEventListener('drop',function(e){if(e.target.closest&&e.target.close
  DB=await openDB();if(!DB)persistOK=false;
  var s=await kvGet('state'),c=await kvGet('chunks');
  S=Object.assign(fresh(),s||{});CH=Array.isArray(c)?c:[];
- if(!EX.some(function(x){return x.id===S.exam}))S.exam=EX[0].id;
+ if(S.exam!=='custom'&&!EX.some(function(x){return x.id===S.exam}))S.exam='custom';
  reassign();renderAll();renderModel();$('app').hidden=false;window.__coach={state:function(){return S},chunks:function(){return CH}};
  if(navigator.storage&&navigator.storage.persist)try{navigator.storage.persist()}catch(e){}
 })();
