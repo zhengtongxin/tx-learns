@@ -1,0 +1,49 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Branches | TX Learns</title>
+<meta name="description" content="Work on an idea in its own branch, switch between branches and bring the work back with a merge"><meta property="og:title" content="Branches | TX Learns"><meta property="og:description" content="Work on an idea in its own branch, switch between branches and bring the work back with a merge"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/git-basics/04-branches.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/pmp.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/git-basics/04-branches.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/git-basics/04-branches.html","url":"https://tx-learns.vercel.app/git-basics/04-branches.html","name":"Branches","alternateName":"分支","description":"Work on an idea in its own branch, switch between branches and bring the work back with a merge","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Working with others","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Git basics","url":"https://tx-learns.vercel.app/git-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Git basics","item":"https://tx-learns.vercel.app/git-basics/index.html"},{"@type":"ListItem","position":3,"name":"Branches","item":"https://tx-learns.vercel.app/git-basics/04-branches.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Working with others · Lesson 1</span><span class="zh">与他人协作 · 第 1 课</span></span><h1><span class="en">Branches</span><span class="zh">分支</span></h1><p class="meta"><span class="en">Work on an idea in its own branch, switch between branches and bring the work back with a merge · ~10 min · reading and practice</span><span class="zh">在自己的分支上做一个想法，在分支间切换，并用合并把成果带回来 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · A branch is a movable label</span><span class="zh">第 1 步 · 分支是一个可移动的标签</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>branch</b> is a named line of commits. Your repository starts on one called <code>main</code>. When you start a new idea, make a branch for it. The commits you make there do not touch <code>main</code> until you decide to bring them back. That lets you experiment, or work on two things at once, without breaking the working version.</p>
+<p class="zh" style="margin:0 0 8px"><b>分支</b>是一条有名字的提交线。你的仓库一开始在叫 <code>main</code> 的分支上。开始一个新想法时，为它建一个分支。你在那里做的提交，在你决定带回来之前不会碰到 <code>main</code>。这样你就能做实验，或同时做两件事，而不会弄坏能用的版本。</p>
+<p class="en" style="margin:0 0 8px">Branches are cheap. Make one for every idea.</p>
+<p class="zh" style="margin:0 0 8px">分支很轻。每个想法都建一个。</p></div>
+<div class="codebox" data-file="terminal" data-lang="bash">git switch -c sale        # make a branch and move to it
+# edit, add, commit as usual
+git switch main           # go back to main
+git merge sale            # bring the sale work into main
+git branch --show-current # which branch am I on?</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Switching changes your files</span><span class="zh">第 2 步 · 切换会改变你的文件</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">When you switch branches, Git rewrites the files in your folder to match the branch you move to. A file you added on the <code>sale</code> branch disappears when you go back to <code>main</code>, and comes back when you return. Nothing is lost: the commits are still there.</p>
+<p class="zh" style="margin:0 0 8px">切换分支时，Git 会改写你文件夹里的文件，使其和你要去的分支一致。你在 <code>sale</code> 分支上加的文件，回到 <code>main</code> 后会消失，回去后又会出现。什么都没丢，提交都还在。</p>
+<p class="en" style="margin:0 0 8px">Always commit, or set aside, your work before you switch, so you do not carry half-done edits into another branch.</p>
+<p class="zh" style="margin:0 0 8px">切换之前，一定要先提交或收好你的改动，别把做到一半的修改带进别的分支。</p></div>
+
+<h2><span class="en">Step 3 · Merge the work back</span><span class="zh">第 3 步 · 把成果合并回来</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><code>git merge sale</code>, run while on <code>main</code>, brings the commits from <code>sale</code> into <code>main</code>. If the two branches changed different things, Git combines them by itself. When they changed the same lines, Git stops and asks you to decide, which is a conflict (next lesson).</p>
+<p class="zh" style="margin:0 0 8px">在 <code>main</code> 上运行 <code>git merge sale</code>，会把 <code>sale</code> 上的提交带进 <code>main</code>。如果两个分支改的是不同的地方，Git 会自己合并。如果改了同样的几行，Git 会停下来让你来决定，这就是冲突（下一课）。</p>
+<p class="en" style="margin:0 0 8px">Decide what each command does.</p>
+<p class="zh" style="margin:0 0 8px">判断每条命令做什么。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> make a branch, add a file there, switch back and watch the file disappear, then merge.</span><span class="zh"><b>试一试：</b>建一个分支，在那里加一个文件，切回来看它消失，然后合并。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> run git branch --show-current before every commit this week.</span><span class="zh"><b>核对：</b>这一周每次提交之前都运行一下 git branch --show-current。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A branch is a named line of commits.<br>• Switching rewrites your files to match the branch.<br>• git merge brings another branch’s commits into the current one.<br>• Make a branch for every idea.</p><p class="zh" style="margin:0">• 分支是一条有名字的提交线。<br>• 切换会改写你的文件，使其和分支一致。<br>• git merge 把另一个分支的提交带进当前分支。<br>• 每个想法都建一个分支。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Git basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Git installed, and a terminal","zh":"装好 Git，并有一个终端"},"know":{"en":"Commits and undoing (see “Looking back and undoing”).","zh":"知道提交与撤销（见“回看与撤销”）。"},"goals":{"en":["Say what a branch is","Create, switch and merge a branch","Check which branch you are on"],"zh":["说出分支是什么","创建、切换并合并分支","确认自己在哪个分支上"]},"prev":["03-looking-back-and-undoing.html"]}}</script>
+<script src="../tracks.js?v=80fa909f"></script><script src="lessons.js?v=42886b04"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/04-branches.js?v=7aec100f"></script></body></html>

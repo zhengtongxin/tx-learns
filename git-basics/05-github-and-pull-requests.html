@@ -1,0 +1,49 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GitHub and pull requests | TX Learns</title>
+<meta name="description" content="Share a repository on GitHub, push and pull changes and propose work with a pull request"><meta property="og:title" content="GitHub and pull requests | TX Learns"><meta property="og:description" content="Share a repository on GitHub, push and pull changes and propose work with a pull request"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/git-basics/05-github-and-pull-requests.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/pmp.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/git-basics/05-github-and-pull-requests.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/git-basics/05-github-and-pull-requests.html","url":"https://tx-learns.vercel.app/git-basics/05-github-and-pull-requests.html","name":"GitHub and pull requests","alternateName":"GitHub 与拉取请求","description":"Share a repository on GitHub, push and pull changes and propose work with a pull request","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Working with others","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Git basics","url":"https://tx-learns.vercel.app/git-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Git basics","item":"https://tx-learns.vercel.app/git-basics/index.html"},{"@type":"ListItem","position":3,"name":"GitHub and pull requests","item":"https://tx-learns.vercel.app/git-basics/05-github-and-pull-requests.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Working with others · Lesson 2</span><span class="zh">与他人协作 · 第 2 课</span></span><h1><span class="en">GitHub and pull requests</span><span class="zh">GitHub 与拉取请求</span></h1><p class="meta"><span class="en">Share a repository on GitHub, push and pull changes and propose work with a pull request · ~10 min · reading and practice</span><span class="zh">把仓库放到 GitHub 上共享，推送和拉取改动，并用拉取请求提出你的工作 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · A remote is a shared copy</span><span class="zh">第 1 步 · 远程是一份共享的副本</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Your repository lives on your computer. A <b>remote</b> is a copy of it on a server, such as GitHub, that others can reach. <code>git clone URL</code> copies a remote repository to your computer. <code>git push</code> sends your new commits up to the remote, and <code>git pull</code> brings others’ new commits down.</p>
+<p class="zh" style="margin:0 0 8px">你的仓库在你的电脑上。<b>远程</b>是它在服务器（比如 GitHub）上的一份副本，别人也能访问。<code>git clone 网址</code> 把一个远程仓库复制到你的电脑。<code>git push</code> 把你的新提交送上去，<code>git pull</code> 把别人的新提交拉下来。</p>
+<p class="en" style="margin:0 0 8px">GitHub is a website built around Git. It adds people, reviews and automation on top, but the history itself is plain Git.</p>
+<p class="zh" style="margin:0 0 8px">GitHub 是围绕 Git 搭建的网站。它在上面加了人员、审阅和自动化，但历史本身就是普通的 Git。</p></div>
+<div class="codebox" data-file="terminal" data-lang="bash">git clone https://github.com/you/shop.git
+cd shop
+git switch -c sale
+# edit, add, commit
+git push -u origin sale</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · The pull request flow</span><span class="zh">第 2 步 · 拉取请求的流程</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>pull request</b> (PR) is a request on GitHub to merge your branch into another one, usually <code>main</code>. The flow: make a branch, commit, push it, open a PR, let others review and automatic checks run, fix what they find by pushing more commits, then merge. The PR is where the team talks about the change before it lands.</p>
+<p class="zh" style="margin:0 0 8px"><b>拉取请求</b>（PR）是在 GitHub 上申请把你的分支合并进另一个分支，通常是 <code>main</code>。流程是：建分支、提交、推送、开 PR、让别人审阅并让自动检查运行、把发现的问题用更多提交推上去修好，最后合并。PR 是团队在改动落地之前讨论它的地方。</p>
+<p class="en" style="margin:0 0 8px">Put the steps of the flow in order.</p>
+<p class="zh" style="margin:0 0 8px">把流程的各个步骤按顺序排好。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Step 3 · Fork when it is not yours</span><span class="zh">第 3 步 · 不是你的仓库就 fork</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">If you cannot push to a project, <b>fork</b> it: GitHub makes your own copy under your account. You push your branch to the fork and open a PR from there back to the original. The owner then decides whether to merge it.</p>
+<p class="zh" style="margin:0 0 8px">如果你没有权限向某个项目推送，就 <b>fork</b> 它：GitHub 会在你的账号下做一份你自己的副本。你把分支推送到 fork，再从那里向原仓库开 PR。是否合并由原仓库的主人决定。</p>
+<p class="en" style="margin:0 0 8px">This is how most open source projects take contributions from strangers.</p>
+<p class="zh" style="margin:0 0 8px">大多数开源项目就是这样接收陌生人的贡献的。</p></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> create a free GitHub repository, clone it, push a branch and open your first pull request, even if you merge it yourself.</span><span class="zh"><b>试一试：</b>建一个免费的 GitHub 仓库，clone 下来，推送一个分支，开出你的第一个拉取请求，哪怕自己合并也行。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> look at a PR on a public project and find who reviewed it and which checks ran.</span><span class="zh"><b>核对：</b>去看一个公开项目的 PR，找出是谁审阅的、跑了哪些检查。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A remote is a shared copy; clone, push and pull move commits.<br>• A pull request asks to merge a branch and invites review.<br>• The flow: branch, commit, push, PR, review, merge.<br>• No access? Fork, then PR from the fork.</p><p class="zh" style="margin:0">• 远程是一份共享的副本；clone、push、pull 搬运提交。<br>• 拉取请求申请合并一个分支，并邀请审阅。<br>• 流程：分支、提交、推送、PR、审阅、合并。<br>• 没有权限？先 fork，再从 fork 发 PR。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Git basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Git and a free GitHub account","zh":"Git 和一个免费的 GitHub 账号"},"know":{"en":"Branches and merging (see “Branches”).","zh":"知道分支与合并（见“分支”）。"},"goals":{"en":["Tell a local repository from a remote","Push, pull and clone","Follow the pull request flow"],"zh":["分清本地仓库和远程仓库","使用 push、pull 和 clone","走通拉取请求的流程"]},"prev":["04-branches.html"]}}</script>
+<script src="../tracks.js?v=80fa909f"></script><script src="lessons.js?v=42886b04"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/05-github-and-pull-requests.js?v=809898da"></script></body></html>

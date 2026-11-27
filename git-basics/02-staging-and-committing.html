@@ -1,0 +1,50 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Staging and committing | TX Learns</title>
+<meta name="description" content="Read git status, stage exactly the changes you want and write messages that help later"><meta property="og:title" content="Staging and committing | TX Learns"><meta property="og:description" content="Read git status, stage exactly the changes you want and write messages that help later"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/git-basics/02-staging-and-committing.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/pmp.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/git-basics/02-staging-and-committing.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/git-basics/02-staging-and-committing.html","url":"https://tx-learns.vercel.app/git-basics/02-staging-and-committing.html","name":"Staging and committing","alternateName":"暂存与提交","description":"Read git status, stage exactly the changes you want and write messages that help later","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Saving your work","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Git basics","url":"https://tx-learns.vercel.app/git-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Git basics","item":"https://tx-learns.vercel.app/git-basics/index.html"},{"@type":"ListItem","position":3,"name":"Staging and committing","item":"https://tx-learns.vercel.app/git-basics/02-staging-and-committing.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Saving your work · Lesson 2</span><span class="zh">保存你的工作 · 第 2 课</span></span><h1><span class="en">Staging and committing</span><span class="zh">暂存与提交</span></h1><p class="meta"><span class="en">Read git status, stage exactly the changes you want and write messages that help later · ~10 min · reading and practice</span><span class="zh">读懂 git status，只暂存你想要的改动，并写出以后有用的提交信息 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Ask Git what changed</span><span class="zh">第 1 步 · 问 Git 改了什么</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><code>git status</code> tells you what state each file is in. Its short form, <code>git status --short</code>, uses two columns: the left column is the staging area and the right column is the working folder. So <code>M  a.txt</code> means “modified and staged”, and <code> M a.txt</code> means “modified but not staged”. <code>?? new.txt</code> is a file Git has never seen.</p>
+<p class="zh" style="margin:0 0 8px"><code>git status</code> 告诉你每个文件处于什么状态。它的简短形式 <code>git status --short</code> 用两列：左列代表暂存区，右列代表工作目录。所以 <code>M  a.txt</code> 的意思是“已修改且已暂存”，<code> M a.txt</code> 是“已修改但未暂存”。<code>?? new.txt</code> 是 Git 从没见过的文件。</p>
+<p class="en" style="margin:0 0 8px"><code>git diff</code> shows the exact lines you changed and have not staged yet.</p>
+<p class="zh" style="margin:0 0 8px"><code>git diff</code> 显示你改了、但还没暂存的具体行。</p></div>
+<div class="codebox" data-file="terminal" data-lang="bash">$ git status --short
+ M prices.txt     &lt;- edited, not staged
+M  menu.txt       &lt;- edited and staged
+?? notes.txt      &lt;- new, Git has never seen it</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Stage on purpose</span><span class="zh">第 2 步 · 有选择地暂存</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The staging area lets you build a commit deliberately. Add only the files that belong to one idea: <code>git add prices.txt</code>. Avoid <code>git add .</code> until you have checked <code>git status</code>, because it stages everything, including files you did not mean to share.</p>
+<p class="zh" style="margin:0 0 8px">暂存区让你有意识地拼出一次提交。只把属于同一个想法的文件 add 进来：<code>git add prices.txt</code>。在看过 <code>git status</code> 之前，别急着用 <code>git add .</code>，它会把所有东西都暂存，包括你不想分享的文件。</p>
+<p class="en" style="margin:0 0 8px">Small commits that each do one thing are easier to read, review and undo.</p>
+<p class="zh" style="margin:0 0 8px">每次只做一件事的小提交，更容易阅读、审阅和撤销。</p>
+<p class="en" style="margin:0 0 8px">Decide what to stage for each situation.</p>
+<p class="zh" style="margin:0 0 8px">判断每种情况下该暂存什么。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Step 3 · Write a useful message</span><span class="zh">第 3 步 · 写有用的信息</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A good message is short, starts with a verb, and says what the commit does: “Fix rounding in the bill total”. It should still make sense in a year. Messages like “update”, “fix” or “asdf” tell the future you nothing.</p>
+<p class="zh" style="margin:0 0 8px">好的信息简短、以动词开头，说明这次提交做了什么：“修正账单总额的舍入”。一年以后读起来仍然看得懂。像“update”“fix”“asdf”这样的信息，对未来的你毫无帮助。</p>
+<p class="en" style="margin:0 0 8px">If you need “and” in the message, the commit probably does two things and should be two commits.</p>
+<p class="zh" style="margin:0 0 8px">如果信息里需要用“和”，这次提交多半做了两件事，应该拆成两次提交。</p></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> change two files for two reasons, and make two commits, one for each.</span><span class="zh"><b>试一试：</b>为两个原因改两个文件，分别做两次提交。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> read your last five commit messages. Would each make sense in a year?</span><span class="zh"><b>核对：</b>读一读你最近的五条提交信息，一年后每条还看得懂吗？</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• git status --short: left column staged, right column not.<br>• git diff shows unstaged changes line by line.<br>• Stage on purpose; one idea per commit.<br>• Write what the commit does, not “update”.</p><p class="zh" style="margin:0">• git status --short：左列是已暂存，右列是未暂存。<br>• git diff 逐行显示未暂存的改动。<br>• 有选择地暂存；一次提交一个想法。<br>• 写这次提交做了什么，别写“update”。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Git basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Git installed, and a terminal","zh":"装好 Git，并有一个终端"},"know":{"en":"Commits and the three places (see “Why version control”).","zh":"知道提交和三个地方（见“为什么要版本管理”）。"},"goals":{"en":["Read git status and git diff","Stage only some of your changes","Write a clear commit message"],"zh":["读懂 git status 和 git diff","只暂存一部分改动","写出清楚的提交信息"]},"prev":["01-why-version-control.html"]}}</script>
+<script src="../tracks.js?v=80fa909f"></script><script src="lessons.js?v=42886b04"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/02-staging-and-committing.js?v=71e3be21"></script></body></html>
