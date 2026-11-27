@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tables and CSV | TX Learns</title>
+<meta name="description" content="Read a table stored as plain text into rows you can work with"><meta property="og:title" content="Tables and CSV | TX Learns"><meta property="og:description" content="Read a table stored as plain text into rows you can work with"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/data-basics/01-tables-and-csv.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/data-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/data-basics/01-tables-and-csv.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/data-basics/01-tables-and-csv.html","url":"https://tx-learns.vercel.app/data-basics/01-tables-and-csv.html","name":"Tables and CSV","alternateName":"表格与 CSV","description":"Read a table stored as plain text into rows you can work with","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Reading data","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Data basics","url":"https://tx-learns.vercel.app/data-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Data basics","item":"https://tx-learns.vercel.app/data-basics/index.html"},{"@type":"ListItem","position":3,"name":"Tables and CSV","item":"https://tx-learns.vercel.app/data-basics/01-tables-and-csv.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Reading data · Lesson 1</span><span class="zh">读取数据 · 第 1 课</span></span><h1><span class="en">Tables and CSV</span><span class="zh">表格与 CSV</span></h1><p class="meta"><span class="en">Read a table stored as plain text into rows you can work with · ~10 min · reading and practice</span><span class="zh">把存成纯文本的表格读成可以处理的行 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Rows and columns</span><span class="zh">第 1 步 · 行与列</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Most data is a <b>table</b>: each <b>row</b> is one thing (an order, a person) and each <b>column</b> is one fact about it (city, amount). Before any analysis, name what one row stands for. If you cannot say it, you cannot trust any total built on it.</p>
+<p class="zh" style="margin:0 0 8px">大多数数据是一张<b>表</b>：每一<b>行</b>代表一件事（一个订单、一个人），每一<b>列</b>是它的一项事实（城市、金额）。分析之前，先说清一行代表什么。说不清，就不能相信任何基于它算出来的总数。</p></div>
+
+<h2><span class="en">Step 2 · CSV is a table as text</span><span class="zh">第 2 步 · CSV 是文本形式的表格</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>CSV</b> file (comma-separated values) writes a table as plain text: one line per row, commas between columns, the first line holding the column names. Every spreadsheet can export it and every language can read it. Python’s <code>csv.DictReader</code> turns each row into a dictionary keyed by column name.</p>
+<p class="zh" style="margin:0 0 8px"><b>CSV</b> 文件（逗号分隔值）把表格写成纯文本：每行一条记录，列之间用逗号隔开，第一行是列名。所有电子表格都能导出它，所有语言都能读它。Python 的 <code>csv.DictReader</code> 把每一行变成以列名为键的字典。</p></div>
+<div class="codebox" data-file="read.py" data-lang="python">import csv, io
+
+text = "name,city,sales\nMei,Singapore,120\nRavi,Penang,80"
+rows = list(csv.DictReader(io.StringIO(text)))
+print(rows[0]["city"])</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Row, column or value?</span><span class="zh">第 3 步 · 行、列还是值</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">For the table with columns <code>name, city, sales</code>, decide what each item is.</p>
+<p class="zh" style="margin:0 0 8px">对列为 <code>name, city, sales</code> 的表，判断每一项是什么。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> export any small spreadsheet as CSV and open it in a text editor.</span><span class="zh"><b>试一试：</b>把任意一个小表格导出成 CSV，用文本编辑器打开。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> say in one sentence what one row stands for.</span><span class="zh"><b>核对：</b>用一句话说出一行代表什么。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Name what one row stands for before anything else.<br>• A CSV is a table as text; DictReader gives dictionaries by column name.<br>• CSV values are text until you convert them.</p><p class="zh" style="margin:0">• 先说清一行代表什么。<br>• CSV 是文本形式的表格；DictReader 按列名给出字典。<br>• CSV 的值在转换之前都是文本。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Data basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3","zh":"Python 3"},"know":{"en":"Python lists and dictionaries.","zh":"会用 Python 的列表和字典。"},"goals":{"en":["Say what rows and columns are","Read a CSV with the csv module","Get a value from a row by column name"],"zh":["说出行和列是什么","用 csv 模块读取 CSV","按列名取出一行里的值"]}}}</script>
+<script src="../tracks.js?v=08f5dd0a"></script><script src="lessons.js?v=e40b7cf1"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/01-tables-and-csv.js?v=8185f76d"></script></body></html>

@@ -1,0 +1,46 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cleaning values | TX Learns</title>
+<meta name="description" content="Turn messy text into clean numbers and deal with blanks and typos"><meta property="og:title" content="Cleaning values | TX Learns"><meta property="og:description" content="Turn messy text into clean numbers and deal with blanks and typos"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/data-basics/02-cleaning-values.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/data-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/data-basics/02-cleaning-values.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/data-basics/02-cleaning-values.html","url":"https://tx-learns.vercel.app/data-basics/02-cleaning-values.html","name":"Cleaning values","alternateName":"清理数据","description":"Turn messy text into clean numbers and deal with blanks and typos","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Reading data","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Data basics","url":"https://tx-learns.vercel.app/data-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Data basics","item":"https://tx-learns.vercel.app/data-basics/index.html"},{"@type":"ListItem","position":3,"name":"Cleaning values","item":"https://tx-learns.vercel.app/data-basics/02-cleaning-values.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Reading data · Lesson 2</span><span class="zh">读取数据 · 第 2 课</span></span><h1><span class="en">Cleaning values</span><span class="zh">清理数据</span></h1><p class="meta"><span class="en">Turn messy text into clean numbers and deal with blanks and typos · ~10 min · reading and practice</span><span class="zh">把凌乱的文本变成干净的数字，并处理空白和错别字 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Real data is messy</span><span class="zh">第 1 步 · 真实数据很凌乱</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Real tables hold blanks, stray spaces, “N/A”, a number typed as <code>1,200</code>, the same city spelled three ways. Analysis on dirty data gives confident wrong answers, so cleaning comes first. The goal is not perfect data but <b>known</b> data: you can say what you changed and what you dropped.</p>
+<p class="zh" style="margin:0 0 8px">真实的表格里有空白、多余的空格、“N/A”、写成 <code>1,200</code> 的数字、同一个城市的三种拼法。在脏数据上分析，会得出自信满满的错误答案，所以先清理。目标不是完美的数据，而是<b>心里有数</b>的数据：你能说清改了什么、丢了什么。</p></div>
+
+<h2><span class="en">Step 2 · Strip, convert, skip</span><span class="zh">第 2 步 · 去空格、转换、跳过</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><code>.strip()</code> removes stray spaces, <code>.lower()</code> evens out capitals, and <code>int()</code> / <code>float()</code> convert text to numbers. A blank or “N/A” makes <code>int()</code> raise <code>ValueError</code>, so wrap it in <code>try</code> and decide: skip the row, use a default or stop. Whatever you pick, count what you skipped.</p>
+<p class="zh" style="margin:0 0 8px"><code>.strip()</code> 去掉多余空格，<code>.lower()</code> 统一大小写，<code>int()</code> / <code>float()</code> 把文本转成数字。空白或“N/A”会让 <code>int()</code> 抛出 <code>ValueError</code>，所以用 <code>try</code> 包起来，并决定：跳过这行、用默认值，还是停下。无论怎么选，都要数一数跳过了多少。</p></div>
+<div class="codebox" data-file="clean.py" data-lang="python">raw = [" 120", "80 ", "N/A", "100"]
+clean, skipped = [], 0
+for s in raw:
+    try:
+        clean.append(int(s.strip()))
+    except ValueError:
+        skipped += 1
+print(clean, skipped)</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Fix, skip or ask?</span><span class="zh">第 3 步 · 修正、跳过还是问人</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Decide what to do with each problem.</p>
+<p class="zh" style="margin:0 0 8px">为每个问题决定怎么处理。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> clean a list of five messy numbers and print how many were skipped.</span><span class="zh"><b>试一试：</b>清理一个有五个凌乱数字的列表，并打印跳过了几个。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> list one problem you would fix and one you would ask about.</span><span class="zh"><b>核对：</b>各列出一个你会自己修正的问题和一个你会去问的问题。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Clean first: dirty data gives confident wrong answers.<br>• strip, lower and int or float fix most text problems; try handles the rest.<br>• Always count what you skipped.</p><p class="zh" style="margin:0">• 先清理：脏数据会给出自信的错误答案。<br>• strip、lower 和 int 或 float 能解决多数文本问题；其余交给 try。<br>• 永远要数一数跳过了多少。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Data basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3","zh":"Python 3"},"know":{"en":"Tables and CSV (see “Tables and CSV”).","zh":"知道表格与 CSV（见“表格与 CSV”）。"},"goals":{"en":["Convert text to numbers safely","Handle blanks and stray spaces","Say what to do with a bad row"],"zh":["把文本安全地转成数字","处理空白和多余的空格","决定怎么处理一条坏数据"]},"prev":["01-tables-and-csv.html"]}}</script>
+<script src="../tracks.js?v=08f5dd0a"></script><script src="lessons.js?v=e40b7cf1"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/02-cleaning-values.js?v=2b828328"></script></body></html>

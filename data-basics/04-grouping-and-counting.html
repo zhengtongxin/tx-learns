@@ -1,0 +1,47 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Grouping and counting | TX Learns</title>
+<meta name="description" content="Answer “how many per city” and “total per product” by grouping rows"><meta property="og:title" content="Grouping and counting | TX Learns"><meta property="og:description" content="Answer “how many per city” and “total per product” by grouping rows"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/data-basics/04-grouping-and-counting.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/data-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/data-basics/04-grouping-and-counting.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/data-basics/04-grouping-and-counting.html","url":"https://tx-learns.vercel.app/data-basics/04-grouping-and-counting.html","name":"Grouping and counting","alternateName":"分组与计数","description":"Answer “how many per city” and “total per product” by grouping rows","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Finding patterns","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Data basics","url":"https://tx-learns.vercel.app/data-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Data basics","item":"https://tx-learns.vercel.app/data-basics/index.html"},{"@type":"ListItem","position":3,"name":"Grouping and counting","item":"https://tx-learns.vercel.app/data-basics/04-grouping-and-counting.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Finding patterns · Lesson 1</span><span class="zh">发现规律 · 第 1 课</span></span><h1><span class="en">Grouping and counting</span><span class="zh">分组与计数</span></h1><p class="meta"><span class="en">Answer “how many per city” and “total per product” by grouping rows · ~10 min · reading and practice</span><span class="zh">通过给行分组，回答“每个城市多少个”和“每种产品总共多少” · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Group, then summarise</span><span class="zh">第 1 步 · 先分组，再汇总</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Most real questions are “per something”: sales per city, tickets per week, errors per page. The recipe is always the same: <b>group</b> the rows by that something, then <b>summarise</b> each group (count them or add a number up). In spreadsheets this is a pivot table; in Python a dictionary does it in three lines.</p>
+<p class="zh" style="margin:0 0 8px">大多数真实问题都是“每个什么”：每个城市的销售额、每周的工单、每个页面的错误数。做法永远一样：按那个“什么”把行<b>分组</b>，再<b>汇总</b>每一组（数个数，或把某个数加起来）。电子表格里这叫数据透视表；Python 里用字典三行就能做到。</p></div>
+
+<h2><span class="en">Step 2 · Count with Counter</span><span class="zh">第 2 步 · 用 Counter 计数</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><code>collections.Counter</code> counts how often each value appears: <code>Counter(cities)</code>. <code>.most_common(2)</code> lists the top two. To <i>total a number</i> per group, use a dictionary: for each row add its amount to <code>totals[city]</code>, starting from <code>totals.get(city, 0)</code>.</p>
+<p class="zh" style="margin:0 0 8px"><code>collections.Counter</code> 数每个值出现的次数：<code>Counter(cities)</code>。<code>.most_common(2)</code> 列出出现最多的前两个。要<i>按组累加一个数</i>，就用字典：对每一行，把金额加到 <code>totals[city]</code> 上，起点是 <code>totals.get(city, 0)</code>。</p></div>
+<div class="codebox" data-file="group.py" data-lang="python">from collections import Counter
+
+rows = [("Singapore", 120), ("Penang", 80), ("Singapore", 100)]
+print(Counter(c for c, _ in rows))
+
+totals = {}
+for city, amount in rows:
+    totals[city] = totals.get(city, 0) + amount
+print(totals)</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Count or total?</span><span class="zh">第 3 步 · 计数还是累加</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Decide which one each question needs.</p>
+<p class="zh" style="margin:0 0 8px">判断每个问题需要哪一种。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> count how often each word appears in a short sentence of your own.</span><span class="zh"><b>试一试：</b>数一数你自己写的一句短话里每个词出现的次数。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> write one “total per group” question about data you know.</span><span class="zh"><b>核对：</b>就你熟悉的数据，写一个“每组总和”的问题。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Group the rows, then summarise each group.<br>• Counter counts how often values appear; a dictionary totals a number.<br>• get(key, 0) lets a new group start at zero.</p><p class="zh" style="margin:0">• 先给行分组，再汇总每一组。<br>• Counter 数值出现的次数；字典累加一个数。<br>• get(key, 0) 让新的一组从零开始。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Data basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3","zh":"Python 3"},"know":{"en":"Summaries (see “Summaries”).","zh":"知道汇总（见“汇总”）。"},"goals":{"en":["Count how often each value appears","Total a number per group","Choose between Counter and a dictionary"],"zh":["数每个值出现的次数","按组累加一个数","在 Counter 和字典之间选择"]},"prev":["03-summaries.html"]}}</script>
+<script src="../tracks.js?v=08f5dd0a"></script><script src="lessons.js?v=e40b7cf1"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/04-grouping-and-counting.js?v=3d3eb3a9"></script></body></html>

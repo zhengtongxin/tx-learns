@@ -1,0 +1,42 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sorting and ranking | TX Learns</title>
+<meta name="description" content="Put results in order and pull out the top few"><meta property="og:title" content="Sorting and ranking | TX Learns"><meta property="og:description" content="Put results in order and pull out the top few"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/data-basics/05-sorting-and-ranking.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/data-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/data-basics/05-sorting-and-ranking.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/data-basics/05-sorting-and-ranking.html","url":"https://tx-learns.vercel.app/data-basics/05-sorting-and-ranking.html","name":"Sorting and ranking","alternateName":"排序与排名","description":"Put results in order and pull out the top few","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Finding patterns","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Data basics","url":"https://tx-learns.vercel.app/data-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Data basics","item":"https://tx-learns.vercel.app/data-basics/index.html"},{"@type":"ListItem","position":3,"name":"Sorting and ranking","item":"https://tx-learns.vercel.app/data-basics/05-sorting-and-ranking.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Finding patterns · Lesson 2</span><span class="zh">发现规律 · 第 2 课</span></span><h1><span class="en">Sorting and ranking</span><span class="zh">排序与排名</span></h1><p class="meta"><span class="en">Put results in order and pull out the top few · ~10 min · reading and practice</span><span class="zh">把结果排好顺序，并取出前几名 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Sort by a key</span><span class="zh">第 1 步 · 按 key 排序</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A pile of totals is hard to read; a ranked list is not. <code>sorted(items, key=...)</code> returns a new sorted list, where <code>key</code> says what to sort by. <code>reverse=True</code> flips the order so the biggest comes first. The original is untouched, which keeps the raw data safe.</p>
+<p class="zh" style="margin:0 0 8px">一堆总数很难读，排好名的列表就容易多了。<code>sorted(items, key=...)</code> 返回一个新的已排序列表，<code>key</code> 说明按什么排。<code>reverse=True</code> 把顺序倒过来，最大的排第一。原数据不受影响，原始数据因此安全。</p></div>
+<div class="codebox" data-file="rank.py" data-lang="python">totals = {"Singapore": 220, "Penang": 80, "Ipoh": 150}
+ranked = sorted(totals.items(), key=lambda kv: kv[1], reverse=True)
+print(ranked[:2])</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Top N and ties</span><span class="zh">第 2 步 · 前 N 名与并列</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Slice with <code>[:3]</code> for the top three. Two cautions. <b>Ties</b>: when two items have the same value, Python keeps their original order, which may look arbitrary, so decide how to break ties on purpose (by name, say). <b>Small groups</b>: “top city” of three rows says little; show the count next to every rank.</p>
+<p class="zh" style="margin:0 0 8px">用 <code>[:3]</code> 切片取前三名。有两点要小心。<b>并列</b>：两项值相同时，Python 保持它们原来的顺序，这看起来可能很随意，所以要有意地决定怎么打破并列（比如按名字）。<b>小样本</b>：三行数据里的“第一名城市”说明不了什么；在每个名次旁边显示个数。</p></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Which order?</span><span class="zh">第 3 步 · 什么顺序</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Decide how to sort for each question.</p>
+<p class="zh" style="margin:0 0 8px">判断每个问题该怎么排序。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> rank five items of your own by a number and print the top three.</span><span class="zh"><b>试一试：</b>把你自己的五样东西按某个数字排名，打印前三名。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> make a tie on purpose and break it by name.</span><span class="zh"><b>核对：</b>故意制造一个并列，并按名字打破。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• sorted(items, key=...) ranks without changing the original.<br>• reverse=True puts the biggest first.<br>• Break ties on purpose and show the count behind each rank.</p><p class="zh" style="margin:0">• sorted(items, key=...) 排名而不改变原数据。<br>• reverse=True 把最大的放在前面。<br>• 有意识地打破并列，并显示每个名次背后的个数。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Data basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3","zh":"Python 3"},"know":{"en":"Grouping and counting (see “Grouping and counting”).","zh":"知道分组与计数（见“分组与计数”）。"},"goals":{"en":["Sort with a key","Reverse an order","Take the top N"],"zh":["用 key 排序","反转顺序","取前 N 名"]},"prev":["04-grouping-and-counting.html"]}}</script>
+<script src="../tracks.js?v=08f5dd0a"></script><script src="lessons.js?v=e40b7cf1"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/05-sorting-and-ranking.js?v=3729697b"></script></body></html>

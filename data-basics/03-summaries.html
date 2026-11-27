@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Summaries | TX Learns</title>
+<meta name="description" content="Boil a column down to a total, an average and a middle value"><meta property="og:title" content="Summaries | TX Learns"><meta property="og:description" content="Boil a column down to a total, an average and a middle value"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/data-basics/03-summaries.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/data-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/data-basics/03-summaries.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/data-basics/03-summaries.html","url":"https://tx-learns.vercel.app/data-basics/03-summaries.html","name":"Summaries","alternateName":"汇总","description":"Boil a column down to a total, an average and a middle value","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Reading data","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Data basics","url":"https://tx-learns.vercel.app/data-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Data basics","item":"https://tx-learns.vercel.app/data-basics/index.html"},{"@type":"ListItem","position":3,"name":"Summaries","item":"https://tx-learns.vercel.app/data-basics/03-summaries.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Reading data · Lesson 3</span><span class="zh">读取数据 · 第 3 课</span></span><h1><span class="en">Summaries</span><span class="zh">汇总</span></h1><p class="meta"><span class="en">Boil a column down to a total, an average and a middle value · ~10 min · reading and practice</span><span class="zh">把一列数据浓缩成总和、平均值和中间值 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Total, count, range</span><span class="zh">第 1 步 · 总和、个数、范围</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A summary squeezes many numbers into a few you can hold in your head. Start with <code>len(x)</code> (how many), <code>sum(x)</code> (total), <code>min(x)</code> and <code>max(x)</code> (the range). Always look at these first: an unexpected maximum or a count that is too low often reveals a cleaning problem.</p>
+<p class="zh" style="margin:0 0 8px">汇总把很多数字压缩成几个你记得住的。先从 <code>len(x)</code>（有多少个）、<code>sum(x)</code>（总和）、<code>min(x)</code> 和 <code>max(x)</code>（范围）开始。总要先看这些：出乎意料的最大值或偏少的个数，常常暴露清理上的问题。</p></div>
+
+<h2><span class="en">Step 2 · Mean and median</span><span class="zh">第 2 步 · 平均值与中位数</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The <b>mean</b> is the sum divided by the count. The <b>median</b> is the middle value once sorted; half the values are below it. One huge value drags the mean up but barely moves the median, so for pay, prices and response times the median is usually the honest “typical”. The <code>statistics</code> module has both.</p>
+<p class="zh" style="margin:0 0 8px"><b>平均值</b>是总和除以个数。<b>中位数</b>是排序后正中间的那个值，一半的值比它小。一个特别大的值会把平均值拉高，却几乎不影响中位数，所以对工资、价格和响应时间，中位数通常才是诚实的“典型值”。<code>statistics</code> 模块两者都有。</p></div>
+<div class="codebox" data-file="summary.py" data-lang="python">import statistics
+
+sales = [100, 120, 80, 95, 2000]
+print(sum(sales) / len(sales))
+print(statistics.median(sales))</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Which summary fits?</span><span class="zh">第 3 步 · 用哪种汇总</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Pick the summary that answers each question.</p>
+<p class="zh" style="margin:0 0 8px">选出能回答每个问题的汇总。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> compute the mean and median of your own five numbers (steps, minutes, prices).</span><span class="zh"><b>试一试：</b>算一算你自己的五个数字（步数、分钟数、价格）的平均值和中位数。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> add one huge value and see which summary moves.</span><span class="zh"><b>核对：</b>加进一个特别大的值，看哪种汇总变了。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Look at count, total, min and max first.<br>• The mean is dragged by extremes; the median is not.<br>• For pay, prices and times, prefer the median.</p><p class="zh" style="margin:0">• 先看个数、总和、最小值和最大值。<br>• 平均值会被极端值拉动；中位数不会。<br>• 对工资、价格和时间，优先用中位数。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Data basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3","zh":"Python 3"},"know":{"en":"Cleaning values (see “Cleaning values”).","zh":"知道清理数据（见“清理数据”）。"},"goals":{"en":["Compute sum, count, min and max","Tell mean from median","Round a result sensibly"],"zh":["计算总和、个数、最小值和最大值","分清平均值和中位数","合理地取整"]},"prev":["02-cleaning-values.html"]}}</script>
+<script src="../tracks.js?v=08f5dd0a"></script><script src="lessons.js?v=e40b7cf1"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/03-summaries.js?v=f0224aec"></script></body></html>
