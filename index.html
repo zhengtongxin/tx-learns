@@ -72,25 +72,25 @@ html[data-theme=light] .shim{background-image:linear-gradient(100deg,#b36b00 20%
 </header>
 <section class="paths" aria-label="Choose how to learn · 选择学法">
 <h2 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap"><span class="en">Choose how to learn</span><span class="zh">选择学法</span></h2>
-<article class="pcd" style="--k:0"><a class="pcd-h" href="tracks.html"><div class="orbi">🧭</div><h3><span class="en">Pick a track</span><span class="zh">选一条路线</span></h3><p class="meta"><span class="en">Interactive AI lessons, easiest first.</span><span class="zh">AI 互动课，由易到难。</span></p></a>
+<article class="pcd" style="--k:0"><a class="pcd-h" href="tracks.html"><div class="orbi">🧭</div><h3><span class="en">Pick a track</span><span class="zh">选一条路线</span></h3><p class="meta"><span class="en">AI and project management, lesson by lesson.</span><span class="zh">AI 和项目管理，一课一课学。</span></p></a>
 <ul class="pcd-l path" id="pl-tracks"></ul><p class="acts"><a class="btn pri" href="tracks.html"><span class="en">See the tracks <i class="ar">→</i></span><span class="zh">查看路线 <i class="ar">→</i></span></a></p></article>
 <article class="pcd" style="--k:1"><a class="pcd-h" href="study/index.html"><div class="orbi">🎯</div><h3><span class="en">Study your own material</span><span class="zh">学你自己的资料</span></h3><p class="meta"><span class="en">Quiz yourself on your own slides and PDFs.</span><span class="zh">用你自己的课件和 PDF 出题考自己。</span></p></a>
 <ul class="pcd-l steps">
 <li style="--i:0"><span class="no">1</span><span><b><span class="en">Hand in</span><span class="zh">交资料</span></b> · <span class="en">slides and PDFs, English or 中文</span><span class="zh">课件和 PDF，中英文均可</span></span></li>
 <li style="--i:1"><span class="no">2</span><span><b><span class="en">Get quizzed</span><span class="zh">被出题</span></b> · <span class="en">original questions from an AI in your browser</span><span class="zh">浏览器里的 AI 出原创题</span></span></li>
 <li style="--i:2"><span class="no">3</span><span><b><span class="en">Find weak spots</span><span class="zh">找弱点</span></b> · <span class="en">a strength map by area</span><span class="zh">按领域的强弱图</span></span></li>
-<li style="--i:3"><span class="no">4</span><span><b><span class="en">Drill by exam weight</span><span class="zh">按考纲刷题</span></b> · <span class="en">PMP first</span><span class="zh">先支持 PMP</span></span></li>
+<li style="--i:3"><span class="no">4</span><span><b><span class="en">Drill by exam weight</span><span class="zh">按考纲刷题</span></b> · <span class="en">any subject</span><span class="zh">任何科目</span></span></li>
 <li style="--i:4"><span class="no">5</span><span><b><span class="en">Practise daily</span><span class="zh">每日练习</span></b> · <span class="en">a plan of what to practise today</span><span class="zh">今天练什么的计划</span></span></li></ul>
-<div class="sm" aria-hidden="true"><div><span><span class="en">People</span><span class="zh">人员</span></span><i style="--w:78%;--i:0"></i></div><div><span><span class="en">Process</span><span class="zh">过程</span></span><i style="--w:42%;--i:1"></i></div><div><span><span class="en">Business</span><span class="zh">商业环境</span></span><i style="--w:64%;--i:2"></i></div></div>
+<div class="sm" aria-hidden="true"><div><span><span class="en">Topic A</span><span class="zh">主题 A</span></span><i style="--w:78%;--i:0"></i></div><div><span><span class="en">Topic B</span><span class="zh">主题 B</span></span><i style="--w:42%;--i:1"></i></div><div><span><span class="en">Topic C</span><span class="zh">主题 C</span></span><i style="--w:64%;--i:2"></i></div></div>
 <p class="tgs"><span><span class="en">Free</span><span class="zh">免费</span></span><span><span class="en">Private: stays on your device</span><span class="zh">私密：留在你的设备上</span></span><span><span class="en">No login</span><span class="zh">不用登录</span></span></p>
 <p class="acts"><a class="btn pri" href="study/index.html"><span class="en">Open the study coach <i class="ar">→</i></span><span class="zh">打开学习教练 <i class="ar">→</i></span></a></p></article>
 </section>
 </main>
-<script src="tracks.js?v=ed1b1518"></script><script src="assets/site.js?v=50672dc8"></script>
+<script src="tracks.js?v=ed1b1518"></script><script src="assets/site.js?v=088e20df"></script>
 <script>(function(){
 var el=document.getElementById('pl-tracks'),T=window.TRACKS||[],LV={1:['Beginner','入门'],2:['Intermediate','进阶'],3:['Advanced','高级']};
 function t(o){return '<span class="en">'+o.en+'</span><span class="zh">'+o.zh+'</span>'}
-el.innerHTML=T.map(function(c,i){var l=LV[c.level]||LV[1];return '<li style="--i:'+i+'"><span class="ic" aria-hidden="true">'+c.icon+'</span><b>'+t(c.title)+'</b><span class="lv">'+t({en:l[0],zh:l[1]})+'</span></li>'}).join('');
+var DM=window.DOMAINS||[];el.innerHTML=DM.map(function(d,i){return '<li style="--i:'+i+'"><span class="ic" aria-hidden="true">'+d.icon+'</span><b>'+t(d.title)+'</b></li>'}).join('');
 function sizeDot(){el.style.setProperty('--h',Math.max(0,el.offsetHeight-22)+'px')}sizeDot();addEventListener('resize',sizeDot);
 /* pointer effects: page spotlight, card tilt with a moving glow, magnetic buttons. Skipped for touch and reduced motion. */
 var fine=matchMedia('(hover:hover) and (pointer:fine)').matches,calm=matchMedia('(prefers-reduced-motion: reduce)').matches;if(!fine||calm)return;
