@@ -36,6 +36,24 @@
 <p class="en">Sort each one.</p>
 <p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
 
+<h2><span class="en">Step 4 · Three items, one run each</span><span class="zh">第 4 步 · 三个条目，各跑一次</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Real data is untidy. Here three rows arrive from a sheet, and the message node from Step 2 runs once for each.</p>
+<p class="zh" style="margin:0 0 8px">真实的数据并不整齐。这里从表格进来三行，第 2 步的消息节点会对每一行各跑一次。</p></div>
+<div class="codebox" data-file="three items in" data-lang="json">[
+  { "name": "Wei Jie", "amount": 42.5 },
+  { "name": "Mei",     "amount": "60" },
+  { "name": "Raj" }
+]</div>
+<div class="codebox" data-file="three messages out" data-lang="text">Hi Wei Jie, your weekend plan is $46.33 with GST.
+Hi Mei, your weekend plan is $65.40 with GST.
+Hi Raj, your weekend plan is $NaN with GST.</div>
+<div class="teach"><p class="en" style="margin:0 0 8px">Three things to notice. Mei's amount is the text "60" in quotes, yet multiplying still worked. Adding would not: <code>{{ $json.amount + 1 }}</code> gives 601, the text "60" followed by 1. And Raj has no amount at all, so the maths gives NaN ("not a number") and a customer would read $NaN. A field name must also match exactly: <code>$json.Name</code> is empty because the field is <code>name</code>.</p>
+<p class="zh" style="margin:0 0 8px">注意三点。Mei 的 amount 是带引号的文本 "60"，但乘法照样算得出来；加法就不行：<code>{{ $json.amount + 1 }}</code> 得到 601，是文本 "60" 后面接了个 1。Raj 干脆没有 amount，于是算出 NaN（“不是数字”），顾客会读到 $NaN。字段名还必须完全一致：<code>$json.Name</code> 是空的，因为字段叫 <code>name</code>。</p>
+<p class="en" style="margin:0 0 8px">So before a message goes out to a customer, add a check step that keeps only items with a number in <code>amount</code>, and open the execution to look at the items you actually got, not the ones you hoped for.</p>
+<p class="zh" style="margin:0 0 8px">所以在消息发给顾客之前，加一个检查步骤，只保留 amount 里是数字的条目，并且打开运行记录，看你实际收到的条目，而不是你以为会收到的。</p></div>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Sketch</b> one of your own routines as boxes and arrows. Circle the single step that really needs a model.</span><span class="zh"><b>画出</b>你自己的一件例行事务，用方框和箭头。圈出真正需要模型的那一步。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Open</b> an n8n execution and click a node to see its items.</span><span class="zh"><b>打开</b>一次 n8n 运行记录，点节点看它的条目。</span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
@@ -45,4 +63,4 @@
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"prev":["01-your-first-ai-agent.html"],"tools":{"en":"The n8n Cloud trial","zh":"之前用过的 n8n Cloud 试用"},"know":{"en":"What an n8n workflow and node are.","zh":"知道 n8n 的工作流和节点是什么。"},"goals":{"en":["Read and write a simple n8n expression","Explain items and JSON in plain words","Choose workflow, AI step or agent for a job"],"zh":["读写简单的 n8n 表达式","用大白话讲清条目和 JSON","为一项任务选工作流、AI 步骤或智能体"]}}}</script>
 <script src="../tracks.js?v=819ff2a4"></script><script src="lessons.js?v=bc7f7459"></script><script src="../assets/site.js?v=a0db7d29"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
-<script src="js/02-workflows-and-agents.js?v=f8d7f954"></script></body></html>
+<script src="js/02-workflows-and-agents.js?v=c054e81d"></script></body></html>
