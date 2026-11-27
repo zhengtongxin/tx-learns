@@ -20,5 +20,7 @@ window.TRACK={id:'itsm',title:{en:'ITSM',zh:'ITSM 备考'},topics:[
  {n:5,level:2,title:{en:"Beyond the basics",zh:"更进一步"},items:[
   {k:'f',file:'14-value-streams.html',title:{en:"Value streams",zh:"价值流"}},
   {k:'c',file:'15-ai-in-service-management.html',title:{en:"AI in service management",zh:"服务管理中的 AI"}},
-  {k:'c',file:'16-working-with-other-frameworks.html',title:{en:"Working with other frameworks",zh:"与其他框架配合"}}]}
+  {k:'c',file:'16-working-with-other-frameworks.html',title:{en:"Working with other frameworks",zh:"与其他框架配合"}}]},
+ {n:6,level:2,title:{en:"Practice",zh:"练习"},items:[
+  {k:'c',file:'17-mixed-question-drill.html',title:{en:"Mixed question drill",zh:"综合题练习"}}]}
 ]};
