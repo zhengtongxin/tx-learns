@@ -1,0 +1,70 @@
+<!doctype html><html lang="en" data-area="study"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Study coach | TX Learns</title>
+<meta name="description" content="Hand in your slides and PDFs. A free AI model that runs in your own browser quizzes you, finds your weak spots and plans what to practise each day."><meta property="og:title" content="Study coach | TX Learns"><meta property="og:description" content="Hand in your slides and PDFs. A free AI model that runs in your own browser quizzes you, finds your weak spots and plans what to practise each day."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/study/index.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<link rel="canonical" href="https://tx-learns.vercel.app/study/index.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=92b1bb9f">
+<style>
+.cch{max-width:760px;margin:0 auto;padding-bottom:56px}
+.cch section{margin-top:34px}.cch h2{text-align:left;margin:0 0 12px}.cch h3{margin:16px 0 8px}
+.lim{margin:0;padding:0;list-style:none;display:grid;gap:6px 24px;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));color:var(--mut);line-height:1.6}
+.lim li{padding:6px 0;border-top:1px solid var(--line)}
+.steps{margin:0;padding-left:1.3em;line-height:1.9;color:var(--mut)}
+.plan{list-style:none;margin:10px 0;padding:0}.plan li{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.pk{font-weight:700;color:var(--acc);text-align:right}
+.acts{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0 0}
+.btn.sm{min-height:34px;padding:0 12px;font-size:13.5px}
+.per{color:var(--mut);display:inline-flex;gap:6px;align-items:center}
+select{max-width:100%;min-width:0;text-overflow:ellipsis;font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 8px;min-height:36px}
+.rows{display:grid;gap:4px}.row{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,2fr) 88px 34px;gap:12px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}
+.bar{height:10px;border-radius:99px;background:color-mix(in srgb,var(--fg) 10%,transparent);overflow:hidden}.bar i{display:block;height:100%;background:#ffc83d;border-radius:99px}.bar i.weak{background:#e5603b}
+.rv2{white-space:nowrap;font-weight:600;text-align:right}.rn{text-align:right}
+@media(max-width:560px){.row{grid-template-columns:1fr 1fr 84px;gap:4px 10px}.row .bar{grid-column:1/3;grid-row:2}.rl{grid-column:1/3}.rv2{grid-column:3;grid-row:1}.rn{display:none}}
+.files{list-style:none;margin:0 0 12px;padding:0}.files li{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}.fn{font-weight:600;word-break:break-all;flex:1 1 200px}
+.drop{display:block;border:1.5px dashed color-mix(in srgb,var(--acc) 60%,var(--line));border-radius:14px;padding:22px 16px;text-align:center;color:var(--mut);cursor:pointer}.drop:hover,.drop:focus-within{border-color:var(--acc);background:rgba(255,200,61,.08)}.drop input{position:absolute;opacity:0;width:1px;height:1px}
+.drop:focus-within{outline:2px solid var(--acc);outline-offset:3px}
+.seg2{display:flex;flex-wrap:wrap;gap:8px 22px}.seg2 label{display:inline-flex;gap:8px;align-items:center;cursor:pointer}
+.rowf{display:flex;flex-wrap:wrap;gap:10px 18px;margin:12px 0 6px}.rowf label{max-width:100%;min-width:0;display:inline-flex;gap:8px;align-items:center;color:var(--mut)}
+progress{width:100%;height:10px;accent-color:#ffc83d;margin-top:10px}
+.warn{color:#e5603b;line-height:1.6}
+#practice{border:1px solid var(--line);border-radius:18px;padding:20px clamp(14px,3vw,24px);margin-top:28px;background:var(--glass)}
+.qt{font-size:1.15rem;line-height:1.55;margin:6px 0 14px;white-space:pre-wrap;outline:none}
+.opts{display:grid;gap:8px}.opt{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start;text-align:left;width:100%;font:inherit;color:var(--fg);background:none;border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;line-height:1.55;min-height:44px}
+.opt:hover:not(:disabled){border-color:var(--acc);background:rgba(255,200,61,.1)}.opt:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.opt b{color:var(--acc)}.opt.ok{border-color:#2f9e63;background:rgba(47,158,99,.14)}.opt.no{border-color:#e5603b;background:rgba(229,96,59,.12)}.opt:disabled{cursor:default;color:var(--fg)}
+.fb{margin-top:14px;line-height:1.7}.snip{white-space:pre-wrap;color:var(--mut);font-size:13.5px}.rev{border-top:1px solid var(--line);padding:8px 0}.rev p{margin:4px 0}.lead2{font-size:1.25rem;font-weight:600;margin:6px 0}
+#nbody,#ntopic{width:100%;box-sizing:border-box;font:inherit;color:var(--fg);background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:10px 12px}#nbody{resize:vertical}.files.long{max-height:260px;overflow:auto;padding-right:6px}.chk{display:grid;grid-template-columns:22px 1fr;gap:8px;margin:12px 0;line-height:1.55;font-size:14px}.chk input{margin-top:5px}.btn:disabled{opacity:.45;cursor:not-allowed}
+#printarea{display:none}@media print{body.printing>*:not(#printarea){display:none!important}body.printing #printarea{display:block;color:#000;background:#fff;font:12pt/1.45 system-ui,sans-serif;padding:0}body.printing{background:#fff}.pq{break-inside:avoid;margin:0 0 14pt}.pq ol{margin:4pt 0 4pt 18pt;padding:0}}
+#status{min-height:1.4em;color:var(--mut);margin:14px 0 0;text-align:center}
+.chip{font-size:12.5px}
+</style><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://tx-learns.vercel.app/study/index.html","url":"https://tx-learns.vercel.app/study/index.html","name":"Study coach","description":"Hand in your slides and PDFs. A free AI model that runs in your own browser quizzes you, finds your weak spots and plans what to practise each day.","inLanguage":["en","zh"],"isPartOf":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Study coach","item":"https://tx-learns.vercel.app/study/index.html"}]}]}</script></head><body>
+<main class="wide">
+<header class="stage compact"><div class="orb"></div>
+<h1 class="mega"><span class="en">Study <em>coach</em></span><span class="zh">学习<em>教练</em></span></h1>
+<p class="sub"><span class="en">Hand in your slides and PDFs. A free AI in your own browser quizzes you, finds your weak spots and plans what to practise today.</span><span class="zh">交出你的课件和 PDF。你自己浏览器里的免费 AI 出题考你，找出薄弱点，并安排今天练什么。</span></p>
+<p class="acts" style="justify-content:center"><a class="btn" href="how.html"><span class="en">How the method works</span><span class="zh">学习方法</span></a></p>
+</header>
+<noscript><p class="meta" style="text-align:center">This tool needs JavaScript. · 这个工具需要 JavaScript。</p></noscript>
+<div class="cch" id="app" hidden>
+<section aria-labelledby="lh"><h2 id="lh"><span class="en">Read this <em>first</em></span><span class="zh">先看<em>限制</em></span></h2>
+<ul class="lim">
+<li><span class="en"><b>Private.</b> Your files and answers never leave this device. No login, no server.</span><span class="zh"><b>私密。</b>你的文件和答案不会离开这台设备。不登录，没有服务器。</span></li>
+<li><span class="en"><b>Desktop Chrome or Edge</b> only, because the model needs WebGPU.</span><span class="zh"><b>仅限电脑版 Chrome 或 Edge</b>，因为模型需要 WebGPU。</span></li>
+<li><span class="en"><b>One-time download</b> of about 1 to 2 GB the first time you start the model.</span><span class="zh"><b>首次启动要下载一次</b>，约 1 到 2 GB。</span></li>
+<li><span class="en"><b>A small model.</b> Questions are weaker than a big chat app’s, and some will be wrong: use “looks wrong” and check what you doubt.</span><span class="zh"><b>模型较小。</b>出的题不如大型聊天应用，有些会出错：用“有问题”按钮，并核对你存疑的地方。</span></li>
+<li><span class="en"><b>Text only.</b> Scanned PDFs, pictures and charts in slides are not read.</span><span class="zh"><b>只读文字。</b>扫描版 PDF、图片和幻灯片里的图表读不了。</span></li>
+<li><span class="en"><b>Your records</b> live in this browser. Use Export to back them up.</span><span class="zh"><b>你的记录</b>保存在这个浏览器里。请用“导出”备份。</span></li>
+</ul></section>
+<section id="today" aria-live="polite"></section>
+<section id="practice" hidden aria-label="Practice · 练习"></section>
+<section id="map"></section>
+<section><h2><span class="en">1 · Your <em>material</em></span><span class="zh">1 · 你的<em>资料</em></span></h2><div id="mats"></div></section>
+<section><h2><span class="en">2 · Your <em>goal</em></span><span class="zh">2 · 你的<em>目标</em></span></h2><div id="goal"></div></section>
+<section><h2><span class="en">3 · The <em>model</em></span><span class="zh">3 · <em>模型</em></span></h2><div id="model"></div></section>
+<section><h2><span class="en">Your <em>records</em></span><span class="zh">你的<em>记录</em></span></h2><div id="backup"></div></section>
+<section><h2><span class="en">Wrong-question <em>book</em></span><span class="zh">错题<em>本</em></span></h2><div id="book"></div></section>
+<section><h2><span class="en">Share <em>what you learned</em></span><span class="zh">分享<em>你学到的</em></span></h2><div id="share"></div></section>
+<div id="printarea" aria-hidden="true"></div>
+<p id="status" role="status" aria-live="polite"></p>
+</div>
+</main>
+<script src="../assets/site.js?v=50672dc8"></script>
+<script src="../coach/exams.js"></script><script src="../coach/logic.js"></script><script src="../coach/coach.js"></script></body></html>

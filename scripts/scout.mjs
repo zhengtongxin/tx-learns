@@ -19,7 +19,7 @@ const MAX_PER_RUN = 2, MAX_PENDING = 12, EXPIRE_DAYS = 30, RESCOUT_DAYS = 45, RO
 const out = (k, v) => process.env.GITHUB_OUTPUT && appendFileSync(process.env.GITHUB_OUTPUT, `${k}=${v}\n`);
 const lessons = () => readdirSync(ROOT, { withFileTypes: true }).filter(d => d.isDirectory() && existsSync(join(ROOT, d.name, 'lessons.js')))
   .flatMap(d => readdirSync(join(ROOT, d.name)).filter(f => /^\d\d-[a-z0-9-]+\.html$/.test(f)).map(f => `${d.name}/${f}`));
-const tops = () => ['index.html', 'glossary.html', 'about.html', '404.html'].filter(f => existsSync(join(ROOT, f)));
+const tops = () => ['index.html', 'tracks.html', 'glossary.html', 'about.html', '404.html'].filter(f => existsSync(join(ROOT, f)));
 
 // One lens per role. `files` lists what the role may look at; `ask` says what that role cares about.
 // Files are chosen so one file means one area (the scope guard allows one area per pull request).

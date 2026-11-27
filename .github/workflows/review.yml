@@ -91,7 +91,8 @@ jobs:
           base=$(node -p 'require("/tmp/pr.json").baseRefName'); head=$(node -p 'require("/tmp/pr.json").headRefName')
           sha=$(git rev-parse HEAD); fix=
           case "$base:$head" in main:writer/*) git log --format=%s "origin/$base..HEAD" | grep -q '^Reviewer:' || fix=1;; esac
-          gh pr diff "$PR" -R "$GITHUB_REPOSITORY" > /tmp/pr.diff
+          # GitHub refuses the diff of a PR over 300 files; the checkout has the same changes, so diff locally then.
+          gh pr diff "$PR" -R "$GITHUB_REPOSITORY" > /tmp/pr.diff 2>/dev/null || git diff "origin/$base...HEAD" > /tmp/pr.diff
           echo "base=$base head=$head sha=$sha fix=$fix"
           { echo "base=$base"; echo "head=$head"; echo "sha=$sha"; echo "fix=$fix"; echo "title=$(node -p 'require("/tmp/pr.json").title.slice(0,100)')"; } >> "$GITHUB_OUTPUT"
       - name: Copy check result for the reviewer

@@ -20,7 +20,8 @@ const root = new URL('..', import.meta.url);
 const FIX = process.argv.includes('--fix');
 const TR = loadTracks(new URL('.', root).pathname);
 const rootPages = readdirSync(new URL('.', root)).filter(f => f.endsWith('.html')).sort((a, b) => (a === 'index.html' ? -1 : b === 'index.html' ? 1 : a < b ? -1 : 1));
-const all = [...rootPages, ...TR.flatMap(t => readdirSync(new URL(t.dir + '/', root)).filter(f => f.endsWith('.html')).map(f => t.dir + '/' + f))];
+const studyPages = readdirSync(new URL('study/', root)).filter(f => f.endsWith('.html')).map(f => 'study/' + f); // the study coach section: pages outside the tracks
+const all = [...rootPages, ...studyPages, ...TR.flatMap(t => readdirSync(new URL(t.dir + '/', root)).filter(f => f.endsWith('.html')).map(f => t.dir + '/' + f))];
 const named = process.argv.slice(2).filter(a => a !== '--fix');
 const pages = named.length ? named : all;
 const problems = [];
@@ -93,7 +94,7 @@ const live = TR.flatMap(t => t.T.topics.flatMap(w => w.items).filter(x => x.file
 const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 const want = {
   'sitemap.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<!-- Made by node scripts/check-pages.mjs --fix from lessons.js. Do not edit by hand. -->\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-    ['', 'ecosystem.html', 'glossary.html', 'about.html', ...TR.map(t => t.dir + '/index.html'), ...live.map(x => x.path)].map(u => `<url><loc>${SITE}${u}</loc></url>`).join('\n') + '\n</urlset>\n',
+    ['', 'ecosystem.html', 'glossary.html', 'about.html', 'tracks.html', 'study/index.html', 'study/about.html', 'study/how.html', ...TR.map(t => t.dir + '/index.html'), ...live.map(x => x.path)].map(u => `<url><loc>${SITE}${u}</loc></url>`).join('\n') + '\n</urlset>\n',
 };
 const TRACKS = (() => { const c = { window: {} }; vm.runInNewContext(readFileSync(new URL('tracks.js', root), 'utf8'), c, { filename: 'tracks.js' }); return c.window.TRACKS; })();
 const lists = Object.fromEntries(TR.map(t => [t.dir + '/index.html', [/<!-- lessons:start -->[\s\S]*?<!-- lessons:end -->/, '<!-- lessons:start --><noscript><ol>' +
@@ -106,17 +107,17 @@ for (const [f, text] of Object.entries(want)) {
   let cur = ''; try { cur = readFileSync(new URL(f, root), 'utf8'); } catch {}
   if (cur !== text) { if (FIX) writeFileSync(new URL(f, root), text); else bad(f, 'out of date with lessons.js (run node scripts/check-pages.mjs --fix)'); }
 }
-for (const f of ['index.html', ...TR.map(t => t.dir + '/index.html')]) {
+for (const f of ['tracks.html', ...TR.map(t => t.dir + '/index.html')]) {
   const cur = readFileSync(new URL(f, root), 'utf8');
   let next = cur;
-  if (f === 'index.html') { // the home page's no-JavaScript track list: every track, in tracks.js order
+  if (f === 'tracks.html') { // the tracks page's no-JavaScript track list: every track, in tracks.js order
     const re = /<!-- tracks:start -->[\s\S]*?<!-- tracks:end -->/;
     if (!re.test(cur)) bad(f, 'missing <!-- tracks:start --><!-- tracks:end --> markers');
     else next = next.replace(re, () => '<!-- tracks:start --><noscript>' + TRACKS.map(t => `<a class="cc" href="${t.href}"><div><h3>${esc(t.title.en)} · ${esc(t.title.zh)}</h3>${t.desc ? `<p>${esc(t.desc.en)} · ${esc(t.desc.zh)}</p>` : ''}</div></a>`).join('') + '</noscript><!-- tracks:end -->');
   }
   if (lists[f]) { const [re, block] = lists[f]; if (!re.test(cur)) bad(f, 'missing <!-- lessons:start --><!-- lessons:end --> markers'); else next = next.replace(re, block); }
-  const own = f === 'index.html' ? TR[0] : TR.find(t => t.dir + '/index.html' === f), first = own && firstOf(own);
-  if (first) next = next.replace(/(<a [^>]*data-start[^>]*href=")[^"]*(")/g, (m, a, b) => a + (f === 'index.html' ? own.dir + '/' : '') + first + b);
+  const own = f === 'tracks.html' ? TR[0] : TR.find(t => t.dir + '/index.html' === f), first = own && firstOf(own);
+  if (first) next = next.replace(/(<a [^>]*data-start[^>]*href=")[^"]*(")/g, (m, a, b) => a + (f === 'tracks.html' ? own.dir + '/' : '') + first + b);
   if (next !== cur) { if (FIX) writeFileSync(new URL(f, root), next); else bad(f, 'track list, lesson list or start link out of date with tracks.js or lessons.js (run node scripts/check-pages.mjs --fix)'); }
 }
 
@@ -218,14 +219,16 @@ for (const m of moves) {
   // Once it has stayed quiet, rename the key to Content-Security-Policy to enforce it (keep SECURITY and CSP in step with the site).
   const SECURITY = [['X-Content-Type-Options', 'nosniff'], ['Referrer-Policy', 'strict-origin-when-cross-origin'], ['X-Frame-Options', 'SAMEORIGIN'],
     ['Permissions-Policy', 'camera=(), microphone=(), geolocation=(), browsing-topics=()']];
-  const CSP = ["default-src 'self'", "script-src 'self' 'unsafe-inline'", "style-src 'self' 'unsafe-inline'", "img-src 'self' data: blob:", "font-src 'self'",
-    "connect-src 'self'", "frame-src 'self'", "object-src 'none'", "base-uri 'self'", "form-action 'self'", "frame-ancestors 'self'"].join('; ');
+  const CSP = ["default-src 'self'", "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'", "worker-src 'self' blob:", "style-src 'self' 'unsafe-inline'", "img-src 'self' data: blob:", "font-src 'self'",
+    "connect-src 'self' https://huggingface.co https://*.huggingface.co https://*.hf.co https://raw.githubusercontent.com", "frame-src 'self'", "object-src 'none'", "base-uri 'self'", "form-action 'self'", "frame-ancestors 'self'"].join('; ');
   const want = { ...cfg, headers: [
     { source: '/(.*)', headers: SECURITY.map(([key, value]) => ({ key, value })) },
     { source: '/(.*)', has: [{ type: 'host', value: new URL(SITE).host }], headers: [{ key: 'Content-Security-Policy-Report-Only', value: CSP }] },
     h('/', 'public, max-age=0, must-revalidate'),
     h('/(.*)\\.html', 'public, max-age=0, must-revalidate'),
     // only the files every page references with ?v=<hash> (checked above) are immutable
+    // the study coach's vendored libraries carry their version in the file name, so they never change
+    h('/coach/vendor/(.*)', 'public, max-age=31536000, immutable'),
     h('/assets/(site\\.js|site\\.css|teach\\.js|teach\\.css|build-concepts\\.js|search\\.js)', 'public, max-age=31536000, immutable'),
     // each lesson's own script (<track>/js/NN-slug.js) is versioned the same way
     h('/(' + TR.map(t => t.dir).join('|') + ')/js/(.+\\.js)', 'public, max-age=31536000, immutable'),

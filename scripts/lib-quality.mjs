@@ -32,7 +32,7 @@ export function lessons() {
 
 // Pages every check opens: home, How it works, glossary (when it exists), 404, each track index, each lesson.
 export function allPages() {
-  const base = ['index.html', 'ecosystem.html', 'glossary.html', 'about.html', '404.html'];
+  const base = ['index.html', 'ecosystem.html', 'glossary.html', 'about.html', 'tracks.html', 'study/index.html', 'study/about.html', 'study/how.html', '404.html'];
   const idx = tracks().map(t => t.href || `${t.id}/index.html`);
   return [...base, ...idx, ...lessons().map(l => l.path)].filter((p, i, a) => a.indexOf(p) === i && existsSync(join(ROOT, p)));
 }

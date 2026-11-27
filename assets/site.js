@@ -28,7 +28,7 @@
     var b=JSON.stringify({event:n==='Lesson done'?'done':'feedback',lesson:d.lesson,answer:d.answer});
     if(!(navigator.sendBeacon&&navigator.sendBeacon('/api/feedback',b)))fetch('/api/feedback',{method:'POST',body:b,keepalive:true})}catch(e){}}
   document.addEventListener('DOMContentLoaded',function(){
-    var C=window.TRACK,here=location.pathname.split('/').pop()||'index.html',d=done();
+    var C=window.TRACK,here=location.pathname.split('/').pop()||'index.html',d=done(),AREA=root.getAttribute('data-area')||'',P=(C||AREA==='study')?'../':'';
     if(C){C.all=[];C.topics.forEach(function(w){w.items.forEach(function(it,i){it.w=w.n;it.i=i+1;it.g=C.all.length+1;C.all.push(it)})});C.lessons=C.all.filter(function(x){return x.file});C.total=C.all.length}
     function countUp(el){var to=+el.dataset.count,s=performance.now();if(calm){el.textContent=to;return}(function tick(n){var k=Math.min(1,(n-s)/1200);el.textContent=Math.round(to*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(tick)})(s)}
     /* Progress counts only keys that still match a published lesson (files = that track's lesson files), so old or renamed lessons never inflate it. */
@@ -46,7 +46,12 @@
     var mn=document.querySelector('main');
     if(mn){if(!mn.id)mn.id='main';mn.setAttribute('tabindex','-1');var sk=document.createElement('a');sk.className='skip';sk.href='#'+mn.id;sk.innerHTML=t({en:'Skip to content',zh:'跳到正文'});sk.onclick=function(){setTimeout(function(){mn.focus()},0)};document.body.prepend(sk)}
     var top=document.createElement('div');top.className='top';
-    top.innerHTML='<a class="brand" href="'+(C?'../index.html':'index.html')+'"><b></b>TX Learns</a>'+'<button class="icon-btn menu-btn" aria-label="Topics · 主题" aria-expanded="false" aria-controls="topics-nav">☰ <span class="en">Topics</span><span class="zh">主题</span></button>'+'<span class="sp"></span>'+'<a class="icon-btn eco-btn" href="'+(C?'../':'')+'about.html" title="About this site · 关于本站" aria-label="About this site · 关于本站"><span class="lbl"> <span class="en">About this site</span><span class="zh">关于本站</span></span></a>'+'<a class="icon-btn eco-btn" href="'+(C?'../':'')+'ecosystem.html" title="How it works · 运作方式" aria-label="How it works · 运作方式">🌐<span class="lbl"> <span class="en">How it works</span><span class="zh">运作方式</span></span></a>'+'<a class="icon-btn eco-btn" href="'+(C?'../':'')+'glossary.html" title="Glossary · 词汇表" aria-label="Glossary · 词汇表">📖<span class="lbl"> <span class="en">Glossary</span><span class="zh">词汇表</span></span></a>'+
+    function lk(h,tt,ic,en,zh){return '<a class="icon-btn eco-btn" href="'+h+'" title="'+tt+'" aria-label="'+tt+'">'+ic+'<span class="lbl"> <span class="en">'+en+'</span><span class="zh">'+zh+'</span></span></a>'}
+    /* Three parts: the landing page (two choices, no menu), the study coach (its own About and How it works), and the tracks (About, How it works, Glossary). */
+    var nav=AREA==='landing'?'':AREA==='study'?'<a class="icon-btn menu-btn" href="'+P+'study/index.html" aria-label="Study coach · 学习教练">🎯 <span class="en">Study coach</span><span class="zh">学习教练</span></a><span class="sp"></span>'+lk(P+'study/about.html','About the coach · 关于学习教练','','About this site','关于本站')+lk(P+'study/how.html','How it works · 运作方式','🌐','How it works','运作方式'):
+      '<button class="icon-btn menu-btn" aria-label="Topics · 主题" aria-expanded="false" aria-controls="topics-nav">☰ <span class="en">Topics</span><span class="zh">主题</span></button><span class="sp"></span>'+lk(P+'about.html','About this site · 关于本站','','About this site','关于本站')+lk(P+'ecosystem.html','How it works · 运作方式','🌐','How it works','运作方式')+lk(P+'glossary.html','Glossary · 词汇表','📖','Glossary','词汇表');
+    if(AREA==='landing')nav='<span class="sp"></span>';
+    top.innerHTML='<a class="brand" href="'+P+'index.html"><b></b>TX Learns</a>'+nav+
       '<div class="seg" role="group" aria-label="Language · 语言"><button data-l="en" lang="en">EN</button><button data-l="zh" lang="zh-Hans">中文</button></div><button class="icon-btn th" aria-label="theme"></button>';
     document.body.insertBefore(top,bar.nextSibling);
     function mark(){top.querySelectorAll('[data-l]').forEach(function(b){var on=b.dataset.l===root.getAttribute('data-lang');b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});var dk=root.getAttribute('data-theme')==='dark',th=top.querySelector('.th');th.textContent=dk?'☀︎':'☾';th.setAttribute('aria-label',dk?'Switch to light theme · 切换到浅色':'Switch to dark theme · 切换到深色')}
@@ -55,11 +60,11 @@
     mark();
 
     var side=document.querySelector('.side'),scrim;if(side){side.id='topics-nav';side.setAttribute('aria-label','Topics · 主题');side.inert=true}
-    if(!C&&!side){
+    if(!C&&!side&&!AREA){
       /* Pages outside a track (home, How it works, Glossary, About): Topics opens a drawer with the track list. */
       side=document.createElement('div');side.className='side';side.id='topics-nav';side.setAttribute('aria-label','Topics · 主题');side.inert=true;
       var tl=(window.TRACKS||[]);
-      side.innerHTML='<div class="side-top"><a class="side-all" href="index.html">⌂ '+t({en:'Home',zh:'首页'})+'</a><button type="button" class="side-close" aria-label="Close topics menu · 关闭主题菜单">✕</button></div>'+tl.map(function(c){return '<a href="'+c.href+'">'+(c.icon?c.icon+' ':'')+t(c.title)+'</a>'}).join('');
+      side.innerHTML='<div class="side-top"><a class="side-all" href="tracks.html">⌂ '+t({en:'All tracks',zh:'所有路线'})+'</a><button type="button" class="side-close" aria-label="Close topics menu · 关闭主题菜单">✕</button></div>'+tl.map(function(c){return '<a href="'+c.href+'">'+(c.icon?c.icon+' ':'')+t(c.title)+'</a>'}).join('');
       scrim=document.createElement('div');scrim.className='scrim';scrim.setAttribute('aria-hidden','true');document.body.appendChild(scrim);document.body.appendChild(side);
       var mb0=top.querySelector('.menu-btn'),tg0=function(o){side.inert=!o;side.classList.toggle('open',o);scrim.classList.toggle('on',o);mb0.setAttribute('aria-expanded',o);if(o)side.querySelector('.side-close').focus();else mb0.focus()};
       mb0.onclick=function(){tg0(!side.classList.contains('open'))};scrim.onclick=function(){tg0(false)};side.querySelector('.side-close').onclick=function(){tg0(false)};
@@ -68,7 +73,7 @@
     if(C&&side){
       var NK='learn-nav',ns={};try{ns=JSON.parse(localStorage.getItem(NK)||'{}')}catch(e){}
       var list=(window.TRACKS&&window.TRACKS.length)?window.TRACKS:[{id:C.id,icon:'',title:C.title,href:'agentic-ai/index.html'}];
-      side.innerHTML='<div class="side-top"><a class="side-all" href="../index.html">← '+t({en:'All tracks',zh:'所有路线'})+'</a><button type="button" class="side-close" aria-label="Close topics menu · 关闭主题菜单">✕</button></div>'+list.map(function(c){
+      side.innerHTML='<div class="side-top"><a class="side-all" href="../tracks.html">← '+t({en:'All tracks',zh:'所有路线'})+'</a><button type="button" class="side-close" aria-label="Close topics menu · 关闭主题菜单">✕</button></div>'+list.map(function(c){
         var cur=c.id===C.id,open=ns[c.id]!==undefined?ns[c.id]:cur,body;
         if(cur)body='<a href="index.html" class="'+(here==='index.html'?'cur':'')+'">⌂ '+t({en:'Overview',zh:'总览'})+'</a>'+
           C.topics.map(function(w){return '<h5>'+t(w.title)+'</h5>'+w.items.map(function(l){
@@ -186,8 +191,11 @@
        (scripts/check-counts.mjs fails a PR that types one). Progress is completed / PUBLISHED lessons; planned lessons are shown separately. */
     var hub=document.querySelector('.track-list'),rsm=document.getElementById('resume');
     function pbar(n,tot,label){return '<div class="mini" role="progressbar" aria-label="'+label+'" aria-valuemin="0" aria-valuemax="'+tot+'" aria-valuenow="'+n+'" aria-valuetext="'+n+' / '+tot+'"><i style="width:'+(tot?n/tot*100:0)+'%"></i></div>'}
-    function drawHub(){if(hub)hub.innerHTML=window.TRACKS.map(function(c,ci){var n=count(c.id,c.files),ok=c.total>0;
-      return '<a class="cc spot" href="'+c.href+'"><div class="orbi">'+c.icon+'</div><div><h3>'+t(c.title)+'</h3><div class="meta" style="margin-top:4px">'+t(c.desc)+'</div><div class="chips"><span class="chip">'+t({en:'Step '+(ci+1),zh:'第 '+(ci+1)+' 步'})+(c.level?' · '+t(LV[c.level]):'')+'</span>'+(ok&&n?'<span class="chip">'+t({en:n+' of '+c.published+' done',zh:'已完成 '+n+' / '+c.published})+'</span>':'')+'</div>'+pbar(n,c.published||0,'Progress in '+c.title.en+' · '+c.title.zh)+'</div><div class="go">→</div></a>'}).join('')}
+    function card(c,ci,n,ok){return '<a class="cc spot" href="'+c.href+'"><div class="orbi">'+c.icon+'</div><div><h3>'+t(c.title)+'</h3><div class="meta" style="margin-top:4px">'+t(c.desc)+'</div><div class="chips"><span class="chip">'+t({en:'Step '+(ci+1),zh:'第 '+(ci+1)+' 步'})+(c.level?' · '+t(LV[c.level]):'')+'</span>'+(ok&&n?'<span class="chip">'+t({en:n+' of '+c.published+' done',zh:'已完成 '+n+' / '+c.published})+'</span>':'')+'</div>'+pbar(n,c.published||0,'Progress in '+c.title.en+' · '+c.title.zh)+'</div><div class="go">→</div></a>'}
+    /* Tracks are grouped by domain (window.DOMAINS in tracks.js); a track names its domain with domain:'<id>'. Step numbers count within a domain. */
+    function drawHub(){if(!hub)return;var D=window.DOMAINS&&window.DOMAINS.length?window.DOMAINS:[{id:'ai',title:{en:'AI',zh:'AI'}}];
+      hub.innerHTML=D.map(function(dm){var ts=window.TRACKS.filter(function(c){return (c.domain||'ai')===dm.id});if(!ts.length)return '';
+        return '<section class="dom"><h3 class="dom-h">'+(dm.icon?'<span aria-hidden="true">'+dm.icon+'</span> ':'')+t(dm.title)+'</h3>'+(dm.desc?'<p class="meta">'+t(dm.desc)+'</p>':'')+'<div class="tl">'+ts.map(function(c,ci){return card(c,ci,count(c.id,c.files),c.total>0)}).join('')+'</div></section>'}).join('')}
     function canStore(){try{localStorage.setItem('learn-t','1');localStorage.removeItem('learn-t');return true}catch(e){return false}}
     function drawResume(){
       var T=window.TRACKS,tot=0,fin=0,hasP=false,lookup={};
@@ -254,8 +262,8 @@
         .then(function(){b.innerHTML=label},function(){b.innerHTML=t({en:'Could not download. Save each file above instead.',zh:'下载失败，请逐个保存上方文件。'})})
         .then(function(){b.disabled=false})});
     /* browser tab title follows the language: fixed pages by name, lessons from their own zh title */
-    var TZ={'index.html':'TX Learns – 中英双语互动 AI 课','ecosystem.html':'TX Learns 如何运作','glossary.html':'AI 词汇表 | TX Learns','about.html':'关于本站 | TX Learns'},TE=document.title;
-    function setTitle(){var zh=root.getAttribute('data-lang')==='zh',tl=C&&C.lessons?C.lessons.filter(function(l){return l.file===here})[0]:null,z=!C&&TZ[here]?TZ[here]:(tl&&tl.title&&tl.title.zh?tl.title.zh+' | TX Learns':'');document.title=zh&&z?z:TE}
+    var TZ={'index.html':'TX Learns – 中英双语互动学习','tracks.html':'选一条路线 | TX Learns','study/index.html':'学习教练 | TX Learns','study/about.html':'关于学习教练 | TX Learns','study/how.html':'学习教练如何运作 | TX Learns','ecosystem.html':'TX Learns 如何运作','glossary.html':'AI 词汇表 | TX Learns','about.html':'关于本站 | TX Learns'},TE=document.title;
+    function setTitle(){var zh=root.getAttribute('data-lang')==='zh',tl=C&&C.lessons?C.lessons.filter(function(l){return l.file===here})[0]:null,z=!C&&TZ[(AREA==='study'?'study/':'')+here]?TZ[(AREA==='study'?'study/':'')+here]:(tl&&tl.title&&tl.title.zh?tl.title.zh+' | TX Learns':'');document.title=zh&&z?z:TE}
     setTitle();new MutationObserver(setTitle).observe(root,{attributes:true,attributeFilter:['data-lang']});
     function toast(msg){var el=document.getElementById('toast');if(!el){el=document.createElement('div');el.id='toast';el.className='toast';el.setAttribute('role','status');el.setAttribute('aria-live','polite');el.onclick=function(){el.classList.remove('on')};document.body.appendChild(el)}
       el.innerHTML=msg;el.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(function(){el.classList.remove('on')},2600)}
@@ -277,7 +285,7 @@
       set(LAST,JSON.stringify({t:C.id,f:here}));
       var cl=C.lessons[idx],tp=C.topics.filter(function(w){return w.n===cl.w})[0],tag0=document.querySelector('main .tag');
       if(tag0&&tp){var bc=document.createElement('nav');bc.className='crumbs';bc.setAttribute('aria-label','Breadcrumb · 面包屑');
-        bc.innerHTML='<a href="../index.html">'+t({en:'Home',zh:'首页'})+'</a> › <a href="index.html">'+t(C.title)+'</a> › <span>'+t(tp.title)+'</span>';tag0.before(bc)}
+        bc.innerHTML='<a href="../tracks.html">'+t({en:'Tracks',zh:'路线'})+'</a> › <a href="index.html">'+t(C.title)+'</a> › <span>'+t(tp.title)+'</span>';tag0.before(bc)}
       var pg=document.querySelector('.pager'),p=C.lessons[idx-1],n=C.lessons[idx+1];
       if(pg)pg.innerHTML=(p?'<a href="'+p.file+'"><small>← '+t({en:'Previous',zh:'上一课'})+'</small>'+t(p.title)+'</a>':'')+'<a class="back" href="index.html">'+t({en:'All lessons in this track',zh:'本路线所有课'})+'</a>'+(n?'<a class="next" href="'+n.file+'"><small>'+t({en:'Next',zh:'下一课'})+' →</small>'+t(n.title)+'</a>':'');
       /* "Was this lesson clear?": one tap, sent as an anonymous analytics event (lesson and yes/no only); the answer is kept on this device so it is asked once */

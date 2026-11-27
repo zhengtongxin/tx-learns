@@ -1,15 +1,104 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TX Learns – Interactive AI lessons (EN/中文)</title>
-<meta name="description" content="My own learning notes, rebuilt as interactive bilingual (English and 中文) lessons for anyone new to AI."><meta property="og:title" content="TX Learns"><meta property="og:description" content="My own learning notes, rebuilt as interactive bilingual (English and 中文) lessons for anyone new to AI."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
-<link rel="canonical" href="https://tx-learns.vercel.app/"><link rel="icon" href="assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><link rel="stylesheet" href="assets/site.css?v=a82ada56"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://tx-learns.vercel.app/#site","name":"TX Learns","url":"https://tx-learns.vercel.app/","inLanguage":["en","zh"],"description":"My own learning notes, rebuilt as interactive bilingual (English and 中文) lessons for anyone new to AI."}]}</script><style>
-</style></head><body>
+<!doctype html><html lang="en" data-area="landing"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TX Learns – Interactive bilingual learning (EN/中文)</title>
+<meta name="description" content="Two ways to learn, in English and 中文: follow interactive AI tracks, or hand in your own slides and PDFs and let a free in-browser AI quiz you."><meta property="og:title" content="TX Learns"><meta property="og:description" content="Two ways to learn, in English and 中文: follow interactive AI tracks, or hand in your own slides and PDFs and let a free in-browser AI quiz you."><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<link rel="canonical" href="https://tx-learns.vercel.app/"><link rel="icon" href="assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><link rel="stylesheet" href="assets/site.css?v=92b1bb9f"><style>
+/* landing: a slow amber aurora, a pointer spotlight, a tilting glass card pair, words that rise in. All motion is CSS or one small script; reduced-motion and touch get the still version. */
+.aur{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.aur i{position:absolute;width:62vmax;height:62vmax;border-radius:50%;background:radial-gradient(circle,var(--c) 0,transparent 62%);opacity:.5;will-change:transform}
+.aur i:nth-child(1){--c:rgba(255,184,28,.55);left:-18vmax;top:-26vmax;animation:dr1 26s ease-in-out infinite alternate}
+.aur i:nth-child(2){--c:rgba(255,120,40,.32);right:-24vmax;top:8vmax;animation:dr2 31s ease-in-out infinite alternate}
+.aur i:nth-child(3){--c:rgba(255,222,120,.28);left:22vw;bottom:-40vmax;animation:dr3 36s ease-in-out infinite alternate}
+@keyframes dr1{to{transform:translate3d(22vmax,12vmax,0) scale(1.15)}}@keyframes dr2{to{transform:translate3d(-20vmax,16vmax,0) scale(.9)}}@keyframes dr3{to{transform:translate3d(-16vmax,-14vmax,0) scale(1.2)}}
+.aur::after{content:"";position:absolute;inset:0;background:radial-gradient(640px circle at var(--mx,50%) var(--my,30%),rgba(255,200,61,.16),transparent 62%)}
+.aur::before{content:"";position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:64px 64px;opacity:.35;-webkit-mask-image:radial-gradient(70% 60% at 50% 30%,#000,transparent);mask-image:radial-gradient(70% 60% at 50% 30%,#000,transparent)}
+main{position:relative;z-index:1}
+.land .stage{padding-top:clamp(36px,7vh,80px);padding-bottom:0}
+.land .orb{display:none}
+.rise{display:inline-block;opacity:0;transform:translateY(.5em);filter:blur(12px);animation:rise .9s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:calc(var(--i)*.11s + .1s)}
+h1.mega .rise{-webkit-text-fill-color:var(--hg1);color:var(--hg1)}
+@keyframes rise{to{opacity:1;transform:none;filter:none}}
+.shim{background:linear-gradient(100deg,#ffd45c 20%,#fff3c2 40%,#ffb81c 55%,#ffd45c 75%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:rise .9s cubic-bezier(.2,.7,.2,1) forwards,shim 5s linear 1.2s infinite;animation-delay:calc(var(--i)*.11s + .1s),0s}
+html[data-theme=light] .shim{background-image:linear-gradient(100deg,#b36b00 20%,#e08a00 45%,#8a5200 60%,#b36b00 80%)}
+@keyframes shim{to{background-position:-220% 0}}
+.land .eyebrow,.land .sub{opacity:0;animation:fade .9s ease forwards}.land .eyebrow{animation-delay:.05s}.land .sub{animation-delay:.55s}
+@keyframes fade{to{opacity:1}}
+.paths{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:22px;max-width:1020px;margin:clamp(24px,4vh,40px) auto 0;perspective:1100px}
+.pcd{--rx:0deg;--ry:0deg;--gx:50%;--gy:0%;position:relative;display:flex;flex-direction:column;padding:clamp(20px,3vw,30px);border-radius:26px;background:linear-gradient(160deg,color-mix(in srgb,var(--fg) 7%,transparent),var(--glass));border:1px solid var(--line);transform:perspective(1100px) rotateX(var(--rx)) rotateY(var(--ry));transition:transform .5s cubic-bezier(.2,.7,.2,1),border-color .3s,box-shadow .4s;transform-style:preserve-3d;opacity:0;animation:cardin .9s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:calc(.45s + var(--k)*.14s);overflow:hidden}
+@keyframes cardin{from{opacity:0;transform:translateY(34px) scale(.97)}to{opacity:1}}
+.pcd.live{transition:transform .08s linear,border-color .3s,box-shadow .4s}
+.pcd::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(420px circle at var(--gx) var(--gy),rgba(255,200,61,.20),transparent 60%);opacity:0;transition:opacity .35s}
+.pcd:hover::before,.pcd:focus-within::before{opacity:1}
+.pcd:hover,.pcd:focus-within{border-color:color-mix(in srgb,var(--acc) 75%,var(--line));box-shadow:0 30px 80px -30px rgba(255,184,28,.45)}
+.pcd>*{position:relative}
+.pcd-h{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:center;color:var(--fg);text-decoration:none}
+.pcd-h .orbi{grid-row:1/3;width:54px;height:54px;border-radius:17px;background:var(--grad);display:grid;place-items:center;font-size:27px;box-shadow:0 0 36px var(--glow);transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+.pcd:hover .orbi{transform:translateZ(30px) rotate(-8deg) scale(1.08)}
+.pcd-h h3{margin:0;font-size:clamp(1.3rem,2.4vw,1.7rem);line-height:1.2;letter-spacing:-.03em}.pcd-h .meta{margin:0}
+.pcd-l{list-style:none;margin:20px 0 18px;padding:0;flex:1}
+.pcd-l li{display:flex;align-items:center;gap:10px;padding:9px 2px;color:var(--mut);line-height:1.45;transition:transform .3s cubic-bezier(.2,.7,.2,1),color .25s}
+.pcd-l li b{color:var(--fg);font-weight:600}.pcd-l .ic{width:24px;text-align:center;flex:none}.pcd-l .lv{margin-left:auto;font-size:12.5px;white-space:nowrap}
+/* track path: a line with a light travelling down it */
+.pcd-l.path{position:relative;padding-left:20px}
+.pcd-l.path::before{content:"";position:absolute;left:5px;top:12px;bottom:12px;width:2px;border-radius:2px;background:var(--line)}
+.pcd-l.path::after{content:"";position:absolute;left:2px;top:6px;width:8px;height:8px;border-radius:50%;background:#ffc83d;box-shadow:0 0 14px 4px rgba(255,200,61,.8);animation:trav 5.5s cubic-bezier(.5,0,.5,1) 1.2s infinite}
+@keyframes trav{0%{transform:translateY(0)}60%,100%{transform:translateY(var(--h,260px))}}
+.pcd-l.path li{opacity:0;transform:translateX(-10px);animation:li .6s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:calc(.9s + var(--i)*.07s)}
+@keyframes li{to{opacity:1;transform:none}}
+.pcd-l.path li::before{content:"";position:absolute;left:-19px;width:6px;height:6px;border-radius:50%;background:var(--mut);opacity:.6}
+.pcd-l.path li:hover{transform:translateX(7px);color:var(--fg)}.pcd-l.path li:hover::before{background:#ffc83d;opacity:1}
+.pcd-l.path li{position:relative}
+/* study steps: each lights up in turn; bars fill like a strength map */
+.pcd-l.steps li{border-radius:10px;padding:8px 8px;animation:lit 7.5s ease-in-out infinite;animation-delay:calc(var(--i)*1.5s + 1s)}
+@keyframes lit{0%,16%{background:color-mix(in srgb,var(--acc) 14%,transparent);color:var(--fg)}20%,100%{background:transparent}}
+.pcd-l .no{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#ffc83d;color:#1d1d1f;font-size:12.5px;font-weight:700}
+.sm{display:grid;gap:7px;margin:0 0 16px}
+.sm div{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:center;font-size:12.5px;color:var(--mut)}
+.sm i{display:block;height:7px;border-radius:99px;background:color-mix(in srgb,var(--fg) 10%,transparent);position:relative;overflow:hidden}
+.sm i::after{content:"";position:absolute;inset:0;width:var(--w);border-radius:inherit;background:linear-gradient(90deg,#ffb81c,#ffe08a);transform-origin:left;animation:fill 6s ease-in-out infinite;animation-delay:calc(var(--i)*.35s + .9s)}
+.sm div:nth-child(2) i::after{background:linear-gradient(90deg,#e5603b,#ffb81c)}
+@keyframes fill{0%{transform:scaleX(0)}35%,85%{transform:scaleX(1)}100%{transform:scaleX(0)}}
+.pcd .tgs{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0 0 16px;color:var(--acc2);font-size:13.5px;font-weight:600}.pcd .tgs>span::before{content:"✓ "}
+.pcd .acts{margin:0}.pcd .btn{transition:transform .25s cubic-bezier(.2,.7,.2,1),background .2s,border-color .2s}
+.pcd .btn .ar{display:inline-block;transition:transform .3s}.pcd .btn:hover .ar{transform:translateX(5px)}
+@media(hover:none),(pointer:coarse){.pcd{transform:none}.pcd::before{display:none}}
+@media(prefers-reduced-motion:reduce){.aur i,.rise,.shim,.pcd,.pcd-l.path li,.pcd-l.path::after,.pcd-l.steps li,.sm i::after,.land .eyebrow,.land .sub{animation:none!important;opacity:1;transform:none;filter:none}.pcd{transition:none}.sm i::after{transform:none}.shim{-webkit-text-fill-color:currentColor;color:#ffd45c;background:none}}
+</style><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://tx-learns.vercel.app/#site","name":"TX Learns","url":"https://tx-learns.vercel.app/","inLanguage":["en","zh"],"description":"Two ways to learn, in English and 中文: follow interactive AI tracks, or hand in your own slides and PDFs and let a free in-browser AI quiz you."}]}</script></head><body class="land">
+<div class="aur" aria-hidden="true"><i></i><i></i><i></i></div>
 <main class="wide">
-<header class="stage home"><div class="orb"></div>
+<header class="stage home">
 <span class="eyebrow"><span class="en">Bilingual · Interactive</span><span class="zh">双语 · 互动</span></span>
-<h1 class="mega"><span class="en">Learn it. Click it. <em>Remember it.</em></span><span class="zh">边学。边点。<em>边记。</em></span></h1>
-<p class="sub"><span class="en">My own learning notes, rebuilt as interactive lessons for anyone new to AI.</span><span class="zh">我的学习笔记，重写成互动课，适合刚接触 AI 的朋友。</span></p>
-<div class="entries"><div class="entry-main"><a class="btn pri big" data-start href="ai-builder/01-your-first-ai-agent.html"><span class="en">Start here: the first lesson →</span><span class="zh">从第一课开始 →</span></a><p class="stopped" id="stopped" hidden></p></div>
-</div></header>
-<section id="topics"><h2><span class="en">Pick a <em>track</em></span><span class="zh">选一条<em>路线</em></span></h2><p class="sub"><span class="en">Easiest first: each track is a step up from the last.</span><span class="zh">由易到难，每条路线比前一条更进一步。</span></p><p class="meta" style="text-align:center"><span class="en">Not sure? Leading a team: <a href="ai-leader/index.html">AI Leader</a>. Automating without code: <a href="ai-builder/index.html">AI Builder</a>. Coding with AI: <a href="ai-coder/index.html">AI Coder</a>. Building AI systems: <a href="ai-engineer/index.html">AI Engineer</a>.</span><span class="zh">不确定？带团队选 <a href="ai-leader/index.html">AI 领导者</a>；不写代码做自动化选 <a href="ai-builder/index.html">AI 构建者</a>；用 AI 写代码选 <a href="ai-coder/index.html">AI 编程</a>；做 AI 系统选 <a href="ai-engineer/index.html">AI 工程师</a>。</span></p><div class="track-list"><!-- tracks:start --><noscript><a class="cc" href="ai-builder/index.html"><div><h3>AI Builder · AI 构建者</h3><p>Build working AI agents without code: workflows, voice agents, your own documents, and teams of agents. · 不写代码就做出能用的 AI 智能体：工作流、语音智能体、你自己的文档，以及智能体团队。</p></div></a><a class="cc" href="ai-coder/index.html"><div><h3>AI Coder · AI 编程</h3><p>Build software with AI coding agents: from a quick vibe-coded app to teams of agents shipping a service. · 用 AI 编程智能体做软件：从凭感觉快速做个应用，到一队智能体交付一项服务。</p></div></a><a class="cc" href="ai-leader/index.html"><div><h3>AI Leader · AI 领导者</h3><p>Lead AI without writing code: the landscape, the decisions you own, and how to prove the return. · 不写代码也能带领 AI：全景、你要拿的决定，以及如何证明回报。</p></div></a><a class="cc" href="ai-engineer/index.html"><div><h3>AI Engineer · AI 工程师</h3><p>Build real things with LLMs: APIs, RAG, open models, fine-tuning and a working agent system. · 用大模型做出真东西：API、RAG、开源模型、微调，以及一个能跑的智能体系统。</p></div></a><a class="cc" href="agentic-ai/index.html"><div><h3>AI Agentic · AI 智能体</h3><p>How AI agents plan, use tools and act, in interactive lessons. · AI 智能体如何规划、调用工具并执行任务，用互动课来讲。</p></div></a><a class="cc" href="ai-production/index.html"><div><h3>AI Production · AI 上线实战</h3><p>Ship AI apps for real: sign-in, containers, cloud memory, infrastructure as code, automatic deploys and managed agents. · 把 AI 应用真正上线：登录、容器、云端记忆、基础设施即代码、自动部署和托管智能体。</p></div></a><a class="cc" href="ai-fde/index.html"><div><h3>AI FDE · AI 前线部署工程师</h3><p>Work like a forward-deployed engineer: pilot an agent at a customer, measure it, secure it and hand it over. · 像前线部署工程师那样工作：在客户那里做智能体试点、衡量、加固并交付。</p></div></a></noscript><!-- tracks:end --></div></section>
+<h1 class="mega"><span class="en"><span class="rise" style="--i:0">Learn it.</span> <span class="rise" style="--i:1">Click it.</span> <span class="shim" style="--i:2">Remember it.</span></span><span class="zh"><span class="rise" style="--i:0">边学。</span><span class="rise" style="--i:1">边点。</span><span class="shim" style="--i:2">边记。</span></span></h1>
+<p class="sub"><span class="en">Two ways to learn: follow a guided path, or bring your own material.</span><span class="zh">两种学法：跟着路线学，或带上你自己的资料。</span></p>
+</header>
+<section class="paths" aria-label="Choose how to learn · 选择学法">
+<h2 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap"><span class="en">Choose how to learn</span><span class="zh">选择学法</span></h2>
+<article class="pcd" style="--k:0"><a class="pcd-h" href="tracks.html"><div class="orbi">🧭</div><h3><span class="en">Pick a track</span><span class="zh">选一条路线</span></h3><p class="meta"><span class="en">Interactive AI lessons, easiest first.</span><span class="zh">AI 互动课，由易到难。</span></p></a>
+<ul class="pcd-l path" id="pl-tracks"></ul><p class="acts"><a class="btn pri" href="tracks.html"><span class="en">See the tracks <i class="ar">→</i></span><span class="zh">查看路线 <i class="ar">→</i></span></a></p></article>
+<article class="pcd" style="--k:1"><a class="pcd-h" href="study/index.html"><div class="orbi">🎯</div><h3><span class="en">Study your own material</span><span class="zh">学你自己的资料</span></h3><p class="meta"><span class="en">Quiz yourself on your own slides and PDFs.</span><span class="zh">用你自己的课件和 PDF 出题考自己。</span></p></a>
+<ul class="pcd-l steps">
+<li style="--i:0"><span class="no">1</span><span><b><span class="en">Hand in</span><span class="zh">交资料</span></b> · <span class="en">slides and PDFs, English or 中文</span><span class="zh">课件和 PDF，中英文均可</span></span></li>
+<li style="--i:1"><span class="no">2</span><span><b><span class="en">Get quizzed</span><span class="zh">被出题</span></b> · <span class="en">original questions from an AI in your browser</span><span class="zh">浏览器里的 AI 出原创题</span></span></li>
+<li style="--i:2"><span class="no">3</span><span><b><span class="en">Find weak spots</span><span class="zh">找弱点</span></b> · <span class="en">a strength map by area</span><span class="zh">按领域的强弱图</span></span></li>
+<li style="--i:3"><span class="no">4</span><span><b><span class="en">Drill by exam weight</span><span class="zh">按考纲刷题</span></b> · <span class="en">PMP first</span><span class="zh">先支持 PMP</span></span></li>
+<li style="--i:4"><span class="no">5</span><span><b><span class="en">Practise daily</span><span class="zh">每日练习</span></b> · <span class="en">a plan of what to practise today</span><span class="zh">今天练什么的计划</span></span></li></ul>
+<div class="sm" aria-hidden="true"><div><span><span class="en">People</span><span class="zh">人员</span></span><i style="--w:78%;--i:0"></i></div><div><span><span class="en">Process</span><span class="zh">过程</span></span><i style="--w:42%;--i:1"></i></div><div><span><span class="en">Business</span><span class="zh">商业环境</span></span><i style="--w:64%;--i:2"></i></div></div>
+<p class="tgs"><span><span class="en">Free</span><span class="zh">免费</span></span><span><span class="en">Private: stays on your device</span><span class="zh">私密：留在你的设备上</span></span><span><span class="en">No login</span><span class="zh">不用登录</span></span></p>
+<p class="acts"><a class="btn pri" href="study/index.html"><span class="en">Open the study coach <i class="ar">→</i></span><span class="zh">打开学习教练 <i class="ar">→</i></span></a></p></article>
+</section>
 </main>
-<script src="tracks.js?v=a4453d35"></script><script src="assets/site.js?v=41946b53"></script></body></html>
+<script src="tracks.js?v=ed1b1518"></script><script src="assets/site.js?v=50672dc8"></script>
+<script>(function(){
+var el=document.getElementById('pl-tracks'),T=window.TRACKS||[],LV={1:['Beginner','入门'],2:['Intermediate','进阶'],3:['Advanced','高级']};
+function t(o){return '<span class="en">'+o.en+'</span><span class="zh">'+o.zh+'</span>'}
+el.innerHTML=T.map(function(c,i){var l=LV[c.level]||LV[1];return '<li style="--i:'+i+'"><span class="ic" aria-hidden="true">'+c.icon+'</span><b>'+t(c.title)+'</b><span class="lv">'+t({en:l[0],zh:l[1]})+'</span></li>'}).join('');
+function sizeDot(){el.style.setProperty('--h',Math.max(0,el.offsetHeight-22)+'px')}sizeDot();addEventListener('resize',sizeDot);
+/* pointer effects: page spotlight, card tilt with a moving glow, magnetic buttons. Skipped for touch and reduced motion. */
+var fine=matchMedia('(hover:hover) and (pointer:fine)').matches,calm=matchMedia('(prefers-reduced-motion: reduce)').matches;if(!fine||calm)return;
+var aur=document.querySelector('.aur'),raf=0,px=0,py=0;
+addEventListener('pointermove',function(e){px=e.clientX;py=e.clientY;if(!raf)raf=requestAnimationFrame(function(){raf=0;aur.style.setProperty('--mx',px+'px');aur.style.setProperty('--my',py+'px')})},{passive:true});
+document.querySelectorAll('.pcd').forEach(function(c){
+ c.addEventListener('pointermove',function(e){var r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;c.classList.add('live');
+  c.style.setProperty('--ry',((x-.5)*9).toFixed(2)+'deg');c.style.setProperty('--rx',((.5-y)*7).toFixed(2)+'deg');c.style.setProperty('--gx',(x*100).toFixed(1)+'%');c.style.setProperty('--gy',(y*100).toFixed(1)+'%')});
+ c.addEventListener('pointerleave',function(){c.classList.remove('live');c.style.setProperty('--rx','0deg');c.style.setProperty('--ry','0deg')});
+ var b=c.querySelector('.btn');if(b){c.addEventListener('pointermove',function(e){var r=b.getBoundingClientRect(),dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2),d=Math.hypot(dx,dy);b.style.transform=d<110?'translate('+(dx*.18).toFixed(1)+'px,'+(dy*.28).toFixed(1)+'px)':''});c.addEventListener('pointerleave',function(){b.style.transform=''})}});
+})()</script></body></html>

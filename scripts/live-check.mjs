@@ -68,7 +68,7 @@ try {
   }
 
   // 2. Pages, lessons and every link in them.
-  const pages = ['index.html', 'ecosystem.html', 'glossary.html', 'about.html', ...TR.map(t => t.dir + '/index.html'), ...lessons.map(l => l.path)];
+  const pages = ['index.html', 'ecosystem.html', 'glossary.html', 'about.html', 'tracks.html', 'study/index.html', 'study/about.html', 'study/how.html', ...TR.map(t => t.dir + '/index.html'), ...lessons.map(l => l.path)];
   const links = new Map();
   const fetched = await pool(pages, p => get(BASE + p));
   for (const [k, p] of pages.entries()) {
@@ -112,7 +112,7 @@ try {
     // Ready signal instead of a fixed wait: fonts loaded, the page's own rendered pieces present (home counts, lesson tag and
     // title) and two frames drawn, then a short settle so late script errors still land. Never waits more than 6 s.
     async function ready(page, p) {
-      const kind = p === 'index.html' ? 'home' : /^[\w-]+\/\d\d-/.test(p) ? 'lesson' : 'other';
+      const kind = p === 'tracks.html' ? 'home' : /^[\w-]+\/\d\d-/.test(p) ? 'lesson' : 'other';
       await page.waitForFunction(k => {
         if (document.fonts && document.fonts.status === 'loading') return false;
         if (k === 'home') { const a = document.querySelector('[data-sum="topics"]'), b = document.querySelector('[data-sum="lessons"]'); if (!a && !b) return !!document.querySelector('.track-list a'); /* no totals on the home page: wait for the track list */ return !!(a && b && a.dataset.count && b.dataset.count && a.textContent.trim() === a.dataset.count && b.textContent.trim() === b.dataset.count && a.dataset.count !== '0'); } /* wait for the count-up animation (1.2 s) to finish, or the totals are read half way */
@@ -136,7 +136,7 @@ try {
         const took = Date.now() - t0;
         if (took > 8000) product.push(`${p} took ${Math.round(took / 1000)} s to load`);
         await ready(page, p);
-        if (p === 'index.html') {
+        if (p === 'tracks.html') {
           const got = await page.evaluate(() => ({ topics: document.querySelector('[data-sum="topics"]')?.textContent, lessons: document.querySelector('[data-sum="lessons"]')?.textContent }));
           if (got.topics !== undefined && +got.topics !== topicCount) errs.push(`home page shows ${got.topics} topics, lessons.js has ${topicCount}`);
           if (got.lessons !== undefined && +got.lessons !== total) errs.push(`home page shows ${got.lessons} lessons, lessons.js has ${total}`);
