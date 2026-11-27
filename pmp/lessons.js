@@ -33,5 +33,6 @@ window.TRACK={id:'pmp',title:{en:'PMP',zh:'PMP 备考'},topics:[
   {k:'c',file:'22-flow-and-metrics.html',title:{en:"Flow and metrics",zh:"流动与度量"}},
   {k:'c',file:'23-hybrid-and-tailoring.html',title:{en:"Hybrid and tailoring",zh:"混合与裁剪"}}]},
  {n:7,level:2,title:{en:"Practice",zh:"练习"},items:[
-  {k:'c',file:'24-mixed-scenario-drill.html',title:{en:"Mixed scenario drill",zh:"综合情境练习"}}]}
+  {k:'c',file:'24-mixed-scenario-drill.html',title:{en:"Mixed scenario drill",zh:"综合情境练习"}},
+  {k:'c',file:'28-more-scenario-practice.html',title:{en:"More scenario practice",zh:"更多情境练习"}}]}
 ]};
