@@ -287,7 +287,7 @@ function renderFlow(){
   return '<button type="button" data-go="'+x[0]+'"'+(x[0]===V?' aria-current="step"':'')+(x[4]?'':' disabled')+'><b>'+(x[1]?'<i>'+x[1]+'</i>':'')+x[2]+'</b><small>'+(x[3]||'&nbsp;')+'</small></button>'}).join('')}
 function applyView(){
  if(!CH.length&&V!=='mats'&&V!=='goal'&&V!=='model')V='mats';
- document.querySelectorAll('#app > section[data-v]').forEach(function(sec){sec.hidden=sec.dataset.v!==V||(sec.id==='practice'&&!R)||sec.id==='review'});
+ document.querySelectorAll('#app > section[data-v]').forEach(function(sec){sec.hidden=sec.dataset.v!==V||(sec.id==='practice'&&!R)||(sec.id==='today'&&R)||sec.id==='review'});
  renderFlow()}
 function go(v,quiet){V=v;applyView();var ap=$('app');if(ap&&!quiet&&ap.scrollIntoView)ap.scrollIntoView({block:'start'})}
 
