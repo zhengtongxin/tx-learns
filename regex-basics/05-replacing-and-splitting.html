@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Replacing and splitting | TX Learns</title>
+<meta name="description" content="Clean up text by replacing patterns and cutting it into pieces"><meta property="og:title" content="Replacing and splitting | TX Learns"><meta property="og:description" content="Clean up text by replacing patterns and cutting it into pieces"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/regex-basics/05-replacing-and-splitting.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/regex-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/regex-basics/05-replacing-and-splitting.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/regex-basics/05-replacing-and-splitting.html","url":"https://tx-learns.vercel.app/regex-basics/05-replacing-and-splitting.html","name":"Replacing and splitting","alternateName":"替换与拆分","description":"Clean up text by replacing patterns and cutting it into pieces","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Using patterns","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Text patterns","url":"https://tx-learns.vercel.app/regex-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Text patterns","item":"https://tx-learns.vercel.app/regex-basics/index.html"},{"@type":"ListItem","position":3,"name":"Replacing and splitting","item":"https://tx-learns.vercel.app/regex-basics/05-replacing-and-splitting.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Using patterns · Lesson 2</span><span class="zh">使用模式 · 第 2 课</span></span><h1><span class="en">Replacing and splitting</span><span class="zh">替换与拆分</span></h1><p class="meta"><span class="en">Clean up text by replacing patterns and cutting it into pieces · ~10 min · reading and practice</span><span class="zh">通过替换模式和切分文本来清理文字 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Replace with sub</span><span class="zh">第 1 步 · 用 sub 替换</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><code>re.sub(pattern, replacement, text)</code> returns a <b>new</b> string with every match replaced; the original is unchanged. It is the quick way to normalise messy text: collapse runs of spaces with <code>\s+</code> to one space, strip digits, mask a card number. In the replacement, <code>\1</code> means “whatever group 1 captured”.</p>
+<p class="zh" style="margin:0 0 8px"><code>re.sub(模式, 替换内容, 文本)</code> 返回把每个匹配都替换掉的<b>新</b>字符串，原字符串不变。它是整理凌乱文本的快捷方法：用 <code>\s+</code> 把连续空格合成一个、去掉数字、遮盖卡号。在替换内容里，<code>\1</code> 表示“第 1 组捕获到的内容”。</p></div>
+<div class="codebox" data-file="clean.py" data-lang="python">import re
+
+print(re.sub(r"\s+", " ", "too    many   spaces"))
+print(re.sub(r"(\d{4})(\d{4})", r"****\2", "card 12345678"))</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Split on a pattern</span><span class="zh">第 2 步 · 按模式拆分</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><code>str.split</code> cuts on one fixed separator. <code>re.split</code> cuts on a <i>pattern</i>: <code>re.split(r"[,;]\s*", text)</code> handles commas, semicolons and any spaces after them in one go. Real lists rarely use just one separator.</p>
+<p class="zh" style="margin:0 0 8px"><code>str.split</code> 只能按一个固定分隔符切。<code>re.split</code> 按<i>模式</i>切：<code>re.split(r"[,;]\s*", text)</code> 一次就处理逗号、分号以及后面的任意空格。现实中的列表很少只用一种分隔符。</p></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Sub or split?</span><span class="zh">第 3 步 · 替换还是拆分</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Pick the tool for each job.</p>
+<p class="zh" style="margin:0 0 8px">为每项工作选工具。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> clean a messy sentence with extra spaces and odd punctuation using one sub.</span><span class="zh"><b>试一试：</b>用一次 sub 整理一个有多余空格和怪标点的句子。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> confirm the original string is unchanged afterwards.</span><span class="zh"><b>核对：</b>确认原字符串之后没有变化。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• re.sub returns a new string with every match replaced.<br>• \1 in the replacement means the first captured group.<br>• re.split cuts on a pattern, so mixed separators are easy.</p><p class="zh" style="margin:0">• re.sub 返回把每个匹配都替换掉的新字符串。<br>• 替换内容中的 \1 表示第 1 个捕获的分组。<br>• re.split 按模式切分，混合分隔符也很容易。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Text patterns</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3","zh":"Python 3"},"know":{"en":"Finding and extracting (see “Finding and extracting”).","zh":"知道查找与提取（见“查找与提取”）。"},"goals":{"en":["Replace patterns with re.sub","Split text on a pattern","Reuse a captured group in the replacement"],"zh":["用 re.sub 替换模式","按模式拆分文本","在替换内容里复用捕获的分组"]},"prev":["04-finding-and-extracting.html"]}}</script>
+<script src="../tracks.js?v=7ead1968"></script><script src="lessons.js?v=a0ff1234"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/05-replacing-and-splitting.js?v=68162c60"></script></body></html>

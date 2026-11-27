@@ -1,0 +1,42 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Patterns and classes | TX Learns</title>
+<meta name="description" content="Describe the shape of text with a pattern instead of searching for exact words"><meta property="og:title" content="Patterns and classes | TX Learns"><meta property="og:description" content="Describe the shape of text with a pattern instead of searching for exact words"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/regex-basics/01-literal-and-classes.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/regex-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/regex-basics/01-literal-and-classes.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/regex-basics/01-literal-and-classes.html","url":"https://tx-learns.vercel.app/regex-basics/01-literal-and-classes.html","name":"Patterns and classes","alternateName":"模式与字符类","description":"Describe the shape of text with a pattern instead of searching for exact words","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Matching text","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Text patterns","url":"https://tx-learns.vercel.app/regex-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Text patterns","item":"https://tx-learns.vercel.app/regex-basics/index.html"},{"@type":"ListItem","position":3,"name":"Patterns and classes","item":"https://tx-learns.vercel.app/regex-basics/01-literal-and-classes.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Matching text · Lesson 1</span><span class="zh">匹配文本 · 第 1 课</span></span><h1><span class="en">Patterns and classes</span><span class="zh">模式与字符类</span></h1><p class="meta"><span class="en">Describe the shape of text with a pattern instead of searching for exact words · ~10 min · reading and practice</span><span class="zh">用模式描述文本的形状，而不是只搜索确切的词 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Shape, not spelling</span><span class="zh">第 1 步 · 看形状，不看拼写</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Searching for “2024” finds one year. A <b>regular expression</b> (regex) describes a <i>shape</i>: “four digits in a row” finds every year, phone prefix and order number at once. It is a tiny language for text patterns, and almost every programming language and editor understands it. In Python it lives in the <code>re</code> module.</p>
+<p class="zh" style="margin:0 0 8px">搜索“2024”只能找到一个年份。<b>正则表达式</b>（regex）描述的是一种<i>形状</i>：“连续四个数字”能一次找出所有年份、电话前缀和订单号。它是一种描述文本模式的小语言，几乎所有编程语言和编辑器都认识它。在 Python 里它位于 <code>re</code> 模块。</p></div>
+
+<h2><span class="en">Step 2 · Literal characters and classes</span><span class="zh">第 2 步 · 普通字符与字符类</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Most characters match themselves: <code>cat</code> matches “cat”. Special ones stand for a <b>class</b> of characters: <code>\d</code> any digit, <code>\w</code> a letter, digit or underscore, <code>\s</code> a space or tab, and <code>.</code> any one character. Square brackets make your own class: <code>[aeiou]</code> any vowel, <code>[0-9]</code> a digit. Write patterns as raw strings, <code>r"\d"</code>, so Python leaves the backslash alone.</p>
+<p class="zh" style="margin:0 0 8px">大多数字符匹配它们自己：<code>cat</code> 匹配“cat”。特殊符号代表一<b>类</b>字符：<code>\d</code> 任意数字，<code>\w</code> 字母、数字或下划线，<code>\s</code> 空格或制表符，<code>.</code> 任意一个字符。方括号可以自定义字符类：<code>[aeiou]</code> 任意元音，<code>[0-9]</code> 一个数字。模式要写成原始字符串 <code>r"\d"</code>，这样 Python 不会动反斜杠。</p></div>
+<div class="codebox" data-file="classes.py" data-lang="python">import re
+
+print(re.search(r"\d\d", "room 42"))
+print(re.search(r"[aeiou]", "rhythm and blues").group())</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Does it match?</span><span class="zh">第 3 步 · 匹配吗？</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Does <code>c.t</code> match each text? (<code>.</code> is any one character.)</p>
+<p class="zh" style="margin:0 0 8px"><code>c.t</code> 能匹配下面的文本吗？（<code>.</code> 是任意一个字符。）</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> write a pattern for a postcode of six digits and test it on three strings.</span><span class="zh"><b>试一试：</b>写一个六位数字邮编的模式，拿三个字符串测试。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> explain in a sentence what <code>[0-9]</code> and <code>\d</code> have in common.</span><span class="zh"><b>核对：</b>用一句话说明 <code>[0-9]</code> 和 <code>\d</code> 的共同点。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A regex describes the shape of text, not exact words.<br>• \d, \w, \s and . each stand for a class of characters.<br>• Write patterns as raw strings: r"\d".</p><p class="zh" style="margin:0">• 正则描述文本的形状，而不是确切的词。<br>• \d、\w、\s 和 . 各代表一类字符。<br>• 把模式写成原始字符串：r"\d"。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Text patterns</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3","zh":"Python 3"},"know":{"en":"Basic Python strings.","zh":"会基础的 Python 字符串。"},"goals":{"en":["Say what a regular expression is","Match digits, letters and any character","Use a character class"],"zh":["说出正则表达式是什么","匹配数字、字母和任意字符","使用字符类"]}}}</script>
+<script src="../tracks.js?v=7ead1968"></script><script src="lessons.js?v=a0ff1234"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/01-literal-and-classes.js?v=78759d92"></script></body></html>

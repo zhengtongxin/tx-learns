@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Finding and extracting | TX Learns</title>
+<meta name="description" content="Pull the dates, numbers and names you need out of a block of text"><meta property="og:title" content="Finding and extracting | TX Learns"><meta property="og:description" content="Pull the dates, numbers and names you need out of a block of text"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/regex-basics/04-finding-and-extracting.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/regex-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/regex-basics/04-finding-and-extracting.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/regex-basics/04-finding-and-extracting.html","url":"https://tx-learns.vercel.app/regex-basics/04-finding-and-extracting.html","name":"Finding and extracting","alternateName":"查找与提取","description":"Pull the dates, numbers and names you need out of a block of text","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Using patterns","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Text patterns","url":"https://tx-learns.vercel.app/regex-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Text patterns","item":"https://tx-learns.vercel.app/regex-basics/index.html"},{"@type":"ListItem","position":3,"name":"Finding and extracting","item":"https://tx-learns.vercel.app/regex-basics/04-finding-and-extracting.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Using patterns · Lesson 1</span><span class="zh">使用模式 · 第 1 课</span></span><h1><span class="en">Finding and extracting</span><span class="zh">查找与提取</span></h1><p class="meta"><span class="en">Pull the dates, numbers and names you need out of a block of text · ~10 min · reading and practice</span><span class="zh">从一大段文本里取出你需要的日期、数字和名字 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · One match or all of them</span><span class="zh">第 1 步 · 找一个还是全部</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><code>re.search</code> returns the <b>first</b> match (or <code>None</code> if there is none, so check before calling <code>.group()</code>). <code>re.findall</code> returns <b>every</b> match as a list of strings, and if the pattern has groups, the list holds the groups. <code>re.finditer</code> gives full match objects one at a time, handy for positions.</p>
+<p class="zh" style="margin:0 0 8px"><code>re.search</code> 返回<b>第一个</b>匹配（没有则返回 <code>None</code>，所以调用 <code>.group()</code> 前要先检查）。<code>re.findall</code> 以字符串列表返回<b>所有</b>匹配；如果模式里有分组，列表里放的就是各个分组。<code>re.finditer</code> 一次给出一个完整的匹配对象，需要位置时很方便。</p></div>
+<div class="codebox" data-file="extract.py" data-lang="python">import re
+
+text = "Invoice 301 due 2026-12-01; invoice 302 due 2026-12-15"
+print(re.findall(r"\d{4}-\d{2}-\d{2}", text))
+print(re.findall(r"nvoice (\d+)", text))</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Name your groups</span><span class="zh">第 2 步 · 给分组起名</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Numbers get confusing past two groups. A <b>named group</b>, <code>(?P&lt;year&gt;\d{4})</code>, lets you ask for <code>m.group("year")</code> or call <code>m.groupdict()</code> to get all of them as a dictionary. Code that says <code>"year"</code> explains itself.</p>
+<p class="zh" style="margin:0 0 8px">分组超过两个，编号就容易混乱。<b>命名分组</b> <code>(?P&lt;year&gt;\d{4})</code> 让你可以用 <code>m.group("year")</code>，或调用 <code>m.groupdict()</code> 把它们全部变成字典。写着 <code>"year"</code> 的代码自己就能说明意思。</p></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Which function?</span><span class="zh">第 3 步 · 用哪个函数</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Choose the function for each need.</p>
+<p class="zh" style="margin:0 0 8px">为每个需求选择函数。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> paste a short message of your own and extract every number from it.</span><span class="zh"><b>试一试：</b>粘贴一段你自己的短消息，把里面的所有数字提取出来。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> handle the case where nothing matches without an error.</span><span class="zh"><b>核对：</b>处理一个都没匹配到的情况，不要报错。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• search finds the first match, findall all of them, finditer with positions.<br>• search returns None when nothing matches; check before .group().<br>• Named groups make extracted parts self-explaining.</p><p class="zh" style="margin:0">• search 找第一个，findall 找全部，finditer 带位置。<br>• 没有匹配时 search 返回 None；调用 .group() 前先检查。<br>• 命名分组让提取出的部分自己说明含义。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Text patterns</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3","zh":"Python 3"},"know":{"en":"Groups and choices (see “Groups and choices”).","zh":"知道分组与选择（见“分组与选择”）。"},"goals":{"en":["Choose between search, findall and finditer","Extract all matches from text","Name a group"],"zh":["在 search、findall、finditer 之间选择","从文本里提取所有匹配","给分组起名字"]},"prev":["03-groups-and-choices.html"]}}</script>
+<script src="../tracks.js?v=7ead1968"></script><script src="lessons.js?v=a0ff1234"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/04-finding-and-extracting.js?v=5267ee4e"></script></body></html>

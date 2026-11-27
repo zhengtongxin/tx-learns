@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Groups and choices | TX Learns</title>
+<meta name="description" content="Group pieces, offer alternatives and pull out the parts you care about"><meta property="og:title" content="Groups and choices | TX Learns"><meta property="og:description" content="Group pieces, offer alternatives and pull out the parts you care about"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/regex-basics/03-groups-and-choices.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/regex-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/regex-basics/03-groups-and-choices.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/regex-basics/03-groups-and-choices.html","url":"https://tx-learns.vercel.app/regex-basics/03-groups-and-choices.html","name":"Groups and choices","alternateName":"分组与选择","description":"Group pieces, offer alternatives and pull out the parts you care about","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Matching text","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Text patterns","url":"https://tx-learns.vercel.app/regex-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Text patterns","item":"https://tx-learns.vercel.app/regex-basics/index.html"},{"@type":"ListItem","position":3,"name":"Groups and choices","item":"https://tx-learns.vercel.app/regex-basics/03-groups-and-choices.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Matching text · Lesson 3</span><span class="zh">匹配文本 · 第 3 课</span></span><h1><span class="en">Groups and choices</span><span class="zh">分组与选择</span></h1><p class="meta"><span class="en">Group pieces, offer alternatives and pull out the parts you care about · ~10 min · reading and practice</span><span class="zh">把片段分组、提供备选，并取出你关心的部分 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Parentheses group</span><span class="zh">第 1 步 · 括号分组</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Parentheses do two jobs. They <b>group</b> pieces so a quantifier covers all of them: <code>(ha)+</code> matches “ha”, “haha”, “hahaha”. And they <b>capture</b> what matched, so you can pull a part out afterwards: in <code>(\d+)-(\d+)</code> the two number runs become group 1 and group 2.</p>
+<p class="zh" style="margin:0 0 8px">括号有两个用途。一是<b>分组</b>，让量词作用于整组：<code>(ha)+</code> 匹配“ha”“haha”“hahaha”。二是<b>捕获</b>匹配到的内容，之后可以取出其中一部分：在 <code>(\d+)-(\d+)</code> 里，两段数字分别是第 1 组和第 2 组。</p></div>
+<div class="codebox" data-file="groups.py" data-lang="python">import re
+
+m = re.search(r"(\d+)-(\d+)", "pages 12-48")
+print(m.group(1), m.group(2))</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Either or</span><span class="zh">第 2 步 · 二选一</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A vertical bar <code>|</code> means “or”: <code>cat|dog</code> matches either word. Put it inside parentheses to limit its reach: <code>gr(a|e)y</code> matches “gray” and “grey”, while <code>gra|ey</code> would mean “gra” or “ey”.</p>
+<p class="zh" style="margin:0 0 8px">竖线 <code>|</code> 表示“或”：<code>cat|dog</code> 两个词都能匹配。放进括号里可以限定它的范围：<code>gr(a|e)y</code> 匹配“gray”和“grey”，而 <code>gra|ey</code> 的意思是“gra”或“ey”。</p></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · What does the group hold?</span><span class="zh">第 3 步 · 这一组里是什么</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">In <code>(\w+)@(\w+)\.com</code> matched against an address, decide what each part holds.</p>
+<p class="zh" style="margin:0 0 8px">在对一个邮箱匹配 <code>(\w+)@(\w+)\.com</code> 时，判断每一部分装的是什么。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> capture the day, month and year of a date like 27-11-2026 into three groups.</span><span class="zh"><b>试一试：</b>把 27-11-2026 这样的日期的日、月、年分别捕获进三个组。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> print each group to confirm it holds what you expect.</span><span class="zh"><b>核对：</b>打印每一组，确认里面是你预期的内容。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Parentheses group pieces and capture what matched.<br>• | means or; wrap it in parentheses to limit its reach.<br>• m.group(1) is the first captured part.</p><p class="zh" style="margin:0">• 括号把片段分组并捕获匹配内容。<br>• | 表示或；用括号限定它的范围。<br>• m.group(1) 是第一个捕获的部分。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Text patterns</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3","zh":"Python 3"},"know":{"en":"Repeats and anchors (see “Repeats and anchors”).","zh":"知道重复与锚点（见“重复与锚点”）。"},"goals":{"en":["Group with parentheses","Offer alternatives with |","Read a captured group"],"zh":["用括号分组","用 | 提供备选","读取捕获的分组"]},"prev":["02-repeats-and-anchors.html"]}}</script>
+<script src="../tracks.js?v=7ead1968"></script><script src="lessons.js?v=a0ff1234"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/03-groups-and-choices.js?v=08fc5850"></script></body></html>

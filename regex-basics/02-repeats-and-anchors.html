@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Repeats and anchors | TX Learns</title>
+<meta name="description" content="Say how many times something repeats and where in the text it must sit"><meta property="og:title" content="Repeats and anchors | TX Learns"><meta property="og:description" content="Say how many times something repeats and where in the text it must sit"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/regex-basics/02-repeats-and-anchors.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/regex-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/regex-basics/02-repeats-and-anchors.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/regex-basics/02-repeats-and-anchors.html","url":"https://tx-learns.vercel.app/regex-basics/02-repeats-and-anchors.html","name":"Repeats and anchors","alternateName":"重复与锚点","description":"Say how many times something repeats and where in the text it must sit","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Matching text","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Text patterns","url":"https://tx-learns.vercel.app/regex-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Text patterns","item":"https://tx-learns.vercel.app/regex-basics/index.html"},{"@type":"ListItem","position":3,"name":"Repeats and anchors","item":"https://tx-learns.vercel.app/regex-basics/02-repeats-and-anchors.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Matching text · Lesson 2</span><span class="zh">匹配文本 · 第 2 课</span></span><h1><span class="en">Repeats and anchors</span><span class="zh">重复与锚点</span></h1><p class="meta"><span class="en">Say how many times something repeats and where in the text it must sit · ~10 min · reading and practice</span><span class="zh">说明某样东西重复几次，以及它必须出现在文本的什么位置 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · How many times</span><span class="zh">第 1 步 · 重复几次</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>quantifier</b> after a piece says how many times it repeats: <code>+</code> one or more, <code>*</code> zero or more, <code>?</code> zero or one (optional), <code>{3}</code> exactly three, <code>{2,4}</code> two to four. So <code>\d+</code> is “a whole number of any length” and <code>colou?r</code> matches both spellings.</p>
+<p class="zh" style="margin:0 0 8px">片段后面的<b>量词</b>说明它重复几次：<code>+</code> 一次或多次，<code>*</code> 零次或多次，<code>?</code> 零次或一次（可选），<code>{3}</code> 恰好三次，<code>{2,4}</code> 两到四次。所以 <code>\d+</code> 是“任意长度的整数”，<code>colou?r</code> 两种拼写都能匹配。</p></div>
+<div class="codebox" data-file="repeats.py" data-lang="python">import re
+
+print(re.findall(r"\d+", "12 apples, 305 pears"))
+print(bool(re.search(r"colou?r", "color")))</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Anchors</span><span class="zh">第 2 步 · 锚点</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px"><b>Anchors</b> pin a pattern to a place: <code>^</code> the start of the text, <code>$</code> the end. Without them a pattern matches anywhere inside, so <code>\d{4}</code> also “matches” inside a 10-digit number. To check that a <i>whole</i> string fits, use <code>re.fullmatch</code> or wrap the pattern as <code>^...$</code>.</p>
+<p class="zh" style="margin:0 0 8px"><b>锚点</b>把模式钉在某个位置：<code>^</code> 是文本开头，<code>$</code> 是结尾。没有锚点时，模式在任何位置匹配都算数，所以 <code>\d{4}</code> 在一个 10 位数字里也会“匹配”。要检查<i>整个</i>字符串是否符合，用 <code>re.fullmatch</code>，或把模式写成 <code>^...$</code>。</p></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Pick the right pattern</span><span class="zh">第 3 步 · 选对模式</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Which pattern fits the description?</p>
+<p class="zh" style="margin:0 0 8px">哪个模式符合描述？</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> write a pattern for a Singapore mobile number: eight digits starting with 8 or 9.</span><span class="zh"><b>试一试：</b>写一个新加坡手机号的模式：以 8 或 9 开头的八位数字。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> test it with fullmatch on a nine-digit number.</span><span class="zh"><b>核对：</b>用 fullmatch 测一个九位数字。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• + * ? and {n} say how many times a piece repeats.<br>• ^ and $ pin a pattern to the start or end.<br>• fullmatch checks the whole string; search finds a part.</p><p class="zh" style="margin:0">• + * ? 和 {n} 说明一个片段重复几次。<br>• ^ 和 $ 把模式钉在开头或结尾。<br>• fullmatch 检查整个字符串；search 找其中一部分。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Text patterns</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Python 3","zh":"Python 3"},"know":{"en":"Patterns and classes (see “Patterns and classes”).","zh":"知道模式与字符类（见“模式与字符类”）。"},"goals":{"en":["Use + * ? and {n}","Anchor a pattern to the start or end","Check a whole string with fullmatch"],"zh":["使用 + * ? 和 {n}","把模式锚定在开头或结尾","用 fullmatch 检查整个字符串"]},"prev":["01-literal-and-classes.html"]}}</script>
+<script src="../tracks.js?v=7ead1968"></script><script src="lessons.js?v=a0ff1234"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/02-repeats-and-anchors.js?v=2d6ce0d6"></script></body></html>
