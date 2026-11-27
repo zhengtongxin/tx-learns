@@ -2,105 +2,101 @@
  "lessons": {
   "agentic-ai/01-agentic-workflow.html": {
    "score": 7,
-   "at": "2026-11-27T04:08:40.896Z",
+   "at": "2026-11-27T05:45:53.116Z",
    "confusing": [
     {
-     "where": "Step 3 · Build it, step 4 (Tools)",
-     "why": "Tools take inputs (a ticker, a date, the values for a row) that the model fills in from your question. The lesson never says this, so it is unclear how a price ends up in the Date and Close columns."
+     "where": "Step 3 · Build it, step 4 (Google Sheets)",
+     "why": "The lesson never says to make that sheet first, so a newcomer may not know the Append row step needs a sheet with those headings already in place."
     },
     {
-     "where": "Step 3 · Build it, step 5",
-     "why": "“Ticker symbol” and AAPL are never explained. A newcomer may not know a ticker is the short code for a listed company's shares."
+     "where": "Step 2 · Watch it run",
+     "why": "'Log' is used all through the lesson (the Logs panel, 'the log shows each step') but is never defined as a concept."
+    },
+    {
+     "where": "Step 3, step 5 (Chat)",
+     "why": "The walkthrough in Step 2 checked a bond ETF, and this step uses AAPL, so the two examples do not match."
     }
    ]
   },
   "agentic-ai/02-agents-and-patterns.html": {
-   "score": 6,
-   "at": "2026-11-27T04:08:40.896Z",
+   "score": 7,
+   "at": "2026-11-27T05:45:53.116Z",
    "confusing": [
     {
-     "where": "Step 3 · Five workflow patterns",
-     "why": "Step 2 says a workflow is one where your code fixes the route and the model only fills in each step, and that the difference is who picks the next step. Here the model picks how many pieces run, yet t"
-    },
-    {
      "where": "Step 2 · Workflow vs agent",
-     "why": "Lesson 1 is titled “Agentic workflow” and builds an agent in n8n, so the word means the wide sense there and the narrow sense here, one lesson apart. The note only lands after the definition."
+     "why": "Lesson 1 calls the whole n8n canvas an 'agentic workflow', and this lesson says 'workflow' means something narrower. A newcomer is left to reconcile the two."
     },
     {
-     "where": "Step 1 · Be the agent",
-     "why": "“Log” is what the agent reads each turn, but it is not defined until the game. A newcomer may not know it is a running list of each tool call and its result."
+     "where": "Step 4 · Choose the simplest design",
+     "why": "'Guardrails' is used in the rule box before it is explained. Only a code comment ('step limit: a guardrail') hints at it."
     }
    ]
   },
   "agentic-ai/03-first-api-calls.html": {
    "score": 7,
-   "at": "2026-11-27T04:08:40.896Z",
+   "at": "2026-11-27T05:45:53.116Z",
    "confusing": [
     {
-     "where": "Step 2 · Make your first call",
-     "why": "“messages”, “role” and “content” are never defined. The reader sees role user with no word on the other roles, and the same roles come up again in lesson 5."
+     "where": "Step 1 · Keep your key safe",
+     "why": "Nobody is told how to create a file named .env. Such files are hidden on Mac and Linux by default and awkward to name on Windows, and 'project root' is not explained."
     },
     {
-     "where": "Step 2 · Make your first call",
-     "why": "The opening “Recap” sends the reader to lessons in another track that they have not read yet. It reads as if the basics were already known."
+     "where": "Step 2 · Make your first call (code)",
+     "why": "load_dotenv and os.getenv are used but never named as a small library and a built-in Python function, so the reader cannot tell what to install or where the functions come from."
     },
     {
-     "where": "Step 3 · Chain three calls",
-     "why": "nano, mini and full stand for sizes in the names gpt-5.4-nano, gpt-5.4-mini and gpt-5.4. The mapping is not explained here; it only appears in lesson 4."
+     "where": "Step 3 · Chain three calls (code)",
+     "why": "A triple-quoted, multi-line f-string appears with no explanation; the Learn text only covers single-line f-strings."
     }
    ]
   },
   "agentic-ai/04-many-models.html": {
-   "score": 7,
-   "at": "2026-11-27T04:08:40.896Z",
+   "score": 6,
+   "at": "2026-11-27T05:45:53.116Z",
    "confusing": [
     {
-     "where": "Step 2 · One code shape, three swaps",
-     "why": "base_url is never explained (the web address your requests go to), and “provider” is never defined. The table introduces both without a word."
+     "where": "Step 2 · One code shape, three swaps (Learn)",
+     "why": "base_url is told to the reader as something to change but never explained. A newcomer does not know it is the web address the requests go to."
     },
     {
-     "where": "Local models",
-     "why": "Running Ollama needs the Ollama app installed and the llama3.2 model downloaded first. The lesson only links to set-up, so the box fails for a reader who skipped the link."
+     "where": "Step 2 · compare.py code box",
+     "why": "The text says the key is loaded with load_dotenv(), but the compare.py box reads os.getenv with no load_dotenv call. Copied as shown, the key is None."
     },
     {
-     "where": "Step 2 · One code shape, three swaps",
-     "why": "This box uses messages and response, which this lesson never defines. A newcomer copying it alone gets a NameError."
+     "where": "Step 2 · Local models",
+     "why": "'localhost' and 'port' are not explained, and the box calls llama3.2 without saying Ollama must be installed and the model downloaded first."
     }
    ]
   },
   "agentic-ai/05-autonomy-and-tools.html": {
-   "score": 6,
-   "at": "2026-11-27T04:08:40.896Z",
+   "score": 7,
+   "at": "2026-11-27T05:45:53.116Z",
    "confusing": [
     {
-     "where": "Step 2 · Context and memory",
-     "why": "The comment above says summary.txt, but the path is twin/summary.txt. The reader is never told to create the twin folder or the file, so the box fails with FileNotFoundError."
+     "where": "Step 2 · Context and memory (code)",
+     "why": "client is never created in this lesson, and the text does not say to reuse the one from lesson 3. Copied as shown, it gives NameError."
     },
     {
-     "where": "Step 2 · Context and memory",
-     "why": "The roles “user” and “assistant” are never explained, and lesson 3 did not explain them either."
+     "where": "Step 2 · Context and memory (code)",
+     "why": "The role names 'assistant' and 'tool' appear without explanation. 'System' is explained, the other two are not."
     },
     {
-     "where": "Step 3 · A tool: let the model ask",
-     "why": "The box has a placeholder and the Learn text does not say to fill it in. Only the quiz below asks the question, so the reader may wonder if the code is broken."
+     "where": "Step 3 · A tool (quiz)",
+     "why": "The quiz asks which description says WHEN to use a tool, but the idea that the description decides when only appears in the takeaways, after the quiz."
     }
    ]
   },
   "agentic-ai/06-career-agent.html": {
    "score": 6,
-   "at": "2026-11-27T04:08:40.896Z",
+   "at": "2026-11-27T05:45:53.116Z",
    "confusing": [
     {
-     "where": "Step 2 · The description is the trigger",
-     "why": "The second tool's JSON is only a comment, so the reader must write it, but the step does not say so. The box also calls itself JSON while it is a Python dict with False."
+     "where": "Step 1 · Two tools, two jobs (Learn)",
+     "why": "The code sends a phone notification through Pushover and stores nothing. The takeaways then warn about storing visitors' emails, so the reader does not know where the email goes."
     },
     {
-     "where": "Step 4 · From a tool name to a real call, then ship",
-     "why": "Alex's facts (the summary file, the LinkedIn text, context.py) are never introduced, so the reader does not know where the twin gets its answers or what to edit. pypdf is also in the install command w"
-    },
-    {
-     "where": "Hero",
-     "why": "Shipping needs an OpenAI key, a Pushover account, uv, Gradio and a hosting account. 20 minutes is optimistic for a newcomer."
+     "where": "Step 4 · Now make it yours (Deploy)",
+     "why": "Which project files, and in which folder? The lesson never points to the package folder. The deploy step is one long sentence of commands (uv, Gradio, a host's secrets) with no numbered path."
     }
    ]
   },
