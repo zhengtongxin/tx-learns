@@ -33,6 +33,14 @@ Email:
 <p class="en">Sort each one.</p>
 <p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
 
+<h2><span class="en">Step 4 · Wire the answer into a draft</span><span class="zh">第 4 步 · 把答案接到草稿上</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Do it</span><span class="zh">动手</span></b><p class="en" style="margin:0 0 8px">Order the nodes like this: <b>Gmail Trigger</b> (new email) → <b>AI node</b> with the prompt above → <b>IF</b> on the label → <b>Gmail</b> with Resource Draft and Operation Create. Open the AI node’s output panel and find where the answer sits (often a field named <code>text</code>, or <code>output</code> if you attach a Structured Output Parser). Use that exact field name in the next node, for example <code>{{ $json.output.draft }}</code>.</p>
+<p class="zh" style="margin:0 0 8px">节点顺序：<b>Gmail Trigger</b>（新邮件）→ 带上面提示的 <b>AI 节点</b> → 按标签判断的 <b>IF</b> → <b>Gmail</b> 节点，Resource 选 Draft，Operation 选 Create。打开 AI 节点的输出面板，看答案放在哪个字段（常见是 <code>text</code>，接了 Structured Output Parser 则是 <code>output</code>），下一个节点里就用这个确切的字段名，例如 <code>{{ $json.output.draft }}</code>。</p>
+<p class="en" style="margin:0 0 8px">If a later node says the field is missing, the model usually wrapped the JSON in a sentence. Fix the prompt (“Return JSON only”) or attach the parser. Do not make every later node cope with free text.</p>
+<p class="zh" style="margin:0 0 8px">如果后面的节点说字段不存在，多半是模型在 JSON 外加了一句话。去改提示（“只返回 JSON”）或接上解析器，别让后面每个节点都去应付自由文本。</p></div>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
 <h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Build</b> a flow that labels each new email and saves a draft reply, without sending.</span><span class="zh"><b>做出</b>一个流程：给每封新邮件分类，存一份回复草稿，但不发送。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check</b> ten drafts by hand and note the mistakes before you trust it with more.</span><span class="zh"><b>手动检查</b>十份草稿，记下错误，再决定要不要放手更多。</span></span></label></div>
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
@@ -42,4 +50,4 @@ Email:
 </main></div>
 <script type="application/json" id="lesson-data">{"p":{"prev":["02-workflows-and-agents.html"],"tools":{"en":"n8n Cloud, a Google account (a test one is best) and a model API key","zh":"n8n Cloud、一个 Google 账号（最好是测试号）和模型 API 密钥"},"know":{"en":"Items and expressions.","zh":"条目和表达式。"},"goals":{"en":["Connect a Google account to n8n","Get a label and a draft from one AI step","Place an approval before anything risky"],"zh":["把 Google 账号连到 n8n","用一个 AI 步骤得到标签和草稿","在有风险的动作前放一道批准"]}}}</script>
 <script src="../tracks.js?v=819ff2a4"></script><script src="lessons.js?v=bc7f7459"></script><script src="../assets/site.js?v=a0db7d29"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
-<script src="js/03-docs-and-email.js?v=5d9a33a6"></script></body></html>
+<script src="js/03-docs-and-email.js?v=62d391b1"></script></body></html>
