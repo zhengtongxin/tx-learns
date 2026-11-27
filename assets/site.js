@@ -27,6 +27,12 @@
     if(!/^https?:$/.test(location.protocol)||/^(localhost|127\.)/.test(location.hostname)||navigator.webdriver)return;
     var b=JSON.stringify({event:n==='Lesson done'?'done':'feedback',lesson:d.lesson,answer:d.answer});
     if(!(navigator.sendBeacon&&navigator.sendBeacon('/api/feedback',b)))fetch('/api/feedback',{method:'POST',body:b,keepalive:true})}catch(e){}}
+(function(){
+    /* line icons instead of emoji: one stroke style, colour from the text */
+    var SV={'sparkle':'<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/>','clip':'<rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4h6v3H9zM9 12h6M9 16h4"/>','users':'<circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c.4-3.3 2.6-5 5.5-5s5.1 1.7 5.5 5"/><circle cx="17" cy="9" r="2.5"/><path d="M16.5 14.2c2.6-.1 4.3 1.3 4.7 4.3"/>','compass':'<circle cx="12" cy="12" r="9"/><path d="M15.8 8.2l-2 5.6-5.6 2 2-5.6z"/>','target':'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/>','globe':'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3z"/>','book':'<path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v16H5.5C4.7 20 4 19.3 4 18.5zM20 5.5c0-.8-.7-1.5-1.5-1.5H13v16h5.5c.8 0 1.5-.7 1.5-1.5z"/>','menu':'<path d="M4 7h16M4 12h16M4 17h16"/>','info':'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>'};
+    var EMO={'🧠':'sparkle','📋':'clip','🤝':'users','🧭':'compass','🎯':'target','🌐':'globe','📖':'book','☰':'menu','ℹ️':'info'};
+    window.txIcon=function(e){var k=EMO[e]||(SV[e]?e:'');return k?'<svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'+SV[k]+'</svg>':(e||'')};
+})();
   document.addEventListener('DOMContentLoaded',function(){
     var C=window.TRACK,here=location.pathname.split('/').pop()||'index.html',d=done(),AREA=root.getAttribute('data-area')||'',P=(C||AREA==='study')?'../':'';
     if(C){C.all=[];C.topics.forEach(function(w){w.items.forEach(function(it,i){it.w=w.n;it.i=i+1;it.g=C.all.length+1;C.all.push(it)})});C.lessons=C.all.filter(function(x){return x.file});C.total=C.all.length}
@@ -45,11 +51,21 @@
     /* Skip link: the first Tab stop, so keyboard users can jump past the top bar, the menu and the dock. */
     var mn=document.querySelector('main');
     if(mn){if(!mn.id)mn.id='main';mn.setAttribute('tabindex','-1');var sk=document.createElement('a');sk.className='skip';sk.href='#'+mn.id;sk.innerHTML=t({en:'Skip to content',zh:'跳到正文'});sk.onclick=function(){setTimeout(function(){mn.focus()},0)};document.body.prepend(sk)}
+    /* gentle entrance for blocks below the fold; skipped for reduced motion, and anything already in view stays put */
+    (function(){try{
+      if(!('IntersectionObserver' in window)||matchMedia('(prefers-reduced-motion:reduce)').matches||navigator.webdriver)return;
+      var els=[].slice.call(document.querySelectorAll('main .wsec,main .cc,main .card,main .callout,main .quiz,main .gl-it')).filter(function(e){return e.getBoundingClientRect().top>innerHeight*0.9});
+      if(!els.length)return;
+      var io=new IntersectionObserver(function(es){es.forEach(function(x){if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}})},{rootMargin:'0px 0px -6% 0px',threshold:.05});
+      document.documentElement.classList.add('rv-on');els.forEach(function(e){e.classList.add('rv');io.observe(e)});
+      setTimeout(function(){els.forEach(function(e){e.classList.add('in')})},6000);
+    }catch(e){}})();
+    var I=window.txIcon;document.querySelectorAll('[data-ic]').forEach(function(n){n.innerHTML=I(n.getAttribute('data-ic'))});
     var top=document.createElement('div');top.className='top';
     function lk(h,tt,ic,en,zh){return '<a class="icon-btn eco-btn" href="'+h+'" title="'+tt+'" aria-label="'+tt+'">'+ic+'<span class="lbl"> <span class="en">'+en+'</span><span class="zh">'+zh+'</span></span></a>'}
     /* Three parts: the landing page (two choices, no menu), the study coach (its own About and How it works), and the tracks (About, How it works, Glossary). */
-    var nav=AREA==='landing'?'':AREA==='study'?'<a class="icon-btn menu-btn" href="'+P+'study/index.html" aria-label="Study coach · 学习教练">🎯 <span class="en">Study coach</span><span class="zh">学习教练</span></a><span class="sp"></span>'+lk(P+'study/about.html','About the coach · 关于学习教练','','About this site','关于本站')+lk(P+'study/how.html','How it works · 运作方式','🌐','How it works','运作方式'):
-      '<button class="icon-btn menu-btn" aria-label="Topics · 主题" aria-expanded="false" aria-controls="topics-nav">☰ <span class="en">Topics</span><span class="zh">主题</span></button><span class="sp"></span>'+lk(P+'about.html','About this site · 关于本站','','About this site','关于本站')+lk(P+'ecosystem.html','How it works · 运作方式','🌐','How it works','运作方式')+lk(P+'glossary.html','Glossary · 词汇表','📖','Glossary','词汇表');
+    var nav=AREA==='landing'?'':AREA==='study'?'<a class="icon-btn menu-btn" href="'+P+'study/index.html" aria-label="Study coach · 学习教练">'+I('🎯')+' <span class="en">Study coach</span><span class="zh">学习教练</span></a><span class="sp"></span>'+lk(P+'study/about.html','About the coach · 关于学习教练','','About this site','关于本站')+lk(P+'study/how.html','How it works · 运作方式',I('🌐'),'How it works','运作方式'):
+      '<button class="icon-btn menu-btn" aria-label="Topics · 主题" aria-expanded="false" aria-controls="topics-nav">'+I('☰')+' <span class="en">Topics</span><span class="zh">主题</span></button><span class="sp"></span>'+lk(P+'about.html','About this site · 关于本站',I('ℹ️'),'About this site','关于本站')+lk(P+'ecosystem.html','How it works · 运作方式',I('🌐'),'How it works','运作方式')+lk(P+'glossary.html','Glossary · 词汇表',I('📖'),'Glossary','词汇表');
     if(AREA==='landing')nav='<span class="sp"></span>';
     top.innerHTML='<a class="brand" href="'+P+'index.html"><b></b>TX Learns</a>'+nav+
       '<div class="seg" role="group" aria-label="Language · 语言"><button data-l="en" lang="en">EN</button><button data-l="zh" lang="zh-Hans">中文</button></div><button class="icon-btn th" aria-label="theme"></button>';
@@ -79,7 +95,7 @@
           C.topics.map(function(w){return '<h5>'+t(w.title)+'</h5>'+w.items.map(function(l){
             return l.file?'<a href="'+l.file+'" class="'+(l.file===here?'cur ':'')+(d[C.id+'/'+l.file]?'done':'')+'"'+(l.file===here?' aria-current="page"':'')+'>'+t(l.title)+'</a>':'<span class="soon">'+t(l.title)+'</span>'}).join('')}).join('');
         else body='<a href="../'+c.href+'">⌂ '+t({en:'Overview',zh:'总览'})+'</a><div class="oth" data-o="'+c.id+'"></div>';
-        return '<div class="cg'+(open?' open':'')+(cur?' cur':'')+'" data-c="'+c.id+'"><button class="cg-h" aria-expanded="'+open+'" aria-controls="cgb-'+c.id+'"><span class="ic">'+(c.icon||'')+'</span><span class="tt">'+t(c.title)+'</span>'+(cur?'<span class="pg">'+count(c.id,CF)+'/'+CF.length+'</span>':'')+'<i class="chev"></i></button><div class="cg-b" id="cgb-'+c.id+'"'+(open?'':' inert')+'><div>'+body+'</div></div></div>'}).join('');
+        return '<div class="cg'+(open?' open':'')+(cur?' cur':'')+'" data-c="'+c.id+'"><button class="cg-h" aria-expanded="'+open+'" aria-controls="cgb-'+c.id+'"><span class="ic">'+txIcon(c.icon||'')+'</span><span class="tt">'+t(c.title)+'</span>'+(cur?'<span class="pg">'+count(c.id,CF)+'/'+CF.length+'</span>':'')+'<i class="chev"></i></button><div class="cg-b" id="cgb-'+c.id+'"'+(open?'':' inert')+'><div>'+body+'</div></div></div>'}).join('');
       /* Other tracks: read their lessons.js (in a throwaway window object) to list their lessons and show done/total. Without it (e.g. opened from disk) only the Overview link shows. */
       var loaded={};
       function loadOther(c){if(c.id===C.id||loaded[c.id])return;loaded[c.id]=1;
@@ -190,7 +206,7 @@
        (scripts/check-counts.mjs fails a PR that types one). Progress is completed / PUBLISHED lessons; planned lessons are shown separately. */
     var hub=document.querySelector('.track-list'),rsm=document.getElementById('resume');
     function pbar(n,tot,label){return '<div class="mini" role="progressbar" aria-label="'+label+'" aria-valuemin="0" aria-valuemax="'+tot+'" aria-valuenow="'+n+'" aria-valuetext="'+n+' / '+tot+'"><i style="width:'+(tot?n/tot*100:0)+'%"></i></div>'}
-    function card(c,ci,n,ok){return '<a class="cc spot" href="'+c.href+'"><div class="orbi">'+c.icon+'</div><div><h3>'+t(c.title)+'</h3><div class="meta" style="margin-top:4px">'+t(c.desc)+'</div><div class="chips"><span class="chip">'+t({en:'Step '+(ci+1),zh:'第 '+(ci+1)+' 步'})+(c.level?' · '+t(LV[c.level]):'')+'</span>'+(ok&&n?'<span class="chip">'+t({en:n+' of '+c.published+' done',zh:'已完成 '+n+' / '+c.published})+'</span>':'')+'</div>'+pbar(n,c.published||0,'Progress in '+c.title.en+' · '+c.title.zh)+'</div><div class="go">→</div></a>'}
+    function card(c,ci,n,ok){return '<a class="cc spot" href="'+c.href+'"><div class="orbi">'+txIcon(c.icon)+'</div><div><h3>'+t(c.title)+'</h3><div class="meta" style="margin-top:4px">'+t(c.desc)+'</div><div class="chips"><span class="chip">'+t({en:'Step '+(ci+1),zh:'第 '+(ci+1)+' 步'})+(c.level?' · '+t(LV[c.level]):'')+'</span>'+(ok&&n?'<span class="chip">'+t({en:n+' of '+c.published+' done',zh:'已完成 '+n+' / '+c.published})+'</span>':'')+'</div>'+pbar(n,c.published||0,'Progress in '+c.title.en+' · '+c.title.zh)+'</div><div class="go">→</div></a>'}
     /* Tracks are grouped by domain (window.DOMAINS in tracks.js); a track names its domain with domain:'<id>'. Step numbers count within a domain. */
     function drawHub(){if(!hub)return;var D=window.DOMAINS&&window.DOMAINS.length?window.DOMAINS:[{id:'ai',title:{en:'AI',zh:'AI'}}];
       function tracksOf(dm){return window.TRACKS.filter(function(c){return (c.domain||'ai')===dm.id})}
@@ -198,9 +214,9 @@
       /* Two levels: the domains first (AI, project management); a domain with several tracks opens its track list, one with a single track goes straight to it. */
       var hints=document.querySelectorAll('#topics > .sub, #topics > p.meta');for(var h=0;h<hints.length;h++)hints[h].hidden=!cur;
       if(cur){var ts=tracksOf(cur);
-        hub.innerHTML='<section class="dom"><p class="meta"><a href="tracks.html" data-back>'+t({en:'← All subjects',zh:'← 全部学科'})+'</a></p><h3 class="dom-h">'+(cur.icon?'<span aria-hidden="true">'+cur.icon+'</span> ':'')+t(cur.title)+'</h3>'+(cur.desc?'<p class="meta">'+t(cur.desc)+'</p>':'')+'<div class="tl">'+ts.map(function(c,ci){return card(c,ci,count(c.id,c.files),c.total>0)}).join('')+'</div></section>';return}
+        hub.innerHTML='<section class="dom"><p class="meta"><a href="tracks.html" data-back>'+t({en:'← All subjects',zh:'← 全部学科'})+'</a></p><h3 class="dom-h">'+(cur.icon?'<span aria-hidden="true">'+txIcon(cur.icon)+'</span> ':'')+t(cur.title)+'</h3>'+(cur.desc?'<p class="meta">'+t(cur.desc)+'</p>':'')+'<div class="tl">'+ts.map(function(c,ci){return card(c,ci,count(c.id,c.files),c.total>0)}).join('')+'</div></section>';return}
       hub.innerHTML='<section class="dom"><div class="tl">'+D.map(function(dm){var ts=tracksOf(dm);if(!ts.length)return '';var href=ts.length>1?'#'+dm.id:ts[0].href;
-        return '<a class="cc spot" href="'+href+'"><div class="orbi">'+(dm.icon||'')+'</div><div><h3>'+t(dm.title)+'</h3>'+(dm.desc?'<div class="meta" style="margin-top:4px">'+t(dm.desc)+'</div>':'')+'</div><div class="go">→</div></a>'}).join('')+'</div></section>'}
+        return '<a class="cc spot" href="'+href+'"><div class="orbi">'+txIcon(dm.icon||'')+'</div><div><h3>'+t(dm.title)+'</h3>'+(dm.desc?'<div class="meta" style="margin-top:4px">'+t(dm.desc)+'</div>':'')+'</div><div class="go">→</div></a>'}).join('')+'</div></section>'}
     addEventListener('hashchange',function(){drawHub();scrollTo(0,document.getElementById('topics')?document.getElementById('topics').offsetTop-20:0)});
     function canStore(){try{localStorage.setItem('learn-t','1');localStorage.removeItem('learn-t');return true}catch(e){return false}}
     function drawResume(){
