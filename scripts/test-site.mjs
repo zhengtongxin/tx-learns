@@ -120,7 +120,7 @@ try {
     eq(await page.$$eval('.track-list .cc', a => a.map(x => x.getAttribute('href'))), T.filter(t => (t.domain || 'ai') === 'ai').map(t => t.href), 'the AI tracks, in tracks.js order');
     // Entry points (picked by who you are) carry their own label; only the tracks after them are numbered steps.
     const chips = await page.$$eval('.track-list .cc', a => a.map(x => x.querySelector('.chip').textContent));
-    T.filter(t => (t.domain || 'ai') === 'ai').forEach((t, i) => ok(t.entry ? chips[i].includes(t.entry.en) && !/Step \d/.test(chips[i]) : /Step \d/.test(chips[i]), `chip of ${t.id}: ${chips[i]}`));
+    T.filter(t => (t.domain || 'ai') === 'ai').forEach((t, i) => ok(t.entry ? chips[i].includes(t.entry.en) && !/Step \d/.test(chips[i]) : t.bridge ? !/Step \d/.test(chips[i]) : /Step \d/.test(chips[i]), `chip of ${t.id}: ${chips[i]}`));
     ok(await page.isVisible('[data-back]'), 'a way back to the subjects');
     await page.click('[data-back]');
     // The link loads the page again and the cards are drawn after the lesson lists arrive: wait for them, do not race the load.
