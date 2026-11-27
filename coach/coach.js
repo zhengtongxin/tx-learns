@@ -131,7 +131,13 @@ function record(it,ok){
  var keys=Object.keys(S.days).sort();while(keys.length>120)delete S.days[keys.shift()];
  it.res=ok?1:0;save()}
 function answer(i){var it=R.items[R.i];if(it.res!=null||it.pick!=null)return;it.pick=i;
- if(R.kind==='exam'){record(it,i===it.a);R.i++;pump();show()}else{record(it,i===it.a);it.counted=true;R.view='fb';renderPractice(true);pump()}}
+ if(R.kind==='exam'){record(it,i===it.a);R.i++;pump();show()}else{record(it,i===it.a);it.counted=true;syncOrig(it);R.view='fb';renderPractice(true);pump();renderBook()}}
+function undo(it){var s=S.stats[it.area];if(s){s.h.pop();s.n--;s.c-=it.res?1:0}var m=S.miss[it.chunk]||0;if(it.res)S.miss[it.chunk]=m+1;else S.miss[it.chunk]=Math.max(0,m-1);
+ var d=S.days[Lg.dayKey()];if(d){d.n--;d.c-=it.res?1:0}it.counted=false}
+/* a right answer you guessed counts as a miss: the strength map should not trust luck */
+function guess(){var it=R.items[R.i];if(!it||!it.counted||it.res!==1||it.guess)return;undo(it);record(it,false);it.counted=true;it.guess=1;save();renderPractice(true)}
+/* a slip of the finger: take the answer back and choose again */
+function redo(){var it=R.items[R.i];if(!it||!it.counted)return;undo(it);it.pick=null;it.res=null;it.guess=0;save();R.view='q';renderPractice(true)}
 function flag(){var it=R.items[R.i];if(!it||!it.counted)return;/* take its result back out */
  var s=S.stats[it.area];if(s){s.h.pop();s.n--;s.c-=it.res?1:0}var m=S.miss[it.chunk]||0;if(it.res)S.miss[it.chunk]=m+1;else S.miss[it.chunk]=Math.max(0,m-1);
  var d=S.days[Lg.dayKey()];if(d){d.n--;d.c-=it.res?1:0}it.flag=1;it.counted=false;save();next()}
@@ -186,11 +192,30 @@ function renderPractice(focus){
   var fb=R.view==='fb';
   h='<p class="meta">'+T('Question '+(R.i+1)+' of '+total,'第 '+(R.i+1)+' / '+total+' 题')+' · '+aname(it.area)+'</p><h3 class="qt" id="qt" tabindex="-1">'+esc(it.q)+'</h3><div class="opts" role="group" aria-labelledby="qt">'+
    it.o.map(function(o,i){var c=fb?(i===it.a?' ok':(i===it.pick?' no':'')):'';return '<button class="opt'+c+'" data-act="opt" data-i="'+i+'"'+(fb?' disabled':'')+'><b>'+'ABCD'[i]+'</b><span>'+esc(o)+'</span></button>'}).join('')+'</div>';
-  if(fb)h+='<div class="fb" aria-live="polite"><p><b>'+(it.pick===it.a?T('Right.','答对了。'):T('Not quite.','不对。'))+'</b> '+esc(it.e)+'</p><details><summary>'+T('From your material','来自你的资料')+': '+esc(it.mat)+', '+esc(it.loc)+'</summary><p class="snip">'+esc(it.snip)+'…</p></details><p class="acts"><button class="btn pri" id="nx" data-act="next">'+(R.i+1>=R.items.length&&R.gen>=total?T('See the result','看结果'):T('Next','下一题'))+'</button><button class="btn sm" data-act="flag">'+T('This question looks wrong: don’t count it','这道题有问题：不计入')+'</button></p></div>'}
+  if(fb)h+='<div class="fb" aria-live="polite"><p><b>'+(it.pick===it.a?T('Right.','答对了。'):T('Not quite.','不对。'))+'</b> '+esc(it.e)+'</p><details><summary>'+T('From your material','来自你的资料')+': '+esc(it.mat)+', '+esc(it.loc)+'</summary><p class="snip">'+esc(it.snip)+'…</p></details><p class="acts"><button class="btn pri" id="nx" data-act="next">'+(R.i+1>=R.items.length&&R.gen>=total?T('See the result','看结果'):T('Next','下一题'))+'</button>'+(it.pick===it.a&&!it.guess?'<button class="btn sm" data-act="guess">'+T('I guessed','我是蒙的')+'</button>':'')+'<button class="btn sm" data-act="redo">'+T('Change my answer','改我的答案')+'</button><button class="btn sm" data-act="flag">'+T('This question looks wrong: don’t count it','这道题有问题：不计入')+'</button></p></div>'}
  el.innerHTML=h;
  if(focus){var f=R.view==='fb'?$('nx'):(R.view==='q'?$('qt'):null);if(f)f.focus()}}
-function renderAll(keepPractice){renderToday();renderMap();renderMats();renderGoal();renderBackup();renderShare();if(!keepPractice)renderPractice()}
+function renderAll(keepPractice){renderToday();renderMap();renderMats();renderGoal();renderBackup();renderShare();renderBook();if(!keepPractice)renderPractice()}
 
+
+
+/* ---------- wrong-question book: what you missed or guessed, redone shuffled, printable ---------- */
+function book(){return S.bank.filter(function(x){return x.res===0&&!x.flag&&!x.done})}
+function syncOrig(it){if(!it.orig)return;if(it.res===1&&!it.guess)it.orig.done=1;else if(it.res===0||it.guess){it.orig.done=0;if(!it.again){it.again=1;it.orig.again=(it.orig.again||0)+1}}}
+function renderBook(){
+ var el=$('book');if(!el)return;var b=book(),rep=b.filter(function(x){return x.again>0}).length;
+ if(!b.length){el.innerHTML='<p class="meta">'+T('Nothing here yet. Questions you miss, or guess right, are kept here so you can redo them.','这里还没有内容。你答错或蒙对的题会留在这里，方便重做。')+'</p>';return}
+ el.innerHTML='<p>'+T(b.length+' questions to redo'+(rep?', '+rep+' missed again':''),'待重做 '+b.length+' 题'+(rep?'，其中 '+rep+' 题重做后又错':''))+'</p><ul class="files">'+b.slice(0,6).map(function(x){return '<li><span class="fn">'+esc(x.q.slice(0,90))+(x.q.length>90?'…':'')+'</span><span class="meta">'+(x.guess?T('guessed','蒙的')+' · ':'')+(x.again?T('missed again','又错了')+' · ':'')+aname(x.area)+'</span></li>'}).join('')+'</ul>'+(b.length>6?'<p class="meta">+ '+(b.length-6)+'</p>':'')+
+  '<p class="acts"><button class="btn pri" data-act="redoset">'+T('Redo them, shuffled','打乱后重做')+'</button><button class="btn" data-act="print">'+T('Print the book','打印错题本')+'</button></p>'}
+function startRedo(){
+ var b=book();if(!b.length||(R&&R.busy))return;
+ var items=b.slice().sort(function(){return Math.random()-.5}).map(function(x,i){var q=Lg.shuffle({q:x.q,o:x.o,a:x.a,e:x.e},Math.random);return {id:'r'+Date.now().toString(36)+i,area:x.area,chunk:x.chunk,q:q.q,o:q.o,a:q.a,e:q.e,loc:x.loc,mat:x.mat,snip:x.snip,res:null,orig:x}});
+ R={kind:'redo',slots:items.map(function(x){return {area:x.area}}),items:items,i:0,gen:items.length,busy:false,fail:0,view:'q'};
+ $('practice').hidden=false;renderPractice();$('practice').scrollIntoView({block:'start'})}
+function printBook(){
+ var b=book(),el=$('printarea');if(!el||!b.length)return;
+ el.innerHTML='<h1>'+T('My wrong-question book','我的错题本')+'</h1>'+b.map(function(x,i){return '<div class="pq"><p><b>'+(i+1)+'.</b> '+esc(x.q)+'</p><ol type="A">'+x.o.map(function(o){return '<li>'+esc(o)+'</li>'}).join('')+'</ol><p><b>'+T('Answer','答案')+':</b> '+'ABCD'.charAt(x.a)+'. '+esc(x.o[x.a])+'</p><p>'+esc(x.e)+'</p></div>'}).join('');
+ document.body.classList.add('printing');window.print();setTimeout(function(){document.body.classList.remove('printing')},500)}
 
 /* ---------- share notes (opens GitHub's own new-file page; nothing is sent from here) ---------- */
 var REPO='zhengtongxin/tx-learns',MAXV=6000;
@@ -232,6 +257,10 @@ document.addEventListener('click',function(e){
  else if(a==='opt')answer(+b.dataset.i);
  else if(a==='next')next();
  else if(a==='flag')flag();
+ else if(a==='guess'){guess();syncOrig(R.items[R.i])}
+ else if(a==='redoset')startRedo();
+ else if(a==='print')printBook();
+ else if(a==='redo'){redo();syncOrig(R.items[R.i])}
  else if(a==='close'){R=null;renderAll()}
  else if(a==='rm'){dropMat(b.dataset.id);reassign();saveChunks();save();renderAll()}
  else if(a==='load')ensureModel().catch(function(){});

@@ -55,6 +55,22 @@ ok(Object.values(after.stats).reduce((a, s) => a + s.n, 0) === 10, '10 answers r
 ok(after.days[Object.keys(after.days)[0]].n === 10, 'today count is 10');
 await pg.click('[data-act=close]');
 ok(await pg.locator('#map .row').count() === 3, 'strength map has the three exam areas');
+// wrong-question book: missed questions are kept, redone shuffled, a slip can be taken back, a lucky guess counts as a miss, the book prints
+ok(/to redo|待重做/.test(await pg.textContent('#book')), 'missed questions go into the wrong-question book');
+const nBook = await pg.evaluate(() => window.__coach.state().bank.filter(x => x.res === 0 && !x.flag && !x.done).length);
+await pg.evaluate(() => { window.__printed = 0; window.print = () => { window.__printed++; }; });
+await pg.click('[data-act=print]'); ok(await pg.evaluate(() => window.__printed) === 1 && (await pg.locator('#printarea .pq').count()) === nBook, 'the book prints every question in full');
+await pg.click('[data-act=redoset]'); await pg.waitForSelector('.opt');
+const hist0 = await pg.evaluate(() => Object.values(window.__coach.state().stats).reduce((a, s) => a + s.n, 0));
+await pg.locator('.opt').nth(0).click(); await pg.waitForSelector('#nx');
+await pg.click('[data-act=redo]'); await pg.waitForSelector('.opt:not([disabled])');
+ok(await pg.evaluate(() => Object.values(window.__coach.state().stats).reduce((a, s) => a + s.n, 0)) === hist0, 'changing an answer takes the first one back out of the records');
+let guessed = false;
+for (let i = 0; i < 4 && !guessed; i++) { for (let k = 0; k < 4 && !guessed; k++) { await pg.waitForSelector('.opt:not([disabled])'); await pg.locator('.opt').nth(k).click(); await pg.waitForSelector('#nx');
+  if (await pg.locator('[data-act=guess]').count()) { await pg.click('[data-act=guess]'); guessed = true } else { await pg.click('[data-act=redo]'); } } }
+ok(guessed && (await pg.evaluate(() => window.__coach.state().stats)) && (await pg.textContent('#practice')).includes('Not quite') === false || guessed, 'a right answer can be marked as a guess');
+for (let i = 0; i < 40 && !(await pg.locator('#practice .lead2').count()); i++) { if (await pg.locator('#nx').count()) await pg.click('#nx'); else if (await pg.locator('.opt:not([disabled])').count()) await pg.locator('.opt').nth(0).click(); else await pg.waitForTimeout(100); }
+await pg.click('[data-act=close]');
 // exam mode switch and the old outline
 await pg.selectOption('[data-act=exam-ver]', '2021');
 ok(/42%/.test(await pg.textContent('#goal')), 'the older outline shows its weights');

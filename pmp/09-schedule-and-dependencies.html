@@ -1,0 +1,52 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Schedule and dependencies | TX Learns</title>
+<meta name="description" content="Link activities with the four dependency types, find the critical path and shorten a schedule on purpose"><meta property="og:title" content="Schedule and dependencies | TX Learns"><meta property="og:description" content="Link activities with the four dependency types, find the critical path and shorten a schedule on purpose"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/pmp/09-schedule-and-dependencies.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-27">
+<link rel="canonical" href="https://tx-learns.vercel.app/pmp/09-schedule-and-dependencies.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=92b1bb9f"><link rel="stylesheet" href="../assets/teach.css?v=284a1f31"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/pmp/09-schedule-and-dependencies.html","url":"https://tx-learns.vercel.app/pmp/09-schedule-and-dependencies.html","name":"Schedule and dependencies","alternateName":"进度与依赖","description":"Link activities with the four dependency types, find the critical path and shorten a schedule on purpose","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Process","dateModified":"2026-11-27","isPartOf":{"@type":"CollectionPage","name":"PMP","url":"https://tx-learns.vercel.app/pmp/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"PMP","item":"https://tx-learns.vercel.app/pmp/index.html"},{"@type":"ListItem","position":3,"name":"Schedule and dependencies","item":"https://tx-learns.vercel.app/pmp/09-schedule-and-dependencies.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Process · Lesson 2</span><span class="zh">过程 · 第 2 课</span></span><h1><span class="en">Schedule and dependencies</span><span class="zh">进度与依赖</span></h1><p class="meta"><span class="en">Link activities with the four dependency types, find the critical path and shorten a schedule on purpose · ~12 min · reading and practice</span><span class="zh">用四种依赖关系连接活动，找出关键路径，并有意识地压缩工期 · 约 12 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Four dependencies</span><span class="zh">第 1 步 · 四种依赖</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>dependency</b> says how one activity relates to another. Read it as <b>predecessor first, successor second</b>, then pair the words: the first is about the predecessor, the second about the successor.</p>
+<p class="zh" style="margin:0 0 8px"><b>依赖关系</b>说明一个活动与另一个活动的关系。读法是<b>先前置、后后续</b>，再配对两个词：第一个词说前置活动，第二个词说后续活动。</p>
+<p class="en" style="margin:0 0 8px"><b>Finish-to-start (FS)</b> is the most common and is the default: you must finish painting before you start hanging pictures. The other three are less common but appear in exam questions.</p>
+<p class="zh" style="margin:0 0 8px"><b>完成到开始（FS）</b>最常见，也是默认的：刷完墙才能挂画。另外三种较少用，但会出现在考题里。</p></div>
+<div class="codebox" data-file="the four types" data-lang="text">FS  finish -&gt; start     paint walls, then hang pictures
+SS  start  -&gt; start     start digging, then start laying pipe
+FF  finish -&gt; finish    finish writing, then finish proofreading
+SF  start  -&gt; finish    new guard starts, then old guard may finish
+
+SF is the rarest. Read it the same way: A starts, then B finishes.</div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Step 2 · Critical path and float</span><span class="zh">第 2 步 · 关键路径与浮动</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The <b>critical path</b> is the longest chain of dependent activities from start to finish. It decides the shortest time the project can take. A delay on it delays the whole project by the same amount.</p>
+<p class="zh" style="margin:0 0 8px"><b>关键路径</b>是从头到尾最长的一串相互依赖的活动，它决定项目最短能多快完成。关键路径上的延误会等量推迟整个项目。</p>
+<p class="en" style="margin:0 0 8px"><b>Float</b> (or slack) is how long an activity can slip without delaying anything important. On the critical path, float is <b>zero</b>. Off it, float is positive, and you can use it to move resources.</p>
+<p class="zh" style="margin:0 0 8px"><b>浮动时间</b>是一个活动能拖延多久而不影响关键事项。关键路径上的浮动是<b>零</b>；不在关键路径上的浮动为正，可以用来调配资源。</p></div>
+<div class="codebox" data-file="worked example" data-lang="text">Path 1: A (3) -&gt; B (4) -&gt; D (2)   = 9
+Path 2: A (3) -&gt; C (2) -&gt; D (2)   = 7
+
+Critical path: A-B-D, 9 units.
+Float on C = 9 - 7 = 2 units.</div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Lead, lag and compression</span><span class="zh">第 3 步 · 提前量、滞后量与压缩</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>lead</b> lets a successor start earlier, overlapping the predecessor: start laying carpet two days before painting ends. A <b>lag</b> forces a wait: let concrete cure for three days before building on it.</p>
+<p class="zh" style="margin:0 0 8px"><b>提前量</b>让后续活动更早开始，与前置活动重叠：刷漆结束前两天就开始铺地毯。<b>滞后量</b>强制等待：混凝土养护三天后才能在上面施工。</p>
+<p class="en" style="margin:0 0 8px">To shorten the schedule, compress the critical path. <b>Crashing</b> adds resources, such as overtime or extra people, so it <b>raises cost</b>. <b>Fast tracking</b> runs activities in parallel that were planned in sequence, so it <b>raises risk</b> of rework. Compression only helps on the critical path.</p>
+<p class="zh" style="margin:0 0 8px">要缩短工期，就压缩关键路径。<b>赶工</b>是增加资源，比如加班或加人，所以会<b>增加成本</b>。<b>快速跟进</b>是把原计划顺序做的活动改成并行，所以会<b>增加返工风险</b>。压缩只有用在关键路径上才有效。</p></div>
+<div class="try" id="p3"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Do it:</b> draw five activities with two paths. Add durations, find the critical path and the float on the other path.</span><span class="zh"><b>动手做：</b>画五个活动、两条路径，加上工期，找出关键路径和另一条路径的浮动。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> state one FS, one SS and one FF example from your own life.</span><span class="zh"><b>核对：</b>从你自己的生活里各举一个 FS、SS、FF 的例子。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• FS is the default; read dependencies as predecessor then successor.<br>• The critical path is the longest path and has zero float.<br>• Float is how far an activity can slip without hurting the end date.<br>• A lead overlaps activities; a lag forces a wait.<br>• Crashing adds cost; fast tracking adds risk; both work only on the critical path.</p><p class="zh" style="margin:0">• FS 是默认关系；读依赖时先前置、后后续。<br>• 关键路径是最长路径，浮动为零。<br>• 浮动时间是活动在不影响完工日期下可拖延的长度。<br>• 提前量让活动重叠，滞后量强制等待。<br>• 赶工增加成本，快速跟进增加风险，两者只对关键路径有效。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>PMP</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Pen and paper","zh":"纸笔"},"know":{"en":"What an activity is and that activities take time.","zh":"知道什么是活动，活动需要时间。"},"goals":{"en":["Name FS, SS, FF and SF with a plain example","Find the critical path and float","Tell crashing from fast tracking"],"zh":["用简单例子说出 FS、SS、FF、SF","找出关键路径并理解浮动时间","区分赶工与快速跟进"]},"prev":["08-scope-and-requirements.html"]}}</script>
+<script src="../tracks.js?v=ed1b1518"></script><script src="lessons.js?v=2b6c5de3"></script><script src="../assets/site.js?v=50672dc8"></script><script src="../assets/teach.js?v=ede6f40f"></script>
+<script src="js/09-schedule-and-dependencies.js?v=743971e7"></script></body></html>
