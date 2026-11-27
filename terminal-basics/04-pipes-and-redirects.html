@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pipes and redirects | TX Learns</title>
+<meta name="description" content="Send output to a file, chain small commands together and see why this beats one big tool"><meta property="og:title" content="Pipes and redirects | TX Learns"><meta property="og:description" content="Send output to a file, chain small commands together and see why this beats one big tool"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/terminal-basics/04-pipes-and-redirects.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/pmp.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/terminal-basics/04-pipes-and-redirects.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/terminal-basics/04-pipes-and-redirects.html","url":"https://tx-learns.vercel.app/terminal-basics/04-pipes-and-redirects.html","name":"Pipes and redirects","alternateName":"管道与重定向","description":"Send output to a file, chain small commands together and see why this beats one big tool","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Combining and automating","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Terminal basics","url":"https://tx-learns.vercel.app/terminal-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Terminal basics","item":"https://tx-learns.vercel.app/terminal-basics/index.html"},{"@type":"ListItem","position":3,"name":"Pipes and redirects","item":"https://tx-learns.vercel.app/terminal-basics/04-pipes-and-redirects.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Combining and automating · Lesson 1</span><span class="zh">组合与自动化 · 第 1 课</span></span><h1><span class="en">Pipes and redirects</span><span class="zh">管道与重定向</span></h1><p class="meta"><span class="en">Send output to a file, chain small commands together and see why this beats one big tool · ~10 min · reading and practice</span><span class="zh">把输出写进文件，把小命令串起来，并明白为什么这比一个大工具更强 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Output to a file</span><span class="zh">第 1 步 · 输出到文件</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Commands print to the screen, but <code>&gt;</code> sends that output into a file instead: <code>ls &gt; files.txt</code>. It replaces the file if it exists. <code>&gt;&gt;</code> appends to the end instead. Nothing is printed on screen, so open the file to see the result.</p>
+<p class="zh" style="margin:0 0 8px">命令默认打印到屏幕，而 <code>&gt;</code> 把输出改送进文件：<code>ls &gt; files.txt</code>。文件已存在时会被替换。<code>&gt;&gt;</code> 则追加到末尾。屏幕上不会打印什么，要打开文件看结果。</p></div>
+<div class="codebox" data-file="terminal" data-lang="bash">echo "tea" &gt; menu.txt
+echo "coffee" &gt;&gt; menu.txt
+cat menu.txt</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · The pipe</span><span class="zh">第 2 步 · 管道</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A pipe <code>|</code> feeds the output of one command into the next as its input. Each tool does one small job and you combine them: <code>cat log.txt | grep ERROR | wc -l</code> reads the log, keeps the error lines and counts them. This is the idea behind most shell work.</p>
+<p class="zh" style="margin:0 0 8px">管道 <code>|</code> 把一条命令的输出送进下一条命令当输入。每个工具只做一件小事，再把它们组合起来：<code>cat log.txt | grep ERROR | wc -l</code> 读日志、留下错误行、再数出行数。大多数 shell 工作都基于这个想法。</p></div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">Step 3 · Build a pipeline</span><span class="zh">第 3 步 · 拼一条流水线</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Build pipelines one step at a time: run the first command, check the output, then add the next stage. <code>sort</code> orders lines, <code>uniq -c</code> counts neighbours that repeat (so sort first), and <code>head</code> keeps the top few. A stage that goes wrong is easy to spot when you grew the line gradually.</p>
+<p class="zh" style="margin:0 0 8px">一步一步拼流水线：先运行第一条命令，检查输出，再加下一级。<code>sort</code> 给行排序，<code>uniq -c</code> 统计相邻重复的行（所以要先排序），<code>head</code> 只留前几行。逐步加长，哪一级出错就很容易发现。</p>
+<p class="en" style="margin:0 0 8px">What does each part do?</p>
+<p class="zh" style="margin:0 0 8px">每一部分做什么？</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> build a pipeline that counts how many lines of a file contain a word.</span><span class="zh"><b>试一试：</b>拼一条流水线，数出一个文件里有多少行含有某个词。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> add one stage at a time and check the output after each.</span><span class="zh"><b>核对：</b>每次只加一级，每加一级就检查输出。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• > replaces a file and >> appends.<br>• A pipe passes one command’s output to the next.<br>• Grow a pipeline one stage at a time.</p><p class="zh" style="margin:0">• > 替换文件，>> 追加。<br>• 管道把一条命令的输出传给下一条。<br>• 一级一级地拼流水线。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Terminal basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"A terminal (macOS or Linux; on Windows use WSL)","zh":"一个终端（macOS 或 Linux；Windows 用 WSL）"},"know":{"en":"cat, grep and wc (see “Reading and searching”).","zh":"会用 cat、grep、wc（见“查看与搜索”）。"},"goals":{"en":["Redirect output with > and >>","Chain commands with a pipe","Build a small pipeline"],"zh":["用 > 和 >> 重定向输出","用管道串联命令","拼出一条小流水线"]},"prev":["03-reading-and-searching.html"]}}</script>
+<script src="../tracks.js?v=c1c7bcfb"></script><script src="lessons.js?v=24194f12"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/04-pipes-and-redirects.js?v=a696e020"></script></body></html>

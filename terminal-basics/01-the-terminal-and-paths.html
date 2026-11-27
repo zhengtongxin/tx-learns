@@ -1,0 +1,47 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The terminal and paths | TX Learns</title>
+<meta name="description" content="Know where you are, move around and tell absolute paths from relative ones"><meta property="og:title" content="The terminal and paths | TX Learns"><meta property="og:description" content="Know where you are, move around and tell absolute paths from relative ones"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/terminal-basics/01-the-terminal-and-paths.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/pmp.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/terminal-basics/01-the-terminal-and-paths.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=73561995"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/terminal-basics/01-the-terminal-and-paths.html","url":"https://tx-learns.vercel.app/terminal-basics/01-the-terminal-and-paths.html","name":"The terminal and paths","alternateName":"终端与路径","description":"Know where you are, move around and tell absolute paths from relative ones","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Moving around","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Terminal basics","url":"https://tx-learns.vercel.app/terminal-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Terminal basics","item":"https://tx-learns.vercel.app/terminal-basics/index.html"},{"@type":"ListItem","position":3,"name":"The terminal and paths","item":"https://tx-learns.vercel.app/terminal-basics/01-the-terminal-and-paths.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Moving around · Lesson 1</span><span class="zh">在文件系统里移动 · 第 1 课</span></span><h1><span class="en">The terminal and paths</span><span class="zh">终端与路径</span></h1><p class="meta"><span class="en">Know where you are, move around and tell absolute paths from relative ones · ~10 min · reading and practice</span><span class="zh">知道自己在哪，学会移动，并分清绝对路径与相对路径 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Text in, text out</span><span class="zh">第 1 步 · 输入文字，得到文字</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The <b>terminal</b> is a window where you type a command and read the answer, instead of clicking. A <b>shell</b> (usually bash or zsh) reads each line you type and runs it. Anything you can click you can also type, and what you type can be saved, repeated and automated. That is why developers and AI coding tools live in it.</p>
+<p class="zh" style="margin:0 0 8px"><b>终端</b>是一个你输入命令、读取结果的窗口，而不是点击。<b>shell</b>（通常是 bash 或 zsh）读取你输入的每一行并执行。你能点的，也都能打出来；而打出来的东西可以保存、重复、自动化。所以开发者和 AI 编程工具都住在里面。</p>
+<p class="en" style="margin:0 0 8px">Every command has the same shape: the program, then options, then what to act on, for example <code>ls -l notes</code>.</p>
+<p class="zh" style="margin:0 0 8px">每条命令的形状都一样：程序名，然后选项，然后操作对象，比如 <code>ls -l notes</code>。</p></div>
+
+<h2><span class="en">Step 2 · Where am I</span><span class="zh">第 2 步 · 我在哪</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">At any moment the shell is “in” one folder, the <b>current directory</b>. <code>pwd</code> prints it, <code>ls</code> lists what is inside, and <code>cd name</code> moves into a folder. <code>cd ..</code> goes up one level, and <code>cd</code> alone goes to your home folder.</p>
+<p class="zh" style="margin:0 0 8px">任何时候 shell 都“在”某一个文件夹里，叫<b>当前目录</b>。<code>pwd</code> 打印它，<code>ls</code> 列出里面的内容，<code>cd 名字</code> 进入某个文件夹。<code>cd ..</code> 回到上一层，单独一个 <code>cd</code> 回到你的主目录。</p></div>
+<div class="codebox" data-file="terminal" data-lang="bash">pwd
+ls
+cd projects
+ls
+cd ..</div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 3 · Absolute and relative paths</span><span class="zh">第 3 步 · 绝对路径与相对路径</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">An <b>absolute path</b> starts at the root <code>/</code> and means the same thing from anywhere: <code>/home/mei/projects</code>. A <b>relative path</b> starts from where you are: <code>projects/shop</code>, or <code>../notes</code> for “up one, then notes”. <code>~</code> stands for your home folder. Use relative paths for speed and absolute ones when you must be sure.</p>
+<p class="zh" style="margin:0 0 8px"><b>绝对路径</b>从根目录 <code>/</code> 开始，无论你在哪里意思都一样：<code>/home/mei/projects</code>。<b>相对路径</b>从你所在的位置开始：<code>projects/shop</code>，或 <code>../notes</code>，意思是“上一层，再进 notes”。<code>~</code> 代表你的主目录。图快用相对路径，要确保无误时用绝对路径。</p>
+<p class="en" style="margin:0 0 8px">Sort each path.</p>
+<p class="zh" style="margin:0 0 8px">给每个路径分类。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> open a terminal, run <code>pwd</code>, <code>ls</code>, then move into any folder and back.</span><span class="zh"><b>试一试：</b>打开终端，运行 <code>pwd</code>、<code>ls</code>，再进入任意文件夹并回来。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> reach the same folder once with an absolute path and once with a relative one.</span><span class="zh"><b>核对：</b>用绝对路径和相对路径各到达同一个文件夹一次。</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• The shell is always in one current directory; pwd shows it.<br>• ls lists, cd moves, cd .. goes up.<br>• Absolute paths start with /, relative ones start from here.</p><p class="zh" style="margin:0">• shell 总在某个当前目录里；pwd 显示它。<br>• ls 列出，cd 移动，cd .. 上一层。<br>• 绝对路径以 / 开头，相对路径从当前位置算起。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Terminal basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"A terminal (macOS or Linux; on Windows use WSL)","zh":"一个终端（macOS 或 Linux；Windows 用 WSL）"},"know":{"en":"Nothing needed.","zh":"无需基础。"},"goals":{"en":["Say what the terminal does","Use pwd, ls and cd","Tell absolute paths from relative paths"],"zh":["说出终端是做什么的","会用 pwd、ls 和 cd","分清绝对路径和相对路径"]}}}</script>
+<script src="../tracks.js?v=c1c7bcfb"></script><script src="lessons.js?v=24194f12"></script><script src="../assets/site.js?v=f280e17c"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/01-the-terminal-and-paths.js?v=9cb2cd18"></script></body></html>
