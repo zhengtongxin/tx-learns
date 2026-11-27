@@ -24,7 +24,7 @@
  /* keyword stems match by prefix ("negotiat" matches "negotiation") */
  L.domainScore=function(tokSet,kw){var n=0,k=kw.toLowerCase().split(/\s+/),toks=Object.keys(tokSet);
   k.forEach(function(w){if(!w)return;if(/[㐀-鿿]/.test(w)){for(var i=0;i<w.length-1;i++)if(tokSet[w.substr(i,2)]){n+=1;break}}
-   else for(var j=0;j<toks.length;j++)if(toks[j].indexOf(w)===0){n+=1;break}});return n};
+   else for(var j=0;j<toks.length;j++)if(toks[j].indexOf(w)===0){n+=1;break}});return n/Math.sqrt(k.length||1)};
  L.assignAreas=function(chunks,domains){chunks.forEach(function(c){var t=L.tokens(c.text),best=null,bs=0;
   domains.forEach(function(d){var s=L.domainScore(t,d.kw);if(s>bs){bs=s;best=d.id}});c.area=best;c.score=bs});return chunks};
  /* strength 0..1 from the last results (1 = right), newest weighted most; null when never tested */

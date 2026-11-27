@@ -19,6 +19,9 @@ ok(p.find(x => x.id === 'b').k > p.find(x => x.id === 'a').k, 'a weak area gets 
 ok(L.parseQuestion('{"question":"short","options":["a","b","c","d"],"answer":1}') === null, 'a bad question is refused');
 ok(L.parseQuestion('{"question":"Which step comes first when two members disagree?","options":["Listen to both","Ignore it","Fire one","Wait"],"answer":"A"}')?.a === 0, 'a good question parses');
 
+{ const g = { window: {} }; globalThis.window = g.window; await import('../coach/exams.js'); const D = globalThis.window.COACH_DOMAINS.D26;
+  const t = ['The team leader should negotiate between two members in conflict and coach them with emotional intelligence.', 'Update the risk register, schedule and budget, then review the critical path and quality plan.', 'Check regulatory compliance and the business case so the benefits and organizational strategy stay aligned.'].map(text => ({ text }));
+  L.assignAreas(t, D); ok(t.map(c => c.area).join() === 'people,process,biz', 'a passage goes to the area its words belong to, not the one with the longest word list'); }
 if (!fx) { process.exit(bad ? 1 : 0); }
 const mime = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.bcmap': 'application/octet-stream' };
 const srv = createServer((q, r) => { let f = join(root, decodeURIComponent(q.url.split('?')[0])); if (f.endsWith('/')) f += 'index.html'; if (!existsSync(f)) { r.writeHead(404); r.end(); return; } r.writeHead(200, { 'content-type': mime[extname(f)] || 'application/octet-stream' }); r.end(readFileSync(f)); }).listen(0);
