@@ -197,6 +197,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 #system[data-f="3"] [data-s]:not([data-s~="3"]){opacity:.2}
 #system[data-f="4"] [data-s]:not([data-s~="4"]){opacity:.2}
 #system[data-f="5"] [data-s]:not([data-s~="5"]){opacity:.2}
+#system[data-f="6"] [data-s]:not([data-s~="6"]){opacity:.2}
 .flow li[tabindex]{cursor:pointer;outline:none;transition:opacity .28s ease}
 .flow li[tabindex]::after{content:"";position:absolute;inset:0 -10px -6px;border-radius:8px;border:1px solid transparent;transition:border-color .28s,background-color .28s;pointer-events:none}
 .flow li.on::after,.flow li:focus-visible::after{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 7%,transparent)}
@@ -209,7 +210,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 .btn:hover,.btn:focus-visible{filter:brightness(1.1)}
 .pnav{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 22px;margin:26px 0 0;font:600 12.5px var(--mono);letter-spacing:.04em}
 .pnav a{color:var(--mut);text-decoration:none;padding:8px 0;min-height:20px}.pnav a:hover,.pnav a:focus-visible{color:var(--acc2)}
-.flow{list-style:none;margin:26px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:0 26px;counter-reset:f}
+.flow{list-style:none;margin:26px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:0 22px;counter-reset:f}
 .flow li{position:relative;padding-top:34px;border-top:1px solid var(--line)}
 .flow li>b{position:absolute;top:-1px;left:0;padding:3px 0 0;border-top:2px solid var(--acc);font:700 12px var(--mono);color:var(--acc2);width:26px}
 .flow h3{margin:0 0 6px;font-weight:700}
@@ -280,13 +281,14 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
 
 <section id="system">
 <h2><span class="en">How a study round works</span><span class="zh">一轮学习是怎么跑的</span></h2>
-<p><span class="en">Five steps, then the full system, left to right. Hover or tap an agent for details.</span><span class="zh">先是五步，再是完整系统，从左往右读。移上去或点一下 agent 看详情。</span></p>
-<ol class="flow" role="group" aria-label="Five steps of the study loop · 学习循环的五步">
+<p><span class="en">Six steps, then the full system, left to right. Hover or tap an agent for details.</span><span class="zh">先是六步，再是完整系统，从左往右读。移上去或点一下 agent 看详情。</span></p>
+<ol class="flow" role="group" aria-label="Six steps of the study loop · 学习循环的六步">
 <li><b>1</b><h3><span class="en">Hand in material</span><span class="zh">交出资料</span></h3><p><span class="en">Your slides and PDFs are read on your device and cut into short passages.</span><span class="zh">你的课件和 PDF 在你的设备上读取，切成短段落。</span></p><i class="ty me"><span class="en">you</span><span class="zh">你</span></i></li>
 <li><b>2</b><h3><span class="en">Get quizzed</span><span class="zh">出题诊断</span></h3><p><span class="en">An open model writes one original question per passage, while you answer the one before.</span><span class="zh">开源模型为每个段落写一道原创题，在你答上一题时就已经在写下一题。</span></p><i class="ty ai"><span class="en">ai</span><span class="zh">AI</span></i></li>
 <li><b>3</b><h3><span class="en">Find weak spots</span><span class="zh">找出薄弱点</span></h3><p><span class="en">Each answer is marked and updates a strength map, down to the passage you missed.</span><span class="zh">每个答案都会批改，并更新强弱图，细到你答错的段落。</span></p><i class="ty ai"><span class="en">ai</span><span class="zh">AI</span></i></li>
 <li><b>4</b><h3><span class="en">Drill by weight</span><span class="zh">按比例刷题</span></h3><p><span class="en">With an exam goal you enter the exam’s areas and weights (or pick a ready-made outline), and questions follow those shares, tilted toward your weak areas.</span><span class="zh">选考试目标时，你填写该考试的领域和比例（或选现成考纲），题目按这些比例出，并向你的弱项倾斜。</span></p><i class="ty ai"><span class="en">ai</span><span class="zh">AI</span></i></li>
 <li><b>5</b><h3><span class="en">Re-analyse</span><span class="zh">重新分析</span></h3><p><span class="en">After each round the plan is rebuilt: today’s questions, weakest first.</span><span class="zh">每轮之后重建计划：今天的题目，最弱的排在前面。</span></p><i class="ty ai"><span class="en">ai</span><span class="zh">AI</span></i></li>
+<li><b>6</b><h3><span class="en">Turn it into a track</span><span class="zh">变成一条路线</span></h3><p><span class="en">Optional. After you read it, one click sends an outline, key terms and your own notes to GitHub, and the site’s content agent writes a track from them. You read it all first.</span><span class="zh">可选。你看过之后，点一下就把提纲、关键词和你自己的笔记发到 GitHub，站点的内容 agent 据此写成一条路线。</span></p><i class="ty me"><span class="en">you</span><span class="zh">你</span></i></li>
 </ol>
 <div class="panel" id="ov-panel"><svg id="ov" viewBox="0 0 1100 510" role="group" aria-label="System diagram: files, passages, question writer, you, grader, weak-spot analyst, planner"></svg></div>
 <ol class="olist" id="ov-list"></ol>
@@ -336,8 +338,11 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
    strength:{c:3,y:RB,en:'Strength map',zh:'强弱图',m:['saved in this browser','存在这个浏览器里'],dn:'One bar per area, from your recent answers. Weak areas get more questions next time.',dz:'每个领域一根条，来自你近期的答案。弱项下次会分到更多题。'},
    planner:{c:2,y:RB,agent:'planner'},
    plan:{c:1,y:RB,en:'Today’s plan',zh:'今天的计划',m:['what to practise','今天练什么'],dn:'Shown when you open the tool: questions per area and why (weak, not tested yet, due for review).',dz:'打开工具时显示：每个领域几题，以及原因（薄弱、还没测过、该复习）。'},
+   share:{c:3,y:RT,en:'Track notes',zh:'路线笔记',m:['outline · key terms','提纲 · 关键词'],dn:'Optional. Built in your browser from your passages: the first line of each passage (cut to 80 characters; never file names), the most frequent key terms, the exam areas, and, if you ask, short summaries the model wrote in its own words (any that repeat the source are refused). Your own notes go in beside them. You see the whole text and tick that you have read it before anything is sent. Your files and their names are not included: only those first lines, key terms, exam areas and any summaries you asked for.',dz:'可选。在你的浏览器里用你的段落生成：每段的第一行（截到 80 个字符，不含文件名）、出现最多的关键词、考纲领域，以及（如果你要）模型用自己的话写的简短概括（重复原文的会被拒绝）。你自己的笔记放在旁边。发送前你会看到全部文字，并勾选确认已读。不含你的文件和文件名：只有这些第一行、关键词、考纲领域，以及你要求的概括。'},
+   gh:{c:2,y:RT,en:'GitHub',zh:'GitHub',m:['you press Send','你点发送'],dn:'“Send to GitHub” opens GitHub’s new-file page with everything filled in (a long text is copied for you to paste). The site’s owner presses Commit; anyone else submits a pull request that the owner reads before merging. No token and no server of ours is involved.',dz:'“发到 GitHub”会打开 GitHub 的新建文件页并填好全部内容（太长的话会先复制好让你粘贴）。站点拥有者按 Commit；其他人提交的 pull request 会先由拥有者看过再合并。不涉及令牌，也不经过我们的服务器。'},
+   track:{c:1,y:RT,en:'New track',zh:'新路线',m:['under “Pick a track”','在“选一条路线”里'],dn:'The site’s content agent drafts lessons from the notes it was sent, in its own words, and says what is missing. After the usual checks the track appears under “From learners” in “Pick a track”, or as one more lesson in the track you chose.',dz:'站点的内容 agent 根据发来的提纲、关键词和笔记，用自己的话起草各课，并写明缺了什么。通过常规检查后，路线出现在“选一条路线”的“来自学习者”里，或作为你所选路线里多出的一课。'},
    goal:{c:1,y:RM,en:'Goal & outline',zh:'目标与考纲',m:['understand · exam shares','弄懂 · 考纲比例'],dn:'You pick “understand the material” or an exam. For an exam, you type its areas and weights from the official outline, or pick a ready-made one.',dz:'你选“弄懂资料”或某场考试。考试的领域和比例由你按官方考纲填写，或选现成考纲。'}};
-  var FS={files:'1',reader:'1',matcher:'1',passages:'1 2',model:'2',writer:'2 4',you:'2 3',grader:'3',analyst:'3 5',strength:'3 5',planner:'4 5',goal:'4',plan:'5'};
+  var FS={files:'1',reader:'1',matcher:'1',passages:'1 2 6',model:'2 6',writer:'2 4',you:'2 3',grader:'3',analyst:'3 5',strength:'3 5',planner:'4 5',goal:'4',plan:'5',share:'6',gh:'6',track:'6'};
   function geo(n){var a=!!n.agent,w=a?AW:NW,h=a?AH:NH,x=X(n.c);return {x:x,y:n.y,w:w,h:h,l:x-w/2,r:x+w/2,t:n.y-h/2,b:n.y+h/2}}
   function box(id){var n=N[id],g=geo(n),a=n.agent&&NAME[n.agent],o;
    if(a){o='<g class="nd ag" style="--h:'+a.hue+'" data-s="'+FS[id]+'" data-node="'+id+'" tabindex="0" role="button"><rect x="'+f(g.l)+'" y="'+f(g.t)+'" width="'+g.w+'" height="'+g.h+'" rx="6"/>'+
@@ -356,6 +361,8 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
     o+='<text class="col" x="'+f(x0+16)+'" y="32"><tspan class="n">0'+(i+1)+'</tspan>  '+ts(c[0],c[1])+'</text><line class="rule" x1="'+f(x0+16)+'" y1="44" x2="'+f(x0+CW-16)+'" y2="44"/>'});
    var pl=geo(N.planner),gl=geo(N.goal),wr=geo(N.writer);
    o+=Hr('files','reader','1')+Hr('reader','matcher','1')+Hr('matcher','passages','1')+Hr('passages','writer','2')+Hr('writer','you','2')+V('model','writer','2')+V('you','grader','3')+Hl('grader','analyst','3')+Hl('analyst','strength','3')+Hl('strength','planner','5')+Hl('planner','plan','5');
+   var sh=geo(N.share),pa=geo(N.passages),md=geo(N.model);
+   o+=e('','M'+f(pa.x)+','+f(pa.t)+' V'+f(sh.b+2),'6')+e('','M'+f(md.l)+','+md.y+' H'+f(sh.r+2),'6')+Hl('share','gh','6')+Hl('gh','track','6');
    o+=e('','M'+f(gl.r)+','+gl.y+' H'+f(pl.x-30)+' V'+f(pl.t-2),'4');
    o+=e('lp','M'+f(pl.x+30)+','+f(pl.t)+' V'+gl.y+' H'+f(wr.x)+' V'+f(wr.b+2),'4');
    o+=lab(geo(N.you).x+34,(geo(N.you).b+geo(N.grader).t)/2,'answer','作答','3')+lab((gl.r+pl.x-30)/2+10,gl.y-8,'exam shares','考纲比例','4')+lab((pl.x+wr.x)/2+30,gl.y-8,'weighted questions','加权出题','4');
@@ -363,7 +370,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
    document.getElementById('ov').innerHTML=o}
   draw();
   // phone: the same path as an ordered list; tapping an agent opens its details in place
-  var ORDER=[['Hand in material','交出资料',['files','reader','matcher','passages']],['Get quizzed','出题',['model','writer','you']],['Find weak spots','找弱点',['grader','analyst','strength']],['Plan the next round','计划下一轮',['goal','planner','plan']]];
+  var ORDER=[['Hand in material','交出资料',['files','reader','matcher','passages']],['Get quizzed','出题',['model','writer','you']],['Find weak spots','找弱点',['grader','analyst','strength']],['Plan the next round','计划下一轮',['goal','planner','plan']],['Turn it into a track','变成一条路线',['share','gh','track']]];
   function spec(a){return '<dl class="spec"><dt>'+t('Runs','触发')+'</dt><dd>'+t(a.runs[0],a.runs[1])+'</dd><dt>'+t('Output','产出')+'</dt><dd>'+t(a.output[0],a.output[1])+'</dd></dl>'}
   function details(id){var n=N[id],a=n.agent&&NAME[n.agent];return a?'<p>'+t(a.den,a.dzh)+'</p>'+spec(a):'<p>'+t(n.dn,n.dz)+'</p>'}
   document.getElementById('ov-list').innerHTML=ORDER.map(function(l,i){return '<li class="h">0'+(i+1)+' · '+t(l[0],l[1])+'</li>'+l[2].map(function(id){var n=N[id],a=n.agent&&NAME[n.agent];
@@ -410,8 +417,9 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
    ['Original questions','原创题目','✍️','Every question is written fresh from your passage. No question bank is copied.','每道题都根据你的段落重新写。不会复制任何题库。'],
    ['Outline shares','按考纲比例','⚖️','Exam questions follow the official content shares of each area. The outline version is yours to pick.','考试题目按官方各领域的内容占比。考纲版本由你选择。'],
    ['Wrong questions can go','错题可以删','🚩','A small model gets some questions wrong. One click removes a bad question’s result from your map.','小模型有些题会出错。点一下就能把坏题的结果从你的强弱图里去掉。'],
+   ['You see what is sent','发出去的你都看得到','👁️','Sharing is optional. Before anything leaves your device you see the whole text, your files and their names are never in it, and you tick that you have read it and that it becomes public.','分享是可选的。任何内容离开你的设备之前，你都能看到全部文字；你的文件和文件名从不包含在内；你要勾选确认已读，并知道它会公开。'],
    ['Plain limits','把限制说清楚','ℹ️','Desktop Chrome or Edge, text only, a smaller model than the big chat apps. Check answers you doubt.','电脑版 Chrome 或 Edge，只读文字，模型比大型聊天应用小。有疑问的答案请自己核对。']];
-  var GG=[[['Your privacy','你的隐私'],[0,1,2]],[['The AI','AI'],[3,4,8]],[['The questions','题目'],[5,6,7]]];
+  var GG=[[['Your privacy','你的隐私'],[0,1,2,8]],[['The AI','AI'],[3,4,9]],[['The questions','题目'],[5,6,7]]];
   document.getElementById('guards').innerHTML=GG.map(function(gr){return '<h3 class="sub3 gh">'+t(gr[0][0],gr[0][1])+'</h3><ul class="gl2" role="group">'+gr[1].map(function(i){var g=G[i];return '<li class="guard" tabindex="0" role="button" data-i="'+i+'"><span class="gi" aria-hidden="true">'+g[2]+'</span><span class="gt"><b>'+t(g[0],g[1])+'</b></span></li>'}).join('')+'</ul>'}).join('');
   document.querySelectorAll('#guards .guard').forEach(function(el){var g=G[el.dataset.i];wire(el,t(g[0],g[1]),'<p>'+t(g[3],g[4])+'</p>',0)});
   var C=[['Local first','本地优先','🏠','Keeping data on the device it belongs to: here, IndexedDB in your browser.','把数据留在它所属的设备上：这里是你浏览器里的 IndexedDB。'],

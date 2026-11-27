@@ -258,7 +258,7 @@ function printBook(){
 
 /* ---------- share notes (opens GitHub's own new-file page; nothing is sent from here) ---------- */
 var REPO='zhengtongxin/tx-learns';
-function defTopic(){return (S.noteTopic||'').trim()||(S.exam==='custom'?(S.cname||'').trim():exam().e.name.en)||((S.mats[0]&&S.mats[0].name)||'').replace(/\.[a-z0-9]+$/i,'').trim()||PH('My notes','我的笔记')}
+function defTopic(){return (S.noteTopic||'').trim()||(S.exam==='custom'?(S.cname||'').trim():exam().e.name.en)||PH('My notes','我的笔记')}
 /* where the notes go: a brand-new track (default), or one more lesson in an existing track */
 function trackChoices(){return (window.TRACKS||[]).map(function(t){return {id:t.id,en:t.title.en,zh:t.title.zh}})}
 function shareBody(o){
@@ -266,7 +266,7 @@ function shareBody(o){
  var weak=areas().map(function(a){var v=Lg.strength(hist(a.id));return {n:a.name.en,p:v==null?null:Math.round(v*100)}}).filter(function(a){return a.p!=null}).sort(function(a,b){return a.p-b.p});
  var topic=defTopic(),tr=S.noteTrack||'new',dg=CH.length?Lg.digest(CH,S.mats,{titles:o.titles,terms:o.terms}):{outline:[],terms:[]},t,sec='';
  if(useExam()){var x=exam();sec+='\n## Exam areas\n'+x.v.domains.map(function(a){return '- '+a.name.en+': '+a.weight+'%'}).join('\n')+'\n'}
- if(dg.outline.some(function(m){return m.titles.length}))sec+='\n## Outline of my material (headings only, no text copied)\n'+dg.outline.filter(function(m){return m.titles.length}).map(function(m){return '### Material '+m.n+' ('+m.kind+')\n'+m.titles.map(function(x,i){return (i+1)+'. '+x}).join('\n')}).join('\n\n')+'\n';
+ if(dg.outline.some(function(m){return m.titles.length}))sec+='\n## Outline of my material (the first line of each passage, cut short)\n'+dg.outline.filter(function(m){return m.titles.length}).map(function(m){return '### Material '+m.n+' ('+m.kind+')\n'+m.titles.map(function(x,i){return (i+1)+'. '+x}).join('\n')}).join('\n\n')+'\n';
  if(dg.terms.length)sec+='\n## Key terms\n'+dg.terms.join(', ')+'\n';
  if((o.sums==null?true:o.sums)&&S.sums&&S.sums.length)sec+='\n## Condensed points (written by the AI in its own words)\n'+S.sums.map(function(x){return '- '+x}).join('\n')+'\n';
  t='# '+topic+'\n\nTrack: '+tr+'\n'+(tr==='new'?'Subject: community\n':'')+'Language: '+pageLang()+'\n'+sec+'\n## Where I was weak\n'+(weak.length?weak.slice(0,4).map(function(a){return '- '+a.n+': '+a.p+'% right in my practice'}).join('\n'):'- (no practice yet)')+'\n\n## What I learned, in my own words\n'+((S.notes||'').trim()||'(none yet)')+'\n';
@@ -295,7 +295,7 @@ async function makeSums(){
  S.sums=out;save();sBusy=false;say(out.length+' short summaries added; check them below.',out.length+' 条简短概括已加入，请在下面核对。');renderShare()}
 function renderShare(){
  var el=$('share');if(!el)return;var n=(S.notes||''),u=shareUrl(),ok=shareOK(),tr=S.noteTrack||'new';
- el.innerHTML='<p>'+T('One click sends what you studied to GitHub, and the content creator agent turns it into a track in the knowledge base. What goes is built here in your browser: an outline of headings, the key terms, any short summaries you add, and your own notes. Your files, their names and their text are never sent. Check it in the box below first.','一键把你学的内容发到 GitHub，内容创作 agent 会把它写成知识库里的一条路线。发出去的内容在你的浏览器里生成：标题提纲、关键词、你加的简短概括，以及你自己的笔记。你的文件、文件名和原文不会被发送。发送前请先在下面的框里检查。')+'</p>'+
+ el.innerHTML='<p>'+T('One click sends what you studied to GitHub, and the content creator agent turns it into a track in the knowledge base. What goes is built here in your browser: an outline of headings, the key terms, any short summaries you add, and your own notes. Your files and their names are never sent; the outline holds only the first line of each passage. Check it in the box below first.','一键把你学的内容发到 GitHub，内容创作 agent 会把它写成知识库里的一条路线。发出去的内容在你的浏览器里生成：标题提纲、关键词、你加的简短概括，以及你自己的笔记。你的文件和文件名不会被发送；提纲里只有每段的第一行。发送前请先在下面的框里检查。')+'</p>'+
  '<p class="rowf"><label>'+T('Topic','主题')+' <input type="text" id="ntopic" maxlength="60" value="'+esc(S.noteTopic||'')+'" placeholder="'+esc(defTopic())+'"></label>'+
  ' <label>'+T('Goes to','放到')+' <select data-act="track" aria-label="Where it goes · 放到哪里"><option value="new"'+(tr==='new'?' selected':'')+'>A new track · 一条新路线</option>'+trackChoices().map(function(t){return '<option value="'+t.id+'"'+(t.id===tr?' selected':'')+'>One more lesson in '+esc(t.en)+' · 加到 '+esc(t.zh)+'</option>'}).join('')+'</select></label></p>'+
  (CH.length?'<p class="acts"><button class="btn sm" data-act="sums"'+(sBusy?' disabled':'')+'>'+(sBusy?T('Summarising…','正在概括…'):(S.sums&&S.sums.length?T('Redo the short summaries','重新生成简短概括'):T('Add short summaries with the AI (slower)','用 AI 加简短概括（较慢）')))+'</button></p>':'')+
