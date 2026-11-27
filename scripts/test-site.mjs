@@ -122,6 +122,24 @@ try {
     eq(await page.$$eval('.track-list .cc', a => a.length), D.length, 'back at the subjects');
   });
 
+  await test('topics menu', async page => {
+    // The menu lists subjects, not every track: a subject with several tracks opens to show them, a subject with one track is that track's row.
+    const D = loadWindow('tracks.js').DOMAINS.map(d => T.filter(t => (t.domain || 'ai') === d.id)).filter(ts => ts.length), many = D.find(ts => ts.length > 1), one = D.find(ts => ts.length === 1);
+    await page.goto(base + 'tracks.html'); await page.click('.menu-btn');
+    eq(await page.$$eval('.side > .cg', a => a.length), D.length, 'one top-level row per subject');
+    ok(!(await page.isVisible(`.side a[href="${many[0].href}"]`)), 'the tracks of a subject stay folded until it is opened');
+    await page.click('.side .dg > .cg-h');
+    eq(await page.$$eval('.side .dg.open > .cg-b a', a => a.map(x => x.getAttribute('href'))), many.map(t => t.href), 'an opened subject lists its tracks');
+    if (one) ok(await page.isVisible(`.side > .cg > a.cg-h[href="${one[0].href}"]`), 'a subject with one track is a row at the same level');
+    // Inside a lesson: the subject of this track is open, with one box per track; a one-track subject is its own box at the top level.
+    await page.goto(base + lesson); await page.click('.menu-btn');
+    eq(await page.$$eval('.side > .cg', a => a.length), D.length, 'top-level rows inside a lesson');
+    eq(await page.$$eval('.side .dg.open > .cg-b > div > .cg', a => a.map(x => x.dataset.c)), many.map(t => t.id), 'the track boxes of the open subject');
+    ok(await page.waitForSelector('.side a[aria-current="page"]', { state: 'visible', timeout: 3000 }).then(() => true, () => false), 'the current lesson is marked and shown');
+    await page.click('.side .dg > .cg-h'); await page.reload(); await page.click('.menu-btn');
+    ok(!(await page.$('.side .dg.open')), 'a folded subject stays folded after a reload');
+  });
+
   await test('what next', async page => {
     // After a track's last lesson the card offers exactly the tracks it names in tracks.js (next), never the next one in the list, plus its go link.
     const X = loadWindow('tracks-index.js').TRACK_INDEX;

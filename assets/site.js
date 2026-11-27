@@ -59,12 +59,21 @@
     top.querySelector('.th').onclick=function(){var n=root.getAttribute('data-theme')==='dark'?'light':'dark';root.setAttribute('data-theme',n);set(TH,n);mark()};
     mark();
 
+    /* Topics menu helpers. byDomain: the tracks grouped by subject, in DOMAINS order (subjects without a track are left out). group: one collapsible box. wire: open/close, remembered in st. */
+    function byDomain(ts){var D=window.DOMAINS&&window.DOMAINS.length?window.DOMAINS:[{id:'ai',icon:'',title:{en:'AI',zh:'AI'}}];
+      return D.map(function(dm){var x=ts.filter(function(c){return (c.domain||'ai')===dm.id});return {id:dm.id,icon:dm.icon,title:dm.title,ts:x,one:x.length===1}}).filter(function(g){return g.ts.length})}
+    function group(g,open,body){return '<div class="cg dg'+(open?' open':'')+'" data-c="d:'+g.id+'"><button class="cg-h" aria-expanded="'+!!open+'" aria-controls="cgb-d-'+g.id+'"><span class="ic">'+(g.icon||'')+'</span><span class="tt">'+t(g.title)+'</span><i class="chev"></i></button><div class="cg-b" id="cgb-d-'+g.id+'"'+(open?'':' inert')+'><div>'+body+'</div></div></div>'}
+    function wire(box,st,onOpen,save){box.querySelectorAll('button.cg-h').forEach(function(h){h.onclick=function(){var g=h.parentNode,o=!g.classList.contains('open');if(o&&onOpen)onOpen(g.dataset.c);g.classList.toggle('open',o);h.setAttribute('aria-expanded',o);g.querySelector('.cg-b').inert=!o;st[g.dataset.c]=o;if(save)save()}})}
     var side=document.querySelector('.side'),scrim;if(side){side.id='topics-nav';side.setAttribute('aria-label','Topics · 主题');side.inert=true}
     if(!C&&!side&&!AREA){
       /* Pages outside a track (home, How it works, Glossary, About): Topics opens a drawer with the track list. */
       side=document.createElement('div');side.className='side';side.id='topics-nav';side.setAttribute('aria-label','Topics · 主题');side.inert=true;
       var tl=(window.TRACKS||[]);
-      side.innerHTML='<div class="side-top"><a class="side-all" href="tracks.html">⌂ '+t({en:'All tracks',zh:'所有路线'})+'</a><button type="button" class="side-close" aria-label="Close topics menu · 关闭主题菜单">✕</button></div>'+tl.map(function(c){return '<a href="'+c.href+'">'+(c.icon?c.icon+' ':'')+t(c.title)+'</a>'}).join('');
+      side.innerHTML='<div class="side-top"><a class="side-all" href="tracks.html">⌂ '+t({en:'All tracks',zh:'所有路线'})+'</a><button type="button" class="side-close" aria-label="Close topics menu · 关闭主题菜单">✕</button></div>'+byDomain(tl).map(function(g){
+        /* subjects at the top level (AI, project management): one with several tracks opens to show them, one with a single track is that track's link */
+        if(g.one)return '<div class="cg"><a class="cg-h" href="'+g.ts[0].href+'"><span class="ic">'+(g.ts[0].icon||'')+'</span><span class="tt">'+t(g.ts[0].title)+'</span></a></div>';
+        return group(g,false,g.ts.map(function(c){return '<a href="'+c.href+'">'+(c.icon?c.icon+' ':'')+t(c.title)+'</a>'}).join(''))}).join('');
+      wire(side,{});
       scrim=document.createElement('div');scrim.className='scrim';scrim.setAttribute('aria-hidden','true');document.body.appendChild(scrim);document.body.appendChild(side);
       var mb0=top.querySelector('.menu-btn'),tg0=function(o){side.inert=!o;side.classList.toggle('open',o);scrim.classList.toggle('on',o);mb0.setAttribute('aria-expanded',o);if(o)side.querySelector('.side-close').focus();else mb0.focus()};
       mb0.onclick=function(){tg0(!side.classList.contains('open'))};scrim.onclick=function(){tg0(false)};side.querySelector('.side-close').onclick=function(){tg0(false)};
@@ -73,13 +82,17 @@
     if(C&&side){
       var NK='learn-nav',ns={};try{ns=JSON.parse(localStorage.getItem(NK)||'{}')}catch(e){}
       var list=(window.TRACKS&&window.TRACKS.length)?window.TRACKS:[{id:C.id,icon:'',title:C.title,href:'agentic-ai/index.html'}];
-      side.innerHTML='<div class="side-top"><a class="side-all" href="../tracks.html">← '+t({en:'All tracks',zh:'所有路线'})+'</a><button type="button" class="side-close" aria-label="Close topics menu · 关闭主题菜单">✕</button></div>'+list.map(function(c){
+      side.innerHTML='<div class="side-top"><a class="side-all" href="../tracks.html">← '+t({en:'All tracks',zh:'所有路线'})+'</a><button type="button" class="side-close" aria-label="Close topics menu · 关闭主题菜单">✕</button></div>'+byDomain(list).map(function(g){
+        /* subjects at the top level: a subject with several tracks is one group that opens to its tracks (open when it holds this track), a subject with one track is that track */
+        var h=g.ts.map(trackBox).join(''),has=g.ts.some(function(c){return c.id===C.id});
+        return g.one?h:group(g,ns['d:'+g.id]!==undefined?ns['d:'+g.id]:has,h)}).join('');
+      function trackBox(c){
         var cur=c.id===C.id,open=ns[c.id]!==undefined?ns[c.id]:cur,body;
         if(cur)body='<a href="index.html" class="'+(here==='index.html'?'cur':'')+'">⌂ '+t({en:'Overview',zh:'总览'})+'</a>'+
           C.topics.map(function(w){return '<h5>'+t(w.title)+'</h5>'+w.items.map(function(l){
             return l.file?'<a href="'+l.file+'" class="'+(l.file===here?'cur ':'')+(d[C.id+'/'+l.file]?'done':'')+'"'+(l.file===here?' aria-current="page"':'')+'>'+t(l.title)+'</a>':'<span class="soon">'+t(l.title)+'</span>'}).join('')}).join('');
         else body='<a href="../'+c.href+'">⌂ '+t({en:'Overview',zh:'总览'})+'</a><div class="oth" data-o="'+c.id+'"></div>';
-        return '<div class="cg'+(open?' open':'')+(cur?' cur':'')+'" data-c="'+c.id+'"><button class="cg-h" aria-expanded="'+open+'" aria-controls="cgb-'+c.id+'"><span class="ic">'+(c.icon||'')+'</span><span class="tt">'+t(c.title)+'</span>'+(cur?'<span class="pg">'+count(c.id,CF)+'/'+CF.length+'</span>':'')+'<i class="chev"></i></button><div class="cg-b" id="cgb-'+c.id+'"'+(open?'':' inert')+'><div>'+body+'</div></div></div>'}).join('');
+        return '<div class="cg'+(open?' open':'')+(cur?' cur':'')+'" data-c="'+c.id+'"><button class="cg-h" aria-expanded="'+open+'" aria-controls="cgb-'+c.id+'"><span class="ic">'+(c.icon||'')+'</span><span class="tt">'+t(c.title)+'</span>'+(cur?'<span class="pg">'+count(c.id,CF)+'/'+CF.length+'</span>':'')+'<i class="chev"></i></button><div class="cg-b" id="cgb-'+c.id+'"'+(open?'':' inert')+'><div>'+body+'</div></div></div>'}
       /* Other tracks: read their lessons.js (in a throwaway window object) to list their lessons and show done/total. Without it (e.g. opened from disk) only the Overview link shows. */
       var loaded={};
       function loadOther(c){if(c.id===C.id||loaded[c.id])return;loaded[c.id]=1;
@@ -92,7 +105,7 @@
         }).catch(function(){loaded[c.id]=0})}
       /* Lazy: a track's lesson list is fetched only when its section is open (or when it is opened), not for every track on every page. */
       list.forEach(function(c){if(ns[c.id]===true)loadOther(c)});
-      side.querySelectorAll('.cg-h').forEach(function(h){h.onclick=function(){var g=h.parentNode,o=!g.classList.contains('open');if(o)list.forEach(function(c){if(c.id===g.dataset.c)loadOther(c)});g.classList.toggle('open',o);h.setAttribute('aria-expanded',o);g.querySelector('.cg-b').inert=!o;ns[g.dataset.c]=o;try{localStorage.setItem(NK,JSON.stringify(ns))}catch(e){}}});
+      wire(side,ns,function(id){list.forEach(function(c){if(c.id===id)loadOther(c)})},function(){try{localStorage.setItem(NK,JSON.stringify(ns))}catch(e){}});
       scrim=document.createElement('div');scrim.className='scrim';scrim.setAttribute('aria-hidden','true');document.body.appendChild(scrim);
       document.body.appendChild(side);
       var opener=null;
