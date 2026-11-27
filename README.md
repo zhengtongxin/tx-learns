@@ -24,6 +24,7 @@ Everything runs with plain Node 22. Nothing needs installing except the browser 
 | `node scripts/test-status.mjs` | Isolated API tests: accurate attention ownership/recovery, safe links, stale data, timeouts and cache limits (no network) |
 | `node scripts/test-ecosystem.mjs` | Attention cards, polling, history, bilingual states, safe links and all compact agent popups on desktop and phone (needs Playwright) |
 | `node scripts/test-site.mjs` | Behaviour tests for `assets/site.js`: language, theme, progress, feedback, no outside requests (needs Playwright) |
+| `node scripts/logic-brief.mjs --flow path --offline` | The brief the efficiency engineer agent's daily logic check starts from; `list` prints the flows |
 | `node scripts/daily-scan.mjs drift` | The docs check: `CLAUDE.md` and this file still match the workflows, scripts, tracks and agents |
 | `node scripts/daily-scan.mjs smoke --pkg packages/<track>/<name>` | Smoke-run one project package: it parses, its requirements install, its imports exist |
 

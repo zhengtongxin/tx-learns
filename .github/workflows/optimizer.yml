@@ -7,6 +7,9 @@
 # wait, the run is a code review of that batch. When none wait, Claude does not run at all, except once a week (the
 # first run on Monday, UTC) and on a manual run, when it is the usual efficiency run: that search rarely finds
 # something new, so it no longer spends four Sonnet runs a day.
+# Once a day (the 12:23 UTC run, or a manual run with `logic`) it is a logic check instead: scripts/logic-brief.mjs (no AI)
+# picks one flow in rotation (the learning path, the study coach, the agents' rules against their data, what the site
+# says about itself) and Claude looks for two parts that disagree, fixes at most one, and lists what needs TX.
 name: Efficiency engineer (optimizer)
 on:
   schedule:
@@ -18,6 +21,12 @@ on:
         required: false
         type: boolean
         default: false
+      logic:
+        description: Run the logic check now - "today" for the flow whose turn it is, or one flow by name
+        required: false
+        type: choice
+        default: ''
+        options: ['', today, path, coach, signals, claims]
 permissions:
   contents: read
 concurrency:
@@ -68,11 +77,21 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           EVENT: ${{ github.event_name }}
+          LOGIC: ${{ inputs.logic }}
         run: |
           mkdir -p /tmp/trusted && cp scripts/code-queue.mjs scripts/signals.mjs scripts/lib.mjs /tmp/trusted/
           node /tmp/trusted/code-queue.mjs plan --out /tmp || echo "review=false" >> "$GITHUB_OUTPUT"
+          # logic: the 12:23 UTC run of every day (or a manual run that asks for it) checks that the parts of the site agree with
+          #   each other, one flow a day in rotation (scripts/logic-brief.mjs); code that waits is read by the next run.
           # review: code waits to be read. efficiency: nothing waits, and it is the weekly slot or a manual run. idle: nothing to do, no AI.
-          if [ -s /tmp/code-brief.md ]; then mode=review
+          case "$LOGIC" in today|path|coach|signals|claims) ;; *) LOGIC= ;; esac
+          hour=$(date -u +%H)
+          if [ -n "$LOGIC" ] || { [ "$EVENT" = schedule ] && [ "$hour" -ge 12 ] && [ "$hour" -lt 18 ]; }; then
+            pick=; case "$LOGIC" in path|coach|signals|claims) pick="--flow $LOGIC" ;; esac
+            flow=$(node scripts/logic-brief.mjs $pick --out /tmp | sed -n 's/^flow=//p') || flow=
+          fi
+          if [ -n "${flow:-}" ] && [ -s /tmp/logic-brief.md ]; then mode=logic; rm -f /tmp/code-brief.md; echo "flow=$flow" >> "$GITHUB_OUTPUT"
+          elif [ -s /tmp/code-brief.md ]; then mode=review
           elif [ "$EVENT" = workflow_dispatch ] || { [ "$(date -u +%u)" = 1 ] && [ "$(date -u +%H)" -lt 6 ]; }; then mode=efficiency
           else mode=idle; fi
           echo "mode=$mode" >> "$GITHUB_OUTPUT"; echo "Mode: $mode"
@@ -86,6 +105,7 @@ jobs:
           # Prefer TX's Claude subscription (CLAUDE_CODE_OAUTH_TOKEN from `claude setup-token`); the API key is only a fallback.
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TRACE_STEP: ${{ steps.queue.outputs.mode }}
         run: |
           set -o pipefail
           if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then unset ANTHROPIC_API_KEY; echo "Auth: Claude subscription"; else unset CLAUDE_CODE_OAUTH_TOKEN; echo "Auth: API key (no CLAUDE_CODE_OAUTH_TOKEN secret)"; fi
@@ -138,6 +158,34 @@ jobs:
           happened), and the title line starts with "Code review:".
           PROMPT
           fi
+          if [ -s /tmp/logic-brief.md ]; then
+          cat >> /tmp/optimizer-prompt.md <<'PROMPT'
+
+          THIS RUN IS A LOGIC CHECK. It replaces the search for an efficiency improvement above; the rules above still apply.
+          A code review asks whether one file does what it says. You ask whether the parts agree with each other and
+          whether the rules still fit what really happens. Read /tmp/logic-brief.md: it names today's flow, the question,
+          the files to read in full, and facts a script gathered. Then walk the flow end to end as one concrete case
+          (one learner, one answer, one lesson, one pull request) and write down where two parts disagree.
+          A finding is real only if you can state it as: "<this part> says or does X, <that part> says or does Y, so for
+          <this concrete case> the outcome is wrong, and here is the wrong outcome." Taste, naming, wording you would
+          have chosen differently and "could be more flexible" are not findings.
+          - Fix the ONE finding that matters most to a learner or wastes the most work, at its root, in the files of this
+            flow (plus a test file under `scripts/` when a case belongs there). Change the smaller side: when a sentence
+            and the code disagree, decide which one is the promise before you touch either.
+          - Add a test case that fails before your fix wherever the flow has a test (`scripts/test-site.mjs`, the asserts
+            at the top of `scripts/test-coach.mjs`, `scripts/run-evals.mjs`, `scripts/check-counts.mjs` for a rule about
+            `tracks.js`). You may run `node scripts/run-evals.mjs`.
+          - Never change a number just because the data moved a little: a rule number changes only when the brief's
+            data shows the rule is not doing its job (a line nearly everything or nothing passes, a queue that cannot empty).
+          - Do not undo a decision CLAUDE.md records as TX's own (what was removed on purpose, what is frozen). Do not
+            edit `ecosystem.html`. A finding that needs `.github/`, `CLAUDE.md` or a decision from TX is not yours to fix:
+            list it under "Needs TX" in the summary, one line each, with the concrete case.
+          - Finding nothing is a good and common result: change nothing and say which case you walked.
+          In `/tmp/optimizer-summary.md` the title line starts with "Logic:", "Problem" is the two parts that disagree
+          and the concrete case, "Measure" is the outcome of that case before and after, and a last section "Needs TX"
+          holds what you could not fix (or "Needs TX: nothing").
+          PROMPT
+          fi
           curl -fsS -o /tmp/claude-run.mjs "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/scripts/claude-run.mjs" && CC="node /tmp/claude-run.mjs optimizer" || CC=claude
           $CC --model sonnet --exclude-dynamic-system-prompt-sections -p "$(cat /tmp/optimizer-prompt.md)" --max-turns 40 \
             --allowedTools "Read,Write,Edit,Glob,Grep,Bash(node scripts/run-evals.mjs:*),Bash(node scripts/check-copy.mjs:*),Bash(node scripts/check-counts.mjs:*),Bash(node scripts/check-pages.mjs:*),Bash(node scripts/check-security.mjs:*)" \
@@ -153,6 +201,7 @@ jobs:
           REVIEW_COUNT: ${{ steps.queue.outputs.count }}
           REVIEW_LEFT: ${{ steps.queue.outputs.left }}
           MODE: ${{ steps.queue.outputs.mode }}
+          FLOW: ${{ steps.queue.outputs.flow }}
         run: |
           set -euo pipefail
           mkdir -p /tmp/out
@@ -163,7 +212,14 @@ jobs:
             exit 0
           fi
           note=""
-          if [ "$REVIEW" = true ]; then note=" Code review: read ${REVIEW_COUNT} code file(s), ${REVIEW_LEFT} still waiting."; fi
+          if [ "$MODE" = review ] && [ "$REVIEW" = true ]; then note=" Code review: read ${REVIEW_COUNT} code file(s), ${REVIEW_LEFT} still waiting."; fi
+          if [ "$MODE" = logic ]; then
+            case "$FLOW" in path|coach|signals|claims) ;; *) FLOW=unknown ;; esac
+            note=" Logic check of the ${FLOW} flow."
+            # What it could not fix itself reaches TX through the status line and the daily digest (first lines only, plain characters).
+            needs=$(sed -n '/Needs TX/,$p' /tmp/optimizer-summary.md 2>/dev/null | tr '\n' ' ' | tr -cd 'A-Za-z0-9 .,:;()/_-' | cut -c1-240)
+            case "$needs" in ''|*"Needs TX: nothing"*) ;; *) note="$note $needs" ;; esac
+          fi
           test -s /tmp/optimizer-summary.md || echo "Efficiency improvement with no written summary." > /tmp/optimizer-summary.md
           {
             git diff --name-only
@@ -228,7 +284,7 @@ jobs:
       # Read files leave the queue once Claude has finished with them. A run whose change failed the guard counts a try
       # (two tries, then the batch is let go); a run where Claude itself could not run remembers nothing, so the batch comes back.
       - name: Remember which code was reviewed
-        if: ${{ !cancelled() && steps.queue.outputs.review == 'true' && steps.agent.outcome == 'success' && inputs.dry_run != true }}
+        if: ${{ !cancelled() && steps.queue.outputs.mode == 'review' && steps.queue.outputs.review == 'true' && steps.agent.outcome == 'success' && inputs.dry_run != true }}
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
