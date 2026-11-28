@@ -371,14 +371,24 @@ var sBusy=false,sStop=false;
 /* up to 30 passages, spread evenly over all the material, so the notes cover all of it */
 function pickSums(){var n=Math.min(30,CH.length),out=[],st=CH.length/Math.max(1,n);for(var i=0;i<n;i++)out.push(CH[Math.floor(i*st)]);return out}
 async function makeSums(){
- if(sBusy||!CH.length)return;sBusy=true;sStop=false;renderShare();
+ if(sBusy)return;if(!CH.length){say('Add some material first: there is nothing to write notes from.','先添加资料：现在没有可以写笔记的内容。');return}
+ sBusy=true;sStop=false;renderShare();
  try{await ensureModel()}catch(e){sBusy=false;renderShare();go('model');return}
- var pl=pageLang(),picks=pickSums(),out=[],i;S.sums=[];
+ var pl=pageLang(),picks=pickSums(),out=[],i,miss={};S.sums=[];
  for(i=0;i<picks.length&&!sStop;i++){
   var pp=$('sline');if(pp)pp.textContent=T('Writing note '+(i+1)+' of '+picks.length+'…','正在写第 '+(i+1)+' / '+picks.length+' 条…');
-  try{var raw=Lg.stripThink(await ENG.chat(Lg.sumPrompt({text:picks[i].text,lang:pl}))),a=raw.indexOf('{'),b=raw.lastIndexOf('}'),o=JSON.parse(raw.slice(a,b+1)),sm=String(o.summary||'').trim(),z=Lg.cjkShare(sm);
-   if(sm.length>=15&&sm.length<=500&&!Lg.copied(sm,picks[i].text)&&Lg.scrubLine(sm)===sm&&(pl==='zh'?z>0.3:z<0.08)){out.push(sm);S.sums=out.slice();save()}}catch(e){}}
- sBusy=false;say(out.length+' notes written; read them below before you send.',out.length+' 条笔记已写好，发送前请在下面核对。');renderShare()}
+  var why='';
+  for(var tr=0;tr<2&&!why.startsWith('ok');tr++){
+   try{var pr=Lg.sumPrompt({text:picks[i].text,lang:pl});if(tr)pr[1].content+='\nIMPORTANT: answer in '+(pl==='zh'?'Chinese (简体中文)':'English')+' only, in your own words, at most 80 words.';
+    var raw=Lg.stripThink(await ENG.chat(pr,{max:400,onTok:function(n){var q=$('sline');if(q&&sBusy)q.textContent=T('Writing note '+(i+1)+' of '+picks.length+'… ('+n+' words so far)','正在写第 '+(i+1)+' / '+picks.length+' 条…（已写 '+n+' 小段）')}})),a=raw.indexOf('{'),b=raw.lastIndexOf('}'),sm;
+    try{sm=String(JSON.parse(raw.slice(a,b+1)).summary||'').trim()}catch(e){sm=raw.replace(/[{}"]|summary\s*:/g,'').trim()}
+    var z=Lg.cjkShare(sm);
+    if(sm.length<15)why='short';else if(sm.length>600)why='long';else if(Lg.copied(sm,picks[i].text))why='copied';else if(Lg.srcMatch(sm))why='source';else if(!(pl==='zh'?z>0.3:z<0.08))why='language';
+    else{out.push(sm);S.sums=out.slice();save();why='ok'}}catch(e){why='error'}}
+  if(why.indexOf('ok')!==0)miss[why]=(miss[why]||0)+1}
+ sBusy=false;var ml=Object.keys(miss).map(function(k){return k+' '+miss[k]}).join(', ');
+ say(out.length+' notes written'+(ml?' ('+(picks.length-out.length)+' passages gave no usable note: '+ml+')':'')+'; read them below before you send.',out.length+' 条笔记已写好'+(ml?'（有 '+(picks.length-out.length)+' 段没写出可用的笔记：'+ml+'）':'')+'，发送前请在下面核对。');renderShare();
+ if(!out.length){var q=$('sline');if(q)q.innerHTML=T('No note could be written ('+ml+'). Try again, or write your own words in step 3.','没能写出笔记（'+ml+'）。可以再试一次，或在第 3 步写你自己的话。')}}
 function renderShare(){
  var el=$('share');if(!el)return;var n=(S.notes||''),u=shareUrl(),ok=shareOK(),tr=S.noteTrack||'new',ns=(S.sums||[]).length;
  el.innerHTML='<p class="meta">'+T('The model reads your material here in your browser and writes the key ideas in its own words. Those notes, an outline of headings and your own words go to GitHub; the content creator agent turns them into a track. Your files and their names never leave your device.','模型在你的浏览器里读你的资料，用它自己的话写出要点。这些笔记、标题提纲和你自己的话会发到 GitHub，由内容创作 agent 写成一条路线。你的文件和文件名不会离开你的设备。')+'</p>'+
