@@ -58,6 +58,15 @@
  L.sumPrompt=function(c){var zh=c.lang==='zh',lg=zh?'Chinese (简体中文)':'English';
   return [{role:'system',content:'You summarise study material for a learner. You answer with one JSON object and nothing else. You write only in '+lg+'.'},
    {role:'user',content:'Excerpt:\n"""\n'+c.text+'\n"""\nSummarise the key idea of this excerpt in two or three sentences in '+lg+', as a study note for someone learning it: say what the idea is and why or when it matters. Use your own words: do not copy phrases from the excerpt, and do not mention any author, publisher, platform or source. JSON: {"summary":"..."}'}]};
+ /* the same question in the other language, shown beside it: the options keep their order and the key stays with them */
+ L.translatePrompt=function(c){var zh=c.to==='zh',lg=zh?'Chinese (简体中文)':'English';
+  return [{role:'system',content:'You translate multiple-choice study questions. You answer with one JSON object and nothing else. You write only in '+lg+'.'},
+   {role:'user',content:'Translate this multiple-choice question into '+lg+'. Keep the meaning and the order of the options exactly; do not add or drop anything.\n'+JSON.stringify({q:c.q.q,o:c.q.o,e:c.q.e||''})+'\nJSON: {"q":"...","o":["...","..."],"e":"..."} with exactly '+c.q.o.length+' options.'}]};
+ L.parseTranslation=function(raw,n,to){var s=L.stripThink(String(raw||'')).replace(/```(?:json)?/g,''),i=s.indexOf('{'),j=s.lastIndexOf('}'),o;
+  if(i<0||j<i)return null;try{o=JSON.parse(s.slice(i,j+1))}catch(e){return null}
+  if(!o||typeof o.q!=='string'||!Array.isArray(o.o)||o.o.length!==n||!o.o.every(function(x){return typeof x==='string'&&x.trim()}))return null;
+  var r={q:o.q.trim(),o:o.o.map(function(x){return x.trim()}),e:typeof o.e==='string'?o.e.trim():''};
+  return L.inLang({q:r.q,o:r.o,e:r.e},to)?r:null};
  L.assignAreas=function(chunks,domains){chunks.forEach(function(c){var t=L.tokens(c.text),best=null,bs=0;
   domains.forEach(function(d){var s=L.domainScore(t,d.kw);if(s>bs){bs=s;best=d.id}});c.area=best;c.score=bs});return chunks};
  /* strength 0..1 from the last results (1 = right), newest weighted most; null when never tested */
