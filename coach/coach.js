@@ -6,6 +6,9 @@ var Lg=window.CoachLogic,EX=window.COACH_EXAMS,BASE=document.currentScript.src.r
 var $=function(id){return document.getElementById(id)};
 function T(en,zh){return '<span class="en">'+en+'</span><span class="zh">'+zh+'</span>'}
 function pageLang(){return document.documentElement.getAttribute('data-lang')==='zh'?'zh':'en'}
+/* a question in the page's language first and, when the model has translated it, the other language under it; switching the page language swaps them */
+function pv(it){var pl=pageLang(),t=it.t,sw=t&&it.lang!==pl&&it.tl===pl;
+ return sw?{q:t.q,o:t.o,e:t.e,q2:it.q,o2:it.o,e2:it.e,l2:it.lang}:{q:it.q,o:it.o,e:it.e,q2:t&&t.q,o2:t&&t.o,e2:t&&t.e,l2:it.tl}}
 function PH(en,zh){return document.documentElement.getAttribute('data-lang')==='zh'?zh:en}
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function say(en,zh){var s=$('status');if(s)s.innerHTML=T(en,zh)}
@@ -175,6 +178,7 @@ async function pump(){
 async function trans(item,pl){var to=pl==='zh'?'en':'zh';
  try{var raw=await ENG.chat(Lg.translatePrompt({to:to,q:{q:item.q,o:item.o,e:item.e}}),{max:700}),t=Lg.parseTranslation(raw,item.o.length,to);
   if(t){item.t=t;item.tl=to;save();if(R&&V==='practice'&&R.items[R.i]===item&&!document.querySelector('#practice details[open]'))renderPractice()}}catch(e){}}
+new MutationObserver(function(){if(R&&V==='practice'&&!document.querySelector('#practice details[open]'))renderPractice()}).observe(document.documentElement,{attributes:true,attributeFilter:['data-lang']});
 function show(){
  if(!R)return;
  if(R.i<R.items.length){R.view=R.items[R.i].res==null?'q':'fb'}
@@ -288,10 +292,10 @@ function renderPractice(focus){
   if(nh)h+='<p class="meta">'+nh+'</p>';
   h+='<p class="acts">'+(book().length?'<button class="btn pri" data-act="redoset">'+T('Redo my misses now','马上重做错题')+' ('+book().length+')</button><button class="btn" data-act="drill">':'<button class="btn pri" data-act="drill">')+T('Another round','再来一轮')+'</button><button class="btn" data-go="progress">'+T('See my progress','看我的进度')+'</button><button class="btn" data-act="close">'+T('Done','完成')+'</button></p>'}
  else if(it){
-  var fb=R.view==='fb';
-  h='<p class="meta">'+T('Question '+(R.i+1)+' of '+total,'第 '+(R.i+1)+' / '+total+' 题')+' · '+aname(it.area)+(it.m?' · <b>'+T('Choose two','选两项')+'</b>':'')+'</p><h3 class="qt" id="qt" tabindex="-1">'+esc(it.q)+'</h3>'+(it.t?'<p class="qt2" lang="'+it.tl+'">'+esc(it.t.q)+'</p>':'')+'<div class="opts" role="group" aria-labelledby="qt">'+
-   it.o.map(function(o,i){var ky=Lg.keys(it),pk=[].concat(it.pick==null?[]:it.pick),c=fb?(ky.indexOf(i)>-1?' ok':(pk.indexOf(i)>-1?' no':'')):((it.sel||[]).indexOf(i)>-1?' sel':'');return '<button class="opt'+c+'" data-act="opt" data-i="'+i+'"'+(it.m&&!fb?' aria-pressed="'+((it.sel||[]).indexOf(i)>-1)+'"':'')+(fb?' disabled':'')+'><b>'+'ABCD'[i]+'</b><span>'+esc(o)+(it.t&&it.t.o[i]?'<small class="o2" lang="'+it.tl+'">'+esc(it.t.o[i])+'</small>':'')+'</span></button>'}).join('')+'</div>'+(it.m&&!fb?'<p class="acts"><button class="btn pri" data-act="check"'+((it.sel||[]).length===2?'':' disabled')+'>'+T('Check my two','提交这两项')+'</button><span class="meta">'+T('Pick two options, then check.','选两项，再提交。')+'</span></p>':'');
-  if(fb)h+='<div class="fb" aria-live="polite"><p><b>'+(Lg.right(it,it.pick)?T('Right.','答对了。'):T('Not quite.','不对。'))+'</b> '+esc(it.e)+(it.t&&it.t.e?'<span class="e2" lang="'+it.tl+'">'+esc(it.t.e)+'</span>':'')+'</p><details><summary>'+T('From your material','来自你的资料')+': '+esc(it.mat)+', '+locT(it.loc)+'</summary><p class="snip">'+esc(it.snip)+'…</p></details><p class="acts"><button class="btn pri" id="nx" data-act="next">'+(R.i+1>=R.items.length&&R.gen>=total?T('See the result','看结果'):T('Next','下一题'))+'</button>'+(Lg.right(it,it.pick)&&!it.guess?'<button class="btn sm" data-act="guess">'+T('I guessed','我是蒙的')+'</button>':'')+'<button class="btn sm" data-act="redo">'+T('Change my answer','改我的答案')+'</button><button class="btn sm" data-act="flag">'+T('This question looks wrong: don’t count it','这道题有问题：不计入')+'</button></p></div>'}
+  var fb=R.view==='fb',v=pv(it);
+  h='<p class="meta">'+T('Question '+(R.i+1)+' of '+total,'第 '+(R.i+1)+' / '+total+' 题')+' · '+aname(it.area)+(it.m?' · <b>'+T('Choose two','选两项')+'</b>':'')+'</p><h3 class="qt" id="qt" tabindex="-1">'+esc(v.q)+'</h3>'+(v.q2?'<p class="qt2" lang="'+v.l2+'">'+esc(v.q2)+'</p>':'')+'<div class="opts" role="group" aria-labelledby="qt">'+
+   v.o.map(function(o,i){var ky=Lg.keys(it),pk=[].concat(it.pick==null?[]:it.pick),c=fb?(ky.indexOf(i)>-1?' ok':(pk.indexOf(i)>-1?' no':'')):((it.sel||[]).indexOf(i)>-1?' sel':'');return '<button class="opt'+c+'" data-act="opt" data-i="'+i+'"'+(it.m&&!fb?' aria-pressed="'+((it.sel||[]).indexOf(i)>-1)+'"':'')+(fb?' disabled':'')+'><b>'+'ABCD'[i]+'</b><span>'+esc(o)+(v.o2&&v.o2[i]?'<small class="o2" lang="'+v.l2+'">'+esc(v.o2[i])+'</small>':'')+'</span></button>'}).join('')+'</div>'+(it.m&&!fb?'<p class="acts"><button class="btn pri" data-act="check"'+((it.sel||[]).length===2?'':' disabled')+'>'+T('Check my two','提交这两项')+'</button><span class="meta">'+T('Pick two options, then check.','选两项，再提交。')+'</span></p>':'');
+  if(fb)h+='<div class="fb" aria-live="polite"><p><b>'+(Lg.right(it,it.pick)?T('Right.','答对了。'):T('Not quite.','不对。'))+'</b> '+esc(v.e)+(v.e2?'<span class="e2" lang="'+v.l2+'">'+esc(v.e2)+'</span>':'')+'</p><details><summary>'+T('From your material','来自你的资料')+': '+esc(it.mat)+', '+locT(it.loc)+'</summary><p class="snip">'+esc(it.snip)+'…</p></details><p class="acts"><button class="btn pri" id="nx" data-act="next">'+(R.i+1>=R.items.length&&R.gen>=total?T('See the result','看结果'):T('Next','下一题'))+'</button>'+(Lg.right(it,it.pick)&&!it.guess?'<button class="btn sm" data-act="guess">'+T('I guessed','我是蒙的')+'</button>':'')+'<button class="btn sm" data-act="redo">'+T('Change my answer','改我的答案')+'</button><button class="btn sm" data-act="flag">'+T('This question looks wrong: don’t count it','这道题有问题：不计入')+'</button></p></div>'}
  el.innerHTML=h;
  if(focus){var f=R.view==='fb'?$('nx'):(R.view==='q'?$('qt'):null);if(f)f.focus()}}
 function renderAll(keepPractice){var ap=$('app');if(ap){if(CH.length)ap.setAttribute('data-ready','');else ap.removeAttribute('data-ready')}renderToday();renderMap();renderMats();renderGoal();renderBackup();renderShare();renderBook();if(!keepPractice)renderPractice();applyView()}

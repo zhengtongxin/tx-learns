@@ -108,11 +108,13 @@ ok(await pg.locator('#today .plan li').count() === 1 && /Process/.test(await pg.
 await v('model'); await pg.click('[data-act=load]');
 await pg.waitForSelector('.opt');
 await pg.waitForSelector('.qt2', { timeout: 8000 }).catch(() => {}); ok(await pg.locator('.qt2').count() === 1 && await pg.locator('.o2').count() === 4, 'the question shows in both languages, options too');
+{ await pg.waitForSelector('.qt2', { timeout: 8000 }).catch(() => {}); const before = await pg.locator('#qt').innerText(); await pg.click('.top [data-l=zh]'); await pg.waitForFunction(() => /[\u4e00-\u9fff]/.test(document.querySelector('#qt').innerText)).catch(() => {}); const after = await pg.locator('#qt').innerText(); ok(before !== after && /[\u4e00-\u9fff]/.test(after) && await pg.locator('.qt2').count() === 1, 'switching the page language swaps the question and its translation'); await pg.click('.top [data-l=en]'); await pg.waitForFunction(() => !/[\u4e00-\u9fff]/.test(document.querySelector('#qt').innerText)).catch(() => {}); ok(!/[\u4e00-\u9fff]/.test(await pg.locator('#qt').innerText()), 'and back'); }
 ok((await pg.evaluate(() => window.__coach.view())) === 'practice' && await pg.locator('#practice').isVisible() && !(await pg.locator('#s-model').isVisible()), 'once the model is ready the flow moves on to practice and starts a round');
 ok(/Fake question/.test(await pg.textContent('#practice')), 'a question appears');
 ok(await pg.evaluate(() => window.__verified > 0), 'the answer key gets a second opinion before the question is shown');
 for (let i = 0; i < 10; i++) {
-  await pg.waitForSelector('.opt:not([disabled])'); await pg.locator('.opt').nth(i % 2 ? 1 : 0).click();
+  /* a question that was being written when the page language was switched is dropped on purpose, so a round can end a question short */
+  if (!(await pg.waitForSelector('.opt:not([disabled])', { timeout: 15000 }).catch(() => null))) break; await pg.locator('.opt').nth(i % 2 ? 1 : 0).click();
   await pg.waitForSelector('#nx'); await pg.click('#nx');
   if (await pg.locator('text=Round').count()) break;
 }
