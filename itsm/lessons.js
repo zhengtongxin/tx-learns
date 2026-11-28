@@ -23,5 +23,6 @@ window.TRACK={id:'itsm',title:{en:'ITSM',zh:'ITSM 备考'},topics:[
   {k:'c',file:'16-working-with-other-frameworks.html',title:{en:"Working with other frameworks",zh:"与其他框架配合"}}]},
  {n:6,level:2,title:{en:"Practice",zh:"练习"},items:[
   {k:'c',file:'17-mixed-question-drill.html',title:{en:"Mixed question drill",zh:"综合题练习"}},
-  {k:'c',file:'18-more-question-practice.html',title:{en:"More question practice",zh:"更多题目练习"}}]}
+  {k:'c',file:'18-more-question-practice.html',title:{en:"More question practice",zh:"更多题目练习"}},
+  {k:'c',file:'19-governance-and-flow-questions.html',title:{en:"Governance and flow questions",zh:"治理与流程题目"}}]}
 ]};
