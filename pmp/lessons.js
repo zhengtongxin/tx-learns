@@ -36,7 +36,8 @@ window.TRACK={id:'pmp',title:{en:'PMP',zh:'PMP 备考'},topics:[
   {k:'c',file:'35-issues-and-improvement.html',title:{en:"Issues and improvement",zh:"问题与持续改进"}},
   {k:'c',file:'18-organisational-change.html',title:{en:"Organisational change",zh:"组织变革"}},
   {k:'c',file:'36-outside-changes.html',title:{en:"Outside changes",zh:"外部环境变化"}},
-  {k:'c',file:'42-ethics-and-conduct.html',title:{en:"Ethics and conduct",zh:"职业操守"}}]},
+  {k:'c',file:'42-ethics-and-conduct.html',title:{en:"Ethics and conduct",zh:"职业操守"}},
+  {k:'c',file:'44-structures-and-the-pmo.html',title:{en:"Structures and the PMO",zh:"组织结构与项目管理办公室"}}]},
  {n:6,level:2,title:{en:"Agile delivery",zh:"敏捷交付"},items:[
   {k:'f',file:'20-backlog-and-user-stories.html',title:{en:"Backlog and user stories",zh:"待办列表与用户故事"}},
   {k:'c',file:'21-sprints-and-events.html',title:{en:"Sprints and events",zh:"冲刺与会议"}},
