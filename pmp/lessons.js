@@ -46,5 +46,6 @@ window.TRACK={id:'pmp',title:{en:'PMP',zh:'PMP 备考'},topics:[
   {k:'c',file:'24-mixed-scenario-drill.html',title:{en:"Mixed scenario drill",zh:"综合情境练习"}},
   {k:'c',file:'28-more-scenario-practice.html',title:{en:"More scenario practice",zh:"更多情境练习"}},
   {k:'c',file:'39-order-of-actions-drill.html',title:{en:"Order of actions drill",zh:"行动顺序练习"}},
-  {k:'c',file:'40-agile-and-people-drill.html',title:{en:"Agile and people drill",zh:"敏捷与人员练习"}}]}
+  {k:'c',file:'40-agile-and-people-drill.html',title:{en:"Agile and people drill",zh:"敏捷与人员练习"}},
+  {k:'c',file:'41-business-and-process-drill.html',title:{en:"Business and process drill",zh:"商业与流程练习"}}]}
 ]};
