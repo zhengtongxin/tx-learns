@@ -7,5 +7,6 @@ window.TRACK={id:'clear-writing',title:{en:'Clear writing',zh:'清晰表达'},to
  {n:2,level:2,title:{en:"Writing at work",zh:"工作中的写作"},items:[
   {k:'f',file:'04-messages-and-emails.html',title:{en:"Messages and emails",zh:"消息与邮件"}},
   {k:'c',file:'05-requests-and-reports.html',title:{en:"Requests and reports",zh:"请求与报告"}},
-  {k:'c',file:'06-writing-for-ai.html',title:{en:"Writing for AI",zh:"给 AI 写指令"}}]}
+  {k:'c',file:'06-writing-for-ai.html',title:{en:"Writing for AI",zh:"给 AI 写指令"}},
+  {k:'c',file:'07-editing-your-draft.html',title:{en:"Editing your draft",zh:"修改你的草稿"}}]}
 ]};
