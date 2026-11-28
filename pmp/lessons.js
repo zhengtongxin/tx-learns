@@ -20,7 +20,8 @@ window.TRACK={id:'pmp',title:{en:'PMP',zh:'PMP 备考'},topics:[
   {k:'c',file:'11-estimating.html',title:{en:"Estimating",zh:"估算"}},
   {k:'c',file:'26-team-and-resources.html',title:{en:"Team and resources",zh:"团队与资源"}},
   {k:'c',file:'30-business-case-numbers.html',title:{en:"Business case numbers",zh:"商业论证数字"}},
-  {k:'c',file:'31-contract-types.html',title:{en:"Contract types",zh:"合同类型"}}]},
+  {k:'c',file:'31-contract-types.html',title:{en:"Contract types",zh:"合同类型"}},
+  {k:'c',file:'46-life-cycles-and-phases.html',title:{en:"Life cycles and phases",zh:"生命周期与阶段"}}]},
  {n:4,level:2,title:{en:"Process delivery",zh:"过程交付"},items:[
   {k:'f',file:'10-cost-and-earned-value.html',title:{en:"Cost and earned value",zh:"成本与挣值"}},
   {k:'c',file:'33-formulas-with-numbers.html',title:{en:"Formulas with numbers",zh:"公式与算例"}},
