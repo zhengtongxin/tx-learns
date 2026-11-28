@@ -80,12 +80,15 @@ async function prepare() {
   const pr = arg('pr'), D = dir();
   const p = await gh('GET', `/pulls/${pr}`);
   const files = [];
-  for (let page = 1; page <= 3; page++) {
+  for (let page = 1; page <= 30; page++) { // GitHub lists at most 3000 files; a new track rewrites ?v= hashes in 400+ pages
     const part = await gh('GET', `/pulls/${pr}/files?per_page=100&page=${page}`);
     files.push(...part);
     if (part.length < 100) break;
   }
   const trackIds = trackIdList();
+  // A brand-new track is not in main's tracks.js yet: take its id from the lines this pull request adds to tracks.js, so its folder counts as that track and not as "other".
+  const tj = files.find(f => f.filename === 'tracks.js');
+  for (const m of String(tj?.patch || '').matchAll(/^\+[^\n]*?\bid:\s*'([a-z0-9-]+)'/gm)) if (!trackIds.includes(m[1])) trackIds.push(m[1]);
   const branch = p.head.ref;
   const labels = (p.labels || []).map(l => l.name);
   // `?v=<hash>` is a generated cache version (check-pages --fix). Mask it so a change that only moves hashes is not read as a content change.
@@ -96,7 +99,12 @@ async function prepare() {
     const plus = lines.filter(l => l[0] === '+').map(l => l.slice(1)).sort().join('\n');
     return minus === plus && lines.length ? '[only ?v= cache hashes changed (generated)]' : m;
   };
-  const rows = files.map(f => ({ path: f.filename, area: classify(f.filename, trackIds), add: f.additions, del: f.deletions, status: f.status, patch: maskV(f.patch || '') }));
+  const rows = files.map(f => {
+    const patch = maskV(f.patch || '');
+    // A page whose only change is a moved `?v=` hash (a shared file such as tracks.js changed) belongs to no area: it is generated.
+    const area = patch.startsWith('[only ?v= cache hashes changed') ? 'generated' : classify(f.filename, trackIds);
+    return { path: f.filename, area, add: f.additions, del: f.deletions, status: f.status, patch };
+  });
   const areas = [...new Set(rows.map(r => r.area))];
   const exempt = AREAS.exempt.some(x => branch.startsWith(x)) ? 'a rollback' : labels.includes('scope-ok') ? 'TX marked it scope-ok' : '';
   const violations = rules(branch, areas, trackIds);
