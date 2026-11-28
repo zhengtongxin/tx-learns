@@ -406,6 +406,19 @@
     /* effects: spotlight, tilt, count-up, reveal */
     document.addEventListener('mousemove',function(e){var s=e.target.closest&&e.target.closest('.spot');if(s){var r=s.getBoundingClientRect();s.style.setProperty('--mx',(e.clientX-r.left)+'px');s.style.setProperty('--my',(e.clientY-r.top)+'px')}
       var c=e.target.closest&&e.target.closest('.cc');if(c){var r2=c.getBoundingClientRect(),x=(e.clientX-r2.left)/r2.width-.5,y=(e.clientY-r2.top)/r2.height-.5;c.style.transform='perspective(900px) rotateX('+(-y*5)+'deg) rotateY('+(x*7)+'deg) translateY(-4px)'}});
+    /* Liquid Glass: the light on a pane follows the pointer (one surface repainted per frame), and in Chromium the bar and dock bend the content behind them */
+    (function(){var GS='.card,.callout,.quiz,.stepper,.wfwrap,.lcard,.cc,.panel,.sc,.chat,.try,.teach,.whatnext,.pager a,.bcn,#guards .guard,.attention-card,.key .kg,.theme,.gl-it,#practice,.streak,#flow,.track-ba>*,.pre-after>*,ol.flow li,label.drop',cur=null,px=0,py=0,raf=0;
+      function put(){raf=0;if(cur){var r=cur.getBoundingClientRect();cur.style.setProperty('--lx',(px-r.left)+'px');cur.style.setProperty('--ly',(py-r.top)+'px')}}
+      function off(el){if(el){el.style.removeProperty('--lx');el.style.removeProperty('--ly')}}
+      document.addEventListener('pointermove',function(e){if(e.pointerType==='touch')return;var t=e.target.closest&&e.target.closest(GS);if(t!==cur){off(cur);cur=t}px=e.clientX;py=e.clientY;if(cur&&!raf)raf=requestAnimationFrame(put)},{passive:true});
+      document.addEventListener('pointerleave',function(){off(cur);cur=null});
+      try{var ua=navigator.userAgentData&&navigator.userAgentData.brands,chromium=ua?ua.some(function(b){return /Chromium/.test(b.brand)}):/Chrome\//.test(navigator.userAgent)&&!/Edg\/|OPR\//.test(navigator.userAgent)||/Edg\//.test(navigator.userAgent);
+        if(chromium&&!window.matchMedia('(max-width:720px)').matches&&!window.matchMedia('(prefers-reduced-transparency:reduce)').matches){
+          var map='<svg xmlns="http://www.w3.org/2000/svg" width="400" height="60" preserveAspectRatio="none"><defs><linearGradient id="g"><stop offset="0" stop-color="rgb(235,128,128)"/><stop offset=".09" stop-color="rgb(128,128,128)"/><stop offset=".91" stop-color="rgb(128,128,128)"/><stop offset="1" stop-color="rgb(21,128,128)"/></linearGradient></defs><rect width="400" height="60" fill="url(#g)"/></svg>';
+          var d=document.createElement('div');d.setAttribute('aria-hidden','true');d.style.cssText='position:absolute;width:0;height:0;overflow:hidden';
+          d.innerHTML='<svg width="0" height="0"><filter id="lq-lens" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB"><feImage href="data:image/svg+xml,'+encodeURIComponent(map)+'" x="0" y="0" width="100%" height="100%" preserveAspectRatio="none" result="m"/><feDisplacementMap in="SourceGraphic" in2="m" scale="26" xChannelSelector="R" yChannelSelector="G"/></filter></svg>';
+          document.body.appendChild(d);document.documentElement.classList.add('lq-refract')}}catch(_){}
+    })();
     document.addEventListener('mouseout',function(e){var c=e.target.closest&&e.target.closest('.cc');if(c&&!c.contains(e.relatedTarget))c.style.transform=''});
     document.querySelectorAll('.zh:not([lang])').forEach(function(e){e.lang='zh-Hans'});document.querySelectorAll('.en:not([lang])').forEach(function(e){e.lang='en'});
     /* study page: lessons finished 1, 3, 7, 14 or 30 days ago come back as a short review list (kept on this device only) */
