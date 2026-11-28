@@ -24,7 +24,8 @@ window.TRACK={id:'pmp',title:{en:'PMP',zh:'PMP 备考'},topics:[
   {k:'c',file:'31-contract-types.html',title:{en:"Contract types",zh:"合同类型"}},
   {k:'c',file:'46-life-cycles-and-phases.html',title:{en:"Life cycles and phases",zh:"生命周期与阶段"}},
   {k:'c',file:'49-balancing-resources.html',title:{en:"Balancing resources",zh:"平衡资源"}},
-  {k:'c',file:'51-contract-terms-and-remedies.html',title:{en:"Contract terms and remedies",zh:"合同条款与补救"}}]},
+  {k:'c',file:'51-contract-terms-and-remedies.html',title:{en:"Contract terms and remedies",zh:"合同条款与补救"}},
+  {k:'c',file:'52-choosing-a-supplier.html',title:{en:"Choosing a supplier",zh:"选择供应方"}}]},
  {n:4,level:2,title:{en:"Process delivery",zh:"过程交付"},items:[
   {k:'f',file:'10-cost-and-earned-value.html',title:{en:"Cost and earned value",zh:"成本与挣值"}},
   {k:'c',file:'33-formulas-with-numbers.html',title:{en:"Formulas with numbers",zh:"公式与算例"}},
