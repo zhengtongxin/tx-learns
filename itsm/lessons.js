@@ -16,7 +16,8 @@ window.TRACK={id:'itsm',title:{en:'ITSM',zh:'ITSM 备考'},topics:[
   {k:'c',file:'10-incidents-and-problems.html',title:{en:"Incidents and problems",zh:"事件与问题"}},
   {k:'c',file:'11-change-and-release.html',title:{en:"Change and release",zh:"变更与发布"}},
   {k:'c',file:'12-service-desk-and-requests.html',title:{en:"Service desk and requests",zh:"服务台与服务请求"}},
-  {k:'c',file:'13-service-levels-and-relationships.html',title:{en:"Service levels and relationships",zh:"服务水平与关系"}}]},
+  {k:'c',file:'13-service-levels-and-relationships.html',title:{en:"Service levels and relationships",zh:"服务水平与关系"}},
+  {k:'c',file:'20-events-and-configuration.html',title:{en:"Events and configuration",zh:"事件与配置"}}]},
  {n:5,level:2,title:{en:"Beyond the basics",zh:"更进一步"},items:[
   {k:'f',file:'14-value-streams.html',title:{en:"Value streams",zh:"价值流"}},
   {k:'c',file:'15-ai-in-service-management.html',title:{en:"AI in service management",zh:"服务管理中的 AI"}},
