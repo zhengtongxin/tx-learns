@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Summaries and lookups | TX Learns</title>
+<meta name="description" content="Total and count by group with a condition, then look a value up by name, and check that the parts add up"><meta property="og:title" content="Summaries and lookups | TX Learns"><meta property="og:description" content="Total and count by group with a condition, then look a value up by name, and check that the parts add up"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/spreadsheet-basics/05-summaries-and-lookups.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/spreadsheet-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/spreadsheet-basics/05-summaries-and-lookups.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=dfd2c386"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/spreadsheet-basics/05-summaries-and-lookups.html","url":"https://tx-learns.vercel.app/spreadsheet-basics/05-summaries-and-lookups.html","name":"Summaries and lookups","alternateName":"汇总与查找","description":"Total and count by group with a condition, then look a value up by name, and check that the parts add up","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Intermediate","teaches":"Making sense of data","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Spreadsheet basics","url":"https://tx-learns.vercel.app/spreadsheet-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Spreadsheet basics","item":"https://tx-learns.vercel.app/spreadsheet-basics/index.html"},{"@type":"ListItem","position":3,"name":"Summaries and lookups","item":"https://tx-learns.vercel.app/spreadsheet-basics/05-summaries-and-lookups.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Making sense of data · Lesson 2</span><span class="zh">读懂数据 · 第 2 课</span></span><h1><span class="en">Summaries and lookups</span><span class="zh">汇总与查找</span></h1><p class="meta"><span class="en">Total and count by group with a condition, then look a value up by name, and check that the parts add up · ~10 min · reading and practice</span><span class="zh">按条件分组求和与计数，再按名称查找数值，并核对各部分加起来是否对得上 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Totals by group</span><span class="zh">第 1 步 · 按组汇总</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Often you want a total for one group, such as how much was spent on tea. A conditional sum adds only the rows that match a test (SUMIF), and a conditional count counts them (COUNTIF). Both read the test column and the amount column row by row.</p>
+<p class="zh" style="margin:0 0 8px">你经常需要某一组的合计，比如茶一共花了多少。条件求和只加符合条件的行（SUMIF），条件计数统计它们的个数（COUNTIF）。两者都会逐行读取条件列和金额列。</p></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Match exactly</span><span class="zh">第 2 步 · 精确匹配</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A match is exact: “Tea ” with a trailing space is not “Tea”, and “tea” may or may not equal “Tea” depending on the tool. A lookup finds a value by name in the same exact way, and gives an error when the name is not found. Clean the spelling first; do not hide the error.</p>
+<p class="zh" style="margin:0 0 8px">匹配是精确的：末尾带空格的“Tea ”不等于“Tea”；“tea”是否等于“Tea”取决于工具。按名称查找数值用的是同样的精确匹配，找不到名称时会给出错误。先把拼写整理干净，不要把错误掩盖掉。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Step 3 · Do the parts add up?</span><span class="zh">第 3 步 · 各部分加起来对吗？</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">After grouping, add the group totals and compare with the overall total. If they differ, some rows were missed: a misspelt name, a stray space or a blank. That one comparison catches many mistakes.</p>
+<p class="zh" style="margin:0 0 8px">分组之后，把各组合计加起来，与总合计对比。如果不一致，说明有些行被漏掉了：拼错的名称、多余的空格或空白。这一次对比就能抓住很多错误。</p></div>
+<div class="codebox" data-file="groups.txt" data-lang="text">Item  Amount
+Tea   3
+Rice  5
+Tea   4
+Rice  6
+Tea   2
+SUMIF Item=Tea   -&gt; 9      COUNTIF Item=Tea  -&gt; 3
+SUMIF Item=Rice  -&gt; 11     COUNTIF Item=Rice -&gt; 2
+Check: 9 + 11 = 20 = total of all amounts</div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> make a small table with repeated names and total each name.</span><span class="zh"><b>试一试：</b>做一张带重复名称的小表，对每个名称求和。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> do the group totals add up to the overall total?</span><span class="zh"><b>核对：</b>各组合计加起来等于总合计吗？</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Total and count by a condition.<br>• Matches are exact.<br>• Check that the parts add up.</p><p class="zh" style="margin:0">• 按条件求和与计数。<br>• 匹配是精确的。<br>• 核对各部分加起来对得上。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Spreadsheet basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Any spreadsheet program, or pen and paper","zh":"任意电子表格软件，或纸笔"},"know":{"en":"Sorting and filtering (see “Sorting and filtering”).","zh":"知道排序和筛选（见“排序与筛选”）。"},"goals":{"en":["Total by a condition","Count matching rows","Look a value up and check the sums"],"zh":["按条件求和","统计符合条件的行数","查找数值并核对合计"]},"prev":["04-sorting-and-filtering.html"]}}</script>
+<script src="../tracks.js?v=7aedb07f"></script><script src="lessons.js?v=3ac54860"></script><script src="../assets/site.js?v=c378ebbe"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/05-summaries-and-lookups.js?v=c7af81db"></script></body></html>
