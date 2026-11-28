@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ranges and functions | TX Learns</title>
+<meta name="description" content="Use a range and a built-in function to total, average and count a column in one step instead of cell by cell"><meta property="og:title" content="Ranges and functions | TX Learns"><meta property="og:description" content="Use a range and a built-in function to total, average and count a column in one step instead of cell by cell"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/spreadsheet-basics/02-ranges-and-functions.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/spreadsheet-basics.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/spreadsheet-basics/02-ranges-and-functions.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=dfd2c386"><link rel="stylesheet" href="../assets/teach.css?v=2fbce40b"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/spreadsheet-basics/02-ranges-and-functions.html","url":"https://tx-learns.vercel.app/spreadsheet-basics/02-ranges-and-functions.html","name":"Ranges and functions","alternateName":"区域与函数","description":"Use a range and a built-in function to total, average and count a column in one step instead of cell by cell","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"Building a sheet","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Spreadsheet basics","url":"https://tx-learns.vercel.app/spreadsheet-basics/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Spreadsheet basics","item":"https://tx-learns.vercel.app/spreadsheet-basics/index.html"},{"@type":"ListItem","position":3,"name":"Ranges and functions","item":"https://tx-learns.vercel.app/spreadsheet-basics/02-ranges-and-functions.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">Building a sheet · Lesson 2</span><span class="zh">搭建表格 · 第 2 课</span></span><h1><span class="en">Ranges and functions</span><span class="zh">区域与函数</span></h1><p class="meta"><span class="en">Use a range and a built-in function to total, average and count a column in one step instead of cell by cell · ~10 min · reading and practice</span><span class="zh">用区域和内置函数一步完成对一列的求和、平均和计数，而不是一格一格相加 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Ranges</span><span class="zh">第 1 步 · 区域</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A range is a block of cells written with a colon: B2:B6 means every cell from B2 down to B6. A function takes a range and does a job on it. =SUM(B2:B6) adds them all, so you do not write B2+B3+B4+B5+B6 and when you insert a row inside the range, the range stretches to include it.</p>
+<p class="zh" style="margin:0 0 8px">区域是用冒号写出的一片单元格：B2:B6 表示从 B2 到 B6 的每一格。函数接收一个区域并对它做一件事。=SUM(B2:B6) 把它们全部相加，所以你不必写 B2+B3+B4+B5+B6，在区域内部插入一行时，区域会自动把它包含进去。</p></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · The everyday five</span><span class="zh">第 2 步 · 常用五个</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Five functions cover most day-to-day work: SUM adds, AVERAGE gives the mean (add the values, divide by how many there are), MIN and MAX find the smallest and largest, COUNT counts the cells that hold numbers. Start the range just below the header row, because text in a header is not a number.</p>
+<p class="zh" style="margin:0 0 8px">五个函数涵盖大部分日常工作：SUM 求和，AVERAGE 求平均（把数值相加，再除以个数），MIN 和 MAX 找最小和最大，COUNT 统计有数字的单元格个数。区域要从表头下面一行开始，因为表头里的文字不是数字。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Step 3 · Order of operations</span><span class="zh">第 3 步 · 运算顺序</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A formula multiplies and divides before it adds and subtracts, so =2+3*4 is 14, not 20. Brackets go first: =(2+3)*4 is 20. When a result looks odd, check the order, then check the range.</p>
+<p class="zh" style="margin:0 0 8px">公式先乘除、后加减，所以 =2+3*4 是 14，不是 20。括号最先算：=(2+3)*4 是 20。结果看着奇怪时，先查运算顺序，再查区域。</p></div>
+<div class="codebox" data-file="functions.txt" data-lang="text">B2:B6 holds 3, 5, 4, 8, 10
+=SUM(B2:B6)      -&gt; 30
+=AVERAGE(B2:B6)  -&gt; 6
+=MIN(B2:B6)      -&gt; 3
+=MAX(B2:B6)      -&gt; 10
+=COUNT(B2:B6)    -&gt; 5</div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> type five numbers in a column and use all five functions on them.</span><span class="zh"><b>试一试：</b>在一列里输入五个数字，对它们用上这五个函数。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> does SUM equal AVERAGE times COUNT?</span><span class="zh"><b>核对：</b>SUM 是否等于 AVERAGE 乘 COUNT？</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A range joins two cells with a colon.<br>• Five functions do most work.<br>• Multiply before you add.</p><p class="zh" style="margin:0">• 区域用冒号连接两个单元格。<br>• 五个函数做大部分工作。<br>• 先乘除，后加减。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Spreadsheet basics</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Any spreadsheet program, or pen and paper","zh":"任意电子表格软件，或纸笔"},"know":{"en":"Cells and formulas (see “Cells and formulas”).","zh":"知道单元格和公式（见“单元格与公式”）。"},"goals":{"en":["Write a range like B2:B6","Use SUM, AVERAGE, MIN, MAX and COUNT","Know the order of operations"],"zh":["写出像 B2:B6 这样的区域","使用 SUM、AVERAGE、MIN、MAX 和 COUNT","了解运算顺序"]},"prev":["01-cells-and-formulas.html"]}}</script>
+<script src="../tracks.js?v=bd35b868"></script><script src="lessons.js?v=3ac54860"></script><script src="../assets/site.js?v=c378ebbe"></script><script src="../assets/teach.js?v=e9b2d64f"></script>
+<script src="js/02-ranges-and-functions.js?v=dc56cf8a"></script></body></html>
