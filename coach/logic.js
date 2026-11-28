@@ -39,6 +39,8 @@
     the key ideas the model wrote in its own words (up to 30 passages). Never the files, their names or their text. */
  /* the words that mark a line about where material came from, kept in pieces so the copy check's own word list does not trip on them */
  var SRCW=['instruc'+'tor','lec'+'turer','plat'+'form','cou'+'rse','课'+'程','讲'+'师','版'+'权'].join('|'),SRC=new RegExp('(https?:\\/\\/|www\\.|@[a-z0-9-]+\\.|©|copyright|all rights reserved|'+SRCW+')','i');
+ /* true when a text names a link, a copyright or a source (unlike scrubLine it never shortens, so it suits a whole note) */
+ L.srcMatch=function(s){return SRC.test(String(s||''))};
  L.scrubLine=function(s){s=String(s||'').replace(/\s+/g,' ').trim();if(!s||SRC.test(s)||/^\d+$/.test(s))return '';return s.length>80?s.slice(0,77).replace(/\s+\S*$/,'')+'…':s};
  L.digest=function(chunks,mats,o){o=o||{};var maxT=o.titles==null?30:o.titles,maxK=o.terms==null?30:o.terms,out={outline:[],terms:[]},freq={};
   mats.forEach(function(m,i){var seen={},ts=[];chunks.filter(function(c){return c.mat===m.id}).forEach(function(c){
