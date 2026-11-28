@@ -574,3 +574,52 @@ label.drop{background:var(--gl-sheen),var(--gl-fill);border-radius:20px;box-shad
 .dom .tl>.cc .meta{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 /* inside a subject the track cards also share one height across its groups: the description always takes its three lines */
 .dom:has(.dom-h) .tl>.cc .meta{min-height:3lh}
+
+/* ---- Liquid Glass (layer on top of the glass above) ----
+   What makes it "liquid" rather than frosted: (1) floating, fully rounded bars that sit off the edges,
+   (2) a lit rim: bright where the light hits (top left), faint on the far side, (3) a highlight that follows the
+   pointer across a surface, (4) springy, fluid press/hover motion, (5) in Chromium the bar and dock also bend the
+   content behind their edges (SVG displacement; other browsers keep the blur). Cheap: no new blur layers, only
+   gradients and shadows; the pointer light only repaints the one surface under the pointer. */
+:root{
+  --lq-rim:inset 1.5px 1.5px 0 -.5px rgba(255,255,255,.55),inset -1px -1px 0 -.5px rgba(255,255,255,.14),inset 0 0 18px rgba(255,255,255,.06);
+  --lq-lens:rgba(255,255,255,.17);
+  --lq-spring:cubic-bezier(.34,1.56,.64,1);
+  --lq-flow:cubic-bezier(.22,1,.36,1)}
+html[data-theme=light]{
+  --lq-rim:inset 1.5px 1.5px 0 -.5px #fff,inset -1px -1px 0 -.5px rgba(255,255,255,.7),inset 0 0 22px rgba(255,255,255,.5);
+  --lq-lens:rgba(255,255,255,.7)}
+/* the pointer light and the lit rim on every pane */
+.card,.callout,.quiz,.stepper,.wfwrap,.lcard,.cc,.panel,.sc,.chat,.try,.teach,.whatnext,.pager a,.dom .tl>.cc,
+.bcn,#guards .guard,.attention-card,.key .kg,.theme,.gl-it,#practice,.streak,#flow,.track-ba>*,.pre-after>*,ol.flow li,label.drop{
+  background:radial-gradient(240px circle at var(--lx,-300px) var(--ly,-300px),var(--lq-lens),transparent 70%),var(--gl-sheen),var(--gl-fill);
+  box-shadow:var(--lq-rim),var(--gl-sh)}
+/* floating bar: a pill that hovers off the edges */
+.top{top:10px;margin:10px auto 0;width:min(1200px,calc(100% - 24px));height:54px;border-radius:999px;padding:0 14px 0 20px;
+  background:color-mix(in srgb,var(--bg) 30%,transparent);border:1px solid var(--gl-edge);
+  box-shadow:var(--lq-rim),0 18px 40px -18px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.12);
+  -webkit-backdrop-filter:blur(20px) saturate(200%) brightness(1.06);backdrop-filter:blur(20px) saturate(200%) brightness(1.06)}
+.side{top:76px;left:12px;bottom:12px;border-radius:28px;border:1px solid var(--gl-edge);box-shadow:var(--lq-rim),0 30px 80px -20px rgba(0,0,0,.6);transition:transform .6s var(--lq-flow)}
+.scrim{inset:0}
+.dock{box-shadow:var(--lq-rim),0 22px 54px -14px rgba(0,0,0,.55)}
+/* controls: lit pills with a spring */
+.btn,.pill,.tg,.icon-btn,.seg,.side-close{box-shadow:var(--lq-rim);transition:transform .5s var(--lq-spring),background .25s,box-shadow .25s,border-color .25s}
+.btn:hover,.pill:hover,.icon-btn:hover{transform:translateY(-1px) scale(1.03)}
+.btn:active,.pill:active,.icon-btn:active,.seg button:active,.opt:active{transform:scale(.95);transition-duration:.12s}
+.seg button{transition:background .35s var(--lq-flow),color .25s,transform .45s var(--lq-spring)}
+.seg button.on{box-shadow:0 4px 14px -4px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.35)}
+.wtab.on{box-shadow:0 4px 14px -4px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.35)}
+.btn.pri,.btn.primary,.btn.main{box-shadow:var(--lq-rim),0 12px 32px -8px var(--glow)}
+/* fluid hover on cards */
+.cc,.dom .tl>.cc,.lcard.ready{transition:transform .6s var(--lq-spring),box-shadow .4s,border-color .35s,background .35s}
+.cc:hover,.dom .tl>.cc:hover,.lcard.ready:hover{box-shadow:var(--lq-rim),0 26px 60px -22px rgba(0,0,0,.6),0 0 40px -12px var(--glow)}
+/* Chromium only: the bar and dock bend what is behind them (the filter is added by site.js) */
+html.lq-refract .top,html.lq-refract .dock{-webkit-backdrop-filter:url(#lq-lens) blur(10px) saturate(190%);backdrop-filter:url(#lq-lens) blur(10px) saturate(190%)}
+@media (max-width:720px){
+  .top{top:6px;margin-top:6px;width:calc(100% - 16px);height:50px;padding:0 8px 0 14px;-webkit-backdrop-filter:blur(16px) saturate(190%);backdrop-filter:blur(16px) saturate(190%);background:color-mix(in srgb,var(--bg) 62%,transparent)}
+  .side{top:64px;left:8px;bottom:8px;border-radius:24px}
+  .dock{border-width:1px;bottom:max(10px,env(safe-area-inset-bottom));border-radius:999px}
+  html.lq-refract .top,html.lq-refract .dock{-webkit-backdrop-filter:blur(16px) saturate(190%);backdrop-filter:blur(16px) saturate(190%)}
+}
+@media (prefers-reduced-motion:reduce){.btn,.pill,.icon-btn,.cc,.lcard,.side{transition:none}.btn:hover,.pill:hover,.icon-btn:hover{transform:none}}
+@media (prefers-reduced-transparency:reduce){html.lq-refract .top,html.lq-refract .dock{-webkit-backdrop-filter:none;backdrop-filter:none}.top{background:var(--gl-fill2)}}
