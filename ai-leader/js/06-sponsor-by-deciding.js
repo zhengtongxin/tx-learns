@@ -11,4 +11,5 @@ document.addEventListener('DOMContentLoaded',function(){
 
 
  predict($('p3'),{q:{en:'Which yes is best for a first AI project?',zh:'第一个 AI 项目，哪种“同意”最好？'},opts:[{k:'a',en:'"Yes, go ahead and roll it out."',zh:'“好，放手去做，全面推行。”'},{k:'b',en:'"Yes for four weeks on one store; we review against this number."',zh:'“先做四周，只在一家分店，到时对着这个数字复盘。”'},{k:'c',en:'"Come back when it is perfect."',zh:'“做到完美再来找我。”'}],a:'b',ex:{en:'It is small, it ends on a date, and it is measured. Easy to stop.',zh:'它小，有结束日期，也能衡量，随时能停。'},hint:{en:'Look for a time limit, a size limit and a number.',zh:'找找有没有时间限制、范围限制和数字。'}});
+ predict($('p9'),{"q": {"en": "Which line is the weakest of the five decisions?", "zh": "这五个决定里哪一行最弱？"}, "opts": [{"k": "a", "en": "“Accountable: the store manager”", "zh": "“负责人：店长”"}, {"k": "b", "en": "“Goal: cut the answer time from 2 hours to 30 minutes”", "zh": "“目标：把回复时间从 2 小时缩到 30 分钟”"}, {"k": "c", "en": "“Goal: improve staff experience”", "zh": "“目标：改善员工体验”"}], "a": "c", "ex": {"en": "A goal with no number cannot be checked after 6 weeks.", "zh": "没有数字的目标，6 周后没法检验。"}, "hint": {"en": "Which line could not be checked later?", "zh": "哪一行以后没法检验？"}});
 });
