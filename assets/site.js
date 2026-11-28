@@ -221,7 +221,7 @@
           return '<h4 class="dom-g">'+t({en:'Pick where you start',zh:'选一个起点'})+'</h4>'+list(en,false)+(br.length?'<h4 class="dom-g">'+t({en:'Skills toolbox: take what you need, in any order',zh:'技能工具箱：缺什么学什么，顺序随意'})+'</h4>'+list(br,false):'')+(pt.length?'<h4 class="dom-g">'+t({en:'Then the engineering path, in order',zh:'然后按顺序走工程路线'})+'</h4>'+list(pt,true):'')})()+'</section>';return}
       hub.innerHTML='<section class="dom"><div class="tl">'+D.map(function(dm){var ts=tracksOf(dm);if(!ts.length)return '';var href=ts.length>1?'#'+dm.id:ts[0].href;
         return '<a class="cc spot" href="'+href+'"><div class="orbi">'+(dm.icon||'')+'</div><div><h3>'+t(dm.title)+'</h3>'+(dm.desc?'<div class="meta" style="margin-top:4px">'+t(dm.desc)+'</div>':'')+'</div><div class="go">→</div></a>'}).join('')+'</div></section>'}
-    addEventListener('hashchange',function(){drawHub();scrollTo(0,document.getElementById('topics')?document.getElementById('topics').offsetTop-20:0)});
+    addEventListener('hashchange',function(){if(!hub)return;drawHub();scrollTo(0,document.getElementById('topics')?document.getElementById('topics').offsetTop-20:0)});
     function canStore(){try{localStorage.setItem('learn-t','1');localStorage.removeItem('learn-t');return true}catch(e){return false}}
     function drawResume(){
       var T=window.TRACKS,tot=0,fin=0,hasP=false,lookup={};
