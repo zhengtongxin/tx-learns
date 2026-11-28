@@ -7,5 +7,6 @@ window.TRACK={id:'project-basics',title:{en:'Project basics',zh:'项目管理入
  {n:2,level:1,title:{en:"Running it",zh:"把它做下去"},items:[
   {k:'f',file:'04-tasks-and-schedule.html',title:{en:"Tasks and schedule",zh:"任务与进度"}},
   {k:'c',file:'05-budget-and-risks.html',title:{en:"Budget and risks",zh:"预算与风险"}},
-  {k:'c',file:'06-progress-and-closing.html',title:{en:"Progress and closing",zh:"进展与收尾"}}]}
+  {k:'c',file:'06-progress-and-closing.html',title:{en:"Progress and closing",zh:"进展与收尾"}},
+  {k:'c',file:'07-writing-a-status-report.html',title:{en:"Writing a status report",zh:"写一份状态报告"}}]}
 ]};
