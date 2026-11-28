@@ -646,7 +646,7 @@ html[data-theme=light] .guard .tags i{color:color-mix(in srgb,var(--h) 35%,var(-
   (function loadTopics(){
     function run(list){var tp=0,all=0,done=0,i=0;
       (function next(){var c=list[i++];
-        if(!c){document.getElementById('kb').innerHTML=t('knowledge base: <b>'+tp+'</b> topics · <b>'+done+'</b> of '+all+' lessons live · ','知识库：<b>'+tp+'</b> 个主题 · 已上线 <b>'+done+'</b> / '+all+' 课 · ')+'<a href="index.html#topics">'+t('browse →','去看看 →')+'</a>';return}
+        if(!c){document.getElementById('kb').innerHTML=t('knowledge base: <b>'+tp+'</b> topics · <b>'+done+'</b> of '+all+' lessons live · ','知识库：<b>'+tp+'</b> 个主题 · 已上线 <b>'+done+'</b> / '+all+' 课 · ')+'<a href="tracks.html#topics">'+t('browse →','去看看 →')+'</a>';return}
         var sc=document.createElement('script');sc.src=c.href.replace(/[^\/]*$/,'')+'lessons.js';
         sc.onload=sc.onerror=function(){var T=window.TRACK;try{delete window.TRACK}catch(e){window.TRACK=undefined}
           if(T&&T.topics){tp+=T.topics.length;T.topics.forEach(function(w){all+=w.items.length;done+=w.items.filter(function(x){return x.file}).length})}
