@@ -7,5 +7,6 @@ window.TRACK={id:'agile-basics',title:{en:'Agile basics',zh:'敏捷入门'},topi
  {n:2,level:2,title:{en:"Working in agile teams",zh:"在敏捷团队里工作"},items:[
   {k:'c',file:'04-roles-in-the-team.html',title:{en:"Roles in the team",zh:"团队里的角色"}},
   {k:'c',file:'05-boards-and-daily-habits.html',title:{en:"Boards and daily habits",zh:"看板与每日习惯"}},
-  {k:'c',file:'06-measuring-progress-honestly.html',title:{en:"Measuring progress honestly",zh:"如实衡量进展"}}]}
+  {k:'c',file:'06-measuring-progress-honestly.html',title:{en:"Measuring progress honestly",zh:"如实衡量进展"}},
+  {k:'c',file:'07-looking-back-together.html',title:{en:"Looking back together",zh:"一起回顾"}}]}
 ]};
