@@ -96,7 +96,12 @@ async function prepare() {
     const plus = lines.filter(l => l[0] === '+').map(l => l.slice(1)).sort().join('\n');
     return minus === plus && lines.length ? '[only ?v= cache hashes changed (generated)]' : m;
   };
-  const rows = files.map(f => ({ path: f.filename, area: classify(f.filename, trackIds), add: f.additions, del: f.deletions, status: f.status, patch: maskV(f.patch || '') }));
+  const rows = files.map(f => {
+    const patch = maskV(f.patch || '');
+    // A page whose only change is a moved `?v=` hash (a shared file such as tracks.js changed) belongs to no area: it is generated.
+    const area = patch.startsWith('[only ?v= cache hashes changed') ? 'generated' : classify(f.filename, trackIds);
+    return { path: f.filename, area, add: f.additions, del: f.deletions, status: f.status, patch };
+  });
   const areas = [...new Set(rows.map(r => r.area))];
   const exempt = AREAS.exempt.some(x => branch.startsWith(x)) ? 'a rollback' : labels.includes('scope-ok') ? 'TX marked it scope-ok' : '';
   const violations = rules(branch, areas, trackIds);
