@@ -56,8 +56,9 @@ function review() {
   let used = 0, cut = 0; const parts = [];
   for (const f of keep) {
     const text = f.text.split('\n').filter(l => !/^[+-].*\?v=[0-9a-f]{6,}/.test(l) || /^[+-]{3}/.test(l)).join('\n');
-    if (used + text.length > DIFF_CAP) { cut++; parts.push(`(diff of ${f.path} left out to keep this short: open it in the checkout)`); continue; }
-    used += text.length; parts.push(text);
+    const size = Buffer.byteLength(text); // bytes, not characters: 中文 is 3 bytes a character and the whole prompt must fit one argument (128 KB)
+    if (used + size > DIFF_CAP) { cut++; parts.push(`(diff of ${f.path} left out to keep this short: open it in the checkout)`); continue; }
+    used += size; parts.push(text);
   }
   L.push('## Diff', '```diff', parts.join('\n').trimEnd(), '```', '');
   if (lessons.length) L.push('## Changed lessons (open each in full)', ...lessons.slice(0, 12).map(l => `- ${l}`), ...(lessons.length > 12 ? [`- ...and ${lessons.length - 12} more`] : []), '');
