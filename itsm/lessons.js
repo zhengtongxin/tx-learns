@@ -19,7 +19,8 @@ window.TRACK={id:'itsm',title:{en:'ITSM',zh:'ITSM 备考'},topics:[
   {k:'c',file:'13-service-levels-and-relationships.html',title:{en:"Service levels and relationships",zh:"服务水平与关系"}},
   {k:'c',file:'20-events-and-configuration.html',title:{en:"Events and configuration",zh:"事态与配置"}},
   {k:'c',file:'21-knowledge-and-capacity.html',title:{en:"Knowledge and capacity",zh:"知识与容量"}},
-  {k:'c',file:'22-catalogue-and-assets.html',title:{en:"Catalogue and assets",zh:"目录与资产"}}]},
+  {k:'c',file:'22-catalogue-and-assets.html',title:{en:"Catalogue and assets",zh:"目录与资产"}},
+  {k:'c',file:'23-deployment-and-rollout.html',title:{en:"Deployment and rollout",zh:"部署与推出"}}]},
  {n:5,level:2,title:{en:"Beyond the basics",zh:"更进一步"},items:[
   {k:'f',file:'14-value-streams.html',title:{en:"Value streams",zh:"价值流"}},
   {k:'c',file:'15-ai-in-service-management.html',title:{en:"AI in service management",zh:"服务管理中的 AI"}},
