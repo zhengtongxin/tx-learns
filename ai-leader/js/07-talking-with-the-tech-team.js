@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded',function(){
  var $=TX2.$,game=TX2.game,predict=TX2.predict;TX2.init();
- predict($('p2'),{q:{en:'The team brings only one plan. What should the sponsor ask for?',zh:'团队只带来一个方案。发起人该要求什么？'},opts:[{k:'a',en:'Two or three options in the same shape, with a recommendation',zh:'两三个格式统一的选项，并附推荐'},{k:'b',en:'A longer slide deck',zh:'更长的幻灯片'},{k:'c',en:'A yes or no, right now',zh:'马上回答好或不好'}],a:'a',ex:{en:'One plan only allows yes or no. Options in one shape can be compared.',zh:'只有一个方案时只能说好或不好；格式统一的选项才能比较。'},hint:{en:'You want to compare, not just agree.',zh:'你要的是比较，不只是同意。'}});
+ predict($('p2'),{q:{en:'The team brings only one plan. What should the sponsor (the leader who backs the work) ask for?',zh:'团队只带来一个方案。发起人（出资支持这项工作的领导）该要求什么？'},opts:[{k:'a',en:'Two or three options in the same shape, with a recommendation',zh:'两三个格式统一的选项，并附推荐'},{k:'b',en:'A longer slide deck',zh:'更长的幻灯片'},{k:'c',en:'A yes or no, right now',zh:'马上回答好或不好'}],a:'a',ex:{en:'One plan only allows yes or no. Options in one shape can be compared.',zh:'只有一个方案时只能说好或不好；格式统一的选项才能比较。'},hint:{en:'You want to compare, not just agree.',zh:'你要的是比较，不只是同意。'}});
  game($('t3'),[
   {en:'How long the answer takes to appear',zh:'答案出现要等多久',a:'l',ex:{en:'That is latency.',zh:'这就是延迟。'},hint:{en:'It is about time.',zh:'它说的是时间。'}},
   {en:'A confident answer that is made up',zh:'自信但编造的答案',a:'h',ex:{en:'That is a hallucination.',zh:'这就是幻觉。'},hint:{en:'The answer sounds sure but is false.',zh:'答案听着很肯定，却是假的。'}},
