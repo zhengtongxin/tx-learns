@@ -7,5 +7,6 @@ window.TRACK={id:'responsible-ai',title:{en:'Using AI responsibly',zh:'负责任
  {n:2,level:2,title:{en:"Using it well",zh:"用得好"},items:[
   {k:'f',file:'04-checking-and-oversight.html',title:{en:"Checking and oversight",zh:"检查与监督"}},
   {k:'c',file:'05-being-open-about-ai.html',title:{en:"Being open about AI",zh:"如实说明用了 AI"}},
-  {k:'c',file:'06-a-simple-team-policy.html',title:{en:"A simple team policy",zh:"一份简单的团队规则"}}]}
+  {k:'c',file:'06-a-simple-team-policy.html',title:{en:"A simple team policy",zh:"一份简单的团队规则"}},
+  {k:'c',file:'07-reviewing-ai-use.html',title:{en:"Reviewing AI use",zh:"回顾 AI 的使用"}}]}
 ]};
