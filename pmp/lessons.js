@@ -12,7 +12,8 @@ window.TRACK={id:'pmp',title:{en:'PMP',zh:'PMP 备考'},topics:[
   {k:'c',file:'15-communication-and-handover.html',title:{en:"Communication and handover",zh:"沟通与交接"}},
   {k:'c',file:'07-agile-roles.html',title:{en:"Agile roles",zh:"敏捷角色"}},
   {k:'c',file:'43-virtual-and-diverse-teams.html',title:{en:"Virtual and diverse teams",zh:"远程与多元团队"}},
-  {k:'c',file:'45-knowledge-and-lessons-learned.html',title:{en:"Knowledge and lessons learned",zh:"知识与经验教训"}}]},
+  {k:'c',file:'45-knowledge-and-lessons-learned.html',title:{en:"Knowledge and lessons learned",zh:"知识与经验教训"}},
+  {k:'c',file:'48-emotional-intelligence-and-influence.html',title:{en:"Emotional intelligence and influence",zh:"情商与影响力"}}]},
  {n:3,level:2,title:{en:"Process planning",zh:"过程规划"},items:[
   {k:'f',file:'25-starting-a-project.html',title:{en:"Starting a project",zh:"启动项目"}},
   {k:'c',file:'08-scope-and-requirements.html',title:{en:"Scope and requirements",zh:"范围与需求"}},
