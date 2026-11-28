@@ -152,7 +152,7 @@ async function startRound(kind,n){
  pump();show()}
 async function pump(){
  var r=R;if(!r||r.busy)return;r.busy=true;
- var t0=0;function tick(n){var l=$('pline');if(R!==r||!l||r.view!=='wait')return;l.textContent=T('Writing… '+n+' words so far, '+Math.round((Date.now()-t0)/1000)+' s. The first question will appear here when it is ready.','正在写… 已写 '+n+' 小段，用时 '+Math.round((Date.now()-t0)/1000)+' 秒。第一题好了就能开始作答。')}
+ var t0=0;function tick(n){var l=$('pline');if(R!==r||!l||r.view!=='wait')return;l.innerHTML=T('Writing… '+n+' words so far, '+Math.round((Date.now()-t0)/1000)+' s. The first question will appear here when it is ready.','正在写… 已写 '+n+' 小段，用时 '+Math.round((Date.now()-t0)/1000)+' 秒。第一题好了就能开始作答。')}
  while(R===r&&r.gen<r.slots.length&&r.items.length-r.i<2){
   var slot=r.slots[r.gen],item=null;
   for(var tries=0;tries<3&&!item&&R===r;tries++){t0=Date.now();
@@ -376,11 +376,11 @@ async function makeSums(){
  try{await ensureModel()}catch(e){sBusy=false;renderShare();go('model');return}
  var pl=pageLang(),picks=pickSums(),out=[],i,miss={};S.sums=[];
  for(i=0;i<picks.length&&!sStop;i++){
-  var pp=$('sline');if(pp)pp.textContent=T('Writing note '+(i+1)+' of '+picks.length+'…','正在写第 '+(i+1)+' / '+picks.length+' 条…');
+  var pp=$('sline');if(pp)pp.innerHTML=T('Writing note '+(i+1)+' of '+picks.length+'…','正在写第 '+(i+1)+' / '+picks.length+' 条…');
   var why='';
   for(var tr=0;tr<2&&!why.startsWith('ok');tr++){
    try{var pr=Lg.sumPrompt({text:picks[i].text,lang:pl});if(tr)pr[1].content+='\nIMPORTANT: answer in '+(pl==='zh'?'Chinese (简体中文)':'English')+' only, in your own words, at most 80 words.';
-    var raw=Lg.stripThink(await ENG.chat(pr,{max:400,onTok:function(n){var q=$('sline');if(q&&sBusy)q.textContent=T('Writing note '+(i+1)+' of '+picks.length+'… ('+n+' words so far)','正在写第 '+(i+1)+' / '+picks.length+' 条…（已写 '+n+' 小段）')}})),a=raw.indexOf('{'),b=raw.lastIndexOf('}'),sm;
+    var raw=Lg.stripThink(await ENG.chat(pr,{max:400,onTok:function(n){var q=$('sline');if(q&&sBusy)q.innerHTML=T('Writing note '+(i+1)+' of '+picks.length+'… ('+n+' words so far)','正在写第 '+(i+1)+' / '+picks.length+' 条…（已写 '+n+' 小段）')}})),a=raw.indexOf('{'),b=raw.lastIndexOf('}'),sm;
     try{sm=String(JSON.parse(raw.slice(a,b+1)).summary||'').trim()}catch(e){sm=raw.replace(/[{}"]|summary\s*:/g,'').trim()}
     var z=Lg.cjkShare(sm);
     if(sm.length<15)why='short';else if(sm.length>600)why='long';else if(Lg.copied(sm,picks[i].text))why='copied';else if(Lg.srcMatch(sm))why='source';else if(!(pl==='zh'?z>0.3:z<0.08))why='language';
