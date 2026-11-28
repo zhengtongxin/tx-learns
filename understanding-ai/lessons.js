@@ -7,5 +7,6 @@ window.TRACK={id:'understanding-ai',title:{en:'Understanding AI',zh:'看懂 AI'}
  {n:2,level:1,title:{en:"What it can and cannot do",zh:"它能做什么，不能做什么"},items:[
   {k:'f',file:'04-strengths-and-limits.html',title:{en:"Strengths and limits",zh:"长处与局限"}},
   {k:'c',file:'05-why-it-makes-things-up.html',title:{en:"Why it makes things up",zh:"它为什么会编造"}},
-  {k:'c',file:'06-using-it-well.html',title:{en:"Using it well",zh:"把它用好"}}]}
+  {k:'c',file:'06-using-it-well.html',title:{en:"Using it well",zh:"把它用好"}},
+  {k:'c',file:'07-judging-an-ai-tool.html',title:{en:"Judging an AI tool",zh:"评估一个 AI 工具"}}]}
 ]};
