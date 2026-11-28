@@ -80,7 +80,7 @@ async function prepare() {
   const pr = arg('pr'), D = dir();
   const p = await gh('GET', `/pulls/${pr}`);
   const files = [];
-  for (let page = 1; page <= 3; page++) {
+  for (let page = 1; page <= 30; page++) { // GitHub lists at most 3000 files; a new track rewrites ?v= hashes in 400+ pages
     const part = await gh('GET', `/pulls/${pr}/files?per_page=100&page=${page}`);
     files.push(...part);
     if (part.length < 100) break;
