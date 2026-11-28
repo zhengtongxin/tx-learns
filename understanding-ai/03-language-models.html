@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Language models | TX Learns</title>
+<meta name="description" content="See how a chat assistant writes by predicting the next piece of text, and why that sounds so fluent"><meta property="og:title" content="Language models | TX Learns"><meta property="og:description" content="See how a chat assistant writes by predicting the next piece of text, and why that sounds so fluent"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/understanding-ai/03-language-models.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/understanding-ai.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/understanding-ai/03-language-models.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=cc1be7bd"><link rel="stylesheet" href="../assets/teach.css?v=5ac4489a"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/understanding-ai/03-language-models.html","url":"https://tx-learns.vercel.app/understanding-ai/03-language-models.html","name":"Language models","alternateName":"语言模型","description":"See how a chat assistant writes by predicting the next piece of text, and why that sounds so fluent","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"What AI is","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Understanding AI","url":"https://tx-learns.vercel.app/understanding-ai/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Understanding AI","item":"https://tx-learns.vercel.app/understanding-ai/index.html"},{"@type":"ListItem","position":3,"name":"Language models","item":"https://tx-learns.vercel.app/understanding-ai/03-language-models.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">What AI is · Lesson 3</span><span class="zh">AI 是什么 · 第 3 课</span></span><h1><span class="en">Language models</span><span class="zh">语言模型</span></h1><p class="meta"><span class="en">See how a chat assistant writes by predicting the next piece of text, and why that sounds so fluent · ~10 min · reading and practice</span><span class="zh">看聊天助手怎样靠预测下一小段文字来写作，以及为什么听起来这么流畅 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Predicting what comes next</span><span class="zh">第 1 步 · 预测接下来是什么</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A <b>language model</b> is trained on huge amounts of text to do one thing: given the text so far, predict what comes next. After “The cat sat on the”, a likely next word is “mat”. It picks a likely continuation, adds it, and repeats, one small piece at a time. Writing a whole answer is just this step done many times.</p>
+<p class="zh" style="margin:0 0 8px"><b>语言模型</b>是用海量文字训练出来的，只做一件事：给定到目前为止的文字，预测接下来是什么。“猫坐在”之后，很可能的下一个词是“垫子”。它选一个很可能的续写，接上去，再重复，一次一小段。写出整篇回答，不过是把这一步重复很多遍。</p></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · Pieces of text and chance</span><span class="zh">第 2 步 · 文字小块与概率</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The small pieces are called <b>tokens</b>: often a short word or part of a word. For each step the model gives every possible next token a chance, and the chances add up to 100%. It usually picks a likely one, but not always the top one, so the same question can get different answers.</p>
+<p class="zh" style="margin:0 0 8px">这些小块叫<b>词元</b>，通常是一个短词或词的一部分。每一步，模型会给每个可能的下一个词元一个概率，所有概率加起来是 100%。它通常选概率高的，但不总是选最高的，所以同一个问题可能得到不同的回答。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Step 3 · Fluent is not the same as true</span><span class="zh">第 3 步 · 流畅不等于真实</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">The model is trained to continue text in a likely way, not to check facts. Because it has read so much, likely text is usually well-formed and often right. But a smooth sentence can still be wrong, and nothing inside the model marks the difference. That is why a fluent answer still needs checking.</p>
+<p class="zh" style="margin:0 0 8px">模型被训练成“用很可能的方式续写文字”，而不是核对事实。因为读得多，很可能的文字通常结构完整，也常常是对的。但一句通顺的话仍可能是错的，模型内部并没有标记出这个区别。所以流畅的回答仍然需要检查。</p></div>
+<div class="codebox" data-file="next-word.txt" data-lang="text">After "The cat sat on the":
+  mat    60%
+  floor  25%
+  sofa   15%
+Total: 60 + 25 + 15 = 100%</div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Do it:</b> finish this sentence in three ways, then say which you think is most likely: “The sun rises in the…”.</span><span class="zh"><b>动手做：</b>用三种方式补全这句话，并说出你觉得哪一种最可能：“太阳从……升起”。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> how is what you just did like what a language model does?</span><span class="zh"><b>核对：</b>你刚才做的事和语言模型做的事有什么相似？</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• A language model predicts a likely next piece of text, over and over.<br>• Each step gives chances that add up to 100%.<br>• The same question can get different answers.<br>• Fluent is not the same as true, so check what matters.</p><p class="zh" style="margin:0">• 语言模型一遍又一遍地预测很可能的下一小段文字。<br>• 每一步给出的概率加起来是 100%。<br>• 同一个问题可能得到不同的回答。<br>• 流畅不等于真实，重要的内容要检查。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Understanding AI</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Pen and paper, and any AI assistant if you want to try the ideas","zh":"纸笔；想亲手试一试的话，再备一个 AI 助手"},"know":{"en":"Know how a program learns from examples (see “How it learns”).","zh":"知道程序怎样从例子里学习（见“它怎样学习”）。"},"goals":{"en":["Say what a language model predicts","Explain why fluent does not mean true","Read a simple next-word table"],"zh":["说出语言模型预测的是什么","说清为什么流畅不等于真实","读懂一张简单的“下一个词”表"]},"prev":["02-how-it-learns.html"]}}</script>
+<script src="../tracks.js?v=0a430517"></script><script src="lessons.js?v=1b0ce643"></script><script src="../assets/site.js?v=5deea3d4"></script><script src="../assets/teach.js?v=6e9da348"></script>
+<script src="js/03-language-models.js?v=c6c268ae"></script></body></html>
