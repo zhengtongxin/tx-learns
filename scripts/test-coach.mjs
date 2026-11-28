@@ -33,6 +33,7 @@ ok(L.parseTranslation('{"q":"问题","o":["甲","乙"],"e":"因为"}', 2, 'zh').
   ok(L.parseQuestion(JSON.stringify({ question: 'Which one action helps a team resolve a conflict about scope?', options: ['Listen to both sides', 'Ignore it', 'Look for the cause', 'Escalate at once'], answers: [0, 2] }), true) === null, 'a choose-two question that asks for "the one" answer is refused');
   const msh = L.shuffle(mp, () => 0.3);
   ok(L.keys(msh).length === 2 && L.keys(msh).every((k) => ['Listen to both sides', 'Look for the cause'].includes(msh.o[k])), 'shuffling keeps both keys on the right options');
+  ok(Array.isArray(msh.p) && msh.p.length === 4 && msh.p.every((k, i) => msh.o[i] === mp.o[k]), 'a shuffle reports where each option came from, so a translation can follow it');
   ok(L.right(mp, [2, 0]) && !L.right(mp, [0]) && !L.right(mp, [0, 1]), 'a choose-two answer is right only with both keys');
   ok(L.right({ a: 2 }, 2) && !L.right({ a: 2 }, 1), 'a one-key answer is right only with its key');
   ok(L.parseVerifyMulti('{"answers":["C","A"]}').join() === '0,2' && L.parseVerifyMulti('{"answer":"A"}') === null && L.parseVerifyMulti('{"answers":["A"]}') === null, 'the second opinion on a choose-two question names two options or none');

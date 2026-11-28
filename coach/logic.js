@@ -159,7 +159,7 @@
   function j(x,y){var k=Object.keys(x),n=0;k.forEach(function(t){if(y[t])n++});var u=k.length+Object.keys(y).length-n;return u?n/u:0}
   return j(w(a.q),w(b.q))>=0.7||j(w(a.q+' '+a.o.join(' ')),w(b.q+' '+b.o.join(' ')))>=0.7};
  L.shuffle=function(item,rnd){var idx=[0,1,2,3];for(var i=3;i>0;i--){var j=Math.floor(rnd()*(i+1)),t=idx[i];idx[i]=idx[j];idx[j]=t}
-  var r={q:item.q,e:item.e,o:idx.map(function(k){return item.o[k]}),a:idx.indexOf(item.a)};
+  var r={q:item.q,e:item.e,o:idx.map(function(k){return item.o[k]}),a:idx.indexOf(item.a),p:idx};
   if(item.m){r.m=item.m.map(function(k){return idx.indexOf(k)}).sort();r.a=r.m[0]}
   return r};
  /* The question, its options and its explanation must be in the language the reader chose on the page, whatever language the material is in. */

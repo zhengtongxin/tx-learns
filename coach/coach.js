@@ -333,7 +333,7 @@ function renderBook(){
   '<p class="acts"><button class="btn pri" data-act="redoset">'+T('Redo them, shuffled','打乱后重做')+'</button><button class="btn" data-act="print">'+T('Print the book','打印错题本')+'</button></p>'}
 function startRedo(){
  var b=book();if(!b.length||(R&&R.busy))return;
- var items=mix(b.slice()).map(function(x,i){var q=Lg.shuffle({q:x.q,o:x.o,a:x.a,m:x.m,e:x.e},Math.random);return {id:'r'+Date.now().toString(36)+i,area:x.area,chunk:x.chunk,q:q.q,o:q.o,a:q.a,m:q.m,e:q.e,loc:x.loc,mat:x.mat,snip:x.snip,res:null,orig:x}});
+ var items=mix(b.slice()).map(function(x,i){var q=Lg.shuffle({q:x.q,o:x.o,a:x.a,m:x.m,e:x.e},Math.random),t=x.t&&x.t.o&&x.t.o.length===q.p.length?{q:x.t.q,e:x.t.e,o:q.p.map(function(k){return x.t.o[k]})}:null;return {id:'r'+Date.now().toString(36)+i,area:x.area,chunk:x.chunk,q:q.q,o:q.o,a:q.a,m:q.m,e:q.e,lang:x.lang,t:t,tl:t?x.tl:null,loc:x.loc,mat:x.mat,snip:x.snip,res:null,orig:x}});
  R={kind:'redo',slots:items.map(function(x){return {area:x.area}}),items:items,i:0,gen:items.length,busy:false,fail:0,view:'q'};
  go('practice');renderPractice()}
 function printBook(){
