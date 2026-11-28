@@ -7,5 +7,6 @@ window.TRACK={id:'better-decisions',title:{en:'Better decisions',zh:'做更好�
  {n:2,level:2,title:{en:"Deciding with doubt",zh:"带着疑问做决定"},items:[
   {k:'f',file:'04-risk-and-reversibility.html',title:{en:"Risk and reversibility",zh:"风险与可逆性"}},
   {k:'c',file:'05-common-biases.html',title:{en:"Common biases",zh:"常见的思维偏差"}},
-  {k:'c',file:'06-decide-and-review.html',title:{en:"Decide and review",zh:"决定与复盘"}}]}
+  {k:'c',file:'06-decide-and-review.html',title:{en:"Decide and review",zh:"决定与复盘"}},
+  {k:'c',file:'07-deciding-together.html',title:{en:"Deciding together",zh:"一起做决定"}}]}
 ]};
