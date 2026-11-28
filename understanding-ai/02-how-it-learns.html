@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>How it learns | TX Learns</title>
+<meta name="description" content="See how a program learns from labelled examples, and why the examples matter more than anything else"><meta property="og:title" content="How it learns | TX Learns"><meta property="og:description" content="See how a program learns from labelled examples, and why the examples matter more than anything else"><meta property="og:type" content="website"><meta property="og:url" content="https://tx-learns.vercel.app/understanding-ai/02-how-it-learns.html"><meta property="og:image" content="https://tx-learns.vercel.app/assets/og/understanding-ai.png"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#14110a">
+<meta name="updated" content="2026-11-28">
+<link rel="canonical" href="https://tx-learns.vercel.app/understanding-ai/02-how-it-learns.html"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="stylesheet" href="../assets/site.css?v=cc1be7bd"><link rel="stylesheet" href="../assets/teach.css?v=5ac4489a"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://tx-learns.vercel.app/understanding-ai/02-how-it-learns.html","url":"https://tx-learns.vercel.app/understanding-ai/02-how-it-learns.html","name":"How it learns","alternateName":"它怎样学习","description":"See how a program learns from labelled examples, and why the examples matter more than anything else","inLanguage":["en","zh"],"learningResourceType":"Interactive lesson","educationalLevel":"Beginner","teaches":"What AI is","dateModified":"2026-11-28","isPartOf":{"@type":"CollectionPage","name":"Understanding AI","url":"https://tx-learns.vercel.app/understanding-ai/index.html"},"publisher":{"@id":"https://tx-learns.vercel.app/#site"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TX Learns","item":"https://tx-learns.vercel.app/"},{"@type":"ListItem","position":2,"name":"Understanding AI","item":"https://tx-learns.vercel.app/understanding-ai/index.html"},{"@type":"ListItem","position":3,"name":"How it learns","item":"https://tx-learns.vercel.app/understanding-ai/02-how-it-learns.html"}]}]}</script></head><body>
+<div class="wrap"><nav class="side"></nav><main>
+<div class="hero"><span class="tag"><span class="en">What AI is · Lesson 2</span><span class="zh">AI 是什么 · 第 2 课</span></span><h1><span class="en">How it learns</span><span class="zh">它怎样学习</span></h1><p class="meta"><span class="en">See how a program learns from labelled examples, and why the examples matter more than anything else · ~10 min · reading and practice</span><span class="zh">看程序怎样从带标签的例子里学习，以及为什么例子比什么都重要 · 约 10 分钟 · 阅读加练习</span></p></div>
+
+<h2><span class="en">Step 1 · Training is practice with answers</span><span class="zh">第 1 步 · 训练就是带答案的练习</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">To teach a spam filter, people collect many emails and mark each one <b>spam</b> or <b>not spam</b>. These marks are called <b>labels</b>. The program adjusts itself until its guesses match the labels as often as possible. This practice stage is called <b>training</b>, and the examples used are the <b>training data</b>.</p>
+<p class="zh" style="margin:0 0 8px">要教会垃圾邮件过滤器，人们先收集大量邮件，给每封标上<b>垃圾</b>或<b>正常</b>。这些标记叫<b>标签</b>。程序不断调整自己，让它的判断尽量多地和标签一致。这个练习阶段叫<b>训练</b>，用到的例子叫<b>训练数据</b>。</p></div>
+<div class="try" id="p1"></div>
+
+<h2><span class="en">Step 2 · The examples shape the result</span><span class="zh">第 2 步 · 例子决定结果</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">A program can only learn what its examples show. If the training emails are mostly in English, it may do badly on Chinese emails. If almost all examples are spam, it may learn to call everything spam. So the first questions about any AI are about its examples: how many, how varied, and who is missing.</p>
+<p class="zh" style="margin:0 0 8px">程序只能学到例子里有的东西。如果训练邮件大多是英文，它处理中文邮件可能就很差；如果例子几乎全是垃圾邮件，它可能学会把什么都叫垃圾邮件。所以问任何 AI，先问它的例子：有多少、多不多样、缺了谁。</p></div>
+<p class="en">Sort each one.</p>
+<p class="zh">给每一项分类。</p><div class="sc" id="g1"></div>
+
+<h2><span class="en">Step 3 · Training, then use</span><span class="zh">第 3 步 · 先训练，再使用</span></h2>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">After training, the program is used on new emails it has never seen. How well it does there is what counts, so people test it on a separate set of examples kept aside. Test on the same emails it trained on and it looks better than it really is, like a student who saw the exam questions beforehand.</p>
+<p class="zh" style="margin:0 0 8px">训练之后，程序要处理它没见过的新邮件。它在新邮件上表现如何才是关键，所以人们会留出另一组例子来测试。如果用训练过的同一批邮件来测，它看起来会比实际好，就像学生提前见过考题。</p></div>
+<div class="codebox" data-file="spam-training.txt" data-lang="text">Training data: 1,000 emails, 300 marked spam
+Share of spam: 300 / 1,000 = 30%
+Test set: 200 new emails the program never saw
+It flags 50 of them: 50 / 200 = 25%</div>
+<div class="try" id="p2"></div>
+
+<h2><span class="en">More practice</span><span class="zh">再练一练</span></h2>
+<div class="try" id="x1"></div>
+<div class="try" id="x2"></div>
+
+<h2><span class="en">Now make it yours</span><span class="zh">现在把它变成你的</span></h2>
+<div class="cl"><label><input type="checkbox"><span><span class="en"><b>Do it:</b> imagine teaching a program to spot a good review. Write three examples with labels.</span><span class="zh"><b>动手做：</b>设想教一个程序识别“好评”，写出三个带标签的例子。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> who or what would be missing from your three examples?</span><span class="zh"><b>核对：</b>你这三个例子里，可能缺了谁、缺了什么？</span></span></label></div>
+
+<h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
+<div class="card"><p class="en" style="margin:0">• Training is practice on examples with correct answers (labels).<br>• A program can only learn what its examples show.<br>• Test on new cases, not on the examples it trained on.<br>• The first questions about any AI are about its examples.</p><p class="zh" style="margin:0">• 训练就是在带正确答案（标签）的例子上练习。<br>• 程序只能学到例子里有的东西。<br>• 要用新情况测试，而不是用它训练过的例子。<br>• 问任何 AI，先问它的例子。</p></div>
+
+<div class="pager"><a href="index.html"><small>All lessons · 所有课</small>Understanding AI</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
+</main></div>
+<script type="application/json" id="lesson-data">{"p":{"tools":{"en":"Pen and paper, and any AI assistant if you want to try the ideas","zh":"纸笔；想亲手试一试的话，再备一个 AI 助手"},"know":{"en":"Know what AI is (see “What AI is”).","zh":"知道 AI 是什么（见“AI 是什么”）。"},"goals":{"en":["Describe training in plain words","Say why the examples shape the result","Judge whether a set of examples is fair to the task"],"zh":["用平常的话描述“训练”","说清为什么例子决定结果","判断一组例子对这项任务是否合适"]},"prev":["01-what-ai-is.html"]}}</script>
+<script src="../tracks.js?v=0a430517"></script><script src="lessons.js?v=1b0ce643"></script><script src="../assets/site.js?v=5deea3d4"></script><script src="../assets/teach.js?v=6e9da348"></script>
+<script src="js/02-how-it-learns.js?v=57e9a1f1"></script></body></html>
