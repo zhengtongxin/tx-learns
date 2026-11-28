@@ -35,10 +35,20 @@ Message: "Can I change my pickup time?"
 <p class="zh" style="margin:0 0 8px">当你把邮件或文章粘进提示词时，先写指令，再用清楚的标记把粘贴的文字围起来，比如“邮件：”加一行横线。否则助手可能把粘贴文字里的某句话当成指令。</p>
 <p class="en" style="margin:0 0 8px">It also keeps your prompt easy to reuse: swap the pasted text and run it again.</p>
 <p class="zh" style="margin:0 0 8px">这也让你的提示词便于复用：换掉粘贴的文字，再跑一次。</p></div>
+<div class="codebox" data-file="marked-paste.txt" data-lang="text">Summarise the email below in two sentences for my manager.
+
+Email:
+----------
+Hi, the supplier moved delivery to Friday. Please confirm.
+----------</div>
 
 <h2><span class="en">Step 4 · Test your examples on a small batch</span><span class="zh">第 4 步 · 用一小批数据测试你的示例</span></h2>
-<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Do not assume examples helped. Run the same ten messages twice, once without examples and once with them, and count how many labels are right. Paste the ten messages into one prompt as a numbered list and ask for one label per number, then check each label by hand. The gap tells you whether the examples earned their place. Ten is a small batch, so treat a small gap as a hint, not proof.</p>
-<p class="zh" style="margin:0 0 8px">别想当然地认为示例有用。把同样的十条消息跑两遍，一遍不带示例，一遍带示例，数一数标对了几条：把十条消息编号后一起贴进同一个提示词，要求每个编号给一个标签，再逐个手动核对。差距告诉你示例值不值得保留。十条是很小的一批，所以小差距只是线索，不是证明。</p></div>
+<div class="teach"><b class="lbl"><span class="en">Learn</span><span class="zh">先学</span></b><p class="en" style="margin:0 0 8px">Do not assume examples helped. Test them, with ten sample messages (a small batch) and a <b>label</b>, the answer the assistant gives for each message, such as Order:</p>
+<p class="en" style="margin:0 0 8px">1. Write the correct label for each message yourself first. This is your answer key.<br>2. In a new chat, paste the ten messages as a numbered list without examples and ask for one label per number.<br>3. In another new chat, do the same with your examples included.<br>4. Count the labels that match your key in each chat. The gap tells you whether the examples earned their place.</p>
+<p class="en" style="margin:0 0 8px">Ten is a small batch, so treat a small gap as a hint, not proof.</p>
+<p class="zh" style="margin:0 0 8px">别想当然地认为示例有用，要测试它。准备十条样本消息（一小批），以及<b>标签</b>，也就是助手给每条消息的答案，比如“订单”：</p>
+<p class="zh" style="margin:0 0 8px">1. 先自己写下每条消息的正确标签，这就是你的标准答案。<br>2. 在一个新对话里，把十条消息编号贴进去，不带示例，要求每个编号给一个标签。<br>3. 在另一个新对话里，带上示例再做一遍。<br>4. 数一数每个对话里和标准答案一致的标签。差距告诉你示例值不值得保留。</p>
+<p class="zh" style="margin:0 0 8px">十条是很小的一批，所以小差距只是线索，不是证明。</p></div>
 <div class="codebox" data-file="example-test.txt" data-lang="text">Same 10 messages, labelled Order, Complaint or Other.
 Without examples: 5 right out of 10 = 50%
 With two examples: 8 right out of 10 = 80%
@@ -53,7 +63,7 @@ Gap: 80% - 50% = 30 percentage points (the difference of the two percentages, no
 <div class="cl"><label><input type="checkbox"><span><span class="en"><b>Try it:</b> write a labelling prompt with two examples and one new input, like the box above.</span><span class="zh"><b>试一试：</b>写一个带两个示例和一个新输入的分类提示词，像上面那个框一样。</span></span></label><label><input type="checkbox"><span><span class="en"><b>Check it:</b> take out one fact from a prompt and see whether the answer really changes.</span><span class="zh"><b>核对：</b>从提示词里拿掉一条事实，看答案是否真的变了。</span></span></label></div>
 
 <h2><span class="en">Takeaways</span><span class="zh">要点回顾</span></h2>
-<div class="card"><p class="en" style="margin:0">• The assistant knows nothing about you until you say it.<br>• Include the facts that change the answer; leave out the rest.<br>• One or two examples teach a pattern faster than a description.<br>• Mark pasted text so it is not mistaken for instructions.<br>• Test examples on a small batch and count the gap, not just the feel.</p><p class="zh" style="margin:0">• 你不说，助手对你一无所知。<br>• 写进会改变答案的事实，其余不写。<br>• 一两个示例比描述更快地教会它一个样子。<br>• 把粘贴的文字标出来，避免被当成指令。<br>• 用小批数据测试示例，数出差距，而不是凭感觉。</p></div>
+<div class="card"><p class="en" style="margin:0">• The assistant knows nothing about you until you say it.<br>• Include the facts that change the answer; leave out the rest.<br>• One or two examples teach a pattern faster than a description.<br>• Mark pasted text so it is not mistaken for instructions.<br>• Test examples on a small batch against your own answer key, and count the gap, not just the feel.</p><p class="zh" style="margin:0">• 你不说，助手对你一无所知。<br>• 写进会改变答案的事实，其余不写。<br>• 一两个示例比描述更快地教会它一个样子。<br>• 把粘贴的文字标出来，避免被当成指令。<br>• 用小批数据对照你自己的标准答案测试示例，数出差距，而不是凭感觉。</p></div>
 
 <div class="pager"><a href="index.html"><small>All lessons · 所有课</small>AI Prompting</a><a class="next" href="../index.html"><small>Home · 首页</small>TX Learns</a></div>
 </main></div>
