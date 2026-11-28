@@ -34,7 +34,8 @@ window.TRACK={id:'pmp',title:{en:'PMP',zh:'PMP 备考'},topics:[
   {k:'c',file:'32-reading-charts.html',title:{en:"Reading charts",zh:"看懂图表"}},
   {k:'c',file:'16-value-and-benefits.html',title:{en:"Value and benefits",zh:"价值与效益"}},
   {k:'c',file:'19-closing-a-project.html',title:{en:"Closing a project",zh:"项目收尾"}},
-  {k:'c',file:'50-measures-and-benchmarks.html',title:{en:"Measures and benchmarks",zh:"度量与对标"}}]},
+  {k:'c',file:'50-measures-and-benchmarks.html',title:{en:"Measures and benchmarks",zh:"度量与对标"}},
+  {k:'c',file:'53-managing-a-supplier.html',title:{en:"Managing a supplier",zh:"管理供应方"}}]},
  {n:5,level:2,title:{en:"Business environment",zh:"商业环境"},items:[
   {k:'f',file:'17-compliance-and-governance.html',title:{en:"Compliance and governance",zh:"合规与治理"}},
   {k:'c',file:'13-change-control.html',title:{en:"Change control",zh:"变更控制"}},
