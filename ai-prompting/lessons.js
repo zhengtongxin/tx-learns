@@ -11,5 +11,6 @@ window.TRACK={id:'ai-prompting',title:{en:'AI Prompting',zh:'AI 提示词'},topi
  {n:3,level:2,title:{en:"Using it well",zh:"用得稳妥"},items:[
   {k:'f',file:'07-safe-and-private-use.html',title:{en:"Safe and private use",zh:"安全与隐私"}},
   {k:'c',file:'08-your-prompt-library.html',title:{en:"Your prompt library",zh:"你的提示词库"}},
-  {k:'c',file:'09-testing-a-prompt.html',title:{en:"Testing a prompt",zh:"测试提示词"}}]}
+  {k:'c',file:'09-testing-a-prompt.html',title:{en:"Testing a prompt",zh:"测试提示词"}},
+  {k:'c',file:'10-standing-instructions.html',title:{en:"Standing instructions",zh:"长期指令"}}]}
 ]};
