@@ -7,5 +7,6 @@ window.TRACK={id:'language-learning',title:{en:'Learning a language',zh:'学外�
  {n:2,level:2,title:{en:"Using it",zh:"用起来"},items:[
   {k:'f',file:'04-speaking-early.html',title:{en:"Speaking early",zh:"尽早开口"}},
   {k:'c',file:'05-reading-and-writing.html',title:{en:"Reading and writing",zh:"阅读与写作"}},
-  {k:'c',file:'06-staying-consistent.html',title:{en:"Staying consistent",zh:"坚持下去"}}]}
+  {k:'c',file:'06-staying-consistent.html',title:{en:"Staying consistent",zh:"坚持下去"}},
+  {k:'c',file:'07-learning-from-corrections.html',title:{en:"Learning from corrections",zh:"从纠正中学习"}}]}
 ]};
