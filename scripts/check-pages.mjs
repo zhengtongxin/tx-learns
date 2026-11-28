@@ -46,6 +46,10 @@ for (const p of pages) {
     ['og:title', /<meta property="og:title" content="[^"]+"/], ['og:description', /<meta property="og:description" content="[^"]+"/],
     ['og:image', /<meta property="og:image" content="https:\/\/[^"]+"/]]) if (!re.test(html)) bad(p, `no ${tag}`);
 
+  // A lesson's link preview is its own track's image when the track has one (a lesson copied from another track must not keep that track's).
+  { const tk = /^([a-z0-9-]+)\/\d\d-[^/]+\.html$/.exec(p), im = /<meta property="og:image" content="https:\/\/[^"\/]+\/([^"]+)"/.exec(html);
+    if (tk && im && existsSync(new URL(`assets/og/${tk[1]}.png`, root)) && im[1] !== `assets/og/${tk[1]}.png`) bad(p, `og:image is ${im[1]}, but this track has its own assets/og/${tk[1]}.png`); }
+
   if (!/<link rel="icon" href="[^"]+"/.test(html)) bad(p, 'no favicon (<link rel="icon">)');
   for (const img of markup.match(/<img\b[^>]*>/gi) || []) if (!/\balt="/i.test(img)) bad(p, `image without alt text: ${img.slice(0, 80)}`);
   // a leftover marker from an edit that never put its piece back (a figure was once lost this way and showed as raw text)

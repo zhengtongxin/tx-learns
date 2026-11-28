@@ -15,6 +15,7 @@
     { "name": "pages: a stale canonical link is caught", "check": "pages", "regex": ["<link rel=\"canonical\" href=\"[^\"]*\">", "<link rel=\"canonical\" href=\"https://example.org/old.html\">"], "expect": "fail", "match": "canonical" },
     { "name": "pages: a stale asset version is caught", "check": "pages", "regex": ["site\\.css\\?v=[0-9a-f]+", "site.css?v=00000000"], "expect": "fail", "match": "out of date" },
     { "name": "pages: image without alt text is caught", "check": "pages", "append": "<img src=\"x.png\">", "expect": "fail", "match": "alt" },
+    { "name": "pages: a lesson that keeps another track's link-preview image is caught", "check": "pages", "regex": ["og/agentic-ai\\.png", "og/pmp.png"], "expect": "fail", "match": "og:image" },
     { "name": "pages: English without its 中文 twin is caught", "check": "pages", "append": "<p class=\"en\">Only English here.</p>", "expect": "fail", "match": "[Zz]h|中文" },
     { "name": "pages: skipped heading level is caught", "check": "pages", "append": "<h5>Jumped</h5>", "expect": "fail", "match": "heading" },
     { "name": "pages: missing language attribute is caught", "check": "pages", "regex": ["<html lang=\"[a-zA-Z-]+\"", "<html"], "expect": "fail", "match": "lang" },
