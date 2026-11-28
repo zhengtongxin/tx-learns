@@ -173,8 +173,8 @@ async function pump(){
  r.busy=false;if(R===r&&r.view==='wait')show()}
 /* writes the same question in the other language (queued behind the next question) so both show side by side */
 async function trans(item,pl){var to=pl==='zh'?'en':'zh';
- try{var raw=await ENG.chat(Lg.translatePrompt({to:to,q:{q:item.q,o:item.o,e:item.e}}),{max:500}),t=Lg.parseTranslation(raw,item.o.length,to);
-  if(t){item.t=t;item.tl=to;save();if(R&&V==='practice'&&R.items[R.i]===item)renderPractice()}}catch(e){}}
+ try{var raw=await ENG.chat(Lg.translatePrompt({to:to,q:{q:item.q,o:item.o,e:item.e}}),{max:700}),t=Lg.parseTranslation(raw,item.o.length,to);
+  if(t){item.t=t;item.tl=to;save();if(R&&V==='practice'&&R.items[R.i]===item&&!document.querySelector('#practice details[open]'))renderPractice()}}catch(e){}}
 function show(){
  if(!R)return;
  if(R.i<R.items.length){R.view=R.items[R.i].res==null?'q':'fb'}
