@@ -5,11 +5,11 @@
    go:{href,title} = one more link on that card (href from the site root). */
 /* Domains group the tracks on the home page. A track names its domain with domain:'<id>'; add a new domain here and put its tracks after the existing ones. */
 window.DOMAINS=[
- {id:'ai',icon:'🧠',title:{en:'AI',zh:'AI'},desc:{en:'Pick a starting point by who you are, then follow the engineering path to running a customer pilot.',zh:'按你的身份选一个起点，再沿工程路线一路走到带客户做试点。'}},
- {id:'pm',icon:'📋',title:{en:'Project management',zh:'项目管理'},desc:{en:'Plan, lead and close projects, and pass the PMP exam.',zh:'规划、带领并收尾项目，并通过 PMP 考试。'}},
- {id:'itsm',icon:'🛠️',title:{en:'IT service management',zh:'IT 服务管理'},desc:{en:'How IT services create value, and how to pass the ITSM foundation exam.',zh:'IT 服务如何创造价值，以及如何通过 ITSM 基础级考试。'}},
- {id:'skills',icon:'🎓',title:{en:'Everyday skills',zh:'通用技能'},desc:{en:'Skills that help with everything else: studying, writing, deciding, working with people, checking claims, managing your time, presenting, looking after money, using spreadsheets, starting out at work, learning a language, explaining things well and solving problems.',zh:'帮你做好其他一切事情的技能：学习、写作、决策、与人共事、辨别信息、管理时间、表达演讲、管好日常的钱、用好电子表格、在职场起步、学外语、把事情讲清楚和解决问题。'}},
- {id:'community',icon:'🤝',title:{en:'From learners',zh:'来自学习者'},desc:{en:'Tracks written from learners’ own study notes, on any subject.',zh:'根据学习者自己的学习笔记写成的路线，科目不限。'}}
+ {id:'ai',icon:'🧠',title:{en:'AI',zh:'AI'},desc:{en:'Start where you are, then build up to a customer pilot.',zh:'从你的起点出发，一路学到带客户做试点。'}},
+ {id:'pm',icon:'📋',title:{en:'Project management',zh:'项目管理'},desc:{en:'Plan, lead and close projects, and pass PMP.',zh:'规划、带领、收尾项目，并通过 PMP。'}},
+ {id:'itsm',icon:'🛠️',title:{en:'IT service management',zh:'IT 服务管理'},desc:{en:'How IT services create value, and the ITSM exam.',zh:'IT 服务如何创造价值，以及 ITSM 考试。'}},
+ {id:'skills',icon:'🎓',title:{en:'Everyday skills',zh:'通用技能'},desc:{en:'Learning, writing, deciding, money and more.',zh:'学习、写作、决策、理财等通用技能。'}},
+ {id:'community',icon:'🤝',title:{en:'From learners',zh:'来自学习者'},desc:{en:'Tracks made from learners’ own notes.',zh:'由学习者自己的笔记写成的路线。'}}
 ];
 window.TRACKS=[
  {domain:'ai',id:'ai-prompting',entry:{en:'Everyday AI',zh:'日常用 AI'},next:['ai-builder','ai-leader'],before:{en:'Nothing required. All you need is a browser and any AI assistant.',zh:'基础要求：无。只需要一个浏览器和任意一个 AI 助手。'},after:{en:'Next: AI Builder to automate work without code, or AI Leader to decide where AI belongs in a business.',zh:'下一步：AI 构建者，不写代码把工作自动化；或 AI 领导者，学会判断 AI 在业务里该放哪。'},level:1,icon:'💬',href:'ai-prompting/index.html',title:{en:'AI Prompting',zh:'AI 提示词'},desc:{en:'Ask AI assistants clearly and check what they say: the parts of a good prompt, examples, follow-ups, checking answers and safe use.',zh:'把话对 AI 助手说清楚，并核对它的回答：好提示词的组成、示例、追问、核对答案和安全使用。'}},
