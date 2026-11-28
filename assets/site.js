@@ -215,6 +215,8 @@
         hub.innerHTML='<section class="dom"><p class="meta"><a href="tracks.html" data-back>'+t({en:'← All subjects',zh:'← 全部领域'})+'</a></p><h3 class="dom-h">'+(cur.icon?'<span aria-hidden="true">'+cur.icon+'</span> ':'')+t(cur.title)+'</h3>'+(cur.desc?'<p class="meta">'+t(cur.desc)+'</p>':'')+(function(){var en=ts.filter(function(c){return c.entry}),pa=ts.filter(function(c){return !c.entry});
           function list(a,num){return '<div class="tl">'+a.map(function(c,ci){return card(c,num?ci:-1,count(c.id,c.files),c.total>0)}).join('')+'</div>'}
           /* Entry points (pick by who you are) come first; the tracks after them are one path, numbered. A domain without entry points is one numbered path. */
+          /* A subject can sort its tracks into labelled groups (groups in DOMAINS, grp on a track): same cards, easier to scan. */
+          if(!en.length&&cur.groups&&cur.groups.length){var seen={},out=cur.groups.map(function(g){var m=ts.filter(function(c){return c.grp===g.id});m.forEach(function(c){seen[c.id]=1});return m.length?'<h4 class="dom-g">'+t(g.title)+'</h4>'+list(m,false):''}).join(''),rest=ts.filter(function(c){return !seen[c.id]});return out+(rest.length?'<h4 class="dom-g">'+t({en:'More',zh:'更多'})+'</h4>'+list(rest,false):'')}
           if(!en.length||!pa.length)return list(ts,pa.length>1&&!pa.every(function(c){return c.bridge}));
           /* Skills tracks (bridge:true) are a toolbox: take only the ones you need, in any order, so they are not numbered; the rest is the numbered path. */
           var br=pa.filter(function(c){return c.bridge}),pt=pa.filter(function(c){return !c.bridge});
