@@ -86,6 +86,9 @@ async function prepare() {
     if (part.length < 100) break;
   }
   const trackIds = trackIdList();
+  // A brand-new track is not in main's tracks.js yet: take its id from the lines this pull request adds to tracks.js, so its folder counts as that track and not as "other".
+  const tj = files.find(f => f.filename === 'tracks.js');
+  for (const m of String(tj?.patch || '').matchAll(/^\+[^\n]*?\bid:\s*'([a-z0-9-]+)'/gm)) if (!trackIds.includes(m[1])) trackIds.push(m[1]);
   const branch = p.head.ref;
   const labels = (p.labels || []).map(l => l.name);
   // `?v=<hash>` is a generated cache version (check-pages --fix). Mask it so a change that only moves hashes is not read as a content change.
