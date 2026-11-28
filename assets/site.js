@@ -259,7 +259,7 @@
         show('<a class="btn pri wn-go" href="'+nl.file+'"><small>'+t({en:'Next lesson',zh:'下一课'})+'</small> '+t(nl.title)+' →</a>',why);return}
       if(!fin||!cur)return;
       withIndex(function(){var X=window.TRACK_INDEX||{},h='',pre='';
-        (cur.next||[]).forEach(function(id,k){var c=window.TRACKS.filter(function(x){return x.id===id&&(x.domain||'ai')===(cur.domain||'ai')})[0],x=X[id];if(!c||!x||!x.files.length)return;
+        (cur.next||[]).forEach(function(id,k){var c=window.TRACKS.filter(function(x){return x.id===id})[0],x=X[id];if(!c||!x||!x.files.length)return;
           h+='<a class="btn'+(h?'':' pri')+' wn-go" href="../'+id+'/'+x.files[0]+'"><small>'+t({en:'Next track',zh:'下一条路线'})+' · '+t(c.title)+'</small> '+t(x.titles[x.files[0]])+' →</a> ';
           if(c.before&&!pre)pre=(cur.next.length>1?'':'<p class="meta">'+t({en:'Before you start it: ',zh:'开始之前：'})+t(c.before)+'</p>')});
         if(cur.go)h+='<a class="btn'+(h?'':' pri')+' wn-go" href="../'+cur.go.href+'">'+t(cur.go.title)+' →</a> ';
