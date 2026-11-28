@@ -10,7 +10,8 @@ window.TRACK={id:'pmp',title:{en:'PMP',zh:'PMP 备考'},topics:[
   {k:'c',file:'05-conflict-and-negotiation.html',title:{en:"Conflict and negotiation",zh:"冲突与谈判"}},
   {k:'c',file:'06-stakeholders.html',title:{en:"Stakeholders",zh:"相关方"}},
   {k:'c',file:'15-communication-and-handover.html',title:{en:"Communication and handover",zh:"沟通与交接"}},
-  {k:'c',file:'07-agile-roles.html',title:{en:"Agile roles",zh:"敏捷角色"}}]},
+  {k:'c',file:'07-agile-roles.html',title:{en:"Agile roles",zh:"敏捷角色"}},
+  {k:'c',file:'43-virtual-and-diverse-teams.html',title:{en:"Virtual and diverse teams",zh:"远程与多元团队"}}]},
  {n:3,level:2,title:{en:"Process planning",zh:"过程规划"},items:[
   {k:'f',file:'25-starting-a-project.html',title:{en:"Starting a project",zh:"启动项目"}},
   {k:'c',file:'08-scope-and-requirements.html',title:{en:"Scope and requirements",zh:"范围与需求"}},
@@ -34,7 +35,8 @@ window.TRACK={id:'pmp',title:{en:'PMP',zh:'PMP 备考'},topics:[
   {k:'c',file:'34-risk-numbers.html',title:{en:"Risk numbers",zh:"风险的数字"}},
   {k:'c',file:'35-issues-and-improvement.html',title:{en:"Issues and improvement",zh:"问题与持续改进"}},
   {k:'c',file:'18-organisational-change.html',title:{en:"Organisational change",zh:"组织变革"}},
-  {k:'c',file:'36-outside-changes.html',title:{en:"Outside changes",zh:"外部环境变化"}}]},
+  {k:'c',file:'36-outside-changes.html',title:{en:"Outside changes",zh:"外部环境变化"}},
+  {k:'c',file:'42-ethics-and-conduct.html',title:{en:"Ethics and conduct",zh:"职业操守"}}]},
  {n:6,level:2,title:{en:"Agile delivery",zh:"敏捷交付"},items:[
   {k:'f',file:'20-backlog-and-user-stories.html',title:{en:"Backlog and user stories",zh:"待办列表与用户故事"}},
   {k:'c',file:'21-sprints-and-events.html',title:{en:"Sprints and events",zh:"冲刺与会议"}},
