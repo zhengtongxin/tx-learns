@@ -7,5 +7,6 @@ window.TRACK={id:'risk-basics',title:{en:'Project risk basics',zh:'项目风险�
  {n:2,level:2,title:{en:"Acting on risks",zh:"应对风险"},items:[
   {k:'f',file:'04-choosing-a-response.html',title:{en:"Choosing a response",zh:"选择应对方式"}},
   {k:'c',file:'05-reserves-and-expected-cost.html',title:{en:"Reserves and expected cost",zh:"储备与预期成本"}},
-  {k:'c',file:'06-keeping-the-register-alive.html',title:{en:"Keeping the register alive",zh:"让登记表活下去"}}]}
+  {k:'c',file:'06-keeping-the-register-alive.html',title:{en:"Keeping the register alive",zh:"让登记表活下去"}},
+  {k:'c',file:'07-learning-from-risks.html',title:{en:"Learning from risks",zh:"从风险中学习"}}]}
 ]};
