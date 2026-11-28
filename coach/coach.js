@@ -102,9 +102,13 @@ async function loadModel(){
  if(!wl.prebuiltAppConfig.model_list.some(function(m){return m.model_id===id}))throw new Error('nomodel');
  var o={initProgressCallback:function(p){setProg(p.progress,p.text)}},e;
  try{e=await wl.CreateWebWorkerMLCEngine(new Worker(BASE+'worker.js',{type:'module'}),id,o)}catch(x){e=await wl.CreateMLCEngine(id,o)}
- ENGID=id;ENG={chat:async function(msgs){var q={messages:msgs,temperature:0.7,max_tokens:700,extra_body:{enable_thinking:false}},r;
-   try{q.response_format={type:'json_object'};r=await e.chat.completions.create(q)}catch(x){delete q.response_format;r=await e.chat.completions.create(q)}
-   return r.choices[0].message.content}};
+ ENGID=id;var noJson=false;
+ /* streams the reply so the page can show it is working (onTok gets the running count); JSON mode is tried once: this model build rejects it, so after one refusal every call goes straight to plain text */
+ async function run(q,onTok){var out='',n=0,st=await e.chat.completions.create(Object.assign({stream:true},q));
+  for await(var ch of st){var d=ch.choices&&ch.choices[0]&&ch.choices[0].delta&&ch.choices[0].delta.content;if(d){out+=d;n++;if(onTok)onTok(n)}}return out}
+ ENG={chat:async function(msgs,opt){opt=opt||{};var q={messages:msgs,temperature:0.7,max_tokens:opt.max||700,extra_body:{enable_thinking:false}};
+   if(!noJson){try{return await run(Object.assign({response_format:{type:'json_object'}},q),opt.onTok)}catch(x){noJson=true}}
+   try{return await run(q,opt.onTok)}catch(x){var r=await e.chat.completions.create(q);return r.choices[0].message.content}}};
  return ENG}
 async function ensureModel(){
  if(ENG&&(window.__coachTestEngine||ENGID))return ENG;
@@ -145,17 +149,18 @@ async function startRound(kind,n){
  pump();show()}
 async function pump(){
  var r=R;if(!r||r.busy)return;r.busy=true;
+ var t0=0;function tick(n){var l=$('pline');if(R!==r||!l||r.view!=='wait')return;l.textContent=T('Writing… '+n+' words so far, '+Math.round((Date.now()-t0)/1000)+' s. You can start as soon as the first question is ready.','正在写… 已写 '+n+' 小段，用时 '+Math.round((Date.now()-t0)/1000)+' 秒。第一题好了就能开始作答。')}
  while(R===r&&r.gen<r.slots.length&&r.items.length-r.i<2){
   var slot=r.slots[r.gen],item=null;
-  for(var tries=0;tries<3&&!item&&R===r;tries++){
+  for(var tries=0;tries<3&&!item&&R===r;tries++){t0=Date.now();
    var ch=slot.chunk?CH.filter(function(c){return c.id===slot.chunk})[0]:Lg.pick(CH,slot.area,S.miss,S.used,Math.random);if(!ch)break;
    var a=areas().filter(function(x){return x.id===slot.area})[0]||{},ex=useExam();
    var pl=pageLang(),mu=ex&&tries===0&&slot.multi;
-   try{var raw=await ENG.chat(Lg.prompt({multi:mu,text:ch.text,lang:pl,srcLang:Lg.lang(ch.text),exam:ex?exam().e.name[pl]+(exam().v.label[pl]?' ('+(pl==='zh'?'考纲：':'outline: ')+exam().v.label[pl]+')':''):'',domain:(a.name&&a.name[pl])||a.dom||'',tasks:a.tasks||''}));
+   try{var raw=await ENG.chat(Lg.prompt({multi:mu,text:ch.text,lang:pl,srcLang:Lg.lang(ch.text),exam:ex?exam().e.name[pl]+(exam().v.label[pl]?' ('+(pl==='zh'?'考纲：':'outline: ')+exam().v.label[pl]+')':''):'',domain:(a.name&&a.name[pl])||a.dom||'',tasks:a.tasks||''}),{onTok:tick});
     var q=Lg.parseQuestion(raw,mu);if(q&&!Lg.inLang(q,pl))q=null;
     /* second opinion: the model answers its own question from the passage without the key; a clear disagreement drops the question */
     if(q&&r.items.concat(S.bank.slice(-30)).some(function(x){return x.chunk===ch.id&&x.lang===pl&&Lg.similar(q,x)})){q=null;r.dup=(r.dup||0)+1}
-    if(q){var vr=await ENG.chat(Lg.verifyPrompt({text:ch.text,lang:pl,q:q}));
+    if(q){var vr=await ENG.chat(Lg.verifyPrompt({text:ch.text,lang:pl,q:q}),{max:40});
      if(q.m){var vm=Lg.parseVerifyMulti(vr);if(vm&&!Lg.right(q,vm)){q=null;r.dropped=(r.dropped||0)+1}}
      else{var v=Lg.parseVerify(vr);if(v>-1&&v!==q.a){q=null;r.dropped=(r.dropped||0)+1}}}
     if(q){q=Lg.shuffle(q,Math.random);S.used[ch.id]=(S.used[ch.id]||0)+1;
