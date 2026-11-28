@@ -2,6 +2,11 @@
 var T=TX.t,$=function(i){return document.getElementById(i)};
 function game(el,items,opts,unit){
  var i=0,sc=0;
+ (function(){var n=opts.length;if(n<2)return;var q=el.previousElementSibling;
+  for(var c=0;c<2&&q;c++,q=q.previousElementSibling){
+   if(q.textContent==='Sort each one.'||q.textContent==='给每一项分类。'){
+    var en=q.classList.contains('en'),L=opts.map(function(o){return en?o.en:o.zh});
+    q.textContent=en?'Sort each one: '+L.slice(0,-1).join(', ')+' or '+L[n-1]+'?':'给每一项分类：'+L.slice(0,-1).join('、')+'，还是'+L[n-1]+'？'}}})();
  function draw(){
   if(i>=items.length){el.innerHTML='<div class="cnt">'+T({en:'Done',zh:'完成'})+'</div><p class="job">'+T({en:'You got '+sc+' of '+items.length+' on the first try.',zh:'你一次答对了 '+sc+' / '+items.length+' 题。'})+'</p><button class="btn" id="re_'+el.id+'">'+T({en:'Play again',zh:'再玩一次'})+'</button>';
    $('re_'+el.id).onclick=function(){i=0;sc=0;draw()};return}
