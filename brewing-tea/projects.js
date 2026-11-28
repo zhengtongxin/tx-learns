@@ -1,1 +1,0 @@
-window.PROJECTS=window.PROJECTS||{};
