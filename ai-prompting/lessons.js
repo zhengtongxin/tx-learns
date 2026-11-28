@@ -10,5 +10,6 @@ window.TRACK={id:'ai-prompting',title:{en:'AI Prompting',zh:'AI 提示词'},topi
   {k:'c',file:'06-breaking-down-big-tasks.html',title:{en:"Breaking down big tasks",zh:"拆解大任务"}}]},
  {n:3,level:2,title:{en:"Using it well",zh:"用得稳妥"},items:[
   {k:'f',file:'07-safe-and-private-use.html',title:{en:"Safe and private use",zh:"安全与隐私"}},
-  {k:'c',file:'08-your-prompt-library.html',title:{en:"Your prompt library",zh:"你的提示词库"}}]}
+  {k:'c',file:'08-your-prompt-library.html',title:{en:"Your prompt library",zh:"你的提示词库"}},
+  {k:'c',file:'09-testing-a-prompt.html',title:{en:"Testing a prompt",zh:"测试提示词"}}]}
 ]};
