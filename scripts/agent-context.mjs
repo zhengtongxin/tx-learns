@@ -53,13 +53,15 @@ function review() {
 
   // Diff: lessons first, then the rest; generated files and hash-only lines dropped; capped.
   const keep = fl.filter(f => !GENERATED.test(f.path)).sort((a, b) => (lessons.includes(b.path) ? 1 : 0) - (lessons.includes(a.path) ? 1 : 0));
-  let used = 0, cut = 0; const parts = [];
+  let used = 0, cut = 0; const parts = [], cutNames = [];
   for (const f of keep) {
     const text = f.text.split('\n').filter(l => !/^[+-].*\?v=[0-9a-f]{6,}/.test(l) || /^[+-]{3}/.test(l)).join('\n');
     const size = Buffer.byteLength(text); // bytes, not characters: 中文 is 3 bytes a character and the whole prompt must fit one argument (128 KB)
-    if (used + size > DIFF_CAP) { cut++; parts.push(`(diff of ${f.path} left out to keep this short: open it in the checkout)`); continue; }
+    if (used + size > DIFF_CAP) { cut++; if (cutNames.length < 15) cutNames.push(f.path); continue; }
     used += size; parts.push(text);
   }
+  // One line for every file left out (not one per file: a new track leaves out hundreds and that alone filled the prompt).
+  if (cut) parts.push(`(${cut} more changed files left out to keep this short, open them in the checkout: ${cutNames.join(', ')}${cut > cutNames.length ? ', ...' : ''})`);
   L.push('## Diff', '```diff', parts.join('\n').trimEnd(), '```', '');
   if (lessons.length) L.push('## Changed lessons (open each in full)', ...lessons.slice(0, 12).map(l => `- ${l}`), ...(lessons.length > 12 ? [`- ...and ${lessons.length - 12} more`] : []), '');
 
